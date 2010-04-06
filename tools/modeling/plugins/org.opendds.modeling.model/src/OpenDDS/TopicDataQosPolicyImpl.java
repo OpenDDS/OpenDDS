@@ -83,9 +83,10 @@ public class TopicDataQosPolicyImpl extends QosPolicyImpl implements TopicDataQo
     public void setValue(String newValue) {
         String oldValue = value;
         value = newValue;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC_DATA_QOS_POLICY__VALUE,
                     oldValue, value));
+        }
     }
 
     /**
@@ -153,8 +154,9 @@ public class TopicDataQosPolicyImpl extends QosPolicyImpl implements TopicDataQo
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (value: ");

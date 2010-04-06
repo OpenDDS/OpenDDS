@@ -78,9 +78,10 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
             InternalEObject oldSwitch = (InternalEObject) switch_;
             switch_ = (TopicField) eResolveProxy(oldSwitch);
             if (switch_ != oldSwitch) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.UNION__SWITCH, oldSwitch,
                             switch_));
+                }
             }
         }
         return switch_;
@@ -103,8 +104,9 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     public void setSwitch(TopicField newSwitch) {
         TopicField oldSwitch = switch_;
         switch_ = newSwitch;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.UNION__SWITCH, oldSwitch, switch_));
+        }
     }
 
     /**
@@ -117,9 +119,10 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
             InternalEObject oldCases = (InternalEObject) cases;
             cases = (Case) eResolveProxy(oldCases);
             if (cases != oldCases) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.UNION__CASES, oldCases,
                             cases));
+                }
             }
         }
         return cases;
@@ -142,8 +145,9 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     public void setCases(Case newCases) {
         Case oldCases = cases;
         cases = newCases;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.UNION__CASES, oldCases, cases));
+        }
     }
 
     /**
@@ -155,12 +159,14 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
             case OpenDDSPackage.UNION__SWITCH:
-                if (resolve)
+                if (resolve) {
                     return getSwitch();
+                }
                 return basicGetSwitch();
             case OpenDDSPackage.UNION__CASES:
-                if (resolve)
+                if (resolve) {
                     return getCases();
+                }
                 return basicGetCases();
         }
         return super.eGet(featureID, resolve, coreType);

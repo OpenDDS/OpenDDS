@@ -83,8 +83,9 @@ public class ArrayImpl extends CollectionImpl implements Array {
     public void setLength(long newLength) {
         long oldLength = length;
         length = newLength;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.ARRAY__LENGTH, oldLength, length));
+        }
     }
 
     /**
@@ -152,8 +153,9 @@ public class ArrayImpl extends CollectionImpl implements Array {
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (length: ");

@@ -67,9 +67,10 @@ public abstract class TopicDescriptionImpl extends NamedEntityImpl implements To
             InternalEObject oldType = (InternalEObject) type;
             type = (TopicField) eResolveProxy(oldType);
             if (type != oldType) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC_DESCRIPTION__TYPE,
                             oldType, type));
+                }
             }
         }
         return type;
@@ -92,8 +93,9 @@ public abstract class TopicDescriptionImpl extends NamedEntityImpl implements To
     public void setType(TopicField newType) {
         TopicField oldType = type;
         type = newType;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC_DESCRIPTION__TYPE, oldType, type));
+        }
     }
 
     /**
@@ -105,8 +107,9 @@ public abstract class TopicDescriptionImpl extends NamedEntityImpl implements To
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
             case OpenDDSPackage.TOPIC_DESCRIPTION__TYPE:
-                if (resolve)
+                if (resolve) {
                     return getType();
+                }
                 return basicGetType();
         }
         return super.eGet(featureID, resolve, coreType);

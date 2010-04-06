@@ -67,9 +67,10 @@ public class TypedefImpl extends TopicFieldImpl implements Typedef {
             InternalEObject oldType = (InternalEObject) type;
             type = (TopicField) eResolveProxy(oldType);
             if (type != oldType) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TYPEDEF__TYPE, oldType,
                             type));
+                }
             }
         }
         return type;
@@ -92,8 +93,9 @@ public class TypedefImpl extends TopicFieldImpl implements Typedef {
     public void setType(TopicField newType) {
         TopicField oldType = type;
         type = newType;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TYPEDEF__TYPE, oldType, type));
+        }
     }
 
     /**
@@ -105,8 +107,9 @@ public class TypedefImpl extends TopicFieldImpl implements Typedef {
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
             case OpenDDSPackage.TYPEDEF__TYPE:
-                if (resolve)
+                if (resolve) {
                     return getType();
+                }
                 return basicGetType();
         }
         return super.eGet(featureID, resolve, coreType);

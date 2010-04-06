@@ -96,9 +96,10 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     public void setKind(ReliabilityQosPolicyKind newKind) {
         ReliabilityQosPolicyKind oldKind = kind;
         kind = newKind == null ? KIND_EDEFAULT : newKind;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.RELIABILITY_QOS_POLICY__KIND, oldKind,
                     kind));
+        }
     }
 
     /**
@@ -122,10 +123,11 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
             ENotificationImpl notification = new ENotificationImpl(this, Notification.SET,
                     OpenDDSPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME, oldMax_blocking_time,
                     newMax_blocking_time);
-            if (msgs == null)
+            if (msgs == null) {
                 msgs = notification;
-            else
+            } else {
                 msgs.add(notification);
+            }
         }
         return msgs;
     }
@@ -138,19 +140,23 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     public void setMax_blocking_time(Period newMax_blocking_time) {
         if (newMax_blocking_time != max_blocking_time) {
             NotificationChain msgs = null;
-            if (max_blocking_time != null)
+            if (max_blocking_time != null) {
                 msgs = ((InternalEObject) max_blocking_time).eInverseRemove(this, EOPPOSITE_FEATURE_BASE
                         - OpenDDSPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME, null, msgs);
-            if (newMax_blocking_time != null)
+            }
+            if (newMax_blocking_time != null) {
                 msgs = ((InternalEObject) newMax_blocking_time).eInverseAdd(this, EOPPOSITE_FEATURE_BASE
                         - OpenDDSPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME, null, msgs);
+            }
             msgs = basicSetMax_blocking_time(newMax_blocking_time, msgs);
-            if (msgs != null)
+            if (msgs != null) {
                 msgs.dispatch();
-        } else if (eNotificationRequired())
+            }
+        } else if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET,
                     OpenDDSPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME, newMax_blocking_time,
                     newMax_blocking_time));
+        }
     }
 
     /**
@@ -242,8 +248,9 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (kind: ");

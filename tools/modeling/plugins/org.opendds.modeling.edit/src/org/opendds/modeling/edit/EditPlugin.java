@@ -10,7 +10,6 @@
 package org.opendds.modeling.edit;
 
 import org.eclipse.emf.common.EMFPlugin;
-
 import org.eclipse.emf.common.util.ResourceLocator;
 
 /**

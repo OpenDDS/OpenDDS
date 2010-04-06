@@ -125,9 +125,10 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     public void setAccess_scope(PresentationQosPolicyAccessScopeKind newAccess_scope) {
         PresentationQosPolicyAccessScopeKind oldAccess_scope = access_scope;
         access_scope = newAccess_scope == null ? ACCESS_SCOPE_EDEFAULT : newAccess_scope;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.PRESENTATION_QOS_POLICY__ACCESS_SCOPE,
                     oldAccess_scope, access_scope));
+        }
     }
 
     /**
@@ -147,9 +148,10 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     public void setCoherent_access(boolean newCoherent_access) {
         boolean oldCoherent_access = coherent_access;
         coherent_access = newCoherent_access;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET,
                     OpenDDSPackage.PRESENTATION_QOS_POLICY__COHERENT_ACCESS, oldCoherent_access, coherent_access));
+        }
     }
 
     /**
@@ -169,9 +171,10 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     public void setOrdered_access(boolean newOrdered_access) {
         boolean oldOrdered_access = ordered_access;
         ordered_access = newOrdered_access;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET,
                     OpenDDSPackage.PRESENTATION_QOS_POLICY__ORDERED_ACCESS, oldOrdered_access, ordered_access));
+        }
     }
 
     /**
@@ -259,8 +262,9 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (access_scope: ");
