@@ -10,11 +10,11 @@
             id="org.eclipse.emf.ecore.Wizard.category.ID"
             name="%_UI_Wizard_category"/>
       <wizard
-            id="OpenDDS.ModelModelWizardID"
+            id="OpenDDS.OpenDDSModelWizardID"
             name="%_UI_ModelModelWizard_label"
-            class="OpenDDS.ModelModelWizard"
+            class="OpenDDS.OpenDDSModelWizard"
             category="org.eclipse.emf.ecore.Wizard.category.ID"
-            icon="icons/full/obj16/ModelModelFile.gif">
+            icon="icons/full/obj16/OpenDDSModelFile.gif">
          <description>%_UI_ModelModelWizard_description</description>
          <selection class="org.eclipse.core.resources.IResource"/>
       </wizard>
@@ -24,10 +24,10 @@
       <editor
             id="OpenDDS.ModelEditorID"
             name="%_UI_ModelEditor_label"
-            icon="icons/full/obj16/ModelModelFile.gif"
+            icon="icons/full/obj16/OpenDDSModelFile.gif"
             extensions="opendds"
-            class="OpenDDS.ModelEditor"
-            contributorClass="OpenDDS.ModelActionBarContributor">
+            class="OpenDDS.OpenDDSEditor"
+            contributorClass="OpenDDS.OpenDDSActionBarContributor">
       </editor>
    </extension>
 
