@@ -26,7 +26,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getDurabilityServiceQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getDurabilityServiceQosPolicy()
  * @model
  * @generated
  */
@@ -41,7 +41,7 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>History depth</em>' attribute.
      * @see #setHistory_depth(long)
-     * @see OpenDDS.ModelPackage#getDurabilityServiceQosPolicy_History_depth()
+     * @see OpenDDS.OpenDDSPackage#getDurabilityServiceQosPolicy_History_depth()
      * @model
      * @generated
      */
@@ -69,7 +69,7 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
      * @return the value of the '<em>History kind</em>' attribute.
      * @see OpenDDS.HistoryQosPolicyKind
      * @see #setHistory_kind(HistoryQosPolicyKind)
-     * @see OpenDDS.ModelPackage#getDurabilityServiceQosPolicy_History_kind()
+     * @see OpenDDS.OpenDDSPackage#getDurabilityServiceQosPolicy_History_kind()
      * @model
      * @generated
      */
@@ -96,7 +96,7 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Max instances</em>' attribute.
      * @see #setMax_instances(long)
-     * @see OpenDDS.ModelPackage#getDurabilityServiceQosPolicy_Max_instances()
+     * @see OpenDDS.OpenDDSPackage#getDurabilityServiceQosPolicy_Max_instances()
      * @model
      * @generated
      */
@@ -122,7 +122,7 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Max samples</em>' attribute.
      * @see #setMax_samples(long)
-     * @see OpenDDS.ModelPackage#getDurabilityServiceQosPolicy_Max_samples()
+     * @see OpenDDS.OpenDDSPackage#getDurabilityServiceQosPolicy_Max_samples()
      * @model
      * @generated
      */
@@ -148,7 +148,7 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Max samples per instance</em>' attribute.
      * @see #setMax_samples_per_instance(long)
-     * @see OpenDDS.ModelPackage#getDurabilityServiceQosPolicy_Max_samples_per_instance()
+     * @see OpenDDS.OpenDDSPackage#getDurabilityServiceQosPolicy_Max_samples_per_instance()
      * @model
      * @generated
      */
@@ -174,7 +174,7 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Service cleanup delay</em>' containment reference.
      * @see #setService_cleanup_delay(Period)
-     * @see OpenDDS.ModelPackage#getDurabilityServiceQosPolicy_Service_cleanup_delay()
+     * @see OpenDDS.OpenDDSPackage#getDurabilityServiceQosPolicy_Service_cleanup_delay()
      * @model containment="true"
      * @generated
      */

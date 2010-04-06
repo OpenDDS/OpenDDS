@@ -22,7 +22,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getDataWriter()
+ * @see OpenDDS.OpenDDSPackage#getDataWriter()
  * @model
  * @generated
  */
@@ -37,7 +37,7 @@ public interface DataWriter extends DataReaderWriter {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Topic</em>' reference.
      * @see #setTopic(Topic)
-     * @see OpenDDS.ModelPackage#getDataWriter_Topic()
+     * @see OpenDDS.OpenDDSPackage#getDataWriter_Topic()
      * @model required="true"
      * @generated
      */
@@ -63,7 +63,7 @@ public interface DataWriter extends DataReaderWriter {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Writer data lifecycle</em>' reference.
      * @see #setWriter_data_lifecycle(WriterDataLifecycleQosPolicy)
-     * @see OpenDDS.ModelPackage#getDataWriter_Writer_data_lifecycle()
+     * @see OpenDDS.OpenDDSPackage#getDataWriter_Writer_data_lifecycle()
      * @model
      * @generated
      */

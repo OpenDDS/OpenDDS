@@ -55,7 +55,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.READER_DATA_LIFECYCLE_QOS_POLICY;
+        return OpenDDSPackage.Literals.READER_DATA_LIFECYCLE_QOS_POLICY;
     }
 
     /**
@@ -78,13 +78,12 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
         autopurge_nowriter_samples_delay = newAutopurge_nowriter_samples_delay;
         if (eNotificationRequired()) {
             ENotificationImpl notification = new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY,
+                    OpenDDSPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY,
                     oldAutopurge_nowriter_samples_delay, newAutopurge_nowriter_samples_delay);
-            if (msgs == null) {
+            if (msgs == null)
                 msgs = notification;
-            } else {
+            else
                 msgs.add(notification);
-            }
         }
         return msgs;
     }
@@ -97,23 +96,23 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     public void setAutopurge_nowriter_samples_delay(Period newAutopurge_nowriter_samples_delay) {
         if (newAutopurge_nowriter_samples_delay != autopurge_nowriter_samples_delay) {
             NotificationChain msgs = null;
-            if (autopurge_nowriter_samples_delay != null) {
-                msgs = ((InternalEObject) autopurge_nowriter_samples_delay).eInverseRemove(this, EOPPOSITE_FEATURE_BASE
-                        - ModelPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY, null, msgs);
-            }
-            if (newAutopurge_nowriter_samples_delay != null) {
-                msgs = ((InternalEObject) newAutopurge_nowriter_samples_delay).eInverseAdd(this, EOPPOSITE_FEATURE_BASE
-                        - ModelPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY, null, msgs);
-            }
+            if (autopurge_nowriter_samples_delay != null)
+                msgs = ((InternalEObject) autopurge_nowriter_samples_delay)
+                        .eInverseRemove(this, EOPPOSITE_FEATURE_BASE
+                                - OpenDDSPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY,
+                                null, msgs);
+            if (newAutopurge_nowriter_samples_delay != null)
+                msgs = ((InternalEObject) newAutopurge_nowriter_samples_delay)
+                        .eInverseAdd(this, EOPPOSITE_FEATURE_BASE
+                                - OpenDDSPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY,
+                                null, msgs);
             msgs = basicSetAutopurge_nowriter_samples_delay(newAutopurge_nowriter_samples_delay, msgs);
-            if (msgs != null) {
+            if (msgs != null)
                 msgs.dispatch();
-            }
-        } else if (eNotificationRequired()) {
+        } else if (eNotificationRequired())
             eNotify(new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY,
+                    OpenDDSPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY,
                     newAutopurge_nowriter_samples_delay, newAutopurge_nowriter_samples_delay));
-        }
     }
 
     /**
@@ -124,7 +123,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     @Override
     public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
         switch (featureID) {
-            case ModelPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY:
+            case OpenDDSPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY:
                 return basicSetAutopurge_nowriter_samples_delay(null, msgs);
         }
         return super.eInverseRemove(otherEnd, featureID, msgs);
@@ -138,7 +137,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY:
+            case OpenDDSPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY:
                 return getAutopurge_nowriter_samples_delay();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -152,7 +151,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY:
+            case OpenDDSPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY:
                 setAutopurge_nowriter_samples_delay((Period) newValue);
                 return;
         }
@@ -167,7 +166,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY:
+            case OpenDDSPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY:
                 setAutopurge_nowriter_samples_delay((Period) null);
                 return;
         }
@@ -182,7 +181,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY:
+            case OpenDDSPackage.READER_DATA_LIFECYCLE_QOS_POLICY__AUTOPURGE_NOWRITER_SAMPLES_DELAY:
                 return autopurge_nowriter_samples_delay != null;
         }
         return super.eIsSet(featureID);

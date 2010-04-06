@@ -15,7 +15,7 @@ package OpenDDS;
  * <!-- end-user-doc -->
  *
  *
- * @see OpenDDS.ModelPackage#getConstructedTopicType()
+ * @see OpenDDS.OpenDDSPackage#getConstructedTopicType()
  * @model abstract="true"
  * @generated
  */

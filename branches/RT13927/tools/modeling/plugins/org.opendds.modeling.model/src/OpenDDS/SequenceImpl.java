@@ -37,7 +37,7 @@ public class SequenceImpl extends CollectionImpl implements Sequence {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.SEQUENCE;
+        return OpenDDSPackage.Literals.SEQUENCE;
     }
 
 } //SequenceImpl

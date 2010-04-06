@@ -63,7 +63,7 @@ public class ArrayImpl extends CollectionImpl implements Array {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.ARRAY;
+        return OpenDDSPackage.Literals.ARRAY;
     }
 
     /**
@@ -83,9 +83,8 @@ public class ArrayImpl extends CollectionImpl implements Array {
     public void setLength(long newLength) {
         long oldLength = length;
         length = newLength;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.ARRAY__LENGTH, oldLength, length));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.ARRAY__LENGTH, oldLength, length));
     }
 
     /**
@@ -96,7 +95,7 @@ public class ArrayImpl extends CollectionImpl implements Array {
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.ARRAY__LENGTH:
+            case OpenDDSPackage.ARRAY__LENGTH:
                 return getLength();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -110,7 +109,7 @@ public class ArrayImpl extends CollectionImpl implements Array {
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.ARRAY__LENGTH:
+            case OpenDDSPackage.ARRAY__LENGTH:
                 setLength((Long) newValue);
                 return;
         }
@@ -125,7 +124,7 @@ public class ArrayImpl extends CollectionImpl implements Array {
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.ARRAY__LENGTH:
+            case OpenDDSPackage.ARRAY__LENGTH:
                 setLength(LENGTH_EDEFAULT);
                 return;
         }
@@ -140,7 +139,7 @@ public class ArrayImpl extends CollectionImpl implements Array {
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.ARRAY__LENGTH:
+            case OpenDDSPackage.ARRAY__LENGTH:
                 return length != LENGTH_EDEFAULT;
         }
         return super.eIsSet(featureID);
@@ -153,9 +152,8 @@ public class ArrayImpl extends CollectionImpl implements Array {
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (length: ");

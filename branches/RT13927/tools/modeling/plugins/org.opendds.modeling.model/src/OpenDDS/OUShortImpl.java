@@ -38,7 +38,7 @@ public class OUShortImpl extends EObjectImpl implements OUShort {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.OU_SHORT;
+        return OpenDDSPackage.Literals.OU_SHORT;
     }
 
 } //OUShortImpl

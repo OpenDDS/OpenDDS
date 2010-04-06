@@ -37,7 +37,7 @@ public abstract class DomainEntityImpl extends NamedEntityImpl implements Domain
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.DOMAIN_ENTITY;
+        return OpenDDSPackage.Literals.DOMAIN_ENTITY;
     }
 
 } //DomainEntityImpl

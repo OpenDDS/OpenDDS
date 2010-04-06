@@ -21,7 +21,7 @@
     <details key="directoryURI" value="."/>
   </genAnnotations>
   <foreignModel>OpenDDS.ecore</foreignModel>
-  <genPackages prefix="Model" resource="XMI" disposableProviderFactory="true" classPackageSuffix=""
+  <genPackages prefix="OpenDDS" resource="XMI" disposableProviderFactory="true" classPackageSuffix=""
       utilityPackageSuffix="" providerPackageSuffix="" presentationPackageSuffix=""
       testsPackageSuffix="" generateExampleClass="false" contentTypeIdentifier=""
       fileExtensions="opendds" ecorePackage="OpenDDS.ecore#/">

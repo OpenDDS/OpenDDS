@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getOwnershipQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getOwnershipQosPolicy()
  * @model
  * @generated
  */
@@ -38,7 +38,7 @@ public interface OwnershipQosPolicy extends QosPolicy {
      * @return the value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.OwnershipQosPolicyKind
      * @see #setKind(OwnershipQosPolicyKind)
-     * @see OpenDDS.ModelPackage#getOwnershipQosPolicy_Kind()
+     * @see OpenDDS.OpenDDSPackage#getOwnershipQosPolicy_Kind()
      * @model
      * @generated
      */

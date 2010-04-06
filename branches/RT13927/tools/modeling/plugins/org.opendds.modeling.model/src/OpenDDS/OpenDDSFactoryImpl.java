@@ -13,7 +13,9 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+
 import org.eclipse.emf.ecore.impl.EFactoryImpl;
+
 import org.eclipse.emf.ecore.plugin.EcorePlugin;
 
 /**
@@ -22,24 +24,24 @@ import org.eclipse.emf.ecore.plugin.EcorePlugin;
  * <!-- end-user-doc -->
  * @generated
  */
-public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
+public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
     /**
      * Creates the default factory implementation.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
      */
-    public static ModelFactory init() {
+    public static OpenDDSFactory init() {
         try {
-            ModelFactory theModelFactory = (ModelFactory) EPackage.Registry.INSTANCE
+            OpenDDSFactory theOpenDDSFactory = (OpenDDSFactory) EPackage.Registry.INSTANCE
                     .getEFactory("http://www.opendds.org/schemas/modeling/OpenDDS");
-            if (theModelFactory != null) {
-                return theModelFactory;
+            if (theOpenDDSFactory != null) {
+                return theOpenDDSFactory;
             }
         } catch (Exception exception) {
             EcorePlugin.INSTANCE.log(exception);
         }
-        return new ModelFactoryImpl();
+        return new OpenDDSFactoryImpl();
     }
 
     /**
@@ -48,7 +50,7 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
      * <!-- end-user-doc -->
      * @generated
      */
-    public ModelFactoryImpl() {
+    public OpenDDSFactoryImpl() {
         super();
     }
 
@@ -60,115 +62,115 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
     @Override
     public EObject create(EClass eClass) {
         switch (eClass.getClassifierID()) {
-            case ModelPackage.CONTENT_FILTERED_TOPIC:
+            case OpenDDSPackage.CONTENT_FILTERED_TOPIC:
                 return createContentFilteredTopic();
-            case ModelPackage.MULTI_TOPIC:
+            case OpenDDSPackage.MULTI_TOPIC:
                 return createMultiTopic();
-            case ModelPackage.TOPIC:
+            case OpenDDSPackage.TOPIC:
                 return createTopic();
-            case ModelPackage.ARRAY:
+            case OpenDDSPackage.ARRAY:
                 return createArray();
-            case ModelPackage.OBOOLEAN:
+            case OpenDDSPackage.OBOOLEAN:
                 return createOBoolean();
-            case ModelPackage.CASE:
+            case OpenDDSPackage.CASE:
                 return createCase();
-            case ModelPackage.OCHAR:
+            case OpenDDSPackage.OCHAR:
                 return createOChar();
-            case ModelPackage.ODOUBLE:
+            case OpenDDSPackage.ODOUBLE:
                 return createODouble();
-            case ModelPackage.ENUM:
+            case OpenDDSPackage.ENUM:
                 return createEnum();
-            case ModelPackage.OFLOAT:
+            case OpenDDSPackage.OFLOAT:
                 return createOFloat();
-            case ModelPackage.KEY:
+            case OpenDDSPackage.KEY:
                 return createKey();
-            case ModelPackage.KEY_FIELD:
+            case OpenDDSPackage.KEY_FIELD:
                 return createKeyField();
-            case ModelPackage.OLONG:
+            case OpenDDSPackage.OLONG:
                 return createOLong();
-            case ModelPackage.OLONG_LONG:
+            case OpenDDSPackage.OLONG_LONG:
                 return createOLongLong();
-            case ModelPackage.OOCTET:
+            case OpenDDSPackage.OOCTET:
                 return createOOctet();
-            case ModelPackage.SEQUENCE:
+            case OpenDDSPackage.SEQUENCE:
                 return createSequence();
-            case ModelPackage.OSHORT:
+            case OpenDDSPackage.OSHORT:
                 return createOShort();
-            case ModelPackage.OSTRING:
+            case OpenDDSPackage.OSTRING:
                 return createOString();
-            case ModelPackage.TOPIC_STRUCT:
+            case OpenDDSPackage.TOPIC_STRUCT:
                 return createTopicStruct();
-            case ModelPackage.TYPEDEF:
+            case OpenDDSPackage.TYPEDEF:
                 return createTypedef();
-            case ModelPackage.OU_LONG:
+            case OpenDDSPackage.OU_LONG:
                 return createOULong();
-            case ModelPackage.OU_LONG_LONG:
+            case OpenDDSPackage.OU_LONG_LONG:
                 return createOULongLong();
-            case ModelPackage.UNION:
+            case OpenDDSPackage.UNION:
                 return createUnion();
-            case ModelPackage.OU_SHORT:
+            case OpenDDSPackage.OU_SHORT:
                 return createOUShort();
-            case ModelPackage.DATA_READER:
+            case OpenDDSPackage.DATA_READER:
                 return createDataReader();
-            case ModelPackage.DATA_WRITER:
+            case OpenDDSPackage.DATA_WRITER:
                 return createDataWriter();
-            case ModelPackage.DOMAIN:
+            case OpenDDSPackage.DOMAIN:
                 return createDomain();
-            case ModelPackage.DOMAIN_PARTICIPANT:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT:
                 return createDomainParticipant();
-            case ModelPackage.PUBLISHER:
+            case OpenDDSPackage.PUBLISHER:
                 return createPublisher();
-            case ModelPackage.SUBSCRIBER:
+            case OpenDDSPackage.SUBSCRIBER:
                 return createSubscriber();
-            case ModelPackage.DEADLINE_QOS_POLICY:
+            case OpenDDSPackage.DEADLINE_QOS_POLICY:
                 return createDeadlineQosPolicy();
-            case ModelPackage.DESTINATION_ORDER_QOS_POLICY:
+            case OpenDDSPackage.DESTINATION_ORDER_QOS_POLICY:
                 return createDestinationOrderQosPolicy();
-            case ModelPackage.DURABILITY_QOS_POLICY:
+            case OpenDDSPackage.DURABILITY_QOS_POLICY:
                 return createDurabilityQosPolicy();
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY:
                 return createDurabilityServiceQosPolicy();
-            case ModelPackage.ENTITY_FACTORY_QOS_POLICY:
+            case OpenDDSPackage.ENTITY_FACTORY_QOS_POLICY:
                 return createEntityFactoryQosPolicy();
-            case ModelPackage.GROUP_DATA_QOS_POLICY:
+            case OpenDDSPackage.GROUP_DATA_QOS_POLICY:
                 return createGroupDataQosPolicy();
-            case ModelPackage.HISTORY_QOS_POLICY:
+            case OpenDDSPackage.HISTORY_QOS_POLICY:
                 return createHistoryQosPolicy();
-            case ModelPackage.LATENCY_BUDGET_QOS_POLICY:
+            case OpenDDSPackage.LATENCY_BUDGET_QOS_POLICY:
                 return createLatencyBudgetQosPolicy();
-            case ModelPackage.LIFESPAN_QOS_POLICY:
+            case OpenDDSPackage.LIFESPAN_QOS_POLICY:
                 return createLifespanQosPolicy();
-            case ModelPackage.LIVELINESS_QOS_POLICY:
+            case OpenDDSPackage.LIVELINESS_QOS_POLICY:
                 return createLivelinessQosPolicy();
-            case ModelPackage.OWNERSHIP_QOS_POLICY:
+            case OpenDDSPackage.OWNERSHIP_QOS_POLICY:
                 return createOwnershipQosPolicy();
-            case ModelPackage.OWNERSHIP_STRENGTH_QOS_POLICY:
+            case OpenDDSPackage.OWNERSHIP_STRENGTH_QOS_POLICY:
                 return createOwnershipStrengthQosPolicy();
-            case ModelPackage.PARTITION_QOS_POLICY:
+            case OpenDDSPackage.PARTITION_QOS_POLICY:
                 return createPartitionQosPolicy();
-            case ModelPackage.PRESENTATION_QOS_POLICY:
+            case OpenDDSPackage.PRESENTATION_QOS_POLICY:
                 return createPresentationQosPolicy();
-            case ModelPackage.READER_DATA_LIFECYCLE_QOS_POLICY:
+            case OpenDDSPackage.READER_DATA_LIFECYCLE_QOS_POLICY:
                 return createReaderDataLifecycleQosPolicy();
-            case ModelPackage.RELIABILITY_QOS_POLICY:
+            case OpenDDSPackage.RELIABILITY_QOS_POLICY:
                 return createReliabilityQosPolicy();
-            case ModelPackage.RESOURCE_LIMITS_QOS_POLICY:
+            case OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY:
                 return createResourceLimitsQosPolicy();
-            case ModelPackage.TIME_BASED_FILTER_QOS_POLICY:
+            case OpenDDSPackage.TIME_BASED_FILTER_QOS_POLICY:
                 return createTimeBasedFilterQosPolicy();
-            case ModelPackage.TOPIC_DATA_QOS_POLICY:
+            case OpenDDSPackage.TOPIC_DATA_QOS_POLICY:
                 return createTopicDataQosPolicy();
-            case ModelPackage.TRANSPORT_PRIORITY_QOS_POLICY:
+            case OpenDDSPackage.TRANSPORT_PRIORITY_QOS_POLICY:
                 return createTransportPriorityQosPolicy();
-            case ModelPackage.USER_DATA_QOS_POLICY:
+            case OpenDDSPackage.USER_DATA_QOS_POLICY:
                 return createUserDataQosPolicy();
-            case ModelPackage.PERIOD:
+            case OpenDDSPackage.PERIOD:
                 return createPeriod();
-            case ModelPackage.WRITER_DATA_LIFECYCLE_QOS_POLICY:
+            case OpenDDSPackage.WRITER_DATA_LIFECYCLE_QOS_POLICY:
                 return createWriterDataLifecycleQosPolicy();
-            case ModelPackage.APPLICATION_TARGET:
+            case OpenDDSPackage.APPLICATION_TARGET:
                 return createApplicationTarget();
-            case ModelPackage.TRANSPORT:
+            case OpenDDSPackage.TRANSPORT:
                 return createTransport();
             default:
                 throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
@@ -183,25 +185,25 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
     @Override
     public Object createFromString(EDataType eDataType, String initialValue) {
         switch (eDataType.getClassifierID()) {
-            case ModelPackage.DESTINATION_ORDER_QOS_POLICY_KIND:
+            case OpenDDSPackage.DESTINATION_ORDER_QOS_POLICY_KIND:
                 return createDestinationOrderQosPolicyKindFromString(eDataType, initialValue);
-            case ModelPackage.DURABILITY_QOS_POLICY_KIND:
+            case OpenDDSPackage.DURABILITY_QOS_POLICY_KIND:
                 return createDurabilityQosPolicyKindFromString(eDataType, initialValue);
-            case ModelPackage.HISTORY_QOS_POLICY_KIND:
+            case OpenDDSPackage.HISTORY_QOS_POLICY_KIND:
                 return createHistoryQosPolicyKindFromString(eDataType, initialValue);
-            case ModelPackage.LIVELINESS_QOS_POLICY_KIND:
+            case OpenDDSPackage.LIVELINESS_QOS_POLICY_KIND:
                 return createLivelinessQosPolicyKindFromString(eDataType, initialValue);
-            case ModelPackage.OWNERSHIP_QOS_POLICY_KIND:
+            case OpenDDSPackage.OWNERSHIP_QOS_POLICY_KIND:
                 return createOwnershipQosPolicyKindFromString(eDataType, initialValue);
-            case ModelPackage.PRESENTATION_QOS_POLICY_ACCESS_SCOPE_KIND:
+            case OpenDDSPackage.PRESENTATION_QOS_POLICY_ACCESS_SCOPE_KIND:
                 return createPresentationQosPolicyAccessScopeKindFromString(eDataType, initialValue);
-            case ModelPackage.RELIABILITY_QOS_POLICY_KIND:
+            case OpenDDSPackage.RELIABILITY_QOS_POLICY_KIND:
                 return createReliabilityQosPolicyKindFromString(eDataType, initialValue);
-            case ModelPackage.COMPONENT_TYPE:
+            case OpenDDSPackage.COMPONENT_TYPE:
                 return createComponentTypeFromString(eDataType, initialValue);
-            case ModelPackage.LANGUAGE_TYPE:
+            case OpenDDSPackage.LANGUAGE_TYPE:
                 return createLanguageTypeFromString(eDataType, initialValue);
-            case ModelPackage.PLATFORM_TYPE:
+            case OpenDDSPackage.PLATFORM_TYPE:
                 return createPlatformTypeFromString(eDataType, initialValue);
             default:
                 throw new IllegalArgumentException("The datatype '" + eDataType.getName()
@@ -217,25 +219,25 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
     @Override
     public String convertToString(EDataType eDataType, Object instanceValue) {
         switch (eDataType.getClassifierID()) {
-            case ModelPackage.DESTINATION_ORDER_QOS_POLICY_KIND:
+            case OpenDDSPackage.DESTINATION_ORDER_QOS_POLICY_KIND:
                 return convertDestinationOrderQosPolicyKindToString(eDataType, instanceValue);
-            case ModelPackage.DURABILITY_QOS_POLICY_KIND:
+            case OpenDDSPackage.DURABILITY_QOS_POLICY_KIND:
                 return convertDurabilityQosPolicyKindToString(eDataType, instanceValue);
-            case ModelPackage.HISTORY_QOS_POLICY_KIND:
+            case OpenDDSPackage.HISTORY_QOS_POLICY_KIND:
                 return convertHistoryQosPolicyKindToString(eDataType, instanceValue);
-            case ModelPackage.LIVELINESS_QOS_POLICY_KIND:
+            case OpenDDSPackage.LIVELINESS_QOS_POLICY_KIND:
                 return convertLivelinessQosPolicyKindToString(eDataType, instanceValue);
-            case ModelPackage.OWNERSHIP_QOS_POLICY_KIND:
+            case OpenDDSPackage.OWNERSHIP_QOS_POLICY_KIND:
                 return convertOwnershipQosPolicyKindToString(eDataType, instanceValue);
-            case ModelPackage.PRESENTATION_QOS_POLICY_ACCESS_SCOPE_KIND:
+            case OpenDDSPackage.PRESENTATION_QOS_POLICY_ACCESS_SCOPE_KIND:
                 return convertPresentationQosPolicyAccessScopeKindToString(eDataType, instanceValue);
-            case ModelPackage.RELIABILITY_QOS_POLICY_KIND:
+            case OpenDDSPackage.RELIABILITY_QOS_POLICY_KIND:
                 return convertReliabilityQosPolicyKindToString(eDataType, instanceValue);
-            case ModelPackage.COMPONENT_TYPE:
+            case OpenDDSPackage.COMPONENT_TYPE:
                 return convertComponentTypeToString(eDataType, instanceValue);
-            case ModelPackage.LANGUAGE_TYPE:
+            case OpenDDSPackage.LANGUAGE_TYPE:
                 return convertLanguageTypeToString(eDataType, instanceValue);
-            case ModelPackage.PLATFORM_TYPE:
+            case OpenDDSPackage.PLATFORM_TYPE:
                 return convertPlatformTypeToString(eDataType, instanceValue);
             default:
                 throw new IllegalArgumentException("The datatype '" + eDataType.getName()
@@ -801,10 +803,9 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
     public DestinationOrderQosPolicyKind createDestinationOrderQosPolicyKindFromString(EDataType eDataType,
             String initialValue) {
         DestinationOrderQosPolicyKind result = DestinationOrderQosPolicyKind.get(initialValue);
-        if (result == null) {
+        if (result == null)
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
-        }
         return result;
     }
 
@@ -824,10 +825,9 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
      */
     public DurabilityQosPolicyKind createDurabilityQosPolicyKindFromString(EDataType eDataType, String initialValue) {
         DurabilityQosPolicyKind result = DurabilityQosPolicyKind.get(initialValue);
-        if (result == null) {
+        if (result == null)
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
-        }
         return result;
     }
 
@@ -847,10 +847,9 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
      */
     public HistoryQosPolicyKind createHistoryQosPolicyKindFromString(EDataType eDataType, String initialValue) {
         HistoryQosPolicyKind result = HistoryQosPolicyKind.get(initialValue);
-        if (result == null) {
+        if (result == null)
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
-        }
         return result;
     }
 
@@ -870,10 +869,9 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
      */
     public LivelinessQosPolicyKind createLivelinessQosPolicyKindFromString(EDataType eDataType, String initialValue) {
         LivelinessQosPolicyKind result = LivelinessQosPolicyKind.get(initialValue);
-        if (result == null) {
+        if (result == null)
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
-        }
         return result;
     }
 
@@ -893,10 +891,9 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
      */
     public OwnershipQosPolicyKind createOwnershipQosPolicyKindFromString(EDataType eDataType, String initialValue) {
         OwnershipQosPolicyKind result = OwnershipQosPolicyKind.get(initialValue);
-        if (result == null) {
+        if (result == null)
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
-        }
         return result;
     }
 
@@ -917,10 +914,9 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
     public PresentationQosPolicyAccessScopeKind createPresentationQosPolicyAccessScopeKindFromString(
             EDataType eDataType, String initialValue) {
         PresentationQosPolicyAccessScopeKind result = PresentationQosPolicyAccessScopeKind.get(initialValue);
-        if (result == null) {
+        if (result == null)
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
-        }
         return result;
     }
 
@@ -940,10 +936,9 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
      */
     public ReliabilityQosPolicyKind createReliabilityQosPolicyKindFromString(EDataType eDataType, String initialValue) {
         ReliabilityQosPolicyKind result = ReliabilityQosPolicyKind.get(initialValue);
-        if (result == null) {
+        if (result == null)
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
-        }
         return result;
     }
 
@@ -963,10 +958,9 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
      */
     public ComponentType createComponentTypeFromString(EDataType eDataType, String initialValue) {
         ComponentType result = ComponentType.get(initialValue);
-        if (result == null) {
+        if (result == null)
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
-        }
         return result;
     }
 
@@ -986,10 +980,9 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
      */
     public LanguageType createLanguageTypeFromString(EDataType eDataType, String initialValue) {
         LanguageType result = LanguageType.get(initialValue);
-        if (result == null) {
+        if (result == null)
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
-        }
         return result;
     }
 
@@ -1009,10 +1002,9 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
      */
     public PlatformType createPlatformTypeFromString(EDataType eDataType, String initialValue) {
         PlatformType result = PlatformType.get(initialValue);
-        if (result == null) {
+        if (result == null)
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
-        }
         return result;
     }
 
@@ -1030,8 +1022,8 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
      * <!-- end-user-doc -->
      * @generated
      */
-    public ModelPackage getModelPackage() {
-        return (ModelPackage) getEPackage();
+    public OpenDDSPackage getOpenDDSPackage() {
+        return (OpenDDSPackage) getEPackage();
     }
 
     /**
@@ -1041,8 +1033,8 @@ public class ModelFactoryImpl extends EFactoryImpl implements ModelFactory {
      * @generated
      */
     @Deprecated
-    public static ModelPackage getPackage() {
-        return ModelPackage.eINSTANCE;
+    public static OpenDDSPackage getPackage() {
+        return OpenDDSPackage.eINSTANCE;
     }
 
-} //ModelFactoryImpl
+} //OpenDDSFactoryImpl

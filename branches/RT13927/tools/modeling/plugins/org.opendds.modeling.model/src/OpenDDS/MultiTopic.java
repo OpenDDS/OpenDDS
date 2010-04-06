@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getMultiTopic()
+ * @see OpenDDS.OpenDDSPackage#getMultiTopic()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface MultiTopic extends TopicDescription {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Subscription expression</em>' attribute.
      * @see #setSubscription_expression(String)
-     * @see OpenDDS.ModelPackage#getMultiTopic_Subscription_expression()
+     * @see OpenDDS.OpenDDSPackage#getMultiTopic_Subscription_expression()
      * @model
      * @generated
      */

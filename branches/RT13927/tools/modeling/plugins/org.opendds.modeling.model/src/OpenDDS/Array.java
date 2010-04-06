@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getArray()
+ * @see OpenDDS.OpenDDSPackage#getArray()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface Array extends Collection {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Length</em>' attribute.
      * @see #setLength(long)
-     * @see OpenDDS.ModelPackage#getArray_Length()
+     * @see OpenDDS.OpenDDSPackage#getArray_Length()
      * @model required="true"
      * @generated
      */

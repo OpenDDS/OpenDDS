@@ -54,7 +54,7 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.COLLECTION;
+        return OpenDDSPackage.Literals.COLLECTION;
     }
 
     /**
@@ -67,10 +67,9 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
             InternalEObject oldType = (InternalEObject) type;
             type = (TopicField) eResolveProxy(oldType);
             if (type != oldType) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.COLLECTION__TYPE, oldType,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.COLLECTION__TYPE, oldType,
                             type));
-                }
             }
         }
         return type;
@@ -93,9 +92,8 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
     public void setType(TopicField newType) {
         TopicField oldType = type;
         type = newType;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.COLLECTION__TYPE, oldType, type));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.COLLECTION__TYPE, oldType, type));
     }
 
     /**
@@ -106,10 +104,9 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.COLLECTION__TYPE:
-                if (resolve) {
+            case OpenDDSPackage.COLLECTION__TYPE:
+                if (resolve)
                     return getType();
-                }
                 return basicGetType();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -123,7 +120,7 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.COLLECTION__TYPE:
+            case OpenDDSPackage.COLLECTION__TYPE:
                 setType((TopicField) newValue);
                 return;
         }
@@ -138,7 +135,7 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.COLLECTION__TYPE:
+            case OpenDDSPackage.COLLECTION__TYPE:
                 setType((TopicField) null);
                 return;
         }
@@ -153,7 +150,7 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.COLLECTION__TYPE:
+            case OpenDDSPackage.COLLECTION__TYPE:
                 return type != null;
         }
         return super.eIsSet(featureID);

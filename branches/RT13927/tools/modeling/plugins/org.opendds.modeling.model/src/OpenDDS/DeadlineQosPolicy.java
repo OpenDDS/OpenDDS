@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getDeadlineQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getDeadlineQosPolicy()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface DeadlineQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Period</em>' containment reference.
      * @see #setPeriod(Period)
-     * @see OpenDDS.ModelPackage#getDeadlineQosPolicy_Period()
+     * @see OpenDDS.OpenDDSPackage#getDeadlineQosPolicy_Period()
      * @model containment="true"
      * @generated
      */

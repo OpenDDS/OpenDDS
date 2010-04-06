@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getDurabilityQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getDurabilityQosPolicy()
  * @model
  * @generated
  */
@@ -38,7 +38,7 @@ public interface DurabilityQosPolicy extends QosPolicy {
      * @return the value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.DurabilityQosPolicyKind
      * @see #setKind(DurabilityQosPolicyKind)
-     * @see OpenDDS.ModelPackage#getDurabilityQosPolicy_Kind()
+     * @see OpenDDS.OpenDDSPackage#getDurabilityQosPolicy_Kind()
      * @model
      * @generated
      */

@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getCollection()
+ * @see OpenDDS.OpenDDSPackage#getCollection()
  * @model abstract="true"
  * @generated
  */
@@ -36,7 +36,7 @@ public interface Collection extends TopicField {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Type</em>' reference.
      * @see #setType(TopicField)
-     * @see OpenDDS.ModelPackage#getCollection_Type()
+     * @see OpenDDS.OpenDDSPackage#getCollection_Type()
      * @model required="true"
      * @generated
      */

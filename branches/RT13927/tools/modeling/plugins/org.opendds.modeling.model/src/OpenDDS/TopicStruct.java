@@ -24,7 +24,7 @@ import org.eclipse.emf.common.util.EList;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getTopicStruct()
+ * @see OpenDDS.OpenDDSPackage#getTopicStruct()
  * @model
  * @generated
  */
@@ -39,7 +39,7 @@ public interface TopicStruct extends ConstructedTopicType {
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Members</em>' containment reference list.
-     * @see OpenDDS.ModelPackage#getTopicStruct_Members()
+     * @see OpenDDS.OpenDDSPackage#getTopicStruct_Members()
      * @model containment="true" required="true"
      * @generated
      */
@@ -55,7 +55,7 @@ public interface TopicStruct extends ConstructedTopicType {
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Keys</em>' containment reference list.
-     * @see OpenDDS.ModelPackage#getTopicStruct_Keys()
+     * @see OpenDDS.OpenDDSPackage#getTopicStruct_Keys()
      * @model containment="true"
      * @generated
      */

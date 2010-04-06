@@ -15,7 +15,7 @@ package OpenDDS;
  * <!-- end-user-doc -->
  *
  *
- * @see OpenDDS.ModelPackage#getDomainEntity()
+ * @see OpenDDS.OpenDDSPackage#getDomainEntity()
  * @model abstract="true"
  * @generated
  */

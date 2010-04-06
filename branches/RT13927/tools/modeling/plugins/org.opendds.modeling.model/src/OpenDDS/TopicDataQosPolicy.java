@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getTopicDataQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getTopicDataQosPolicy()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface TopicDataQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Value</em>' attribute.
      * @see #setValue(String)
-     * @see OpenDDS.ModelPackage#getTopicDataQosPolicy_Value()
+     * @see OpenDDS.OpenDDSPackage#getTopicDataQosPolicy_Value()
      * @model
      * @generated
      */

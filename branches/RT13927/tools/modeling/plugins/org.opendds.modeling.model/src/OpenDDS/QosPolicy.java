@@ -15,7 +15,7 @@ package OpenDDS;
  * <!-- end-user-doc -->
  *
  *
- * @see OpenDDS.ModelPackage#getQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getQosPolicy()
  * @model abstract="true"
  * @generated
  */

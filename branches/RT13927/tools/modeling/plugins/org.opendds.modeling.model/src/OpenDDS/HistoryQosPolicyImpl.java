@@ -84,7 +84,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.HISTORY_QOS_POLICY;
+        return OpenDDSPackage.Literals.HISTORY_QOS_POLICY;
     }
 
     /**
@@ -104,10 +104,9 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     public void setDepth(long newDepth) {
         long oldDepth = depth;
         depth = newDepth;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.HISTORY_QOS_POLICY__DEPTH, oldDepth,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.HISTORY_QOS_POLICY__DEPTH, oldDepth,
                     depth));
-        }
     }
 
     /**
@@ -127,9 +126,9 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     public void setKind(HistoryQosPolicyKind newKind) {
         HistoryQosPolicyKind oldKind = kind;
         kind = newKind == null ? KIND_EDEFAULT : newKind;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.HISTORY_QOS_POLICY__KIND, oldKind, kind));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.HISTORY_QOS_POLICY__KIND, oldKind,
+                    kind));
     }
 
     /**
@@ -140,9 +139,9 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.HISTORY_QOS_POLICY__DEPTH:
+            case OpenDDSPackage.HISTORY_QOS_POLICY__DEPTH:
                 return getDepth();
-            case ModelPackage.HISTORY_QOS_POLICY__KIND:
+            case OpenDDSPackage.HISTORY_QOS_POLICY__KIND:
                 return getKind();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -156,10 +155,10 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.HISTORY_QOS_POLICY__DEPTH:
+            case OpenDDSPackage.HISTORY_QOS_POLICY__DEPTH:
                 setDepth((Long) newValue);
                 return;
-            case ModelPackage.HISTORY_QOS_POLICY__KIND:
+            case OpenDDSPackage.HISTORY_QOS_POLICY__KIND:
                 setKind((HistoryQosPolicyKind) newValue);
                 return;
         }
@@ -174,10 +173,10 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.HISTORY_QOS_POLICY__DEPTH:
+            case OpenDDSPackage.HISTORY_QOS_POLICY__DEPTH:
                 setDepth(DEPTH_EDEFAULT);
                 return;
-            case ModelPackage.HISTORY_QOS_POLICY__KIND:
+            case OpenDDSPackage.HISTORY_QOS_POLICY__KIND:
                 setKind(KIND_EDEFAULT);
                 return;
         }
@@ -192,9 +191,9 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.HISTORY_QOS_POLICY__DEPTH:
+            case OpenDDSPackage.HISTORY_QOS_POLICY__DEPTH:
                 return depth != DEPTH_EDEFAULT;
-            case ModelPackage.HISTORY_QOS_POLICY__KIND:
+            case OpenDDSPackage.HISTORY_QOS_POLICY__KIND:
                 return kind != KIND_EDEFAULT;
         }
         return super.eIsSet(featureID);
@@ -207,9 +206,8 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (depth: ");

@@ -15,7 +15,7 @@ package OpenDDS;
  * <!-- end-user-doc -->
  *
  *
- * @see OpenDDS.ModelPackage#getTopicField()
+ * @see OpenDDS.OpenDDSPackage#getTopicField()
  * @model abstract="true"
  * @generated
  */

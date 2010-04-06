@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getWriterDataLifecycleQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getWriterDataLifecycleQosPolicy()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface WriterDataLifecycleQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Autodispose unregistered instances</em>' attribute.
      * @see #setAutodispose_unregistered_instances(boolean)
-     * @see OpenDDS.ModelPackage#getWriterDataLifecycleQosPolicy_Autodispose_unregistered_instances()
+     * @see OpenDDS.OpenDDSPackage#getWriterDataLifecycleQosPolicy_Autodispose_unregistered_instances()
      * @model
      * @generated
      */

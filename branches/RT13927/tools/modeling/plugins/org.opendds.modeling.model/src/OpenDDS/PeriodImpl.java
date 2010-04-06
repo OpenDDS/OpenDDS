@@ -85,7 +85,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.PERIOD;
+        return OpenDDSPackage.Literals.PERIOD;
     }
 
     /**
@@ -105,9 +105,8 @@ public class PeriodImpl extends EObjectImpl implements Period {
     public void setSeconds(long newSeconds) {
         long oldSeconds = seconds;
         seconds = newSeconds;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.PERIOD__SECONDS, oldSeconds, seconds));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.PERIOD__SECONDS, oldSeconds, seconds));
     }
 
     /**
@@ -127,10 +126,9 @@ public class PeriodImpl extends EObjectImpl implements Period {
     public void setNanoseconds(long newNanoseconds) {
         long oldNanoseconds = nanoseconds;
         nanoseconds = newNanoseconds;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.PERIOD__NANOSECONDS, oldNanoseconds,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.PERIOD__NANOSECONDS, oldNanoseconds,
                     nanoseconds));
-        }
     }
 
     /**
@@ -141,9 +139,9 @@ public class PeriodImpl extends EObjectImpl implements Period {
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.PERIOD__SECONDS:
+            case OpenDDSPackage.PERIOD__SECONDS:
                 return getSeconds();
-            case ModelPackage.PERIOD__NANOSECONDS:
+            case OpenDDSPackage.PERIOD__NANOSECONDS:
                 return getNanoseconds();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -157,10 +155,10 @@ public class PeriodImpl extends EObjectImpl implements Period {
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.PERIOD__SECONDS:
+            case OpenDDSPackage.PERIOD__SECONDS:
                 setSeconds((Long) newValue);
                 return;
-            case ModelPackage.PERIOD__NANOSECONDS:
+            case OpenDDSPackage.PERIOD__NANOSECONDS:
                 setNanoseconds((Long) newValue);
                 return;
         }
@@ -175,10 +173,10 @@ public class PeriodImpl extends EObjectImpl implements Period {
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.PERIOD__SECONDS:
+            case OpenDDSPackage.PERIOD__SECONDS:
                 setSeconds(SECONDS_EDEFAULT);
                 return;
-            case ModelPackage.PERIOD__NANOSECONDS:
+            case OpenDDSPackage.PERIOD__NANOSECONDS:
                 setNanoseconds(NANOSECONDS_EDEFAULT);
                 return;
         }
@@ -193,9 +191,9 @@ public class PeriodImpl extends EObjectImpl implements Period {
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.PERIOD__SECONDS:
+            case OpenDDSPackage.PERIOD__SECONDS:
                 return seconds != SECONDS_EDEFAULT;
-            case ModelPackage.PERIOD__NANOSECONDS:
+            case OpenDDSPackage.PERIOD__NANOSECONDS:
                 return nanoseconds != NANOSECONDS_EDEFAULT;
         }
         return super.eIsSet(featureID);
@@ -208,9 +206,8 @@ public class PeriodImpl extends EObjectImpl implements Period {
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (seconds: ");

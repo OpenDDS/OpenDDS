@@ -75,7 +75,7 @@ public class CaseImpl extends TopicFieldImpl implements Case {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.CASE;
+        return OpenDDSPackage.Literals.CASE;
     }
 
     /**
@@ -95,9 +95,8 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     public void setLabels(String newLabels) {
         String oldLabels = labels;
         labels = newLabels;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.CASE__LABELS, oldLabels, labels));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.CASE__LABELS, oldLabels, labels));
     }
 
     /**
@@ -110,9 +109,8 @@ public class CaseImpl extends TopicFieldImpl implements Case {
             InternalEObject oldType = (InternalEObject) type;
             type = (TopicField) eResolveProxy(oldType);
             if (type != oldType) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.CASE__TYPE, oldType, type));
-                }
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.CASE__TYPE, oldType, type));
             }
         }
         return type;
@@ -135,9 +133,8 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     public void setType(TopicField newType) {
         TopicField oldType = type;
         type = newType;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.CASE__TYPE, oldType, type));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.CASE__TYPE, oldType, type));
     }
 
     /**
@@ -148,12 +145,11 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.CASE__LABELS:
+            case OpenDDSPackage.CASE__LABELS:
                 return getLabels();
-            case ModelPackage.CASE__TYPE:
-                if (resolve) {
+            case OpenDDSPackage.CASE__TYPE:
+                if (resolve)
                     return getType();
-                }
                 return basicGetType();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -167,10 +163,10 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.CASE__LABELS:
+            case OpenDDSPackage.CASE__LABELS:
                 setLabels((String) newValue);
                 return;
-            case ModelPackage.CASE__TYPE:
+            case OpenDDSPackage.CASE__TYPE:
                 setType((TopicField) newValue);
                 return;
         }
@@ -185,10 +181,10 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.CASE__LABELS:
+            case OpenDDSPackage.CASE__LABELS:
                 setLabels(LABELS_EDEFAULT);
                 return;
-            case ModelPackage.CASE__TYPE:
+            case OpenDDSPackage.CASE__TYPE:
                 setType((TopicField) null);
                 return;
         }
@@ -203,9 +199,9 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.CASE__LABELS:
+            case OpenDDSPackage.CASE__LABELS:
                 return LABELS_EDEFAULT == null ? labels != null : !LABELS_EDEFAULT.equals(labels);
-            case ModelPackage.CASE__TYPE:
+            case OpenDDSPackage.CASE__TYPE:
                 return type != null;
         }
         return super.eIsSet(featureID);
@@ -218,9 +214,8 @@ public class CaseImpl extends TopicFieldImpl implements Case {
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (labels: ");

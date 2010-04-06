@@ -63,7 +63,7 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.USER_DATA_QOS_POLICY;
+        return OpenDDSPackage.Literals.USER_DATA_QOS_POLICY;
     }
 
     /**
@@ -83,10 +83,9 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
     public void setValue(String newValue) {
         String oldValue = value;
         value = newValue;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.USER_DATA_QOS_POLICY__VALUE, oldValue,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.USER_DATA_QOS_POLICY__VALUE, oldValue,
                     value));
-        }
     }
 
     /**
@@ -97,7 +96,7 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.USER_DATA_QOS_POLICY__VALUE:
+            case OpenDDSPackage.USER_DATA_QOS_POLICY__VALUE:
                 return getValue();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -111,7 +110,7 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.USER_DATA_QOS_POLICY__VALUE:
+            case OpenDDSPackage.USER_DATA_QOS_POLICY__VALUE:
                 setValue((String) newValue);
                 return;
         }
@@ -126,7 +125,7 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.USER_DATA_QOS_POLICY__VALUE:
+            case OpenDDSPackage.USER_DATA_QOS_POLICY__VALUE:
                 setValue(VALUE_EDEFAULT);
                 return;
         }
@@ -141,7 +140,7 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.USER_DATA_QOS_POLICY__VALUE:
+            case OpenDDSPackage.USER_DATA_QOS_POLICY__VALUE:
                 return VALUE_EDEFAULT == null ? value != null : !VALUE_EDEFAULT.equals(value);
         }
         return super.eIsSet(featureID);
@@ -154,9 +153,8 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (value: ");

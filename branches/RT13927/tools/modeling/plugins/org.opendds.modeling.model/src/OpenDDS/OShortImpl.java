@@ -37,7 +37,7 @@ public class OShortImpl extends SimpleImpl implements OShort {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.OSHORT;
+        return OpenDDSPackage.Literals.OSHORT;
     }
 
 } //OShortImpl

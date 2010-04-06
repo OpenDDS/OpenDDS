@@ -37,7 +37,7 @@ public class ODoubleImpl extends SimpleImpl implements ODouble {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.ODOUBLE;
+        return OpenDDSPackage.Literals.ODOUBLE;
     }
 
 } //ODoubleImpl

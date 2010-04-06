@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getOwnershipStrengthQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getOwnershipStrengthQosPolicy()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface OwnershipStrengthQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Value</em>' attribute.
      * @see #setValue(long)
-     * @see OpenDDS.ModelPackage#getOwnershipStrengthQosPolicy_Value()
+     * @see OpenDDS.OpenDDSPackage#getOwnershipStrengthQosPolicy_Value()
      * @model
      * @generated
      */

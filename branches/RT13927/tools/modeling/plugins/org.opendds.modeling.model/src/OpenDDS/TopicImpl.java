@@ -186,7 +186,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.TOPIC;
+        return OpenDDSPackage.Literals.TOPIC;
     }
 
     /**
@@ -199,9 +199,8 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldType = (InternalEObject) type;
             type = (TopicField) eResolveProxy(oldType);
             if (type != oldType) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__TYPE, oldType, type));
-                }
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC__TYPE, oldType, type));
             }
         }
         return type;
@@ -224,9 +223,8 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setType(TopicField newType) {
         TopicField oldType = type;
         type = newType;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__TYPE, oldType, type));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC__TYPE, oldType, type));
     }
 
     /**
@@ -239,10 +237,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldDurability_service = (InternalEObject) durability_service;
             durability_service = (DurabilityServiceQosPolicy) eResolveProxy(oldDurability_service);
             if (durability_service != oldDurability_service) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__DURABILITY_SERVICE,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC__DURABILITY_SERVICE,
                             oldDurability_service, durability_service));
-                }
             }
         }
         return durability_service;
@@ -265,10 +262,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setDurability_service(DurabilityServiceQosPolicy newDurability_service) {
         DurabilityServiceQosPolicy oldDurability_service = durability_service;
         durability_service = newDurability_service;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__DURABILITY_SERVICE,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC__DURABILITY_SERVICE,
                     oldDurability_service, durability_service));
-        }
     }
 
     /**
@@ -281,10 +277,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldTransport_priority = (InternalEObject) transport_priority;
             transport_priority = (TransportPriorityQosPolicy) eResolveProxy(oldTransport_priority);
             if (transport_priority != oldTransport_priority) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__TRANSPORT_PRIORITY,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC__TRANSPORT_PRIORITY,
                             oldTransport_priority, transport_priority));
-                }
             }
         }
         return transport_priority;
@@ -307,10 +302,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setTransport_priority(TransportPriorityQosPolicy newTransport_priority) {
         TransportPriorityQosPolicy oldTransport_priority = transport_priority;
         transport_priority = newTransport_priority;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__TRANSPORT_PRIORITY,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC__TRANSPORT_PRIORITY,
                     oldTransport_priority, transport_priority));
-        }
     }
 
     /**
@@ -323,10 +317,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldTopic_data = (InternalEObject) topic_data;
             topic_data = (TopicDataQosPolicy) eResolveProxy(oldTopic_data);
             if (topic_data != oldTopic_data) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__TOPIC_DATA,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC__TOPIC_DATA,
                             oldTopic_data, topic_data));
-                }
             }
         }
         return topic_data;
@@ -349,10 +342,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setTopic_data(TopicDataQosPolicy newTopic_data) {
         TopicDataQosPolicy oldTopic_data = topic_data;
         topic_data = newTopic_data;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__TOPIC_DATA, oldTopic_data,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC__TOPIC_DATA, oldTopic_data,
                     topic_data));
-        }
     }
 
     /**
@@ -365,10 +357,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldResource_limits = (InternalEObject) resource_limits;
             resource_limits = (ResourceLimitsQosPolicy) eResolveProxy(oldResource_limits);
             if (resource_limits != oldResource_limits) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__RESOURCE_LIMITS,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC__RESOURCE_LIMITS,
                             oldResource_limits, resource_limits));
-                }
             }
         }
         return resource_limits;
@@ -391,10 +382,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setResource_limits(ResourceLimitsQosPolicy newResource_limits) {
         ResourceLimitsQosPolicy oldResource_limits = resource_limits;
         resource_limits = newResource_limits;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__RESOURCE_LIMITS,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC__RESOURCE_LIMITS,
                     oldResource_limits, resource_limits));
-        }
     }
 
     /**
@@ -407,10 +397,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldReliability = (InternalEObject) reliability;
             reliability = (ReliabilityQosPolicy) eResolveProxy(oldReliability);
             if (reliability != oldReliability) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__RELIABILITY,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC__RELIABILITY,
                             oldReliability, reliability));
-                }
             }
         }
         return reliability;
@@ -433,10 +422,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setReliability(ReliabilityQosPolicy newReliability) {
         ReliabilityQosPolicy oldReliability = reliability;
         reliability = newReliability;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__RELIABILITY, oldReliability,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC__RELIABILITY, oldReliability,
                     reliability));
-        }
     }
 
     /**
@@ -449,10 +437,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldOwnership = (InternalEObject) ownership;
             ownership = (OwnershipQosPolicy) eResolveProxy(oldOwnership);
             if (ownership != oldOwnership) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__OWNERSHIP,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC__OWNERSHIP,
                             oldOwnership, ownership));
-                }
             }
         }
         return ownership;
@@ -475,10 +462,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setOwnership(OwnershipQosPolicy newOwnership) {
         OwnershipQosPolicy oldOwnership = ownership;
         ownership = newOwnership;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__OWNERSHIP, oldOwnership,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC__OWNERSHIP, oldOwnership,
                     ownership));
-        }
     }
 
     /**
@@ -491,10 +477,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldLiveliness = (InternalEObject) liveliness;
             liveliness = (LivelinessQosPolicy) eResolveProxy(oldLiveliness);
             if (liveliness != oldLiveliness) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__LIVELINESS,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC__LIVELINESS,
                             oldLiveliness, liveliness));
-                }
             }
         }
         return liveliness;
@@ -517,10 +502,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setLiveliness(LivelinessQosPolicy newLiveliness) {
         LivelinessQosPolicy oldLiveliness = liveliness;
         liveliness = newLiveliness;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__LIVELINESS, oldLiveliness,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC__LIVELINESS, oldLiveliness,
                     liveliness));
-        }
     }
 
     /**
@@ -533,10 +517,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldHistory = (InternalEObject) history;
             history = (HistoryQosPolicy) eResolveProxy(oldHistory);
             if (history != oldHistory) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__HISTORY, oldHistory,
-                            history));
-                }
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC__HISTORY,
+                            oldHistory, history));
             }
         }
         return history;
@@ -559,9 +542,8 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setHistory(HistoryQosPolicy newHistory) {
         HistoryQosPolicy oldHistory = history;
         history = newHistory;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__HISTORY, oldHistory, history));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC__HISTORY, oldHistory, history));
     }
 
     /**
@@ -574,10 +556,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldDurability = (InternalEObject) durability;
             durability = (DurabilityQosPolicy) eResolveProxy(oldDurability);
             if (durability != oldDurability) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__DURABILITY,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC__DURABILITY,
                             oldDurability, durability));
-                }
             }
         }
         return durability;
@@ -600,10 +581,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setDurability(DurabilityQosPolicy newDurability) {
         DurabilityQosPolicy oldDurability = durability;
         durability = newDurability;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__DURABILITY, oldDurability,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC__DURABILITY, oldDurability,
                     durability));
-        }
     }
 
     /**
@@ -616,10 +596,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldDestination_order = (InternalEObject) destination_order;
             destination_order = (DestinationOrderQosPolicy) eResolveProxy(oldDestination_order);
             if (destination_order != oldDestination_order) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__DESTINATION_ORDER,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC__DESTINATION_ORDER,
                             oldDestination_order, destination_order));
-                }
             }
         }
         return destination_order;
@@ -642,10 +621,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setDestination_order(DestinationOrderQosPolicy newDestination_order) {
         DestinationOrderQosPolicy oldDestination_order = destination_order;
         destination_order = newDestination_order;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__DESTINATION_ORDER,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC__DESTINATION_ORDER,
                     oldDestination_order, destination_order));
-        }
     }
 
     /**
@@ -658,10 +636,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldDeadline = (InternalEObject) deadline;
             deadline = (DeadlineQosPolicy) eResolveProxy(oldDeadline);
             if (deadline != oldDeadline) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__DEADLINE,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC__DEADLINE,
                             oldDeadline, deadline));
-                }
             }
         }
         return deadline;
@@ -684,9 +661,8 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setDeadline(DeadlineQosPolicy newDeadline) {
         DeadlineQosPolicy oldDeadline = deadline;
         deadline = newDeadline;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__DEADLINE, oldDeadline, deadline));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC__DEADLINE, oldDeadline, deadline));
     }
 
     /**
@@ -699,10 +675,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldLatency_budget = (InternalEObject) latency_budget;
             latency_budget = (LatencyBudgetQosPolicy) eResolveProxy(oldLatency_budget);
             if (latency_budget != oldLatency_budget) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__LATENCY_BUDGET,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC__LATENCY_BUDGET,
                             oldLatency_budget, latency_budget));
-                }
             }
         }
         return latency_budget;
@@ -725,10 +700,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setLatency_budget(LatencyBudgetQosPolicy newLatency_budget) {
         LatencyBudgetQosPolicy oldLatency_budget = latency_budget;
         latency_budget = newLatency_budget;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__LATENCY_BUDGET,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC__LATENCY_BUDGET,
                     oldLatency_budget, latency_budget));
-        }
     }
 
     /**
@@ -739,70 +713,57 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.TOPIC__TYPE:
-                if (resolve) {
+            case OpenDDSPackage.TOPIC__TYPE:
+                if (resolve)
                     return getType();
-                }
                 return basicGetType();
-            case ModelPackage.TOPIC__DURABILITY_SERVICE:
-                if (resolve) {
+            case OpenDDSPackage.TOPIC__DURABILITY_SERVICE:
+                if (resolve)
                     return getDurability_service();
-                }
                 return basicGetDurability_service();
-            case ModelPackage.TOPIC__TRANSPORT_PRIORITY:
-                if (resolve) {
+            case OpenDDSPackage.TOPIC__TRANSPORT_PRIORITY:
+                if (resolve)
                     return getTransport_priority();
-                }
                 return basicGetTransport_priority();
-            case ModelPackage.TOPIC__TOPIC_DATA:
-                if (resolve) {
+            case OpenDDSPackage.TOPIC__TOPIC_DATA:
+                if (resolve)
                     return getTopic_data();
-                }
                 return basicGetTopic_data();
-            case ModelPackage.TOPIC__RESOURCE_LIMITS:
-                if (resolve) {
+            case OpenDDSPackage.TOPIC__RESOURCE_LIMITS:
+                if (resolve)
                     return getResource_limits();
-                }
                 return basicGetResource_limits();
-            case ModelPackage.TOPIC__RELIABILITY:
-                if (resolve) {
+            case OpenDDSPackage.TOPIC__RELIABILITY:
+                if (resolve)
                     return getReliability();
-                }
                 return basicGetReliability();
-            case ModelPackage.TOPIC__OWNERSHIP:
-                if (resolve) {
+            case OpenDDSPackage.TOPIC__OWNERSHIP:
+                if (resolve)
                     return getOwnership();
-                }
                 return basicGetOwnership();
-            case ModelPackage.TOPIC__LIVELINESS:
-                if (resolve) {
+            case OpenDDSPackage.TOPIC__LIVELINESS:
+                if (resolve)
                     return getLiveliness();
-                }
                 return basicGetLiveliness();
-            case ModelPackage.TOPIC__HISTORY:
-                if (resolve) {
+            case OpenDDSPackage.TOPIC__HISTORY:
+                if (resolve)
                     return getHistory();
-                }
                 return basicGetHistory();
-            case ModelPackage.TOPIC__DURABILITY:
-                if (resolve) {
+            case OpenDDSPackage.TOPIC__DURABILITY:
+                if (resolve)
                     return getDurability();
-                }
                 return basicGetDurability();
-            case ModelPackage.TOPIC__DESTINATION_ORDER:
-                if (resolve) {
+            case OpenDDSPackage.TOPIC__DESTINATION_ORDER:
+                if (resolve)
                     return getDestination_order();
-                }
                 return basicGetDestination_order();
-            case ModelPackage.TOPIC__DEADLINE:
-                if (resolve) {
+            case OpenDDSPackage.TOPIC__DEADLINE:
+                if (resolve)
                     return getDeadline();
-                }
                 return basicGetDeadline();
-            case ModelPackage.TOPIC__LATENCY_BUDGET:
-                if (resolve) {
+            case OpenDDSPackage.TOPIC__LATENCY_BUDGET:
+                if (resolve)
                     return getLatency_budget();
-                }
                 return basicGetLatency_budget();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -816,43 +777,43 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.TOPIC__TYPE:
+            case OpenDDSPackage.TOPIC__TYPE:
                 setType((TopicField) newValue);
                 return;
-            case ModelPackage.TOPIC__DURABILITY_SERVICE:
+            case OpenDDSPackage.TOPIC__DURABILITY_SERVICE:
                 setDurability_service((DurabilityServiceQosPolicy) newValue);
                 return;
-            case ModelPackage.TOPIC__TRANSPORT_PRIORITY:
+            case OpenDDSPackage.TOPIC__TRANSPORT_PRIORITY:
                 setTransport_priority((TransportPriorityQosPolicy) newValue);
                 return;
-            case ModelPackage.TOPIC__TOPIC_DATA:
+            case OpenDDSPackage.TOPIC__TOPIC_DATA:
                 setTopic_data((TopicDataQosPolicy) newValue);
                 return;
-            case ModelPackage.TOPIC__RESOURCE_LIMITS:
+            case OpenDDSPackage.TOPIC__RESOURCE_LIMITS:
                 setResource_limits((ResourceLimitsQosPolicy) newValue);
                 return;
-            case ModelPackage.TOPIC__RELIABILITY:
+            case OpenDDSPackage.TOPIC__RELIABILITY:
                 setReliability((ReliabilityQosPolicy) newValue);
                 return;
-            case ModelPackage.TOPIC__OWNERSHIP:
+            case OpenDDSPackage.TOPIC__OWNERSHIP:
                 setOwnership((OwnershipQosPolicy) newValue);
                 return;
-            case ModelPackage.TOPIC__LIVELINESS:
+            case OpenDDSPackage.TOPIC__LIVELINESS:
                 setLiveliness((LivelinessQosPolicy) newValue);
                 return;
-            case ModelPackage.TOPIC__HISTORY:
+            case OpenDDSPackage.TOPIC__HISTORY:
                 setHistory((HistoryQosPolicy) newValue);
                 return;
-            case ModelPackage.TOPIC__DURABILITY:
+            case OpenDDSPackage.TOPIC__DURABILITY:
                 setDurability((DurabilityQosPolicy) newValue);
                 return;
-            case ModelPackage.TOPIC__DESTINATION_ORDER:
+            case OpenDDSPackage.TOPIC__DESTINATION_ORDER:
                 setDestination_order((DestinationOrderQosPolicy) newValue);
                 return;
-            case ModelPackage.TOPIC__DEADLINE:
+            case OpenDDSPackage.TOPIC__DEADLINE:
                 setDeadline((DeadlineQosPolicy) newValue);
                 return;
-            case ModelPackage.TOPIC__LATENCY_BUDGET:
+            case OpenDDSPackage.TOPIC__LATENCY_BUDGET:
                 setLatency_budget((LatencyBudgetQosPolicy) newValue);
                 return;
         }
@@ -867,43 +828,43 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.TOPIC__TYPE:
+            case OpenDDSPackage.TOPIC__TYPE:
                 setType((TopicField) null);
                 return;
-            case ModelPackage.TOPIC__DURABILITY_SERVICE:
+            case OpenDDSPackage.TOPIC__DURABILITY_SERVICE:
                 setDurability_service((DurabilityServiceQosPolicy) null);
                 return;
-            case ModelPackage.TOPIC__TRANSPORT_PRIORITY:
+            case OpenDDSPackage.TOPIC__TRANSPORT_PRIORITY:
                 setTransport_priority((TransportPriorityQosPolicy) null);
                 return;
-            case ModelPackage.TOPIC__TOPIC_DATA:
+            case OpenDDSPackage.TOPIC__TOPIC_DATA:
                 setTopic_data((TopicDataQosPolicy) null);
                 return;
-            case ModelPackage.TOPIC__RESOURCE_LIMITS:
+            case OpenDDSPackage.TOPIC__RESOURCE_LIMITS:
                 setResource_limits((ResourceLimitsQosPolicy) null);
                 return;
-            case ModelPackage.TOPIC__RELIABILITY:
+            case OpenDDSPackage.TOPIC__RELIABILITY:
                 setReliability((ReliabilityQosPolicy) null);
                 return;
-            case ModelPackage.TOPIC__OWNERSHIP:
+            case OpenDDSPackage.TOPIC__OWNERSHIP:
                 setOwnership((OwnershipQosPolicy) null);
                 return;
-            case ModelPackage.TOPIC__LIVELINESS:
+            case OpenDDSPackage.TOPIC__LIVELINESS:
                 setLiveliness((LivelinessQosPolicy) null);
                 return;
-            case ModelPackage.TOPIC__HISTORY:
+            case OpenDDSPackage.TOPIC__HISTORY:
                 setHistory((HistoryQosPolicy) null);
                 return;
-            case ModelPackage.TOPIC__DURABILITY:
+            case OpenDDSPackage.TOPIC__DURABILITY:
                 setDurability((DurabilityQosPolicy) null);
                 return;
-            case ModelPackage.TOPIC__DESTINATION_ORDER:
+            case OpenDDSPackage.TOPIC__DESTINATION_ORDER:
                 setDestination_order((DestinationOrderQosPolicy) null);
                 return;
-            case ModelPackage.TOPIC__DEADLINE:
+            case OpenDDSPackage.TOPIC__DEADLINE:
                 setDeadline((DeadlineQosPolicy) null);
                 return;
-            case ModelPackage.TOPIC__LATENCY_BUDGET:
+            case OpenDDSPackage.TOPIC__LATENCY_BUDGET:
                 setLatency_budget((LatencyBudgetQosPolicy) null);
                 return;
         }
@@ -918,31 +879,31 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.TOPIC__TYPE:
+            case OpenDDSPackage.TOPIC__TYPE:
                 return type != null;
-            case ModelPackage.TOPIC__DURABILITY_SERVICE:
+            case OpenDDSPackage.TOPIC__DURABILITY_SERVICE:
                 return durability_service != null;
-            case ModelPackage.TOPIC__TRANSPORT_PRIORITY:
+            case OpenDDSPackage.TOPIC__TRANSPORT_PRIORITY:
                 return transport_priority != null;
-            case ModelPackage.TOPIC__TOPIC_DATA:
+            case OpenDDSPackage.TOPIC__TOPIC_DATA:
                 return topic_data != null;
-            case ModelPackage.TOPIC__RESOURCE_LIMITS:
+            case OpenDDSPackage.TOPIC__RESOURCE_LIMITS:
                 return resource_limits != null;
-            case ModelPackage.TOPIC__RELIABILITY:
+            case OpenDDSPackage.TOPIC__RELIABILITY:
                 return reliability != null;
-            case ModelPackage.TOPIC__OWNERSHIP:
+            case OpenDDSPackage.TOPIC__OWNERSHIP:
                 return ownership != null;
-            case ModelPackage.TOPIC__LIVELINESS:
+            case OpenDDSPackage.TOPIC__LIVELINESS:
                 return liveliness != null;
-            case ModelPackage.TOPIC__HISTORY:
+            case OpenDDSPackage.TOPIC__HISTORY:
                 return history != null;
-            case ModelPackage.TOPIC__DURABILITY:
+            case OpenDDSPackage.TOPIC__DURABILITY:
                 return durability != null;
-            case ModelPackage.TOPIC__DESTINATION_ORDER:
+            case OpenDDSPackage.TOPIC__DESTINATION_ORDER:
                 return destination_order != null;
-            case ModelPackage.TOPIC__DEADLINE:
+            case OpenDDSPackage.TOPIC__DEADLINE:
                 return deadline != null;
-            case ModelPackage.TOPIC__LATENCY_BUDGET:
+            case OpenDDSPackage.TOPIC__LATENCY_BUDGET:
                 return latency_budget != null;
         }
         return super.eIsSet(featureID);
@@ -957,8 +918,8 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public int eBaseStructuralFeatureID(int derivedFeatureID, Class<?> baseClass) {
         if (baseClass == TopicDescription.class) {
             switch (derivedFeatureID) {
-                case ModelPackage.TOPIC__TYPE:
-                    return ModelPackage.TOPIC_DESCRIPTION__TYPE;
+                case OpenDDSPackage.TOPIC__TYPE:
+                    return OpenDDSPackage.TOPIC_DESCRIPTION__TYPE;
                 default:
                     return -1;
             }
@@ -975,8 +936,8 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public int eDerivedStructuralFeatureID(int baseFeatureID, Class<?> baseClass) {
         if (baseClass == TopicDescription.class) {
             switch (baseFeatureID) {
-                case ModelPackage.TOPIC_DESCRIPTION__TYPE:
-                    return ModelPackage.TOPIC__TYPE;
+                case OpenDDSPackage.TOPIC_DESCRIPTION__TYPE:
+                    return OpenDDSPackage.TOPIC__TYPE;
                 default:
                     return -1;
             }

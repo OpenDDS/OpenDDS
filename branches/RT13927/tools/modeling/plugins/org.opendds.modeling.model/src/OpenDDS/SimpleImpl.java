@@ -37,7 +37,7 @@ public abstract class SimpleImpl extends TopicFieldImpl implements Simple {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.SIMPLE;
+        return OpenDDSPackage.Literals.SIMPLE;
     }
 
 } //SimpleImpl

@@ -23,7 +23,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getPresentationQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getPresentationQosPolicy()
  * @model
  * @generated
  */
@@ -40,7 +40,7 @@ public interface PresentationQosPolicy extends QosPolicy {
      * @return the value of the '<em>Access scope</em>' attribute.
      * @see OpenDDS.PresentationQosPolicyAccessScopeKind
      * @see #setAccess_scope(PresentationQosPolicyAccessScopeKind)
-     * @see OpenDDS.ModelPackage#getPresentationQosPolicy_Access_scope()
+     * @see OpenDDS.OpenDDSPackage#getPresentationQosPolicy_Access_scope()
      * @model
      * @generated
      */
@@ -67,7 +67,7 @@ public interface PresentationQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Coherent access</em>' attribute.
      * @see #setCoherent_access(boolean)
-     * @see OpenDDS.ModelPackage#getPresentationQosPolicy_Coherent_access()
+     * @see OpenDDS.OpenDDSPackage#getPresentationQosPolicy_Coherent_access()
      * @model
      * @generated
      */
@@ -93,7 +93,7 @@ public interface PresentationQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Ordered access</em>' attribute.
      * @see #setOrdered_access(boolean)
-     * @see OpenDDS.ModelPackage#getPresentationQosPolicy_Ordered_access()
+     * @see OpenDDS.OpenDDSPackage#getPresentationQosPolicy_Ordered_access()
      * @model
      * @generated
      */

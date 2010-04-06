@@ -63,7 +63,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.MULTI_TOPIC;
+        return OpenDDSPackage.Literals.MULTI_TOPIC;
     }
 
     /**
@@ -83,10 +83,9 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     public void setSubscription_expression(String newSubscription_expression) {
         String oldSubscription_expression = subscription_expression;
         subscription_expression = newSubscription_expression;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION,
                     oldSubscription_expression, subscription_expression));
-        }
     }
 
     /**
@@ -97,7 +96,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
+            case OpenDDSPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
                 return getSubscription_expression();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -111,7 +110,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
+            case OpenDDSPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
                 setSubscription_expression((String) newValue);
                 return;
         }
@@ -126,7 +125,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
+            case OpenDDSPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
                 setSubscription_expression(SUBSCRIPTION_EXPRESSION_EDEFAULT);
                 return;
         }
@@ -141,7 +140,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
+            case OpenDDSPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
                 return SUBSCRIPTION_EXPRESSION_EDEFAULT == null ? subscription_expression != null
                         : !SUBSCRIPTION_EXPRESSION_EDEFAULT.equals(subscription_expression);
         }
@@ -155,9 +154,8 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (subscription_expression: ");

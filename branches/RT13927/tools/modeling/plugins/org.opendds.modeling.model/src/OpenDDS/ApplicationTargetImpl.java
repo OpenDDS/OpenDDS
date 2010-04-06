@@ -141,7 +141,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.APPLICATION_TARGET;
+        return OpenDDSPackage.Literals.APPLICATION_TARGET;
     }
 
     /**
@@ -161,10 +161,9 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     public void setComponent_type(ComponentType newComponent_type) {
         ComponentType oldComponent_type = component_type;
         component_type = newComponent_type == null ? COMPONENT_TYPE_EDEFAULT : newComponent_type;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.APPLICATION_TARGET__COMPONENT_TYPE,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.APPLICATION_TARGET__COMPONENT_TYPE,
                     oldComponent_type, component_type));
-        }
     }
 
     /**
@@ -184,10 +183,9 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     public void setLanguage(LanguageType newLanguage) {
         LanguageType oldLanguage = language;
         language = newLanguage == null ? LANGUAGE_EDEFAULT : newLanguage;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.APPLICATION_TARGET__LANGUAGE,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.APPLICATION_TARGET__LANGUAGE,
                     oldLanguage, language));
-        }
     }
 
     /**
@@ -207,10 +205,9 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     public void setPlatform(PlatformType newPlatform) {
         PlatformType oldPlatform = platform;
         platform = newPlatform == null ? PLATFORM_EDEFAULT : newPlatform;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.APPLICATION_TARGET__PLATFORM,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.APPLICATION_TARGET__PLATFORM,
                     oldPlatform, platform));
-        }
     }
 
     /**
@@ -221,7 +218,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     public EList<DomainParticipant> getParticipants() {
         if (participants == null) {
             participants = new EObjectResolvingEList<DomainParticipant>(DomainParticipant.class, this,
-                    ModelPackage.APPLICATION_TARGET__PARTICIPANTS);
+                    OpenDDSPackage.APPLICATION_TARGET__PARTICIPANTS);
         }
         return participants;
     }
@@ -243,10 +240,9 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     public void setService_arguments(String newService_arguments) {
         String oldService_arguments = service_arguments;
         service_arguments = newService_arguments;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS,
                     oldService_arguments, service_arguments));
-        }
     }
 
     /**
@@ -257,15 +253,15 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.APPLICATION_TARGET__COMPONENT_TYPE:
+            case OpenDDSPackage.APPLICATION_TARGET__COMPONENT_TYPE:
                 return getComponent_type();
-            case ModelPackage.APPLICATION_TARGET__LANGUAGE:
+            case OpenDDSPackage.APPLICATION_TARGET__LANGUAGE:
                 return getLanguage();
-            case ModelPackage.APPLICATION_TARGET__PLATFORM:
+            case OpenDDSPackage.APPLICATION_TARGET__PLATFORM:
                 return getPlatform();
-            case ModelPackage.APPLICATION_TARGET__PARTICIPANTS:
+            case OpenDDSPackage.APPLICATION_TARGET__PARTICIPANTS:
                 return getParticipants();
-            case ModelPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS:
+            case OpenDDSPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS:
                 return getService_arguments();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -280,20 +276,20 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.APPLICATION_TARGET__COMPONENT_TYPE:
+            case OpenDDSPackage.APPLICATION_TARGET__COMPONENT_TYPE:
                 setComponent_type((ComponentType) newValue);
                 return;
-            case ModelPackage.APPLICATION_TARGET__LANGUAGE:
+            case OpenDDSPackage.APPLICATION_TARGET__LANGUAGE:
                 setLanguage((LanguageType) newValue);
                 return;
-            case ModelPackage.APPLICATION_TARGET__PLATFORM:
+            case OpenDDSPackage.APPLICATION_TARGET__PLATFORM:
                 setPlatform((PlatformType) newValue);
                 return;
-            case ModelPackage.APPLICATION_TARGET__PARTICIPANTS:
+            case OpenDDSPackage.APPLICATION_TARGET__PARTICIPANTS:
                 getParticipants().clear();
                 getParticipants().addAll((Collection<? extends DomainParticipant>) newValue);
                 return;
-            case ModelPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS:
+            case OpenDDSPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS:
                 setService_arguments((String) newValue);
                 return;
         }
@@ -308,19 +304,19 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.APPLICATION_TARGET__COMPONENT_TYPE:
+            case OpenDDSPackage.APPLICATION_TARGET__COMPONENT_TYPE:
                 setComponent_type(COMPONENT_TYPE_EDEFAULT);
                 return;
-            case ModelPackage.APPLICATION_TARGET__LANGUAGE:
+            case OpenDDSPackage.APPLICATION_TARGET__LANGUAGE:
                 setLanguage(LANGUAGE_EDEFAULT);
                 return;
-            case ModelPackage.APPLICATION_TARGET__PLATFORM:
+            case OpenDDSPackage.APPLICATION_TARGET__PLATFORM:
                 setPlatform(PLATFORM_EDEFAULT);
                 return;
-            case ModelPackage.APPLICATION_TARGET__PARTICIPANTS:
+            case OpenDDSPackage.APPLICATION_TARGET__PARTICIPANTS:
                 getParticipants().clear();
                 return;
-            case ModelPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS:
+            case OpenDDSPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS:
                 setService_arguments(SERVICE_ARGUMENTS_EDEFAULT);
                 return;
         }
@@ -335,15 +331,15 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.APPLICATION_TARGET__COMPONENT_TYPE:
+            case OpenDDSPackage.APPLICATION_TARGET__COMPONENT_TYPE:
                 return component_type != COMPONENT_TYPE_EDEFAULT;
-            case ModelPackage.APPLICATION_TARGET__LANGUAGE:
+            case OpenDDSPackage.APPLICATION_TARGET__LANGUAGE:
                 return language != LANGUAGE_EDEFAULT;
-            case ModelPackage.APPLICATION_TARGET__PLATFORM:
+            case OpenDDSPackage.APPLICATION_TARGET__PLATFORM:
                 return platform != PLATFORM_EDEFAULT;
-            case ModelPackage.APPLICATION_TARGET__PARTICIPANTS:
+            case OpenDDSPackage.APPLICATION_TARGET__PARTICIPANTS:
                 return participants != null && !participants.isEmpty();
-            case ModelPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS:
+            case OpenDDSPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS:
                 return SERVICE_ARGUMENTS_EDEFAULT == null ? service_arguments != null : !SERVICE_ARGUMENTS_EDEFAULT
                         .equals(service_arguments);
         }
@@ -357,9 +353,8 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (component_type: ");

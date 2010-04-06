@@ -63,7 +63,7 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.PARTITION_QOS_POLICY;
+        return OpenDDSPackage.Literals.PARTITION_QOS_POLICY;
     }
 
     /**
@@ -83,10 +83,9 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
     public void setName(String newName) {
         String oldName = name;
         name = newName;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.PARTITION_QOS_POLICY__NAME, oldName,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.PARTITION_QOS_POLICY__NAME, oldName,
                     name));
-        }
     }
 
     /**
@@ -97,7 +96,7 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.PARTITION_QOS_POLICY__NAME:
+            case OpenDDSPackage.PARTITION_QOS_POLICY__NAME:
                 return getName();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -111,7 +110,7 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.PARTITION_QOS_POLICY__NAME:
+            case OpenDDSPackage.PARTITION_QOS_POLICY__NAME:
                 setName((String) newValue);
                 return;
         }
@@ -126,7 +125,7 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.PARTITION_QOS_POLICY__NAME:
+            case OpenDDSPackage.PARTITION_QOS_POLICY__NAME:
                 setName(NAME_EDEFAULT);
                 return;
         }
@@ -141,7 +140,7 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.PARTITION_QOS_POLICY__NAME:
+            case OpenDDSPackage.PARTITION_QOS_POLICY__NAME:
                 return NAME_EDEFAULT == null ? name != null : !NAME_EDEFAULT.equals(name);
         }
         return super.eIsSet(featureID);
@@ -154,9 +153,8 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (name: ");

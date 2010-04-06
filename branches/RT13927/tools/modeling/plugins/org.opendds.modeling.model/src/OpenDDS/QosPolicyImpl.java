@@ -37,7 +37,7 @@ public abstract class QosPolicyImpl extends SpecificationImpl implements QosPoli
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.QOS_POLICY;
+        return OpenDDSPackage.Literals.QOS_POLICY;
     }
 
 } //QosPolicyImpl

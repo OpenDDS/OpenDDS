@@ -98,7 +98,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.DATA_READER;
+        return OpenDDSPackage.Literals.DATA_READER;
     }
 
     /**
@@ -111,10 +111,9 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
             InternalEObject oldTopic = (InternalEObject) topic;
             topic = (TopicDescription) eResolveProxy(oldTopic);
             if (topic != oldTopic) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.DATA_READER__TOPIC,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.DATA_READER__TOPIC,
                             oldTopic, topic));
-                }
             }
         }
         return topic;
@@ -137,9 +136,8 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
     public void setTopic(TopicDescription newTopic) {
         TopicDescription oldTopic = topic;
         topic = newTopic;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.DATA_READER__TOPIC, oldTopic, topic));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.DATA_READER__TOPIC, oldTopic, topic));
     }
 
     /**
@@ -152,11 +150,10 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
             InternalEObject oldReader_data_lifecycle = (InternalEObject) reader_data_lifecycle;
             reader_data_lifecycle = (ReaderDataLifecycleQosPolicy) eResolveProxy(oldReader_data_lifecycle);
             if (reader_data_lifecycle != oldReader_data_lifecycle) {
-                if (eNotificationRequired()) {
+                if (eNotificationRequired())
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE,
-                            ModelPackage.DATA_READER__READER_DATA_LIFECYCLE, oldReader_data_lifecycle,
+                            OpenDDSPackage.DATA_READER__READER_DATA_LIFECYCLE, oldReader_data_lifecycle,
                             reader_data_lifecycle));
-                }
             }
         }
         return reader_data_lifecycle;
@@ -179,10 +176,9 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
     public void setReader_data_lifecycle(ReaderDataLifecycleQosPolicy newReader_data_lifecycle) {
         ReaderDataLifecycleQosPolicy oldReader_data_lifecycle = reader_data_lifecycle;
         reader_data_lifecycle = newReader_data_lifecycle;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.DATA_READER__READER_DATA_LIFECYCLE,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.DATA_READER__READER_DATA_LIFECYCLE,
                     oldReader_data_lifecycle, reader_data_lifecycle));
-        }
     }
 
     /**
@@ -195,10 +191,9 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
             InternalEObject oldTransport_priority = (InternalEObject) transport_priority;
             transport_priority = (TransportPriorityQosPolicy) eResolveProxy(oldTransport_priority);
             if (transport_priority != oldTransport_priority) {
-                if (eNotificationRequired()) {
+                if (eNotificationRequired())
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE,
-                            ModelPackage.DATA_READER__TRANSPORT_PRIORITY, oldTransport_priority, transport_priority));
-                }
+                            OpenDDSPackage.DATA_READER__TRANSPORT_PRIORITY, oldTransport_priority, transport_priority));
             }
         }
         return transport_priority;
@@ -221,10 +216,9 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
     public void setTransport_priority(TransportPriorityQosPolicy newTransport_priority) {
         TransportPriorityQosPolicy oldTransport_priority = transport_priority;
         transport_priority = newTransport_priority;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.DATA_READER__TRANSPORT_PRIORITY,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.DATA_READER__TRANSPORT_PRIORITY,
                     oldTransport_priority, transport_priority));
-        }
     }
 
     /**
@@ -237,10 +231,9 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
             InternalEObject oldDurability_service = (InternalEObject) durability_service;
             durability_service = (DurabilityServiceQosPolicy) eResolveProxy(oldDurability_service);
             if (durability_service != oldDurability_service) {
-                if (eNotificationRequired()) {
+                if (eNotificationRequired())
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE,
-                            ModelPackage.DATA_READER__DURABILITY_SERVICE, oldDurability_service, durability_service));
-                }
+                            OpenDDSPackage.DATA_READER__DURABILITY_SERVICE, oldDurability_service, durability_service));
             }
         }
         return durability_service;
@@ -263,10 +256,9 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
     public void setDurability_service(DurabilityServiceQosPolicy newDurability_service) {
         DurabilityServiceQosPolicy oldDurability_service = durability_service;
         durability_service = newDurability_service;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.DATA_READER__DURABILITY_SERVICE,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.DATA_READER__DURABILITY_SERVICE,
                     oldDurability_service, durability_service));
-        }
     }
 
     /**
@@ -279,10 +271,9 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
             InternalEObject oldOwnership_strength = (InternalEObject) ownership_strength;
             ownership_strength = (OwnershipStrengthQosPolicy) eResolveProxy(oldOwnership_strength);
             if (ownership_strength != oldOwnership_strength) {
-                if (eNotificationRequired()) {
+                if (eNotificationRequired())
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE,
-                            ModelPackage.DATA_READER__OWNERSHIP_STRENGTH, oldOwnership_strength, ownership_strength));
-                }
+                            OpenDDSPackage.DATA_READER__OWNERSHIP_STRENGTH, oldOwnership_strength, ownership_strength));
             }
         }
         return ownership_strength;
@@ -305,10 +296,9 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
     public void setOwnership_strength(OwnershipStrengthQosPolicy newOwnership_strength) {
         OwnershipStrengthQosPolicy oldOwnership_strength = ownership_strength;
         ownership_strength = newOwnership_strength;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.DATA_READER__OWNERSHIP_STRENGTH,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.DATA_READER__OWNERSHIP_STRENGTH,
                     oldOwnership_strength, ownership_strength));
-        }
     }
 
     /**
@@ -319,30 +309,25 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.DATA_READER__TOPIC:
-                if (resolve) {
+            case OpenDDSPackage.DATA_READER__TOPIC:
+                if (resolve)
                     return getTopic();
-                }
                 return basicGetTopic();
-            case ModelPackage.DATA_READER__READER_DATA_LIFECYCLE:
-                if (resolve) {
+            case OpenDDSPackage.DATA_READER__READER_DATA_LIFECYCLE:
+                if (resolve)
                     return getReader_data_lifecycle();
-                }
                 return basicGetReader_data_lifecycle();
-            case ModelPackage.DATA_READER__TRANSPORT_PRIORITY:
-                if (resolve) {
+            case OpenDDSPackage.DATA_READER__TRANSPORT_PRIORITY:
+                if (resolve)
                     return getTransport_priority();
-                }
                 return basicGetTransport_priority();
-            case ModelPackage.DATA_READER__DURABILITY_SERVICE:
-                if (resolve) {
+            case OpenDDSPackage.DATA_READER__DURABILITY_SERVICE:
+                if (resolve)
                     return getDurability_service();
-                }
                 return basicGetDurability_service();
-            case ModelPackage.DATA_READER__OWNERSHIP_STRENGTH:
-                if (resolve) {
+            case OpenDDSPackage.DATA_READER__OWNERSHIP_STRENGTH:
+                if (resolve)
                     return getOwnership_strength();
-                }
                 return basicGetOwnership_strength();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -356,19 +341,19 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.DATA_READER__TOPIC:
+            case OpenDDSPackage.DATA_READER__TOPIC:
                 setTopic((TopicDescription) newValue);
                 return;
-            case ModelPackage.DATA_READER__READER_DATA_LIFECYCLE:
+            case OpenDDSPackage.DATA_READER__READER_DATA_LIFECYCLE:
                 setReader_data_lifecycle((ReaderDataLifecycleQosPolicy) newValue);
                 return;
-            case ModelPackage.DATA_READER__TRANSPORT_PRIORITY:
+            case OpenDDSPackage.DATA_READER__TRANSPORT_PRIORITY:
                 setTransport_priority((TransportPriorityQosPolicy) newValue);
                 return;
-            case ModelPackage.DATA_READER__DURABILITY_SERVICE:
+            case OpenDDSPackage.DATA_READER__DURABILITY_SERVICE:
                 setDurability_service((DurabilityServiceQosPolicy) newValue);
                 return;
-            case ModelPackage.DATA_READER__OWNERSHIP_STRENGTH:
+            case OpenDDSPackage.DATA_READER__OWNERSHIP_STRENGTH:
                 setOwnership_strength((OwnershipStrengthQosPolicy) newValue);
                 return;
         }
@@ -383,19 +368,19 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.DATA_READER__TOPIC:
+            case OpenDDSPackage.DATA_READER__TOPIC:
                 setTopic((TopicDescription) null);
                 return;
-            case ModelPackage.DATA_READER__READER_DATA_LIFECYCLE:
+            case OpenDDSPackage.DATA_READER__READER_DATA_LIFECYCLE:
                 setReader_data_lifecycle((ReaderDataLifecycleQosPolicy) null);
                 return;
-            case ModelPackage.DATA_READER__TRANSPORT_PRIORITY:
+            case OpenDDSPackage.DATA_READER__TRANSPORT_PRIORITY:
                 setTransport_priority((TransportPriorityQosPolicy) null);
                 return;
-            case ModelPackage.DATA_READER__DURABILITY_SERVICE:
+            case OpenDDSPackage.DATA_READER__DURABILITY_SERVICE:
                 setDurability_service((DurabilityServiceQosPolicy) null);
                 return;
-            case ModelPackage.DATA_READER__OWNERSHIP_STRENGTH:
+            case OpenDDSPackage.DATA_READER__OWNERSHIP_STRENGTH:
                 setOwnership_strength((OwnershipStrengthQosPolicy) null);
                 return;
         }
@@ -410,15 +395,15 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.DATA_READER__TOPIC:
+            case OpenDDSPackage.DATA_READER__TOPIC:
                 return topic != null;
-            case ModelPackage.DATA_READER__READER_DATA_LIFECYCLE:
+            case OpenDDSPackage.DATA_READER__READER_DATA_LIFECYCLE:
                 return reader_data_lifecycle != null;
-            case ModelPackage.DATA_READER__TRANSPORT_PRIORITY:
+            case OpenDDSPackage.DATA_READER__TRANSPORT_PRIORITY:
                 return transport_priority != null;
-            case ModelPackage.DATA_READER__DURABILITY_SERVICE:
+            case OpenDDSPackage.DATA_READER__DURABILITY_SERVICE:
                 return durability_service != null;
-            case ModelPackage.DATA_READER__OWNERSHIP_STRENGTH:
+            case OpenDDSPackage.DATA_READER__OWNERSHIP_STRENGTH:
                 return ownership_strength != null;
         }
         return super.eIsSet(featureID);

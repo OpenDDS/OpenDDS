@@ -22,7 +22,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getUnion()
+ * @see OpenDDS.OpenDDSPackage#getUnion()
  * @model
  * @generated
  */
@@ -37,7 +37,7 @@ public interface Union extends ConstructedTopicType {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Switch</em>' reference.
      * @see #setSwitch(TopicField)
-     * @see OpenDDS.ModelPackage#getUnion_Switch()
+     * @see OpenDDS.OpenDDSPackage#getUnion_Switch()
      * @model required="true"
      * @generated
      */
@@ -63,7 +63,7 @@ public interface Union extends ConstructedTopicType {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Cases</em>' reference.
      * @see #setCases(Case)
-     * @see OpenDDS.ModelPackage#getUnion_Cases()
+     * @see OpenDDS.OpenDDSPackage#getUnion_Cases()
      * @model required="true"
      * @generated
      */

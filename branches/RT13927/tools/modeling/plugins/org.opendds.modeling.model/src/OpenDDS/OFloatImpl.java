@@ -37,7 +37,7 @@ public class OFloatImpl extends SimpleImpl implements OFloat {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.OFLOAT;
+        return OpenDDSPackage.Literals.OFLOAT;
     }
 
 } //OFloatImpl

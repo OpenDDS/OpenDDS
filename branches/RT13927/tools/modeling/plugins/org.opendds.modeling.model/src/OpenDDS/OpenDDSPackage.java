@@ -26,11 +26,11 @@ import org.eclipse.emf.ecore.EReference;
  *   <li>and each data type</li>
  * </ul>
  * <!-- end-user-doc -->
- * @see OpenDDS.ModelFactory
+ * @see OpenDDS.OpenDDSFactory
  * @model kind="package"
  * @generated
  */
-public interface ModelPackage extends EPackage {
+public interface OpenDDSPackage extends EPackage {
     /**
      * The package name.
      * <!-- begin-user-doc -->
@@ -61,14 +61,14 @@ public interface ModelPackage extends EPackage {
      * <!-- end-user-doc -->
      * @generated
      */
-    ModelPackage eINSTANCE = OpenDDS.ModelPackageImpl.init();
+    OpenDDSPackage eINSTANCE = OpenDDS.OpenDDSPackageImpl.init();
 
     /**
      * The meta object id for the '{@link OpenDDS.EntityImpl <em>Entity</em>}' class.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.EntityImpl
-     * @see OpenDDS.ModelPackageImpl#getEntity()
+     * @see OpenDDS.OpenDDSPackageImpl#getEntity()
      * @generated
      */
     int ENTITY = 0;
@@ -87,7 +87,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.NamedEntityImpl
-     * @see OpenDDS.ModelPackageImpl#getNamedEntity()
+     * @see OpenDDS.OpenDDSPackageImpl#getNamedEntity()
      * @generated
      */
     int NAMED_ENTITY = 1;
@@ -115,7 +115,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.SpecificationImpl
-     * @see OpenDDS.ModelPackageImpl#getSpecification()
+     * @see OpenDDS.OpenDDSPackageImpl#getSpecification()
      * @generated
      */
     int SPECIFICATION = 2;
@@ -134,7 +134,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.DomainEntityImpl
-     * @see OpenDDS.ModelPackageImpl#getDomainEntity()
+     * @see OpenDDS.OpenDDSPackageImpl#getDomainEntity()
      * @generated
      */
     int DOMAIN_ENTITY = 3;
@@ -162,7 +162,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.TopicDescriptionImpl
-     * @see OpenDDS.ModelPackageImpl#getTopicDescription()
+     * @see OpenDDS.OpenDDSPackageImpl#getTopicDescription()
      * @generated
      */
     int TOPIC_DESCRIPTION = 7;
@@ -199,7 +199,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.ContentFilteredTopicImpl
-     * @see OpenDDS.ModelPackageImpl#getContentFilteredTopic()
+     * @see OpenDDS.OpenDDSPackageImpl#getContentFilteredTopic()
      * @generated
      */
     int CONTENT_FILTERED_TOPIC = 4;
@@ -245,7 +245,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.MultiTopicImpl
-     * @see OpenDDS.ModelPackageImpl#getMultiTopic()
+     * @see OpenDDS.OpenDDSPackageImpl#getMultiTopic()
      * @generated
      */
     int MULTI_TOPIC = 5;
@@ -291,7 +291,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.TopicImpl
-     * @see OpenDDS.ModelPackageImpl#getTopic()
+     * @see OpenDDS.OpenDDSPackageImpl#getTopic()
      * @generated
      */
     int TOPIC = 6;
@@ -436,7 +436,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.TopicFieldImpl
-     * @see OpenDDS.ModelPackageImpl#getTopicField()
+     * @see OpenDDS.OpenDDSPackageImpl#getTopicField()
      * @generated
      */
     int TOPIC_FIELD = 27;
@@ -464,7 +464,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.CollectionImpl
-     * @see OpenDDS.ModelPackageImpl#getCollection()
+     * @see OpenDDS.OpenDDSPackageImpl#getCollection()
      * @generated
      */
     int COLLECTION = 12;
@@ -501,7 +501,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.ArrayImpl
-     * @see OpenDDS.ModelPackageImpl#getArray()
+     * @see OpenDDS.OpenDDSPackageImpl#getArray()
      * @generated
      */
     int ARRAY = 8;
@@ -547,7 +547,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.SimpleImpl
-     * @see OpenDDS.ModelPackageImpl#getSimple()
+     * @see OpenDDS.OpenDDSPackageImpl#getSimple()
      * @generated
      */
     int SIMPLE = 24;
@@ -575,7 +575,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.OBooleanImpl
-     * @see OpenDDS.ModelPackageImpl#getOBoolean()
+     * @see OpenDDS.OpenDDSPackageImpl#getOBoolean()
      * @generated
      */
     int OBOOLEAN = 9;
@@ -603,7 +603,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.CaseImpl
-     * @see OpenDDS.ModelPackageImpl#getCase()
+     * @see OpenDDS.OpenDDSPackageImpl#getCase()
      * @generated
      */
     int CASE = 10;
@@ -649,7 +649,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.OCharImpl
-     * @see OpenDDS.ModelPackageImpl#getOChar()
+     * @see OpenDDS.OpenDDSPackageImpl#getOChar()
      * @generated
      */
     int OCHAR = 11;
@@ -677,7 +677,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.ConstructedTopicTypeImpl
-     * @see OpenDDS.ModelPackageImpl#getConstructedTopicType()
+     * @see OpenDDS.OpenDDSPackageImpl#getConstructedTopicType()
      * @generated
      */
     int CONSTRUCTED_TOPIC_TYPE = 13;
@@ -705,7 +705,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.ODoubleImpl
-     * @see OpenDDS.ModelPackageImpl#getODouble()
+     * @see OpenDDS.OpenDDSPackageImpl#getODouble()
      * @generated
      */
     int ODOUBLE = 14;
@@ -733,7 +733,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.EnumImpl
-     * @see OpenDDS.ModelPackageImpl#getEnum()
+     * @see OpenDDS.OpenDDSPackageImpl#getEnum()
      * @generated
      */
     int ENUM = 15;
@@ -770,7 +770,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.OFloatImpl
-     * @see OpenDDS.ModelPackageImpl#getOFloat()
+     * @see OpenDDS.OpenDDSPackageImpl#getOFloat()
      * @generated
      */
     int OFLOAT = 16;
@@ -798,7 +798,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.KeyImpl
-     * @see OpenDDS.ModelPackageImpl#getKey()
+     * @see OpenDDS.OpenDDSPackageImpl#getKey()
      * @generated
      */
     int KEY = 17;
@@ -826,7 +826,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.KeyFieldImpl
-     * @see OpenDDS.ModelPackageImpl#getKeyField()
+     * @see OpenDDS.OpenDDSPackageImpl#getKeyField()
      * @generated
      */
     int KEY_FIELD = 18;
@@ -845,7 +845,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.OLongImpl
-     * @see OpenDDS.ModelPackageImpl#getOLong()
+     * @see OpenDDS.OpenDDSPackageImpl#getOLong()
      * @generated
      */
     int OLONG = 19;
@@ -873,7 +873,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.OLongLongImpl
-     * @see OpenDDS.ModelPackageImpl#getOLongLong()
+     * @see OpenDDS.OpenDDSPackageImpl#getOLongLong()
      * @generated
      */
     int OLONG_LONG = 20;
@@ -901,7 +901,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.OOctetImpl
-     * @see OpenDDS.ModelPackageImpl#getOOctet()
+     * @see OpenDDS.OpenDDSPackageImpl#getOOctet()
      * @generated
      */
     int OOCTET = 21;
@@ -929,7 +929,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.SequenceImpl
-     * @see OpenDDS.ModelPackageImpl#getSequence()
+     * @see OpenDDS.OpenDDSPackageImpl#getSequence()
      * @generated
      */
     int SEQUENCE = 22;
@@ -966,7 +966,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.OShortImpl
-     * @see OpenDDS.ModelPackageImpl#getOShort()
+     * @see OpenDDS.OpenDDSPackageImpl#getOShort()
      * @generated
      */
     int OSHORT = 23;
@@ -994,7 +994,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.OStringImpl
-     * @see OpenDDS.ModelPackageImpl#getOString()
+     * @see OpenDDS.OpenDDSPackageImpl#getOString()
      * @generated
      */
     int OSTRING = 25;
@@ -1022,7 +1022,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.TopicStructImpl
-     * @see OpenDDS.ModelPackageImpl#getTopicStruct()
+     * @see OpenDDS.OpenDDSPackageImpl#getTopicStruct()
      * @generated
      */
     int TOPIC_STRUCT = 26;
@@ -1068,7 +1068,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.TypedefImpl
-     * @see OpenDDS.ModelPackageImpl#getTypedef()
+     * @see OpenDDS.OpenDDSPackageImpl#getTypedef()
      * @generated
      */
     int TYPEDEF = 28;
@@ -1105,7 +1105,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.OULongImpl
-     * @see OpenDDS.ModelPackageImpl#getOULong()
+     * @see OpenDDS.OpenDDSPackageImpl#getOULong()
      * @generated
      */
     int OU_LONG = 29;
@@ -1124,7 +1124,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.OULongLongImpl
-     * @see OpenDDS.ModelPackageImpl#getOULongLong()
+     * @see OpenDDS.OpenDDSPackageImpl#getOULongLong()
      * @generated
      */
     int OU_LONG_LONG = 30;
@@ -1143,7 +1143,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.UnionImpl
-     * @see OpenDDS.ModelPackageImpl#getUnion()
+     * @see OpenDDS.OpenDDSPackageImpl#getUnion()
      * @generated
      */
     int UNION = 31;
@@ -1189,7 +1189,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.OUShortImpl
-     * @see OpenDDS.ModelPackageImpl#getOUShort()
+     * @see OpenDDS.OpenDDSPackageImpl#getOUShort()
      * @generated
      */
     int OU_SHORT = 32;
@@ -1208,7 +1208,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.DataReaderWriterImpl
-     * @see OpenDDS.ModelPackageImpl#getDataReaderWriter()
+     * @see OpenDDS.OpenDDSPackageImpl#getDataReaderWriter()
      * @generated
      */
     int DATA_READER_WRITER = 34;
@@ -1326,7 +1326,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.DataReaderImpl
-     * @see OpenDDS.ModelPackageImpl#getDataReader()
+     * @see OpenDDS.OpenDDSPackageImpl#getDataReader()
      * @generated
      */
     int DATA_READER = 33;
@@ -1489,7 +1489,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.DataWriterImpl
-     * @see OpenDDS.ModelPackageImpl#getDataWriter()
+     * @see OpenDDS.OpenDDSPackageImpl#getDataWriter()
      * @generated
      */
     int DATA_WRITER = 35;
@@ -1625,7 +1625,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.DomainImpl
-     * @see OpenDDS.ModelPackageImpl#getDomain()
+     * @see OpenDDS.OpenDDSPackageImpl#getDomain()
      * @generated
      */
     int DOMAIN = 36;
@@ -1653,7 +1653,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.DomainParticipantImpl
-     * @see OpenDDS.ModelPackageImpl#getDomainParticipant()
+     * @see OpenDDS.OpenDDSPackageImpl#getDomainParticipant()
      * @generated
      */
     int DOMAIN_PARTICIPANT = 37;
@@ -1726,7 +1726,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.PublisherSubscriberImpl
-     * @see OpenDDS.ModelPackageImpl#getPublisherSubscriber()
+     * @see OpenDDS.OpenDDSPackageImpl#getPublisherSubscriber()
      * @generated
      */
     int PUBLISHER_SUBSCRIBER = 39;
@@ -1799,7 +1799,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.PublisherImpl
-     * @see OpenDDS.ModelPackageImpl#getPublisher()
+     * @see OpenDDS.OpenDDSPackageImpl#getPublisher()
      * @generated
      */
     int PUBLISHER = 38;
@@ -1881,7 +1881,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.SubscriberImpl
-     * @see OpenDDS.ModelPackageImpl#getSubscriber()
+     * @see OpenDDS.OpenDDSPackageImpl#getSubscriber()
      * @generated
      */
     int SUBSCRIBER = 40;
@@ -1963,7 +1963,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.QosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getQosPolicy()
      * @generated
      */
     int QOS_POLICY = 55;
@@ -1982,7 +1982,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.DeadlineQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getDeadlineQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getDeadlineQosPolicy()
      * @generated
      */
     int DEADLINE_QOS_POLICY = 41;
@@ -2010,7 +2010,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.DestinationOrderQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getDestinationOrderQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getDestinationOrderQosPolicy()
      * @generated
      */
     int DESTINATION_ORDER_QOS_POLICY = 42;
@@ -2038,7 +2038,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.DurabilityQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getDurabilityQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getDurabilityQosPolicy()
      * @generated
      */
     int DURABILITY_QOS_POLICY = 43;
@@ -2066,7 +2066,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.DurabilityServiceQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getDurabilityServiceQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getDurabilityServiceQosPolicy()
      * @generated
      */
     int DURABILITY_SERVICE_QOS_POLICY = 44;
@@ -2139,7 +2139,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.EntityFactoryQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getEntityFactoryQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getEntityFactoryQosPolicy()
      * @generated
      */
     int ENTITY_FACTORY_QOS_POLICY = 45;
@@ -2167,7 +2167,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.GroupDataQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getGroupDataQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getGroupDataQosPolicy()
      * @generated
      */
     int GROUP_DATA_QOS_POLICY = 46;
@@ -2195,7 +2195,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.HistoryQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getHistoryQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getHistoryQosPolicy()
      * @generated
      */
     int HISTORY_QOS_POLICY = 47;
@@ -2232,7 +2232,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.LatencyBudgetQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getLatencyBudgetQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getLatencyBudgetQosPolicy()
      * @generated
      */
     int LATENCY_BUDGET_QOS_POLICY = 48;
@@ -2260,7 +2260,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.LifespanQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getLifespanQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getLifespanQosPolicy()
      * @generated
      */
     int LIFESPAN_QOS_POLICY = 49;
@@ -2288,7 +2288,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.LivelinessQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getLivelinessQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getLivelinessQosPolicy()
      * @generated
      */
     int LIVELINESS_QOS_POLICY = 50;
@@ -2325,7 +2325,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.OwnershipQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getOwnershipQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getOwnershipQosPolicy()
      * @generated
      */
     int OWNERSHIP_QOS_POLICY = 51;
@@ -2353,7 +2353,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.OwnershipStrengthQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getOwnershipStrengthQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getOwnershipStrengthQosPolicy()
      * @generated
      */
     int OWNERSHIP_STRENGTH_QOS_POLICY = 52;
@@ -2381,7 +2381,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.PartitionQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getPartitionQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getPartitionQosPolicy()
      * @generated
      */
     int PARTITION_QOS_POLICY = 53;
@@ -2409,7 +2409,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.PresentationQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getPresentationQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getPresentationQosPolicy()
      * @generated
      */
     int PRESENTATION_QOS_POLICY = 54;
@@ -2455,7 +2455,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.ReaderDataLifecycleQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getReaderDataLifecycleQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getReaderDataLifecycleQosPolicy()
      * @generated
      */
     int READER_DATA_LIFECYCLE_QOS_POLICY = 56;
@@ -2483,7 +2483,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.ReliabilityQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getReliabilityQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getReliabilityQosPolicy()
      * @generated
      */
     int RELIABILITY_QOS_POLICY = 57;
@@ -2520,7 +2520,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.ResourceLimitsQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getResourceLimitsQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getResourceLimitsQosPolicy()
      * @generated
      */
     int RESOURCE_LIMITS_QOS_POLICY = 58;
@@ -2566,7 +2566,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.TimeBasedFilterQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getTimeBasedFilterQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getTimeBasedFilterQosPolicy()
      * @generated
      */
     int TIME_BASED_FILTER_QOS_POLICY = 59;
@@ -2594,7 +2594,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.TopicDataQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getTopicDataQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getTopicDataQosPolicy()
      * @generated
      */
     int TOPIC_DATA_QOS_POLICY = 60;
@@ -2622,7 +2622,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.TransportPriorityQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getTransportPriorityQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getTransportPriorityQosPolicy()
      * @generated
      */
     int TRANSPORT_PRIORITY_QOS_POLICY = 61;
@@ -2650,7 +2650,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.UserDataQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getUserDataQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getUserDataQosPolicy()
      * @generated
      */
     int USER_DATA_QOS_POLICY = 62;
@@ -2678,7 +2678,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.PeriodImpl
-     * @see OpenDDS.ModelPackageImpl#getPeriod()
+     * @see OpenDDS.OpenDDSPackageImpl#getPeriod()
      * @generated
      */
     int PERIOD = 63;
@@ -2715,7 +2715,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.WriterDataLifecycleQosPolicyImpl
-     * @see OpenDDS.ModelPackageImpl#getWriterDataLifecycleQosPolicy()
+     * @see OpenDDS.OpenDDSPackageImpl#getWriterDataLifecycleQosPolicy()
      * @generated
      */
     int WRITER_DATA_LIFECYCLE_QOS_POLICY = 64;
@@ -2743,7 +2743,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.ApplicationTargetImpl
-     * @see OpenDDS.ModelPackageImpl#getApplicationTarget()
+     * @see OpenDDS.OpenDDSPackageImpl#getApplicationTarget()
      * @generated
      */
     int APPLICATION_TARGET = 65;
@@ -2807,7 +2807,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.TransportImpl
-     * @see OpenDDS.ModelPackageImpl#getTransport()
+     * @see OpenDDS.OpenDDSPackageImpl#getTransport()
      * @generated
      */
     int TRANSPORT = 66;
@@ -2835,7 +2835,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.DestinationOrderQosPolicyKind
-     * @see OpenDDS.ModelPackageImpl#getDestinationOrderQosPolicyKind()
+     * @see OpenDDS.OpenDDSPackageImpl#getDestinationOrderQosPolicyKind()
      * @generated
      */
     int DESTINATION_ORDER_QOS_POLICY_KIND = 67;
@@ -2845,7 +2845,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.DurabilityQosPolicyKind
-     * @see OpenDDS.ModelPackageImpl#getDurabilityQosPolicyKind()
+     * @see OpenDDS.OpenDDSPackageImpl#getDurabilityQosPolicyKind()
      * @generated
      */
     int DURABILITY_QOS_POLICY_KIND = 68;
@@ -2855,7 +2855,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.HistoryQosPolicyKind
-     * @see OpenDDS.ModelPackageImpl#getHistoryQosPolicyKind()
+     * @see OpenDDS.OpenDDSPackageImpl#getHistoryQosPolicyKind()
      * @generated
      */
     int HISTORY_QOS_POLICY_KIND = 69;
@@ -2865,7 +2865,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.LivelinessQosPolicyKind
-     * @see OpenDDS.ModelPackageImpl#getLivelinessQosPolicyKind()
+     * @see OpenDDS.OpenDDSPackageImpl#getLivelinessQosPolicyKind()
      * @generated
      */
     int LIVELINESS_QOS_POLICY_KIND = 70;
@@ -2875,7 +2875,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.OwnershipQosPolicyKind
-     * @see OpenDDS.ModelPackageImpl#getOwnershipQosPolicyKind()
+     * @see OpenDDS.OpenDDSPackageImpl#getOwnershipQosPolicyKind()
      * @generated
      */
     int OWNERSHIP_QOS_POLICY_KIND = 71;
@@ -2885,7 +2885,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.PresentationQosPolicyAccessScopeKind
-     * @see OpenDDS.ModelPackageImpl#getPresentationQosPolicyAccessScopeKind()
+     * @see OpenDDS.OpenDDSPackageImpl#getPresentationQosPolicyAccessScopeKind()
      * @generated
      */
     int PRESENTATION_QOS_POLICY_ACCESS_SCOPE_KIND = 72;
@@ -2895,7 +2895,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.ReliabilityQosPolicyKind
-     * @see OpenDDS.ModelPackageImpl#getReliabilityQosPolicyKind()
+     * @see OpenDDS.OpenDDSPackageImpl#getReliabilityQosPolicyKind()
      * @generated
      */
     int RELIABILITY_QOS_POLICY_KIND = 73;
@@ -2905,7 +2905,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.ComponentType
-     * @see OpenDDS.ModelPackageImpl#getComponentType()
+     * @see OpenDDS.OpenDDSPackageImpl#getComponentType()
      * @generated
      */
     int COMPONENT_TYPE = 74;
@@ -2915,7 +2915,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.LanguageType
-     * @see OpenDDS.ModelPackageImpl#getLanguageType()
+     * @see OpenDDS.OpenDDSPackageImpl#getLanguageType()
      * @generated
      */
     int LANGUAGE_TYPE = 75;
@@ -2925,7 +2925,7 @@ public interface ModelPackage extends EPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see OpenDDS.PlatformType
-     * @see OpenDDS.ModelPackageImpl#getPlatformType()
+     * @see OpenDDS.OpenDDSPackageImpl#getPlatformType()
      * @generated
      */
     int PLATFORM_TYPE = 76;
@@ -4785,7 +4785,7 @@ public interface ModelPackage extends EPackage {
      * @return the factory that creates the instances of the model.
      * @generated
      */
-    ModelFactory getModelFactory();
+    OpenDDSFactory getOpenDDSFactory();
 
     /**
      * <!-- begin-user-doc -->
@@ -4805,7 +4805,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.EntityImpl
-         * @see OpenDDS.ModelPackageImpl#getEntity()
+         * @see OpenDDS.OpenDDSPackageImpl#getEntity()
          * @generated
          */
         EClass ENTITY = eINSTANCE.getEntity();
@@ -4815,7 +4815,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.NamedEntityImpl
-         * @see OpenDDS.ModelPackageImpl#getNamedEntity()
+         * @see OpenDDS.OpenDDSPackageImpl#getNamedEntity()
          * @generated
          */
         EClass NAMED_ENTITY = eINSTANCE.getNamedEntity();
@@ -4833,7 +4833,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.SpecificationImpl
-         * @see OpenDDS.ModelPackageImpl#getSpecification()
+         * @see OpenDDS.OpenDDSPackageImpl#getSpecification()
          * @generated
          */
         EClass SPECIFICATION = eINSTANCE.getSpecification();
@@ -4843,7 +4843,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.DomainEntityImpl
-         * @see OpenDDS.ModelPackageImpl#getDomainEntity()
+         * @see OpenDDS.OpenDDSPackageImpl#getDomainEntity()
          * @generated
          */
         EClass DOMAIN_ENTITY = eINSTANCE.getDomainEntity();
@@ -4853,7 +4853,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.ContentFilteredTopicImpl
-         * @see OpenDDS.ModelPackageImpl#getContentFilteredTopic()
+         * @see OpenDDS.OpenDDSPackageImpl#getContentFilteredTopic()
          * @generated
          */
         EClass CONTENT_FILTERED_TOPIC = eINSTANCE.getContentFilteredTopic();
@@ -4871,7 +4871,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.MultiTopicImpl
-         * @see OpenDDS.ModelPackageImpl#getMultiTopic()
+         * @see OpenDDS.OpenDDSPackageImpl#getMultiTopic()
          * @generated
          */
         EClass MULTI_TOPIC = eINSTANCE.getMultiTopic();
@@ -4889,7 +4889,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.TopicImpl
-         * @see OpenDDS.ModelPackageImpl#getTopic()
+         * @see OpenDDS.OpenDDSPackageImpl#getTopic()
          * @generated
          */
         EClass TOPIC = eINSTANCE.getTopic();
@@ -4995,7 +4995,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.TopicDescriptionImpl
-         * @see OpenDDS.ModelPackageImpl#getTopicDescription()
+         * @see OpenDDS.OpenDDSPackageImpl#getTopicDescription()
          * @generated
          */
         EClass TOPIC_DESCRIPTION = eINSTANCE.getTopicDescription();
@@ -5013,7 +5013,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.ArrayImpl
-         * @see OpenDDS.ModelPackageImpl#getArray()
+         * @see OpenDDS.OpenDDSPackageImpl#getArray()
          * @generated
          */
         EClass ARRAY = eINSTANCE.getArray();
@@ -5031,7 +5031,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.OBooleanImpl
-         * @see OpenDDS.ModelPackageImpl#getOBoolean()
+         * @see OpenDDS.OpenDDSPackageImpl#getOBoolean()
          * @generated
          */
         EClass OBOOLEAN = eINSTANCE.getOBoolean();
@@ -5041,7 +5041,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.CaseImpl
-         * @see OpenDDS.ModelPackageImpl#getCase()
+         * @see OpenDDS.OpenDDSPackageImpl#getCase()
          * @generated
          */
         EClass CASE = eINSTANCE.getCase();
@@ -5067,7 +5067,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.OCharImpl
-         * @see OpenDDS.ModelPackageImpl#getOChar()
+         * @see OpenDDS.OpenDDSPackageImpl#getOChar()
          * @generated
          */
         EClass OCHAR = eINSTANCE.getOChar();
@@ -5077,7 +5077,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.CollectionImpl
-         * @see OpenDDS.ModelPackageImpl#getCollection()
+         * @see OpenDDS.OpenDDSPackageImpl#getCollection()
          * @generated
          */
         EClass COLLECTION = eINSTANCE.getCollection();
@@ -5095,7 +5095,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.ConstructedTopicTypeImpl
-         * @see OpenDDS.ModelPackageImpl#getConstructedTopicType()
+         * @see OpenDDS.OpenDDSPackageImpl#getConstructedTopicType()
          * @generated
          */
         EClass CONSTRUCTED_TOPIC_TYPE = eINSTANCE.getConstructedTopicType();
@@ -5105,7 +5105,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.ODoubleImpl
-         * @see OpenDDS.ModelPackageImpl#getODouble()
+         * @see OpenDDS.OpenDDSPackageImpl#getODouble()
          * @generated
          */
         EClass ODOUBLE = eINSTANCE.getODouble();
@@ -5115,7 +5115,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.EnumImpl
-         * @see OpenDDS.ModelPackageImpl#getEnum()
+         * @see OpenDDS.OpenDDSPackageImpl#getEnum()
          * @generated
          */
         EClass ENUM = eINSTANCE.getEnum();
@@ -5133,7 +5133,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.OFloatImpl
-         * @see OpenDDS.ModelPackageImpl#getOFloat()
+         * @see OpenDDS.OpenDDSPackageImpl#getOFloat()
          * @generated
          */
         EClass OFLOAT = eINSTANCE.getOFloat();
@@ -5143,7 +5143,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.KeyImpl
-         * @see OpenDDS.ModelPackageImpl#getKey()
+         * @see OpenDDS.OpenDDSPackageImpl#getKey()
          * @generated
          */
         EClass KEY = eINSTANCE.getKey();
@@ -5161,7 +5161,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.KeyFieldImpl
-         * @see OpenDDS.ModelPackageImpl#getKeyField()
+         * @see OpenDDS.OpenDDSPackageImpl#getKeyField()
          * @generated
          */
         EClass KEY_FIELD = eINSTANCE.getKeyField();
@@ -5171,7 +5171,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.OLongImpl
-         * @see OpenDDS.ModelPackageImpl#getOLong()
+         * @see OpenDDS.OpenDDSPackageImpl#getOLong()
          * @generated
          */
         EClass OLONG = eINSTANCE.getOLong();
@@ -5181,7 +5181,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.OLongLongImpl
-         * @see OpenDDS.ModelPackageImpl#getOLongLong()
+         * @see OpenDDS.OpenDDSPackageImpl#getOLongLong()
          * @generated
          */
         EClass OLONG_LONG = eINSTANCE.getOLongLong();
@@ -5191,7 +5191,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.OOctetImpl
-         * @see OpenDDS.ModelPackageImpl#getOOctet()
+         * @see OpenDDS.OpenDDSPackageImpl#getOOctet()
          * @generated
          */
         EClass OOCTET = eINSTANCE.getOOctet();
@@ -5201,7 +5201,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.SequenceImpl
-         * @see OpenDDS.ModelPackageImpl#getSequence()
+         * @see OpenDDS.OpenDDSPackageImpl#getSequence()
          * @generated
          */
         EClass SEQUENCE = eINSTANCE.getSequence();
@@ -5211,7 +5211,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.OShortImpl
-         * @see OpenDDS.ModelPackageImpl#getOShort()
+         * @see OpenDDS.OpenDDSPackageImpl#getOShort()
          * @generated
          */
         EClass OSHORT = eINSTANCE.getOShort();
@@ -5221,7 +5221,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.SimpleImpl
-         * @see OpenDDS.ModelPackageImpl#getSimple()
+         * @see OpenDDS.OpenDDSPackageImpl#getSimple()
          * @generated
          */
         EClass SIMPLE = eINSTANCE.getSimple();
@@ -5231,7 +5231,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.OStringImpl
-         * @see OpenDDS.ModelPackageImpl#getOString()
+         * @see OpenDDS.OpenDDSPackageImpl#getOString()
          * @generated
          */
         EClass OSTRING = eINSTANCE.getOString();
@@ -5241,7 +5241,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.TopicStructImpl
-         * @see OpenDDS.ModelPackageImpl#getTopicStruct()
+         * @see OpenDDS.OpenDDSPackageImpl#getTopicStruct()
          * @generated
          */
         EClass TOPIC_STRUCT = eINSTANCE.getTopicStruct();
@@ -5267,7 +5267,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.TopicFieldImpl
-         * @see OpenDDS.ModelPackageImpl#getTopicField()
+         * @see OpenDDS.OpenDDSPackageImpl#getTopicField()
          * @generated
          */
         EClass TOPIC_FIELD = eINSTANCE.getTopicField();
@@ -5277,7 +5277,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.TypedefImpl
-         * @see OpenDDS.ModelPackageImpl#getTypedef()
+         * @see OpenDDS.OpenDDSPackageImpl#getTypedef()
          * @generated
          */
         EClass TYPEDEF = eINSTANCE.getTypedef();
@@ -5295,7 +5295,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.OULongImpl
-         * @see OpenDDS.ModelPackageImpl#getOULong()
+         * @see OpenDDS.OpenDDSPackageImpl#getOULong()
          * @generated
          */
         EClass OU_LONG = eINSTANCE.getOULong();
@@ -5305,7 +5305,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.OULongLongImpl
-         * @see OpenDDS.ModelPackageImpl#getOULongLong()
+         * @see OpenDDS.OpenDDSPackageImpl#getOULongLong()
          * @generated
          */
         EClass OU_LONG_LONG = eINSTANCE.getOULongLong();
@@ -5315,7 +5315,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.UnionImpl
-         * @see OpenDDS.ModelPackageImpl#getUnion()
+         * @see OpenDDS.OpenDDSPackageImpl#getUnion()
          * @generated
          */
         EClass UNION = eINSTANCE.getUnion();
@@ -5341,7 +5341,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.OUShortImpl
-         * @see OpenDDS.ModelPackageImpl#getOUShort()
+         * @see OpenDDS.OpenDDSPackageImpl#getOUShort()
          * @generated
          */
         EClass OU_SHORT = eINSTANCE.getOUShort();
@@ -5351,7 +5351,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.DataReaderImpl
-         * @see OpenDDS.ModelPackageImpl#getDataReader()
+         * @see OpenDDS.OpenDDSPackageImpl#getDataReader()
          * @generated
          */
         EClass DATA_READER = eINSTANCE.getDataReader();
@@ -5401,7 +5401,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.DataReaderWriterImpl
-         * @see OpenDDS.ModelPackageImpl#getDataReaderWriter()
+         * @see OpenDDS.OpenDDSPackageImpl#getDataReaderWriter()
          * @generated
          */
         EClass DATA_READER_WRITER = eINSTANCE.getDataReaderWriter();
@@ -5491,7 +5491,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.DataWriterImpl
-         * @see OpenDDS.ModelPackageImpl#getDataWriter()
+         * @see OpenDDS.OpenDDSPackageImpl#getDataWriter()
          * @generated
          */
         EClass DATA_WRITER = eINSTANCE.getDataWriter();
@@ -5517,7 +5517,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.DomainImpl
-         * @see OpenDDS.ModelPackageImpl#getDomain()
+         * @see OpenDDS.OpenDDSPackageImpl#getDomain()
          * @generated
          */
         EClass DOMAIN = eINSTANCE.getDomain();
@@ -5527,7 +5527,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.DomainParticipantImpl
-         * @see OpenDDS.ModelPackageImpl#getDomainParticipant()
+         * @see OpenDDS.OpenDDSPackageImpl#getDomainParticipant()
          * @generated
          */
         EClass DOMAIN_PARTICIPANT = eINSTANCE.getDomainParticipant();
@@ -5577,7 +5577,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.PublisherImpl
-         * @see OpenDDS.ModelPackageImpl#getPublisher()
+         * @see OpenDDS.OpenDDSPackageImpl#getPublisher()
          * @generated
          */
         EClass PUBLISHER = eINSTANCE.getPublisher();
@@ -5595,7 +5595,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.PublisherSubscriberImpl
-         * @see OpenDDS.ModelPackageImpl#getPublisherSubscriber()
+         * @see OpenDDS.OpenDDSPackageImpl#getPublisherSubscriber()
          * @generated
          */
         EClass PUBLISHER_SUBSCRIBER = eINSTANCE.getPublisherSubscriber();
@@ -5645,7 +5645,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.SubscriberImpl
-         * @see OpenDDS.ModelPackageImpl#getSubscriber()
+         * @see OpenDDS.OpenDDSPackageImpl#getSubscriber()
          * @generated
          */
         EClass SUBSCRIBER = eINSTANCE.getSubscriber();
@@ -5663,7 +5663,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.DeadlineQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getDeadlineQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getDeadlineQosPolicy()
          * @generated
          */
         EClass DEADLINE_QOS_POLICY = eINSTANCE.getDeadlineQosPolicy();
@@ -5681,7 +5681,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.DestinationOrderQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getDestinationOrderQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getDestinationOrderQosPolicy()
          * @generated
          */
         EClass DESTINATION_ORDER_QOS_POLICY = eINSTANCE.getDestinationOrderQosPolicy();
@@ -5699,7 +5699,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.DurabilityQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getDurabilityQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getDurabilityQosPolicy()
          * @generated
          */
         EClass DURABILITY_QOS_POLICY = eINSTANCE.getDurabilityQosPolicy();
@@ -5717,7 +5717,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.DurabilityServiceQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getDurabilityServiceQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getDurabilityServiceQosPolicy()
          * @generated
          */
         EClass DURABILITY_SERVICE_QOS_POLICY = eINSTANCE.getDurabilityServiceQosPolicy();
@@ -5779,7 +5779,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.EntityFactoryQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getEntityFactoryQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getEntityFactoryQosPolicy()
          * @generated
          */
         EClass ENTITY_FACTORY_QOS_POLICY = eINSTANCE.getEntityFactoryQosPolicy();
@@ -5798,7 +5798,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.GroupDataQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getGroupDataQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getGroupDataQosPolicy()
          * @generated
          */
         EClass GROUP_DATA_QOS_POLICY = eINSTANCE.getGroupDataQosPolicy();
@@ -5816,7 +5816,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.HistoryQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getHistoryQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getHistoryQosPolicy()
          * @generated
          */
         EClass HISTORY_QOS_POLICY = eINSTANCE.getHistoryQosPolicy();
@@ -5842,7 +5842,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.LatencyBudgetQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getLatencyBudgetQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getLatencyBudgetQosPolicy()
          * @generated
          */
         EClass LATENCY_BUDGET_QOS_POLICY = eINSTANCE.getLatencyBudgetQosPolicy();
@@ -5860,7 +5860,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.LifespanQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getLifespanQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getLifespanQosPolicy()
          * @generated
          */
         EClass LIFESPAN_QOS_POLICY = eINSTANCE.getLifespanQosPolicy();
@@ -5878,7 +5878,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.LivelinessQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getLivelinessQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getLivelinessQosPolicy()
          * @generated
          */
         EClass LIVELINESS_QOS_POLICY = eINSTANCE.getLivelinessQosPolicy();
@@ -5904,7 +5904,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.OwnershipQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getOwnershipQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getOwnershipQosPolicy()
          * @generated
          */
         EClass OWNERSHIP_QOS_POLICY = eINSTANCE.getOwnershipQosPolicy();
@@ -5922,7 +5922,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.OwnershipStrengthQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getOwnershipStrengthQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getOwnershipStrengthQosPolicy()
          * @generated
          */
         EClass OWNERSHIP_STRENGTH_QOS_POLICY = eINSTANCE.getOwnershipStrengthQosPolicy();
@@ -5940,7 +5940,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.PartitionQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getPartitionQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getPartitionQosPolicy()
          * @generated
          */
         EClass PARTITION_QOS_POLICY = eINSTANCE.getPartitionQosPolicy();
@@ -5958,7 +5958,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.PresentationQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getPresentationQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getPresentationQosPolicy()
          * @generated
          */
         EClass PRESENTATION_QOS_POLICY = eINSTANCE.getPresentationQosPolicy();
@@ -5992,7 +5992,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.QosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getQosPolicy()
          * @generated
          */
         EClass QOS_POLICY = eINSTANCE.getQosPolicy();
@@ -6002,7 +6002,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.ReaderDataLifecycleQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getReaderDataLifecycleQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getReaderDataLifecycleQosPolicy()
          * @generated
          */
         EClass READER_DATA_LIFECYCLE_QOS_POLICY = eINSTANCE.getReaderDataLifecycleQosPolicy();
@@ -6021,7 +6021,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.ReliabilityQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getReliabilityQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getReliabilityQosPolicy()
          * @generated
          */
         EClass RELIABILITY_QOS_POLICY = eINSTANCE.getReliabilityQosPolicy();
@@ -6047,7 +6047,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.ResourceLimitsQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getResourceLimitsQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getResourceLimitsQosPolicy()
          * @generated
          */
         EClass RESOURCE_LIMITS_QOS_POLICY = eINSTANCE.getResourceLimitsQosPolicy();
@@ -6082,7 +6082,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.TimeBasedFilterQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getTimeBasedFilterQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getTimeBasedFilterQosPolicy()
          * @generated
          */
         EClass TIME_BASED_FILTER_QOS_POLICY = eINSTANCE.getTimeBasedFilterQosPolicy();
@@ -6101,7 +6101,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.TopicDataQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getTopicDataQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getTopicDataQosPolicy()
          * @generated
          */
         EClass TOPIC_DATA_QOS_POLICY = eINSTANCE.getTopicDataQosPolicy();
@@ -6119,7 +6119,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.TransportPriorityQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getTransportPriorityQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getTransportPriorityQosPolicy()
          * @generated
          */
         EClass TRANSPORT_PRIORITY_QOS_POLICY = eINSTANCE.getTransportPriorityQosPolicy();
@@ -6137,7 +6137,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.UserDataQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getUserDataQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getUserDataQosPolicy()
          * @generated
          */
         EClass USER_DATA_QOS_POLICY = eINSTANCE.getUserDataQosPolicy();
@@ -6155,7 +6155,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.PeriodImpl
-         * @see OpenDDS.ModelPackageImpl#getPeriod()
+         * @see OpenDDS.OpenDDSPackageImpl#getPeriod()
          * @generated
          */
         EClass PERIOD = eINSTANCE.getPeriod();
@@ -6181,7 +6181,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.WriterDataLifecycleQosPolicyImpl
-         * @see OpenDDS.ModelPackageImpl#getWriterDataLifecycleQosPolicy()
+         * @see OpenDDS.OpenDDSPackageImpl#getWriterDataLifecycleQosPolicy()
          * @generated
          */
         EClass WRITER_DATA_LIFECYCLE_QOS_POLICY = eINSTANCE.getWriterDataLifecycleQosPolicy();
@@ -6200,7 +6200,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.ApplicationTargetImpl
-         * @see OpenDDS.ModelPackageImpl#getApplicationTarget()
+         * @see OpenDDS.OpenDDSPackageImpl#getApplicationTarget()
          * @generated
          */
         EClass APPLICATION_TARGET = eINSTANCE.getApplicationTarget();
@@ -6250,7 +6250,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.TransportImpl
-         * @see OpenDDS.ModelPackageImpl#getTransport()
+         * @see OpenDDS.OpenDDSPackageImpl#getTransport()
          * @generated
          */
         EClass TRANSPORT = eINSTANCE.getTransport();
@@ -6268,7 +6268,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.DestinationOrderQosPolicyKind
-         * @see OpenDDS.ModelPackageImpl#getDestinationOrderQosPolicyKind()
+         * @see OpenDDS.OpenDDSPackageImpl#getDestinationOrderQosPolicyKind()
          * @generated
          */
         EEnum DESTINATION_ORDER_QOS_POLICY_KIND = eINSTANCE.getDestinationOrderQosPolicyKind();
@@ -6278,7 +6278,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.DurabilityQosPolicyKind
-         * @see OpenDDS.ModelPackageImpl#getDurabilityQosPolicyKind()
+         * @see OpenDDS.OpenDDSPackageImpl#getDurabilityQosPolicyKind()
          * @generated
          */
         EEnum DURABILITY_QOS_POLICY_KIND = eINSTANCE.getDurabilityQosPolicyKind();
@@ -6288,7 +6288,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.HistoryQosPolicyKind
-         * @see OpenDDS.ModelPackageImpl#getHistoryQosPolicyKind()
+         * @see OpenDDS.OpenDDSPackageImpl#getHistoryQosPolicyKind()
          * @generated
          */
         EEnum HISTORY_QOS_POLICY_KIND = eINSTANCE.getHistoryQosPolicyKind();
@@ -6298,7 +6298,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.LivelinessQosPolicyKind
-         * @see OpenDDS.ModelPackageImpl#getLivelinessQosPolicyKind()
+         * @see OpenDDS.OpenDDSPackageImpl#getLivelinessQosPolicyKind()
          * @generated
          */
         EEnum LIVELINESS_QOS_POLICY_KIND = eINSTANCE.getLivelinessQosPolicyKind();
@@ -6308,7 +6308,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.OwnershipQosPolicyKind
-         * @see OpenDDS.ModelPackageImpl#getOwnershipQosPolicyKind()
+         * @see OpenDDS.OpenDDSPackageImpl#getOwnershipQosPolicyKind()
          * @generated
          */
         EEnum OWNERSHIP_QOS_POLICY_KIND = eINSTANCE.getOwnershipQosPolicyKind();
@@ -6318,7 +6318,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.PresentationQosPolicyAccessScopeKind
-         * @see OpenDDS.ModelPackageImpl#getPresentationQosPolicyAccessScopeKind()
+         * @see OpenDDS.OpenDDSPackageImpl#getPresentationQosPolicyAccessScopeKind()
          * @generated
          */
         EEnum PRESENTATION_QOS_POLICY_ACCESS_SCOPE_KIND = eINSTANCE.getPresentationQosPolicyAccessScopeKind();
@@ -6328,7 +6328,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.ReliabilityQosPolicyKind
-         * @see OpenDDS.ModelPackageImpl#getReliabilityQosPolicyKind()
+         * @see OpenDDS.OpenDDSPackageImpl#getReliabilityQosPolicyKind()
          * @generated
          */
         EEnum RELIABILITY_QOS_POLICY_KIND = eINSTANCE.getReliabilityQosPolicyKind();
@@ -6338,7 +6338,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.ComponentType
-         * @see OpenDDS.ModelPackageImpl#getComponentType()
+         * @see OpenDDS.OpenDDSPackageImpl#getComponentType()
          * @generated
          */
         EEnum COMPONENT_TYPE = eINSTANCE.getComponentType();
@@ -6348,7 +6348,7 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.LanguageType
-         * @see OpenDDS.ModelPackageImpl#getLanguageType()
+         * @see OpenDDS.OpenDDSPackageImpl#getLanguageType()
          * @generated
          */
         EEnum LANGUAGE_TYPE = eINSTANCE.getLanguageType();
@@ -6358,11 +6358,11 @@ public interface ModelPackage extends EPackage {
          * <!-- begin-user-doc -->
          * <!-- end-user-doc -->
          * @see OpenDDS.PlatformType
-         * @see OpenDDS.ModelPackageImpl#getPlatformType()
+         * @see OpenDDS.OpenDDSPackageImpl#getPlatformType()
          * @generated
          */
         EEnum PLATFORM_TYPE = eINSTANCE.getPlatformType();
 
     }
 
-} //ModelPackage
+} //OpenDDSPackage

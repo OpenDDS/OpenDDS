@@ -37,7 +37,7 @@ public abstract class ConstructedTopicTypeImpl extends TopicFieldImpl implements
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.CONSTRUCTED_TOPIC_TYPE;
+        return OpenDDSPackage.Literals.CONSTRUCTED_TOPIC_TYPE;
     }
 
 } //ConstructedTopicTypeImpl

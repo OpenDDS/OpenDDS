@@ -54,7 +54,7 @@ public class TypedefImpl extends TopicFieldImpl implements Typedef {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.TYPEDEF;
+        return OpenDDSPackage.Literals.TYPEDEF;
     }
 
     /**
@@ -67,9 +67,9 @@ public class TypedefImpl extends TopicFieldImpl implements Typedef {
             InternalEObject oldType = (InternalEObject) type;
             type = (TopicField) eResolveProxy(oldType);
             if (type != oldType) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TYPEDEF__TYPE, oldType, type));
-                }
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TYPEDEF__TYPE, oldType,
+                            type));
             }
         }
         return type;
@@ -92,9 +92,8 @@ public class TypedefImpl extends TopicFieldImpl implements Typedef {
     public void setType(TopicField newType) {
         TopicField oldType = type;
         type = newType;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TYPEDEF__TYPE, oldType, type));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TYPEDEF__TYPE, oldType, type));
     }
 
     /**
@@ -105,10 +104,9 @@ public class TypedefImpl extends TopicFieldImpl implements Typedef {
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.TYPEDEF__TYPE:
-                if (resolve) {
+            case OpenDDSPackage.TYPEDEF__TYPE:
+                if (resolve)
                     return getType();
-                }
                 return basicGetType();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -122,7 +120,7 @@ public class TypedefImpl extends TopicFieldImpl implements Typedef {
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.TYPEDEF__TYPE:
+            case OpenDDSPackage.TYPEDEF__TYPE:
                 setType((TopicField) newValue);
                 return;
         }
@@ -137,7 +135,7 @@ public class TypedefImpl extends TopicFieldImpl implements Typedef {
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.TYPEDEF__TYPE:
+            case OpenDDSPackage.TYPEDEF__TYPE:
                 setType((TopicField) null);
                 return;
         }
@@ -152,7 +150,7 @@ public class TypedefImpl extends TopicFieldImpl implements Typedef {
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.TYPEDEF__TYPE:
+            case OpenDDSPackage.TYPEDEF__TYPE:
                 return type != null;
         }
         return super.eIsSet(featureID);

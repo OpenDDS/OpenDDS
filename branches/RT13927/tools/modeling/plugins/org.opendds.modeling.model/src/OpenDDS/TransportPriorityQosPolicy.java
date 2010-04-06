@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getTransportPriorityQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getTransportPriorityQosPolicy()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface TransportPriorityQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Value</em>' attribute.
      * @see #setValue(long)
-     * @see OpenDDS.ModelPackage#getTransportPriorityQosPolicy_Value()
+     * @see OpenDDS.OpenDDSPackage#getTransportPriorityQosPolicy_Value()
      * @model
      * @generated
      */

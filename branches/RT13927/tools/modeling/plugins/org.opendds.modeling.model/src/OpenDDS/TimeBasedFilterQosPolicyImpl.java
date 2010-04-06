@@ -55,7 +55,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.TIME_BASED_FILTER_QOS_POLICY;
+        return OpenDDSPackage.Literals.TIME_BASED_FILTER_QOS_POLICY;
     }
 
     /**
@@ -77,13 +77,12 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
         minimum_separation = newMinimum_separation;
         if (eNotificationRequired()) {
             ENotificationImpl notification = new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION, oldMinimum_separation,
+                    OpenDDSPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION, oldMinimum_separation,
                     newMinimum_separation);
-            if (msgs == null) {
+            if (msgs == null)
                 msgs = notification;
-            } else {
+            else
                 msgs.add(notification);
-            }
         }
         return msgs;
     }
@@ -96,23 +95,19 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     public void setMinimum_separation(Period newMinimum_separation) {
         if (newMinimum_separation != minimum_separation) {
             NotificationChain msgs = null;
-            if (minimum_separation != null) {
+            if (minimum_separation != null)
                 msgs = ((InternalEObject) minimum_separation).eInverseRemove(this, EOPPOSITE_FEATURE_BASE
-                        - ModelPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION, null, msgs);
-            }
-            if (newMinimum_separation != null) {
+                        - OpenDDSPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION, null, msgs);
+            if (newMinimum_separation != null)
                 msgs = ((InternalEObject) newMinimum_separation).eInverseAdd(this, EOPPOSITE_FEATURE_BASE
-                        - ModelPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION, null, msgs);
-            }
+                        - OpenDDSPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION, null, msgs);
             msgs = basicSetMinimum_separation(newMinimum_separation, msgs);
-            if (msgs != null) {
+            if (msgs != null)
                 msgs.dispatch();
-            }
-        } else if (eNotificationRequired()) {
+        } else if (eNotificationRequired())
             eNotify(new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION, newMinimum_separation,
+                    OpenDDSPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION, newMinimum_separation,
                     newMinimum_separation));
-        }
     }
 
     /**
@@ -123,7 +118,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     @Override
     public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
         switch (featureID) {
-            case ModelPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION:
+            case OpenDDSPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION:
                 return basicSetMinimum_separation(null, msgs);
         }
         return super.eInverseRemove(otherEnd, featureID, msgs);
@@ -137,7 +132,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION:
+            case OpenDDSPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION:
                 return getMinimum_separation();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -151,7 +146,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION:
+            case OpenDDSPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION:
                 setMinimum_separation((Period) newValue);
                 return;
         }
@@ -166,7 +161,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION:
+            case OpenDDSPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION:
                 setMinimum_separation((Period) null);
                 return;
         }
@@ -181,7 +176,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION:
+            case OpenDDSPackage.TIME_BASED_FILTER_QOS_POLICY__MINIMUM_SEPARATION:
                 return minimum_separation != null;
         }
         return super.eIsSet(featureID);

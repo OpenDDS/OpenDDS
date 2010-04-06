@@ -15,7 +15,7 @@ package OpenDDS;
  * <!-- end-user-doc -->
  *
  *
- * @see OpenDDS.ModelPackage#getOBoolean()
+ * @see OpenDDS.OpenDDSPackage#getOBoolean()
  * @model
  * @generated
  */

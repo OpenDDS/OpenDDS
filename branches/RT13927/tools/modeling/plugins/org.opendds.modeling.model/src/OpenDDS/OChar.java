@@ -15,7 +15,7 @@ package OpenDDS;
  * <!-- end-user-doc -->
  *
  *
- * @see OpenDDS.ModelPackage#getOChar()
+ * @see OpenDDS.OpenDDSPackage#getOChar()
  * @model
  * @generated
  */

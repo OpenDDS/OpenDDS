@@ -22,7 +22,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getLivelinessQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getLivelinessQosPolicy()
  * @model
  * @generated
  */
@@ -39,7 +39,7 @@ public interface LivelinessQosPolicy extends QosPolicy {
      * @return the value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.LivelinessQosPolicyKind
      * @see #setKind(LivelinessQosPolicyKind)
-     * @see OpenDDS.ModelPackage#getLivelinessQosPolicy_Kind()
+     * @see OpenDDS.OpenDDSPackage#getLivelinessQosPolicy_Kind()
      * @model
      * @generated
      */
@@ -66,7 +66,7 @@ public interface LivelinessQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Lease duration</em>' containment reference.
      * @see #setLease_duration(Period)
-     * @see OpenDDS.ModelPackage#getLivelinessQosPolicy_Lease_duration()
+     * @see OpenDDS.OpenDDSPackage#getLivelinessQosPolicy_Lease_duration()
      * @model containment="true"
      * @generated
      */

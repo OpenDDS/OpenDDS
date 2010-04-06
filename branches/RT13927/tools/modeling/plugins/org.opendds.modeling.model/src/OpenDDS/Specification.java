@@ -15,7 +15,7 @@ package OpenDDS;
  * <!-- end-user-doc -->
  *
  *
- * @see OpenDDS.ModelPackage#getSpecification()
+ * @see OpenDDS.OpenDDSPackage#getSpecification()
  * @model abstract="true"
  * @generated
  */

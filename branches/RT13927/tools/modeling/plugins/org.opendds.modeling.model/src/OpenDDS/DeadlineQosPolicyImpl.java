@@ -55,7 +55,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.DEADLINE_QOS_POLICY;
+        return OpenDDSPackage.Literals.DEADLINE_QOS_POLICY;
     }
 
     /**
@@ -77,12 +77,11 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
         period = newPeriod;
         if (eNotificationRequired()) {
             ENotificationImpl notification = new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.DEADLINE_QOS_POLICY__PERIOD, oldPeriod, newPeriod);
-            if (msgs == null) {
+                    OpenDDSPackage.DEADLINE_QOS_POLICY__PERIOD, oldPeriod, newPeriod);
+            if (msgs == null)
                 msgs = notification;
-            } else {
+            else
                 msgs.add(notification);
-            }
         }
         return msgs;
     }
@@ -95,22 +94,18 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     public void setPeriod(Period newPeriod) {
         if (newPeriod != period) {
             NotificationChain msgs = null;
-            if (period != null) {
+            if (period != null)
                 msgs = ((InternalEObject) period).eInverseRemove(this, EOPPOSITE_FEATURE_BASE
-                        - ModelPackage.DEADLINE_QOS_POLICY__PERIOD, null, msgs);
-            }
-            if (newPeriod != null) {
+                        - OpenDDSPackage.DEADLINE_QOS_POLICY__PERIOD, null, msgs);
+            if (newPeriod != null)
                 msgs = ((InternalEObject) newPeriod).eInverseAdd(this, EOPPOSITE_FEATURE_BASE
-                        - ModelPackage.DEADLINE_QOS_POLICY__PERIOD, null, msgs);
-            }
+                        - OpenDDSPackage.DEADLINE_QOS_POLICY__PERIOD, null, msgs);
             msgs = basicSetPeriod(newPeriod, msgs);
-            if (msgs != null) {
+            if (msgs != null)
                 msgs.dispatch();
-            }
-        } else if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.DEADLINE_QOS_POLICY__PERIOD, newPeriod,
-                    newPeriod));
-        }
+        } else if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.DEADLINE_QOS_POLICY__PERIOD,
+                    newPeriod, newPeriod));
     }
 
     /**
@@ -121,7 +116,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     @Override
     public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
         switch (featureID) {
-            case ModelPackage.DEADLINE_QOS_POLICY__PERIOD:
+            case OpenDDSPackage.DEADLINE_QOS_POLICY__PERIOD:
                 return basicSetPeriod(null, msgs);
         }
         return super.eInverseRemove(otherEnd, featureID, msgs);
@@ -135,7 +130,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.DEADLINE_QOS_POLICY__PERIOD:
+            case OpenDDSPackage.DEADLINE_QOS_POLICY__PERIOD:
                 return getPeriod();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -149,7 +144,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.DEADLINE_QOS_POLICY__PERIOD:
+            case OpenDDSPackage.DEADLINE_QOS_POLICY__PERIOD:
                 setPeriod((Period) newValue);
                 return;
         }
@@ -164,7 +159,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.DEADLINE_QOS_POLICY__PERIOD:
+            case OpenDDSPackage.DEADLINE_QOS_POLICY__PERIOD:
                 setPeriod((Period) null);
                 return;
         }
@@ -179,7 +174,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.DEADLINE_QOS_POLICY__PERIOD:
+            case OpenDDSPackage.DEADLINE_QOS_POLICY__PERIOD:
                 return period != null;
         }
         return super.eIsSet(featureID);

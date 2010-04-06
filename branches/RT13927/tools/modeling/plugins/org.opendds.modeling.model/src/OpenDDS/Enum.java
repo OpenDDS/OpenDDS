@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getEnum()
+ * @see OpenDDS.OpenDDSPackage#getEnum()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface Enum extends TopicField {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Labels</em>' attribute.
      * @see #setLabels(String)
-     * @see OpenDDS.ModelPackage#getEnum_Labels()
+     * @see OpenDDS.OpenDDSPackage#getEnum_Labels()
      * @model
      * @generated
      */

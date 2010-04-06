@@ -15,7 +15,7 @@ package OpenDDS;
  * <!-- end-user-doc -->
  *
  *
- * @see OpenDDS.ModelPackage#getOFloat()
+ * @see OpenDDS.OpenDDSPackage#getOFloat()
  * @model
  * @generated
  */

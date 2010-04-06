@@ -32,7 +32,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getTopic()
+ * @see OpenDDS.OpenDDSPackage#getTopic()
  * @model
  * @generated
  */
@@ -47,7 +47,7 @@ public interface Topic extends DomainEntity, TopicDescription {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Durability service</em>' reference.
      * @see #setDurability_service(DurabilityServiceQosPolicy)
-     * @see OpenDDS.ModelPackage#getTopic_Durability_service()
+     * @see OpenDDS.OpenDDSPackage#getTopic_Durability_service()
      * @model
      * @generated
      */
@@ -73,7 +73,7 @@ public interface Topic extends DomainEntity, TopicDescription {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Transport priority</em>' reference.
      * @see #setTransport_priority(TransportPriorityQosPolicy)
-     * @see OpenDDS.ModelPackage#getTopic_Transport_priority()
+     * @see OpenDDS.OpenDDSPackage#getTopic_Transport_priority()
      * @model
      * @generated
      */
@@ -99,7 +99,7 @@ public interface Topic extends DomainEntity, TopicDescription {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Topic data</em>' reference.
      * @see #setTopic_data(TopicDataQosPolicy)
-     * @see OpenDDS.ModelPackage#getTopic_Topic_data()
+     * @see OpenDDS.OpenDDSPackage#getTopic_Topic_data()
      * @model
      * @generated
      */
@@ -125,7 +125,7 @@ public interface Topic extends DomainEntity, TopicDescription {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Resource limits</em>' reference.
      * @see #setResource_limits(ResourceLimitsQosPolicy)
-     * @see OpenDDS.ModelPackage#getTopic_Resource_limits()
+     * @see OpenDDS.OpenDDSPackage#getTopic_Resource_limits()
      * @model
      * @generated
      */
@@ -151,7 +151,7 @@ public interface Topic extends DomainEntity, TopicDescription {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Reliability</em>' reference.
      * @see #setReliability(ReliabilityQosPolicy)
-     * @see OpenDDS.ModelPackage#getTopic_Reliability()
+     * @see OpenDDS.OpenDDSPackage#getTopic_Reliability()
      * @model
      * @generated
      */
@@ -177,7 +177,7 @@ public interface Topic extends DomainEntity, TopicDescription {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Ownership</em>' reference.
      * @see #setOwnership(OwnershipQosPolicy)
-     * @see OpenDDS.ModelPackage#getTopic_Ownership()
+     * @see OpenDDS.OpenDDSPackage#getTopic_Ownership()
      * @model
      * @generated
      */
@@ -203,7 +203,7 @@ public interface Topic extends DomainEntity, TopicDescription {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Liveliness</em>' reference.
      * @see #setLiveliness(LivelinessQosPolicy)
-     * @see OpenDDS.ModelPackage#getTopic_Liveliness()
+     * @see OpenDDS.OpenDDSPackage#getTopic_Liveliness()
      * @model
      * @generated
      */
@@ -229,7 +229,7 @@ public interface Topic extends DomainEntity, TopicDescription {
      * <!-- end-user-doc -->
      * @return the value of the '<em>History</em>' reference.
      * @see #setHistory(HistoryQosPolicy)
-     * @see OpenDDS.ModelPackage#getTopic_History()
+     * @see OpenDDS.OpenDDSPackage#getTopic_History()
      * @model
      * @generated
      */
@@ -255,7 +255,7 @@ public interface Topic extends DomainEntity, TopicDescription {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Durability</em>' reference.
      * @see #setDurability(DurabilityQosPolicy)
-     * @see OpenDDS.ModelPackage#getTopic_Durability()
+     * @see OpenDDS.OpenDDSPackage#getTopic_Durability()
      * @model
      * @generated
      */
@@ -281,7 +281,7 @@ public interface Topic extends DomainEntity, TopicDescription {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Destination order</em>' reference.
      * @see #setDestination_order(DestinationOrderQosPolicy)
-     * @see OpenDDS.ModelPackage#getTopic_Destination_order()
+     * @see OpenDDS.OpenDDSPackage#getTopic_Destination_order()
      * @model
      * @generated
      */
@@ -307,7 +307,7 @@ public interface Topic extends DomainEntity, TopicDescription {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Deadline</em>' reference.
      * @see #setDeadline(DeadlineQosPolicy)
-     * @see OpenDDS.ModelPackage#getTopic_Deadline()
+     * @see OpenDDS.OpenDDSPackage#getTopic_Deadline()
      * @model
      * @generated
      */
@@ -333,7 +333,7 @@ public interface Topic extends DomainEntity, TopicDescription {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Latency budget</em>' reference.
      * @see #setLatency_budget(LatencyBudgetQosPolicy)
-     * @see OpenDDS.ModelPackage#getTopic_Latency_budget()
+     * @see OpenDDS.OpenDDSPackage#getTopic_Latency_budget()
      * @model
      * @generated
      */

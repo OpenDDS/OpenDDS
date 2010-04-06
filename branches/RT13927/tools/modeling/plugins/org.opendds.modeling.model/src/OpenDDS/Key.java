@@ -23,7 +23,7 @@ import org.eclipse.emf.ecore.EObject;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getKey()
+ * @see OpenDDS.OpenDDSPackage#getKey()
  * @model
  * @generated
  */
@@ -38,7 +38,7 @@ public interface Key extends EObject {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Member</em>' reference.
      * @see #setMember(KeyField)
-     * @see OpenDDS.ModelPackage#getKey_Member()
+     * @see OpenDDS.OpenDDSPackage#getKey_Member()
      * @model required="true"
      * @generated
      */

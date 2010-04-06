@@ -63,7 +63,7 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.NAMED_ENTITY;
+        return OpenDDSPackage.Literals.NAMED_ENTITY;
     }
 
     /**
@@ -83,9 +83,8 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
     public void setName(String newName) {
         String oldName = name;
         name = newName;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.NAMED_ENTITY__NAME, oldName, name));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.NAMED_ENTITY__NAME, oldName, name));
     }
 
     /**
@@ -96,7 +95,7 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.NAMED_ENTITY__NAME:
+            case OpenDDSPackage.NAMED_ENTITY__NAME:
                 return getName();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -110,7 +109,7 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.NAMED_ENTITY__NAME:
+            case OpenDDSPackage.NAMED_ENTITY__NAME:
                 setName((String) newValue);
                 return;
         }
@@ -125,7 +124,7 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.NAMED_ENTITY__NAME:
+            case OpenDDSPackage.NAMED_ENTITY__NAME:
                 setName(NAME_EDEFAULT);
                 return;
         }
@@ -140,7 +139,7 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.NAMED_ENTITY__NAME:
+            case OpenDDSPackage.NAMED_ENTITY__NAME:
                 return NAME_EDEFAULT == null ? name != null : !NAME_EDEFAULT.equals(name);
         }
         return super.eIsSet(featureID);
@@ -153,9 +152,8 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (name: ");

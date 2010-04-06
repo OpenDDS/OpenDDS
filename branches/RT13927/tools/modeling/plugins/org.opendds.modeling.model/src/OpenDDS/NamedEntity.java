@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getNamedEntity()
+ * @see OpenDDS.OpenDDSPackage#getNamedEntity()
  * @model abstract="true"
  * @generated
  */
@@ -36,7 +36,7 @@ public interface NamedEntity extends Entity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Name</em>' attribute.
      * @see #setName(String)
-     * @see OpenDDS.ModelPackage#getNamedEntity_Name()
+     * @see OpenDDS.OpenDDSPackage#getNamedEntity_Name()
      * @model
      * @generated
      */

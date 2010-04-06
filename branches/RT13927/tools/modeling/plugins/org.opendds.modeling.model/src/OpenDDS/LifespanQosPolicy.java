@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getLifespanQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getLifespanQosPolicy()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface LifespanQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Duration</em>' containment reference.
      * @see #setDuration(Period)
-     * @see OpenDDS.ModelPackage#getLifespanQosPolicy_Duration()
+     * @see OpenDDS.OpenDDSPackage#getLifespanQosPolicy_Duration()
      * @model containment="true"
      * @generated
      */

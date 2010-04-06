@@ -160,7 +160,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.DURABILITY_SERVICE_QOS_POLICY;
+        return OpenDDSPackage.Literals.DURABILITY_SERVICE_QOS_POLICY;
     }
 
     /**
@@ -180,10 +180,9 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     public void setHistory_depth(long newHistory_depth) {
         long oldHistory_depth = history_depth;
         history_depth = newHistory_depth;
-        if (eNotificationRequired()) {
+        if (eNotificationRequired())
             eNotify(new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_DEPTH, oldHistory_depth, history_depth));
-        }
+                    OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_DEPTH, oldHistory_depth, history_depth));
     }
 
     /**
@@ -203,10 +202,9 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     public void setHistory_kind(HistoryQosPolicyKind newHistory_kind) {
         HistoryQosPolicyKind oldHistory_kind = history_kind;
         history_kind = newHistory_kind == null ? HISTORY_KIND_EDEFAULT : newHistory_kind;
-        if (eNotificationRequired()) {
+        if (eNotificationRequired())
             eNotify(new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_KIND, oldHistory_kind, history_kind));
-        }
+                    OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_KIND, oldHistory_kind, history_kind));
     }
 
     /**
@@ -226,10 +224,9 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     public void setMax_instances(long newMax_instances) {
         long oldMax_instances = max_instances;
         max_instances = newMax_instances;
-        if (eNotificationRequired()) {
+        if (eNotificationRequired())
             eNotify(new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_INSTANCES, oldMax_instances, max_instances));
-        }
+                    OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_INSTANCES, oldMax_instances, max_instances));
     }
 
     /**
@@ -249,10 +246,9 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     public void setMax_samples(long newMax_samples) {
         long oldMax_samples = max_samples;
         max_samples = newMax_samples;
-        if (eNotificationRequired()) {
+        if (eNotificationRequired())
             eNotify(new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES, oldMax_samples, max_samples));
-        }
+                    OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES, oldMax_samples, max_samples));
     }
 
     /**
@@ -272,11 +268,10 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     public void setMax_samples_per_instance(long newMax_samples_per_instance) {
         long oldMax_samples_per_instance = max_samples_per_instance;
         max_samples_per_instance = newMax_samples_per_instance;
-        if (eNotificationRequired()) {
+        if (eNotificationRequired())
             eNotify(new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE, oldMax_samples_per_instance,
-                    max_samples_per_instance));
-        }
+                    OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE,
+                    oldMax_samples_per_instance, max_samples_per_instance));
     }
 
     /**
@@ -298,13 +293,12 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
         service_cleanup_delay = newService_cleanup_delay;
         if (eNotificationRequired()) {
             ENotificationImpl notification = new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY, oldService_cleanup_delay,
+                    OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY, oldService_cleanup_delay,
                     newService_cleanup_delay);
-            if (msgs == null) {
+            if (msgs == null)
                 msgs = notification;
-            } else {
+            else
                 msgs.add(notification);
-            }
         }
         return msgs;
     }
@@ -317,23 +311,19 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     public void setService_cleanup_delay(Period newService_cleanup_delay) {
         if (newService_cleanup_delay != service_cleanup_delay) {
             NotificationChain msgs = null;
-            if (service_cleanup_delay != null) {
+            if (service_cleanup_delay != null)
                 msgs = ((InternalEObject) service_cleanup_delay).eInverseRemove(this, EOPPOSITE_FEATURE_BASE
-                        - ModelPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY, null, msgs);
-            }
-            if (newService_cleanup_delay != null) {
+                        - OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY, null, msgs);
+            if (newService_cleanup_delay != null)
                 msgs = ((InternalEObject) newService_cleanup_delay).eInverseAdd(this, EOPPOSITE_FEATURE_BASE
-                        - ModelPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY, null, msgs);
-            }
+                        - OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY, null, msgs);
             msgs = basicSetService_cleanup_delay(newService_cleanup_delay, msgs);
-            if (msgs != null) {
+            if (msgs != null)
                 msgs.dispatch();
-            }
-        } else if (eNotificationRequired()) {
+        } else if (eNotificationRequired())
             eNotify(new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY, newService_cleanup_delay,
+                    OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY, newService_cleanup_delay,
                     newService_cleanup_delay));
-        }
     }
 
     /**
@@ -344,7 +334,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     @Override
     public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
         switch (featureID) {
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY:
                 return basicSetService_cleanup_delay(null, msgs);
         }
         return super.eInverseRemove(otherEnd, featureID, msgs);
@@ -358,17 +348,17 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_DEPTH:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_DEPTH:
                 return getHistory_depth();
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_KIND:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_KIND:
                 return getHistory_kind();
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_INSTANCES:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_INSTANCES:
                 return getMax_instances();
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES:
                 return getMax_samples();
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
                 return getMax_samples_per_instance();
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY:
                 return getService_cleanup_delay();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -382,22 +372,22 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_DEPTH:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_DEPTH:
                 setHistory_depth((Long) newValue);
                 return;
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_KIND:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_KIND:
                 setHistory_kind((HistoryQosPolicyKind) newValue);
                 return;
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_INSTANCES:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_INSTANCES:
                 setMax_instances((Long) newValue);
                 return;
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES:
                 setMax_samples((Long) newValue);
                 return;
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
                 setMax_samples_per_instance((Long) newValue);
                 return;
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY:
                 setService_cleanup_delay((Period) newValue);
                 return;
         }
@@ -412,22 +402,22 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_DEPTH:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_DEPTH:
                 setHistory_depth(HISTORY_DEPTH_EDEFAULT);
                 return;
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_KIND:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_KIND:
                 setHistory_kind(HISTORY_KIND_EDEFAULT);
                 return;
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_INSTANCES:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_INSTANCES:
                 setMax_instances(MAX_INSTANCES_EDEFAULT);
                 return;
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES:
                 setMax_samples(MAX_SAMPLES_EDEFAULT);
                 return;
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
                 setMax_samples_per_instance(MAX_SAMPLES_PER_INSTANCE_EDEFAULT);
                 return;
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY:
                 setService_cleanup_delay((Period) null);
                 return;
         }
@@ -442,17 +432,17 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_DEPTH:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_DEPTH:
                 return history_depth != HISTORY_DEPTH_EDEFAULT;
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_KIND:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__HISTORY_KIND:
                 return history_kind != HISTORY_KIND_EDEFAULT;
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_INSTANCES:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_INSTANCES:
                 return max_instances != MAX_INSTANCES_EDEFAULT;
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES:
                 return max_samples != MAX_SAMPLES_EDEFAULT;
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
                 return max_samples_per_instance != MAX_SAMPLES_PER_INSTANCE_EDEFAULT;
-            case ModelPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY:
+            case OpenDDSPackage.DURABILITY_SERVICE_QOS_POLICY__SERVICE_CLEANUP_DELAY:
                 return service_cleanup_delay != null;
         }
         return super.eIsSet(featureID);
@@ -465,9 +455,8 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (history_depth: ");

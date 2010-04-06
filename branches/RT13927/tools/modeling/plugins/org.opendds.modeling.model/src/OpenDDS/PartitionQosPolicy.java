@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getPartitionQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getPartitionQosPolicy()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface PartitionQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Name</em>' attribute.
      * @see #setName(String)
-     * @see OpenDDS.ModelPackage#getPartitionQosPolicy_Name()
+     * @see OpenDDS.OpenDDSPackage#getPartitionQosPolicy_Name()
      * @model
      * @generated
      */

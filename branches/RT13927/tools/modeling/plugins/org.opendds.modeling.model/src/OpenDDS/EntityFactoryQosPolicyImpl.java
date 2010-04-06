@@ -63,7 +63,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.ENTITY_FACTORY_QOS_POLICY;
+        return OpenDDSPackage.Literals.ENTITY_FACTORY_QOS_POLICY;
     }
 
     /**
@@ -83,11 +83,10 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
     public void setAutoenable_created_entities(boolean newAutoenable_created_entities) {
         boolean oldAutoenable_created_entities = autoenable_created_entities;
         autoenable_created_entities = newAutoenable_created_entities;
-        if (eNotificationRequired()) {
+        if (eNotificationRequired())
             eNotify(new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.ENTITY_FACTORY_QOS_POLICY__AUTOENABLE_CREATED_ENTITIES,
+                    OpenDDSPackage.ENTITY_FACTORY_QOS_POLICY__AUTOENABLE_CREATED_ENTITIES,
                     oldAutoenable_created_entities, autoenable_created_entities));
-        }
     }
 
     /**
@@ -98,7 +97,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.ENTITY_FACTORY_QOS_POLICY__AUTOENABLE_CREATED_ENTITIES:
+            case OpenDDSPackage.ENTITY_FACTORY_QOS_POLICY__AUTOENABLE_CREATED_ENTITIES:
                 return isAutoenable_created_entities();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -112,7 +111,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.ENTITY_FACTORY_QOS_POLICY__AUTOENABLE_CREATED_ENTITIES:
+            case OpenDDSPackage.ENTITY_FACTORY_QOS_POLICY__AUTOENABLE_CREATED_ENTITIES:
                 setAutoenable_created_entities((Boolean) newValue);
                 return;
         }
@@ -127,7 +126,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.ENTITY_FACTORY_QOS_POLICY__AUTOENABLE_CREATED_ENTITIES:
+            case OpenDDSPackage.ENTITY_FACTORY_QOS_POLICY__AUTOENABLE_CREATED_ENTITIES:
                 setAutoenable_created_entities(AUTOENABLE_CREATED_ENTITIES_EDEFAULT);
                 return;
         }
@@ -142,7 +141,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.ENTITY_FACTORY_QOS_POLICY__AUTOENABLE_CREATED_ENTITIES:
+            case OpenDDSPackage.ENTITY_FACTORY_QOS_POLICY__AUTOENABLE_CREATED_ENTITIES:
                 return autoenable_created_entities != AUTOENABLE_CREATED_ENTITIES_EDEFAULT;
         }
         return super.eIsSet(featureID);
@@ -155,9 +154,8 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (autoenable_created_entities: ");

@@ -14,6 +14,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
+
 import org.eclipse.emf.ecore.impl.EPackageImpl;
 
 /**
@@ -22,7 +23,7 @@ import org.eclipse.emf.ecore.impl.EPackageImpl;
  * <!-- end-user-doc -->
  * @generated
  */
-public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
+public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     /**
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
@@ -573,12 +574,12 @@ public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @see org.eclipse.emf.ecore.EPackage.Registry
-     * @see OpenDDS.ModelPackage#eNS_URI
+     * @see OpenDDS.OpenDDSPackage#eNS_URI
      * @see #init()
      * @generated
      */
-    private ModelPackageImpl() {
-        super(eNS_URI, ModelFactory.eINSTANCE);
+    private OpenDDSPackageImpl() {
+        super(eNS_URI, OpenDDSFactory.eINSTANCE);
     }
 
     /**
@@ -590,8 +591,8 @@ public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
 
     /**
      * Creates, registers, and initializes the <b>Package</b> for this model, and for any others upon which it depends.
-     *
-     * <p>This method is used to initialize {@link ModelPackage#eINSTANCE} when that field is accessed.
+     * 
+     * <p>This method is used to initialize {@link OpenDDSPackage#eINSTANCE} when that field is accessed.
      * Clients should not invoke it directly. Instead, they should simply access that field to obtain the package.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
@@ -600,30 +601,29 @@ public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
      * @see #initializePackageContents()
      * @generated
      */
-    public static ModelPackage init() {
-        if (isInited) {
-            return (ModelPackage) EPackage.Registry.INSTANCE.getEPackage(ModelPackage.eNS_URI);
-        }
+    public static OpenDDSPackage init() {
+        if (isInited)
+            return (OpenDDSPackage) EPackage.Registry.INSTANCE.getEPackage(OpenDDSPackage.eNS_URI);
 
         // Obtain or create and register package
-        ModelPackageImpl theModelPackage = (ModelPackageImpl) (EPackage.Registry.INSTANCE.get(eNS_URI) instanceof ModelPackageImpl ? EPackage.Registry.INSTANCE
+        OpenDDSPackageImpl theOpenDDSPackage = (OpenDDSPackageImpl) (EPackage.Registry.INSTANCE.get(eNS_URI) instanceof OpenDDSPackageImpl ? EPackage.Registry.INSTANCE
                 .get(eNS_URI)
-                : new ModelPackageImpl());
+                : new OpenDDSPackageImpl());
 
         isInited = true;
 
         // Create package meta-data objects
-        theModelPackage.createPackageContents();
+        theOpenDDSPackage.createPackageContents();
 
         // Initialize created meta-data
-        theModelPackage.initializePackageContents();
+        theOpenDDSPackage.initializePackageContents();
 
         // Mark meta-data to indicate it can't be changed
-        theModelPackage.freeze();
+        theOpenDDSPackage.freeze();
 
         // Update the registry and return the package
-        EPackage.Registry.INSTANCE.put(ModelPackage.eNS_URI, theModelPackage);
-        return theModelPackage;
+        EPackage.Registry.INSTANCE.put(OpenDDSPackage.eNS_URI, theOpenDDSPackage);
+        return theOpenDDSPackage;
     }
 
     /**
@@ -2206,8 +2206,8 @@ public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
      * <!-- end-user-doc -->
      * @generated
      */
-    public ModelFactory getModelFactory() {
-        return (ModelFactory) getEFactoryInstance();
+    public OpenDDSFactory getOpenDDSFactory() {
+        return (OpenDDSFactory) getEFactoryInstance();
     }
 
     /**
@@ -2225,9 +2225,8 @@ public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
      * @generated
      */
     public void createPackageContents() {
-        if (isCreated) {
+        if (isCreated)
             return;
-        }
         isCreated = true;
 
         // Create classes and their features
@@ -2493,9 +2492,8 @@ public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
      * @generated
      */
     public void initializePackageContents() {
-        if (isInitialized) {
+        if (isInitialized)
             return;
-        }
         isInitialized = true;
 
         // Initialize package
@@ -3094,4 +3092,4 @@ public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
         createResource(eNS_URI);
     }
 
-} //ModelPackageImpl
+} //OpenDDSPackageImpl

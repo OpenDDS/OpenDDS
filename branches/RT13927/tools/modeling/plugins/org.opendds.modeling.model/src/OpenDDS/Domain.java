@@ -15,7 +15,7 @@ package OpenDDS;
  * <!-- end-user-doc -->
  *
  *
- * @see OpenDDS.ModelPackage#getDomain()
+ * @see OpenDDS.OpenDDSPackage#getDomain()
  * @model
  * @generated
  */
