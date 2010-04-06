@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: OpenDDS Modeling SDK (Model)
+Bundle-Name: OpenDDS Modeling SDK (model)
 Bundle-SymbolicName: org.opendds.modeling.model;singleton:=true
 Bundle-Version: 0.0.0
 Bundle-Activator: org.opendds.modeling.model.ModelPlugin$Implementation
-Bundle-Vendor: OpenDDS (http://www.opendds.org)
+Bundle-Vendor: OpenDDS
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: OpenDDS,
  org.opendds.modeling.model
