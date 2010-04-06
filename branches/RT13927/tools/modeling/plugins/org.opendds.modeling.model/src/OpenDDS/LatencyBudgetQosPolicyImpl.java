@@ -11,10 +11,8 @@ package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.NotificationChain;
-
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.InternalEObject;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -80,10 +78,11 @@ public class LatencyBudgetQosPolicyImpl extends QosPolicyImpl implements Latency
         if (eNotificationRequired()) {
             ENotificationImpl notification = new ENotificationImpl(this, Notification.SET,
                     ModelPackage.LATENCY_BUDGET_QOS_POLICY__DURATION, oldDuration, newDuration);
-            if (msgs == null)
+            if (msgs == null) {
                 msgs = notification;
-            else
+            } else {
                 msgs.add(notification);
+            }
         }
         return msgs;
     }
@@ -96,18 +95,22 @@ public class LatencyBudgetQosPolicyImpl extends QosPolicyImpl implements Latency
     public void setDuration(Period newDuration) {
         if (newDuration != duration) {
             NotificationChain msgs = null;
-            if (duration != null)
+            if (duration != null) {
                 msgs = ((InternalEObject) duration).eInverseRemove(this, EOPPOSITE_FEATURE_BASE
                         - ModelPackage.LATENCY_BUDGET_QOS_POLICY__DURATION, null, msgs);
-            if (newDuration != null)
+            }
+            if (newDuration != null) {
                 msgs = ((InternalEObject) newDuration).eInverseAdd(this, EOPPOSITE_FEATURE_BASE
                         - ModelPackage.LATENCY_BUDGET_QOS_POLICY__DURATION, null, msgs);
+            }
             msgs = basicSetDuration(newDuration, msgs);
-            if (msgs != null)
+            if (msgs != null) {
                 msgs.dispatch();
-        } else if (eNotificationRequired())
+            }
+        } else if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.LATENCY_BUDGET_QOS_POLICY__DURATION,
                     newDuration, newDuration));
+        }
     }
 
     /**

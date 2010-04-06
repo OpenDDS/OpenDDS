@@ -11,10 +11,8 @@ package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.NotificationChain;
-
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.InternalEObject;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -98,9 +96,10 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     public void setKind(LivelinessQosPolicyKind newKind) {
         LivelinessQosPolicyKind oldKind = kind;
         kind = newKind == null ? KIND_EDEFAULT : newKind;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.LIVELINESS_QOS_POLICY__KIND, oldKind,
                     kind));
+        }
     }
 
     /**
@@ -123,10 +122,11 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
         if (eNotificationRequired()) {
             ENotificationImpl notification = new ENotificationImpl(this, Notification.SET,
                     ModelPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION, oldLease_duration, newLease_duration);
-            if (msgs == null)
+            if (msgs == null) {
                 msgs = notification;
-            else
+            } else {
                 msgs.add(notification);
+            }
         }
         return msgs;
     }
@@ -139,18 +139,22 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     public void setLease_duration(Period newLease_duration) {
         if (newLease_duration != lease_duration) {
             NotificationChain msgs = null;
-            if (lease_duration != null)
+            if (lease_duration != null) {
                 msgs = ((InternalEObject) lease_duration).eInverseRemove(this, EOPPOSITE_FEATURE_BASE
                         - ModelPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION, null, msgs);
-            if (newLease_duration != null)
+            }
+            if (newLease_duration != null) {
                 msgs = ((InternalEObject) newLease_duration).eInverseAdd(this, EOPPOSITE_FEATURE_BASE
                         - ModelPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION, null, msgs);
+            }
             msgs = basicSetLease_duration(newLease_duration, msgs);
-            if (msgs != null)
+            if (msgs != null) {
                 msgs.dispatch();
-        } else if (eNotificationRequired())
+            }
+        } else if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION,
                     newLease_duration, newLease_duration));
+        }
     }
 
     /**
@@ -242,8 +246,9 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (kind: ");

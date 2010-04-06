@@ -10,10 +10,8 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.InternalEObject;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -69,8 +67,9 @@ public class TypedefImpl extends TopicFieldImpl implements Typedef {
             InternalEObject oldType = (InternalEObject) type;
             type = (TopicField) eResolveProxy(oldType);
             if (type != oldType) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TYPEDEF__TYPE, oldType, type));
+                }
             }
         }
         return type;
@@ -93,8 +92,9 @@ public class TypedefImpl extends TopicFieldImpl implements Typedef {
     public void setType(TopicField newType) {
         TopicField oldType = type;
         type = newType;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TYPEDEF__TYPE, oldType, type));
+        }
     }
 
     /**
@@ -106,8 +106,9 @@ public class TypedefImpl extends TopicFieldImpl implements Typedef {
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
             case ModelPackage.TYPEDEF__TYPE:
-                if (resolve)
+                if (resolve) {
                     return getType();
+                }
                 return basicGetType();
         }
         return super.eGet(featureID, resolve, coreType);

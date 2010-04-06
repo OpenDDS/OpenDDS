@@ -10,9 +10,7 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.ecore.EClass;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -85,10 +83,11 @@ public class WriterDataLifecycleQosPolicyImpl extends QosPolicyImpl implements W
     public void setAutodispose_unregistered_instances(boolean newAutodispose_unregistered_instances) {
         boolean oldAutodispose_unregistered_instances = autodispose_unregistered_instances;
         autodispose_unregistered_instances = newAutodispose_unregistered_instances;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET,
                     ModelPackage.WRITER_DATA_LIFECYCLE_QOS_POLICY__AUTODISPOSE_UNREGISTERED_INSTANCES,
                     oldAutodispose_unregistered_instances, autodispose_unregistered_instances));
+        }
     }
 
     /**
@@ -156,8 +155,9 @@ public class WriterDataLifecycleQosPolicyImpl extends QosPolicyImpl implements W
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (autodispose_unregistered_instances: ");

@@ -10,9 +10,7 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.ecore.EClass;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -85,9 +83,10 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
     public void setKind(OwnershipQosPolicyKind newKind) {
         OwnershipQosPolicyKind oldKind = kind;
         kind = newKind == null ? KIND_EDEFAULT : newKind;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.OWNERSHIP_QOS_POLICY__KIND, oldKind,
                     kind));
+        }
     }
 
     /**
@@ -155,8 +154,9 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (kind: ");

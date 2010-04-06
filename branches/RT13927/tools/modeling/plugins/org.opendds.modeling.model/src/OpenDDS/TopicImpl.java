@@ -10,10 +10,8 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.InternalEObject;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -201,8 +199,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldType = (InternalEObject) type;
             type = (TopicField) eResolveProxy(oldType);
             if (type != oldType) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__TYPE, oldType, type));
+                }
             }
         }
         return type;
@@ -225,8 +224,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setType(TopicField newType) {
         TopicField oldType = type;
         type = newType;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__TYPE, oldType, type));
+        }
     }
 
     /**
@@ -239,9 +239,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldDurability_service = (InternalEObject) durability_service;
             durability_service = (DurabilityServiceQosPolicy) eResolveProxy(oldDurability_service);
             if (durability_service != oldDurability_service) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__DURABILITY_SERVICE,
                             oldDurability_service, durability_service));
+                }
             }
         }
         return durability_service;
@@ -264,9 +265,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setDurability_service(DurabilityServiceQosPolicy newDurability_service) {
         DurabilityServiceQosPolicy oldDurability_service = durability_service;
         durability_service = newDurability_service;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__DURABILITY_SERVICE,
                     oldDurability_service, durability_service));
+        }
     }
 
     /**
@@ -279,9 +281,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldTransport_priority = (InternalEObject) transport_priority;
             transport_priority = (TransportPriorityQosPolicy) eResolveProxy(oldTransport_priority);
             if (transport_priority != oldTransport_priority) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__TRANSPORT_PRIORITY,
                             oldTransport_priority, transport_priority));
+                }
             }
         }
         return transport_priority;
@@ -304,9 +307,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setTransport_priority(TransportPriorityQosPolicy newTransport_priority) {
         TransportPriorityQosPolicy oldTransport_priority = transport_priority;
         transport_priority = newTransport_priority;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__TRANSPORT_PRIORITY,
                     oldTransport_priority, transport_priority));
+        }
     }
 
     /**
@@ -319,9 +323,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldTopic_data = (InternalEObject) topic_data;
             topic_data = (TopicDataQosPolicy) eResolveProxy(oldTopic_data);
             if (topic_data != oldTopic_data) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__TOPIC_DATA,
                             oldTopic_data, topic_data));
+                }
             }
         }
         return topic_data;
@@ -344,9 +349,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setTopic_data(TopicDataQosPolicy newTopic_data) {
         TopicDataQosPolicy oldTopic_data = topic_data;
         topic_data = newTopic_data;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__TOPIC_DATA, oldTopic_data,
                     topic_data));
+        }
     }
 
     /**
@@ -359,9 +365,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldResource_limits = (InternalEObject) resource_limits;
             resource_limits = (ResourceLimitsQosPolicy) eResolveProxy(oldResource_limits);
             if (resource_limits != oldResource_limits) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__RESOURCE_LIMITS,
                             oldResource_limits, resource_limits));
+                }
             }
         }
         return resource_limits;
@@ -384,9 +391,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setResource_limits(ResourceLimitsQosPolicy newResource_limits) {
         ResourceLimitsQosPolicy oldResource_limits = resource_limits;
         resource_limits = newResource_limits;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__RESOURCE_LIMITS,
                     oldResource_limits, resource_limits));
+        }
     }
 
     /**
@@ -399,9 +407,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldReliability = (InternalEObject) reliability;
             reliability = (ReliabilityQosPolicy) eResolveProxy(oldReliability);
             if (reliability != oldReliability) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__RELIABILITY,
                             oldReliability, reliability));
+                }
             }
         }
         return reliability;
@@ -424,9 +433,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setReliability(ReliabilityQosPolicy newReliability) {
         ReliabilityQosPolicy oldReliability = reliability;
         reliability = newReliability;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__RELIABILITY, oldReliability,
                     reliability));
+        }
     }
 
     /**
@@ -439,9 +449,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldOwnership = (InternalEObject) ownership;
             ownership = (OwnershipQosPolicy) eResolveProxy(oldOwnership);
             if (ownership != oldOwnership) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__OWNERSHIP,
                             oldOwnership, ownership));
+                }
             }
         }
         return ownership;
@@ -464,9 +475,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setOwnership(OwnershipQosPolicy newOwnership) {
         OwnershipQosPolicy oldOwnership = ownership;
         ownership = newOwnership;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__OWNERSHIP, oldOwnership,
                     ownership));
+        }
     }
 
     /**
@@ -479,9 +491,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldLiveliness = (InternalEObject) liveliness;
             liveliness = (LivelinessQosPolicy) eResolveProxy(oldLiveliness);
             if (liveliness != oldLiveliness) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__LIVELINESS,
                             oldLiveliness, liveliness));
+                }
             }
         }
         return liveliness;
@@ -504,9 +517,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setLiveliness(LivelinessQosPolicy newLiveliness) {
         LivelinessQosPolicy oldLiveliness = liveliness;
         liveliness = newLiveliness;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__LIVELINESS, oldLiveliness,
                     liveliness));
+        }
     }
 
     /**
@@ -519,9 +533,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldHistory = (InternalEObject) history;
             history = (HistoryQosPolicy) eResolveProxy(oldHistory);
             if (history != oldHistory) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__HISTORY, oldHistory,
                             history));
+                }
             }
         }
         return history;
@@ -544,8 +559,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setHistory(HistoryQosPolicy newHistory) {
         HistoryQosPolicy oldHistory = history;
         history = newHistory;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__HISTORY, oldHistory, history));
+        }
     }
 
     /**
@@ -558,9 +574,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldDurability = (InternalEObject) durability;
             durability = (DurabilityQosPolicy) eResolveProxy(oldDurability);
             if (durability != oldDurability) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__DURABILITY,
                             oldDurability, durability));
+                }
             }
         }
         return durability;
@@ -583,9 +600,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setDurability(DurabilityQosPolicy newDurability) {
         DurabilityQosPolicy oldDurability = durability;
         durability = newDurability;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__DURABILITY, oldDurability,
                     durability));
+        }
     }
 
     /**
@@ -598,9 +616,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldDestination_order = (InternalEObject) destination_order;
             destination_order = (DestinationOrderQosPolicy) eResolveProxy(oldDestination_order);
             if (destination_order != oldDestination_order) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__DESTINATION_ORDER,
                             oldDestination_order, destination_order));
+                }
             }
         }
         return destination_order;
@@ -623,9 +642,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setDestination_order(DestinationOrderQosPolicy newDestination_order) {
         DestinationOrderQosPolicy oldDestination_order = destination_order;
         destination_order = newDestination_order;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__DESTINATION_ORDER,
                     oldDestination_order, destination_order));
+        }
     }
 
     /**
@@ -638,9 +658,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldDeadline = (InternalEObject) deadline;
             deadline = (DeadlineQosPolicy) eResolveProxy(oldDeadline);
             if (deadline != oldDeadline) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__DEADLINE,
                             oldDeadline, deadline));
+                }
             }
         }
         return deadline;
@@ -663,8 +684,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setDeadline(DeadlineQosPolicy newDeadline) {
         DeadlineQosPolicy oldDeadline = deadline;
         deadline = newDeadline;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__DEADLINE, oldDeadline, deadline));
+        }
     }
 
     /**
@@ -677,9 +699,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
             InternalEObject oldLatency_budget = (InternalEObject) latency_budget;
             latency_budget = (LatencyBudgetQosPolicy) eResolveProxy(oldLatency_budget);
             if (latency_budget != oldLatency_budget) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.TOPIC__LATENCY_BUDGET,
                             oldLatency_budget, latency_budget));
+                }
             }
         }
         return latency_budget;
@@ -702,9 +725,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public void setLatency_budget(LatencyBudgetQosPolicy newLatency_budget) {
         LatencyBudgetQosPolicy oldLatency_budget = latency_budget;
         latency_budget = newLatency_budget;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TOPIC__LATENCY_BUDGET,
                     oldLatency_budget, latency_budget));
+        }
     }
 
     /**
@@ -716,56 +740,69 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
             case ModelPackage.TOPIC__TYPE:
-                if (resolve)
+                if (resolve) {
                     return getType();
+                }
                 return basicGetType();
             case ModelPackage.TOPIC__DURABILITY_SERVICE:
-                if (resolve)
+                if (resolve) {
                     return getDurability_service();
+                }
                 return basicGetDurability_service();
             case ModelPackage.TOPIC__TRANSPORT_PRIORITY:
-                if (resolve)
+                if (resolve) {
                     return getTransport_priority();
+                }
                 return basicGetTransport_priority();
             case ModelPackage.TOPIC__TOPIC_DATA:
-                if (resolve)
+                if (resolve) {
                     return getTopic_data();
+                }
                 return basicGetTopic_data();
             case ModelPackage.TOPIC__RESOURCE_LIMITS:
-                if (resolve)
+                if (resolve) {
                     return getResource_limits();
+                }
                 return basicGetResource_limits();
             case ModelPackage.TOPIC__RELIABILITY:
-                if (resolve)
+                if (resolve) {
                     return getReliability();
+                }
                 return basicGetReliability();
             case ModelPackage.TOPIC__OWNERSHIP:
-                if (resolve)
+                if (resolve) {
                     return getOwnership();
+                }
                 return basicGetOwnership();
             case ModelPackage.TOPIC__LIVELINESS:
-                if (resolve)
+                if (resolve) {
                     return getLiveliness();
+                }
                 return basicGetLiveliness();
             case ModelPackage.TOPIC__HISTORY:
-                if (resolve)
+                if (resolve) {
                     return getHistory();
+                }
                 return basicGetHistory();
             case ModelPackage.TOPIC__DURABILITY:
-                if (resolve)
+                if (resolve) {
                     return getDurability();
+                }
                 return basicGetDurability();
             case ModelPackage.TOPIC__DESTINATION_ORDER:
-                if (resolve)
+                if (resolve) {
                     return getDestination_order();
+                }
                 return basicGetDestination_order();
             case ModelPackage.TOPIC__DEADLINE:
-                if (resolve)
+                if (resolve) {
                     return getDeadline();
+                }
                 return basicGetDeadline();
             case ModelPackage.TOPIC__LATENCY_BUDGET:
-                if (resolve)
+                if (resolve) {
                     return getLatency_budget();
+                }
                 return basicGetLatency_budget();
         }
         return super.eGet(featureID, resolve, coreType);

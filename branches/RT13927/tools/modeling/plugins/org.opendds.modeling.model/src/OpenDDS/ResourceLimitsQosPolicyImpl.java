@@ -10,9 +10,7 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.ecore.EClass;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -127,9 +125,10 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     public void setMax_instances(long newMax_instances) {
         long oldMax_instances = max_instances;
         max_instances = newMax_instances;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET,
                     ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_INSTANCES, oldMax_instances, max_instances));
+        }
     }
 
     /**
@@ -149,9 +148,10 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     public void setMax_samples(long newMax_samples) {
         long oldMax_samples = max_samples;
         max_samples = newMax_samples;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES,
                     oldMax_samples, max_samples));
+        }
     }
 
     /**
@@ -171,10 +171,11 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     public void setMax_samples_per_instance(long newMax_samples_per_instance) {
         long oldMax_samples_per_instance = max_samples_per_instance;
         max_samples_per_instance = newMax_samples_per_instance;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET,
                     ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE, oldMax_samples_per_instance,
                     max_samples_per_instance));
+        }
     }
 
     /**
@@ -262,8 +263,9 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (max_instances: ");

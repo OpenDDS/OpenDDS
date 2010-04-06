@@ -10,9 +10,7 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.ecore.EClass;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -85,8 +83,9 @@ public class ArrayImpl extends CollectionImpl implements Array {
     public void setLength(long newLength) {
         long oldLength = length;
         length = newLength;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.ARRAY__LENGTH, oldLength, length));
+        }
     }
 
     /**
@@ -154,8 +153,9 @@ public class ArrayImpl extends CollectionImpl implements Array {
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (length: ");

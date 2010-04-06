@@ -10,9 +10,7 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.ecore.EClass;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -85,9 +83,10 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     public void setFilter_expression(String newFilter_expression) {
         String oldFilter_expression = filter_expression;
         filter_expression = newFilter_expression;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET,
                     ModelPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION, oldFilter_expression, filter_expression));
+        }
     }
 
     /**
@@ -156,8 +155,9 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (filter_expression: ");

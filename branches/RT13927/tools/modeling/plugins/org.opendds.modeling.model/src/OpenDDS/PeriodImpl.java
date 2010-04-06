@@ -10,9 +10,7 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.ecore.EClass;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.emf.ecore.impl.EObjectImpl;
 
@@ -107,8 +105,9 @@ public class PeriodImpl extends EObjectImpl implements Period {
     public void setSeconds(long newSeconds) {
         long oldSeconds = seconds;
         seconds = newSeconds;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.PERIOD__SECONDS, oldSeconds, seconds));
+        }
     }
 
     /**
@@ -128,9 +127,10 @@ public class PeriodImpl extends EObjectImpl implements Period {
     public void setNanoseconds(long newNanoseconds) {
         long oldNanoseconds = nanoseconds;
         nanoseconds = newNanoseconds;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.PERIOD__NANOSECONDS, oldNanoseconds,
                     nanoseconds));
+        }
     }
 
     /**
@@ -208,8 +208,9 @@ public class PeriodImpl extends EObjectImpl implements Period {
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (seconds: ");

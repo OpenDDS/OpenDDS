@@ -14,7 +14,6 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
-
 import org.eclipse.emf.ecore.impl.EPackageImpl;
 
 /**
@@ -591,7 +590,7 @@ public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
 
     /**
      * Creates, registers, and initializes the <b>Package</b> for this model, and for any others upon which it depends.
-     * 
+     *
      * <p>This method is used to initialize {@link ModelPackage#eINSTANCE} when that field is accessed.
      * Clients should not invoke it directly. Instead, they should simply access that field to obtain the package.
      * <!-- begin-user-doc -->
@@ -602,8 +601,9 @@ public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
      * @generated
      */
     public static ModelPackage init() {
-        if (isInited)
+        if (isInited) {
             return (ModelPackage) EPackage.Registry.INSTANCE.getEPackage(ModelPackage.eNS_URI);
+        }
 
         // Obtain or create and register package
         ModelPackageImpl theModelPackage = (ModelPackageImpl) (EPackage.Registry.INSTANCE.get(eNS_URI) instanceof ModelPackageImpl ? EPackage.Registry.INSTANCE
@@ -2225,8 +2225,9 @@ public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
      * @generated
      */
     public void createPackageContents() {
-        if (isCreated)
+        if (isCreated) {
             return;
+        }
         isCreated = true;
 
         // Create classes and their features
@@ -2492,8 +2493,9 @@ public class ModelPackageImpl extends EPackageImpl implements ModelPackage {
      * @generated
      */
     public void initializePackageContents() {
-        if (isInitialized)
+        if (isInitialized) {
             return;
+        }
         isInitialized = true;
 
         // Initialize package

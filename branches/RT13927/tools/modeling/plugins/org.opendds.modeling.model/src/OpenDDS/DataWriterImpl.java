@@ -10,10 +10,8 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.InternalEObject;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -80,9 +78,10 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
             InternalEObject oldTopic = (InternalEObject) topic;
             topic = (Topic) eResolveProxy(oldTopic);
             if (topic != oldTopic) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.DATA_WRITER__TOPIC,
                             oldTopic, topic));
+                }
             }
         }
         return topic;
@@ -105,8 +104,9 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     public void setTopic(Topic newTopic) {
         Topic oldTopic = topic;
         topic = newTopic;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.DATA_WRITER__TOPIC, oldTopic, topic));
+        }
     }
 
     /**
@@ -119,10 +119,11 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
             InternalEObject oldWriter_data_lifecycle = (InternalEObject) writer_data_lifecycle;
             writer_data_lifecycle = (WriterDataLifecycleQosPolicy) eResolveProxy(oldWriter_data_lifecycle);
             if (writer_data_lifecycle != oldWriter_data_lifecycle) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE,
                             ModelPackage.DATA_WRITER__WRITER_DATA_LIFECYCLE, oldWriter_data_lifecycle,
                             writer_data_lifecycle));
+                }
             }
         }
         return writer_data_lifecycle;
@@ -145,9 +146,10 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     public void setWriter_data_lifecycle(WriterDataLifecycleQosPolicy newWriter_data_lifecycle) {
         WriterDataLifecycleQosPolicy oldWriter_data_lifecycle = writer_data_lifecycle;
         writer_data_lifecycle = newWriter_data_lifecycle;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.DATA_WRITER__WRITER_DATA_LIFECYCLE,
                     oldWriter_data_lifecycle, writer_data_lifecycle));
+        }
     }
 
     /**
@@ -159,12 +161,14 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
             case ModelPackage.DATA_WRITER__TOPIC:
-                if (resolve)
+                if (resolve) {
                     return getTopic();
+                }
                 return basicGetTopic();
             case ModelPackage.DATA_WRITER__WRITER_DATA_LIFECYCLE:
-                if (resolve)
+                if (resolve) {
                     return getWriter_data_lifecycle();
+                }
                 return basicGetWriter_data_lifecycle();
         }
         return super.eGet(featureID, resolve, coreType);

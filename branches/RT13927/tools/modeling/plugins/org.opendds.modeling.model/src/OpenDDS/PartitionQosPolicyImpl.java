@@ -10,9 +10,7 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.ecore.EClass;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -85,9 +83,10 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
     public void setName(String newName) {
         String oldName = name;
         name = newName;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.PARTITION_QOS_POLICY__NAME, oldName,
                     name));
+        }
     }
 
     /**
@@ -155,8 +154,9 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (name: ");

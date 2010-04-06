@@ -87,858 +87,1119 @@ public class ModelSwitch<T> {
             case ModelPackage.ENTITY: {
                 Entity entity = (Entity) theEObject;
                 T result = caseEntity(entity);
-                if (result == null)
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.NAMED_ENTITY: {
                 NamedEntity namedEntity = (NamedEntity) theEObject;
                 T result = caseNamedEntity(namedEntity);
-                if (result == null)
+                if (result == null) {
                     result = caseEntity(namedEntity);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.SPECIFICATION: {
                 Specification specification = (Specification) theEObject;
                 T result = caseSpecification(specification);
-                if (result == null)
+                if (result == null) {
                     result = caseEntity(specification);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.DOMAIN_ENTITY: {
                 DomainEntity domainEntity = (DomainEntity) theEObject;
                 T result = caseDomainEntity(domainEntity);
-                if (result == null)
+                if (result == null) {
                     result = caseNamedEntity(domainEntity);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(domainEntity);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.CONTENT_FILTERED_TOPIC: {
                 ContentFilteredTopic contentFilteredTopic = (ContentFilteredTopic) theEObject;
                 T result = caseContentFilteredTopic(contentFilteredTopic);
-                if (result == null)
+                if (result == null) {
                     result = caseTopicDescription(contentFilteredTopic);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(contentFilteredTopic);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(contentFilteredTopic);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.MULTI_TOPIC: {
                 MultiTopic multiTopic = (MultiTopic) theEObject;
                 T result = caseMultiTopic(multiTopic);
-                if (result == null)
+                if (result == null) {
                     result = caseTopicDescription(multiTopic);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(multiTopic);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(multiTopic);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.TOPIC: {
                 Topic topic = (Topic) theEObject;
                 T result = caseTopic(topic);
-                if (result == null)
+                if (result == null) {
                     result = caseDomainEntity(topic);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseTopicDescription(topic);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(topic);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(topic);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.TOPIC_DESCRIPTION: {
                 TopicDescription topicDescription = (TopicDescription) theEObject;
                 T result = caseTopicDescription(topicDescription);
-                if (result == null)
+                if (result == null) {
                     result = caseNamedEntity(topicDescription);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(topicDescription);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.ARRAY: {
                 Array array = (Array) theEObject;
                 T result = caseArray(array);
-                if (result == null)
+                if (result == null) {
                     result = caseCollection(array);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseTopicField(array);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(array);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(array);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.OBOOLEAN: {
                 OBoolean oBoolean = (OBoolean) theEObject;
                 T result = caseOBoolean(oBoolean);
-                if (result == null)
+                if (result == null) {
                     result = caseSimple(oBoolean);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseTopicField(oBoolean);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseKeyField(oBoolean);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(oBoolean);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(oBoolean);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.CASE: {
                 Case case_ = (Case) theEObject;
                 T result = caseCase(case_);
-                if (result == null)
+                if (result == null) {
                     result = caseTopicField(case_);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(case_);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(case_);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.OCHAR: {
                 OChar oChar = (OChar) theEObject;
                 T result = caseOChar(oChar);
-                if (result == null)
+                if (result == null) {
                     result = caseSimple(oChar);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseTopicField(oChar);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseKeyField(oChar);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(oChar);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(oChar);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.COLLECTION: {
                 Collection collection = (Collection) theEObject;
                 T result = caseCollection(collection);
-                if (result == null)
+                if (result == null) {
                     result = caseTopicField(collection);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(collection);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(collection);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.CONSTRUCTED_TOPIC_TYPE: {
                 ConstructedTopicType constructedTopicType = (ConstructedTopicType) theEObject;
                 T result = caseConstructedTopicType(constructedTopicType);
-                if (result == null)
+                if (result == null) {
                     result = caseTopicField(constructedTopicType);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(constructedTopicType);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(constructedTopicType);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.ODOUBLE: {
                 ODouble oDouble = (ODouble) theEObject;
                 T result = caseODouble(oDouble);
-                if (result == null)
+                if (result == null) {
                     result = caseSimple(oDouble);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseTopicField(oDouble);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseKeyField(oDouble);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(oDouble);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(oDouble);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.ENUM: {
                 Enum enum_ = (Enum) theEObject;
                 T result = caseEnum(enum_);
-                if (result == null)
+                if (result == null) {
                     result = caseTopicField(enum_);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(enum_);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(enum_);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.OFLOAT: {
                 OFloat oFloat = (OFloat) theEObject;
                 T result = caseOFloat(oFloat);
-                if (result == null)
+                if (result == null) {
                     result = caseSimple(oFloat);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseTopicField(oFloat);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseKeyField(oFloat);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(oFloat);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(oFloat);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.KEY: {
                 Key key = (Key) theEObject;
                 T result = caseKey(key);
-                if (result == null)
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.KEY_FIELD: {
                 KeyField keyField = (KeyField) theEObject;
                 T result = caseKeyField(keyField);
-                if (result == null)
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.OLONG: {
                 OLong oLong = (OLong) theEObject;
                 T result = caseOLong(oLong);
-                if (result == null)
+                if (result == null) {
                     result = caseSimple(oLong);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseTopicField(oLong);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseKeyField(oLong);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(oLong);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(oLong);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.OLONG_LONG: {
                 OLongLong oLongLong = (OLongLong) theEObject;
                 T result = caseOLongLong(oLongLong);
-                if (result == null)
+                if (result == null) {
                     result = caseSimple(oLongLong);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseTopicField(oLongLong);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseKeyField(oLongLong);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(oLongLong);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(oLongLong);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.OOCTET: {
                 OOctet oOctet = (OOctet) theEObject;
                 T result = caseOOctet(oOctet);
-                if (result == null)
+                if (result == null) {
                     result = caseSimple(oOctet);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseTopicField(oOctet);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseKeyField(oOctet);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(oOctet);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(oOctet);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.SEQUENCE: {
                 Sequence sequence = (Sequence) theEObject;
                 T result = caseSequence(sequence);
-                if (result == null)
+                if (result == null) {
                     result = caseCollection(sequence);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseTopicField(sequence);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(sequence);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(sequence);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.OSHORT: {
                 OShort oShort = (OShort) theEObject;
                 T result = caseOShort(oShort);
-                if (result == null)
+                if (result == null) {
                     result = caseSimple(oShort);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseTopicField(oShort);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseKeyField(oShort);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(oShort);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(oShort);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.SIMPLE: {
                 Simple simple = (Simple) theEObject;
                 T result = caseSimple(simple);
-                if (result == null)
+                if (result == null) {
                     result = caseTopicField(simple);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseKeyField(simple);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(simple);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(simple);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.OSTRING: {
                 OString oString = (OString) theEObject;
                 T result = caseOString(oString);
-                if (result == null)
+                if (result == null) {
                     result = caseSimple(oString);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseTopicField(oString);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseKeyField(oString);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(oString);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(oString);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.TOPIC_STRUCT: {
                 TopicStruct topicStruct = (TopicStruct) theEObject;
                 T result = caseTopicStruct(topicStruct);
-                if (result == null)
+                if (result == null) {
                     result = caseConstructedTopicType(topicStruct);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseTopicField(topicStruct);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(topicStruct);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(topicStruct);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.TOPIC_FIELD: {
                 TopicField topicField = (TopicField) theEObject;
                 T result = caseTopicField(topicField);
-                if (result == null)
+                if (result == null) {
                     result = caseNamedEntity(topicField);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(topicField);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.TYPEDEF: {
                 Typedef typedef = (Typedef) theEObject;
                 T result = caseTypedef(typedef);
-                if (result == null)
+                if (result == null) {
                     result = caseTopicField(typedef);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(typedef);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(typedef);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.OU_LONG: {
                 OULong ouLong = (OULong) theEObject;
                 T result = caseOULong(ouLong);
-                if (result == null)
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.OU_LONG_LONG: {
                 OULongLong ouLongLong = (OULongLong) theEObject;
                 T result = caseOULongLong(ouLongLong);
-                if (result == null)
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.UNION: {
                 Union union = (Union) theEObject;
                 T result = caseUnion(union);
-                if (result == null)
+                if (result == null) {
                     result = caseConstructedTopicType(union);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseTopicField(union);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(union);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(union);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.OU_SHORT: {
                 OUShort ouShort = (OUShort) theEObject;
                 T result = caseOUShort(ouShort);
-                if (result == null)
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.DATA_READER: {
                 DataReader dataReader = (DataReader) theEObject;
                 T result = caseDataReader(dataReader);
-                if (result == null)
+                if (result == null) {
                     result = caseDataReaderWriter(dataReader);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseDomainEntity(dataReader);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(dataReader);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(dataReader);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.DATA_READER_WRITER: {
                 DataReaderWriter dataReaderWriter = (DataReaderWriter) theEObject;
                 T result = caseDataReaderWriter(dataReaderWriter);
-                if (result == null)
+                if (result == null) {
                     result = caseDomainEntity(dataReaderWriter);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(dataReaderWriter);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(dataReaderWriter);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.DATA_WRITER: {
                 DataWriter dataWriter = (DataWriter) theEObject;
                 T result = caseDataWriter(dataWriter);
-                if (result == null)
+                if (result == null) {
                     result = caseDataReaderWriter(dataWriter);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseDomainEntity(dataWriter);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(dataWriter);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(dataWriter);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.DOMAIN: {
                 Domain domain = (Domain) theEObject;
                 T result = caseDomain(domain);
-                if (result == null)
+                if (result == null) {
                     result = caseNamedEntity(domain);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(domain);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.DOMAIN_PARTICIPANT: {
                 DomainParticipant domainParticipant = (DomainParticipant) theEObject;
                 T result = caseDomainParticipant(domainParticipant);
-                if (result == null)
+                if (result == null) {
                     result = caseDomainEntity(domainParticipant);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(domainParticipant);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(domainParticipant);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.PUBLISHER: {
                 Publisher publisher = (Publisher) theEObject;
                 T result = casePublisher(publisher);
-                if (result == null)
+                if (result == null) {
                     result = casePublisherSubscriber(publisher);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseDomainEntity(publisher);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(publisher);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(publisher);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.PUBLISHER_SUBSCRIBER: {
                 PublisherSubscriber publisherSubscriber = (PublisherSubscriber) theEObject;
                 T result = casePublisherSubscriber(publisherSubscriber);
-                if (result == null)
+                if (result == null) {
                     result = caseDomainEntity(publisherSubscriber);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(publisherSubscriber);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(publisherSubscriber);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.SUBSCRIBER: {
                 Subscriber subscriber = (Subscriber) theEObject;
                 T result = caseSubscriber(subscriber);
-                if (result == null)
+                if (result == null) {
                     result = casePublisherSubscriber(subscriber);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseDomainEntity(subscriber);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseNamedEntity(subscriber);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(subscriber);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.DEADLINE_QOS_POLICY: {
                 DeadlineQosPolicy deadlineQosPolicy = (DeadlineQosPolicy) theEObject;
                 T result = caseDeadlineQosPolicy(deadlineQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(deadlineQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(deadlineQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(deadlineQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.DESTINATION_ORDER_QOS_POLICY: {
                 DestinationOrderQosPolicy destinationOrderQosPolicy = (DestinationOrderQosPolicy) theEObject;
                 T result = caseDestinationOrderQosPolicy(destinationOrderQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(destinationOrderQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(destinationOrderQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(destinationOrderQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.DURABILITY_QOS_POLICY: {
                 DurabilityQosPolicy durabilityQosPolicy = (DurabilityQosPolicy) theEObject;
                 T result = caseDurabilityQosPolicy(durabilityQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(durabilityQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(durabilityQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(durabilityQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.DURABILITY_SERVICE_QOS_POLICY: {
                 DurabilityServiceQosPolicy durabilityServiceQosPolicy = (DurabilityServiceQosPolicy) theEObject;
                 T result = caseDurabilityServiceQosPolicy(durabilityServiceQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(durabilityServiceQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(durabilityServiceQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(durabilityServiceQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.ENTITY_FACTORY_QOS_POLICY: {
                 EntityFactoryQosPolicy entityFactoryQosPolicy = (EntityFactoryQosPolicy) theEObject;
                 T result = caseEntityFactoryQosPolicy(entityFactoryQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(entityFactoryQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(entityFactoryQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(entityFactoryQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.GROUP_DATA_QOS_POLICY: {
                 GroupDataQosPolicy groupDataQosPolicy = (GroupDataQosPolicy) theEObject;
                 T result = caseGroupDataQosPolicy(groupDataQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(groupDataQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(groupDataQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(groupDataQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.HISTORY_QOS_POLICY: {
                 HistoryQosPolicy historyQosPolicy = (HistoryQosPolicy) theEObject;
                 T result = caseHistoryQosPolicy(historyQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(historyQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(historyQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(historyQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.LATENCY_BUDGET_QOS_POLICY: {
                 LatencyBudgetQosPolicy latencyBudgetQosPolicy = (LatencyBudgetQosPolicy) theEObject;
                 T result = caseLatencyBudgetQosPolicy(latencyBudgetQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(latencyBudgetQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(latencyBudgetQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(latencyBudgetQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.LIFESPAN_QOS_POLICY: {
                 LifespanQosPolicy lifespanQosPolicy = (LifespanQosPolicy) theEObject;
                 T result = caseLifespanQosPolicy(lifespanQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(lifespanQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(lifespanQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(lifespanQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.LIVELINESS_QOS_POLICY: {
                 LivelinessQosPolicy livelinessQosPolicy = (LivelinessQosPolicy) theEObject;
                 T result = caseLivelinessQosPolicy(livelinessQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(livelinessQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(livelinessQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(livelinessQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.OWNERSHIP_QOS_POLICY: {
                 OwnershipQosPolicy ownershipQosPolicy = (OwnershipQosPolicy) theEObject;
                 T result = caseOwnershipQosPolicy(ownershipQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(ownershipQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(ownershipQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(ownershipQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.OWNERSHIP_STRENGTH_QOS_POLICY: {
                 OwnershipStrengthQosPolicy ownershipStrengthQosPolicy = (OwnershipStrengthQosPolicy) theEObject;
                 T result = caseOwnershipStrengthQosPolicy(ownershipStrengthQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(ownershipStrengthQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(ownershipStrengthQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(ownershipStrengthQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.PARTITION_QOS_POLICY: {
                 PartitionQosPolicy partitionQosPolicy = (PartitionQosPolicy) theEObject;
                 T result = casePartitionQosPolicy(partitionQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(partitionQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(partitionQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(partitionQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.PRESENTATION_QOS_POLICY: {
                 PresentationQosPolicy presentationQosPolicy = (PresentationQosPolicy) theEObject;
                 T result = casePresentationQosPolicy(presentationQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(presentationQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(presentationQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(presentationQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.QOS_POLICY: {
                 QosPolicy qosPolicy = (QosPolicy) theEObject;
                 T result = caseQosPolicy(qosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseSpecification(qosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(qosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.READER_DATA_LIFECYCLE_QOS_POLICY: {
                 ReaderDataLifecycleQosPolicy readerDataLifecycleQosPolicy = (ReaderDataLifecycleQosPolicy) theEObject;
                 T result = caseReaderDataLifecycleQosPolicy(readerDataLifecycleQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(readerDataLifecycleQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(readerDataLifecycleQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(readerDataLifecycleQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.RELIABILITY_QOS_POLICY: {
                 ReliabilityQosPolicy reliabilityQosPolicy = (ReliabilityQosPolicy) theEObject;
                 T result = caseReliabilityQosPolicy(reliabilityQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(reliabilityQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(reliabilityQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(reliabilityQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.RESOURCE_LIMITS_QOS_POLICY: {
                 ResourceLimitsQosPolicy resourceLimitsQosPolicy = (ResourceLimitsQosPolicy) theEObject;
                 T result = caseResourceLimitsQosPolicy(resourceLimitsQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(resourceLimitsQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(resourceLimitsQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(resourceLimitsQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.TIME_BASED_FILTER_QOS_POLICY: {
                 TimeBasedFilterQosPolicy timeBasedFilterQosPolicy = (TimeBasedFilterQosPolicy) theEObject;
                 T result = caseTimeBasedFilterQosPolicy(timeBasedFilterQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(timeBasedFilterQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(timeBasedFilterQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(timeBasedFilterQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.TOPIC_DATA_QOS_POLICY: {
                 TopicDataQosPolicy topicDataQosPolicy = (TopicDataQosPolicy) theEObject;
                 T result = caseTopicDataQosPolicy(topicDataQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(topicDataQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(topicDataQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(topicDataQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.TRANSPORT_PRIORITY_QOS_POLICY: {
                 TransportPriorityQosPolicy transportPriorityQosPolicy = (TransportPriorityQosPolicy) theEObject;
                 T result = caseTransportPriorityQosPolicy(transportPriorityQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(transportPriorityQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(transportPriorityQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(transportPriorityQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.USER_DATA_QOS_POLICY: {
                 UserDataQosPolicy userDataQosPolicy = (UserDataQosPolicy) theEObject;
                 T result = caseUserDataQosPolicy(userDataQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(userDataQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(userDataQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(userDataQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.PERIOD: {
                 Period period = (Period) theEObject;
                 T result = casePeriod(period);
-                if (result == null)
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.WRITER_DATA_LIFECYCLE_QOS_POLICY: {
                 WriterDataLifecycleQosPolicy writerDataLifecycleQosPolicy = (WriterDataLifecycleQosPolicy) theEObject;
                 T result = caseWriterDataLifecycleQosPolicy(writerDataLifecycleQosPolicy);
-                if (result == null)
+                if (result == null) {
                     result = caseQosPolicy(writerDataLifecycleQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseSpecification(writerDataLifecycleQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = caseEntity(writerDataLifecycleQosPolicy);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.APPLICATION_TARGET: {
                 ApplicationTarget applicationTarget = (ApplicationTarget) theEObject;
                 T result = caseApplicationTarget(applicationTarget);
-                if (result == null)
+                if (result == null) {
                     result = caseEntity(applicationTarget);
-                if (result == null)
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             case ModelPackage.TRANSPORT: {
                 Transport transport = (Transport) theEObject;
                 T result = caseTransport(transport);
-                if (result == null)
+                if (result == null) {
                     result = defaultCase(theEObject);
+                }
                 return result;
             }
             default:

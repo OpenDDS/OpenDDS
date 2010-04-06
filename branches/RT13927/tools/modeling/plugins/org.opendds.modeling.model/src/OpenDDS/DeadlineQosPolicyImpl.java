@@ -11,10 +11,8 @@ package OpenDDS;
 
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.NotificationChain;
-
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.InternalEObject;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
@@ -80,10 +78,11 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
         if (eNotificationRequired()) {
             ENotificationImpl notification = new ENotificationImpl(this, Notification.SET,
                     ModelPackage.DEADLINE_QOS_POLICY__PERIOD, oldPeriod, newPeriod);
-            if (msgs == null)
+            if (msgs == null) {
                 msgs = notification;
-            else
+            } else {
                 msgs.add(notification);
+            }
         }
         return msgs;
     }
@@ -96,18 +95,22 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     public void setPeriod(Period newPeriod) {
         if (newPeriod != period) {
             NotificationChain msgs = null;
-            if (period != null)
+            if (period != null) {
                 msgs = ((InternalEObject) period).eInverseRemove(this, EOPPOSITE_FEATURE_BASE
                         - ModelPackage.DEADLINE_QOS_POLICY__PERIOD, null, msgs);
-            if (newPeriod != null)
+            }
+            if (newPeriod != null) {
                 msgs = ((InternalEObject) newPeriod).eInverseAdd(this, EOPPOSITE_FEATURE_BASE
                         - ModelPackage.DEADLINE_QOS_POLICY__PERIOD, null, msgs);
+            }
             msgs = basicSetPeriod(newPeriod, msgs);
-            if (msgs != null)
+            if (msgs != null) {
                 msgs.dispatch();
-        } else if (eNotificationRequired())
+            }
+        } else if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.DEADLINE_QOS_POLICY__PERIOD, newPeriod,
                     newPeriod));
+        }
     }
 
     /**
