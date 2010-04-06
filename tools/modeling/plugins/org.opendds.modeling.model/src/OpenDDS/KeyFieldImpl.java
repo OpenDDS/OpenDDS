@@ -38,7 +38,7 @@ public class KeyFieldImpl extends EObjectImpl implements KeyField {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.KEY_FIELD;
+        return OpenDDSPackage.Literals.KEY_FIELD;
     }
 
 } //KeyFieldImpl

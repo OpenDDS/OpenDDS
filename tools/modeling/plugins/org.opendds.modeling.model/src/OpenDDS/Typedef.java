@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getTypedef()
+ * @see OpenDDS.OpenDDSPackage#getTypedef()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface Typedef extends TopicField {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Type</em>' reference.
      * @see #setType(TopicField)
-     * @see OpenDDS.ModelPackage#getTypedef_Type()
+     * @see OpenDDS.OpenDDSPackage#getTypedef_Type()
      * @model
      * @generated
      */

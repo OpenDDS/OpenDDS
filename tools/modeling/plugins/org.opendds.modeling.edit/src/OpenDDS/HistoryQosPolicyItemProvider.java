@@ -6,6 +6,7 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
+
 package OpenDDS;
 
 import java.util.Collection;
@@ -29,131 +30,116 @@ import org.eclipse.emf.edit.provider.ViewerNotification;
  * <!-- end-user-doc -->
  * @generated
  */
-public class HistoryQosPolicyItemProvider extends QosPolicyItemProvider
-		implements IEditingDomainItemProvider, IStructuredItemContentProvider,
-		ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource {
-	/**
-	 * This constructs an instance from a factory and a notifier.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public HistoryQosPolicyItemProvider(AdapterFactory adapterFactory) {
-		super(adapterFactory);
-	}
+public class HistoryQosPolicyItemProvider extends QosPolicyItemProvider implements IEditingDomainItemProvider,
+        IStructuredItemContentProvider, ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource {
+    /**
+     * This constructs an instance from a factory and a notifier.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    public HistoryQosPolicyItemProvider(AdapterFactory adapterFactory) {
+        super(adapterFactory);
+    }
 
-	/**
-	 * This returns the property descriptors for the adapted class.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public List<IItemPropertyDescriptor> getPropertyDescriptors(Object object) {
-		if (itemPropertyDescriptors == null) {
-			super.getPropertyDescriptors(object);
+    /**
+     * This returns the property descriptors for the adapted class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    @Override
+    public List<IItemPropertyDescriptor> getPropertyDescriptors(Object object) {
+        if (itemPropertyDescriptors == null) {
+            super.getPropertyDescriptors(object);
 
-			addDepthPropertyDescriptor(object);
-			addKindPropertyDescriptor(object);
-		}
-		return itemPropertyDescriptors;
-	}
+            addDepthPropertyDescriptor(object);
+            addKindPropertyDescriptor(object);
+        }
+        return itemPropertyDescriptors;
+    }
 
-	/**
-	 * This adds a property descriptor for the Depth feature.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected void addDepthPropertyDescriptor(Object object) {
-		itemPropertyDescriptors
-				.add(createItemPropertyDescriptor(
-						((ComposeableAdapterFactory) adapterFactory)
-								.getRootAdapterFactory(), getResourceLocator(),
-						getString("_UI_HistoryQosPolicy_depth_feature"),
-						getString("_UI_PropertyDescriptor_description",
-								"_UI_HistoryQosPolicy_depth_feature",
-								"_UI_HistoryQosPolicy_type"),
-						ModelPackage.Literals.HISTORY_QOS_POLICY__DEPTH, true,
-						false, false,
-						ItemPropertyDescriptor.INTEGRAL_VALUE_IMAGE, null, null));
-	}
+    /**
+     * This adds a property descriptor for the Depth feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    protected void addDepthPropertyDescriptor(Object object) {
+        itemPropertyDescriptors.add(createItemPropertyDescriptor(((ComposeableAdapterFactory) adapterFactory)
+                .getRootAdapterFactory(), getResourceLocator(), getString("_UI_HistoryQosPolicy_depth_feature"),
+                getString("_UI_PropertyDescriptor_description", "_UI_HistoryQosPolicy_depth_feature",
+                        "_UI_HistoryQosPolicy_type"), OpenDDSPackage.Literals.HISTORY_QOS_POLICY__DEPTH, true, false,
+                false, ItemPropertyDescriptor.INTEGRAL_VALUE_IMAGE, null, null));
+    }
 
-	/**
-	 * This adds a property descriptor for the Kind feature.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected void addKindPropertyDescriptor(Object object) {
-		itemPropertyDescriptors.add(createItemPropertyDescriptor(
-				((ComposeableAdapterFactory) adapterFactory)
-						.getRootAdapterFactory(), getResourceLocator(),
-				getString("_UI_HistoryQosPolicy_kind_feature"), getString(
-						"_UI_PropertyDescriptor_description",
-						"_UI_HistoryQosPolicy_kind_feature",
-						"_UI_HistoryQosPolicy_type"),
-				ModelPackage.Literals.HISTORY_QOS_POLICY__KIND, true, false,
-				false, ItemPropertyDescriptor.GENERIC_VALUE_IMAGE, null, null));
-	}
+    /**
+     * This adds a property descriptor for the Kind feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    protected void addKindPropertyDescriptor(Object object) {
+        itemPropertyDescriptors.add(createItemPropertyDescriptor(((ComposeableAdapterFactory) adapterFactory)
+                .getRootAdapterFactory(), getResourceLocator(), getString("_UI_HistoryQosPolicy_kind_feature"),
+                getString("_UI_PropertyDescriptor_description", "_UI_HistoryQosPolicy_kind_feature",
+                        "_UI_HistoryQosPolicy_type"), OpenDDSPackage.Literals.HISTORY_QOS_POLICY__KIND, true, false,
+                false, ItemPropertyDescriptor.GENERIC_VALUE_IMAGE, null, null));
+    }
 
-	/**
-	 * This returns HistoryQosPolicy.gif.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Object getImage(Object object) {
-		return overlayImage(object, getResourceLocator().getImage(
-				"full/obj16/HistoryQosPolicy"));
-	}
+    /**
+     * This returns HistoryQosPolicy.gif.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    @Override
+    public Object getImage(Object object) {
+        return overlayImage(object, getResourceLocator().getImage("full/obj16/HistoryQosPolicy"));
+    }
 
-	/**
-	 * This returns the label text for the adapted class.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public String getText(Object object) {
-		HistoryQosPolicy historyQosPolicy = (HistoryQosPolicy) object;
-		return getString("_UI_HistoryQosPolicy_type") + " "
-				+ historyQosPolicy.getDepth();
-	}
+    /**
+     * This returns the label text for the adapted class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    @Override
+    public String getText(Object object) {
+        HistoryQosPolicy historyQosPolicy = (HistoryQosPolicy) object;
+        return getString("_UI_HistoryQosPolicy_type") + " " + historyQosPolicy.getDepth();
+    }
 
-	/**
-	 * This handles model notifications by calling {@link #updateChildren} to update any cached
-	 * children and by creating a viewer notification, which it passes to {@link #fireNotifyChanged}.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void notifyChanged(Notification notification) {
-		updateChildren(notification);
+    /**
+     * This handles model notifications by calling {@link #updateChildren} to update any cached
+     * children and by creating a viewer notification, which it passes to {@link #fireNotifyChanged}.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    @Override
+    public void notifyChanged(Notification notification) {
+        updateChildren(notification);
 
-		switch (notification.getFeatureID(HistoryQosPolicy.class)) {
-		case ModelPackage.HISTORY_QOS_POLICY__DEPTH:
-		case ModelPackage.HISTORY_QOS_POLICY__KIND:
-			fireNotifyChanged(new ViewerNotification(notification, notification
-					.getNotifier(), false, true));
-			return;
-		}
-		super.notifyChanged(notification);
-	}
+        switch (notification.getFeatureID(HistoryQosPolicy.class)) {
+            case OpenDDSPackage.HISTORY_QOS_POLICY__DEPTH:
+            case OpenDDSPackage.HISTORY_QOS_POLICY__KIND:
+                fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
+                return;
+        }
+        super.notifyChanged(notification);
+    }
 
-	/**
-	 * This adds {@link org.eclipse.emf.edit.command.CommandParameter}s describing the children
-	 * that can be created under this object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	protected void collectNewChildDescriptors(
-			Collection<Object> newChildDescriptors, Object object) {
-		super.collectNewChildDescriptors(newChildDescriptors, object);
-	}
+    /**
+     * This adds {@link org.eclipse.emf.edit.command.CommandParameter}s describing the children
+     * that can be created under this object.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    @Override
+    protected void collectNewChildDescriptors(Collection<Object> newChildDescriptors, Object object) {
+        super.collectNewChildDescriptors(newChildDescriptors, object);
+    }
 
 }

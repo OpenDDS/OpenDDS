@@ -37,7 +37,7 @@ public abstract class TopicFieldImpl extends NamedEntityImpl implements TopicFie
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.TOPIC_FIELD;
+        return OpenDDSPackage.Literals.TOPIC_FIELD;
     }
 
 } //TopicFieldImpl

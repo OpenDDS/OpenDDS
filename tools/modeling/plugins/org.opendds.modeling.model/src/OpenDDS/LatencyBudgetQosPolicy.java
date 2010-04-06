@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getLatencyBudgetQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getLatencyBudgetQosPolicy()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface LatencyBudgetQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Duration</em>' containment reference.
      * @see #setDuration(Period)
-     * @see OpenDDS.ModelPackage#getLatencyBudgetQosPolicy_Duration()
+     * @see OpenDDS.OpenDDSPackage#getLatencyBudgetQosPolicy_Duration()
      * @model containment="true"
      * @generated
      */

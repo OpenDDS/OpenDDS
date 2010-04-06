@@ -37,7 +37,7 @@ public class OStringImpl extends SimpleImpl implements OString {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.OSTRING;
+        return OpenDDSPackage.Literals.OSTRING;
     }
 
 } //OStringImpl

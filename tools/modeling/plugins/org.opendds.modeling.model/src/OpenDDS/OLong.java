@@ -15,7 +15,7 @@ package OpenDDS;
  * <!-- end-user-doc -->
  *
  *
- * @see OpenDDS.ModelPackage#getOLong()
+ * @see OpenDDS.OpenDDSPackage#getOLong()
  * @model
  * @generated
  */

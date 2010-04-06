@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getTimeBasedFilterQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getTimeBasedFilterQosPolicy()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface TimeBasedFilterQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Minimum separation</em>' containment reference.
      * @see #setMinimum_separation(Period)
-     * @see OpenDDS.ModelPackage#getTimeBasedFilterQosPolicy_Minimum_separation()
+     * @see OpenDDS.OpenDDSPackage#getTimeBasedFilterQosPolicy_Minimum_separation()
      * @model containment="true"
      * @generated
      */

@@ -55,7 +55,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.LIFESPAN_QOS_POLICY;
+        return OpenDDSPackage.Literals.LIFESPAN_QOS_POLICY;
     }
 
     /**
@@ -77,12 +77,11 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
         duration = newDuration;
         if (eNotificationRequired()) {
             ENotificationImpl notification = new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.LIFESPAN_QOS_POLICY__DURATION, oldDuration, newDuration);
-            if (msgs == null) {
+                    OpenDDSPackage.LIFESPAN_QOS_POLICY__DURATION, oldDuration, newDuration);
+            if (msgs == null)
                 msgs = notification;
-            } else {
+            else
                 msgs.add(notification);
-            }
         }
         return msgs;
     }
@@ -95,22 +94,18 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     public void setDuration(Period newDuration) {
         if (newDuration != duration) {
             NotificationChain msgs = null;
-            if (duration != null) {
+            if (duration != null)
                 msgs = ((InternalEObject) duration).eInverseRemove(this, EOPPOSITE_FEATURE_BASE
-                        - ModelPackage.LIFESPAN_QOS_POLICY__DURATION, null, msgs);
-            }
-            if (newDuration != null) {
+                        - OpenDDSPackage.LIFESPAN_QOS_POLICY__DURATION, null, msgs);
+            if (newDuration != null)
                 msgs = ((InternalEObject) newDuration).eInverseAdd(this, EOPPOSITE_FEATURE_BASE
-                        - ModelPackage.LIFESPAN_QOS_POLICY__DURATION, null, msgs);
-            }
+                        - OpenDDSPackage.LIFESPAN_QOS_POLICY__DURATION, null, msgs);
             msgs = basicSetDuration(newDuration, msgs);
-            if (msgs != null) {
+            if (msgs != null)
                 msgs.dispatch();
-            }
-        } else if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.LIFESPAN_QOS_POLICY__DURATION,
+        } else if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.LIFESPAN_QOS_POLICY__DURATION,
                     newDuration, newDuration));
-        }
     }
 
     /**
@@ -121,7 +116,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     @Override
     public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
         switch (featureID) {
-            case ModelPackage.LIFESPAN_QOS_POLICY__DURATION:
+            case OpenDDSPackage.LIFESPAN_QOS_POLICY__DURATION:
                 return basicSetDuration(null, msgs);
         }
         return super.eInverseRemove(otherEnd, featureID, msgs);
@@ -135,7 +130,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.LIFESPAN_QOS_POLICY__DURATION:
+            case OpenDDSPackage.LIFESPAN_QOS_POLICY__DURATION:
                 return getDuration();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -149,7 +144,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.LIFESPAN_QOS_POLICY__DURATION:
+            case OpenDDSPackage.LIFESPAN_QOS_POLICY__DURATION:
                 setDuration((Period) newValue);
                 return;
         }
@@ -164,7 +159,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.LIFESPAN_QOS_POLICY__DURATION:
+            case OpenDDSPackage.LIFESPAN_QOS_POLICY__DURATION:
                 setDuration((Period) null);
                 return;
         }
@@ -179,7 +174,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.LIFESPAN_QOS_POLICY__DURATION:
+            case OpenDDSPackage.LIFESPAN_QOS_POLICY__DURATION:
                 return duration != null;
         }
         return super.eIsSet(featureID);

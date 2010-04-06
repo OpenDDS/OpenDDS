@@ -25,7 +25,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getDataReader()
+ * @see OpenDDS.OpenDDSPackage#getDataReader()
  * @model
  * @generated
  */
@@ -40,7 +40,7 @@ public interface DataReader extends DataReaderWriter {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Topic</em>' reference.
      * @see #setTopic(TopicDescription)
-     * @see OpenDDS.ModelPackage#getDataReader_Topic()
+     * @see OpenDDS.OpenDDSPackage#getDataReader_Topic()
      * @model required="true"
      * @generated
      */
@@ -66,7 +66,7 @@ public interface DataReader extends DataReaderWriter {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Reader data lifecycle</em>' reference.
      * @see #setReader_data_lifecycle(ReaderDataLifecycleQosPolicy)
-     * @see OpenDDS.ModelPackage#getDataReader_Reader_data_lifecycle()
+     * @see OpenDDS.OpenDDSPackage#getDataReader_Reader_data_lifecycle()
      * @model
      * @generated
      */
@@ -92,7 +92,7 @@ public interface DataReader extends DataReaderWriter {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Transport priority</em>' reference.
      * @see #setTransport_priority(TransportPriorityQosPolicy)
-     * @see OpenDDS.ModelPackage#getDataReader_Transport_priority()
+     * @see OpenDDS.OpenDDSPackage#getDataReader_Transport_priority()
      * @model
      * @generated
      */
@@ -118,7 +118,7 @@ public interface DataReader extends DataReaderWriter {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Durability service</em>' reference.
      * @see #setDurability_service(DurabilityServiceQosPolicy)
-     * @see OpenDDS.ModelPackage#getDataReader_Durability_service()
+     * @see OpenDDS.OpenDDSPackage#getDataReader_Durability_service()
      * @model
      * @generated
      */
@@ -144,7 +144,7 @@ public interface DataReader extends DataReaderWriter {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Ownership strength</em>' reference.
      * @see #setOwnership_strength(OwnershipStrengthQosPolicy)
-     * @see OpenDDS.ModelPackage#getDataReader_Ownership_strength()
+     * @see OpenDDS.OpenDDSPackage#getDataReader_Ownership_strength()
      * @model
      * @generated
      */

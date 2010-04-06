@@ -64,7 +64,7 @@ public class TransportImpl extends EObjectImpl implements Transport {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.TRANSPORT;
+        return OpenDDSPackage.Literals.TRANSPORT;
     }
 
     /**
@@ -84,10 +84,9 @@ public class TransportImpl extends EObjectImpl implements Transport {
     public void setTransport_id(long newTransport_id) {
         long oldTransport_id = transport_id;
         transport_id = newTransport_id;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.TRANSPORT__TRANSPORT_ID,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TRANSPORT__TRANSPORT_ID,
                     oldTransport_id, transport_id));
-        }
     }
 
     /**
@@ -98,7 +97,7 @@ public class TransportImpl extends EObjectImpl implements Transport {
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.TRANSPORT__TRANSPORT_ID:
+            case OpenDDSPackage.TRANSPORT__TRANSPORT_ID:
                 return getTransport_id();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -112,7 +111,7 @@ public class TransportImpl extends EObjectImpl implements Transport {
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.TRANSPORT__TRANSPORT_ID:
+            case OpenDDSPackage.TRANSPORT__TRANSPORT_ID:
                 setTransport_id((Long) newValue);
                 return;
         }
@@ -127,7 +126,7 @@ public class TransportImpl extends EObjectImpl implements Transport {
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.TRANSPORT__TRANSPORT_ID:
+            case OpenDDSPackage.TRANSPORT__TRANSPORT_ID:
                 setTransport_id(TRANSPORT_ID_EDEFAULT);
                 return;
         }
@@ -142,7 +141,7 @@ public class TransportImpl extends EObjectImpl implements Transport {
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.TRANSPORT__TRANSPORT_ID:
+            case OpenDDSPackage.TRANSPORT__TRANSPORT_ID:
                 return transport_id != TRANSPORT_ID_EDEFAULT;
         }
         return super.eIsSet(featureID);
@@ -155,9 +154,8 @@ public class TransportImpl extends EObjectImpl implements Transport {
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (transport_id: ");

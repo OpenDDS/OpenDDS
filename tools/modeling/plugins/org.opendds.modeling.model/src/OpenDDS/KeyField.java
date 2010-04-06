@@ -17,7 +17,7 @@ import org.eclipse.emf.ecore.EObject;
  * <!-- end-user-doc -->
  *
  *
- * @see OpenDDS.ModelPackage#getKeyField()
+ * @see OpenDDS.OpenDDSPackage#getKeyField()
  * @model
  * @generated
  */

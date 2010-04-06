@@ -37,7 +37,7 @@ public class OOctetImpl extends SimpleImpl implements OOctet {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.OOCTET;
+        return OpenDDSPackage.Literals.OOCTET;
     }
 
 } //OOctetImpl

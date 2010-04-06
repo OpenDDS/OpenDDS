@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getTopicDescription()
+ * @see OpenDDS.OpenDDSPackage#getTopicDescription()
  * @model abstract="true"
  * @generated
  */
@@ -36,7 +36,7 @@ public interface TopicDescription extends NamedEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Type</em>' reference.
      * @see #setType(TopicField)
-     * @see OpenDDS.ModelPackage#getTopicDescription_Type()
+     * @see OpenDDS.OpenDDSPackage#getTopicDescription_Type()
      * @model required="true"
      * @generated
      */

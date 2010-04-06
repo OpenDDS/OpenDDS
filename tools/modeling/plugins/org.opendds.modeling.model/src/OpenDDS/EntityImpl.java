@@ -38,7 +38,7 @@ public abstract class EntityImpl extends EObjectImpl implements Entity {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.ENTITY;
+        return OpenDDSPackage.Literals.ENTITY;
     }
 
 } //EntityImpl

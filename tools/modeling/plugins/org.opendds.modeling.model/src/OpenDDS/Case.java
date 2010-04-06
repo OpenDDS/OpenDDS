@@ -22,7 +22,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getCase()
+ * @see OpenDDS.OpenDDSPackage#getCase()
  * @model
  * @generated
  */
@@ -37,7 +37,7 @@ public interface Case extends TopicField {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Labels</em>' attribute.
      * @see #setLabels(String)
-     * @see OpenDDS.ModelPackage#getCase_Labels()
+     * @see OpenDDS.OpenDDSPackage#getCase_Labels()
      * @model
      * @generated
      */
@@ -63,7 +63,7 @@ public interface Case extends TopicField {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Type</em>' reference.
      * @see #setType(TopicField)
-     * @see OpenDDS.ModelPackage#getCase_Type()
+     * @see OpenDDS.OpenDDSPackage#getCase_Type()
      * @model required="true"
      * @generated
      */

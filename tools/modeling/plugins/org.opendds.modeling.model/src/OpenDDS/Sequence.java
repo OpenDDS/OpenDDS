@@ -15,7 +15,7 @@ package OpenDDS;
  * <!-- end-user-doc -->
  *
  *
- * @see OpenDDS.ModelPackage#getSequence()
+ * @see OpenDDS.OpenDDSPackage#getSequence()
  * @model
  * @generated
  */

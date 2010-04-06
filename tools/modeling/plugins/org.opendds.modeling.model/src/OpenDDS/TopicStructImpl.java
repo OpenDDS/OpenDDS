@@ -69,7 +69,7 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.TOPIC_STRUCT;
+        return OpenDDSPackage.Literals.TOPIC_STRUCT;
     }
 
     /**
@@ -80,7 +80,7 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
     public EList<TopicField> getMembers() {
         if (members == null) {
             members = new EObjectContainmentEList<TopicField>(TopicField.class, this,
-                    ModelPackage.TOPIC_STRUCT__MEMBERS);
+                    OpenDDSPackage.TOPIC_STRUCT__MEMBERS);
         }
         return members;
     }
@@ -92,7 +92,7 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
      */
     public EList<Key> getKeys() {
         if (keys == null) {
-            keys = new EObjectContainmentEList<Key>(Key.class, this, ModelPackage.TOPIC_STRUCT__KEYS);
+            keys = new EObjectContainmentEList<Key>(Key.class, this, OpenDDSPackage.TOPIC_STRUCT__KEYS);
         }
         return keys;
     }
@@ -105,9 +105,9 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
     @Override
     public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
         switch (featureID) {
-            case ModelPackage.TOPIC_STRUCT__MEMBERS:
+            case OpenDDSPackage.TOPIC_STRUCT__MEMBERS:
                 return ((InternalEList<?>) getMembers()).basicRemove(otherEnd, msgs);
-            case ModelPackage.TOPIC_STRUCT__KEYS:
+            case OpenDDSPackage.TOPIC_STRUCT__KEYS:
                 return ((InternalEList<?>) getKeys()).basicRemove(otherEnd, msgs);
         }
         return super.eInverseRemove(otherEnd, featureID, msgs);
@@ -121,9 +121,9 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.TOPIC_STRUCT__MEMBERS:
+            case OpenDDSPackage.TOPIC_STRUCT__MEMBERS:
                 return getMembers();
-            case ModelPackage.TOPIC_STRUCT__KEYS:
+            case OpenDDSPackage.TOPIC_STRUCT__KEYS:
                 return getKeys();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -138,11 +138,11 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.TOPIC_STRUCT__MEMBERS:
+            case OpenDDSPackage.TOPIC_STRUCT__MEMBERS:
                 getMembers().clear();
                 getMembers().addAll((Collection<? extends TopicField>) newValue);
                 return;
-            case ModelPackage.TOPIC_STRUCT__KEYS:
+            case OpenDDSPackage.TOPIC_STRUCT__KEYS:
                 getKeys().clear();
                 getKeys().addAll((Collection<? extends Key>) newValue);
                 return;
@@ -158,10 +158,10 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.TOPIC_STRUCT__MEMBERS:
+            case OpenDDSPackage.TOPIC_STRUCT__MEMBERS:
                 getMembers().clear();
                 return;
-            case ModelPackage.TOPIC_STRUCT__KEYS:
+            case OpenDDSPackage.TOPIC_STRUCT__KEYS:
                 getKeys().clear();
                 return;
         }
@@ -176,9 +176,9 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.TOPIC_STRUCT__MEMBERS:
+            case OpenDDSPackage.TOPIC_STRUCT__MEMBERS:
                 return members != null && !members.isEmpty();
-            case ModelPackage.TOPIC_STRUCT__KEYS:
+            case OpenDDSPackage.TOPIC_STRUCT__KEYS:
                 return keys != null && !keys.isEmpty();
         }
         return super.eIsSet(featureID);

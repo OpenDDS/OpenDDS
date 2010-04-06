@@ -38,7 +38,7 @@ public class OULongImpl extends EObjectImpl implements OULong {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.OU_LONG;
+        return OpenDDSPackage.Literals.OU_LONG;
     }
 
 } //OULongImpl

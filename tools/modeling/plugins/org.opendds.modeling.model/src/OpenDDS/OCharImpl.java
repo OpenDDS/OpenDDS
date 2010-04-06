@@ -37,7 +37,7 @@ public class OCharImpl extends SimpleImpl implements OChar {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.OCHAR;
+        return OpenDDSPackage.Literals.OCHAR;
     }
 
 } //OCharImpl

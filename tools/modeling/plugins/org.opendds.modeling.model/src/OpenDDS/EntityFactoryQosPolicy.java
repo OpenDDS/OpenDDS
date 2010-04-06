@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getEntityFactoryQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getEntityFactoryQosPolicy()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface EntityFactoryQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Autoenable created entities</em>' attribute.
      * @see #setAutoenable_created_entities(boolean)
-     * @see OpenDDS.ModelPackage#getEntityFactoryQosPolicy_Autoenable_created_entities()
+     * @see OpenDDS.OpenDDSPackage#getEntityFactoryQosPolicy_Autoenable_created_entities()
      * @model
      * @generated
      */

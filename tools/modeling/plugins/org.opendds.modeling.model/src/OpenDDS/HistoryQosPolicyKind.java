@@ -20,7 +20,7 @@ import org.eclipse.emf.common.util.Enumerator;
  * A representation of the literals of the enumeration '<em><b>History Qos Policy Kind</b></em>',
  * and utility methods for working with them.
  * <!-- end-user-doc -->
- * @see OpenDDS.ModelPackage#getHistoryQosPolicyKind()
+ * @see OpenDDS.OpenDDSPackage#getHistoryQosPolicyKind()
  * @model
  * @generated
  */

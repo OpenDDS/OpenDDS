@@ -37,7 +37,7 @@ public class OBooleanImpl extends SimpleImpl implements OBoolean {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.OBOOLEAN;
+        return OpenDDSPackage.Literals.OBOOLEAN;
     }
 
 } //OBooleanImpl

@@ -23,7 +23,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getResourceLimitsQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getResourceLimitsQosPolicy()
  * @model
  * @generated
  */
@@ -38,7 +38,7 @@ public interface ResourceLimitsQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Max instances</em>' attribute.
      * @see #setMax_instances(long)
-     * @see OpenDDS.ModelPackage#getResourceLimitsQosPolicy_Max_instances()
+     * @see OpenDDS.OpenDDSPackage#getResourceLimitsQosPolicy_Max_instances()
      * @model
      * @generated
      */
@@ -64,7 +64,7 @@ public interface ResourceLimitsQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Max samples</em>' attribute.
      * @see #setMax_samples(long)
-     * @see OpenDDS.ModelPackage#getResourceLimitsQosPolicy_Max_samples()
+     * @see OpenDDS.OpenDDSPackage#getResourceLimitsQosPolicy_Max_samples()
      * @model
      * @generated
      */
@@ -90,7 +90,7 @@ public interface ResourceLimitsQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Max samples per instance</em>' attribute.
      * @see #setMax_samples_per_instance(long)
-     * @see OpenDDS.ModelPackage#getResourceLimitsQosPolicy_Max_samples_per_instance()
+     * @see OpenDDS.OpenDDSPackage#getResourceLimitsQosPolicy_Max_samples_per_instance()
      * @model
      * @generated
      */

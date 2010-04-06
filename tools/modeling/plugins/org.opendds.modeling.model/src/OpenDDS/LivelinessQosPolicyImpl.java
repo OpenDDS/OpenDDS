@@ -76,7 +76,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.LIVELINESS_QOS_POLICY;
+        return OpenDDSPackage.Literals.LIVELINESS_QOS_POLICY;
     }
 
     /**
@@ -96,10 +96,9 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     public void setKind(LivelinessQosPolicyKind newKind) {
         LivelinessQosPolicyKind oldKind = kind;
         kind = newKind == null ? KIND_EDEFAULT : newKind;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.LIVELINESS_QOS_POLICY__KIND, oldKind,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.LIVELINESS_QOS_POLICY__KIND, oldKind,
                     kind));
-        }
     }
 
     /**
@@ -121,12 +120,11 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
         lease_duration = newLease_duration;
         if (eNotificationRequired()) {
             ENotificationImpl notification = new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION, oldLease_duration, newLease_duration);
-            if (msgs == null) {
+                    OpenDDSPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION, oldLease_duration, newLease_duration);
+            if (msgs == null)
                 msgs = notification;
-            } else {
+            else
                 msgs.add(notification);
-            }
         }
         return msgs;
     }
@@ -139,22 +137,18 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     public void setLease_duration(Period newLease_duration) {
         if (newLease_duration != lease_duration) {
             NotificationChain msgs = null;
-            if (lease_duration != null) {
+            if (lease_duration != null)
                 msgs = ((InternalEObject) lease_duration).eInverseRemove(this, EOPPOSITE_FEATURE_BASE
-                        - ModelPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION, null, msgs);
-            }
-            if (newLease_duration != null) {
+                        - OpenDDSPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION, null, msgs);
+            if (newLease_duration != null)
                 msgs = ((InternalEObject) newLease_duration).eInverseAdd(this, EOPPOSITE_FEATURE_BASE
-                        - ModelPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION, null, msgs);
-            }
+                        - OpenDDSPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION, null, msgs);
             msgs = basicSetLease_duration(newLease_duration, msgs);
-            if (msgs != null) {
+            if (msgs != null)
                 msgs.dispatch();
-            }
-        } else if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION,
+        } else if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION,
                     newLease_duration, newLease_duration));
-        }
     }
 
     /**
@@ -165,7 +159,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     @Override
     public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
         switch (featureID) {
-            case ModelPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION:
+            case OpenDDSPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION:
                 return basicSetLease_duration(null, msgs);
         }
         return super.eInverseRemove(otherEnd, featureID, msgs);
@@ -179,9 +173,9 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.LIVELINESS_QOS_POLICY__KIND:
+            case OpenDDSPackage.LIVELINESS_QOS_POLICY__KIND:
                 return getKind();
-            case ModelPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION:
+            case OpenDDSPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION:
                 return getLease_duration();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -195,10 +189,10 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.LIVELINESS_QOS_POLICY__KIND:
+            case OpenDDSPackage.LIVELINESS_QOS_POLICY__KIND:
                 setKind((LivelinessQosPolicyKind) newValue);
                 return;
-            case ModelPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION:
+            case OpenDDSPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION:
                 setLease_duration((Period) newValue);
                 return;
         }
@@ -213,10 +207,10 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.LIVELINESS_QOS_POLICY__KIND:
+            case OpenDDSPackage.LIVELINESS_QOS_POLICY__KIND:
                 setKind(KIND_EDEFAULT);
                 return;
-            case ModelPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION:
+            case OpenDDSPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION:
                 setLease_duration((Period) null);
                 return;
         }
@@ -231,9 +225,9 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.LIVELINESS_QOS_POLICY__KIND:
+            case OpenDDSPackage.LIVELINESS_QOS_POLICY__KIND:
                 return kind != KIND_EDEFAULT;
-            case ModelPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION:
+            case OpenDDSPackage.LIVELINESS_QOS_POLICY__LEASE_DURATION:
                 return lease_duration != null;
         }
         return super.eIsSet(featureID);
@@ -246,9 +240,8 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (kind: ");

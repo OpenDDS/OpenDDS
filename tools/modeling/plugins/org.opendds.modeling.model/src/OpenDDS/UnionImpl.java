@@ -65,7 +65,7 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.UNION;
+        return OpenDDSPackage.Literals.UNION;
     }
 
     /**
@@ -78,10 +78,9 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
             InternalEObject oldSwitch = (InternalEObject) switch_;
             switch_ = (TopicField) eResolveProxy(oldSwitch);
             if (switch_ != oldSwitch) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.UNION__SWITCH, oldSwitch,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.UNION__SWITCH, oldSwitch,
                             switch_));
-                }
             }
         }
         return switch_;
@@ -104,9 +103,8 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     public void setSwitch(TopicField newSwitch) {
         TopicField oldSwitch = switch_;
         switch_ = newSwitch;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.UNION__SWITCH, oldSwitch, switch_));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.UNION__SWITCH, oldSwitch, switch_));
     }
 
     /**
@@ -119,10 +117,9 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
             InternalEObject oldCases = (InternalEObject) cases;
             cases = (Case) eResolveProxy(oldCases);
             if (cases != oldCases) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.UNION__CASES, oldCases,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.UNION__CASES, oldCases,
                             cases));
-                }
             }
         }
         return cases;
@@ -145,9 +142,8 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     public void setCases(Case newCases) {
         Case oldCases = cases;
         cases = newCases;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.UNION__CASES, oldCases, cases));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.UNION__CASES, oldCases, cases));
     }
 
     /**
@@ -158,15 +154,13 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.UNION__SWITCH:
-                if (resolve) {
+            case OpenDDSPackage.UNION__SWITCH:
+                if (resolve)
                     return getSwitch();
-                }
                 return basicGetSwitch();
-            case ModelPackage.UNION__CASES:
-                if (resolve) {
+            case OpenDDSPackage.UNION__CASES:
+                if (resolve)
                     return getCases();
-                }
                 return basicGetCases();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -180,10 +174,10 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.UNION__SWITCH:
+            case OpenDDSPackage.UNION__SWITCH:
                 setSwitch((TopicField) newValue);
                 return;
-            case ModelPackage.UNION__CASES:
+            case OpenDDSPackage.UNION__CASES:
                 setCases((Case) newValue);
                 return;
         }
@@ -198,10 +192,10 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.UNION__SWITCH:
+            case OpenDDSPackage.UNION__SWITCH:
                 setSwitch((TopicField) null);
                 return;
-            case ModelPackage.UNION__CASES:
+            case OpenDDSPackage.UNION__CASES:
                 setCases((Case) null);
                 return;
         }
@@ -216,9 +210,9 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.UNION__SWITCH:
+            case OpenDDSPackage.UNION__SWITCH:
                 return switch_ != null;
-            case ModelPackage.UNION__CASES:
+            case OpenDDSPackage.UNION__CASES:
                 return cases != null;
         }
         return super.eIsSet(featureID);

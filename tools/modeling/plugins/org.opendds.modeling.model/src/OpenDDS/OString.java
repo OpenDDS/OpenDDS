@@ -15,7 +15,7 @@ package OpenDDS;
  * <!-- end-user-doc -->
  *
  *
- * @see OpenDDS.ModelPackage#getOString()
+ * @see OpenDDS.OpenDDSPackage#getOString()
  * @model
  * @generated
  */

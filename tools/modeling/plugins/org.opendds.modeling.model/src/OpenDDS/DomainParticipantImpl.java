@@ -104,7 +104,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.DOMAIN_PARTICIPANT;
+        return OpenDDSPackage.Literals.DOMAIN_PARTICIPANT;
     }
 
     /**
@@ -115,7 +115,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     public EList<Subscriber> getSubscribers() {
         if (subscribers == null) {
             subscribers = new EObjectContainmentEList<Subscriber>(Subscriber.class, this,
-                    ModelPackage.DOMAIN_PARTICIPANT__SUBSCRIBERS);
+                    OpenDDSPackage.DOMAIN_PARTICIPANT__SUBSCRIBERS);
         }
         return subscribers;
     }
@@ -128,7 +128,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     public EList<Publisher> getPublishers() {
         if (publishers == null) {
             publishers = new EObjectContainmentEList<Publisher>(Publisher.class, this,
-                    ModelPackage.DOMAIN_PARTICIPANT__PUBLISHERS);
+                    OpenDDSPackage.DOMAIN_PARTICIPANT__PUBLISHERS);
         }
         return publishers;
     }
@@ -143,10 +143,9 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
             InternalEObject oldEntity_factory = (InternalEObject) entity_factory;
             entity_factory = (EntityFactoryQosPolicy) eResolveProxy(oldEntity_factory);
             if (entity_factory != oldEntity_factory) {
-                if (eNotificationRequired()) {
+                if (eNotificationRequired())
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE,
-                            ModelPackage.DOMAIN_PARTICIPANT__ENTITY_FACTORY, oldEntity_factory, entity_factory));
-                }
+                            OpenDDSPackage.DOMAIN_PARTICIPANT__ENTITY_FACTORY, oldEntity_factory, entity_factory));
             }
         }
         return entity_factory;
@@ -169,10 +168,9 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     public void setEntity_factory(EntityFactoryQosPolicy newEntity_factory) {
         EntityFactoryQosPolicy oldEntity_factory = entity_factory;
         entity_factory = newEntity_factory;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.DOMAIN_PARTICIPANT__ENTITY_FACTORY,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.DOMAIN_PARTICIPANT__ENTITY_FACTORY,
                     oldEntity_factory, entity_factory));
-        }
     }
 
     /**
@@ -185,10 +183,9 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
             InternalEObject oldUser_data = (InternalEObject) user_data;
             user_data = (UserDataQosPolicy) eResolveProxy(oldUser_data);
             if (user_data != oldUser_data) {
-                if (eNotificationRequired()) {
+                if (eNotificationRequired())
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE,
-                            ModelPackage.DOMAIN_PARTICIPANT__USER_DATA, oldUser_data, user_data));
-                }
+                            OpenDDSPackage.DOMAIN_PARTICIPANT__USER_DATA, oldUser_data, user_data));
             }
         }
         return user_data;
@@ -211,10 +208,9 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     public void setUser_data(UserDataQosPolicy newUser_data) {
         UserDataQosPolicy oldUser_data = user_data;
         user_data = newUser_data;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.DOMAIN_PARTICIPANT__USER_DATA,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.DOMAIN_PARTICIPANT__USER_DATA,
                     oldUser_data, user_data));
-        }
     }
 
     /**
@@ -227,10 +223,9 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
             InternalEObject oldDomain = (InternalEObject) domain;
             domain = (Domain) eResolveProxy(oldDomain);
             if (domain != oldDomain) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.DOMAIN_PARTICIPANT__DOMAIN,
-                            oldDomain, domain));
-                }
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE,
+                            OpenDDSPackage.DOMAIN_PARTICIPANT__DOMAIN, oldDomain, domain));
             }
         }
         return domain;
@@ -253,10 +248,9 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     public void setDomain(Domain newDomain) {
         Domain oldDomain = domain;
         domain = newDomain;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.DOMAIN_PARTICIPANT__DOMAIN, oldDomain,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.DOMAIN_PARTICIPANT__DOMAIN, oldDomain,
                     domain));
-        }
     }
 
     /**
@@ -267,9 +261,9 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     @Override
     public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
         switch (featureID) {
-            case ModelPackage.DOMAIN_PARTICIPANT__SUBSCRIBERS:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__SUBSCRIBERS:
                 return ((InternalEList<?>) getSubscribers()).basicRemove(otherEnd, msgs);
-            case ModelPackage.DOMAIN_PARTICIPANT__PUBLISHERS:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__PUBLISHERS:
                 return ((InternalEList<?>) getPublishers()).basicRemove(otherEnd, msgs);
         }
         return super.eInverseRemove(otherEnd, featureID, msgs);
@@ -283,24 +277,21 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.DOMAIN_PARTICIPANT__SUBSCRIBERS:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__SUBSCRIBERS:
                 return getSubscribers();
-            case ModelPackage.DOMAIN_PARTICIPANT__PUBLISHERS:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__PUBLISHERS:
                 return getPublishers();
-            case ModelPackage.DOMAIN_PARTICIPANT__ENTITY_FACTORY:
-                if (resolve) {
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__ENTITY_FACTORY:
+                if (resolve)
                     return getEntity_factory();
-                }
                 return basicGetEntity_factory();
-            case ModelPackage.DOMAIN_PARTICIPANT__USER_DATA:
-                if (resolve) {
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__USER_DATA:
+                if (resolve)
                     return getUser_data();
-                }
                 return basicGetUser_data();
-            case ModelPackage.DOMAIN_PARTICIPANT__DOMAIN:
-                if (resolve) {
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__DOMAIN:
+                if (resolve)
                     return getDomain();
-                }
                 return basicGetDomain();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -315,21 +306,21 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.DOMAIN_PARTICIPANT__SUBSCRIBERS:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__SUBSCRIBERS:
                 getSubscribers().clear();
                 getSubscribers().addAll((Collection<? extends Subscriber>) newValue);
                 return;
-            case ModelPackage.DOMAIN_PARTICIPANT__PUBLISHERS:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__PUBLISHERS:
                 getPublishers().clear();
                 getPublishers().addAll((Collection<? extends Publisher>) newValue);
                 return;
-            case ModelPackage.DOMAIN_PARTICIPANT__ENTITY_FACTORY:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__ENTITY_FACTORY:
                 setEntity_factory((EntityFactoryQosPolicy) newValue);
                 return;
-            case ModelPackage.DOMAIN_PARTICIPANT__USER_DATA:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__USER_DATA:
                 setUser_data((UserDataQosPolicy) newValue);
                 return;
-            case ModelPackage.DOMAIN_PARTICIPANT__DOMAIN:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__DOMAIN:
                 setDomain((Domain) newValue);
                 return;
         }
@@ -344,19 +335,19 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.DOMAIN_PARTICIPANT__SUBSCRIBERS:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__SUBSCRIBERS:
                 getSubscribers().clear();
                 return;
-            case ModelPackage.DOMAIN_PARTICIPANT__PUBLISHERS:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__PUBLISHERS:
                 getPublishers().clear();
                 return;
-            case ModelPackage.DOMAIN_PARTICIPANT__ENTITY_FACTORY:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__ENTITY_FACTORY:
                 setEntity_factory((EntityFactoryQosPolicy) null);
                 return;
-            case ModelPackage.DOMAIN_PARTICIPANT__USER_DATA:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__USER_DATA:
                 setUser_data((UserDataQosPolicy) null);
                 return;
-            case ModelPackage.DOMAIN_PARTICIPANT__DOMAIN:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__DOMAIN:
                 setDomain((Domain) null);
                 return;
         }
@@ -371,15 +362,15 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.DOMAIN_PARTICIPANT__SUBSCRIBERS:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__SUBSCRIBERS:
                 return subscribers != null && !subscribers.isEmpty();
-            case ModelPackage.DOMAIN_PARTICIPANT__PUBLISHERS:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__PUBLISHERS:
                 return publishers != null && !publishers.isEmpty();
-            case ModelPackage.DOMAIN_PARTICIPANT__ENTITY_FACTORY:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__ENTITY_FACTORY:
                 return entity_factory != null;
-            case ModelPackage.DOMAIN_PARTICIPANT__USER_DATA:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__USER_DATA:
                 return user_data != null;
-            case ModelPackage.DOMAIN_PARTICIPANT__DOMAIN:
+            case OpenDDSPackage.DOMAIN_PARTICIPANT__DOMAIN:
                 return domain != null;
         }
         return super.eIsSet(featureID);

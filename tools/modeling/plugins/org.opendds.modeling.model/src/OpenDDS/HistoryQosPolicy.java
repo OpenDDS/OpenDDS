@@ -22,7 +22,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getHistoryQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getHistoryQosPolicy()
  * @model
  * @generated
  */
@@ -37,7 +37,7 @@ public interface HistoryQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Depth</em>' attribute.
      * @see #setDepth(long)
-     * @see OpenDDS.ModelPackage#getHistoryQosPolicy_Depth()
+     * @see OpenDDS.OpenDDSPackage#getHistoryQosPolicy_Depth()
      * @model
      * @generated
      */
@@ -65,7 +65,7 @@ public interface HistoryQosPolicy extends QosPolicy {
      * @return the value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.HistoryQosPolicyKind
      * @see #setKind(HistoryQosPolicyKind)
-     * @see OpenDDS.ModelPackage#getHistoryQosPolicy_Kind()
+     * @see OpenDDS.OpenDDSPackage#getHistoryQosPolicy_Kind()
      * @model
      * @generated
      */

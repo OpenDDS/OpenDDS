@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getReaderDataLifecycleQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getReaderDataLifecycleQosPolicy()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface ReaderDataLifecycleQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Autopurge nowriter samples delay</em>' containment reference.
      * @see #setAutopurge_nowriter_samples_delay(Period)
-     * @see OpenDDS.ModelPackage#getReaderDataLifecycleQosPolicy_Autopurge_nowriter_samples_delay()
+     * @see OpenDDS.OpenDDSPackage#getReaderDataLifecycleQosPolicy_Autopurge_nowriter_samples_delay()
      * @model containment="true"
      * @generated
      */

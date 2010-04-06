@@ -105,7 +105,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.PRESENTATION_QOS_POLICY;
+        return OpenDDSPackage.Literals.PRESENTATION_QOS_POLICY;
     }
 
     /**
@@ -125,10 +125,9 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     public void setAccess_scope(PresentationQosPolicyAccessScopeKind newAccess_scope) {
         PresentationQosPolicyAccessScopeKind oldAccess_scope = access_scope;
         access_scope = newAccess_scope == null ? ACCESS_SCOPE_EDEFAULT : newAccess_scope;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.PRESENTATION_QOS_POLICY__ACCESS_SCOPE,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.PRESENTATION_QOS_POLICY__ACCESS_SCOPE,
                     oldAccess_scope, access_scope));
-        }
     }
 
     /**
@@ -148,10 +147,9 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     public void setCoherent_access(boolean newCoherent_access) {
         boolean oldCoherent_access = coherent_access;
         coherent_access = newCoherent_access;
-        if (eNotificationRequired()) {
+        if (eNotificationRequired())
             eNotify(new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.PRESENTATION_QOS_POLICY__COHERENT_ACCESS, oldCoherent_access, coherent_access));
-        }
+                    OpenDDSPackage.PRESENTATION_QOS_POLICY__COHERENT_ACCESS, oldCoherent_access, coherent_access));
     }
 
     /**
@@ -171,10 +169,9 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     public void setOrdered_access(boolean newOrdered_access) {
         boolean oldOrdered_access = ordered_access;
         ordered_access = newOrdered_access;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.PRESENTATION_QOS_POLICY__ORDERED_ACCESS,
-                    oldOrdered_access, ordered_access));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET,
+                    OpenDDSPackage.PRESENTATION_QOS_POLICY__ORDERED_ACCESS, oldOrdered_access, ordered_access));
     }
 
     /**
@@ -185,11 +182,11 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.PRESENTATION_QOS_POLICY__ACCESS_SCOPE:
+            case OpenDDSPackage.PRESENTATION_QOS_POLICY__ACCESS_SCOPE:
                 return getAccess_scope();
-            case ModelPackage.PRESENTATION_QOS_POLICY__COHERENT_ACCESS:
+            case OpenDDSPackage.PRESENTATION_QOS_POLICY__COHERENT_ACCESS:
                 return isCoherent_access();
-            case ModelPackage.PRESENTATION_QOS_POLICY__ORDERED_ACCESS:
+            case OpenDDSPackage.PRESENTATION_QOS_POLICY__ORDERED_ACCESS:
                 return isOrdered_access();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -203,13 +200,13 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.PRESENTATION_QOS_POLICY__ACCESS_SCOPE:
+            case OpenDDSPackage.PRESENTATION_QOS_POLICY__ACCESS_SCOPE:
                 setAccess_scope((PresentationQosPolicyAccessScopeKind) newValue);
                 return;
-            case ModelPackage.PRESENTATION_QOS_POLICY__COHERENT_ACCESS:
+            case OpenDDSPackage.PRESENTATION_QOS_POLICY__COHERENT_ACCESS:
                 setCoherent_access((Boolean) newValue);
                 return;
-            case ModelPackage.PRESENTATION_QOS_POLICY__ORDERED_ACCESS:
+            case OpenDDSPackage.PRESENTATION_QOS_POLICY__ORDERED_ACCESS:
                 setOrdered_access((Boolean) newValue);
                 return;
         }
@@ -224,13 +221,13 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.PRESENTATION_QOS_POLICY__ACCESS_SCOPE:
+            case OpenDDSPackage.PRESENTATION_QOS_POLICY__ACCESS_SCOPE:
                 setAccess_scope(ACCESS_SCOPE_EDEFAULT);
                 return;
-            case ModelPackage.PRESENTATION_QOS_POLICY__COHERENT_ACCESS:
+            case OpenDDSPackage.PRESENTATION_QOS_POLICY__COHERENT_ACCESS:
                 setCoherent_access(COHERENT_ACCESS_EDEFAULT);
                 return;
-            case ModelPackage.PRESENTATION_QOS_POLICY__ORDERED_ACCESS:
+            case OpenDDSPackage.PRESENTATION_QOS_POLICY__ORDERED_ACCESS:
                 setOrdered_access(ORDERED_ACCESS_EDEFAULT);
                 return;
         }
@@ -245,11 +242,11 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.PRESENTATION_QOS_POLICY__ACCESS_SCOPE:
+            case OpenDDSPackage.PRESENTATION_QOS_POLICY__ACCESS_SCOPE:
                 return access_scope != ACCESS_SCOPE_EDEFAULT;
-            case ModelPackage.PRESENTATION_QOS_POLICY__COHERENT_ACCESS:
+            case OpenDDSPackage.PRESENTATION_QOS_POLICY__COHERENT_ACCESS:
                 return coherent_access != COHERENT_ACCESS_EDEFAULT;
-            case ModelPackage.PRESENTATION_QOS_POLICY__ORDERED_ACCESS:
+            case OpenDDSPackage.PRESENTATION_QOS_POLICY__ORDERED_ACCESS:
                 return ordered_access != ORDERED_ACCESS_EDEFAULT;
         }
         return super.eIsSet(featureID);
@@ -262,9 +259,8 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (access_scope: ");

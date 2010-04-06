@@ -63,7 +63,7 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.ENUM;
+        return OpenDDSPackage.Literals.ENUM;
     }
 
     /**
@@ -83,9 +83,8 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     public void setLabels(String newLabels) {
         String oldLabels = labels;
         labels = newLabels;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.ENUM__LABELS, oldLabels, labels));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.ENUM__LABELS, oldLabels, labels));
     }
 
     /**
@@ -96,7 +95,7 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.ENUM__LABELS:
+            case OpenDDSPackage.ENUM__LABELS:
                 return getLabels();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -110,7 +109,7 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.ENUM__LABELS:
+            case OpenDDSPackage.ENUM__LABELS:
                 setLabels((String) newValue);
                 return;
         }
@@ -125,7 +124,7 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.ENUM__LABELS:
+            case OpenDDSPackage.ENUM__LABELS:
                 setLabels(LABELS_EDEFAULT);
                 return;
         }
@@ -140,7 +139,7 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.ENUM__LABELS:
+            case OpenDDSPackage.ENUM__LABELS:
                 return LABELS_EDEFAULT == null ? labels != null : !LABELS_EDEFAULT.equals(labels);
         }
         return super.eIsSet(featureID);
@@ -153,9 +152,8 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (labels: ");

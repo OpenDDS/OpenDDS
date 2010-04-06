@@ -15,7 +15,7 @@ package OpenDDS;
  * <!-- end-user-doc -->
  *
  *
- * @see OpenDDS.ModelPackage#getOOctet()
+ * @see OpenDDS.OpenDDSPackage#getOOctet()
  * @model
  * @generated
  */

@@ -10,24 +10,26 @@
 package OpenDDS;
 
 import org.eclipse.emf.common.util.URI;
+
 import org.eclipse.emf.ecore.resource.Resource;
+
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl;
 
 /**
  * <!-- begin-user-doc -->
  * The <b>Resource Factory</b> associated with the package.
  * <!-- end-user-doc -->
- * @see OpenDDS.ModelResourceImpl
+ * @see OpenDDS.OpenDDSResourceImpl
  * @generated
  */
-public class ModelResourceFactoryImpl extends ResourceFactoryImpl {
+public class OpenDDSResourceFactoryImpl extends ResourceFactoryImpl {
     /**
      * Creates an instance of the resource factory.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
      */
-    public ModelResourceFactoryImpl() {
+    public OpenDDSResourceFactoryImpl() {
         super();
     }
 
@@ -39,8 +41,8 @@ public class ModelResourceFactoryImpl extends ResourceFactoryImpl {
      */
     @Override
     public Resource createResource(URI uri) {
-        Resource result = new ModelResourceImpl(uri);
+        Resource result = new OpenDDSResourceImpl(uri);
         return result;
     }
 
-} //ModelResourceFactoryImpl
+} //OpenDDSResourceFactoryImpl

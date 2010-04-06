@@ -25,7 +25,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getPublisherSubscriber()
+ * @see OpenDDS.OpenDDSPackage#getPublisherSubscriber()
  * @model abstract="true"
  * @generated
  */
@@ -40,7 +40,7 @@ public interface PublisherSubscriber extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Entity factory</em>' reference.
      * @see #setEntity_factory(EntityFactoryQosPolicy)
-     * @see OpenDDS.ModelPackage#getPublisherSubscriber_Entity_factory()
+     * @see OpenDDS.OpenDDSPackage#getPublisherSubscriber_Entity_factory()
      * @model
      * @generated
      */
@@ -66,7 +66,7 @@ public interface PublisherSubscriber extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Presentation</em>' reference.
      * @see #setPresentation(PresentationQosPolicy)
-     * @see OpenDDS.ModelPackage#getPublisherSubscriber_Presentation()
+     * @see OpenDDS.OpenDDSPackage#getPublisherSubscriber_Presentation()
      * @model
      * @generated
      */
@@ -92,7 +92,7 @@ public interface PublisherSubscriber extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Group data</em>' reference.
      * @see #setGroup_data(GroupDataQosPolicy)
-     * @see OpenDDS.ModelPackage#getPublisherSubscriber_Group_data()
+     * @see OpenDDS.OpenDDSPackage#getPublisherSubscriber_Group_data()
      * @model
      * @generated
      */
@@ -118,7 +118,7 @@ public interface PublisherSubscriber extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Partition</em>' reference.
      * @see #setPartition(PartitionQosPolicy)
-     * @see OpenDDS.ModelPackage#getPublisherSubscriber_Partition()
+     * @see OpenDDS.OpenDDSPackage#getPublisherSubscriber_Partition()
      * @model
      * @generated
      */
@@ -144,7 +144,7 @@ public interface PublisherSubscriber extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Transport</em>' reference.
      * @see #setTransport(Transport)
-     * @see OpenDDS.ModelPackage#getPublisherSubscriber_Transport()
+     * @see OpenDDS.OpenDDSPackage#getPublisherSubscriber_Transport()
      * @model required="true"
      * @generated
      */

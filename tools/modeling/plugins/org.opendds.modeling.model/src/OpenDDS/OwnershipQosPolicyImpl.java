@@ -63,7 +63,7 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.OWNERSHIP_QOS_POLICY;
+        return OpenDDSPackage.Literals.OWNERSHIP_QOS_POLICY;
     }
 
     /**
@@ -83,10 +83,9 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
     public void setKind(OwnershipQosPolicyKind newKind) {
         OwnershipQosPolicyKind oldKind = kind;
         kind = newKind == null ? KIND_EDEFAULT : newKind;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.OWNERSHIP_QOS_POLICY__KIND, oldKind,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.OWNERSHIP_QOS_POLICY__KIND, oldKind,
                     kind));
-        }
     }
 
     /**
@@ -97,7 +96,7 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.OWNERSHIP_QOS_POLICY__KIND:
+            case OpenDDSPackage.OWNERSHIP_QOS_POLICY__KIND:
                 return getKind();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -111,7 +110,7 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.OWNERSHIP_QOS_POLICY__KIND:
+            case OpenDDSPackage.OWNERSHIP_QOS_POLICY__KIND:
                 setKind((OwnershipQosPolicyKind) newValue);
                 return;
         }
@@ -126,7 +125,7 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.OWNERSHIP_QOS_POLICY__KIND:
+            case OpenDDSPackage.OWNERSHIP_QOS_POLICY__KIND:
                 setKind(KIND_EDEFAULT);
                 return;
         }
@@ -141,7 +140,7 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.OWNERSHIP_QOS_POLICY__KIND:
+            case OpenDDSPackage.OWNERSHIP_QOS_POLICY__KIND:
                 return kind != KIND_EDEFAULT;
         }
         return super.eIsSet(featureID);
@@ -154,9 +153,8 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (kind: ");

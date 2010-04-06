@@ -55,7 +55,7 @@ public class KeyImpl extends EObjectImpl implements Key {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.KEY;
+        return OpenDDSPackage.Literals.KEY;
     }
 
     /**
@@ -68,10 +68,9 @@ public class KeyImpl extends EObjectImpl implements Key {
             InternalEObject oldMember = (InternalEObject) member;
             member = (KeyField) eResolveProxy(oldMember);
             if (member != oldMember) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, ModelPackage.KEY__MEMBER, oldMember,
+                if (eNotificationRequired())
+                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.KEY__MEMBER, oldMember,
                             member));
-                }
             }
         }
         return member;
@@ -94,9 +93,8 @@ public class KeyImpl extends EObjectImpl implements Key {
     public void setMember(KeyField newMember) {
         KeyField oldMember = member;
         member = newMember;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.KEY__MEMBER, oldMember, member));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.KEY__MEMBER, oldMember, member));
     }
 
     /**
@@ -107,10 +105,9 @@ public class KeyImpl extends EObjectImpl implements Key {
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.KEY__MEMBER:
-                if (resolve) {
+            case OpenDDSPackage.KEY__MEMBER:
+                if (resolve)
                     return getMember();
-                }
                 return basicGetMember();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -124,7 +121,7 @@ public class KeyImpl extends EObjectImpl implements Key {
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.KEY__MEMBER:
+            case OpenDDSPackage.KEY__MEMBER:
                 setMember((KeyField) newValue);
                 return;
         }
@@ -139,7 +136,7 @@ public class KeyImpl extends EObjectImpl implements Key {
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.KEY__MEMBER:
+            case OpenDDSPackage.KEY__MEMBER:
                 setMember((KeyField) null);
                 return;
         }
@@ -154,7 +151,7 @@ public class KeyImpl extends EObjectImpl implements Key {
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.KEY__MEMBER:
+            case OpenDDSPackage.KEY__MEMBER:
                 return member != null;
         }
         return super.eIsSet(featureID);

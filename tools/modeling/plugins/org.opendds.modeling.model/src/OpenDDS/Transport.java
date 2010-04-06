@@ -23,7 +23,7 @@ import org.eclipse.emf.ecore.EObject;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getTransport()
+ * @see OpenDDS.OpenDDSPackage#getTransport()
  * @model
  * @generated
  */
@@ -38,7 +38,7 @@ public interface Transport extends EObject {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Transport id</em>' attribute.
      * @see #setTransport_id(long)
-     * @see OpenDDS.ModelPackage#getTransport_Transport_id()
+     * @see OpenDDS.OpenDDSPackage#getTransport_Transport_id()
      * @model required="true"
      * @generated
      */

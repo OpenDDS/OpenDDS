@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getDestinationOrderQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getDestinationOrderQosPolicy()
  * @model
  * @generated
  */
@@ -38,7 +38,7 @@ public interface DestinationOrderQosPolicy extends QosPolicy {
      * @return the value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.DestinationOrderQosPolicyKind
      * @see #setKind(DestinationOrderQosPolicyKind)
-     * @see OpenDDS.ModelPackage#getDestinationOrderQosPolicy_Kind()
+     * @see OpenDDS.OpenDDSPackage#getDestinationOrderQosPolicy_Kind()
      * @model
      * @generated
      */

@@ -11,7 +11,9 @@ package OpenDDS;
 
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notifier;
+
 import org.eclipse.emf.common.notify.impl.AdapterFactoryImpl;
+
 import org.eclipse.emf.ecore.EObject;
 
 /**
@@ -19,17 +21,17 @@ import org.eclipse.emf.ecore.EObject;
  * The <b>Adapter Factory</b> for the model.
  * It provides an adapter <code>createXXX</code> method for each class of the model.
  * <!-- end-user-doc -->
- * @see OpenDDS.ModelPackage
+ * @see OpenDDS.OpenDDSPackage
  * @generated
  */
-public class ModelAdapterFactory extends AdapterFactoryImpl {
+public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     /**
      * The cached model package.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
      */
-    protected static ModelPackage modelPackage;
+    protected static OpenDDSPackage modelPackage;
 
     /**
      * Creates an instance of the adapter factory.
@@ -37,9 +39,9 @@ public class ModelAdapterFactory extends AdapterFactoryImpl {
      * <!-- end-user-doc -->
      * @generated
      */
-    public ModelAdapterFactory() {
+    public OpenDDSAdapterFactory() {
         if (modelPackage == null) {
-            modelPackage = ModelPackage.eINSTANCE;
+            modelPackage = OpenDDSPackage.eINSTANCE;
         }
     }
 
@@ -68,7 +70,7 @@ public class ModelAdapterFactory extends AdapterFactoryImpl {
      * <!-- end-user-doc -->
      * @generated
      */
-    protected ModelSwitch<Adapter> modelSwitch = new ModelSwitch<Adapter>() {
+    protected OpenDDSSwitch<Adapter> modelSwitch = new OpenDDSSwitch<Adapter>() {
         @Override
         public Adapter caseEntity(Entity object) {
             return createEntityAdapter();
@@ -1373,4 +1375,4 @@ public class ModelAdapterFactory extends AdapterFactoryImpl {
         return null;
     }
 
-} //ModelAdapterFactory
+} //OpenDDSAdapterFactory

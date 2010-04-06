@@ -27,7 +27,7 @@ import org.eclipse.emf.common.util.EList;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getDomainParticipant()
+ * @see OpenDDS.OpenDDSPackage#getDomainParticipant()
  * @model
  * @generated
  */
@@ -42,7 +42,7 @@ public interface DomainParticipant extends DomainEntity {
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Subscribers</em>' containment reference list.
-     * @see OpenDDS.ModelPackage#getDomainParticipant_Subscribers()
+     * @see OpenDDS.OpenDDSPackage#getDomainParticipant_Subscribers()
      * @model containment="true"
      * @generated
      */
@@ -58,7 +58,7 @@ public interface DomainParticipant extends DomainEntity {
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Publishers</em>' containment reference list.
-     * @see OpenDDS.ModelPackage#getDomainParticipant_Publishers()
+     * @see OpenDDS.OpenDDSPackage#getDomainParticipant_Publishers()
      * @model containment="true"
      * @generated
      */
@@ -74,7 +74,7 @@ public interface DomainParticipant extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Entity factory</em>' reference.
      * @see #setEntity_factory(EntityFactoryQosPolicy)
-     * @see OpenDDS.ModelPackage#getDomainParticipant_Entity_factory()
+     * @see OpenDDS.OpenDDSPackage#getDomainParticipant_Entity_factory()
      * @model
      * @generated
      */
@@ -100,7 +100,7 @@ public interface DomainParticipant extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>User data</em>' reference.
      * @see #setUser_data(UserDataQosPolicy)
-     * @see OpenDDS.ModelPackage#getDomainParticipant_User_data()
+     * @see OpenDDS.OpenDDSPackage#getDomainParticipant_User_data()
      * @model
      * @generated
      */
@@ -126,7 +126,7 @@ public interface DomainParticipant extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Domain</em>' reference.
      * @see #setDomain(Domain)
-     * @see OpenDDS.ModelPackage#getDomainParticipant_Domain()
+     * @see OpenDDS.OpenDDSPackage#getDomainParticipant_Domain()
      * @model required="true"
      * @generated
      */

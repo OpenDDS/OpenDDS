@@ -63,7 +63,7 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.DURABILITY_QOS_POLICY;
+        return OpenDDSPackage.Literals.DURABILITY_QOS_POLICY;
     }
 
     /**
@@ -83,10 +83,9 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
     public void setKind(DurabilityQosPolicyKind newKind) {
         DurabilityQosPolicyKind oldKind = kind;
         kind = newKind == null ? KIND_EDEFAULT : newKind;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.DURABILITY_QOS_POLICY__KIND, oldKind,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.DURABILITY_QOS_POLICY__KIND, oldKind,
                     kind));
-        }
     }
 
     /**
@@ -97,7 +96,7 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.DURABILITY_QOS_POLICY__KIND:
+            case OpenDDSPackage.DURABILITY_QOS_POLICY__KIND:
                 return getKind();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -111,7 +110,7 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.DURABILITY_QOS_POLICY__KIND:
+            case OpenDDSPackage.DURABILITY_QOS_POLICY__KIND:
                 setKind((DurabilityQosPolicyKind) newValue);
                 return;
         }
@@ -126,7 +125,7 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.DURABILITY_QOS_POLICY__KIND:
+            case OpenDDSPackage.DURABILITY_QOS_POLICY__KIND:
                 setKind(KIND_EDEFAULT);
                 return;
         }
@@ -141,7 +140,7 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.DURABILITY_QOS_POLICY__KIND:
+            case OpenDDSPackage.DURABILITY_QOS_POLICY__KIND:
                 return kind != KIND_EDEFAULT;
         }
         return super.eIsSet(featureID);
@@ -154,9 +153,8 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (kind: ");

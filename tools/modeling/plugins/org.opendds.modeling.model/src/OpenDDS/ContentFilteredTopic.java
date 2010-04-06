@@ -21,7 +21,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getContentFilteredTopic()
+ * @see OpenDDS.OpenDDSPackage#getContentFilteredTopic()
  * @model
  * @generated
  */
@@ -36,7 +36,7 @@ public interface ContentFilteredTopic extends TopicDescription {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Filter expression</em>' attribute.
      * @see #setFilter_expression(String)
-     * @see OpenDDS.ModelPackage#getContentFilteredTopic_Filter_expression()
+     * @see OpenDDS.OpenDDSPackage#getContentFilteredTopic_Filter_expression()
      * @model
      * @generated
      */

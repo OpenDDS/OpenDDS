@@ -58,7 +58,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.SUBSCRIBER;
+        return OpenDDSPackage.Literals.SUBSCRIBER;
     }
 
     /**
@@ -68,7 +68,8 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
      */
     public EList<DataReader> getReaders() {
         if (readers == null) {
-            readers = new EObjectContainmentEList<DataReader>(DataReader.class, this, ModelPackage.SUBSCRIBER__READERS);
+            readers = new EObjectContainmentEList<DataReader>(DataReader.class, this,
+                    OpenDDSPackage.SUBSCRIBER__READERS);
         }
         return readers;
     }
@@ -81,7 +82,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
     @Override
     public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
         switch (featureID) {
-            case ModelPackage.SUBSCRIBER__READERS:
+            case OpenDDSPackage.SUBSCRIBER__READERS:
                 return ((InternalEList<?>) getReaders()).basicRemove(otherEnd, msgs);
         }
         return super.eInverseRemove(otherEnd, featureID, msgs);
@@ -95,7 +96,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.SUBSCRIBER__READERS:
+            case OpenDDSPackage.SUBSCRIBER__READERS:
                 return getReaders();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -110,7 +111,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.SUBSCRIBER__READERS:
+            case OpenDDSPackage.SUBSCRIBER__READERS:
                 getReaders().clear();
                 getReaders().addAll((Collection<? extends DataReader>) newValue);
                 return;
@@ -126,7 +127,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.SUBSCRIBER__READERS:
+            case OpenDDSPackage.SUBSCRIBER__READERS:
                 getReaders().clear();
                 return;
         }
@@ -141,7 +142,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.SUBSCRIBER__READERS:
+            case OpenDDSPackage.SUBSCRIBER__READERS:
                 return readers != null && !readers.isEmpty();
         }
         return super.eIsSet(featureID);

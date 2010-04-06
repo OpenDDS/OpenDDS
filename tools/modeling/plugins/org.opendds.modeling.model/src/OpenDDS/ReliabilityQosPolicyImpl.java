@@ -76,7 +76,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.RELIABILITY_QOS_POLICY;
+        return OpenDDSPackage.Literals.RELIABILITY_QOS_POLICY;
     }
 
     /**
@@ -96,10 +96,9 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     public void setKind(ReliabilityQosPolicyKind newKind) {
         ReliabilityQosPolicyKind oldKind = kind;
         kind = newKind == null ? KIND_EDEFAULT : newKind;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.RELIABILITY_QOS_POLICY__KIND, oldKind,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.RELIABILITY_QOS_POLICY__KIND, oldKind,
                     kind));
-        }
     }
 
     /**
@@ -121,12 +120,12 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
         max_blocking_time = newMax_blocking_time;
         if (eNotificationRequired()) {
             ENotificationImpl notification = new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME, oldMax_blocking_time, newMax_blocking_time);
-            if (msgs == null) {
+                    OpenDDSPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME, oldMax_blocking_time,
+                    newMax_blocking_time);
+            if (msgs == null)
                 msgs = notification;
-            } else {
+            else
                 msgs.add(notification);
-            }
         }
         return msgs;
     }
@@ -139,22 +138,19 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     public void setMax_blocking_time(Period newMax_blocking_time) {
         if (newMax_blocking_time != max_blocking_time) {
             NotificationChain msgs = null;
-            if (max_blocking_time != null) {
+            if (max_blocking_time != null)
                 msgs = ((InternalEObject) max_blocking_time).eInverseRemove(this, EOPPOSITE_FEATURE_BASE
-                        - ModelPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME, null, msgs);
-            }
-            if (newMax_blocking_time != null) {
+                        - OpenDDSPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME, null, msgs);
+            if (newMax_blocking_time != null)
                 msgs = ((InternalEObject) newMax_blocking_time).eInverseAdd(this, EOPPOSITE_FEATURE_BASE
-                        - ModelPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME, null, msgs);
-            }
+                        - OpenDDSPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME, null, msgs);
             msgs = basicSetMax_blocking_time(newMax_blocking_time, msgs);
-            if (msgs != null) {
+            if (msgs != null)
                 msgs.dispatch();
-            }
-        } else if (eNotificationRequired()) {
+        } else if (eNotificationRequired())
             eNotify(new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME, newMax_blocking_time, newMax_blocking_time));
-        }
+                    OpenDDSPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME, newMax_blocking_time,
+                    newMax_blocking_time));
     }
 
     /**
@@ -165,7 +161,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     @Override
     public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
         switch (featureID) {
-            case ModelPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME:
+            case OpenDDSPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME:
                 return basicSetMax_blocking_time(null, msgs);
         }
         return super.eInverseRemove(otherEnd, featureID, msgs);
@@ -179,9 +175,9 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.RELIABILITY_QOS_POLICY__KIND:
+            case OpenDDSPackage.RELIABILITY_QOS_POLICY__KIND:
                 return getKind();
-            case ModelPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME:
+            case OpenDDSPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME:
                 return getMax_blocking_time();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -195,10 +191,10 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.RELIABILITY_QOS_POLICY__KIND:
+            case OpenDDSPackage.RELIABILITY_QOS_POLICY__KIND:
                 setKind((ReliabilityQosPolicyKind) newValue);
                 return;
-            case ModelPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME:
+            case OpenDDSPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME:
                 setMax_blocking_time((Period) newValue);
                 return;
         }
@@ -213,10 +209,10 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.RELIABILITY_QOS_POLICY__KIND:
+            case OpenDDSPackage.RELIABILITY_QOS_POLICY__KIND:
                 setKind(KIND_EDEFAULT);
                 return;
-            case ModelPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME:
+            case OpenDDSPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME:
                 setMax_blocking_time((Period) null);
                 return;
         }
@@ -231,9 +227,9 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.RELIABILITY_QOS_POLICY__KIND:
+            case OpenDDSPackage.RELIABILITY_QOS_POLICY__KIND:
                 return kind != KIND_EDEFAULT;
-            case ModelPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME:
+            case OpenDDSPackage.RELIABILITY_QOS_POLICY__MAX_BLOCKING_TIME:
                 return max_blocking_time != null;
         }
         return super.eIsSet(featureID);
@@ -246,9 +242,8 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (kind: ");

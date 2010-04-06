@@ -6,6 +6,7 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
+
 package OpenDDS;
 
 import java.util.Collection;
@@ -27,119 +28,108 @@ import org.eclipse.emf.edit.provider.ITreeItemContentProvider;
  * <!-- end-user-doc -->
  * @generated
  */
-public class UnionItemProvider extends ConstructedTopicTypeItemProvider
-		implements IEditingDomainItemProvider, IStructuredItemContentProvider,
-		ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource {
-	/**
-	 * This constructs an instance from a factory and a notifier.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public UnionItemProvider(AdapterFactory adapterFactory) {
-		super(adapterFactory);
-	}
+public class UnionItemProvider extends ConstructedTopicTypeItemProvider implements IEditingDomainItemProvider,
+        IStructuredItemContentProvider, ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource {
+    /**
+     * This constructs an instance from a factory and a notifier.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    public UnionItemProvider(AdapterFactory adapterFactory) {
+        super(adapterFactory);
+    }
 
-	/**
-	 * This returns the property descriptors for the adapted class.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public List<IItemPropertyDescriptor> getPropertyDescriptors(Object object) {
-		if (itemPropertyDescriptors == null) {
-			super.getPropertyDescriptors(object);
+    /**
+     * This returns the property descriptors for the adapted class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    @Override
+    public List<IItemPropertyDescriptor> getPropertyDescriptors(Object object) {
+        if (itemPropertyDescriptors == null) {
+            super.getPropertyDescriptors(object);
 
-			addSwitchPropertyDescriptor(object);
-			addCasesPropertyDescriptor(object);
-		}
-		return itemPropertyDescriptors;
-	}
+            addSwitchPropertyDescriptor(object);
+            addCasesPropertyDescriptor(object);
+        }
+        return itemPropertyDescriptors;
+    }
 
-	/**
-	 * This adds a property descriptor for the Switch feature.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected void addSwitchPropertyDescriptor(Object object) {
-		itemPropertyDescriptors.add(createItemPropertyDescriptor(
-				((ComposeableAdapterFactory) adapterFactory)
-						.getRootAdapterFactory(), getResourceLocator(),
-				getString("_UI_Union_switch_feature"), getString(
-						"_UI_PropertyDescriptor_description",
-						"_UI_Union_switch_feature", "_UI_Union_type"),
-				ModelPackage.Literals.UNION__SWITCH, true, false, true, null,
-				null, null));
-	}
+    /**
+     * This adds a property descriptor for the Switch feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    protected void addSwitchPropertyDescriptor(Object object) {
+        itemPropertyDescriptors.add(createItemPropertyDescriptor(((ComposeableAdapterFactory) adapterFactory)
+                .getRootAdapterFactory(), getResourceLocator(), getString("_UI_Union_switch_feature"), getString(
+                "_UI_PropertyDescriptor_description", "_UI_Union_switch_feature", "_UI_Union_type"),
+                OpenDDSPackage.Literals.UNION__SWITCH, true, false, true, null, null, null));
+    }
 
-	/**
-	 * This adds a property descriptor for the Cases feature.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected void addCasesPropertyDescriptor(Object object) {
-		itemPropertyDescriptors.add(createItemPropertyDescriptor(
-				((ComposeableAdapterFactory) adapterFactory)
-						.getRootAdapterFactory(), getResourceLocator(),
-				getString("_UI_Union_cases_feature"), getString(
-						"_UI_PropertyDescriptor_description",
-						"_UI_Union_cases_feature", "_UI_Union_type"),
-				ModelPackage.Literals.UNION__CASES, true, false, true, null,
-				null, null));
-	}
+    /**
+     * This adds a property descriptor for the Cases feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    protected void addCasesPropertyDescriptor(Object object) {
+        itemPropertyDescriptors.add(createItemPropertyDescriptor(((ComposeableAdapterFactory) adapterFactory)
+                .getRootAdapterFactory(), getResourceLocator(), getString("_UI_Union_cases_feature"), getString(
+                "_UI_PropertyDescriptor_description", "_UI_Union_cases_feature", "_UI_Union_type"),
+                OpenDDSPackage.Literals.UNION__CASES, true, false, true, null, null, null));
+    }
 
-	/**
-	 * This returns Union.gif.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Object getImage(Object object) {
-		return overlayImage(object, getResourceLocator().getImage(
-				"full/obj16/Union"));
-	}
+    /**
+     * This returns Union.gif.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    @Override
+    public Object getImage(Object object) {
+        return overlayImage(object, getResourceLocator().getImage("full/obj16/Union"));
+    }
 
-	/**
-	 * This returns the label text for the adapted class.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public String getText(Object object) {
-		String label = ((Union) object).getName();
-		return label == null || label.length() == 0 ? getString("_UI_Union_type")
-				: getString("_UI_Union_type") + " " + label;
-	}
+    /**
+     * This returns the label text for the adapted class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    @Override
+    public String getText(Object object) {
+        String label = ((Union) object).getName();
+        return label == null || label.length() == 0 ? getString("_UI_Union_type") : getString("_UI_Union_type") + " "
+                + label;
+    }
 
-	/**
-	 * This handles model notifications by calling {@link #updateChildren} to update any cached
-	 * children and by creating a viewer notification, which it passes to {@link #fireNotifyChanged}.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void notifyChanged(Notification notification) {
-		updateChildren(notification);
-		super.notifyChanged(notification);
-	}
+    /**
+     * This handles model notifications by calling {@link #updateChildren} to update any cached
+     * children and by creating a viewer notification, which it passes to {@link #fireNotifyChanged}.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    @Override
+    public void notifyChanged(Notification notification) {
+        updateChildren(notification);
+        super.notifyChanged(notification);
+    }
 
-	/**
-	 * This adds {@link org.eclipse.emf.edit.command.CommandParameter}s describing the children
-	 * that can be created under this object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	protected void collectNewChildDescriptors(
-			Collection<Object> newChildDescriptors, Object object) {
-		super.collectNewChildDescriptors(newChildDescriptors, object);
-	}
+    /**
+     * This adds {@link org.eclipse.emf.edit.command.CommandParameter}s describing the children
+     * that can be created under this object.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    @Override
+    protected void collectNewChildDescriptors(Collection<Object> newChildDescriptors, Object object) {
+        super.collectNewChildDescriptors(newChildDescriptors, object);
+    }
 
 }

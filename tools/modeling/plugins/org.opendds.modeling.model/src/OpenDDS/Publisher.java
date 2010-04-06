@@ -23,7 +23,7 @@ import org.eclipse.emf.common.util.EList;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getPublisher()
+ * @see OpenDDS.OpenDDSPackage#getPublisher()
  * @model
  * @generated
  */
@@ -38,7 +38,7 @@ public interface Publisher extends PublisherSubscriber {
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Writers</em>' containment reference list.
-     * @see OpenDDS.ModelPackage#getPublisher_Writers()
+     * @see OpenDDS.OpenDDSPackage#getPublisher_Writers()
      * @model containment="true" required="true"
      * @generated
      */

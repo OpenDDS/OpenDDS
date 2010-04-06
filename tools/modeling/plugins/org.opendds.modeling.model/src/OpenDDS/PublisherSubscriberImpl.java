@@ -98,7 +98,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.PUBLISHER_SUBSCRIBER;
+        return OpenDDSPackage.Literals.PUBLISHER_SUBSCRIBER;
     }
 
     /**
@@ -111,10 +111,9 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
             InternalEObject oldEntity_factory = (InternalEObject) entity_factory;
             entity_factory = (EntityFactoryQosPolicy) eResolveProxy(oldEntity_factory);
             if (entity_factory != oldEntity_factory) {
-                if (eNotificationRequired()) {
+                if (eNotificationRequired())
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE,
-                            ModelPackage.PUBLISHER_SUBSCRIBER__ENTITY_FACTORY, oldEntity_factory, entity_factory));
-                }
+                            OpenDDSPackage.PUBLISHER_SUBSCRIBER__ENTITY_FACTORY, oldEntity_factory, entity_factory));
             }
         }
         return entity_factory;
@@ -137,10 +136,9 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     public void setEntity_factory(EntityFactoryQosPolicy newEntity_factory) {
         EntityFactoryQosPolicy oldEntity_factory = entity_factory;
         entity_factory = newEntity_factory;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.PUBLISHER_SUBSCRIBER__ENTITY_FACTORY,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.PUBLISHER_SUBSCRIBER__ENTITY_FACTORY,
                     oldEntity_factory, entity_factory));
-        }
     }
 
     /**
@@ -153,10 +151,9 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
             InternalEObject oldPresentation = (InternalEObject) presentation;
             presentation = (PresentationQosPolicy) eResolveProxy(oldPresentation);
             if (presentation != oldPresentation) {
-                if (eNotificationRequired()) {
+                if (eNotificationRequired())
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE,
-                            ModelPackage.PUBLISHER_SUBSCRIBER__PRESENTATION, oldPresentation, presentation));
-                }
+                            OpenDDSPackage.PUBLISHER_SUBSCRIBER__PRESENTATION, oldPresentation, presentation));
             }
         }
         return presentation;
@@ -179,10 +176,9 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     public void setPresentation(PresentationQosPolicy newPresentation) {
         PresentationQosPolicy oldPresentation = presentation;
         presentation = newPresentation;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.PUBLISHER_SUBSCRIBER__PRESENTATION,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.PUBLISHER_SUBSCRIBER__PRESENTATION,
                     oldPresentation, presentation));
-        }
     }
 
     /**
@@ -195,10 +191,9 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
             InternalEObject oldGroup_data = (InternalEObject) group_data;
             group_data = (GroupDataQosPolicy) eResolveProxy(oldGroup_data);
             if (group_data != oldGroup_data) {
-                if (eNotificationRequired()) {
+                if (eNotificationRequired())
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE,
-                            ModelPackage.PUBLISHER_SUBSCRIBER__GROUP_DATA, oldGroup_data, group_data));
-                }
+                            OpenDDSPackage.PUBLISHER_SUBSCRIBER__GROUP_DATA, oldGroup_data, group_data));
             }
         }
         return group_data;
@@ -221,10 +216,9 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     public void setGroup_data(GroupDataQosPolicy newGroup_data) {
         GroupDataQosPolicy oldGroup_data = group_data;
         group_data = newGroup_data;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.PUBLISHER_SUBSCRIBER__GROUP_DATA,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.PUBLISHER_SUBSCRIBER__GROUP_DATA,
                     oldGroup_data, group_data));
-        }
     }
 
     /**
@@ -237,10 +231,9 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
             InternalEObject oldPartition = (InternalEObject) partition;
             partition = (PartitionQosPolicy) eResolveProxy(oldPartition);
             if (partition != oldPartition) {
-                if (eNotificationRequired()) {
+                if (eNotificationRequired())
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE,
-                            ModelPackage.PUBLISHER_SUBSCRIBER__PARTITION, oldPartition, partition));
-                }
+                            OpenDDSPackage.PUBLISHER_SUBSCRIBER__PARTITION, oldPartition, partition));
             }
         }
         return partition;
@@ -263,10 +256,9 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     public void setPartition(PartitionQosPolicy newPartition) {
         PartitionQosPolicy oldPartition = partition;
         partition = newPartition;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.PUBLISHER_SUBSCRIBER__PARTITION,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.PUBLISHER_SUBSCRIBER__PARTITION,
                     oldPartition, partition));
-        }
     }
 
     /**
@@ -279,10 +271,9 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
             InternalEObject oldTransport = (InternalEObject) transport;
             transport = (Transport) eResolveProxy(oldTransport);
             if (transport != oldTransport) {
-                if (eNotificationRequired()) {
+                if (eNotificationRequired())
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE,
-                            ModelPackage.PUBLISHER_SUBSCRIBER__TRANSPORT, oldTransport, transport));
-                }
+                            OpenDDSPackage.PUBLISHER_SUBSCRIBER__TRANSPORT, oldTransport, transport));
             }
         }
         return transport;
@@ -305,10 +296,9 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     public void setTransport(Transport newTransport) {
         Transport oldTransport = transport;
         transport = newTransport;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.PUBLISHER_SUBSCRIBER__TRANSPORT,
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.PUBLISHER_SUBSCRIBER__TRANSPORT,
                     oldTransport, transport));
-        }
     }
 
     /**
@@ -319,30 +309,25 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.PUBLISHER_SUBSCRIBER__ENTITY_FACTORY:
-                if (resolve) {
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__ENTITY_FACTORY:
+                if (resolve)
                     return getEntity_factory();
-                }
                 return basicGetEntity_factory();
-            case ModelPackage.PUBLISHER_SUBSCRIBER__PRESENTATION:
-                if (resolve) {
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__PRESENTATION:
+                if (resolve)
                     return getPresentation();
-                }
                 return basicGetPresentation();
-            case ModelPackage.PUBLISHER_SUBSCRIBER__GROUP_DATA:
-                if (resolve) {
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__GROUP_DATA:
+                if (resolve)
                     return getGroup_data();
-                }
                 return basicGetGroup_data();
-            case ModelPackage.PUBLISHER_SUBSCRIBER__PARTITION:
-                if (resolve) {
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__PARTITION:
+                if (resolve)
                     return getPartition();
-                }
                 return basicGetPartition();
-            case ModelPackage.PUBLISHER_SUBSCRIBER__TRANSPORT:
-                if (resolve) {
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__TRANSPORT:
+                if (resolve)
                     return getTransport();
-                }
                 return basicGetTransport();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -356,19 +341,19 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.PUBLISHER_SUBSCRIBER__ENTITY_FACTORY:
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__ENTITY_FACTORY:
                 setEntity_factory((EntityFactoryQosPolicy) newValue);
                 return;
-            case ModelPackage.PUBLISHER_SUBSCRIBER__PRESENTATION:
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__PRESENTATION:
                 setPresentation((PresentationQosPolicy) newValue);
                 return;
-            case ModelPackage.PUBLISHER_SUBSCRIBER__GROUP_DATA:
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__GROUP_DATA:
                 setGroup_data((GroupDataQosPolicy) newValue);
                 return;
-            case ModelPackage.PUBLISHER_SUBSCRIBER__PARTITION:
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__PARTITION:
                 setPartition((PartitionQosPolicy) newValue);
                 return;
-            case ModelPackage.PUBLISHER_SUBSCRIBER__TRANSPORT:
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__TRANSPORT:
                 setTransport((Transport) newValue);
                 return;
         }
@@ -383,19 +368,19 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.PUBLISHER_SUBSCRIBER__ENTITY_FACTORY:
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__ENTITY_FACTORY:
                 setEntity_factory((EntityFactoryQosPolicy) null);
                 return;
-            case ModelPackage.PUBLISHER_SUBSCRIBER__PRESENTATION:
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__PRESENTATION:
                 setPresentation((PresentationQosPolicy) null);
                 return;
-            case ModelPackage.PUBLISHER_SUBSCRIBER__GROUP_DATA:
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__GROUP_DATA:
                 setGroup_data((GroupDataQosPolicy) null);
                 return;
-            case ModelPackage.PUBLISHER_SUBSCRIBER__PARTITION:
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__PARTITION:
                 setPartition((PartitionQosPolicy) null);
                 return;
-            case ModelPackage.PUBLISHER_SUBSCRIBER__TRANSPORT:
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__TRANSPORT:
                 setTransport((Transport) null);
                 return;
         }
@@ -410,15 +395,15 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.PUBLISHER_SUBSCRIBER__ENTITY_FACTORY:
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__ENTITY_FACTORY:
                 return entity_factory != null;
-            case ModelPackage.PUBLISHER_SUBSCRIBER__PRESENTATION:
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__PRESENTATION:
                 return presentation != null;
-            case ModelPackage.PUBLISHER_SUBSCRIBER__GROUP_DATA:
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__GROUP_DATA:
                 return group_data != null;
-            case ModelPackage.PUBLISHER_SUBSCRIBER__PARTITION:
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__PARTITION:
                 return partition != null;
-            case ModelPackage.PUBLISHER_SUBSCRIBER__TRANSPORT:
+            case OpenDDSPackage.PUBLISHER_SUBSCRIBER__TRANSPORT:
                 return transport != null;
         }
         return super.eIsSet(featureID);

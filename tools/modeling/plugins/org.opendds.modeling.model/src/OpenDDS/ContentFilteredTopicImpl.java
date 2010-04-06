@@ -63,7 +63,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.CONTENT_FILTERED_TOPIC;
+        return OpenDDSPackage.Literals.CONTENT_FILTERED_TOPIC;
     }
 
     /**
@@ -83,10 +83,9 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     public void setFilter_expression(String newFilter_expression) {
         String oldFilter_expression = filter_expression;
         filter_expression = newFilter_expression;
-        if (eNotificationRequired()) {
+        if (eNotificationRequired())
             eNotify(new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION, oldFilter_expression, filter_expression));
-        }
+                    OpenDDSPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION, oldFilter_expression, filter_expression));
     }
 
     /**
@@ -97,7 +96,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
+            case OpenDDSPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
                 return getFilter_expression();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -111,7 +110,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
+            case OpenDDSPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
                 setFilter_expression((String) newValue);
                 return;
         }
@@ -126,7 +125,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
+            case OpenDDSPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
                 setFilter_expression(FILTER_EXPRESSION_EDEFAULT);
                 return;
         }
@@ -141,7 +140,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
+            case OpenDDSPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
                 return FILTER_EXPRESSION_EDEFAULT == null ? filter_expression != null : !FILTER_EXPRESSION_EDEFAULT
                         .equals(filter_expression);
         }
@@ -155,9 +154,8 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (filter_expression: ");

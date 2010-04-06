@@ -37,7 +37,7 @@ public class OLongLongImpl extends SimpleImpl implements OLongLong {
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.OLONG_LONG;
+        return OpenDDSPackage.Literals.OLONG_LONG;
     }
 
 } //OLongLongImpl

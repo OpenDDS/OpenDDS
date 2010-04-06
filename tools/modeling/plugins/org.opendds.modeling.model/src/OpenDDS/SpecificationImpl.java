@@ -37,7 +37,7 @@ public abstract class SpecificationImpl extends EntityImpl implements Specificat
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.SPECIFICATION;
+        return OpenDDSPackage.Literals.SPECIFICATION;
     }
 
 } //SpecificationImpl

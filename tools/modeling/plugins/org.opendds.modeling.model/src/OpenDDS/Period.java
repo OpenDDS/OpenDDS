@@ -24,7 +24,7 @@ import org.eclipse.emf.ecore.EObject;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getPeriod()
+ * @see OpenDDS.OpenDDSPackage#getPeriod()
  * @model
  * @generated
  */
@@ -40,7 +40,7 @@ public interface Period extends EObject {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Seconds</em>' attribute.
      * @see #setSeconds(long)
-     * @see OpenDDS.ModelPackage#getPeriod_Seconds()
+     * @see OpenDDS.OpenDDSPackage#getPeriod_Seconds()
      * @model default="0"
      * @generated
      */
@@ -67,7 +67,7 @@ public interface Period extends EObject {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Nanoseconds</em>' attribute.
      * @see #setNanoseconds(long)
-     * @see OpenDDS.ModelPackage#getPeriod_Nanoseconds()
+     * @see OpenDDS.OpenDDSPackage#getPeriod_Nanoseconds()
      * @model default="0"
      * @generated
      */

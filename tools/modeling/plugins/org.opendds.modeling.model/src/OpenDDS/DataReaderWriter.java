@@ -30,7 +30,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getDataReaderWriter()
+ * @see OpenDDS.OpenDDSPackage#getDataReaderWriter()
  * @model abstract="true"
  * @generated
  */
@@ -45,7 +45,7 @@ public interface DataReaderWriter extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Durability</em>' reference.
      * @see #setDurability(DurabilityQosPolicy)
-     * @see OpenDDS.ModelPackage#getDataReaderWriter_Durability()
+     * @see OpenDDS.OpenDDSPackage#getDataReaderWriter_Durability()
      * @model
      * @generated
      */
@@ -71,7 +71,7 @@ public interface DataReaderWriter extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Destination order</em>' reference.
      * @see #setDestination_order(DestinationOrderQosPolicy)
-     * @see OpenDDS.ModelPackage#getDataReaderWriter_Destination_order()
+     * @see OpenDDS.OpenDDSPackage#getDataReaderWriter_Destination_order()
      * @model
      * @generated
      */
@@ -97,7 +97,7 @@ public interface DataReaderWriter extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Deadline</em>' reference.
      * @see #setDeadline(DeadlineQosPolicy)
-     * @see OpenDDS.ModelPackage#getDataReaderWriter_Deadline()
+     * @see OpenDDS.OpenDDSPackage#getDataReaderWriter_Deadline()
      * @model
      * @generated
      */
@@ -123,7 +123,7 @@ public interface DataReaderWriter extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>History</em>' reference.
      * @see #setHistory(HistoryQosPolicy)
-     * @see OpenDDS.ModelPackage#getDataReaderWriter_History()
+     * @see OpenDDS.OpenDDSPackage#getDataReaderWriter_History()
      * @model
      * @generated
      */
@@ -149,7 +149,7 @@ public interface DataReaderWriter extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>User data</em>' reference.
      * @see #setUser_data(UserDataQosPolicy)
-     * @see OpenDDS.ModelPackage#getDataReaderWriter_User_data()
+     * @see OpenDDS.OpenDDSPackage#getDataReaderWriter_User_data()
      * @model
      * @generated
      */
@@ -175,7 +175,7 @@ public interface DataReaderWriter extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Resource limits</em>' reference.
      * @see #setResource_limits(ResourceLimitsQosPolicy)
-     * @see OpenDDS.ModelPackage#getDataReaderWriter_Resource_limits()
+     * @see OpenDDS.OpenDDSPackage#getDataReaderWriter_Resource_limits()
      * @model
      * @generated
      */
@@ -201,7 +201,7 @@ public interface DataReaderWriter extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Ownership</em>' reference.
      * @see #setOwnership(OwnershipQosPolicy)
-     * @see OpenDDS.ModelPackage#getDataReaderWriter_Ownership()
+     * @see OpenDDS.OpenDDSPackage#getDataReaderWriter_Ownership()
      * @model
      * @generated
      */
@@ -227,7 +227,7 @@ public interface DataReaderWriter extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Liveliness</em>' reference.
      * @see #setLiveliness(LivelinessQosPolicy)
-     * @see OpenDDS.ModelPackage#getDataReaderWriter_Liveliness()
+     * @see OpenDDS.OpenDDSPackage#getDataReaderWriter_Liveliness()
      * @model
      * @generated
      */
@@ -253,7 +253,7 @@ public interface DataReaderWriter extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Latency budget</em>' reference.
      * @see #setLatency_budget(LatencyBudgetQosPolicy)
-     * @see OpenDDS.ModelPackage#getDataReaderWriter_Latency_budget()
+     * @see OpenDDS.OpenDDSPackage#getDataReaderWriter_Latency_budget()
      * @model
      * @generated
      */
@@ -279,7 +279,7 @@ public interface DataReaderWriter extends DomainEntity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Reliability</em>' reference.
      * @see #setReliability(ReliabilityQosPolicy)
-     * @see OpenDDS.ModelPackage#getDataReaderWriter_Reliability()
+     * @see OpenDDS.OpenDDSPackage#getDataReaderWriter_Reliability()
      * @model
      * @generated
      */

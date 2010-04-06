@@ -22,7 +22,7 @@ package OpenDDS;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getReliabilityQosPolicy()
+ * @see OpenDDS.OpenDDSPackage#getReliabilityQosPolicy()
  * @model
  * @generated
  */
@@ -39,7 +39,7 @@ public interface ReliabilityQosPolicy extends QosPolicy {
      * @return the value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.ReliabilityQosPolicyKind
      * @see #setKind(ReliabilityQosPolicyKind)
-     * @see OpenDDS.ModelPackage#getReliabilityQosPolicy_Kind()
+     * @see OpenDDS.OpenDDSPackage#getReliabilityQosPolicy_Kind()
      * @model
      * @generated
      */
@@ -66,7 +66,7 @@ public interface ReliabilityQosPolicy extends QosPolicy {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Max blocking time</em>' containment reference.
      * @see #setMax_blocking_time(Period)
-     * @see OpenDDS.ModelPackage#getReliabilityQosPolicy_Max_blocking_time()
+     * @see OpenDDS.OpenDDSPackage#getReliabilityQosPolicy_Max_blocking_time()
      * @model containment="true"
      * @generated
      */

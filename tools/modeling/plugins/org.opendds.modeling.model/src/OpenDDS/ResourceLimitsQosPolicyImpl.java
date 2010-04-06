@@ -105,7 +105,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.RESOURCE_LIMITS_QOS_POLICY;
+        return OpenDDSPackage.Literals.RESOURCE_LIMITS_QOS_POLICY;
     }
 
     /**
@@ -125,10 +125,9 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     public void setMax_instances(long newMax_instances) {
         long oldMax_instances = max_instances;
         max_instances = newMax_instances;
-        if (eNotificationRequired()) {
+        if (eNotificationRequired())
             eNotify(new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_INSTANCES, oldMax_instances, max_instances));
-        }
+                    OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_INSTANCES, oldMax_instances, max_instances));
     }
 
     /**
@@ -148,10 +147,9 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     public void setMax_samples(long newMax_samples) {
         long oldMax_samples = max_samples;
         max_samples = newMax_samples;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES,
-                    oldMax_samples, max_samples));
-        }
+        if (eNotificationRequired())
+            eNotify(new ENotificationImpl(this, Notification.SET,
+                    OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES, oldMax_samples, max_samples));
     }
 
     /**
@@ -171,11 +169,10 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     public void setMax_samples_per_instance(long newMax_samples_per_instance) {
         long oldMax_samples_per_instance = max_samples_per_instance;
         max_samples_per_instance = newMax_samples_per_instance;
-        if (eNotificationRequired()) {
+        if (eNotificationRequired())
             eNotify(new ENotificationImpl(this, Notification.SET,
-                    ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE, oldMax_samples_per_instance,
+                    OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE, oldMax_samples_per_instance,
                     max_samples_per_instance));
-        }
     }
 
     /**
@@ -186,11 +183,11 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_INSTANCES:
+            case OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_INSTANCES:
                 return getMax_instances();
-            case ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES:
+            case OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES:
                 return getMax_samples();
-            case ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
+            case OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
                 return getMax_samples_per_instance();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -204,13 +201,13 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_INSTANCES:
+            case OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_INSTANCES:
                 setMax_instances((Long) newValue);
                 return;
-            case ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES:
+            case OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES:
                 setMax_samples((Long) newValue);
                 return;
-            case ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
+            case OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
                 setMax_samples_per_instance((Long) newValue);
                 return;
         }
@@ -225,13 +222,13 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_INSTANCES:
+            case OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_INSTANCES:
                 setMax_instances(MAX_INSTANCES_EDEFAULT);
                 return;
-            case ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES:
+            case OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES:
                 setMax_samples(MAX_SAMPLES_EDEFAULT);
                 return;
-            case ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
+            case OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
                 setMax_samples_per_instance(MAX_SAMPLES_PER_INSTANCE_EDEFAULT);
                 return;
         }
@@ -246,11 +243,11 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_INSTANCES:
+            case OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_INSTANCES:
                 return max_instances != MAX_INSTANCES_EDEFAULT;
-            case ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES:
+            case OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES:
                 return max_samples != MAX_SAMPLES_EDEFAULT;
-            case ModelPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
+            case OpenDDSPackage.RESOURCE_LIMITS_QOS_POLICY__MAX_SAMPLES_PER_INSTANCE:
                 return max_samples_per_instance != MAX_SAMPLES_PER_INSTANCE_EDEFAULT;
         }
         return super.eIsSet(featureID);
@@ -263,9 +260,8 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
      */
     @Override
     public String toString() {
-        if (eIsProxy()) {
+        if (eIsProxy())
             return super.toString();
-        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (max_instances: ");

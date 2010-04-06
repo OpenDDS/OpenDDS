@@ -58,7 +58,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
      */
     @Override
     protected EClass eStaticClass() {
-        return ModelPackage.Literals.PUBLISHER;
+        return OpenDDSPackage.Literals.PUBLISHER;
     }
 
     /**
@@ -68,7 +68,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
      */
     public EList<DataWriter> getWriters() {
         if (writers == null) {
-            writers = new EObjectContainmentEList<DataWriter>(DataWriter.class, this, ModelPackage.PUBLISHER__WRITERS);
+            writers = new EObjectContainmentEList<DataWriter>(DataWriter.class, this, OpenDDSPackage.PUBLISHER__WRITERS);
         }
         return writers;
     }
@@ -81,7 +81,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
     @Override
     public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
         switch (featureID) {
-            case ModelPackage.PUBLISHER__WRITERS:
+            case OpenDDSPackage.PUBLISHER__WRITERS:
                 return ((InternalEList<?>) getWriters()).basicRemove(otherEnd, msgs);
         }
         return super.eInverseRemove(otherEnd, featureID, msgs);
@@ -95,7 +95,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case ModelPackage.PUBLISHER__WRITERS:
+            case OpenDDSPackage.PUBLISHER__WRITERS:
                 return getWriters();
         }
         return super.eGet(featureID, resolve, coreType);
@@ -110,7 +110,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case ModelPackage.PUBLISHER__WRITERS:
+            case OpenDDSPackage.PUBLISHER__WRITERS:
                 getWriters().clear();
                 getWriters().addAll((Collection<? extends DataWriter>) newValue);
                 return;
@@ -126,7 +126,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case ModelPackage.PUBLISHER__WRITERS:
+            case OpenDDSPackage.PUBLISHER__WRITERS:
                 getWriters().clear();
                 return;
         }
@@ -141,7 +141,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case ModelPackage.PUBLISHER__WRITERS:
+            case OpenDDSPackage.PUBLISHER__WRITERS:
                 return writers != null && !writers.isEmpty();
         }
         return super.eIsSet(featureID);

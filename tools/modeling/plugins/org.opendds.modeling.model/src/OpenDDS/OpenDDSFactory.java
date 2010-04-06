@@ -16,17 +16,17 @@ import org.eclipse.emf.ecore.EFactory;
  * The <b>Factory</b> for the model.
  * It provides a create method for each non-abstract class of the model.
  * <!-- end-user-doc -->
- * @see OpenDDS.ModelPackage
+ * @see OpenDDS.OpenDDSPackage
  * @generated
  */
-public interface ModelFactory extends EFactory {
+public interface OpenDDSFactory extends EFactory {
     /**
      * The singleton instance of the factory.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
      */
-    ModelFactory eINSTANCE = OpenDDS.ModelFactoryImpl.init();
+    OpenDDSFactory eINSTANCE = OpenDDS.OpenDDSFactoryImpl.init();
 
     /**
      * Returns a new object of class '<em>Content Filtered Topic</em>'.
@@ -530,6 +530,6 @@ public interface ModelFactory extends EFactory {
      * @return the package supported by this factory.
      * @generated
      */
-    ModelPackage getModelPackage();
+    OpenDDSPackage getOpenDDSPackage();
 
-} //ModelFactory
+} //OpenDDSFactory

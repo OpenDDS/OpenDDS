@@ -27,7 +27,7 @@ import org.eclipse.emf.common.util.EList;
  * </ul>
  * </p>
  *
- * @see OpenDDS.ModelPackage#getApplicationTarget()
+ * @see OpenDDS.OpenDDSPackage#getApplicationTarget()
  * @model
  * @generated
  */
@@ -44,7 +44,7 @@ public interface ApplicationTarget extends Entity {
      * @return the value of the '<em>Component type</em>' attribute.
      * @see OpenDDS.ComponentType
      * @see #setComponent_type(ComponentType)
-     * @see OpenDDS.ModelPackage#getApplicationTarget_Component_type()
+     * @see OpenDDS.OpenDDSPackage#getApplicationTarget_Component_type()
      * @model required="true"
      * @generated
      */
@@ -73,7 +73,7 @@ public interface ApplicationTarget extends Entity {
      * @return the value of the '<em>Language</em>' attribute.
      * @see OpenDDS.LanguageType
      * @see #setLanguage(LanguageType)
-     * @see OpenDDS.ModelPackage#getApplicationTarget_Language()
+     * @see OpenDDS.OpenDDSPackage#getApplicationTarget_Language()
      * @model required="true"
      * @generated
      */
@@ -102,7 +102,7 @@ public interface ApplicationTarget extends Entity {
      * @return the value of the '<em>Platform</em>' attribute.
      * @see OpenDDS.PlatformType
      * @see #setPlatform(PlatformType)
-     * @see OpenDDS.ModelPackage#getApplicationTarget_Platform()
+     * @see OpenDDS.OpenDDSPackage#getApplicationTarget_Platform()
      * @model required="true"
      * @generated
      */
@@ -129,7 +129,7 @@ public interface ApplicationTarget extends Entity {
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Participants</em>' reference list.
-     * @see OpenDDS.ModelPackage#getApplicationTarget_Participants()
+     * @see OpenDDS.OpenDDSPackage#getApplicationTarget_Participants()
      * @model required="true"
      * @generated
      */
@@ -145,7 +145,7 @@ public interface ApplicationTarget extends Entity {
      * <!-- end-user-doc -->
      * @return the value of the '<em>Service arguments</em>' attribute.
      * @see #setService_arguments(String)
-     * @see OpenDDS.ModelPackage#getApplicationTarget_Service_arguments()
+     * @see OpenDDS.OpenDDSPackage#getApplicationTarget_Service_arguments()
      * @model
      * @generated
      */
