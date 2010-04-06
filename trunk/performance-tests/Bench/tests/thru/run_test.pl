@@ -26,7 +26,7 @@ sub configure_transport_file {
 
   while (<CONFIGFILE>) {
     s/\<%HOSTNAME%\>/$myhostname/g;
-    print <NEWCONFIGFILE> $_;
+    print NEWCONFIGFILE "$_\n";
   }
   close NEWCONFIGFILE;
   close CONFIGFILE;
@@ -46,32 +46,32 @@ my $starting_test_number = 1;
 my $ending_test_number = 14;
 my $current_dir = getcwd;
 
-my @pub_be_config_files = ("$bench_location/tests/thru/bidir-1sub-be-80.ini", \
-                           "$bench_location/tests/thru/bidir-1sub-be-320.ini", \
-                           "$bench_location/tests/thru/bidir-1sub-be-720.ini", \
-                           "$bench_location/tests/thru/bidir-1sub-be-1280.ini", \
-                           "$bench_location/tests/thru/bidir-1sub-be-2000.ini", \
-                           "$bench_location/tests/thru/bidir-1sub-be-160r.ini", \
-                           "$bench_location/tests/thru/bidir-1sub-be-240r.ini", \
-                           "$bench_location/tests/thru/bidir-1sub-be-320r.ini", \
-                           "$bench_location/tests/thru/bidir-1sub-be-400r.ini", \
-                           "$bench_location/tests/thru/bidir-1sub-be-160s.ini", \
-                           "$bench_location/tests/thru/bidir-1sub-be-240s.ini", \
-                           "$bench_location/tests/thru/bidir-1sub-be-320s.ini", \
+my @pub_be_config_files = ("$bench_location/tests/thru/bidir-1sub-be-80.ini",
+                           "$bench_location/tests/thru/bidir-1sub-be-320.ini",
+                           "$bench_location/tests/thru/bidir-1sub-be-720.ini",
+                           "$bench_location/tests/thru/bidir-1sub-be-1280.ini",
+                           "$bench_location/tests/thru/bidir-1sub-be-2000.ini",
+                           "$bench_location/tests/thru/bidir-1sub-be-160r.ini",
+                           "$bench_location/tests/thru/bidir-1sub-be-240r.ini",
+                           "$bench_location/tests/thru/bidir-1sub-be-320r.ini",
+                           "$bench_location/tests/thru/bidir-1sub-be-400r.ini",
+                           "$bench_location/tests/thru/bidir-1sub-be-160s.ini",
+                           "$bench_location/tests/thru/bidir-1sub-be-240s.ini",
+                           "$bench_location/tests/thru/bidir-1sub-be-320s.ini",
                            "$bench_location/tests/thru/bidir-1sub-be-400s.ini");
 
-my @pub_rel_config_files = ("$bench_location/tests/thru/bidir-1sub-rel-80.ini", \
-                            "$bench_location/tests/thru/bidir-1sub-rel-320.ini", \
-                            "$bench_location/tests/thru/bidir-1sub-rel-720.ini", \
-                            "$bench_location/tests/thru/bidir-1sub-rel-1280.ini", \
-                            "$bench_location/tests/thru/bidir-1sub-rel-2000.ini", \
-                            "$bench_location/tests/thru/bidir-1sub-rel-160r.ini", \
-                            "$bench_location/tests/thru/bidir-1sub-rel-240r.ini", \
-                            "$bench_location/tests/thru/bidir-1sub-rel-320r.ini", \
-                            "$bench_location/tests/thru/bidir-1sub-rel-400r.ini", \
-                            "$bench_location/tests/thru/bidir-1sub-rel-160s.ini", \
-                            "$bench_location/tests/thru/bidir-1sub-rel-240s.ini", \
-                            "$bench_location/tests/thru/bidir-1sub-rel-320s.ini", \
+my @pub_rel_config_files = ("$bench_location/tests/thru/bidir-1sub-rel-80.ini",
+                            "$bench_location/tests/thru/bidir-1sub-rel-320.ini",
+                            "$bench_location/tests/thru/bidir-1sub-rel-720.ini",
+                            "$bench_location/tests/thru/bidir-1sub-rel-1280.ini",
+                            "$bench_location/tests/thru/bidir-1sub-rel-2000.ini",
+                            "$bench_location/tests/thru/bidir-1sub-rel-160r.ini",
+                            "$bench_location/tests/thru/bidir-1sub-rel-240r.ini",
+                            "$bench_location/tests/thru/bidir-1sub-rel-320r.ini",
+                            "$bench_location/tests/thru/bidir-1sub-rel-400r.ini",
+                            "$bench_location/tests/thru/bidir-1sub-rel-160s.ini",
+                            "$bench_location/tests/thru/bidir-1sub-rel-240s.ini",
+                            "$bench_location/tests/thru/bidir-1sub-rel-320s.ini",
                             "$bench_location/tests/thru/bidir-1sub-rel-400s.ini");
 
 if ($transport_type eq 'udp') {
@@ -104,7 +104,7 @@ else {
     exit 0;
 }
 
-if ($@ARGV > 1) {
+if (scalar @ARGV > 1) {
     die "Invalid test number.\n" unless (($ARGV[1] > 0) && ($ARGV[1] < 14));
     $starting_test_number = $ARGV[1];
     $ending_test_number = $starting_test_number + 1;
@@ -121,7 +121,7 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
 
 
     $CS = new PerlDDS::Cross_Sync (1, PerlACE::random_port(), PerlACE::random_port()
-                            , $pub_config_file, $sub_config_file);
+                            , $pub_config_file, $sub_config_file, "../test_list.txt");
     if (!$CS) {
         print "Crossplatform test pre-reqs not met. Skipping...\n";
         exit 0;
@@ -130,10 +130,6 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
     if ($transport_type eq 'udp') {
         $trans_config_file = configure_transport_file ("$bench_location/etc/transport-udp.ini", $CS->self());
     }
-
-    @test_configs = $CS->get_config_info();
-    $pub_config_file = @test_configs[0];
-    $sub_config_file = @test_configs[1];
 
     my $role = $CS->wait();
     if ($role == -1) {
@@ -153,7 +149,6 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
     my $common_args = "-P -t 120 -h $repo_host:$port1 -i $trans_config_file ";
 
     if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
-        unlink $dcpsrepo_ior;
         $DCPSREPO = PerlDDS::create_process
                   ("$bench_location/bin/run_test",
                    "-S -t 180 -h iiop://$repo_host:$port1");
@@ -165,11 +160,10 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
             $DCPSREPO->Kill ();
             exit 1;
         }
-        unlink $dcpsrepo_ior;
 
         $Publisher = PerlDDS::create_process
                   ("$bench_location/bin/run_test",
-                   "$common_args -s $pub_config_file");
+                   "$common_args -s $pub_config_file -v -f bidir$starting_test_number.results");
 
         print $Publisher->CommandLine(). "\n";
         $Publisher->Spawn ();
@@ -195,6 +189,8 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
         #    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
         #    $status = 1;
         #}
+
+        unlink $dcpsrepo_ior;
     } else {
         $Subscriber = PerlDDS::create_process
               ("$bench_location/bin/run_test",
@@ -221,4 +217,3 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
 chdir $current_dir;
 exit $total_status;
 
-#  LocalWords:  eval

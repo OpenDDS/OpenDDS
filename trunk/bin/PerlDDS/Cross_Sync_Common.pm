@@ -324,9 +324,16 @@ sub _parse_schedule {
     }
     close ($in_fh);
 
-    if ((scalar(@argv) < 3) || (@argv[0] != $self->{TEST_INSTANCE})) {
+    if (scalar(@argv) < 3) {
         if ($verbose) {
-            print "Failed to parse schedle.\n";
+            print "Failed to parse schedule.\n";
+        }
+        return -1;
+    }
+
+    if (@argv[0] != $self->{TEST_INSTANCE}) {
+        if ($verbose) {
+            print "Failed to find the group instance in the schedule.\n";
         }
         return -1;
     }
