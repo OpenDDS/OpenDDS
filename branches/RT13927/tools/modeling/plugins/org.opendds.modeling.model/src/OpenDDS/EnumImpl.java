@@ -83,8 +83,9 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     public void setLabels(String newLabels) {
         String oldLabels = labels;
         labels = newLabels;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.ENUM__LABELS, oldLabels, labels));
+        }
     }
 
     /**
@@ -152,8 +153,9 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (labels: ");

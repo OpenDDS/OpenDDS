@@ -13,9 +13,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
-
 import org.eclipse.emf.ecore.impl.EFactoryImpl;
-
 import org.eclipse.emf.ecore.plugin.EcorePlugin;
 
 /**
@@ -803,9 +801,10 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
     public DestinationOrderQosPolicyKind createDestinationOrderQosPolicyKindFromString(EDataType eDataType,
             String initialValue) {
         DestinationOrderQosPolicyKind result = DestinationOrderQosPolicyKind.get(initialValue);
-        if (result == null)
+        if (result == null) {
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
+        }
         return result;
     }
 
@@ -825,9 +824,10 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
      */
     public DurabilityQosPolicyKind createDurabilityQosPolicyKindFromString(EDataType eDataType, String initialValue) {
         DurabilityQosPolicyKind result = DurabilityQosPolicyKind.get(initialValue);
-        if (result == null)
+        if (result == null) {
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
+        }
         return result;
     }
 
@@ -847,9 +847,10 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
      */
     public HistoryQosPolicyKind createHistoryQosPolicyKindFromString(EDataType eDataType, String initialValue) {
         HistoryQosPolicyKind result = HistoryQosPolicyKind.get(initialValue);
-        if (result == null)
+        if (result == null) {
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
+        }
         return result;
     }
 
@@ -869,9 +870,10 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
      */
     public LivelinessQosPolicyKind createLivelinessQosPolicyKindFromString(EDataType eDataType, String initialValue) {
         LivelinessQosPolicyKind result = LivelinessQosPolicyKind.get(initialValue);
-        if (result == null)
+        if (result == null) {
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
+        }
         return result;
     }
 
@@ -891,9 +893,10 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
      */
     public OwnershipQosPolicyKind createOwnershipQosPolicyKindFromString(EDataType eDataType, String initialValue) {
         OwnershipQosPolicyKind result = OwnershipQosPolicyKind.get(initialValue);
-        if (result == null)
+        if (result == null) {
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
+        }
         return result;
     }
 
@@ -914,9 +917,10 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
     public PresentationQosPolicyAccessScopeKind createPresentationQosPolicyAccessScopeKindFromString(
             EDataType eDataType, String initialValue) {
         PresentationQosPolicyAccessScopeKind result = PresentationQosPolicyAccessScopeKind.get(initialValue);
-        if (result == null)
+        if (result == null) {
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
+        }
         return result;
     }
 
@@ -936,9 +940,10 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
      */
     public ReliabilityQosPolicyKind createReliabilityQosPolicyKindFromString(EDataType eDataType, String initialValue) {
         ReliabilityQosPolicyKind result = ReliabilityQosPolicyKind.get(initialValue);
-        if (result == null)
+        if (result == null) {
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
+        }
         return result;
     }
 
@@ -958,9 +963,10 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
      */
     public ComponentType createComponentTypeFromString(EDataType eDataType, String initialValue) {
         ComponentType result = ComponentType.get(initialValue);
-        if (result == null)
+        if (result == null) {
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
+        }
         return result;
     }
 
@@ -980,9 +986,10 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
      */
     public LanguageType createLanguageTypeFromString(EDataType eDataType, String initialValue) {
         LanguageType result = LanguageType.get(initialValue);
-        if (result == null)
+        if (result == null) {
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
+        }
         return result;
     }
 
@@ -1002,9 +1009,10 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
      */
     public PlatformType createPlatformTypeFromString(EDataType eDataType, String initialValue) {
         PlatformType result = PlatformType.get(initialValue);
-        if (result == null)
+        if (result == null) {
             throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
                     + eDataType.getName() + "'");
+        }
         return result;
     }
 

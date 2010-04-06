@@ -15,7 +15,6 @@ import java.util.Collection;
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.Notifier;
-
 import org.eclipse.emf.edit.provider.ChangeNotifier;
 import org.eclipse.emf.edit.provider.ComposeableAdapterFactory;
 import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
@@ -1435,122 +1434,177 @@ public class OpenDDSItemProviderAdapterFactory extends OpenDDSAdapterFactory imp
     }
 
     /**
-     * This disposes all of the item providers created by this factory. 
+     * This disposes all of the item providers created by this factory.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
      */
     public void dispose() {
-        if (contentFilteredTopicItemProvider != null)
+        if (contentFilteredTopicItemProvider != null) {
             contentFilteredTopicItemProvider.dispose();
-        if (multiTopicItemProvider != null)
+        }
+        if (multiTopicItemProvider != null) {
             multiTopicItemProvider.dispose();
-        if (topicItemProvider != null)
+        }
+        if (topicItemProvider != null) {
             topicItemProvider.dispose();
-        if (arrayItemProvider != null)
+        }
+        if (arrayItemProvider != null) {
             arrayItemProvider.dispose();
-        if (oBooleanItemProvider != null)
+        }
+        if (oBooleanItemProvider != null) {
             oBooleanItemProvider.dispose();
-        if (caseItemProvider != null)
+        }
+        if (caseItemProvider != null) {
             caseItemProvider.dispose();
-        if (oCharItemProvider != null)
+        }
+        if (oCharItemProvider != null) {
             oCharItemProvider.dispose();
-        if (oDoubleItemProvider != null)
+        }
+        if (oDoubleItemProvider != null) {
             oDoubleItemProvider.dispose();
-        if (enumItemProvider != null)
+        }
+        if (enumItemProvider != null) {
             enumItemProvider.dispose();
-        if (oFloatItemProvider != null)
+        }
+        if (oFloatItemProvider != null) {
             oFloatItemProvider.dispose();
-        if (keyItemProvider != null)
+        }
+        if (keyItemProvider != null) {
             keyItemProvider.dispose();
-        if (keyFieldItemProvider != null)
+        }
+        if (keyFieldItemProvider != null) {
             keyFieldItemProvider.dispose();
-        if (oLongItemProvider != null)
+        }
+        if (oLongItemProvider != null) {
             oLongItemProvider.dispose();
-        if (oLongLongItemProvider != null)
+        }
+        if (oLongLongItemProvider != null) {
             oLongLongItemProvider.dispose();
-        if (oOctetItemProvider != null)
+        }
+        if (oOctetItemProvider != null) {
             oOctetItemProvider.dispose();
-        if (sequenceItemProvider != null)
+        }
+        if (sequenceItemProvider != null) {
             sequenceItemProvider.dispose();
-        if (oShortItemProvider != null)
+        }
+        if (oShortItemProvider != null) {
             oShortItemProvider.dispose();
-        if (oStringItemProvider != null)
+        }
+        if (oStringItemProvider != null) {
             oStringItemProvider.dispose();
-        if (topicStructItemProvider != null)
+        }
+        if (topicStructItemProvider != null) {
             topicStructItemProvider.dispose();
-        if (typedefItemProvider != null)
+        }
+        if (typedefItemProvider != null) {
             typedefItemProvider.dispose();
-        if (ouLongItemProvider != null)
+        }
+        if (ouLongItemProvider != null) {
             ouLongItemProvider.dispose();
-        if (ouLongLongItemProvider != null)
+        }
+        if (ouLongLongItemProvider != null) {
             ouLongLongItemProvider.dispose();
-        if (unionItemProvider != null)
+        }
+        if (unionItemProvider != null) {
             unionItemProvider.dispose();
-        if (ouShortItemProvider != null)
+        }
+        if (ouShortItemProvider != null) {
             ouShortItemProvider.dispose();
-        if (dataReaderItemProvider != null)
+        }
+        if (dataReaderItemProvider != null) {
             dataReaderItemProvider.dispose();
-        if (dataWriterItemProvider != null)
+        }
+        if (dataWriterItemProvider != null) {
             dataWriterItemProvider.dispose();
-        if (domainItemProvider != null)
+        }
+        if (domainItemProvider != null) {
             domainItemProvider.dispose();
-        if (domainParticipantItemProvider != null)
+        }
+        if (domainParticipantItemProvider != null) {
             domainParticipantItemProvider.dispose();
-        if (publisherItemProvider != null)
+        }
+        if (publisherItemProvider != null) {
             publisherItemProvider.dispose();
-        if (subscriberItemProvider != null)
+        }
+        if (subscriberItemProvider != null) {
             subscriberItemProvider.dispose();
-        if (deadlineQosPolicyItemProvider != null)
+        }
+        if (deadlineQosPolicyItemProvider != null) {
             deadlineQosPolicyItemProvider.dispose();
-        if (destinationOrderQosPolicyItemProvider != null)
+        }
+        if (destinationOrderQosPolicyItemProvider != null) {
             destinationOrderQosPolicyItemProvider.dispose();
-        if (durabilityQosPolicyItemProvider != null)
+        }
+        if (durabilityQosPolicyItemProvider != null) {
             durabilityQosPolicyItemProvider.dispose();
-        if (durabilityServiceQosPolicyItemProvider != null)
+        }
+        if (durabilityServiceQosPolicyItemProvider != null) {
             durabilityServiceQosPolicyItemProvider.dispose();
-        if (entityFactoryQosPolicyItemProvider != null)
+        }
+        if (entityFactoryQosPolicyItemProvider != null) {
             entityFactoryQosPolicyItemProvider.dispose();
-        if (groupDataQosPolicyItemProvider != null)
+        }
+        if (groupDataQosPolicyItemProvider != null) {
             groupDataQosPolicyItemProvider.dispose();
-        if (historyQosPolicyItemProvider != null)
+        }
+        if (historyQosPolicyItemProvider != null) {
             historyQosPolicyItemProvider.dispose();
-        if (latencyBudgetQosPolicyItemProvider != null)
+        }
+        if (latencyBudgetQosPolicyItemProvider != null) {
             latencyBudgetQosPolicyItemProvider.dispose();
-        if (lifespanQosPolicyItemProvider != null)
+        }
+        if (lifespanQosPolicyItemProvider != null) {
             lifespanQosPolicyItemProvider.dispose();
-        if (livelinessQosPolicyItemProvider != null)
+        }
+        if (livelinessQosPolicyItemProvider != null) {
             livelinessQosPolicyItemProvider.dispose();
-        if (ownershipQosPolicyItemProvider != null)
+        }
+        if (ownershipQosPolicyItemProvider != null) {
             ownershipQosPolicyItemProvider.dispose();
-        if (ownershipStrengthQosPolicyItemProvider != null)
+        }
+        if (ownershipStrengthQosPolicyItemProvider != null) {
             ownershipStrengthQosPolicyItemProvider.dispose();
-        if (partitionQosPolicyItemProvider != null)
+        }
+        if (partitionQosPolicyItemProvider != null) {
             partitionQosPolicyItemProvider.dispose();
-        if (presentationQosPolicyItemProvider != null)
+        }
+        if (presentationQosPolicyItemProvider != null) {
             presentationQosPolicyItemProvider.dispose();
-        if (readerDataLifecycleQosPolicyItemProvider != null)
+        }
+        if (readerDataLifecycleQosPolicyItemProvider != null) {
             readerDataLifecycleQosPolicyItemProvider.dispose();
-        if (reliabilityQosPolicyItemProvider != null)
+        }
+        if (reliabilityQosPolicyItemProvider != null) {
             reliabilityQosPolicyItemProvider.dispose();
-        if (resourceLimitsQosPolicyItemProvider != null)
+        }
+        if (resourceLimitsQosPolicyItemProvider != null) {
             resourceLimitsQosPolicyItemProvider.dispose();
-        if (timeBasedFilterQosPolicyItemProvider != null)
+        }
+        if (timeBasedFilterQosPolicyItemProvider != null) {
             timeBasedFilterQosPolicyItemProvider.dispose();
-        if (topicDataQosPolicyItemProvider != null)
+        }
+        if (topicDataQosPolicyItemProvider != null) {
             topicDataQosPolicyItemProvider.dispose();
-        if (transportPriorityQosPolicyItemProvider != null)
+        }
+        if (transportPriorityQosPolicyItemProvider != null) {
             transportPriorityQosPolicyItemProvider.dispose();
-        if (userDataQosPolicyItemProvider != null)
+        }
+        if (userDataQosPolicyItemProvider != null) {
             userDataQosPolicyItemProvider.dispose();
-        if (periodItemProvider != null)
+        }
+        if (periodItemProvider != null) {
             periodItemProvider.dispose();
-        if (writerDataLifecycleQosPolicyItemProvider != null)
+        }
+        if (writerDataLifecycleQosPolicyItemProvider != null) {
             writerDataLifecycleQosPolicyItemProvider.dispose();
-        if (applicationTargetItemProvider != null)
+        }
+        if (applicationTargetItemProvider != null) {
             applicationTargetItemProvider.dispose();
-        if (transportItemProvider != null)
+        }
+        if (transportItemProvider != null) {
             transportItemProvider.dispose();
+        }
     }
 
 }

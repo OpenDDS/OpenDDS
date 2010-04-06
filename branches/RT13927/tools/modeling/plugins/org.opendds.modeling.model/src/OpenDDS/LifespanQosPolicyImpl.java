@@ -78,10 +78,11 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
         if (eNotificationRequired()) {
             ENotificationImpl notification = new ENotificationImpl(this, Notification.SET,
                     OpenDDSPackage.LIFESPAN_QOS_POLICY__DURATION, oldDuration, newDuration);
-            if (msgs == null)
+            if (msgs == null) {
                 msgs = notification;
-            else
+            } else {
                 msgs.add(notification);
+            }
         }
         return msgs;
     }
@@ -94,18 +95,22 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     public void setDuration(Period newDuration) {
         if (newDuration != duration) {
             NotificationChain msgs = null;
-            if (duration != null)
+            if (duration != null) {
                 msgs = ((InternalEObject) duration).eInverseRemove(this, EOPPOSITE_FEATURE_BASE
                         - OpenDDSPackage.LIFESPAN_QOS_POLICY__DURATION, null, msgs);
-            if (newDuration != null)
+            }
+            if (newDuration != null) {
                 msgs = ((InternalEObject) newDuration).eInverseAdd(this, EOPPOSITE_FEATURE_BASE
                         - OpenDDSPackage.LIFESPAN_QOS_POLICY__DURATION, null, msgs);
+            }
             msgs = basicSetDuration(newDuration, msgs);
-            if (msgs != null)
+            if (msgs != null) {
                 msgs.dispatch();
-        } else if (eNotificationRequired())
+            }
+        } else if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.LIFESPAN_QOS_POLICY__DURATION,
                     newDuration, newDuration));
+        }
     }
 
     /**

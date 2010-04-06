@@ -83,9 +83,10 @@ public class TransportPriorityQosPolicyImpl extends QosPolicyImpl implements Tra
     public void setValue(long newValue) {
         long oldValue = value;
         value = newValue;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TRANSPORT_PRIORITY_QOS_POLICY__VALUE,
                     oldValue, value));
+        }
     }
 
     /**
@@ -153,8 +154,9 @@ public class TransportPriorityQosPolicyImpl extends QosPolicyImpl implements Tra
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (value: ");

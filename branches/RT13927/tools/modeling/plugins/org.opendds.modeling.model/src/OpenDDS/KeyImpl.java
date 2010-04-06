@@ -68,9 +68,10 @@ public class KeyImpl extends EObjectImpl implements Key {
             InternalEObject oldMember = (InternalEObject) member;
             member = (KeyField) eResolveProxy(oldMember);
             if (member != oldMember) {
-                if (eNotificationRequired())
+                if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.KEY__MEMBER, oldMember,
                             member));
+                }
             }
         }
         return member;
@@ -93,8 +94,9 @@ public class KeyImpl extends EObjectImpl implements Key {
     public void setMember(KeyField newMember) {
         KeyField oldMember = member;
         member = newMember;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.KEY__MEMBER, oldMember, member));
+        }
     }
 
     /**
@@ -106,8 +108,9 @@ public class KeyImpl extends EObjectImpl implements Key {
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
             case OpenDDSPackage.KEY__MEMBER:
-                if (resolve)
+                if (resolve) {
                     return getMember();
+                }
                 return basicGetMember();
         }
         return super.eGet(featureID, resolve, coreType);

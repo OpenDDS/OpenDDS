@@ -83,9 +83,10 @@ public class DestinationOrderQosPolicyImpl extends QosPolicyImpl implements Dest
     public void setKind(DestinationOrderQosPolicyKind newKind) {
         DestinationOrderQosPolicyKind oldKind = kind;
         kind = newKind == null ? KIND_EDEFAULT : newKind;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.DESTINATION_ORDER_QOS_POLICY__KIND,
                     oldKind, kind));
+        }
     }
 
     /**
@@ -153,8 +154,9 @@ public class DestinationOrderQosPolicyImpl extends QosPolicyImpl implements Dest
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (kind: ");

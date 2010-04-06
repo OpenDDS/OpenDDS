@@ -84,9 +84,10 @@ public class TransportImpl extends EObjectImpl implements Transport {
     public void setTransport_id(long newTransport_id) {
         long oldTransport_id = transport_id;
         transport_id = newTransport_id;
-        if (eNotificationRequired())
+        if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TRANSPORT__TRANSPORT_ID,
                     oldTransport_id, transport_id));
+        }
     }
 
     /**
@@ -154,8 +155,9 @@ public class TransportImpl extends EObjectImpl implements Transport {
      */
     @Override
     public String toString() {
-        if (eIsProxy())
+        if (eIsProxy()) {
             return super.toString();
+        }
 
         StringBuffer result = new StringBuffer(super.toString());
         result.append(" (transport_id: ");
