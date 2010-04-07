@@ -28,10 +28,13 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_to
 
   Header_Files {
     DCPS
+    DCPS/transport/framework
+    DCPS/yard
   }
 
   Template_Files {
     DCPS
+    DCPS/transport/framework
   }
 
   IDL_Files {

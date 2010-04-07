@@ -699,11 +699,15 @@ DDS::QueryCondition_ptr DataReaderImpl::create_querycondition(
 ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_, 0);
-  DDS::QueryCondition_var qc = new QueryConditionImpl(this, sample_states,
-                                                        view_states, instance_states, query_expression, query_parameters);
-  DDS::ReadCondition_var rc = DDS::ReadCondition::_duplicate(qc);
-  read_conditions_.insert(rc);
-  return qc._retn();
+  try {
+    DDS::QueryCondition_var qc = new QueryConditionImpl(this, sample_states,
+      view_states, instance_states, query_expression, query_parameters);
+    DDS::ReadCondition_var rc = DDS::ReadCondition::_duplicate(qc);
+    read_conditions_.insert(rc);
+    return qc._retn();
+  } catch (std::exception&) {
+    return 0;
+  }
 }
 #endif
 

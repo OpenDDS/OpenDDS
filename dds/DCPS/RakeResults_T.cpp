@@ -12,25 +12,10 @@
 #include "dds/DCPS/RakeResults_T.h"
 #include "dds/DCPS/SubscriptionInstance.h"
 #include "dds/DCPS/DataReaderImpl.h"
+#include "dds/DCPS/QueryConditionImpl.h"
 
 namespace OpenDDS {
 namespace DCPS {
-
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-
-const char ORDER_BY[] = "ORDER BY ";
-const size_t ORDER_BY_SIZE = sizeof(ORDER_BY) - 1 /*no null*/;
-const char WHITESPACE[] = " \t\f\v\n\r"; //from std::isspace() in <cctype>
-
-inline void trim(std::string& str)
-{
-  size_t start = str.find_first_not_of(WHITESPACE);
-  size_t end = str.find_last_not_of(WHITESPACE);
-  std::string sub = str.substr(start, end - start + 1);
-  str.swap(sub);
-}
-
-#endif
 
 template <class SampleSeq>
 RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
@@ -47,28 +32,24 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
   , cond_(cond)
   , oper_(oper)
   , do_sort_(false)
+  , do_filter_(false)
 {
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
   if (cond_) {
-    CORBA::String_var query_var = cond_->get_query_expression();
-    std::string query(query_var);
-    //FUTURE: Parse the "WHERE" clause, including get_query_parameters()
-    size_t idx_orderby = query.find(ORDER_BY);
-    do_sort_ = (idx_orderby != std::string::npos);
+    const QueryConditionImpl* qci = dynamic_cast<QueryConditionImpl*>(cond_);
+    do_filter_ = qci->hasFilter();
+    std::vector<std::string> order_bys = qci->getOrderBys();
+    do_sort_ = order_bys.size() > 0;
 
-    if (do_sort_ && query.size() > idx_orderby + ORDER_BY_SIZE) {
+    if (do_sort_) {
       typename SampleSeq::value_type* sample = 0;
-      std::string order_by_str(query, idx_orderby + ORDER_BY_SIZE);
       ComparatorBase::Ptr cmp = 0;
 
       // Iterate in reverse over the comma-separated fields so that the
       // top-level comparison is the leftmost.  The others will be chained.
-      for (size_t idx = std::string::npos, end = order_by_str.size(); idx;) {
-        idx = order_by_str.rfind(',', end - 1) + 1; //npos -> 0
-        std::string fieldspec(order_by_str, idx, end - idx);
-        end = idx - 1;
-        trim(fieldspec);
+      for (size_t i = order_bys.size(); i > 0; --i) {
+        const std::string& fieldspec = order_bys[i - 1];
         //FUTURE: handle ASC / DESC as an extension to the DDS spec?
         cmp = create_qc_comparator(sample, fieldspec.c_str(), cmp);
       }
@@ -96,8 +77,12 @@ bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
 {
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
-  if (!where_filter(static_cast<typename SampleSeq::value_type*>
-                    (sample->registered_data_))) return false;
+  if (do_filter_) {
+    const QueryConditionImpl* qci = dynamic_cast<QueryConditionImpl*>(cond_);
+    typedef typename SampleSeq::value_type VT;
+    const VT* typed_sample = static_cast<VT*>(sample->registered_data_);
+    if (!qci->filter(*typed_sample)) return false;
+  }
 
 #endif
 
@@ -158,14 +143,18 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
 
     if (result.second) { // first time we've seen this Instance
       ReceivedDataElement& mrs = *inst.rcvd_samples_.tail_;
-      id.MRS_disposed_gc_ = mrs.disposed_generation_count_;
-      id.MRS_nowriters_gc_ = mrs.no_writers_generation_count_;
+      id.MRS_disposed_gc_ =
+        static_cast<CORBA::Long>(mrs.disposed_generation_count_);
+      id.MRS_nowriters_gc_ =
+        static_cast<CORBA::Long>(mrs.no_writers_generation_count_);
     }
 
     if (iter->index_in_instance_ >= id.MRSIC_index_) {
       id.MRSIC_index_ = iter->index_in_instance_;
-      id.MRSIC_disposed_gc_ = rde->disposed_generation_count_;
-      id.MRSIC_nowriters_gc_ = rde->no_writers_generation_count_;
+      id.MRSIC_disposed_gc_ =
+        static_cast<CORBA::Long>(rde->disposed_generation_count_);
+      id.MRSIC_nowriters_gc_ =
+        static_cast<CORBA::Long>(rde->no_writers_generation_count_);
     }
 
     if (!id.most_recent_generation_) {
@@ -190,7 +179,8 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
 
     if (id.most_recent_generation_) inst.instance_state_.accessed();
 
-    CORBA::Long sample_rank = id.sampleinfo_positions_.size();
+    CORBA::Long sample_rank =
+      static_cast<CORBA::Long>(id.sampleinfo_positions_.size());
 
     for (IndexList::iterator s_iter(id.sampleinfo_positions_.begin()),
          s_end(id.sampleinfo_positions_.end()); s_iter != s_end; ++s_iter) {
@@ -213,14 +203,14 @@ bool RakeResults<SampleSeq>::copy_to_user()
 
   if (do_sort_) {
     size_t len = std::min(sorted_.size(), static_cast<size_t>(max_samples_));
-    received_data_p.internal_set_length(len);
-    info_seq_.length(len);
+    received_data_p.internal_set_length(static_cast<CORBA::ULong>(len));
+    info_seq_.length(static_cast<CORBA::ULong>(len));
     return copy_into(sorted_.begin(), sorted_.end(), received_data_p);
 
   } else {
     size_t len = unsorted_.size(); //can't be larger than max_samples_
-    received_data_p.internal_set_length(len);
-    info_seq_.length(len);
+    received_data_p.internal_set_length(static_cast<CORBA::ULong>(len));
+    info_seq_.length(static_cast<CORBA::ULong>(len));
     return copy_into(unsorted_.begin(), unsorted_.end(), received_data_p);
   }
 }
