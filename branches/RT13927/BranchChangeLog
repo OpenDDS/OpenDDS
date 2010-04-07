@@ -1,3 +1,13 @@
+Wed Apr  7 17:27:51 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.edit/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.editor/.project:
+        * tools/modeling/plugins/org.opendds.modeling.editor/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.editor/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.model/plugin.xml:
+
+          Fixed errornous generation artifacts; editor is now functional.
+
 Tue Apr  6 23:02:24 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.edit/.classpath:
