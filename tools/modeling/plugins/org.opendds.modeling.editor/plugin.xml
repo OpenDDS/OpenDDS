@@ -7,15 +7,15 @@
 
    <extension point="org.eclipse.ui.newWizards">
       <category
-            id="org.eclipse.emf.ecore.Wizard.category.ID"
+            id="org.opendds.modeling.Wizard.category.ID"
             name="%_UI_Wizard_category"/>
       <wizard
             id="OpenDDS.OpenDDSModelWizardID"
-            name="%_UI_ModelModelWizard_label"
+            name="%_UI_OpenDDSModelWizard_label"
             class="OpenDDS.OpenDDSModelWizard"
-            category="org.eclipse.emf.ecore.Wizard.category.ID"
+            category="org.opendds.modeling.Wizard.category.ID"
             icon="icons/full/obj16/OpenDDSModelFile.gif">
-         <description>%_UI_ModelModelWizard_description</description>
+         <description>%_UI_OpenDDSModelWizard_description</description>
          <selection class="org.eclipse.core.resources.IResource"/>
       </wizard>
    </extension>
@@ -23,7 +23,7 @@
    <extension point="org.eclipse.ui.editors">
       <editor
             id="OpenDDS.ModelEditorID"
-            name="%_UI_ModelEditor_label"
+            name="%_UI_OpenDDSEditor_label"
             icon="icons/full/obj16/OpenDDSModelFile.gif"
             extensions="opendds"
             class="OpenDDS.OpenDDSEditor"

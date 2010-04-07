@@ -8,7 +8,7 @@
    <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
       <factory
             uri="http://www.opendds.org/schemas/modeling/OpenDDS"
-            class="OpenDDS.ModelItemProviderAdapterFactory"
+            class="OpenDDS.OpenDDSItemProviderAdapterFactory"
             supportedTypes=
               "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
                org.eclipse.emf.edit.provider.IStructuredItemContentProvider
