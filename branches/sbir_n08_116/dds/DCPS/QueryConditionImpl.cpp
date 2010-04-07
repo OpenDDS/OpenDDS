@@ -37,6 +37,18 @@ ACE_THROW_SPEC((CORBA::SystemException))
   return DDS::RETCODE_OK;
 }
 
+std::vector<std::string>
+QueryConditionImpl::getOrderBys() const
+{
+  return evaluator_.getOrderBys();
+}
+
+bool
+QueryConditionImpl::hasFilter() const
+{
+  return evaluator_.hasFilter();
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

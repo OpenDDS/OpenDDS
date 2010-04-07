@@ -1,3 +1,37 @@
+Wed Apr  7 15:32:56 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        The following is for the Content-Subscription Profile implementation
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/FilterExpressionGrammar.h:
+
+          Added a new class for evaluating filter (and query) expressions.
+          This is an early version that parses the expression but doesn't do
+          much evaluation, except as needed to support the current OpenDDS
+          feature of "ORDER BY" sorting in QueryCondition.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/QueryConditionImpl.h:
+        * dds/DCPS/QueryConditionImpl.cpp:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RakeResults_T.cpp:
+
+          Made use of the new FilterEvaluator for QueryCondition.
+
+        * dds/DCPS/ZeroCopySeq_T.inl:
+
+          Fixed 64-bit warnings (when size_t is 64 bits).  Also in
+          RakeResults_T.cpp.
+
+        * dds/DdsDcps.mpc:
+        * dds/DCPS/yard/*:
+
+          yard (Yet Another Recursive Descent) is a 3rd-party library for
+          constructing parsers at compile time using template metaprogramming.
+          The license is either Public Domain (if applicable) or MIT, so we
+          are including it here.  It's a header-only library.
+
 Wed Mar 24 15:43:43 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         Merging trunk changes 3113:3165 out to branch.

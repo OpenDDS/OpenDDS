@@ -63,12 +63,6 @@ public:
   bool copy_to_user();
 
 private:
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  bool where_filter(typename SampleSeq::value_type*) const {
-    return true; //FUTURE: implement
-  }
-#endif
-
   template <class FwdIter>
   bool copy_into(FwdIter begin, FwdIter end,
                  typename SampleSeq::PrivateMemberAccess& received_data_p);
@@ -102,7 +96,7 @@ private:
     ComparatorBase::Ptr cmp_;
   };
 
-  bool do_sort_;
+  bool do_sort_, do_filter_;
   typedef std::multiset<RakeData, SortedSetCmp> SortedSet;
 
   // Contains data for QueryCondition/Ordered access
