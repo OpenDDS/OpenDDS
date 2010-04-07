@@ -1,3 +1,11 @@
+Wed Apr  7 17:54:07 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/models/OpenDDS.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.model/models/OpenDDS.genmodel:
+
+          Updated the domain model with defaulted QosPolicy values and a
+          new top-level EClass to encapsulate modeled entities.
+
 Wed Apr  7 17:27:51 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.edit/plugin.xml:
