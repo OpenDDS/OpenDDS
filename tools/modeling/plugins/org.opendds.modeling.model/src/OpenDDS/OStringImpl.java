@@ -12,9 +12,8 @@ package OpenDDS;
 import org.eclipse.emf.ecore.EClass;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>OString</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>OString</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
  *
@@ -22,8 +21,7 @@ import org.eclipse.emf.ecore.EClass;
  */
 public class OStringImpl extends SimpleImpl implements OString {
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected OStringImpl() {
@@ -31,8 +29,7 @@ public class OStringImpl extends SimpleImpl implements OString {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -40,4 +37,4 @@ public class OStringImpl extends SimpleImpl implements OString {
         return OpenDDSPackage.Literals.OSTRING;
     }
 
-} //OStringImpl
+} // OStringImpl

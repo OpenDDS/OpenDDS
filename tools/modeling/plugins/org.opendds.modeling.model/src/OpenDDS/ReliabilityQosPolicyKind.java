@@ -16,19 +16,18 @@ import java.util.List;
 import org.eclipse.emf.common.util.Enumerator;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the literals of the enumeration '<em><b>Reliability Qos Policy Kind</b></em>',
- * and utility methods for working with them.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the literals of the
+ * enumeration '<em><b>Reliability Qos Policy Kind</b></em>', and
+ * utility methods for working with them. <!-- end-user-doc -->
  * @see OpenDDS.OpenDDSPackage#getReliabilityQosPolicyKind()
  * @model
  * @generated
  */
 public enum ReliabilityQosPolicyKind implements Enumerator {
     /**
-     * The '<em><b>BEST EFFORT</b></em>' literal object.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * The '<em><b>BEST EFFORT</b></em>' literal object. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @see #BEST_EFFORT_VALUE
      * @generated
      * @ordered
@@ -36,9 +35,9 @@ public enum ReliabilityQosPolicyKind implements Enumerator {
     BEST_EFFORT(0, "BEST_EFFORT", "BEST_EFFORT"),
 
     /**
-     * The '<em><b>RELIABLE</b></em>' literal object.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * The '<em><b>RELIABLE</b></em>' literal object. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @see #RELIABLE_VALUE
      * @generated
      * @ordered
@@ -46,13 +45,15 @@ public enum ReliabilityQosPolicyKind implements Enumerator {
     RELIABLE(1, "RELIABLE", "RELIABLE");
 
     /**
-     * The '<em><b>BEST EFFORT</b></em>' literal value.
-     * <!-- begin-user-doc -->
+     * The '<em><b>BEST EFFORT</b></em>' literal value. <!--
+     * begin-user-doc -->
      * <p>
-     * If the meaning of '<em><b>BEST EFFORT</b></em>' literal object isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of '<em><b>BEST EFFORT</b></em>' literal object
+     * isn't clear, there really should be more of a description
+     * here...
      * </p>
      * <!-- end-user-doc -->
+     *
      * @see #BEST_EFFORT
      * @model
      * @generated
@@ -61,13 +62,15 @@ public enum ReliabilityQosPolicyKind implements Enumerator {
     public static final int BEST_EFFORT_VALUE = 0;
 
     /**
-     * The '<em><b>RELIABLE</b></em>' literal value.
-     * <!-- begin-user-doc -->
+     * The '<em><b>RELIABLE</b></em>' literal value. <!--
+     * begin-user-doc -->
      * <p>
-     * If the meaning of '<em><b>RELIABLE</b></em>' literal object isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of '<em><b>RELIABLE</b></em>' literal object
+     * isn't clear, there really should be more of a description
+     * here...
      * </p>
      * <!-- end-user-doc -->
+     *
      * @see #RELIABLE
      * @model
      * @generated
@@ -76,18 +79,20 @@ public enum ReliabilityQosPolicyKind implements Enumerator {
     public static final int RELIABLE_VALUE = 1;
 
     /**
-     * An array of all the '<em><b>Reliability Qos Policy Kind</b></em>' enumerators.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * An array of all the '
+     * <em><b>Reliability Qos Policy Kind</b></em>' enumerators. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @generated
      */
     private static final ReliabilityQosPolicyKind[] VALUES_ARRAY = new ReliabilityQosPolicyKind[] { BEST_EFFORT,
             RELIABLE, };
 
     /**
-     * A public read-only list of all the '<em><b>Reliability Qos Policy Kind</b></em>' enumerators.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * A public read-only list of all the '
+     * <em><b>Reliability Qos Policy Kind</b></em>' enumerators. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @generated
      */
     public static final List<ReliabilityQosPolicyKind> VALUES = Collections.unmodifiableList(Arrays
@@ -95,8 +100,8 @@ public enum ReliabilityQosPolicyKind implements Enumerator {
 
     /**
      * Returns the '<em><b>Reliability Qos Policy Kind</b></em>' literal with the specified literal value.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @generated
      */
     public static ReliabilityQosPolicyKind get(String literal) {
@@ -111,8 +116,8 @@ public enum ReliabilityQosPolicyKind implements Enumerator {
 
     /**
      * Returns the '<em><b>Reliability Qos Policy Kind</b></em>' literal with the specified name.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @generated
      */
     public static ReliabilityQosPolicyKind getByName(String name) {
@@ -127,8 +132,8 @@ public enum ReliabilityQosPolicyKind implements Enumerator {
 
     /**
      * Returns the '<em><b>Reliability Qos Policy Kind</b></em>' literal with the specified integer value.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @generated
      */
     public static ReliabilityQosPolicyKind get(int value) {
@@ -142,30 +147,27 @@ public enum ReliabilityQosPolicyKind implements Enumerator {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private final int value;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private final String name;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private final String literal;
 
     /**
      * Only this class can construct instances.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @generated
      */
     private ReliabilityQosPolicyKind(int value, String name, String literal) {
@@ -175,8 +177,7 @@ public enum ReliabilityQosPolicyKind implements Enumerator {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public int getValue() {
@@ -184,8 +185,7 @@ public enum ReliabilityQosPolicyKind implements Enumerator {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public String getName() {
@@ -193,8 +193,7 @@ public enum ReliabilityQosPolicyKind implements Enumerator {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public String getLiteral() {
@@ -203,8 +202,8 @@ public enum ReliabilityQosPolicyKind implements Enumerator {
 
     /**
      * Returns the literal value of the enumerator, which is its string representation.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @generated
      */
     @Override
@@ -212,4 +211,4 @@ public enum ReliabilityQosPolicyKind implements Enumerator {
         return literal;
     }
 
-} //ReliabilityQosPolicyKind
+} // ReliabilityQosPolicyKind

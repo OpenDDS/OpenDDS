@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Enum</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Enum</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -44,8 +43,8 @@ public interface Enum extends TopicField {
 
     /**
      * Sets the value of the '{@link OpenDDS.Enum#getLabels <em>Labels</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Labels</em>' attribute.
      * @see #getLabels()
      * @generated

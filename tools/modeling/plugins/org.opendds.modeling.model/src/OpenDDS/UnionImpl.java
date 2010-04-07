@@ -15,9 +15,8 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Union</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Union</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -31,8 +30,7 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     /**
      * The cached value of the '{@link #getSwitch() <em>Switch</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getSwitch()
      * @generated
      * @ordered
@@ -41,8 +39,7 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
 
     /**
      * The cached value of the '{@link #getCases() <em>Cases</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getCases()
      * @generated
      * @ordered
@@ -50,8 +47,7 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     protected Case cases;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected UnionImpl() {
@@ -59,8 +55,7 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -69,8 +64,7 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public TopicField getSwitch() {
@@ -88,8 +82,7 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public TopicField basicGetSwitch() {
@@ -97,8 +90,7 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setSwitch(TopicField newSwitch) {
@@ -110,8 +102,7 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public Case getCases() {
@@ -129,8 +120,7 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public Case basicGetCases() {
@@ -138,8 +128,7 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setCases(Case newCases) {
@@ -151,8 +140,7 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -173,8 +161,7 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -191,8 +178,7 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -209,8 +195,7 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -224,4 +209,4 @@ public class UnionImpl extends ConstructedTopicTypeImpl implements Union {
         return super.eIsSet(featureID);
     }
 
-} //UnionImpl
+} // UnionImpl

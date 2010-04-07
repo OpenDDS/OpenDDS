@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>User Data Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>User Data Qos Policy</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -44,8 +43,7 @@ public interface UserDataQosPolicy extends QosPolicy {
 
     /**
      * Sets the value of the '{@link OpenDDS.UserDataQosPolicy#getValue <em>Value</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @param value the new value of the '<em>Value</em>' attribute.
      * @see #getValue()
      * @generated

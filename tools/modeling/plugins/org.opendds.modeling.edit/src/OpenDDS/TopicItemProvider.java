@@ -23,17 +23,17 @@ import org.eclipse.emf.edit.provider.IStructuredItemContentProvider;
 import org.eclipse.emf.edit.provider.ITreeItemContentProvider;
 
 /**
- * This is the item provider adapter for a {@link OpenDDS.Topic} object.
- * <!-- begin-user-doc -->
- * <!-- end-user-doc -->
+ * This is the item provider adapter for a {@link OpenDDS.Topic}
+ * object. <!-- begin-user-doc --> <!-- end-user-doc -->
+ * 
  * @generated
  */
-public class TopicItemProvider extends DomainEntityItemProvider implements IEditingDomainItemProvider,
+public class TopicItemProvider extends TopicDescriptionItemProvider implements IEditingDomainItemProvider,
         IStructuredItemContentProvider, ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource {
     /**
-     * This constructs an instance from a factory and a notifier.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This constructs an instance from a factory and a notifier. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public TopicItemProvider(AdapterFactory adapterFactory) {
@@ -42,8 +42,8 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
 
     /**
      * This returns the property descriptors for the adapted class.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -51,7 +51,6 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
         if (itemPropertyDescriptors == null) {
             super.getPropertyDescriptors(object);
 
-            addTypePropertyDescriptor(object);
             addDurability_servicePropertyDescriptor(object);
             addTransport_priorityPropertyDescriptor(object);
             addTopic_dataPropertyDescriptor(object);
@@ -69,23 +68,9 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
     }
 
     /**
-     * This adds a property descriptor for the Type feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    protected void addTypePropertyDescriptor(Object object) {
-        itemPropertyDescriptors.add(createItemPropertyDescriptor(((ComposeableAdapterFactory) adapterFactory)
-                .getRootAdapterFactory(), getResourceLocator(), getString("_UI_TopicDescription_type_feature"),
-                getString("_UI_PropertyDescriptor_description", "_UI_TopicDescription_type_feature",
-                        "_UI_TopicDescription_type"), OpenDDSPackage.Literals.TOPIC_DESCRIPTION__TYPE, true, false,
-                true, null, null, null));
-    }
-
-    /**
-     * This adds a property descriptor for the Durability service feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the Durability service
+     * feature. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addDurability_servicePropertyDescriptor(Object object) {
@@ -97,9 +82,9 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
     }
 
     /**
-     * This adds a property descriptor for the Transport priority feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the Transport priority
+     * feature. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addTransport_priorityPropertyDescriptor(Object object) {
@@ -112,8 +97,8 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
 
     /**
      * This adds a property descriptor for the Topic data feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addTopic_dataPropertyDescriptor(Object object) {
@@ -124,9 +109,9 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
     }
 
     /**
-     * This adds a property descriptor for the Resource limits feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the Resource limits
+     * feature. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addResource_limitsPropertyDescriptor(Object object) {
@@ -138,8 +123,8 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
 
     /**
      * This adds a property descriptor for the Reliability feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addReliabilityPropertyDescriptor(Object object) {
@@ -150,9 +135,9 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
     }
 
     /**
-     * This adds a property descriptor for the Ownership feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the Ownership feature. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addOwnershipPropertyDescriptor(Object object) {
@@ -164,8 +149,8 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
 
     /**
      * This adds a property descriptor for the Liveliness feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addLivelinessPropertyDescriptor(Object object) {
@@ -176,9 +161,9 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
     }
 
     /**
-     * This adds a property descriptor for the History feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the History feature. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addHistoryPropertyDescriptor(Object object) {
@@ -190,8 +175,8 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
 
     /**
      * This adds a property descriptor for the Durability feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addDurabilityPropertyDescriptor(Object object) {
@@ -202,9 +187,9 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
     }
 
     /**
-     * This adds a property descriptor for the Destination order feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the Destination order
+     * feature. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addDestination_orderPropertyDescriptor(Object object) {
@@ -217,9 +202,9 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
     }
 
     /**
-     * This adds a property descriptor for the Deadline feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the Deadline feature. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addDeadlinePropertyDescriptor(Object object) {
@@ -231,8 +216,8 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
 
     /**
      * This adds a property descriptor for the Latency budget feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addLatency_budgetPropertyDescriptor(Object object) {
@@ -243,9 +228,9 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
     }
 
     /**
-     * This returns Topic.gif.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This returns Topic.gif. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -254,9 +239,9 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
     }
 
     /**
-     * This returns the label text for the adapted class.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This returns the label text for the adapted class. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -267,10 +252,12 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
     }
 
     /**
-     * This handles model notifications by calling {@link #updateChildren} to update any cached
-     * children and by creating a viewer notification, which it passes to {@link #fireNotifyChanged}.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This handles model notifications by calling
+     * {@link #updateChildren} to update any cached children and by
+     * creating a viewer notification, which it passes to
+     * {@link #fireNotifyChanged}. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -280,10 +267,10 @@ public class TopicItemProvider extends DomainEntityItemProvider implements IEdit
     }
 
     /**
-     * This adds {@link org.eclipse.emf.edit.command.CommandParameter}s describing the children
-     * that can be created under this object.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds {@link org.eclipse.emf.edit.command.CommandParameter}
+     * s describing the children that can be created under this
+     * object. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

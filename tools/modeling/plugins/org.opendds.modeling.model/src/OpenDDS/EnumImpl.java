@@ -14,9 +14,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Enum</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Enum</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -29,8 +28,7 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     /**
      * The default value of the '{@link #getLabels() <em>Labels</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getLabels()
      * @generated
      * @ordered
@@ -39,8 +37,7 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
 
     /**
      * The cached value of the '{@link #getLabels() <em>Labels</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getLabels()
      * @generated
      * @ordered
@@ -48,8 +45,7 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     protected String labels = LABELS_EDEFAULT;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected EnumImpl() {
@@ -57,8 +53,7 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -67,8 +62,7 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public String getLabels() {
@@ -76,8 +70,7 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setLabels(String newLabels) {
@@ -89,8 +82,7 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -103,8 +95,7 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -118,8 +109,7 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -133,8 +123,7 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -147,8 +136,7 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -164,4 +152,4 @@ public class EnumImpl extends TopicFieldImpl implements OpenDDS.Enum {
         return result.toString();
     }
 
-} //EnumImpl
+} // EnumImpl

@@ -14,13 +14,14 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Transport Priority Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Transport Priority Qos Policy</b></em>'. <!-- end-user-doc
+ * -->
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.TransportPriorityQosPolicyImpl#getValue <em>Value</em>}</li>
+ * <li>{@link OpenDDS.TransportPriorityQosPolicyImpl#getValue <em>
+ * Value</em>}</li>
  * </ul>
  * </p>
  *
@@ -29,8 +30,7 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public class TransportPriorityQosPolicyImpl extends QosPolicyImpl implements TransportPriorityQosPolicy {
     /**
      * The default value of the '{@link #getValue() <em>Value</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getValue()
      * @generated
      * @ordered
@@ -39,8 +39,7 @@ public class TransportPriorityQosPolicyImpl extends QosPolicyImpl implements Tra
 
     /**
      * The cached value of the '{@link #getValue() <em>Value</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getValue()
      * @generated
      * @ordered
@@ -48,8 +47,7 @@ public class TransportPriorityQosPolicyImpl extends QosPolicyImpl implements Tra
     protected long value = VALUE_EDEFAULT;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected TransportPriorityQosPolicyImpl() {
@@ -57,8 +55,7 @@ public class TransportPriorityQosPolicyImpl extends QosPolicyImpl implements Tra
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -67,8 +64,7 @@ public class TransportPriorityQosPolicyImpl extends QosPolicyImpl implements Tra
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public long getValue() {
@@ -76,8 +72,7 @@ public class TransportPriorityQosPolicyImpl extends QosPolicyImpl implements Tra
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setValue(long newValue) {
@@ -90,8 +85,7 @@ public class TransportPriorityQosPolicyImpl extends QosPolicyImpl implements Tra
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -104,8 +98,7 @@ public class TransportPriorityQosPolicyImpl extends QosPolicyImpl implements Tra
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -119,8 +112,7 @@ public class TransportPriorityQosPolicyImpl extends QosPolicyImpl implements Tra
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -134,8 +126,7 @@ public class TransportPriorityQosPolicyImpl extends QosPolicyImpl implements Tra
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -148,8 +139,7 @@ public class TransportPriorityQosPolicyImpl extends QosPolicyImpl implements Tra
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -165,4 +155,4 @@ public class TransportPriorityQosPolicyImpl extends QosPolicyImpl implements Tra
         return result.toString();
     }
 
-} //TransportPriorityQosPolicyImpl
+} // TransportPriorityQosPolicyImpl

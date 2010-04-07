@@ -14,9 +14,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Entity Factory Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Entity Factory Qos Policy</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -28,19 +27,23 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  */
 public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityFactoryQosPolicy {
     /**
-     * The default value of the '{@link #isAutoenable_created_entities() <em>Autoenable created entities</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * The default value of the '
+     * {@link #isAutoenable_created_entities()
+     * <em>Autoenable created entities</em>}' attribute. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @see #isAutoenable_created_entities()
      * @generated
      * @ordered
      */
-    protected static final boolean AUTOENABLE_CREATED_ENTITIES_EDEFAULT = false;
+    protected static final boolean AUTOENABLE_CREATED_ENTITIES_EDEFAULT = true;
 
     /**
-     * The cached value of the '{@link #isAutoenable_created_entities() <em>Autoenable created entities</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * The cached value of the '
+     * {@link #isAutoenable_created_entities()
+     * <em>Autoenable created entities</em>}' attribute. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @see #isAutoenable_created_entities()
      * @generated
      * @ordered
@@ -48,8 +51,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
     protected boolean autoenable_created_entities = AUTOENABLE_CREATED_ENTITIES_EDEFAULT;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected EntityFactoryQosPolicyImpl() {
@@ -57,8 +59,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -67,8 +68,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public boolean isAutoenable_created_entities() {
@@ -76,8 +76,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setAutoenable_created_entities(boolean newAutoenable_created_entities) {
@@ -91,8 +90,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -105,8 +103,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -120,8 +117,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -135,8 +131,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -149,8 +144,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -166,4 +160,4 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
         return result.toString();
     }
 
-} //EntityFactoryQosPolicyImpl
+} // EntityFactoryQosPolicyImpl

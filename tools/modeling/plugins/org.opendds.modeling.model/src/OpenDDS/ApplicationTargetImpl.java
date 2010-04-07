@@ -18,9 +18,8 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.emf.ecore.util.EObjectResolvingEList;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Application Target</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Application Target</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -57,8 +56,8 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
 
     /**
      * The default value of the '{@link #getLanguage() <em>Language</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getLanguage()
      * @generated
      * @ordered
@@ -67,8 +66,8 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
 
     /**
      * The cached value of the '{@link #getLanguage() <em>Language</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getLanguage()
      * @generated
      * @ordered
@@ -77,8 +76,8 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
 
     /**
      * The default value of the '{@link #getPlatform() <em>Platform</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getPlatform()
      * @generated
      * @ordered
@@ -87,8 +86,8 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
 
     /**
      * The cached value of the '{@link #getPlatform() <em>Platform</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getPlatform()
      * @generated
      * @ordered
@@ -126,8 +125,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     protected String service_arguments = SERVICE_ARGUMENTS_EDEFAULT;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected ApplicationTargetImpl() {
@@ -135,8 +133,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -145,8 +142,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public ComponentType getComponent_type() {
@@ -154,8 +150,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setComponent_type(ComponentType newComponent_type) {
@@ -168,8 +163,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public LanguageType getLanguage() {
@@ -177,8 +171,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setLanguage(LanguageType newLanguage) {
@@ -191,8 +184,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public PlatformType getPlatform() {
@@ -200,8 +192,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setPlatform(PlatformType newPlatform) {
@@ -214,8 +205,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EList<DomainParticipant> getParticipants() {
@@ -227,8 +217,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public String getService_arguments() {
@@ -236,8 +225,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setService_arguments(String newService_arguments) {
@@ -250,8 +238,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -272,8 +259,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @SuppressWarnings("unchecked")
@@ -301,8 +287,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -328,8 +313,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -351,8 +335,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -374,4 +357,4 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
         return result.toString();
     }
 
-} //ApplicationTargetImpl
+} // ApplicationTargetImpl

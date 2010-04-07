@@ -13,9 +13,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.EObjectImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>OU Long Long</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>OU Long Long</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
  *
@@ -23,8 +22,7 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
  */
 public class OULongLongImpl extends EObjectImpl implements OULongLong {
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected OULongLongImpl() {
@@ -32,8 +30,7 @@ public class OULongLongImpl extends EObjectImpl implements OULongLong {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -41,4 +38,4 @@ public class OULongLongImpl extends EObjectImpl implements OULongLong {
         return OpenDDSPackage.Literals.OU_LONG_LONG;
     }
 
-} //OULongLongImpl
+} // OULongLongImpl

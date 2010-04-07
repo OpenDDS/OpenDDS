@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Data Reader</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Data Reader</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -48,8 +47,8 @@ public interface DataReader extends DataReaderWriter {
 
     /**
      * Sets the value of the '{@link OpenDDS.DataReader#getTopic <em>Topic</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Topic</em>' reference.
      * @see #getTopic()
      * @generated
@@ -60,8 +59,9 @@ public interface DataReader extends DataReaderWriter {
      * Returns the value of the '<em><b>Reader data lifecycle</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Reader data lifecycle</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Reader data lifecycle</em>'
+     * reference isn't clear, there really should be more of a
+     * description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Reader data lifecycle</em>' reference.
@@ -74,8 +74,8 @@ public interface DataReader extends DataReaderWriter {
 
     /**
      * Sets the value of the '{@link OpenDDS.DataReader#getReader_data_lifecycle <em>Reader data lifecycle</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @param value the new value of the '<em>Reader data lifecycle</em>' reference.
      * @see #getReader_data_lifecycle()
      * @generated
@@ -86,8 +86,9 @@ public interface DataReader extends DataReaderWriter {
      * Returns the value of the '<em><b>Transport priority</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Transport priority</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Transport priority</em>' reference
+     * isn't clear, there really should be more of a description
+     * here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Transport priority</em>' reference.
@@ -100,8 +101,8 @@ public interface DataReader extends DataReaderWriter {
 
     /**
      * Sets the value of the '{@link OpenDDS.DataReader#getTransport_priority <em>Transport priority</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @param value the new value of the '<em>Transport priority</em>' reference.
      * @see #getTransport_priority()
      * @generated
@@ -112,8 +113,9 @@ public interface DataReader extends DataReaderWriter {
      * Returns the value of the '<em><b>Durability service</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Durability service</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Durability service</em>' reference
+     * isn't clear, there really should be more of a description
+     * here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Durability service</em>' reference.
@@ -126,8 +128,8 @@ public interface DataReader extends DataReaderWriter {
 
     /**
      * Sets the value of the '{@link OpenDDS.DataReader#getDurability_service <em>Durability service</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @param value the new value of the '<em>Durability service</em>' reference.
      * @see #getDurability_service()
      * @generated
@@ -138,8 +140,9 @@ public interface DataReader extends DataReaderWriter {
      * Returns the value of the '<em><b>Ownership strength</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Ownership strength</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Ownership strength</em>' reference
+     * isn't clear, there really should be more of a description
+     * here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Ownership strength</em>' reference.
@@ -152,8 +155,8 @@ public interface DataReader extends DataReaderWriter {
 
     /**
      * Sets the value of the '{@link OpenDDS.DataReader#getOwnership_strength <em>Ownership strength</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @param value the new value of the '<em>Ownership strength</em>' reference.
      * @see #getOwnership_strength()
      * @generated

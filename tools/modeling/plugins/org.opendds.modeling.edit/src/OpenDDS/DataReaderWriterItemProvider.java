@@ -23,17 +23,18 @@ import org.eclipse.emf.edit.provider.IStructuredItemContentProvider;
 import org.eclipse.emf.edit.provider.ITreeItemContentProvider;
 
 /**
- * This is the item provider adapter for a {@link OpenDDS.DataReaderWriter} object.
- * <!-- begin-user-doc -->
+ * This is the item provider adapter for a
+ * {@link OpenDDS.DataReaderWriter} object. <!-- begin-user-doc -->
  * <!-- end-user-doc -->
+ * 
  * @generated
  */
 public class DataReaderWriterItemProvider extends DomainEntityItemProvider implements IEditingDomainItemProvider,
         IStructuredItemContentProvider, ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource {
     /**
-     * This constructs an instance from a factory and a notifier.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This constructs an instance from a factory and a notifier. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DataReaderWriterItemProvider(AdapterFactory adapterFactory) {
@@ -42,8 +43,8 @@ public class DataReaderWriterItemProvider extends DomainEntityItemProvider imple
 
     /**
      * This returns the property descriptors for the adapted class.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -67,8 +68,8 @@ public class DataReaderWriterItemProvider extends DomainEntityItemProvider imple
 
     /**
      * This adds a property descriptor for the Durability feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addDurabilityPropertyDescriptor(Object object) {
@@ -80,9 +81,9 @@ public class DataReaderWriterItemProvider extends DomainEntityItemProvider imple
     }
 
     /**
-     * This adds a property descriptor for the Destination order feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the Destination order
+     * feature. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addDestination_orderPropertyDescriptor(Object object) {
@@ -95,9 +96,9 @@ public class DataReaderWriterItemProvider extends DomainEntityItemProvider imple
     }
 
     /**
-     * This adds a property descriptor for the Deadline feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the Deadline feature. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addDeadlinePropertyDescriptor(Object object) {
@@ -109,9 +110,9 @@ public class DataReaderWriterItemProvider extends DomainEntityItemProvider imple
     }
 
     /**
-     * This adds a property descriptor for the History feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the History feature. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addHistoryPropertyDescriptor(Object object) {
@@ -123,9 +124,9 @@ public class DataReaderWriterItemProvider extends DomainEntityItemProvider imple
     }
 
     /**
-     * This adds a property descriptor for the User data feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the User data feature. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addUser_dataPropertyDescriptor(Object object) {
@@ -137,9 +138,9 @@ public class DataReaderWriterItemProvider extends DomainEntityItemProvider imple
     }
 
     /**
-     * This adds a property descriptor for the Resource limits feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the Resource limits
+     * feature. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addResource_limitsPropertyDescriptor(Object object) {
@@ -152,9 +153,9 @@ public class DataReaderWriterItemProvider extends DomainEntityItemProvider imple
     }
 
     /**
-     * This adds a property descriptor for the Ownership feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the Ownership feature. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addOwnershipPropertyDescriptor(Object object) {
@@ -167,8 +168,8 @@ public class DataReaderWriterItemProvider extends DomainEntityItemProvider imple
 
     /**
      * This adds a property descriptor for the Liveliness feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addLivelinessPropertyDescriptor(Object object) {
@@ -181,8 +182,8 @@ public class DataReaderWriterItemProvider extends DomainEntityItemProvider imple
 
     /**
      * This adds a property descriptor for the Latency budget feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addLatency_budgetPropertyDescriptor(Object object) {
@@ -196,8 +197,8 @@ public class DataReaderWriterItemProvider extends DomainEntityItemProvider imple
 
     /**
      * This adds a property descriptor for the Reliability feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addReliabilityPropertyDescriptor(Object object) {
@@ -209,9 +210,9 @@ public class DataReaderWriterItemProvider extends DomainEntityItemProvider imple
     }
 
     /**
-     * This returns the label text for the adapted class.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This returns the label text for the adapted class. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -222,10 +223,12 @@ public class DataReaderWriterItemProvider extends DomainEntityItemProvider imple
     }
 
     /**
-     * This handles model notifications by calling {@link #updateChildren} to update any cached
-     * children and by creating a viewer notification, which it passes to {@link #fireNotifyChanged}.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This handles model notifications by calling
+     * {@link #updateChildren} to update any cached children and by
+     * creating a viewer notification, which it passes to
+     * {@link #fireNotifyChanged}. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -235,10 +238,10 @@ public class DataReaderWriterItemProvider extends DomainEntityItemProvider imple
     }
 
     /**
-     * This adds {@link org.eclipse.emf.edit.command.CommandParameter}s describing the children
-     * that can be created under this object.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds {@link org.eclipse.emf.edit.command.CommandParameter}
+     * s describing the children that can be created under this
+     * object. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Multi Topic</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Multi Topic</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -27,14 +26,18 @@ package OpenDDS;
  */
 public interface MultiTopic extends TopicDescription {
     /**
-     * Returns the value of the '<em><b>Subscription expression</b></em>' attribute.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '
+     * <em><b>Subscription expression</b></em>' attribute. <!--
+     * begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Subscription expression</em>' attribute isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Subscription expression</em>'
+     * attribute isn't clear, there really should be more of a
+     * description here...
      * </p>
      * <!-- end-user-doc -->
-     * @return the value of the '<em>Subscription expression</em>' attribute.
+     *
+     * @return the value of the '<em>Subscription expression</em>'
+     *         attribute.
      * @see #setSubscription_expression(String)
      * @see OpenDDS.OpenDDSPackage#getMultiTopic_Subscription_expression()
      * @model
@@ -43,10 +46,14 @@ public interface MultiTopic extends TopicDescription {
     String getSubscription_expression();
 
     /**
-     * Sets the value of the '{@link OpenDDS.MultiTopic#getSubscription_expression <em>Subscription expression</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @param value the new value of the '<em>Subscription expression</em>' attribute.
+     * Sets the value of the '
+     * {@link OpenDDS.MultiTopic#getSubscription_expression
+     * <em>Subscription expression</em>}' attribute. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
+     * @param value
+     *            the new value of the '
+     *            <em>Subscription expression</em>' attribute.
      * @see #getSubscription_expression()
      * @generated
      */

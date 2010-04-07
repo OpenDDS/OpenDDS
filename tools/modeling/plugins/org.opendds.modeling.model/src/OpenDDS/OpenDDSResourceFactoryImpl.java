@@ -14,17 +14,16 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl;
 
 /**
- * <!-- begin-user-doc -->
- * The <b>Resource Factory</b> associated with the package.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> The <b>Resource Factory</b> associated with
+ * the package. <!-- end-user-doc -->
  * @see OpenDDS.OpenDDSResourceImpl
  * @generated
  */
 public class OpenDDSResourceFactoryImpl extends ResourceFactoryImpl {
     /**
-     * Creates an instance of the resource factory.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * Creates an instance of the resource factory. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @generated
      */
     public OpenDDSResourceFactoryImpl() {
@@ -43,4 +42,4 @@ public class OpenDDSResourceFactoryImpl extends ResourceFactoryImpl {
         return result;
     }
 
-} //OpenDDSResourceFactoryImpl
+} // OpenDDSResourceFactoryImpl

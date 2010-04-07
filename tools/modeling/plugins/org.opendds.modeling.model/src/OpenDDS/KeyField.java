@@ -12,9 +12,8 @@ package OpenDDS;
 import org.eclipse.emf.ecore.EObject;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Key Field</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Key Field</b></em>'. <!-- end-user-doc -->
  *
  *
  * @see OpenDDS.OpenDDSPackage#getKeyField()

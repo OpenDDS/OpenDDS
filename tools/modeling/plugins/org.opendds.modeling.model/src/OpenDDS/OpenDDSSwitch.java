@@ -15,31 +15,29 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 
 /**
- * <!-- begin-user-doc -->
- * The <b>Switch</b> for the model's inheritance hierarchy.
- * It supports the call {@link #doSwitch(EObject) doSwitch(object)}
- * to invoke the <code>caseXXX</code> method for each class of the model,
- * starting with the actual class of the object
- * and proceeding up the inheritance hierarchy
- * until a non-null result is returned,
- * which is the result of the switch.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> The <b>Switch</b> for the model's
+ * inheritance hierarchy. It supports the call
+ * {@link #doSwitch(EObject) doSwitch(object)} to invoke the
+ * <code>caseXXX</code> method for each class of the model, starting
+ * with the actual class of the object and proceeding up the
+ * inheritance hierarchy until a non-null result is returned, which is
+ * the result of the switch. <!-- end-user-doc -->
  * @see OpenDDS.OpenDDSPackage
  * @generated
  */
 public class OpenDDSSwitch<T> {
     /**
      * The cached model package
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @generated
      */
     protected static OpenDDSPackage modelPackage;
 
     /**
      * Creates an instance of the switch.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @generated
      */
     public OpenDDSSwitch() {
@@ -49,10 +47,12 @@ public class OpenDDSSwitch<T> {
     }
 
     /**
-     * Calls <code>caseXXX</code> for each class of the model until one returns a non null result; it yields that result.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @return the first non-null result returned by a <code>caseXXX</code> call.
+     * Calls <code>caseXXX</code> for each class of the model until
+     * one returns a non null result; it yields that result. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
+     * @return the first non-null result returned by a
+     *         <code>caseXXX</code> call.
      * @generated
      */
     public T doSwitch(EObject theEObject) {
@@ -60,10 +60,12 @@ public class OpenDDSSwitch<T> {
     }
 
     /**
-     * Calls <code>caseXXX</code> for each class of the model until one returns a non null result; it yields that result.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @return the first non-null result returned by a <code>caseXXX</code> call.
+     * Calls <code>caseXXX</code> for each class of the model until
+     * one returns a non null result; it yields that result. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
+     * @return the first non-null result returned by a
+     *         <code>caseXXX</code> call.
      * @generated
      */
     protected T doSwitch(EClass theEClass, EObject theEObject) {
@@ -76,10 +78,12 @@ public class OpenDDSSwitch<T> {
     }
 
     /**
-     * Calls <code>caseXXX</code> for each class of the model until one returns a non null result; it yields that result.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @return the first non-null result returned by a <code>caseXXX</code> call.
+     * Calls <code>caseXXX</code> for each class of the model until
+     * one returns a non null result; it yields that result. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
+     * @return the first non-null result returned by a
+     *         <code>caseXXX</code> call.
      * @generated
      */
     protected T doSwitch(int classifierID, EObject theEObject) {
@@ -135,6 +139,12 @@ public class OpenDDSSwitch<T> {
                     result = caseTopicDescription(contentFilteredTopic);
                 }
                 if (result == null) {
+                    result = caseDomainEntity(contentFilteredTopic);
+                }
+                if (result == null) {
+                    result = caseModelEntity(contentFilteredTopic);
+                }
+                if (result == null) {
                     result = caseNamedEntity(contentFilteredTopic);
                 }
                 if (result == null) {
@@ -152,6 +162,12 @@ public class OpenDDSSwitch<T> {
                     result = caseTopicDescription(multiTopic);
                 }
                 if (result == null) {
+                    result = caseDomainEntity(multiTopic);
+                }
+                if (result == null) {
+                    result = caseModelEntity(multiTopic);
+                }
+                if (result == null) {
                     result = caseNamedEntity(multiTopic);
                 }
                 if (result == null) {
@@ -166,10 +182,13 @@ public class OpenDDSSwitch<T> {
                 Topic topic = (Topic) theEObject;
                 T result = caseTopic(topic);
                 if (result == null) {
+                    result = caseTopicDescription(topic);
+                }
+                if (result == null) {
                     result = caseDomainEntity(topic);
                 }
                 if (result == null) {
-                    result = caseTopicDescription(topic);
+                    result = caseModelEntity(topic);
                 }
                 if (result == null) {
                     result = caseNamedEntity(topic);
@@ -185,6 +204,12 @@ public class OpenDDSSwitch<T> {
             case OpenDDSPackage.TOPIC_DESCRIPTION: {
                 TopicDescription topicDescription = (TopicDescription) theEObject;
                 T result = caseTopicDescription(topicDescription);
+                if (result == null) {
+                    result = caseDomainEntity(topicDescription);
+                }
+                if (result == null) {
+                    result = caseModelEntity(topicDescription);
+                }
                 if (result == null) {
                     result = caseNamedEntity(topicDescription);
                 }
@@ -206,12 +231,6 @@ public class OpenDDSSwitch<T> {
                     result = caseTopicField(array);
                 }
                 if (result == null) {
-                    result = caseNamedEntity(array);
-                }
-                if (result == null) {
-                    result = caseEntity(array);
-                }
-                if (result == null) {
                     result = defaultCase(theEObject);
                 }
                 return result;
@@ -229,12 +248,6 @@ public class OpenDDSSwitch<T> {
                     result = caseKeyField(oBoolean);
                 }
                 if (result == null) {
-                    result = caseNamedEntity(oBoolean);
-                }
-                if (result == null) {
-                    result = caseEntity(oBoolean);
-                }
-                if (result == null) {
                     result = defaultCase(theEObject);
                 }
                 return result;
@@ -244,12 +257,6 @@ public class OpenDDSSwitch<T> {
                 T result = caseCase(case_);
                 if (result == null) {
                     result = caseTopicField(case_);
-                }
-                if (result == null) {
-                    result = caseNamedEntity(case_);
-                }
-                if (result == null) {
-                    result = caseEntity(case_);
                 }
                 if (result == null) {
                     result = defaultCase(theEObject);
@@ -269,12 +276,6 @@ public class OpenDDSSwitch<T> {
                     result = caseKeyField(oChar);
                 }
                 if (result == null) {
-                    result = caseNamedEntity(oChar);
-                }
-                if (result == null) {
-                    result = caseEntity(oChar);
-                }
-                if (result == null) {
                     result = defaultCase(theEObject);
                 }
                 return result;
@@ -286,12 +287,6 @@ public class OpenDDSSwitch<T> {
                     result = caseTopicField(collection);
                 }
                 if (result == null) {
-                    result = caseNamedEntity(collection);
-                }
-                if (result == null) {
-                    result = caseEntity(collection);
-                }
-                if (result == null) {
                     result = defaultCase(theEObject);
                 }
                 return result;
@@ -301,12 +296,6 @@ public class OpenDDSSwitch<T> {
                 T result = caseConstructedTopicType(constructedTopicType);
                 if (result == null) {
                     result = caseTopicField(constructedTopicType);
-                }
-                if (result == null) {
-                    result = caseNamedEntity(constructedTopicType);
-                }
-                if (result == null) {
-                    result = caseEntity(constructedTopicType);
                 }
                 if (result == null) {
                     result = defaultCase(theEObject);
@@ -326,12 +315,6 @@ public class OpenDDSSwitch<T> {
                     result = caseKeyField(oDouble);
                 }
                 if (result == null) {
-                    result = caseNamedEntity(oDouble);
-                }
-                if (result == null) {
-                    result = caseEntity(oDouble);
-                }
-                if (result == null) {
                     result = defaultCase(theEObject);
                 }
                 return result;
@@ -341,12 +324,6 @@ public class OpenDDSSwitch<T> {
                 T result = caseEnum(enum_);
                 if (result == null) {
                     result = caseTopicField(enum_);
-                }
-                if (result == null) {
-                    result = caseNamedEntity(enum_);
-                }
-                if (result == null) {
-                    result = caseEntity(enum_);
                 }
                 if (result == null) {
                     result = defaultCase(theEObject);
@@ -364,12 +341,6 @@ public class OpenDDSSwitch<T> {
                 }
                 if (result == null) {
                     result = caseKeyField(oFloat);
-                }
-                if (result == null) {
-                    result = caseNamedEntity(oFloat);
-                }
-                if (result == null) {
-                    result = caseEntity(oFloat);
                 }
                 if (result == null) {
                     result = defaultCase(theEObject);
@@ -405,12 +376,6 @@ public class OpenDDSSwitch<T> {
                     result = caseKeyField(oLong);
                 }
                 if (result == null) {
-                    result = caseNamedEntity(oLong);
-                }
-                if (result == null) {
-                    result = caseEntity(oLong);
-                }
-                if (result == null) {
                     result = defaultCase(theEObject);
                 }
                 return result;
@@ -426,12 +391,6 @@ public class OpenDDSSwitch<T> {
                 }
                 if (result == null) {
                     result = caseKeyField(oLongLong);
-                }
-                if (result == null) {
-                    result = caseNamedEntity(oLongLong);
-                }
-                if (result == null) {
-                    result = caseEntity(oLongLong);
                 }
                 if (result == null) {
                     result = defaultCase(theEObject);
@@ -451,12 +410,6 @@ public class OpenDDSSwitch<T> {
                     result = caseKeyField(oOctet);
                 }
                 if (result == null) {
-                    result = caseNamedEntity(oOctet);
-                }
-                if (result == null) {
-                    result = caseEntity(oOctet);
-                }
-                if (result == null) {
                     result = defaultCase(theEObject);
                 }
                 return result;
@@ -469,12 +422,6 @@ public class OpenDDSSwitch<T> {
                 }
                 if (result == null) {
                     result = caseTopicField(sequence);
-                }
-                if (result == null) {
-                    result = caseNamedEntity(sequence);
-                }
-                if (result == null) {
-                    result = caseEntity(sequence);
                 }
                 if (result == null) {
                     result = defaultCase(theEObject);
@@ -494,12 +441,6 @@ public class OpenDDSSwitch<T> {
                     result = caseKeyField(oShort);
                 }
                 if (result == null) {
-                    result = caseNamedEntity(oShort);
-                }
-                if (result == null) {
-                    result = caseEntity(oShort);
-                }
-                if (result == null) {
                     result = defaultCase(theEObject);
                 }
                 return result;
@@ -512,12 +453,6 @@ public class OpenDDSSwitch<T> {
                 }
                 if (result == null) {
                     result = caseKeyField(simple);
-                }
-                if (result == null) {
-                    result = caseNamedEntity(simple);
-                }
-                if (result == null) {
-                    result = caseEntity(simple);
                 }
                 if (result == null) {
                     result = defaultCase(theEObject);
@@ -537,12 +472,6 @@ public class OpenDDSSwitch<T> {
                     result = caseKeyField(oString);
                 }
                 if (result == null) {
-                    result = caseNamedEntity(oString);
-                }
-                if (result == null) {
-                    result = caseEntity(oString);
-                }
-                if (result == null) {
                     result = defaultCase(theEObject);
                 }
                 return result;
@@ -554,13 +483,10 @@ public class OpenDDSSwitch<T> {
                     result = caseConstructedTopicType(topicStruct);
                 }
                 if (result == null) {
+                    result = caseModelEntity(topicStruct);
+                }
+                if (result == null) {
                     result = caseTopicField(topicStruct);
-                }
-                if (result == null) {
-                    result = caseNamedEntity(topicStruct);
-                }
-                if (result == null) {
-                    result = caseEntity(topicStruct);
                 }
                 if (result == null) {
                     result = defaultCase(theEObject);
@@ -571,12 +497,6 @@ public class OpenDDSSwitch<T> {
                 TopicField topicField = (TopicField) theEObject;
                 T result = caseTopicField(topicField);
                 if (result == null) {
-                    result = caseNamedEntity(topicField);
-                }
-                if (result == null) {
-                    result = caseEntity(topicField);
-                }
-                if (result == null) {
                     result = defaultCase(theEObject);
                 }
                 return result;
@@ -586,12 +506,6 @@ public class OpenDDSSwitch<T> {
                 T result = caseTypedef(typedef);
                 if (result == null) {
                     result = caseTopicField(typedef);
-                }
-                if (result == null) {
-                    result = caseNamedEntity(typedef);
-                }
-                if (result == null) {
-                    result = caseEntity(typedef);
                 }
                 if (result == null) {
                     result = defaultCase(theEObject);
@@ -622,12 +536,6 @@ public class OpenDDSSwitch<T> {
                 }
                 if (result == null) {
                     result = caseTopicField(union);
-                }
-                if (result == null) {
-                    result = caseNamedEntity(union);
-                }
-                if (result == null) {
-                    result = caseEntity(union);
                 }
                 if (result == null) {
                     result = defaultCase(theEObject);
@@ -706,6 +614,9 @@ public class OpenDDSSwitch<T> {
                     result = caseNamedEntity(domain);
                 }
                 if (result == null) {
+                    result = caseModelEntity(domain);
+                }
+                if (result == null) {
                     result = caseEntity(domain);
                 }
                 if (result == null) {
@@ -718,6 +629,9 @@ public class OpenDDSSwitch<T> {
                 T result = caseDomainParticipant(domainParticipant);
                 if (result == null) {
                     result = caseDomainEntity(domainParticipant);
+                }
+                if (result == null) {
+                    result = caseModelEntity(domainParticipant);
                 }
                 if (result == null) {
                     result = caseNamedEntity(domainParticipant);
@@ -797,6 +711,9 @@ public class OpenDDSSwitch<T> {
                     result = caseSpecification(deadlineQosPolicy);
                 }
                 if (result == null) {
+                    result = caseModelEntity(deadlineQosPolicy);
+                }
+                if (result == null) {
                     result = caseEntity(deadlineQosPolicy);
                 }
                 if (result == null) {
@@ -812,6 +729,9 @@ public class OpenDDSSwitch<T> {
                 }
                 if (result == null) {
                     result = caseSpecification(destinationOrderQosPolicy);
+                }
+                if (result == null) {
+                    result = caseModelEntity(destinationOrderQosPolicy);
                 }
                 if (result == null) {
                     result = caseEntity(destinationOrderQosPolicy);
@@ -831,6 +751,9 @@ public class OpenDDSSwitch<T> {
                     result = caseSpecification(durabilityQosPolicy);
                 }
                 if (result == null) {
+                    result = caseModelEntity(durabilityQosPolicy);
+                }
+                if (result == null) {
                     result = caseEntity(durabilityQosPolicy);
                 }
                 if (result == null) {
@@ -846,6 +769,9 @@ public class OpenDDSSwitch<T> {
                 }
                 if (result == null) {
                     result = caseSpecification(durabilityServiceQosPolicy);
+                }
+                if (result == null) {
+                    result = caseModelEntity(durabilityServiceQosPolicy);
                 }
                 if (result == null) {
                     result = caseEntity(durabilityServiceQosPolicy);
@@ -865,6 +791,9 @@ public class OpenDDSSwitch<T> {
                     result = caseSpecification(entityFactoryQosPolicy);
                 }
                 if (result == null) {
+                    result = caseModelEntity(entityFactoryQosPolicy);
+                }
+                if (result == null) {
                     result = caseEntity(entityFactoryQosPolicy);
                 }
                 if (result == null) {
@@ -880,6 +809,9 @@ public class OpenDDSSwitch<T> {
                 }
                 if (result == null) {
                     result = caseSpecification(groupDataQosPolicy);
+                }
+                if (result == null) {
+                    result = caseModelEntity(groupDataQosPolicy);
                 }
                 if (result == null) {
                     result = caseEntity(groupDataQosPolicy);
@@ -899,6 +831,9 @@ public class OpenDDSSwitch<T> {
                     result = caseSpecification(historyQosPolicy);
                 }
                 if (result == null) {
+                    result = caseModelEntity(historyQosPolicy);
+                }
+                if (result == null) {
                     result = caseEntity(historyQosPolicy);
                 }
                 if (result == null) {
@@ -914,6 +849,9 @@ public class OpenDDSSwitch<T> {
                 }
                 if (result == null) {
                     result = caseSpecification(latencyBudgetQosPolicy);
+                }
+                if (result == null) {
+                    result = caseModelEntity(latencyBudgetQosPolicy);
                 }
                 if (result == null) {
                     result = caseEntity(latencyBudgetQosPolicy);
@@ -933,6 +871,9 @@ public class OpenDDSSwitch<T> {
                     result = caseSpecification(lifespanQosPolicy);
                 }
                 if (result == null) {
+                    result = caseModelEntity(lifespanQosPolicy);
+                }
+                if (result == null) {
                     result = caseEntity(lifespanQosPolicy);
                 }
                 if (result == null) {
@@ -948,6 +889,9 @@ public class OpenDDSSwitch<T> {
                 }
                 if (result == null) {
                     result = caseSpecification(livelinessQosPolicy);
+                }
+                if (result == null) {
+                    result = caseModelEntity(livelinessQosPolicy);
                 }
                 if (result == null) {
                     result = caseEntity(livelinessQosPolicy);
@@ -967,6 +911,9 @@ public class OpenDDSSwitch<T> {
                     result = caseSpecification(ownershipQosPolicy);
                 }
                 if (result == null) {
+                    result = caseModelEntity(ownershipQosPolicy);
+                }
+                if (result == null) {
                     result = caseEntity(ownershipQosPolicy);
                 }
                 if (result == null) {
@@ -982,6 +929,9 @@ public class OpenDDSSwitch<T> {
                 }
                 if (result == null) {
                     result = caseSpecification(ownershipStrengthQosPolicy);
+                }
+                if (result == null) {
+                    result = caseModelEntity(ownershipStrengthQosPolicy);
                 }
                 if (result == null) {
                     result = caseEntity(ownershipStrengthQosPolicy);
@@ -1001,6 +951,9 @@ public class OpenDDSSwitch<T> {
                     result = caseSpecification(partitionQosPolicy);
                 }
                 if (result == null) {
+                    result = caseModelEntity(partitionQosPolicy);
+                }
+                if (result == null) {
                     result = caseEntity(partitionQosPolicy);
                 }
                 if (result == null) {
@@ -1018,6 +971,9 @@ public class OpenDDSSwitch<T> {
                     result = caseSpecification(presentationQosPolicy);
                 }
                 if (result == null) {
+                    result = caseModelEntity(presentationQosPolicy);
+                }
+                if (result == null) {
                     result = caseEntity(presentationQosPolicy);
                 }
                 if (result == null) {
@@ -1030,6 +986,9 @@ public class OpenDDSSwitch<T> {
                 T result = caseQosPolicy(qosPolicy);
                 if (result == null) {
                     result = caseSpecification(qosPolicy);
+                }
+                if (result == null) {
+                    result = caseModelEntity(qosPolicy);
                 }
                 if (result == null) {
                     result = caseEntity(qosPolicy);
@@ -1049,6 +1008,9 @@ public class OpenDDSSwitch<T> {
                     result = caseSpecification(readerDataLifecycleQosPolicy);
                 }
                 if (result == null) {
+                    result = caseModelEntity(readerDataLifecycleQosPolicy);
+                }
+                if (result == null) {
                     result = caseEntity(readerDataLifecycleQosPolicy);
                 }
                 if (result == null) {
@@ -1064,6 +1026,9 @@ public class OpenDDSSwitch<T> {
                 }
                 if (result == null) {
                     result = caseSpecification(reliabilityQosPolicy);
+                }
+                if (result == null) {
+                    result = caseModelEntity(reliabilityQosPolicy);
                 }
                 if (result == null) {
                     result = caseEntity(reliabilityQosPolicy);
@@ -1083,6 +1048,9 @@ public class OpenDDSSwitch<T> {
                     result = caseSpecification(resourceLimitsQosPolicy);
                 }
                 if (result == null) {
+                    result = caseModelEntity(resourceLimitsQosPolicy);
+                }
+                if (result == null) {
                     result = caseEntity(resourceLimitsQosPolicy);
                 }
                 if (result == null) {
@@ -1098,6 +1066,9 @@ public class OpenDDSSwitch<T> {
                 }
                 if (result == null) {
                     result = caseSpecification(timeBasedFilterQosPolicy);
+                }
+                if (result == null) {
+                    result = caseModelEntity(timeBasedFilterQosPolicy);
                 }
                 if (result == null) {
                     result = caseEntity(timeBasedFilterQosPolicy);
@@ -1117,6 +1088,9 @@ public class OpenDDSSwitch<T> {
                     result = caseSpecification(topicDataQosPolicy);
                 }
                 if (result == null) {
+                    result = caseModelEntity(topicDataQosPolicy);
+                }
+                if (result == null) {
                     result = caseEntity(topicDataQosPolicy);
                 }
                 if (result == null) {
@@ -1134,6 +1108,9 @@ public class OpenDDSSwitch<T> {
                     result = caseSpecification(transportPriorityQosPolicy);
                 }
                 if (result == null) {
+                    result = caseModelEntity(transportPriorityQosPolicy);
+                }
+                if (result == null) {
                     result = caseEntity(transportPriorityQosPolicy);
                 }
                 if (result == null) {
@@ -1149,6 +1126,9 @@ public class OpenDDSSwitch<T> {
                 }
                 if (result == null) {
                     result = caseSpecification(userDataQosPolicy);
+                }
+                if (result == null) {
+                    result = caseModelEntity(userDataQosPolicy);
                 }
                 if (result == null) {
                     result = caseEntity(userDataQosPolicy);
@@ -1176,6 +1156,9 @@ public class OpenDDSSwitch<T> {
                     result = caseSpecification(writerDataLifecycleQosPolicy);
                 }
                 if (result == null) {
+                    result = caseModelEntity(writerDataLifecycleQosPolicy);
+                }
+                if (result == null) {
                     result = caseEntity(writerDataLifecycleQosPolicy);
                 }
                 if (result == null) {
@@ -1190,6 +1173,9 @@ public class OpenDDSSwitch<T> {
                     result = caseEntity(applicationTarget);
                 }
                 if (result == null) {
+                    result = caseModelEntity(applicationTarget);
+                }
+                if (result == null) {
                     result = defaultCase(theEObject);
                 }
                 return result;
@@ -1197,6 +1183,28 @@ public class OpenDDSSwitch<T> {
             case OpenDDSPackage.TRANSPORT: {
                 Transport transport = (Transport) theEObject;
                 T result = caseTransport(transport);
+                if (result == null) {
+                    result = caseEntity(transport);
+                }
+                if (result == null) {
+                    result = caseModelEntity(transport);
+                }
+                if (result == null) {
+                    result = defaultCase(theEObject);
+                }
+                return result;
+            }
+            case OpenDDSPackage.MODEL: {
+                Model model = (Model) theEObject;
+                T result = caseModel(model);
+                if (result == null) {
+                    result = defaultCase(theEObject);
+                }
+                return result;
+            }
+            case OpenDDSPackage.MODEL_ENTITY: {
+                ModelEntity modelEntity = (ModelEntity) theEObject;
+                T result = caseModelEntity(modelEntity);
                 if (result == null) {
                     result = defaultCase(theEObject);
                 }
@@ -1209,10 +1217,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Entity</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Entity</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1224,10 +1231,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Named Entity</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Named Entity</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1239,10 +1245,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Specification</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Specification</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1254,10 +1259,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Domain Entity</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Domain Entity</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1269,10 +1273,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Content Filtered Topic</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Content Filtered Topic</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1284,10 +1287,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Multi Topic</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Multi Topic</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1299,10 +1301,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Topic</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Topic</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1314,10 +1315,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Topic Description</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Topic Description</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1329,10 +1329,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Array</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Array</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1344,10 +1343,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>OBoolean</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>OBoolean</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1359,10 +1357,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Case</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Case</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1374,10 +1371,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>OChar</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>OChar</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1389,10 +1385,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Collection</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Collection</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1404,10 +1399,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Constructed Topic Type</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Constructed Topic Type</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1419,10 +1413,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>ODouble</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>ODouble</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1434,10 +1427,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Enum</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Enum</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1449,10 +1441,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>OFloat</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>OFloat</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1464,10 +1455,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Key</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Key</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1479,10 +1469,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Key Field</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Key Field</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1494,10 +1483,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>OLong</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>OLong</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1509,10 +1497,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>OLong Long</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>OLong Long</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1524,10 +1511,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>OOctet</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>OOctet</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1539,10 +1525,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Sequence</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Sequence</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1554,10 +1539,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>OShort</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>OShort</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1569,10 +1553,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Simple</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Simple</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1584,10 +1567,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>OString</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>OString</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1599,10 +1581,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Topic Struct</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Topic Struct</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1614,10 +1595,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Topic Field</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Topic Field</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1629,10 +1609,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Typedef</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Typedef</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1644,10 +1623,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>OU Long</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>OU Long</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1659,10 +1637,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>OU Long Long</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>OU Long Long</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1674,10 +1651,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Union</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Union</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1689,10 +1665,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>OU Short</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>OU Short</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1704,10 +1679,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Data Reader</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Data Reader</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1719,10 +1693,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Data Reader Writer</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Data Reader Writer</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1734,10 +1707,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Data Writer</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Data Writer</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1749,10 +1721,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Domain</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Domain</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1764,10 +1735,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Domain Participant</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Domain Participant</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1779,10 +1749,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Publisher</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Publisher</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1794,10 +1763,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Publisher Subscriber</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Publisher Subscriber</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1809,10 +1777,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Subscriber</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Subscriber</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1824,10 +1791,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Deadline Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Deadline Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1839,10 +1805,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Destination Order Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> This implementation returns null; returning a non-null
+     * result will terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Destination Order Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1854,10 +1819,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Durability Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Durability Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1869,10 +1833,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Durability Service Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> This implementation returns null; returning a non-null
+     * result will terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Durability Service Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1885,9 +1848,8 @@ public class OpenDDSSwitch<T> {
     /**
      * Returns the result of interpreting the object as an instance of '<em>Entity Factory Qos Policy</em>'.
      * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * This implementation returns null; returning a non-null result
+     * will terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Entity Factory Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1899,10 +1861,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Group Data Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Group Data Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1914,10 +1875,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>History Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>History Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1930,9 +1890,8 @@ public class OpenDDSSwitch<T> {
     /**
      * Returns the result of interpreting the object as an instance of '<em>Latency Budget Qos Policy</em>'.
      * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * This implementation returns null; returning a non-null result
+     * will terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Latency Budget Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1944,10 +1903,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Lifespan Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Lifespan Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1959,10 +1917,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Liveliness Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Liveliness Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1974,10 +1931,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Ownership Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Ownership Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -1989,10 +1945,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Ownership Strength Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> This implementation returns null; returning a non-null
+     * result will terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Ownership Strength Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -2004,10 +1959,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Partition Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Partition Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -2020,9 +1974,8 @@ public class OpenDDSSwitch<T> {
     /**
      * Returns the result of interpreting the object as an instance of '<em>Presentation Qos Policy</em>'.
      * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * This implementation returns null; returning a non-null result
+     * will terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Presentation Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -2034,10 +1987,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -2048,13 +2000,16 @@ public class OpenDDSSwitch<T> {
     }
 
     /**
-     * Returns the result of interpreting the object as an instance of '<em>Reader Data Lifecycle Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
-     * @param object the target of the switch.
-     * @return the result of interpreting the object as an instance of '<em>Reader Data Lifecycle Qos Policy</em>'.
+     * Returns the result of interpreting the object as an instance of
+     * '<em>Reader Data Lifecycle Qos Policy</em>'. <!--
+     * begin-user-doc --> This implementation returns null; returning
+     * a non-null result will terminate the switch. <!-- end-user-doc
+     * -->
+     *
+     * @param object
+     *            the target of the switch.
+     * @return the result of interpreting the object as an instance of
+     *         '<em>Reader Data Lifecycle Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
      * @generated
      */
@@ -2064,10 +2019,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Reliability Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Reliability Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -2080,9 +2034,8 @@ public class OpenDDSSwitch<T> {
     /**
      * Returns the result of interpreting the object as an instance of '<em>Resource Limits Qos Policy</em>'.
      * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * This implementation returns null; returning a non-null result
+     * will terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Resource Limits Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -2094,10 +2047,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Time Based Filter Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> This implementation returns null; returning a non-null
+     * result will terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Time Based Filter Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -2109,10 +2061,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Topic Data Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Topic Data Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -2124,10 +2075,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Transport Priority Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> This implementation returns null; returning a non-null
+     * result will terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Transport Priority Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -2139,10 +2089,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>User Data Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>User Data Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -2154,10 +2103,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Period</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Period</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -2168,13 +2116,16 @@ public class OpenDDSSwitch<T> {
     }
 
     /**
-     * Returns the result of interpreting the object as an instance of '<em>Writer Data Lifecycle Qos Policy</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
-     * @param object the target of the switch.
-     * @return the result of interpreting the object as an instance of '<em>Writer Data Lifecycle Qos Policy</em>'.
+     * Returns the result of interpreting the object as an instance of
+     * '<em>Writer Data Lifecycle Qos Policy</em>'. <!--
+     * begin-user-doc --> This implementation returns null; returning
+     * a non-null result will terminate the switch. <!-- end-user-doc
+     * -->
+     *
+     * @param object
+     *            the target of the switch.
+     * @return the result of interpreting the object as an instance of
+     *         '<em>Writer Data Lifecycle Qos Policy</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
      * @generated
      */
@@ -2184,10 +2135,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Application Target</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Application Target</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -2199,10 +2149,9 @@ public class OpenDDSSwitch<T> {
 
     /**
      * Returns the result of interpreting the object as an instance of '<em>Transport</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>Transport</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
@@ -2213,11 +2162,38 @@ public class OpenDDSSwitch<T> {
     }
 
     /**
+     * Returns the result of interpreting the object as an instance of '<em>Model</em>'.
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch. <!-- end-user-doc -->
+     * @param object the target of the switch.
+     * @return the result of interpreting the object as an instance of '<em>Model</em>'.
+     * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+     * @generated
+     */
+    public T caseModel(Model object) {
+        return null;
+    }
+
+    /**
+     * Returns the result of interpreting the object as an instance of '<em>Model Entity</em>'.
+     * <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
+     * @param object the target of the switch.
+     * @return the result of interpreting the object as an instance of '<em>Model Entity</em>'.
+     * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+     * @generated
+     */
+    public T caseModelEntity(ModelEntity object) {
+        return null;
+    }
+
+    /**
      * Returns the result of interpreting the object as an instance of '<em>EObject</em>'.
-     * <!-- begin-user-doc -->
-     * This implementation returns null;
-     * returning a non-null result will terminate the switch, but this is the last case anyway.
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> This implementation
+     * returns null; returning a non-null result will terminate the
+     * switch, but this is the last case anyway. <!-- end-user-doc -->
      * @param object the target of the switch.
      * @return the result of interpreting the object as an instance of '<em>EObject</em>'.
      * @see #doSwitch(org.eclipse.emf.ecore.EObject)
@@ -2227,4 +2203,4 @@ public class OpenDDSSwitch<T> {
         return null;
     }
 
-} //OpenDDSSwitch
+} // OpenDDSSwitch

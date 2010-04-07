@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Union</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Union</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -45,8 +44,8 @@ public interface Union extends ConstructedTopicType {
 
     /**
      * Sets the value of the '{@link OpenDDS.Union#getSwitch <em>Switch</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Switch</em>' reference.
      * @see #getSwitch()
      * @generated
@@ -71,8 +70,8 @@ public interface Union extends ConstructedTopicType {
 
     /**
      * Sets the value of the '{@link OpenDDS.Union#getCases <em>Cases</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Cases</em>' reference.
      * @see #getCases()
      * @generated

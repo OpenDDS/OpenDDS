@@ -12,12 +12,10 @@ package OpenDDS;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
-import org.eclipse.emf.ecore.impl.EObjectImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Transport</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Transport</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -27,11 +25,11 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
  *
  * @generated
  */
-public class TransportImpl extends EObjectImpl implements Transport {
+public class TransportImpl extends EntityImpl implements Transport {
     /**
      * The default value of the '{@link #getTransport_id() <em>Transport id</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getTransport_id()
      * @generated
      * @ordered
@@ -40,8 +38,8 @@ public class TransportImpl extends EObjectImpl implements Transport {
 
     /**
      * The cached value of the '{@link #getTransport_id() <em>Transport id</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getTransport_id()
      * @generated
      * @ordered
@@ -49,8 +47,7 @@ public class TransportImpl extends EObjectImpl implements Transport {
     protected long transport_id = TRANSPORT_ID_EDEFAULT;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected TransportImpl() {
@@ -58,8 +55,7 @@ public class TransportImpl extends EObjectImpl implements Transport {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -68,8 +64,7 @@ public class TransportImpl extends EObjectImpl implements Transport {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public long getTransport_id() {
@@ -77,8 +72,7 @@ public class TransportImpl extends EObjectImpl implements Transport {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setTransport_id(long newTransport_id) {
@@ -91,8 +85,7 @@ public class TransportImpl extends EObjectImpl implements Transport {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -105,8 +98,7 @@ public class TransportImpl extends EObjectImpl implements Transport {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -120,8 +112,7 @@ public class TransportImpl extends EObjectImpl implements Transport {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -135,8 +126,7 @@ public class TransportImpl extends EObjectImpl implements Transport {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -149,8 +139,7 @@ public class TransportImpl extends EObjectImpl implements Transport {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -166,4 +155,4 @@ public class TransportImpl extends EObjectImpl implements Transport {
         return result.toString();
     }
 
-} //TransportImpl
+} // TransportImpl

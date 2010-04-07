@@ -14,9 +14,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>History Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>History Qos Policy</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -30,18 +29,16 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPolicy {
     /**
      * The default value of the '{@link #getDepth() <em>Depth</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getDepth()
      * @generated
      * @ordered
      */
-    protected static final long DEPTH_EDEFAULT = 0L;
+    protected static final long DEPTH_EDEFAULT = 1L;
 
     /**
      * The cached value of the '{@link #getDepth() <em>Depth</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getDepth()
      * @generated
      * @ordered
@@ -50,8 +47,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
 
     /**
      * The default value of the '{@link #getKind() <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getKind()
      * @generated
      * @ordered
@@ -60,8 +56,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
 
     /**
      * The cached value of the '{@link #getKind() <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getKind()
      * @generated
      * @ordered
@@ -69,8 +64,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     protected HistoryQosPolicyKind kind = KIND_EDEFAULT;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected HistoryQosPolicyImpl() {
@@ -78,8 +72,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -88,8 +81,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public long getDepth() {
@@ -97,8 +89,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setDepth(long newDepth) {
@@ -111,8 +102,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public HistoryQosPolicyKind getKind() {
@@ -120,8 +110,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setKind(HistoryQosPolicyKind newKind) {
@@ -134,8 +123,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -150,8 +138,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -168,8 +155,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -186,8 +172,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -202,8 +187,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -221,4 +205,4 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
         return result.toString();
     }
 
-} //HistoryQosPolicyImpl
+} // HistoryQosPolicyImpl

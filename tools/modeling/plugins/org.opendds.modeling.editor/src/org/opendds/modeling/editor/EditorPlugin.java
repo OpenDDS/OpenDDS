@@ -14,32 +14,32 @@ import org.eclipse.emf.common.ui.EclipseUIPlugin;
 import org.eclipse.emf.common.util.ResourceLocator;
 
 /**
- * This is the central singleton for the OpenDDS editor plugin.
- * <!-- begin-user-doc -->
- * <!-- end-user-doc -->
+ * This is the central singleton for the OpenDDS editor plugin. <!--
+ * begin-user-doc --> <!-- end-user-doc -->
+ * 
  * @generated
  */
 public final class EditorPlugin extends EMFPlugin {
     /**
-     * Keep track of the singleton.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * Keep track of the singleton. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
+     * 
      * @generated
      */
     public static final EditorPlugin INSTANCE = new EditorPlugin();
 
     /**
-     * Keep track of the singleton.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * Keep track of the singleton. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
+     * 
      * @generated
      */
     private static Implementation plugin;
 
     /**
-     * Create the instance.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * Create the instance. <!-- begin-user-doc --> <!-- end-user-doc
+     * -->
+     * 
      * @generated
      */
     public EditorPlugin() {
@@ -47,9 +47,9 @@ public final class EditorPlugin extends EMFPlugin {
     }
 
     /**
-     * Returns the singleton instance of the Eclipse plugin.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * Returns the singleton instance of the Eclipse plugin. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @return the singleton instance.
      * @generated
      */
@@ -59,9 +59,9 @@ public final class EditorPlugin extends EMFPlugin {
     }
 
     /**
-     * Returns the singleton instance of the Eclipse plugin.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * Returns the singleton instance of the Eclipse plugin. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @return the singleton instance.
      * @generated
      */
@@ -70,16 +70,16 @@ public final class EditorPlugin extends EMFPlugin {
     }
 
     /**
-     * The actual implementation of the Eclipse <b>Plugin</b>.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * The actual implementation of the Eclipse <b>Plugin</b>. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public static class Implementation extends EclipseUIPlugin {
         /**
-         * Creates an instance.
-         * <!-- begin-user-doc -->
-         * <!-- end-user-doc -->
+         * Creates an instance. <!-- begin-user-doc --> <!--
+         * end-user-doc -->
+         * 
          * @generated
          */
         public Implementation() {

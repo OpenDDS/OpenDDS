@@ -12,9 +12,8 @@ package OpenDDS;
 import org.eclipse.emf.ecore.EObject;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Period</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Period</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -31,7 +30,7 @@ import org.eclipse.emf.ecore.EObject;
 public interface Period extends EObject {
     /**
      * Returns the value of the '<em><b>Seconds</b></em>' attribute.
-     * The default value is <code>"0"</code>.
+     * The default value is <code>"-1"</code>.
      * <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Seconds</em>' attribute isn't clear,
@@ -41,15 +40,15 @@ public interface Period extends EObject {
      * @return the value of the '<em>Seconds</em>' attribute.
      * @see #setSeconds(long)
      * @see OpenDDS.OpenDDSPackage#getPeriod_Seconds()
-     * @model default="0"
+     * @model default="-1"
      * @generated
      */
     long getSeconds();
 
     /**
      * Sets the value of the '{@link OpenDDS.Period#getSeconds <em>Seconds</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Seconds</em>' attribute.
      * @see #getSeconds()
      * @generated
@@ -57,26 +56,27 @@ public interface Period extends EObject {
     void setSeconds(long value);
 
     /**
-     * Returns the value of the '<em><b>Nanoseconds</b></em>' attribute.
-     * The default value is <code>"0"</code>.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Nanoseconds</b></em>'
+     * attribute. The default value is <code>"-1"</code>. <!--
+     * begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Nanoseconds</em>' attribute isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Nanoseconds</em>' attribute isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     *
      * @return the value of the '<em>Nanoseconds</em>' attribute.
      * @see #setNanoseconds(long)
      * @see OpenDDS.OpenDDSPackage#getPeriod_Nanoseconds()
-     * @model default="0"
+     * @model default="-1"
      * @generated
      */
     long getNanoseconds();
 
     /**
      * Sets the value of the '{@link OpenDDS.Period#getNanoseconds <em>Nanoseconds</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Nanoseconds</em>' attribute.
      * @see #getNanoseconds()
      * @generated

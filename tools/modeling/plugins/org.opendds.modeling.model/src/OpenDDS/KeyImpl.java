@@ -16,9 +16,8 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.emf.ecore.impl.EObjectImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Key</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Key</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -31,8 +30,7 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
 public class KeyImpl extends EObjectImpl implements Key {
     /**
      * The cached value of the '{@link #getMember() <em>Member</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getMember()
      * @generated
      * @ordered
@@ -40,8 +38,7 @@ public class KeyImpl extends EObjectImpl implements Key {
     protected KeyField member;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected KeyImpl() {
@@ -49,8 +46,7 @@ public class KeyImpl extends EObjectImpl implements Key {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -59,8 +55,7 @@ public class KeyImpl extends EObjectImpl implements Key {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public KeyField getMember() {
@@ -78,8 +73,7 @@ public class KeyImpl extends EObjectImpl implements Key {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public KeyField basicGetMember() {
@@ -87,8 +81,7 @@ public class KeyImpl extends EObjectImpl implements Key {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setMember(KeyField newMember) {
@@ -100,8 +93,7 @@ public class KeyImpl extends EObjectImpl implements Key {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -117,8 +109,7 @@ public class KeyImpl extends EObjectImpl implements Key {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -132,8 +123,7 @@ public class KeyImpl extends EObjectImpl implements Key {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -147,8 +137,7 @@ public class KeyImpl extends EObjectImpl implements Key {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -160,4 +149,4 @@ public class KeyImpl extends EObjectImpl implements Key {
         return super.eIsSet(featureID);
     }
 
-} //KeyImpl
+} // KeyImpl

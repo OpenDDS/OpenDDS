@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Presentation Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Presentation Qos Policy</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -29,27 +28,30 @@ package OpenDDS;
  */
 public interface PresentationQosPolicy extends QosPolicy {
     /**
-     * Returns the value of the '<em><b>Access scope</b></em>' attribute.
-     * The literals are from the enumeration {@link OpenDDS.PresentationQosPolicyAccessScopeKind}.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Access scope</b></em>'
+     * attribute. The default value is <code>"INSTANCE"</code>. The
+     * literals are from the enumeration
+     * {@link OpenDDS.PresentationQosPolicyAccessScopeKind}. <!--
+     * begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Access scope</em>' attribute isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Access scope</em>' attribute isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     *
      * @return the value of the '<em>Access scope</em>' attribute.
      * @see OpenDDS.PresentationQosPolicyAccessScopeKind
      * @see #setAccess_scope(PresentationQosPolicyAccessScopeKind)
      * @see OpenDDS.OpenDDSPackage#getPresentationQosPolicy_Access_scope()
-     * @model
+     * @model default="INSTANCE"
      * @generated
      */
     PresentationQosPolicyAccessScopeKind getAccess_scope();
 
     /**
      * Sets the value of the '{@link OpenDDS.PresentationQosPolicy#getAccess_scope <em>Access scope</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Access scope</em>' attribute.
      * @see OpenDDS.PresentationQosPolicyAccessScopeKind
      * @see #getAccess_scope()
@@ -58,17 +60,20 @@ public interface PresentationQosPolicy extends QosPolicy {
     void setAccess_scope(PresentationQosPolicyAccessScopeKind value);
 
     /**
-     * Returns the value of the '<em><b>Coherent access</b></em>' attribute.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Coherent access</b></em>'
+     * attribute. The default value is <code>"false"</code>. <!--
+     * begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Coherent access</em>' attribute isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Coherent access</em>' attribute
+     * isn't clear, there really should be more of a description
+     * here...
      * </p>
      * <!-- end-user-doc -->
+     *
      * @return the value of the '<em>Coherent access</em>' attribute.
      * @see #setCoherent_access(boolean)
      * @see OpenDDS.OpenDDSPackage#getPresentationQosPolicy_Coherent_access()
-     * @model
+     * @model default="false"
      * @generated
      */
     boolean isCoherent_access();
@@ -84,17 +89,19 @@ public interface PresentationQosPolicy extends QosPolicy {
     void setCoherent_access(boolean value);
 
     /**
-     * Returns the value of the '<em><b>Ordered access</b></em>' attribute.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Ordered access</b></em>'
+     * attribute. The default value is <code>"false"</code>. <!--
+     * begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Ordered access</em>' attribute isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Ordered access</em>' attribute isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     *
      * @return the value of the '<em>Ordered access</em>' attribute.
      * @see #setOrdered_access(boolean)
      * @see OpenDDS.OpenDDSPackage#getPresentationQosPolicy_Ordered_access()
-     * @model
+     * @model default="false"
      * @generated
      */
     boolean isOrdered_access();

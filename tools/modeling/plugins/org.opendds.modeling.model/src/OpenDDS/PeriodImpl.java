@@ -15,9 +15,8 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.emf.ecore.impl.EObjectImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Period</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Period</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -31,18 +30,17 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
 public class PeriodImpl extends EObjectImpl implements Period {
     /**
      * The default value of the '{@link #getSeconds() <em>Seconds</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getSeconds()
      * @generated
      * @ordered
      */
-    protected static final long SECONDS_EDEFAULT = 0L;
+    protected static final long SECONDS_EDEFAULT = -1L;
 
     /**
      * The cached value of the '{@link #getSeconds() <em>Seconds</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getSeconds()
      * @generated
      * @ordered
@@ -51,18 +49,18 @@ public class PeriodImpl extends EObjectImpl implements Period {
 
     /**
      * The default value of the '{@link #getNanoseconds() <em>Nanoseconds</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getNanoseconds()
      * @generated
      * @ordered
      */
-    protected static final long NANOSECONDS_EDEFAULT = 0L;
+    protected static final long NANOSECONDS_EDEFAULT = -1L;
 
     /**
      * The cached value of the '{@link #getNanoseconds() <em>Nanoseconds</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getNanoseconds()
      * @generated
      * @ordered
@@ -70,8 +68,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
     protected long nanoseconds = NANOSECONDS_EDEFAULT;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected PeriodImpl() {
@@ -79,8 +76,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -89,8 +85,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public long getSeconds() {
@@ -98,8 +93,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setSeconds(long newSeconds) {
@@ -111,8 +105,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public long getNanoseconds() {
@@ -120,8 +113,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setNanoseconds(long newNanoseconds) {
@@ -134,8 +126,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -150,8 +141,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -168,8 +158,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -186,8 +175,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -202,8 +190,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -221,4 +208,4 @@ public class PeriodImpl extends EObjectImpl implements Period {
         return result.toString();
     }
 
-} //PeriodImpl
+} // PeriodImpl

@@ -12,9 +12,8 @@ package OpenDDS;
 import org.eclipse.emf.ecore.EClass;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Domain Entity</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Domain Entity</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
  *
@@ -22,8 +21,7 @@ import org.eclipse.emf.ecore.EClass;
  */
 public abstract class DomainEntityImpl extends NamedEntityImpl implements DomainEntity {
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected DomainEntityImpl() {
@@ -31,8 +29,7 @@ public abstract class DomainEntityImpl extends NamedEntityImpl implements Domain
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -40,4 +37,4 @@ public abstract class DomainEntityImpl extends NamedEntityImpl implements Domain
         return OpenDDSPackage.Literals.DOMAIN_ENTITY;
     }
 
-} //DomainEntityImpl
+} // DomainEntityImpl

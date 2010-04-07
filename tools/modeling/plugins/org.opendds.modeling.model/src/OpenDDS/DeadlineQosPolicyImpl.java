@@ -16,9 +16,8 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Deadline Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Deadline Qos Policy</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -31,8 +30,8 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosPolicy {
     /**
      * The cached value of the '{@link #getPeriod() <em>Period</em>}' containment reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getPeriod()
      * @generated
      * @ordered
@@ -40,8 +39,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     protected Period period;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected DeadlineQosPolicyImpl() {
@@ -49,8 +47,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -59,8 +56,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public Period getPeriod() {
@@ -68,8 +64,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public NotificationChain basicSetPeriod(Period newPeriod, NotificationChain msgs) {
@@ -88,8 +83,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setPeriod(Period newPeriod) {
@@ -114,8 +108,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -128,8 +121,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -142,8 +134,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -157,8 +148,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -172,8 +162,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -185,4 +174,4 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
         return super.eIsSet(featureID);
     }
 
-} //DeadlineQosPolicyImpl
+} // DeadlineQosPolicyImpl

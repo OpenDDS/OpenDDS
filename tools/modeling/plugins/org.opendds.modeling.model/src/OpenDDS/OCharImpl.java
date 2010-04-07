@@ -12,9 +12,8 @@ package OpenDDS;
 import org.eclipse.emf.ecore.EClass;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>OChar</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>OChar</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
  *
@@ -22,8 +21,7 @@ import org.eclipse.emf.ecore.EClass;
  */
 public class OCharImpl extends SimpleImpl implements OChar {
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected OCharImpl() {
@@ -31,8 +29,7 @@ public class OCharImpl extends SimpleImpl implements OChar {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -40,4 +37,4 @@ public class OCharImpl extends SimpleImpl implements OChar {
         return OpenDDSPackage.Literals.OCHAR;
     }
 
-} //OCharImpl
+} // OCharImpl

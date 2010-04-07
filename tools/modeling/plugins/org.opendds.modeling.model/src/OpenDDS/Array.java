@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Array</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Array</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -44,8 +43,8 @@ public interface Array extends Collection {
 
     /**
      * Sets the value of the '{@link OpenDDS.Array#getLength <em>Length</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Length</em>' attribute.
      * @see #getLength()
      * @generated

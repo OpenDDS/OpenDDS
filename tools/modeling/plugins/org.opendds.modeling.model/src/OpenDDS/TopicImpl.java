@@ -15,13 +15,11 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Topic</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Topic</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.TopicImpl#getType <em>Type</em>}</li>
  *   <li>{@link OpenDDS.TopicImpl#getDurability_service <em>Durability service</em>}</li>
  *   <li>{@link OpenDDS.TopicImpl#getTransport_priority <em>Transport priority</em>}</li>
  *   <li>{@link OpenDDS.TopicImpl#getTopic_data <em>Topic data</em>}</li>
@@ -39,21 +37,11 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  *
  * @generated
  */
-public class TopicImpl extends DomainEntityImpl implements Topic {
-    /**
-     * The cached value of the '{@link #getType() <em>Type</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @see #getType()
-     * @generated
-     * @ordered
-     */
-    protected TopicField type;
-
+public class TopicImpl extends TopicDescriptionImpl implements Topic {
     /**
      * The cached value of the '{@link #getDurability_service() <em>Durability service</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @see #getDurability_service()
      * @generated
      * @ordered
@@ -62,8 +50,8 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 
     /**
      * The cached value of the '{@link #getTransport_priority() <em>Transport priority</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @see #getTransport_priority()
      * @generated
      * @ordered
@@ -72,8 +60,8 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 
     /**
      * The cached value of the '{@link #getTopic_data() <em>Topic data</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getTopic_data()
      * @generated
      * @ordered
@@ -92,8 +80,8 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 
     /**
      * The cached value of the '{@link #getReliability() <em>Reliability</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getReliability()
      * @generated
      * @ordered
@@ -102,8 +90,8 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 
     /**
      * The cached value of the '{@link #getOwnership() <em>Ownership</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getOwnership()
      * @generated
      * @ordered
@@ -112,8 +100,8 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 
     /**
      * The cached value of the '{@link #getLiveliness() <em>Liveliness</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getLiveliness()
      * @generated
      * @ordered
@@ -122,8 +110,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 
     /**
      * The cached value of the '{@link #getHistory() <em>History</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getHistory()
      * @generated
      * @ordered
@@ -132,8 +119,8 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 
     /**
      * The cached value of the '{@link #getDurability() <em>Durability</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getDurability()
      * @generated
      * @ordered
@@ -152,8 +139,8 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 
     /**
      * The cached value of the '{@link #getDeadline() <em>Deadline</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getDeadline()
      * @generated
      * @ordered
@@ -171,8 +158,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     protected LatencyBudgetQosPolicy latency_budget;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected TopicImpl() {
@@ -180,8 +166,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -190,48 +175,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    public TopicField getType() {
-        if (type != null && type.eIsProxy()) {
-            InternalEObject oldType = (InternalEObject) type;
-            type = (TopicField) eResolveProxy(oldType);
-            if (type != oldType) {
-                if (eNotificationRequired()) {
-                    eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC__TYPE, oldType, type));
-                }
-            }
-        }
-        return type;
-    }
-
-    /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    public TopicField basicGetType() {
-        return type;
-    }
-
-    /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    public void setType(TopicField newType) {
-        TopicField oldType = type;
-        type = newType;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC__TYPE, oldType, type));
-        }
-    }
-
-    /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public DurabilityServiceQosPolicy getDurability_service() {
@@ -249,8 +193,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public DurabilityServiceQosPolicy basicGetDurability_service() {
@@ -258,8 +201,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setDurability_service(DurabilityServiceQosPolicy newDurability_service) {
@@ -272,8 +214,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public TransportPriorityQosPolicy getTransport_priority() {
@@ -291,8 +232,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public TransportPriorityQosPolicy basicGetTransport_priority() {
@@ -300,8 +240,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setTransport_priority(TransportPriorityQosPolicy newTransport_priority) {
@@ -314,8 +253,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public TopicDataQosPolicy getTopic_data() {
@@ -333,8 +271,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public TopicDataQosPolicy basicGetTopic_data() {
@@ -342,8 +279,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setTopic_data(TopicDataQosPolicy newTopic_data) {
@@ -356,8 +292,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public ResourceLimitsQosPolicy getResource_limits() {
@@ -375,8 +310,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public ResourceLimitsQosPolicy basicGetResource_limits() {
@@ -384,8 +318,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setResource_limits(ResourceLimitsQosPolicy newResource_limits) {
@@ -398,8 +331,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public ReliabilityQosPolicy getReliability() {
@@ -417,8 +349,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public ReliabilityQosPolicy basicGetReliability() {
@@ -426,8 +357,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setReliability(ReliabilityQosPolicy newReliability) {
@@ -440,8 +370,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public OwnershipQosPolicy getOwnership() {
@@ -459,8 +388,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public OwnershipQosPolicy basicGetOwnership() {
@@ -468,8 +396,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setOwnership(OwnershipQosPolicy newOwnership) {
@@ -482,8 +409,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public LivelinessQosPolicy getLiveliness() {
@@ -501,8 +427,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public LivelinessQosPolicy basicGetLiveliness() {
@@ -510,8 +435,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setLiveliness(LivelinessQosPolicy newLiveliness) {
@@ -524,8 +448,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public HistoryQosPolicy getHistory() {
@@ -543,8 +466,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public HistoryQosPolicy basicGetHistory() {
@@ -552,8 +474,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setHistory(HistoryQosPolicy newHistory) {
@@ -565,8 +486,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public DurabilityQosPolicy getDurability() {
@@ -584,8 +504,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public DurabilityQosPolicy basicGetDurability() {
@@ -593,8 +512,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setDurability(DurabilityQosPolicy newDurability) {
@@ -607,8 +525,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public DestinationOrderQosPolicy getDestination_order() {
@@ -626,8 +543,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public DestinationOrderQosPolicy basicGetDestination_order() {
@@ -635,8 +551,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setDestination_order(DestinationOrderQosPolicy newDestination_order) {
@@ -649,8 +564,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public DeadlineQosPolicy getDeadline() {
@@ -668,8 +582,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public DeadlineQosPolicy basicGetDeadline() {
@@ -677,8 +590,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setDeadline(DeadlineQosPolicy newDeadline) {
@@ -690,8 +602,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public LatencyBudgetQosPolicy getLatency_budget() {
@@ -709,8 +620,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public LatencyBudgetQosPolicy basicGetLatency_budget() {
@@ -718,8 +628,7 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setLatency_budget(LatencyBudgetQosPolicy newLatency_budget) {
@@ -732,18 +641,12 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
     public Object eGet(int featureID, boolean resolve, boolean coreType) {
         switch (featureID) {
-            case OpenDDSPackage.TOPIC__TYPE:
-                if (resolve) {
-                    return getType();
-                }
-                return basicGetType();
             case OpenDDSPackage.TOPIC__DURABILITY_SERVICE:
                 if (resolve) {
                     return getDurability_service();
@@ -809,16 +712,12 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
-            case OpenDDSPackage.TOPIC__TYPE:
-                setType((TopicField) newValue);
-                return;
             case OpenDDSPackage.TOPIC__DURABILITY_SERVICE:
                 setDurability_service((DurabilityServiceQosPolicy) newValue);
                 return;
@@ -860,16 +759,12 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
-            case OpenDDSPackage.TOPIC__TYPE:
-                setType((TopicField) null);
-                return;
             case OpenDDSPackage.TOPIC__DURABILITY_SERVICE:
                 setDurability_service((DurabilityServiceQosPolicy) null);
                 return;
@@ -911,15 +806,12 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
     public boolean eIsSet(int featureID) {
         switch (featureID) {
-            case OpenDDSPackage.TOPIC__TYPE:
-                return type != null;
             case OpenDDSPackage.TOPIC__DURABILITY_SERVICE:
                 return durability_service != null;
             case OpenDDSPackage.TOPIC__TRANSPORT_PRIORITY:
@@ -948,40 +840,4 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
         return super.eIsSet(featureID);
     }
 
-    /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    @Override
-    public int eBaseStructuralFeatureID(int derivedFeatureID, Class<?> baseClass) {
-        if (baseClass == TopicDescription.class) {
-            switch (derivedFeatureID) {
-                case OpenDDSPackage.TOPIC__TYPE:
-                    return OpenDDSPackage.TOPIC_DESCRIPTION__TYPE;
-                default:
-                    return -1;
-            }
-        }
-        return super.eBaseStructuralFeatureID(derivedFeatureID, baseClass);
-    }
-
-    /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    @Override
-    public int eDerivedStructuralFeatureID(int baseFeatureID, Class<?> baseClass) {
-        if (baseClass == TopicDescription.class) {
-            switch (baseFeatureID) {
-                case OpenDDSPackage.TOPIC_DESCRIPTION__TYPE:
-                    return OpenDDSPackage.TOPIC__TYPE;
-                default:
-                    return -1;
-            }
-        }
-        return super.eDerivedStructuralFeatureID(baseFeatureID, baseClass);
-    }
-
-} //TopicImpl
+} // TopicImpl

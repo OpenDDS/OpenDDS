@@ -12,9 +12,8 @@ package OpenDDS;
 import org.eclipse.emf.ecore.EClass;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Specification</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Specification</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
  *
@@ -22,8 +21,7 @@ import org.eclipse.emf.ecore.EClass;
  */
 public abstract class SpecificationImpl extends EntityImpl implements Specification {
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected SpecificationImpl() {
@@ -31,8 +29,7 @@ public abstract class SpecificationImpl extends EntityImpl implements Specificat
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -40,4 +37,4 @@ public abstract class SpecificationImpl extends EntityImpl implements Specificat
         return OpenDDSPackage.Literals.SPECIFICATION;
     }
 
-} //SpecificationImpl
+} // SpecificationImpl

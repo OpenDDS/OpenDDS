@@ -25,17 +25,18 @@ import org.eclipse.emf.edit.provider.ItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.ViewerNotification;
 
 /**
- * This is the item provider adapter for a {@link OpenDDS.TopicDataQosPolicy} object.
- * <!-- begin-user-doc -->
+ * This is the item provider adapter for a
+ * {@link OpenDDS.TopicDataQosPolicy} object. <!-- begin-user-doc -->
  * <!-- end-user-doc -->
+ * 
  * @generated
  */
 public class TopicDataQosPolicyItemProvider extends QosPolicyItemProvider implements IEditingDomainItemProvider,
         IStructuredItemContentProvider, ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource {
     /**
-     * This constructs an instance from a factory and a notifier.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This constructs an instance from a factory and a notifier. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public TopicDataQosPolicyItemProvider(AdapterFactory adapterFactory) {
@@ -44,8 +45,8 @@ public class TopicDataQosPolicyItemProvider extends QosPolicyItemProvider implem
 
     /**
      * This returns the property descriptors for the adapted class.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -59,9 +60,9 @@ public class TopicDataQosPolicyItemProvider extends QosPolicyItemProvider implem
     }
 
     /**
-     * This adds a property descriptor for the Value feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the Value feature. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addValuePropertyDescriptor(Object object) {
@@ -73,9 +74,9 @@ public class TopicDataQosPolicyItemProvider extends QosPolicyItemProvider implem
     }
 
     /**
-     * This returns TopicDataQosPolicy.gif.
-     * <!-- begin-user-doc -->
+     * This returns TopicDataQosPolicy.gif. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -84,9 +85,9 @@ public class TopicDataQosPolicyItemProvider extends QosPolicyItemProvider implem
     }
 
     /**
-     * This returns the label text for the adapted class.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This returns the label text for the adapted class. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -97,10 +98,12 @@ public class TopicDataQosPolicyItemProvider extends QosPolicyItemProvider implem
     }
 
     /**
-     * This handles model notifications by calling {@link #updateChildren} to update any cached
-     * children and by creating a viewer notification, which it passes to {@link #fireNotifyChanged}.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This handles model notifications by calling
+     * {@link #updateChildren} to update any cached children and by
+     * creating a viewer notification, which it passes to
+     * {@link #fireNotifyChanged}. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -116,10 +119,10 @@ public class TopicDataQosPolicyItemProvider extends QosPolicyItemProvider implem
     }
 
     /**
-     * This adds {@link org.eclipse.emf.edit.command.CommandParameter}s describing the children
-     * that can be created under this object.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds {@link org.eclipse.emf.edit.command.CommandParameter}
+     * s describing the children that can be created under this
+     * object. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

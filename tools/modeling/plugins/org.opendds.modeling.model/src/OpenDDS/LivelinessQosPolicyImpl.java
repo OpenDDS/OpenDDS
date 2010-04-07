@@ -16,9 +16,8 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Liveliness Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Liveliness Qos Policy</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -32,8 +31,7 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public class LivelinessQosPolicyImpl extends QosPolicyImpl implements LivelinessQosPolicy {
     /**
      * The default value of the '{@link #getKind() <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getKind()
      * @generated
      * @ordered
@@ -42,8 +40,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
 
     /**
      * The cached value of the '{@link #getKind() <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getKind()
      * @generated
      * @ordered
@@ -51,9 +48,10 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     protected LivelinessQosPolicyKind kind = KIND_EDEFAULT;
 
     /**
-     * The cached value of the '{@link #getLease_duration() <em>Lease duration</em>}' containment reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * The cached value of the '{@link #getLease_duration()
+     * <em>Lease duration</em>}' containment reference. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @see #getLease_duration()
      * @generated
      * @ordered
@@ -61,8 +59,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     protected Period lease_duration;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected LivelinessQosPolicyImpl() {
@@ -70,8 +67,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -80,8 +76,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public LivelinessQosPolicyKind getKind() {
@@ -89,8 +84,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setKind(LivelinessQosPolicyKind newKind) {
@@ -103,8 +97,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public Period getLease_duration() {
@@ -112,8 +105,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public NotificationChain basicSetLease_duration(Period newLease_duration, NotificationChain msgs) {
@@ -132,8 +124,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setLease_duration(Period newLease_duration) {
@@ -158,8 +149,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -172,8 +162,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -188,8 +177,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -206,8 +194,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -224,8 +211,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -240,8 +226,7 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -257,4 +242,4 @@ public class LivelinessQosPolicyImpl extends QosPolicyImpl implements Liveliness
         return result.toString();
     }
 
-} //LivelinessQosPolicyImpl
+} // LivelinessQosPolicyImpl

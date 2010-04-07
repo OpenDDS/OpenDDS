@@ -19,9 +19,8 @@ import org.eclipse.emf.ecore.util.EObjectContainmentEList;
 import org.eclipse.emf.ecore.util.InternalEList;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Topic Struct</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Topic Struct</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -35,8 +34,8 @@ import org.eclipse.emf.ecore.util.InternalEList;
 public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicStruct {
     /**
      * The cached value of the '{@link #getMembers() <em>Members</em>}' containment reference list.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getMembers()
      * @generated
      * @ordered
@@ -45,8 +44,8 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
 
     /**
      * The cached value of the '{@link #getKeys() <em>Keys</em>}' containment reference list.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getKeys()
      * @generated
      * @ordered
@@ -54,8 +53,7 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
     protected EList<Key> keys;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected TopicStructImpl() {
@@ -63,8 +61,7 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -73,8 +70,7 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EList<TopicField> getMembers() {
@@ -86,8 +82,7 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EList<Key> getKeys() {
@@ -98,8 +93,7 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -114,8 +108,7 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -130,8 +123,7 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @SuppressWarnings("unchecked")
@@ -151,8 +143,7 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -169,8 +160,7 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -184,4 +174,4 @@ public class TopicStructImpl extends ConstructedTopicTypeImpl implements TopicSt
         return super.eIsSet(featureID);
     }
 
-} //TopicStructImpl
+} // TopicStructImpl
