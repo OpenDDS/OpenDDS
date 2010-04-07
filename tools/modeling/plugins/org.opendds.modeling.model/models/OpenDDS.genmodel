@@ -23,8 +23,8 @@
   <foreignModel>OpenDDS.ecore</foreignModel>
   <genPackages prefix="OpenDDS" resource="XMI" disposableProviderFactory="true" classPackageSuffix=""
       utilityPackageSuffix="" providerPackageSuffix="" presentationPackageSuffix=""
-      testsPackageSuffix="" generateExampleClass="false" contentTypeIdentifier=""
-      fileExtensions="opendds" ecorePackage="OpenDDS.ecore#/">
+      testsPackageSuffix="" generateExampleClass="false" multipleEditorPages="false"
+      contentTypeIdentifier="" fileExtensions="opendds" ecorePackage="OpenDDS.ecore#/">
     <genAnnotations source="http://www.eclipse.org/emf/2002/GenModel/exporter/org.eclipse.xsd.ecore.exporter.xmi">
       <genAnnotations source="OpenDDS.xsd"/>
     </genAnnotations>
