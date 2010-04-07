@@ -16,13 +16,15 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Time Based Filter Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Time Based Filter Qos Policy</b></em>'. <!-- end-user-doc
+ * -->
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.TimeBasedFilterQosPolicyImpl#getMinimum_separation <em>Minimum separation</em>}</li>
+ * <li>
+ * {@link OpenDDS.TimeBasedFilterQosPolicyImpl#getMinimum_separation
+ * <em>Minimum separation</em>}</li>
  * </ul>
  * </p>
  *
@@ -30,9 +32,10 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  */
 public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeBasedFilterQosPolicy {
     /**
-     * The cached value of the '{@link #getMinimum_separation() <em>Minimum separation</em>}' containment reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * The cached value of the '{@link #getMinimum_separation()
+     * <em>Minimum separation</em>}' containment reference. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @see #getMinimum_separation()
      * @generated
      * @ordered
@@ -40,8 +43,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     protected Period minimum_separation;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected TimeBasedFilterQosPolicyImpl() {
@@ -49,8 +51,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -59,8 +60,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public Period getMinimum_separation() {
@@ -68,8 +68,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public NotificationChain basicSetMinimum_separation(Period newMinimum_separation, NotificationChain msgs) {
@@ -89,8 +88,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setMinimum_separation(Period newMinimum_separation) {
@@ -116,8 +114,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -130,8 +127,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -144,8 +140,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -159,8 +154,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -174,8 +168,7 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -187,4 +180,4 @@ public class TimeBasedFilterQosPolicyImpl extends QosPolicyImpl implements TimeB
         return super.eIsSet(featureID);
     }
 
-} //TimeBasedFilterQosPolicyImpl
+} // TimeBasedFilterQosPolicyImpl

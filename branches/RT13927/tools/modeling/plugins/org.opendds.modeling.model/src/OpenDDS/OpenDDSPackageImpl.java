@@ -17,547 +17,481 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.impl.EPackageImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model <b>Package</b>.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model
+ * <b>Package</b>. <!-- end-user-doc -->
  * @generated
  */
 public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass entityEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass namedEntityEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass specificationEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass domainEntityEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass contentFilteredTopicEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass multiTopicEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass topicEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass topicDescriptionEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass arrayEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass oBooleanEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass caseEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass oCharEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass collectionEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass constructedTopicTypeEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass oDoubleEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass enumEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass oFloatEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass keyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass keyFieldEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass oLongEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass oLongLongEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass oOctetEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass sequenceEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass oShortEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass simpleEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass oStringEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass topicStructEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass topicFieldEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass typedefEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass ouLongEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass ouLongLongEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass unionEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass ouShortEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass dataReaderEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass dataReaderWriterEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass dataWriterEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass domainEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass domainParticipantEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass publisherEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass publisherSubscriberEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass subscriberEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass deadlineQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass destinationOrderQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass durabilityQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass durabilityServiceQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass entityFactoryQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass groupDataQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass historyQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass latencyBudgetQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass lifespanQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass livelinessQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass ownershipQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass ownershipStrengthQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass partitionQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass presentationQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass qosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass readerDataLifecycleQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass reliabilityQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass resourceLimitsQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass timeBasedFilterQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass topicDataQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass transportPriorityQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass userDataQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass periodEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass writerDataLifecycleQosPolicyEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass applicationTargetEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EClass transportEClass = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * @generated
+     */
+    private EClass modelEClass = null;
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * @generated
+     */
+    private EClass modelEntityEClass = null;
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EEnum destinationOrderQosPolicyKindEEnum = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EEnum durabilityQosPolicyKindEEnum = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EEnum historyQosPolicyKindEEnum = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EEnum livelinessQosPolicyKindEEnum = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EEnum ownershipQosPolicyKindEEnum = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EEnum presentationQosPolicyAccessScopeKindEEnum = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EEnum reliabilityQosPolicyKindEEnum = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EEnum componentTypeEEnum = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EEnum languageTypeEEnum = null;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private EEnum platformTypeEEnum = null;
@@ -570,8 +504,8 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
      * factory method {@link #init init()}, which also performs
      * initialization of the package, or returns the registered package,
      * if one already exists.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see org.eclipse.emf.ecore.EPackage.Registry
      * @see OpenDDS.OpenDDSPackage#eNS_URI
      * @see #init()
@@ -582,19 +516,22 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private static boolean isInited = false;
 
     /**
-     * Creates, registers, and initializes the <b>Package</b> for this model, and for any others upon which it depends.
+     * Creates, registers, and initializes the <b>Package</b> for this
+     * model, and for any others upon which it depends.
      *
-     * <p>This method is used to initialize {@link OpenDDSPackage#eINSTANCE} when that field is accessed.
-     * Clients should not invoke it directly. Instead, they should simply access that field to obtain the package.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <p>
+     * This method is used to initialize
+     * {@link OpenDDSPackage#eINSTANCE} when that field is accessed.
+     * Clients should not invoke it directly. Instead, they should
+     * simply access that field to obtain the package. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @see #eNS_URI
      * @see #createPackageContents()
      * @see #initializePackageContents()
@@ -627,8 +564,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getEntity() {
@@ -636,8 +572,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getNamedEntity() {
@@ -645,8 +580,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getNamedEntity_Name() {
@@ -654,8 +588,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getSpecification() {
@@ -663,8 +596,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getDomainEntity() {
@@ -672,8 +604,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getContentFilteredTopic() {
@@ -681,8 +612,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getContentFilteredTopic_Filter_expression() {
@@ -690,8 +620,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getMultiTopic() {
@@ -699,8 +628,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getMultiTopic_Subscription_expression() {
@@ -708,8 +636,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getTopic() {
@@ -717,8 +644,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTopic_Durability_service() {
@@ -726,8 +652,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTopic_Transport_priority() {
@@ -735,8 +660,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTopic_Topic_data() {
@@ -744,8 +668,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTopic_Resource_limits() {
@@ -753,8 +676,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTopic_Reliability() {
@@ -762,8 +684,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTopic_Ownership() {
@@ -771,8 +692,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTopic_Liveliness() {
@@ -780,8 +700,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTopic_History() {
@@ -789,8 +708,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTopic_Durability() {
@@ -798,8 +716,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTopic_Destination_order() {
@@ -807,8 +724,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTopic_Deadline() {
@@ -816,8 +732,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTopic_Latency_budget() {
@@ -825,8 +740,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getTopicDescription() {
@@ -834,8 +748,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTopicDescription_Type() {
@@ -843,8 +756,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getArray() {
@@ -852,8 +764,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getArray_Length() {
@@ -861,8 +772,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getOBoolean() {
@@ -870,8 +780,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getCase() {
@@ -879,8 +788,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getCase_Labels() {
@@ -888,8 +796,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getCase_Type() {
@@ -897,8 +804,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getOChar() {
@@ -906,8 +812,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getCollection() {
@@ -915,8 +820,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getCollection_Type() {
@@ -924,8 +828,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getConstructedTopicType() {
@@ -933,8 +836,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getODouble() {
@@ -942,8 +844,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getEnum() {
@@ -951,8 +852,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getEnum_Labels() {
@@ -960,8 +860,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getOFloat() {
@@ -969,8 +868,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getKey() {
@@ -978,8 +876,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getKey_Member() {
@@ -987,8 +884,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getKeyField() {
@@ -996,8 +892,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getOLong() {
@@ -1005,8 +900,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getOLongLong() {
@@ -1014,8 +908,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getOOctet() {
@@ -1023,8 +916,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getSequence() {
@@ -1032,8 +924,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getOShort() {
@@ -1041,8 +932,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getSimple() {
@@ -1050,8 +940,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getOString() {
@@ -1059,8 +948,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getTopicStruct() {
@@ -1068,8 +956,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTopicStruct_Members() {
@@ -1077,8 +964,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTopicStruct_Keys() {
@@ -1086,8 +972,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getTopicField() {
@@ -1095,8 +980,15 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * @generated
+     */
+    public EAttribute getTopicField_Name() {
+        return (EAttribute) topicFieldEClass.getEStructuralFeatures().get(0);
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getTypedef() {
@@ -1104,8 +996,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTypedef_Type() {
@@ -1113,8 +1004,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getOULong() {
@@ -1122,8 +1012,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getOULongLong() {
@@ -1131,8 +1020,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getUnion() {
@@ -1140,8 +1028,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getUnion_Switch() {
@@ -1149,8 +1036,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getUnion_Cases() {
@@ -1158,8 +1044,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getOUShort() {
@@ -1167,8 +1052,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getDataReader() {
@@ -1176,8 +1060,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataReader_Topic() {
@@ -1185,8 +1068,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataReader_Reader_data_lifecycle() {
@@ -1194,8 +1076,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataReader_Transport_priority() {
@@ -1203,8 +1084,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataReader_Durability_service() {
@@ -1212,8 +1092,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataReader_Ownership_strength() {
@@ -1221,8 +1100,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getDataReaderWriter() {
@@ -1230,8 +1108,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataReaderWriter_Durability() {
@@ -1239,8 +1116,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataReaderWriter_Destination_order() {
@@ -1248,8 +1124,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataReaderWriter_Deadline() {
@@ -1257,8 +1132,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataReaderWriter_History() {
@@ -1266,8 +1140,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataReaderWriter_User_data() {
@@ -1275,8 +1148,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataReaderWriter_Resource_limits() {
@@ -1284,8 +1156,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataReaderWriter_Ownership() {
@@ -1293,8 +1164,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataReaderWriter_Liveliness() {
@@ -1302,8 +1172,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataReaderWriter_Latency_budget() {
@@ -1311,8 +1180,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataReaderWriter_Reliability() {
@@ -1320,8 +1188,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getDataWriter() {
@@ -1329,8 +1196,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataWriter_Topic() {
@@ -1338,8 +1204,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDataWriter_Writer_data_lifecycle() {
@@ -1347,8 +1212,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getDomain() {
@@ -1356,8 +1220,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getDomainParticipant() {
@@ -1365,8 +1228,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDomainParticipant_Subscribers() {
@@ -1374,8 +1236,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDomainParticipant_Publishers() {
@@ -1383,8 +1244,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDomainParticipant_Entity_factory() {
@@ -1392,8 +1252,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDomainParticipant_User_data() {
@@ -1401,8 +1260,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDomainParticipant_Domain() {
@@ -1410,8 +1268,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getPublisher() {
@@ -1419,8 +1276,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getPublisher_Writers() {
@@ -1428,8 +1284,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getPublisherSubscriber() {
@@ -1437,8 +1292,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getPublisherSubscriber_Entity_factory() {
@@ -1446,8 +1300,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getPublisherSubscriber_Presentation() {
@@ -1455,8 +1308,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getPublisherSubscriber_Group_data() {
@@ -1464,8 +1316,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getPublisherSubscriber_Partition() {
@@ -1473,8 +1324,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getPublisherSubscriber_Transport() {
@@ -1482,8 +1332,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getSubscriber() {
@@ -1491,8 +1340,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getSubscriber_Readers() {
@@ -1500,8 +1348,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getDeadlineQosPolicy() {
@@ -1509,8 +1356,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDeadlineQosPolicy_Period() {
@@ -1518,8 +1364,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getDestinationOrderQosPolicy() {
@@ -1527,8 +1372,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getDestinationOrderQosPolicy_Kind() {
@@ -1536,8 +1380,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getDurabilityQosPolicy() {
@@ -1545,8 +1388,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getDurabilityQosPolicy_Kind() {
@@ -1554,8 +1396,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getDurabilityServiceQosPolicy() {
@@ -1563,8 +1404,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getDurabilityServiceQosPolicy_History_depth() {
@@ -1572,8 +1412,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getDurabilityServiceQosPolicy_History_kind() {
@@ -1581,8 +1420,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getDurabilityServiceQosPolicy_Max_instances() {
@@ -1590,8 +1428,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getDurabilityServiceQosPolicy_Max_samples() {
@@ -1599,8 +1436,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getDurabilityServiceQosPolicy_Max_samples_per_instance() {
@@ -1608,8 +1444,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getDurabilityServiceQosPolicy_Service_cleanup_delay() {
@@ -1617,8 +1452,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getEntityFactoryQosPolicy() {
@@ -1626,8 +1460,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getEntityFactoryQosPolicy_Autoenable_created_entities() {
@@ -1635,8 +1468,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getGroupDataQosPolicy() {
@@ -1644,8 +1476,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getGroupDataQosPolicy_Value() {
@@ -1653,8 +1484,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getHistoryQosPolicy() {
@@ -1662,8 +1492,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getHistoryQosPolicy_Depth() {
@@ -1671,8 +1500,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getHistoryQosPolicy_Kind() {
@@ -1680,8 +1508,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getLatencyBudgetQosPolicy() {
@@ -1689,8 +1516,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getLatencyBudgetQosPolicy_Duration() {
@@ -1698,8 +1524,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getLifespanQosPolicy() {
@@ -1707,8 +1532,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getLifespanQosPolicy_Duration() {
@@ -1716,8 +1540,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getLivelinessQosPolicy() {
@@ -1725,8 +1548,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getLivelinessQosPolicy_Kind() {
@@ -1734,8 +1556,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getLivelinessQosPolicy_Lease_duration() {
@@ -1743,8 +1564,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getOwnershipQosPolicy() {
@@ -1752,8 +1572,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getOwnershipQosPolicy_Kind() {
@@ -1761,8 +1580,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getOwnershipStrengthQosPolicy() {
@@ -1770,8 +1588,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getOwnershipStrengthQosPolicy_Value() {
@@ -1779,8 +1596,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getPartitionQosPolicy() {
@@ -1788,8 +1604,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getPartitionQosPolicy_Name() {
@@ -1797,8 +1612,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getPresentationQosPolicy() {
@@ -1806,8 +1620,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getPresentationQosPolicy_Access_scope() {
@@ -1815,8 +1628,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getPresentationQosPolicy_Coherent_access() {
@@ -1824,8 +1636,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getPresentationQosPolicy_Ordered_access() {
@@ -1833,8 +1644,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getQosPolicy() {
@@ -1842,8 +1652,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getReaderDataLifecycleQosPolicy() {
@@ -1851,8 +1660,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getReaderDataLifecycleQosPolicy_Autopurge_nowriter_samples_delay() {
@@ -1860,8 +1668,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getReliabilityQosPolicy() {
@@ -1869,8 +1676,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getReliabilityQosPolicy_Kind() {
@@ -1878,8 +1684,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getReliabilityQosPolicy_Max_blocking_time() {
@@ -1887,8 +1692,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getResourceLimitsQosPolicy() {
@@ -1896,8 +1700,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getResourceLimitsQosPolicy_Max_instances() {
@@ -1905,8 +1708,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getResourceLimitsQosPolicy_Max_samples() {
@@ -1914,8 +1716,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getResourceLimitsQosPolicy_Max_samples_per_instance() {
@@ -1923,8 +1724,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getTimeBasedFilterQosPolicy() {
@@ -1932,8 +1732,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getTimeBasedFilterQosPolicy_Minimum_separation() {
@@ -1941,8 +1740,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getTopicDataQosPolicy() {
@@ -1950,8 +1748,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getTopicDataQosPolicy_Value() {
@@ -1959,8 +1756,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getTransportPriorityQosPolicy() {
@@ -1968,8 +1764,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getTransportPriorityQosPolicy_Value() {
@@ -1977,8 +1772,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getUserDataQosPolicy() {
@@ -1986,8 +1780,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getUserDataQosPolicy_Value() {
@@ -1995,8 +1788,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getPeriod() {
@@ -2004,8 +1796,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getPeriod_Seconds() {
@@ -2013,8 +1804,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getPeriod_Nanoseconds() {
@@ -2022,8 +1812,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getWriterDataLifecycleQosPolicy() {
@@ -2031,8 +1820,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getWriterDataLifecycleQosPolicy_Autodispose_unregistered_instances() {
@@ -2040,8 +1828,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getApplicationTarget() {
@@ -2049,8 +1836,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getApplicationTarget_Component_type() {
@@ -2058,8 +1844,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getApplicationTarget_Language() {
@@ -2067,8 +1852,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getApplicationTarget_Platform() {
@@ -2076,8 +1860,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EReference getApplicationTarget_Participants() {
@@ -2085,8 +1868,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getApplicationTarget_Service_arguments() {
@@ -2094,8 +1876,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EClass getTransport() {
@@ -2103,8 +1884,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EAttribute getTransport_Transport_id() {
@@ -2112,8 +1892,31 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * @generated
+     */
+    public EClass getModel() {
+        return modelEClass;
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * @generated
+     */
+    public EReference getModel_Entities() {
+        return (EReference) modelEClass.getEStructuralFeatures().get(0);
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * @generated
+     */
+    public EClass getModelEntity() {
+        return modelEntityEClass;
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EEnum getDestinationOrderQosPolicyKind() {
@@ -2121,8 +1924,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EEnum getDurabilityQosPolicyKind() {
@@ -2130,8 +1932,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EEnum getHistoryQosPolicyKind() {
@@ -2139,8 +1940,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EEnum getLivelinessQosPolicyKind() {
@@ -2148,8 +1948,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EEnum getOwnershipQosPolicyKind() {
@@ -2157,8 +1956,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EEnum getPresentationQosPolicyAccessScopeKind() {
@@ -2166,8 +1964,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EEnum getReliabilityQosPolicyKind() {
@@ -2175,8 +1972,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EEnum getComponentType() {
@@ -2184,8 +1980,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EEnum getLanguageType() {
@@ -2193,8 +1988,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EEnum getPlatformType() {
@@ -2202,8 +1996,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public OpenDDSFactory getOpenDDSFactory() {
@@ -2211,17 +2004,16 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private boolean isCreated = false;
 
     /**
-     * Creates the meta-model objects for the package.  This method is
-     * guarded to have no affect on any invocation but its first.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * Creates the meta-model objects for the package. This method is
+     * guarded to have no affect on any invocation but its first. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @generated
      */
     public void createPackageContents() {
@@ -2310,6 +2102,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
         createEReference(topicStructEClass, TOPIC_STRUCT__KEYS);
 
         topicFieldEClass = createEClass(TOPIC_FIELD);
+        createEAttribute(topicFieldEClass, TOPIC_FIELD__NAME);
 
         typedefEClass = createEClass(TYPEDEF);
         createEReference(typedefEClass, TYPEDEF__TYPE);
@@ -2465,6 +2258,11 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
         transportEClass = createEClass(TRANSPORT);
         createEAttribute(transportEClass, TRANSPORT__TRANSPORT_ID);
 
+        modelEClass = createEClass(MODEL);
+        createEReference(modelEClass, MODEL__ENTITIES);
+
+        modelEntityEClass = createEClass(MODEL_ENTITY);
+
         // Create enums
         destinationOrderQosPolicyKindEEnum = createEEnum(DESTINATION_ORDER_QOS_POLICY_KIND);
         durabilityQosPolicyKindEEnum = createEEnum(DURABILITY_QOS_POLICY_KIND);
@@ -2479,8 +2277,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private boolean isInitialized = false;
@@ -2488,8 +2285,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
     /**
      * Complete the initialization of the package and its meta-model.  This
      * method is guarded to have no affect on any invocation but its first.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void initializePackageContents() {
@@ -2513,9 +2309,9 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
         domainEntityEClass.getESuperTypes().add(this.getNamedEntity());
         contentFilteredTopicEClass.getESuperTypes().add(this.getTopicDescription());
         multiTopicEClass.getESuperTypes().add(this.getTopicDescription());
-        topicEClass.getESuperTypes().add(this.getDomainEntity());
         topicEClass.getESuperTypes().add(this.getTopicDescription());
-        topicDescriptionEClass.getESuperTypes().add(this.getNamedEntity());
+        topicDescriptionEClass.getESuperTypes().add(this.getDomainEntity());
+        topicDescriptionEClass.getESuperTypes().add(this.getModelEntity());
         arrayEClass.getESuperTypes().add(this.getCollection());
         oBooleanEClass.getESuperTypes().add(this.getSimple());
         caseEClass.getESuperTypes().add(this.getTopicField());
@@ -2534,14 +2330,16 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
         simpleEClass.getESuperTypes().add(this.getKeyField());
         oStringEClass.getESuperTypes().add(this.getSimple());
         topicStructEClass.getESuperTypes().add(this.getConstructedTopicType());
-        topicFieldEClass.getESuperTypes().add(this.getNamedEntity());
+        topicStructEClass.getESuperTypes().add(this.getModelEntity());
         typedefEClass.getESuperTypes().add(this.getTopicField());
         unionEClass.getESuperTypes().add(this.getConstructedTopicType());
         dataReaderEClass.getESuperTypes().add(this.getDataReaderWriter());
         dataReaderWriterEClass.getESuperTypes().add(this.getDomainEntity());
         dataWriterEClass.getESuperTypes().add(this.getDataReaderWriter());
         domainEClass.getESuperTypes().add(this.getNamedEntity());
+        domainEClass.getESuperTypes().add(this.getModelEntity());
         domainParticipantEClass.getESuperTypes().add(this.getDomainEntity());
+        domainParticipantEClass.getESuperTypes().add(this.getModelEntity());
         publisherEClass.getESuperTypes().add(this.getPublisherSubscriber());
         publisherSubscriberEClass.getESuperTypes().add(this.getDomainEntity());
         subscriberEClass.getESuperTypes().add(this.getPublisherSubscriber());
@@ -2560,6 +2358,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
         partitionQosPolicyEClass.getESuperTypes().add(this.getQosPolicy());
         presentationQosPolicyEClass.getESuperTypes().add(this.getQosPolicy());
         qosPolicyEClass.getESuperTypes().add(this.getSpecification());
+        qosPolicyEClass.getESuperTypes().add(this.getModelEntity());
         readerDataLifecycleQosPolicyEClass.getESuperTypes().add(this.getQosPolicy());
         reliabilityQosPolicyEClass.getESuperTypes().add(this.getQosPolicy());
         resourceLimitsQosPolicyEClass.getESuperTypes().add(this.getQosPolicy());
@@ -2569,6 +2368,9 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
         userDataQosPolicyEClass.getESuperTypes().add(this.getQosPolicy());
         writerDataLifecycleQosPolicyEClass.getESuperTypes().add(this.getQosPolicy());
         applicationTargetEClass.getESuperTypes().add(this.getEntity());
+        applicationTargetEClass.getESuperTypes().add(this.getModelEntity());
+        transportEClass.getESuperTypes().add(this.getEntity());
+        transportEClass.getESuperTypes().add(this.getModelEntity());
 
         // Initialize classes and features; add operations and parameters
         initEClass(entityEClass, Entity.class, "Entity", IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
@@ -2705,6 +2507,8 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
 
         initEClass(topicFieldEClass, TopicField.class, "TopicField", IS_ABSTRACT, !IS_INTERFACE,
                 IS_GENERATED_INSTANCE_CLASS);
+        initEAttribute(getTopicField_Name(), ecorePackage.getEString(), "name", null, 1, 1, TopicField.class,
+                !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
         initEClass(typedefEClass, Typedef.class, "Typedef", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
         initEReference(getTypedef_Type(), this.getTopicField(), null, "type", null, 0, 1, Typedef.class, !IS_TRANSIENT,
@@ -2844,32 +2648,32 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
 
         initEClass(destinationOrderQosPolicyEClass, DestinationOrderQosPolicy.class, "DestinationOrderQosPolicy",
                 !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-        initEAttribute(getDestinationOrderQosPolicy_Kind(), this.getDestinationOrderQosPolicyKind(), "kind", null, 0,
-                1, DestinationOrderQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID,
-                IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+        initEAttribute(getDestinationOrderQosPolicy_Kind(), this.getDestinationOrderQosPolicyKind(), "kind",
+                "BY_RECEPTION_TIMESTAMP", 0, 1, DestinationOrderQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE,
+                IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
         initEClass(durabilityQosPolicyEClass, DurabilityQosPolicy.class, "DurabilityQosPolicy", !IS_ABSTRACT,
                 !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-        initEAttribute(getDurabilityQosPolicy_Kind(), this.getDurabilityQosPolicyKind(), "kind", null, 0, 1,
+        initEAttribute(getDurabilityQosPolicy_Kind(), this.getDurabilityQosPolicyKind(), "kind", "VOLATILE", 0, 1,
                 DurabilityQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID,
                 IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
         initEClass(durabilityServiceQosPolicyEClass, DurabilityServiceQosPolicy.class, "DurabilityServiceQosPolicy",
                 !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-        initEAttribute(getDurabilityServiceQosPolicy_History_depth(), ecorePackage.getELong(), "history_depth", null,
-                0, 1, DurabilityServiceQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE,
+        initEAttribute(getDurabilityServiceQosPolicy_History_depth(), ecorePackage.getELong(), "history_depth", "1", 0,
+                1, DurabilityServiceQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE,
                 !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
         initEAttribute(getDurabilityServiceQosPolicy_History_kind(), this.getHistoryQosPolicyKind(), "history_kind",
-                null, 0, 1, DurabilityServiceQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE,
+                "KEEP_LAST", 0, 1, DurabilityServiceQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE,
                 !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-        initEAttribute(getDurabilityServiceQosPolicy_Max_instances(), ecorePackage.getELong(), "max_instances", null,
+        initEAttribute(getDurabilityServiceQosPolicy_Max_instances(), ecorePackage.getELong(), "max_instances", "-1",
                 0, 1, DurabilityServiceQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE,
                 !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-        initEAttribute(getDurabilityServiceQosPolicy_Max_samples(), ecorePackage.getELong(), "max_samples", null, 0, 1,
+        initEAttribute(getDurabilityServiceQosPolicy_Max_samples(), ecorePackage.getELong(), "max_samples", "-1", 0, 1,
                 DurabilityServiceQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID,
                 IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
         initEAttribute(getDurabilityServiceQosPolicy_Max_samples_per_instance(), ecorePackage.getELong(),
-                "max_samples_per_instance", null, 0, 1, DurabilityServiceQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE,
+                "max_samples_per_instance", "-1", 0, 1, DurabilityServiceQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE,
                 IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
         initEReference(getDurabilityServiceQosPolicy_Service_cleanup_delay(), this.getPeriod(), null,
                 "service_cleanup_delay", null, 0, 1, DurabilityServiceQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE,
@@ -2878,7 +2682,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
         initEClass(entityFactoryQosPolicyEClass, EntityFactoryQosPolicy.class, "EntityFactoryQosPolicy", !IS_ABSTRACT,
                 !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
         initEAttribute(getEntityFactoryQosPolicy_Autoenable_created_entities(), ecorePackage.getEBoolean(),
-                "autoenable_created_entities", null, 0, 1, EntityFactoryQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE,
+                "autoenable_created_entities", "true", 0, 1, EntityFactoryQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE,
                 IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
         initEClass(groupDataQosPolicyEClass, GroupDataQosPolicy.class, "GroupDataQosPolicy", !IS_ABSTRACT,
@@ -2889,10 +2693,10 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
 
         initEClass(historyQosPolicyEClass, HistoryQosPolicy.class, "HistoryQosPolicy", !IS_ABSTRACT, !IS_INTERFACE,
                 IS_GENERATED_INSTANCE_CLASS);
-        initEAttribute(getHistoryQosPolicy_Depth(), ecorePackage.getELong(), "depth", null, 0, 1,
+        initEAttribute(getHistoryQosPolicy_Depth(), ecorePackage.getELong(), "depth", "1", 0, 1,
                 HistoryQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE,
                 !IS_DERIVED, IS_ORDERED);
-        initEAttribute(getHistoryQosPolicy_Kind(), this.getHistoryQosPolicyKind(), "kind", null, 0, 1,
+        initEAttribute(getHistoryQosPolicy_Kind(), this.getHistoryQosPolicyKind(), "kind", "KEEP_LAST", 0, 1,
                 HistoryQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE,
                 !IS_DERIVED, IS_ORDERED);
 
@@ -2910,7 +2714,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
 
         initEClass(livelinessQosPolicyEClass, LivelinessQosPolicy.class, "LivelinessQosPolicy", !IS_ABSTRACT,
                 !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-        initEAttribute(getLivelinessQosPolicy_Kind(), this.getLivelinessQosPolicyKind(), "kind", null, 0, 1,
+        initEAttribute(getLivelinessQosPolicy_Kind(), this.getLivelinessQosPolicyKind(), "kind", "AUTOMATIC", 0, 1,
                 LivelinessQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID,
                 IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
         initEReference(getLivelinessQosPolicy_Lease_duration(), this.getPeriod(), null, "lease_duration", null, 0, 1,
@@ -2919,13 +2723,13 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
 
         initEClass(ownershipQosPolicyEClass, OwnershipQosPolicy.class, "OwnershipQosPolicy", !IS_ABSTRACT,
                 !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-        initEAttribute(getOwnershipQosPolicy_Kind(), this.getOwnershipQosPolicyKind(), "kind", null, 0, 1,
+        initEAttribute(getOwnershipQosPolicy_Kind(), this.getOwnershipQosPolicyKind(), "kind", "SHARED", 0, 1,
                 OwnershipQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID,
                 IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
         initEClass(ownershipStrengthQosPolicyEClass, OwnershipStrengthQosPolicy.class, "OwnershipStrengthQosPolicy",
                 !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-        initEAttribute(getOwnershipStrengthQosPolicy_Value(), ecorePackage.getELong(), "value", null, 0, 1,
+        initEAttribute(getOwnershipStrengthQosPolicy_Value(), ecorePackage.getELong(), "value", "0", 0, 1,
                 OwnershipStrengthQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID,
                 IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
@@ -2938,14 +2742,14 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
         initEClass(presentationQosPolicyEClass, PresentationQosPolicy.class, "PresentationQosPolicy", !IS_ABSTRACT,
                 !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
         initEAttribute(getPresentationQosPolicy_Access_scope(), this.getPresentationQosPolicyAccessScopeKind(),
-                "access_scope", null, 0, 1, PresentationQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE,
-                !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-        initEAttribute(getPresentationQosPolicy_Coherent_access(), ecorePackage.getEBoolean(), "coherent_access", null,
-                0, 1, PresentationQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID,
-                IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-        initEAttribute(getPresentationQosPolicy_Ordered_access(), ecorePackage.getEBoolean(), "ordered_access", null,
-                0, 1, PresentationQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID,
-                IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+                "access_scope", "INSTANCE", 0, 1, PresentationQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE,
+                IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+        initEAttribute(getPresentationQosPolicy_Coherent_access(), ecorePackage.getEBoolean(), "coherent_access",
+                "false", 0, 1, PresentationQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE,
+                !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+        initEAttribute(getPresentationQosPolicy_Ordered_access(), ecorePackage.getEBoolean(), "ordered_access",
+                "false", 0, 1, PresentationQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE,
+                !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
         initEClass(qosPolicyEClass, QosPolicy.class, "QosPolicy", IS_ABSTRACT, !IS_INTERFACE,
                 IS_GENERATED_INSTANCE_CLASS);
@@ -2959,7 +2763,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
 
         initEClass(reliabilityQosPolicyEClass, ReliabilityQosPolicy.class, "ReliabilityQosPolicy", !IS_ABSTRACT,
                 !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-        initEAttribute(getReliabilityQosPolicy_Kind(), this.getReliabilityQosPolicyKind(), "kind", null, 0, 1,
+        initEAttribute(getReliabilityQosPolicy_Kind(), this.getReliabilityQosPolicyKind(), "kind", "BEST_EFFORT", 0, 1,
                 ReliabilityQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID,
                 IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
         initEReference(getReliabilityQosPolicy_Max_blocking_time(), this.getPeriod(), null, "max_blocking_time", null,
@@ -2968,14 +2772,14 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
 
         initEClass(resourceLimitsQosPolicyEClass, ResourceLimitsQosPolicy.class, "ResourceLimitsQosPolicy",
                 !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-        initEAttribute(getResourceLimitsQosPolicy_Max_instances(), ecorePackage.getELong(), "max_instances", null, 0,
+        initEAttribute(getResourceLimitsQosPolicy_Max_instances(), ecorePackage.getELong(), "max_instances", "-1", 0,
                 1, ResourceLimitsQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID,
                 IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-        initEAttribute(getResourceLimitsQosPolicy_Max_samples(), ecorePackage.getELong(), "max_samples", null, 0, 1,
+        initEAttribute(getResourceLimitsQosPolicy_Max_samples(), ecorePackage.getELong(), "max_samples", "-1", 0, 1,
                 ResourceLimitsQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID,
                 IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
         initEAttribute(getResourceLimitsQosPolicy_Max_samples_per_instance(), ecorePackage.getELong(),
-                "max_samples_per_instance", null, 0, 1, ResourceLimitsQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE,
+                "max_samples_per_instance", "-1", 0, 1, ResourceLimitsQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE,
                 IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
         initEClass(timeBasedFilterQosPolicyEClass, TimeBasedFilterQosPolicy.class, "TimeBasedFilterQosPolicy",
@@ -2992,7 +2796,7 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
 
         initEClass(transportPriorityQosPolicyEClass, TransportPriorityQosPolicy.class, "TransportPriorityQosPolicy",
                 !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-        initEAttribute(getTransportPriorityQosPolicy_Value(), ecorePackage.getELong(), "value", null, 0, 1,
+        initEAttribute(getTransportPriorityQosPolicy_Value(), ecorePackage.getELong(), "value", "0", 0, 1,
                 TransportPriorityQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID,
                 IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
@@ -3003,15 +2807,15 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
                 !IS_DERIVED, IS_ORDERED);
 
         initEClass(periodEClass, Period.class, "Period", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-        initEAttribute(getPeriod_Seconds(), ecorePackage.getELong(), "seconds", "0", 0, 1, Period.class, !IS_TRANSIENT,
-                !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-        initEAttribute(getPeriod_Nanoseconds(), ecorePackage.getELong(), "nanoseconds", "0", 0, 1, Period.class,
+        initEAttribute(getPeriod_Seconds(), ecorePackage.getELong(), "seconds", "-1", 0, 1, Period.class,
+                !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+        initEAttribute(getPeriod_Nanoseconds(), ecorePackage.getELong(), "nanoseconds", "-1", 0, 1, Period.class,
                 !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
         initEClass(writerDataLifecycleQosPolicyEClass, WriterDataLifecycleQosPolicy.class,
                 "WriterDataLifecycleQosPolicy", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
         initEAttribute(getWriterDataLifecycleQosPolicy_Autodispose_unregistered_instances(),
-                ecorePackage.getEBoolean(), "autodispose_unregistered_instances", null, 0, 1,
+                ecorePackage.getEBoolean(), "autodispose_unregistered_instances", "true", 0, 1,
                 WriterDataLifecycleQosPolicy.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID,
                 IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
@@ -3038,6 +2842,14 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
         initEAttribute(getTransport_Transport_id(), ecorePackage.getELong(), "transport_id", null, 1, 1,
                 Transport.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE,
                 !IS_DERIVED, IS_ORDERED);
+
+        initEClass(modelEClass, Model.class, "Model", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+        initEReference(getModel_Entities(), this.getModelEntity(), null, "entities", null, 0, -1, Model.class,
+                !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE,
+                IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+        initEClass(modelEntityEClass, ModelEntity.class, "ModelEntity", IS_ABSTRACT, !IS_INTERFACE,
+                IS_GENERATED_INSTANCE_CLASS);
 
         // Initialize enums and add enum literals
         initEEnum(destinationOrderQosPolicyKindEEnum, DestinationOrderQosPolicyKind.class,
@@ -3094,4 +2906,4 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
         createResource(eNS_URI);
     }
 
-} //OpenDDSPackageImpl
+} // OpenDDSPackageImpl

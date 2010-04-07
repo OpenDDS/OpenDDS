@@ -16,10 +16,9 @@ import java.util.List;
 import org.eclipse.emf.common.util.Enumerator;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the literals of the enumeration '<em><b>Language Type</b></em>',
- * and utility methods for working with them.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the literals of the
+ * enumeration '<em><b>Language Type</b></em>', and utility methods
+ * for working with them. <!-- end-user-doc -->
  * @see OpenDDS.OpenDDSPackage#getLanguageType()
  * @model
  * @generated
@@ -27,8 +26,8 @@ import org.eclipse.emf.common.util.Enumerator;
 public enum LanguageType implements Enumerator {
     /**
      * The '<em><b>CXX</b></em>' literal object.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @see #CXX_VALUE
      * @generated
      * @ordered
@@ -37,10 +36,11 @@ public enum LanguageType implements Enumerator {
 
     /**
      * The '<em><b>CXX</b></em>' literal value.
-     * <!-- begin-user-doc -->
+     * <!-- begin-user-doc
+     * -->
      * <p>
-     * If the meaning of '<em><b>CXX</b></em>' literal object isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of '<em><b>CXX</b></em>' literal object isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @see #CXX
@@ -52,24 +52,23 @@ public enum LanguageType implements Enumerator {
 
     /**
      * An array of all the '<em><b>Language Type</b></em>' enumerators.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private static final LanguageType[] VALUES_ARRAY = new LanguageType[] { CXX, };
 
     /**
      * A public read-only list of all the '<em><b>Language Type</b></em>' enumerators.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @generated
      */
     public static final List<LanguageType> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
 
     /**
      * Returns the '<em><b>Language Type</b></em>' literal with the specified literal value.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @generated
      */
     public static LanguageType get(String literal) {
@@ -84,8 +83,7 @@ public enum LanguageType implements Enumerator {
 
     /**
      * Returns the '<em><b>Language Type</b></em>' literal with the specified name.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public static LanguageType getByName(String name) {
@@ -100,8 +98,8 @@ public enum LanguageType implements Enumerator {
 
     /**
      * Returns the '<em><b>Language Type</b></em>' literal with the specified integer value.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @generated
      */
     public static LanguageType get(int value) {
@@ -113,30 +111,27 @@ public enum LanguageType implements Enumerator {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private final int value;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private final String name;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private final String literal;
 
     /**
      * Only this class can construct instances.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @generated
      */
     private LanguageType(int value, String name, String literal) {
@@ -146,8 +141,7 @@ public enum LanguageType implements Enumerator {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public int getValue() {
@@ -155,8 +149,7 @@ public enum LanguageType implements Enumerator {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public String getName() {
@@ -164,8 +157,7 @@ public enum LanguageType implements Enumerator {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public String getLiteral() {
@@ -174,8 +166,8 @@ public enum LanguageType implements Enumerator {
 
     /**
      * Returns the literal value of the enumerator, which is its string representation.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @generated
      */
     @Override
@@ -183,4 +175,4 @@ public enum LanguageType implements Enumerator {
         return literal;
     }
 
-} //LanguageType
+} // LanguageType

@@ -12,9 +12,8 @@ package OpenDDS;
 import org.eclipse.emf.ecore.EClass;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>OLong</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>OLong</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
  *
@@ -22,8 +21,7 @@ import org.eclipse.emf.ecore.EClass;
  */
 public class OLongImpl extends SimpleImpl implements OLong {
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected OLongImpl() {
@@ -31,8 +29,7 @@ public class OLongImpl extends SimpleImpl implements OLong {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -40,4 +37,4 @@ public class OLongImpl extends SimpleImpl implements OLong {
         return OpenDDSPackage.Literals.OLONG;
     }
 
-} //OLongImpl
+} // OLongImpl

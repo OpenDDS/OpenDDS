@@ -15,9 +15,8 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Data Reader Writer</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Data Reader Writer</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -39,8 +38,8 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public abstract class DataReaderWriterImpl extends DomainEntityImpl implements DataReaderWriter {
     /**
      * The cached value of the '{@link #getDurability() <em>Durability</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getDurability()
      * @generated
      * @ordered
@@ -59,8 +58,8 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
 
     /**
      * The cached value of the '{@link #getDeadline() <em>Deadline</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getDeadline()
      * @generated
      * @ordered
@@ -69,8 +68,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
 
     /**
      * The cached value of the '{@link #getHistory() <em>History</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getHistory()
      * @generated
      * @ordered
@@ -79,8 +77,8 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
 
     /**
      * The cached value of the '{@link #getUser_data() <em>User data</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getUser_data()
      * @generated
      * @ordered
@@ -99,8 +97,8 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
 
     /**
      * The cached value of the '{@link #getOwnership() <em>Ownership</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getOwnership()
      * @generated
      * @ordered
@@ -109,8 +107,8 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
 
     /**
      * The cached value of the '{@link #getLiveliness() <em>Liveliness</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getLiveliness()
      * @generated
      * @ordered
@@ -129,8 +127,8 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
 
     /**
      * The cached value of the '{@link #getReliability() <em>Reliability</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getReliability()
      * @generated
      * @ordered
@@ -138,8 +136,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     protected ReliabilityQosPolicy reliability;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected DataReaderWriterImpl() {
@@ -147,8 +144,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -157,8 +153,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public DurabilityQosPolicy getDurability() {
@@ -176,8 +171,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public DurabilityQosPolicy basicGetDurability() {
@@ -185,8 +179,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setDurability(DurabilityQosPolicy newDurability) {
@@ -199,8 +192,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public DestinationOrderQosPolicy getDestination_order() {
@@ -219,8 +211,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public DestinationOrderQosPolicy basicGetDestination_order() {
@@ -228,8 +219,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setDestination_order(DestinationOrderQosPolicy newDestination_order) {
@@ -242,8 +232,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public DeadlineQosPolicy getDeadline() {
@@ -261,8 +250,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public DeadlineQosPolicy basicGetDeadline() {
@@ -270,8 +258,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setDeadline(DeadlineQosPolicy newDeadline) {
@@ -284,8 +271,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public HistoryQosPolicy getHistory() {
@@ -303,8 +289,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public HistoryQosPolicy basicGetHistory() {
@@ -312,8 +297,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setHistory(HistoryQosPolicy newHistory) {
@@ -326,8 +310,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public UserDataQosPolicy getUser_data() {
@@ -345,8 +328,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public UserDataQosPolicy basicGetUser_data() {
@@ -354,8 +336,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setUser_data(UserDataQosPolicy newUser_data) {
@@ -368,8 +349,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public ResourceLimitsQosPolicy getResource_limits() {
@@ -387,8 +367,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public ResourceLimitsQosPolicy basicGetResource_limits() {
@@ -396,8 +375,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setResource_limits(ResourceLimitsQosPolicy newResource_limits) {
@@ -410,8 +388,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public OwnershipQosPolicy getOwnership() {
@@ -429,8 +406,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public OwnershipQosPolicy basicGetOwnership() {
@@ -438,8 +414,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setOwnership(OwnershipQosPolicy newOwnership) {
@@ -452,8 +427,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public LivelinessQosPolicy getLiveliness() {
@@ -471,8 +445,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public LivelinessQosPolicy basicGetLiveliness() {
@@ -480,8 +453,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setLiveliness(LivelinessQosPolicy newLiveliness) {
@@ -494,8 +466,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public LatencyBudgetQosPolicy getLatency_budget() {
@@ -513,8 +484,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public LatencyBudgetQosPolicy basicGetLatency_budget() {
@@ -522,8 +492,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setLatency_budget(LatencyBudgetQosPolicy newLatency_budget) {
@@ -536,8 +505,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public ReliabilityQosPolicy getReliability() {
@@ -555,8 +523,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public ReliabilityQosPolicy basicGetReliability() {
@@ -564,8 +531,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setReliability(ReliabilityQosPolicy newReliability) {
@@ -578,8 +544,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -640,8 +605,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -682,8 +646,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -724,8 +687,7 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -755,4 +717,4 @@ public abstract class DataReaderWriterImpl extends DomainEntityImpl implements D
         return super.eIsSet(featureID);
     }
 
-} //DataReaderWriterImpl
+} // DataReaderWriterImpl

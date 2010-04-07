@@ -13,9 +13,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.EObjectImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>OU Short</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>OU Short</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
  *
@@ -23,8 +22,7 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
  */
 public class OUShortImpl extends EObjectImpl implements OUShort {
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected OUShortImpl() {
@@ -32,8 +30,7 @@ public class OUShortImpl extends EObjectImpl implements OUShort {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -41,4 +38,4 @@ public class OUShortImpl extends EObjectImpl implements OUShort {
         return OpenDDSPackage.Literals.OU_SHORT;
     }
 
-} //OUShortImpl
+} // OUShortImpl

@@ -15,9 +15,8 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Data Writer</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Data Writer</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -31,8 +30,7 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     /**
      * The cached value of the '{@link #getTopic() <em>Topic</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getTopic()
      * @generated
      * @ordered
@@ -41,8 +39,8 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
 
     /**
      * The cached value of the '{@link #getWriter_data_lifecycle() <em>Writer data lifecycle</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @see #getWriter_data_lifecycle()
      * @generated
      * @ordered
@@ -50,8 +48,7 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     protected WriterDataLifecycleQosPolicy writer_data_lifecycle;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected DataWriterImpl() {
@@ -59,8 +56,7 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -69,8 +65,7 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public Topic getTopic() {
@@ -88,8 +83,7 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public Topic basicGetTopic() {
@@ -97,8 +91,7 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setTopic(Topic newTopic) {
@@ -110,8 +103,7 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public WriterDataLifecycleQosPolicy getWriter_data_lifecycle() {
@@ -130,8 +122,7 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public WriterDataLifecycleQosPolicy basicGetWriter_data_lifecycle() {
@@ -139,8 +130,7 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setWriter_data_lifecycle(WriterDataLifecycleQosPolicy newWriter_data_lifecycle) {
@@ -153,8 +143,7 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -175,8 +164,7 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -193,8 +181,7 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -211,8 +198,7 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -226,4 +212,4 @@ public class DataWriterImpl extends DataReaderWriterImpl implements DataWriter {
         return super.eIsSet(featureID);
     }
 
-} //DataWriterImpl
+} // DataWriterImpl

@@ -14,9 +14,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Presentation Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Presentation Qos Policy</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -31,8 +30,8 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public class PresentationQosPolicyImpl extends QosPolicyImpl implements PresentationQosPolicy {
     /**
      * The default value of the '{@link #getAccess_scope() <em>Access scope</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getAccess_scope()
      * @generated
      * @ordered
@@ -41,8 +40,8 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
 
     /**
      * The cached value of the '{@link #getAccess_scope() <em>Access scope</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getAccess_scope()
      * @generated
      * @ordered
@@ -90,8 +89,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     protected boolean ordered_access = ORDERED_ACCESS_EDEFAULT;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected PresentationQosPolicyImpl() {
@@ -99,8 +97,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -109,8 +106,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public PresentationQosPolicyAccessScopeKind getAccess_scope() {
@@ -118,8 +114,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setAccess_scope(PresentationQosPolicyAccessScopeKind newAccess_scope) {
@@ -132,8 +127,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public boolean isCoherent_access() {
@@ -141,8 +135,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setCoherent_access(boolean newCoherent_access) {
@@ -155,8 +148,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public boolean isOrdered_access() {
@@ -164,8 +156,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setOrdered_access(boolean newOrdered_access) {
@@ -178,8 +169,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -196,8 +186,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -217,8 +206,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -238,8 +226,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -256,8 +243,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -277,4 +263,4 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
         return result.toString();
     }
 
-} //PresentationQosPolicyImpl
+} // PresentationQosPolicyImpl

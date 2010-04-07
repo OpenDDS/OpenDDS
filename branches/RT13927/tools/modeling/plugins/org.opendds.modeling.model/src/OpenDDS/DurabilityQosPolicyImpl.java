@@ -14,9 +14,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Durability Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Durability Qos Policy</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -29,8 +28,7 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public class DurabilityQosPolicyImpl extends QosPolicyImpl implements DurabilityQosPolicy {
     /**
      * The default value of the '{@link #getKind() <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getKind()
      * @generated
      * @ordered
@@ -39,8 +37,7 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
 
     /**
      * The cached value of the '{@link #getKind() <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getKind()
      * @generated
      * @ordered
@@ -48,8 +45,7 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
     protected DurabilityQosPolicyKind kind = KIND_EDEFAULT;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected DurabilityQosPolicyImpl() {
@@ -57,8 +53,7 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -67,8 +62,7 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public DurabilityQosPolicyKind getKind() {
@@ -76,8 +70,7 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setKind(DurabilityQosPolicyKind newKind) {
@@ -90,8 +83,7 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -104,8 +96,7 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -119,8 +110,7 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -134,8 +124,7 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -148,8 +137,7 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -165,4 +153,4 @@ public class DurabilityQosPolicyImpl extends QosPolicyImpl implements Durability
         return result.toString();
     }
 
-} //DurabilityQosPolicyImpl
+} // DurabilityQosPolicyImpl

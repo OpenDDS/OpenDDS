@@ -16,9 +16,9 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Reader Data Lifecycle Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Reader Data Lifecycle Qos Policy</b></em>'. <!--
+ * end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -31,8 +31,7 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements ReaderDataLifecycleQosPolicy {
     /**
      * The cached value of the '{@link #getAutopurge_nowriter_samples_delay() <em>Autopurge nowriter samples delay</em>}' containment reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getAutopurge_nowriter_samples_delay()
      * @generated
      * @ordered
@@ -40,8 +39,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     protected Period autopurge_nowriter_samples_delay;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected ReaderDataLifecycleQosPolicyImpl() {
@@ -49,8 +47,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -59,8 +56,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public Period getAutopurge_nowriter_samples_delay() {
@@ -68,8 +64,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public NotificationChain basicSetAutopurge_nowriter_samples_delay(Period newAutopurge_nowriter_samples_delay,
@@ -90,8 +85,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setAutopurge_nowriter_samples_delay(Period newAutopurge_nowriter_samples_delay) {
@@ -121,8 +115,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -135,8 +128,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -149,8 +141,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -164,8 +155,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -179,8 +169,7 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -192,4 +181,4 @@ public class ReaderDataLifecycleQosPolicyImpl extends QosPolicyImpl implements R
         return super.eIsSet(featureID);
     }
 
-} //ReaderDataLifecycleQosPolicyImpl
+} // ReaderDataLifecycleQosPolicyImpl

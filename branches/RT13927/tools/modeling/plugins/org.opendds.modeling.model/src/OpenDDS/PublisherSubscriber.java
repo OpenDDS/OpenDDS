@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Publisher Subscriber</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Publisher Subscriber</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -34,8 +33,8 @@ public interface PublisherSubscriber extends DomainEntity {
      * Returns the value of the '<em><b>Entity factory</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Entity factory</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Entity factory</em>' reference isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Entity factory</em>' reference.
@@ -60,8 +59,8 @@ public interface PublisherSubscriber extends DomainEntity {
      * Returns the value of the '<em><b>Presentation</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Presentation</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Presentation</em>' reference isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Presentation</em>' reference.
@@ -74,8 +73,8 @@ public interface PublisherSubscriber extends DomainEntity {
 
     /**
      * Sets the value of the '{@link OpenDDS.PublisherSubscriber#getPresentation <em>Presentation</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Presentation</em>' reference.
      * @see #getPresentation()
      * @generated
@@ -86,8 +85,8 @@ public interface PublisherSubscriber extends DomainEntity {
      * Returns the value of the '<em><b>Group data</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Group data</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Group data</em>' reference isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Group data</em>' reference.
@@ -100,8 +99,8 @@ public interface PublisherSubscriber extends DomainEntity {
 
     /**
      * Sets the value of the '{@link OpenDDS.PublisherSubscriber#getGroup_data <em>Group data</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Group data</em>' reference.
      * @see #getGroup_data()
      * @generated
@@ -112,8 +111,8 @@ public interface PublisherSubscriber extends DomainEntity {
      * Returns the value of the '<em><b>Partition</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Partition</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Partition</em>' reference isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Partition</em>' reference.
@@ -126,8 +125,8 @@ public interface PublisherSubscriber extends DomainEntity {
 
     /**
      * Sets the value of the '{@link OpenDDS.PublisherSubscriber#getPartition <em>Partition</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Partition</em>' reference.
      * @see #getPartition()
      * @generated
@@ -138,8 +137,8 @@ public interface PublisherSubscriber extends DomainEntity {
      * Returns the value of the '<em><b>Transport</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Transport</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Transport</em>' reference isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Transport</em>' reference.
@@ -152,8 +151,8 @@ public interface PublisherSubscriber extends DomainEntity {
 
     /**
      * Sets the value of the '{@link OpenDDS.PublisherSubscriber#getTransport <em>Transport</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Transport</em>' reference.
      * @see #getTransport()
      * @generated

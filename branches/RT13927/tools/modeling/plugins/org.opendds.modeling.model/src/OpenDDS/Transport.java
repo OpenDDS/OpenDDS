@@ -9,12 +9,9 @@
 
 package OpenDDS;
 
-import org.eclipse.emf.ecore.EObject;
-
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Transport</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Transport</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -27,13 +24,13 @@ import org.eclipse.emf.ecore.EObject;
  * @model
  * @generated
  */
-public interface Transport extends EObject {
+public interface Transport extends Entity, ModelEntity {
     /**
      * Returns the value of the '<em><b>Transport id</b></em>' attribute.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Transport id</em>' attribute isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Transport id</em>' attribute isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Transport id</em>' attribute.
@@ -46,8 +43,7 @@ public interface Transport extends EObject {
 
     /**
      * Sets the value of the '{@link OpenDDS.Transport#getTransport_id <em>Transport id</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @param value the new value of the '<em>Transport id</em>' attribute.
      * @see #getTransport_id()
      * @generated

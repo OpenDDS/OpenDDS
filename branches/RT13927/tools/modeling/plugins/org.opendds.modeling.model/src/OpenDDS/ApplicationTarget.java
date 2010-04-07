@@ -12,9 +12,8 @@ package OpenDDS;
 import org.eclipse.emf.common.util.EList;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Application Target</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Application Target</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -31,14 +30,14 @@ import org.eclipse.emf.common.util.EList;
  * @model
  * @generated
  */
-public interface ApplicationTarget extends Entity {
+public interface ApplicationTarget extends Entity, ModelEntity {
     /**
      * Returns the value of the '<em><b>Component type</b></em>' attribute.
      * The literals are from the enumeration {@link OpenDDS.ComponentType}.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Component type</em>' attribute isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Component type</em>' attribute isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Component type</em>' attribute.
@@ -66,8 +65,8 @@ public interface ApplicationTarget extends Entity {
      * The literals are from the enumeration {@link OpenDDS.LanguageType}.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Language</em>' attribute isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Language</em>' attribute isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Language</em>' attribute.
@@ -81,8 +80,7 @@ public interface ApplicationTarget extends Entity {
 
     /**
      * Sets the value of the '{@link OpenDDS.ApplicationTarget#getLanguage <em>Language</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @param value the new value of the '<em>Language</em>' attribute.
      * @see OpenDDS.LanguageType
      * @see #getLanguage()
@@ -95,8 +93,8 @@ public interface ApplicationTarget extends Entity {
      * The literals are from the enumeration {@link OpenDDS.PlatformType}.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Platform</em>' attribute isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Platform</em>' attribute isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Platform</em>' attribute.
@@ -110,8 +108,7 @@ public interface ApplicationTarget extends Entity {
 
     /**
      * Sets the value of the '{@link OpenDDS.ApplicationTarget#getPlatform <em>Platform</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @param value the new value of the '<em>Platform</em>' attribute.
      * @see OpenDDS.PlatformType
      * @see #getPlatform()
@@ -124,8 +121,9 @@ public interface ApplicationTarget extends Entity {
      * The list contents are of type {@link OpenDDS.DomainParticipant}.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Participants</em>' reference list isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Participants</em>' reference list
+     * isn't clear, there really should be more of a description
+     * here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Participants</em>' reference list.
@@ -139,8 +137,9 @@ public interface ApplicationTarget extends Entity {
      * Returns the value of the '<em><b>Service arguments</b></em>' attribute.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Service arguments</em>' attribute isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Service arguments</em>' attribute
+     * isn't clear, there really should be more of a description
+     * here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Service arguments</em>' attribute.

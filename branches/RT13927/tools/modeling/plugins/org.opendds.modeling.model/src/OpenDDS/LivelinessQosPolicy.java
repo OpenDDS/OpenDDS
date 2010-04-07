@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Liveliness Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Liveliness Qos Policy</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -29,6 +28,7 @@ package OpenDDS;
 public interface LivelinessQosPolicy extends QosPolicy {
     /**
      * Returns the value of the '<em><b>Kind</b></em>' attribute.
+     * The default value is <code>"AUTOMATIC"</code>.
      * The literals are from the enumeration {@link OpenDDS.LivelinessQosPolicyKind}.
      * <!-- begin-user-doc -->
      * <p>
@@ -40,15 +40,14 @@ public interface LivelinessQosPolicy extends QosPolicy {
      * @see OpenDDS.LivelinessQosPolicyKind
      * @see #setKind(LivelinessQosPolicyKind)
      * @see OpenDDS.OpenDDSPackage#getLivelinessQosPolicy_Kind()
-     * @model
+     * @model default="AUTOMATIC"
      * @generated
      */
     LivelinessQosPolicyKind getKind();
 
     /**
      * Sets the value of the '{@link OpenDDS.LivelinessQosPolicy#getKind <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @param value the new value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.LivelinessQosPolicyKind
      * @see #getKind()
@@ -60,8 +59,9 @@ public interface LivelinessQosPolicy extends QosPolicy {
      * Returns the value of the '<em><b>Lease duration</b></em>' containment reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Lease duration</em>' containment reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Lease duration</em>' containment
+     * reference isn't clear, there really should be more of a
+     * description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Lease duration</em>' containment reference.
@@ -73,10 +73,14 @@ public interface LivelinessQosPolicy extends QosPolicy {
     Period getLease_duration();
 
     /**
-     * Sets the value of the '{@link OpenDDS.LivelinessQosPolicy#getLease_duration <em>Lease duration</em>}' containment reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @param value the new value of the '<em>Lease duration</em>' containment reference.
+     * Sets the value of the '
+     * {@link OpenDDS.LivelinessQosPolicy#getLease_duration
+     * <em>Lease duration</em>}' containment reference. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
+     * @param value
+     *            the new value of the '<em>Lease duration</em>'
+     *            containment reference.
      * @see #getLease_duration()
      * @generated
      */

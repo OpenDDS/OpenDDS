@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Reliability Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Reliability Qos Policy</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -29,6 +28,7 @@ package OpenDDS;
 public interface ReliabilityQosPolicy extends QosPolicy {
     /**
      * Returns the value of the '<em><b>Kind</b></em>' attribute.
+     * The default value is <code>"BEST_EFFORT"</code>.
      * The literals are from the enumeration {@link OpenDDS.ReliabilityQosPolicyKind}.
      * <!-- begin-user-doc -->
      * <p>
@@ -40,15 +40,14 @@ public interface ReliabilityQosPolicy extends QosPolicy {
      * @see OpenDDS.ReliabilityQosPolicyKind
      * @see #setKind(ReliabilityQosPolicyKind)
      * @see OpenDDS.OpenDDSPackage#getReliabilityQosPolicy_Kind()
-     * @model
+     * @model default="BEST_EFFORT"
      * @generated
      */
     ReliabilityQosPolicyKind getKind();
 
     /**
      * Sets the value of the '{@link OpenDDS.ReliabilityQosPolicy#getKind <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @param value the new value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.ReliabilityQosPolicyKind
      * @see #getKind()
@@ -60,8 +59,9 @@ public interface ReliabilityQosPolicy extends QosPolicy {
      * Returns the value of the '<em><b>Max blocking time</b></em>' containment reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Max blocking time</em>' containment reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Max blocking time</em>' containment
+     * reference isn't clear, there really should be more of a
+     * description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Max blocking time</em>' containment reference.
@@ -73,10 +73,14 @@ public interface ReliabilityQosPolicy extends QosPolicy {
     Period getMax_blocking_time();
 
     /**
-     * Sets the value of the '{@link OpenDDS.ReliabilityQosPolicy#getMax_blocking_time <em>Max blocking time</em>}' containment reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @param value the new value of the '<em>Max blocking time</em>' containment reference.
+     * Sets the value of the '
+     * {@link OpenDDS.ReliabilityQosPolicy#getMax_blocking_time
+     * <em>Max blocking time</em>}' containment reference. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
+     * @param value
+     *            the new value of the '<em>Max blocking time</em>'
+     *            containment reference.
      * @see #getMax_blocking_time()
      * @generated
      */

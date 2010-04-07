@@ -14,9 +14,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Multi Topic</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Multi Topic</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -28,9 +27,10 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  */
 public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     /**
-     * The default value of the '{@link #getSubscription_expression() <em>Subscription expression</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * The default value of the '{@link #getSubscription_expression()
+     * <em>Subscription expression</em>}' attribute. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @see #getSubscription_expression()
      * @generated
      * @ordered
@@ -38,9 +38,10 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     protected static final String SUBSCRIPTION_EXPRESSION_EDEFAULT = null;
 
     /**
-     * The cached value of the '{@link #getSubscription_expression() <em>Subscription expression</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * The cached value of the '{@link #getSubscription_expression()
+     * <em>Subscription expression</em>}' attribute. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @see #getSubscription_expression()
      * @generated
      * @ordered
@@ -48,8 +49,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     protected String subscription_expression = SUBSCRIPTION_EXPRESSION_EDEFAULT;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected MultiTopicImpl() {
@@ -57,8 +57,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -67,8 +66,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public String getSubscription_expression() {
@@ -76,8 +74,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setSubscription_expression(String newSubscription_expression) {
@@ -90,8 +87,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -104,8 +100,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -119,8 +114,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -134,8 +128,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -149,8 +142,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -166,4 +158,4 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
         return result.toString();
     }
 
-} //MultiTopicImpl
+} // MultiTopicImpl

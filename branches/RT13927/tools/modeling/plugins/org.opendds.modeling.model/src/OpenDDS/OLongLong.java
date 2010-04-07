@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>OLong Long</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>OLong Long</b></em>'. <!-- end-user-doc -->
  *
  *
  * @see OpenDDS.OpenDDSPackage#getOLongLong()

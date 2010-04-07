@@ -23,17 +23,18 @@ import org.eclipse.emf.edit.provider.IStructuredItemContentProvider;
 import org.eclipse.emf.edit.provider.ITreeItemContentProvider;
 
 /**
- * This is the item provider adapter for a {@link OpenDDS.TopicDescription} object.
- * <!-- begin-user-doc -->
+ * This is the item provider adapter for a
+ * {@link OpenDDS.TopicDescription} object. <!-- begin-user-doc -->
  * <!-- end-user-doc -->
+ * 
  * @generated
  */
-public class TopicDescriptionItemProvider extends NamedEntityItemProvider implements IEditingDomainItemProvider,
+public class TopicDescriptionItemProvider extends DomainEntityItemProvider implements IEditingDomainItemProvider,
         IStructuredItemContentProvider, ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource {
     /**
-     * This constructs an instance from a factory and a notifier.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This constructs an instance from a factory and a notifier. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public TopicDescriptionItemProvider(AdapterFactory adapterFactory) {
@@ -42,8 +43,8 @@ public class TopicDescriptionItemProvider extends NamedEntityItemProvider implem
 
     /**
      * This returns the property descriptors for the adapted class.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -57,9 +58,9 @@ public class TopicDescriptionItemProvider extends NamedEntityItemProvider implem
     }
 
     /**
-     * This adds a property descriptor for the Type feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the Type feature. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addTypePropertyDescriptor(Object object) {
@@ -71,9 +72,9 @@ public class TopicDescriptionItemProvider extends NamedEntityItemProvider implem
     }
 
     /**
-     * This returns the label text for the adapted class.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This returns the label text for the adapted class. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -84,10 +85,12 @@ public class TopicDescriptionItemProvider extends NamedEntityItemProvider implem
     }
 
     /**
-     * This handles model notifications by calling {@link #updateChildren} to update any cached
-     * children and by creating a viewer notification, which it passes to {@link #fireNotifyChanged}.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This handles model notifications by calling
+     * {@link #updateChildren} to update any cached children and by
+     * creating a viewer notification, which it passes to
+     * {@link #fireNotifyChanged}. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -97,10 +100,10 @@ public class TopicDescriptionItemProvider extends NamedEntityItemProvider implem
     }
 
     /**
-     * This adds {@link org.eclipse.emf.edit.command.CommandParameter}s describing the children
-     * that can be created under this object.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds {@link org.eclipse.emf.edit.command.CommandParameter}
+     * s describing the children that can be created under this
+     * object. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

@@ -12,9 +12,8 @@ package OpenDDS;
 import org.eclipse.emf.ecore.EObject;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Key</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Key</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -46,8 +45,8 @@ public interface Key extends EObject {
 
     /**
      * Sets the value of the '{@link OpenDDS.Key#getMember <em>Member</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Member</em>' reference.
      * @see #getMember()
      * @generated

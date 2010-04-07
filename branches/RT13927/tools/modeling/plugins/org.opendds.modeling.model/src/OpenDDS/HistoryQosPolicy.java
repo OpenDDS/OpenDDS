@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>History Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>History Qos Policy</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -29,6 +28,7 @@ package OpenDDS;
 public interface HistoryQosPolicy extends QosPolicy {
     /**
      * Returns the value of the '<em><b>Depth</b></em>' attribute.
+     * The default value is <code>"1"</code>.
      * <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Depth</em>' attribute isn't clear,
@@ -38,15 +38,14 @@ public interface HistoryQosPolicy extends QosPolicy {
      * @return the value of the '<em>Depth</em>' attribute.
      * @see #setDepth(long)
      * @see OpenDDS.OpenDDSPackage#getHistoryQosPolicy_Depth()
-     * @model
+     * @model default="1"
      * @generated
      */
     long getDepth();
 
     /**
      * Sets the value of the '{@link OpenDDS.HistoryQosPolicy#getDepth <em>Depth</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @param value the new value of the '<em>Depth</em>' attribute.
      * @see #getDepth()
      * @generated
@@ -54,27 +53,29 @@ public interface HistoryQosPolicy extends QosPolicy {
     void setDepth(long value);
 
     /**
-     * Returns the value of the '<em><b>Kind</b></em>' attribute.
-     * The literals are from the enumeration {@link OpenDDS.HistoryQosPolicyKind}.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Kind</b></em>' attribute. The
+     * default value is <code>"KEEP_LAST"</code>. The literals are
+     * from the enumeration {@link OpenDDS.HistoryQosPolicyKind}. <!--
+     * begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Kind</em>' attribute isn't clear,
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     *
      * @return the value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.HistoryQosPolicyKind
      * @see #setKind(HistoryQosPolicyKind)
      * @see OpenDDS.OpenDDSPackage#getHistoryQosPolicy_Kind()
-     * @model
+     * @model default="KEEP_LAST"
      * @generated
      */
     HistoryQosPolicyKind getKind();
 
     /**
      * Sets the value of the '{@link OpenDDS.HistoryQosPolicy#getKind <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.HistoryQosPolicyKind
      * @see #getKind()

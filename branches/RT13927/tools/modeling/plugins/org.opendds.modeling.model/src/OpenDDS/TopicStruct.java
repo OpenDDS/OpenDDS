@@ -12,9 +12,8 @@ package OpenDDS;
 import org.eclipse.emf.common.util.EList;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Topic Struct</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Topic Struct</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -28,14 +27,15 @@ import org.eclipse.emf.common.util.EList;
  * @model
  * @generated
  */
-public interface TopicStruct extends ConstructedTopicType {
+public interface TopicStruct extends ConstructedTopicType, ModelEntity {
     /**
      * Returns the value of the '<em><b>Members</b></em>' containment reference list.
      * The list contents are of type {@link OpenDDS.TopicField}.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Members</em>' containment reference list isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Members</em>' containment reference
+     * list isn't clear, there really should be more of a description
+     * here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Members</em>' containment reference list.
@@ -50,8 +50,9 @@ public interface TopicStruct extends ConstructedTopicType {
      * The list contents are of type {@link OpenDDS.Key}.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Keys</em>' containment reference list isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Keys</em>' containment reference
+     * list isn't clear, there really should be more of a description
+     * here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Keys</em>' containment reference list.

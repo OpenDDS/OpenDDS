@@ -12,9 +12,8 @@ package OpenDDS;
 import org.eclipse.emf.ecore.EClass;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Constructed Topic Type</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Constructed Topic Type</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
  *
@@ -22,8 +21,7 @@ import org.eclipse.emf.ecore.EClass;
  */
 public abstract class ConstructedTopicTypeImpl extends TopicFieldImpl implements ConstructedTopicType {
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected ConstructedTopicTypeImpl() {
@@ -31,8 +29,7 @@ public abstract class ConstructedTopicTypeImpl extends TopicFieldImpl implements
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -40,4 +37,4 @@ public abstract class ConstructedTopicTypeImpl extends TopicFieldImpl implements
         return OpenDDSPackage.Literals.CONSTRUCTED_TOPIC_TYPE;
     }
 
-} //ConstructedTopicTypeImpl
+} // ConstructedTopicTypeImpl

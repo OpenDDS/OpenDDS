@@ -16,9 +16,8 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Lifespan Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Lifespan Qos Policy</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -31,8 +30,8 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosPolicy {
     /**
      * The cached value of the '{@link #getDuration() <em>Duration</em>}' containment reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @see #getDuration()
      * @generated
      * @ordered
@@ -40,8 +39,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     protected Period duration;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected LifespanQosPolicyImpl() {
@@ -49,8 +47,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -59,8 +56,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public Period getDuration() {
@@ -68,8 +64,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public NotificationChain basicSetDuration(Period newDuration, NotificationChain msgs) {
@@ -88,8 +83,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setDuration(Period newDuration) {
@@ -114,8 +108,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -128,8 +121,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -142,8 +134,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -157,8 +148,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -172,8 +162,7 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -185,4 +174,4 @@ public class LifespanQosPolicyImpl extends QosPolicyImpl implements LifespanQosP
         return super.eIsSet(featureID);
     }
 
-} //LifespanQosPolicyImpl
+} // LifespanQosPolicyImpl

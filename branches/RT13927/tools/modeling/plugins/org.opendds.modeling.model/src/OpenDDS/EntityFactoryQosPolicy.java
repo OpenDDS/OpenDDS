@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Entity Factory Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Entity Factory Qos Policy</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -28,25 +27,31 @@ package OpenDDS;
 public interface EntityFactoryQosPolicy extends QosPolicy {
     /**
      * Returns the value of the '<em><b>Autoenable created entities</b></em>' attribute.
+     * The default value is <code>"true"</code>.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Autoenable created entities</em>' attribute isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Autoenable created entities</em>'
+     * attribute isn't clear, there really should be more of a
+     * description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Autoenable created entities</em>' attribute.
      * @see #setAutoenable_created_entities(boolean)
      * @see OpenDDS.OpenDDSPackage#getEntityFactoryQosPolicy_Autoenable_created_entities()
-     * @model
+     * @model default="true"
      * @generated
      */
     boolean isAutoenable_created_entities();
 
     /**
-     * Sets the value of the '{@link OpenDDS.EntityFactoryQosPolicy#isAutoenable_created_entities <em>Autoenable created entities</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @param value the new value of the '<em>Autoenable created entities</em>' attribute.
+     * Sets the value of the '
+     * {@link OpenDDS.EntityFactoryQosPolicy#isAutoenable_created_entities
+     * <em>Autoenable created entities</em>}' attribute. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
+     * @param value
+     *            the new value of the '
+     *            <em>Autoenable created entities</em>' attribute.
      * @see #isAutoenable_created_entities()
      * @generated
      */

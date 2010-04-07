@@ -16,10 +16,9 @@ import java.util.List;
 import org.eclipse.emf.common.util.Enumerator;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the literals of the enumeration '<em><b>Destination Order Qos Policy Kind</b></em>',
- * and utility methods for working with them.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the literals of the
+ * enumeration '<em><b>Destination Order Qos Policy Kind</b></em>',
+ * and utility methods for working with them. <!-- end-user-doc -->
  * @see OpenDDS.OpenDDSPackage#getDestinationOrderQosPolicyKind()
  * @model
  * @generated
@@ -27,8 +26,7 @@ import org.eclipse.emf.common.util.Enumerator;
 public enum DestinationOrderQosPolicyKind implements Enumerator {
     /**
      * The '<em><b>BY RECEPTION TIMESTAMP</b></em>' literal object.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #BY_RECEPTION_TIMESTAMP_VALUE
      * @generated
      * @ordered
@@ -36,9 +34,9 @@ public enum DestinationOrderQosPolicyKind implements Enumerator {
     BY_RECEPTION_TIMESTAMP(0, "BY_RECEPTION_TIMESTAMP", "BY_RECEPTION_TIMESTAMP"),
 
     /**
-     * The '<em><b>BY SOURCE TIMESTAMP</b></em>' literal object.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * The '<em><b>BY SOURCE TIMESTAMP</b></em>' literal object. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @see #BY_SOURCE_TIMESTAMP_VALUE
      * @generated
      * @ordered
@@ -49,8 +47,9 @@ public enum DestinationOrderQosPolicyKind implements Enumerator {
      * The '<em><b>BY RECEPTION TIMESTAMP</b></em>' literal value.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of '<em><b>BY RECEPTION TIMESTAMP</b></em>' literal object isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of '<em><b>BY RECEPTION TIMESTAMP</b></em>'
+     * literal object isn't clear, there really should be more of a
+     * description here...
      * </p>
      * <!-- end-user-doc -->
      * @see #BY_RECEPTION_TIMESTAMP
@@ -61,13 +60,15 @@ public enum DestinationOrderQosPolicyKind implements Enumerator {
     public static final int BY_RECEPTION_TIMESTAMP_VALUE = 0;
 
     /**
-     * The '<em><b>BY SOURCE TIMESTAMP</b></em>' literal value.
-     * <!-- begin-user-doc -->
+     * The '<em><b>BY SOURCE TIMESTAMP</b></em>' literal value. <!--
+     * begin-user-doc -->
      * <p>
-     * If the meaning of '<em><b>BY SOURCE TIMESTAMP</b></em>' literal object isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of '<em><b>BY SOURCE TIMESTAMP</b></em>' literal
+     * object isn't clear, there really should be more of a
+     * description here...
      * </p>
      * <!-- end-user-doc -->
+     *
      * @see #BY_SOURCE_TIMESTAMP
      * @model
      * @generated
@@ -77,8 +78,7 @@ public enum DestinationOrderQosPolicyKind implements Enumerator {
 
     /**
      * An array of all the '<em><b>Destination Order Qos Policy Kind</b></em>' enumerators.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private static final DestinationOrderQosPolicyKind[] VALUES_ARRAY = new DestinationOrderQosPolicyKind[] {
@@ -86,8 +86,7 @@ public enum DestinationOrderQosPolicyKind implements Enumerator {
 
     /**
      * A public read-only list of all the '<em><b>Destination Order Qos Policy Kind</b></em>' enumerators.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public static final List<DestinationOrderQosPolicyKind> VALUES = Collections.unmodifiableList(Arrays
@@ -95,8 +94,8 @@ public enum DestinationOrderQosPolicyKind implements Enumerator {
 
     /**
      * Returns the '<em><b>Destination Order Qos Policy Kind</b></em>' literal with the specified literal value.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @generated
      */
     public static DestinationOrderQosPolicyKind get(String literal) {
@@ -111,8 +110,8 @@ public enum DestinationOrderQosPolicyKind implements Enumerator {
 
     /**
      * Returns the '<em><b>Destination Order Qos Policy Kind</b></em>' literal with the specified name.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @generated
      */
     public static DestinationOrderQosPolicyKind getByName(String name) {
@@ -127,8 +126,8 @@ public enum DestinationOrderQosPolicyKind implements Enumerator {
 
     /**
      * Returns the '<em><b>Destination Order Qos Policy Kind</b></em>' literal with the specified integer value.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @generated
      */
     public static DestinationOrderQosPolicyKind get(int value) {
@@ -142,30 +141,27 @@ public enum DestinationOrderQosPolicyKind implements Enumerator {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private final int value;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private final String name;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     private final String literal;
 
     /**
      * Only this class can construct instances.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * @generated
      */
     private DestinationOrderQosPolicyKind(int value, String name, String literal) {
@@ -175,8 +171,7 @@ public enum DestinationOrderQosPolicyKind implements Enumerator {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public int getValue() {
@@ -184,8 +179,7 @@ public enum DestinationOrderQosPolicyKind implements Enumerator {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public String getName() {
@@ -193,8 +187,7 @@ public enum DestinationOrderQosPolicyKind implements Enumerator {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public String getLiteral() {
@@ -203,8 +196,8 @@ public enum DestinationOrderQosPolicyKind implements Enumerator {
 
     /**
      * Returns the literal value of the enumerator, which is its string representation.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @generated
      */
     @Override
@@ -212,4 +205,4 @@ public enum DestinationOrderQosPolicyKind implements Enumerator {
         return literal;
     }
 
-} //DestinationOrderQosPolicyKind
+} // DestinationOrderQosPolicyKind

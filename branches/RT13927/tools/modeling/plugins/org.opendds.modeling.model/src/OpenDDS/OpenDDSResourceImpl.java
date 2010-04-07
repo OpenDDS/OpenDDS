@@ -13,9 +13,8 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 
 /**
- * <!-- begin-user-doc -->
- * The <b>Resource </b> associated with the package.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> The <b>Resource </b> associated with the
+ * package. <!-- end-user-doc -->
  * @see OpenDDS.OpenDDSResourceFactoryImpl
  * @generated
  */
@@ -31,4 +30,4 @@ public class OpenDDSResourceImpl extends XMIResourceImpl {
         super(uri);
     }
 
-} //OpenDDSResourceImpl
+} // OpenDDSResourceImpl

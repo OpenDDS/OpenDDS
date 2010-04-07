@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Data Reader Writer</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Data Reader Writer</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -39,8 +38,8 @@ public interface DataReaderWriter extends DomainEntity {
      * Returns the value of the '<em><b>Durability</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Durability</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Durability</em>' reference isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Durability</em>' reference.
@@ -53,8 +52,8 @@ public interface DataReaderWriter extends DomainEntity {
 
     /**
      * Sets the value of the '{@link OpenDDS.DataReaderWriter#getDurability <em>Durability</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Durability</em>' reference.
      * @see #getDurability()
      * @generated
@@ -65,8 +64,9 @@ public interface DataReaderWriter extends DomainEntity {
      * Returns the value of the '<em><b>Destination order</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Destination order</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Destination order</em>' reference
+     * isn't clear, there really should be more of a description
+     * here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Destination order</em>' reference.
@@ -91,8 +91,8 @@ public interface DataReaderWriter extends DomainEntity {
      * Returns the value of the '<em><b>Deadline</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Deadline</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Deadline</em>' reference isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Deadline</em>' reference.
@@ -105,8 +105,7 @@ public interface DataReaderWriter extends DomainEntity {
 
     /**
      * Sets the value of the '{@link OpenDDS.DataReaderWriter#getDeadline <em>Deadline</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @param value the new value of the '<em>Deadline</em>' reference.
      * @see #getDeadline()
      * @generated
@@ -131,8 +130,7 @@ public interface DataReaderWriter extends DomainEntity {
 
     /**
      * Sets the value of the '{@link OpenDDS.DataReaderWriter#getHistory <em>History</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @param value the new value of the '<em>History</em>' reference.
      * @see #getHistory()
      * @generated
@@ -143,8 +141,8 @@ public interface DataReaderWriter extends DomainEntity {
      * Returns the value of the '<em><b>User data</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>User data</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>User data</em>' reference isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>User data</em>' reference.
@@ -157,8 +155,8 @@ public interface DataReaderWriter extends DomainEntity {
 
     /**
      * Sets the value of the '{@link OpenDDS.DataReaderWriter#getUser_data <em>User data</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>User data</em>' reference.
      * @see #getUser_data()
      * @generated
@@ -169,8 +167,9 @@ public interface DataReaderWriter extends DomainEntity {
      * Returns the value of the '<em><b>Resource limits</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Resource limits</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Resource limits</em>' reference
+     * isn't clear, there really should be more of a description
+     * here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Resource limits</em>' reference.
@@ -195,8 +194,8 @@ public interface DataReaderWriter extends DomainEntity {
      * Returns the value of the '<em><b>Ownership</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Ownership</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Ownership</em>' reference isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Ownership</em>' reference.
@@ -209,8 +208,8 @@ public interface DataReaderWriter extends DomainEntity {
 
     /**
      * Sets the value of the '{@link OpenDDS.DataReaderWriter#getOwnership <em>Ownership</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Ownership</em>' reference.
      * @see #getOwnership()
      * @generated
@@ -221,8 +220,8 @@ public interface DataReaderWriter extends DomainEntity {
      * Returns the value of the '<em><b>Liveliness</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Liveliness</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Liveliness</em>' reference isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Liveliness</em>' reference.
@@ -235,8 +234,8 @@ public interface DataReaderWriter extends DomainEntity {
 
     /**
      * Sets the value of the '{@link OpenDDS.DataReaderWriter#getLiveliness <em>Liveliness</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Liveliness</em>' reference.
      * @see #getLiveliness()
      * @generated
@@ -247,8 +246,8 @@ public interface DataReaderWriter extends DomainEntity {
      * Returns the value of the '<em><b>Latency budget</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Latency budget</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Latency budget</em>' reference isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Latency budget</em>' reference.
@@ -273,8 +272,8 @@ public interface DataReaderWriter extends DomainEntity {
      * Returns the value of the '<em><b>Reliability</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Reliability</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Reliability</em>' reference isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Reliability</em>' reference.
@@ -287,8 +286,8 @@ public interface DataReaderWriter extends DomainEntity {
 
     /**
      * Sets the value of the '{@link OpenDDS.DataReaderWriter#getReliability <em>Reliability</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>Reliability</em>' reference.
      * @see #getReliability()
      * @generated

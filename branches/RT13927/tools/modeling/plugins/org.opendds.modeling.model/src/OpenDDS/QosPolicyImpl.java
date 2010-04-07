@@ -12,9 +12,8 @@ package OpenDDS;
 import org.eclipse.emf.ecore.EClass;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Qos Policy</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
  *
@@ -22,8 +21,7 @@ import org.eclipse.emf.ecore.EClass;
  */
 public abstract class QosPolicyImpl extends SpecificationImpl implements QosPolicy {
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected QosPolicyImpl() {
@@ -31,8 +29,7 @@ public abstract class QosPolicyImpl extends SpecificationImpl implements QosPoli
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -40,4 +37,4 @@ public abstract class QosPolicyImpl extends SpecificationImpl implements QosPoli
         return OpenDDSPackage.Literals.QOS_POLICY;
     }
 
-} //QosPolicyImpl
+} // QosPolicyImpl

@@ -14,9 +14,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Content Filtered Topic</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Content Filtered Topic</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -48,8 +47,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     protected String filter_expression = FILTER_EXPRESSION_EDEFAULT;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected ContentFilteredTopicImpl() {
@@ -57,8 +55,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -67,8 +64,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public String getFilter_expression() {
@@ -76,8 +72,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setFilter_expression(String newFilter_expression) {
@@ -90,8 +85,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -104,8 +98,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -119,8 +112,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -134,8 +126,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -149,8 +140,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -166,4 +156,4 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
         return result.toString();
     }
 
-} //ContentFilteredTopicImpl
+} // ContentFilteredTopicImpl

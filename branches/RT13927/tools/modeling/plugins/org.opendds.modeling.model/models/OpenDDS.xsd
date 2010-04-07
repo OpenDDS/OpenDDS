@@ -115,9 +115,8 @@
   <xsd:element name="MultiTopic" type="opendds:MultiTopic"/>
   <xsd:complexType name="Topic">
     <xsd:complexContent>
-      <xsd:extension base="opendds:DomainEntity">
+      <xsd:extension base="opendds:TopicDescription">
         <xsd:choice maxOccurs="unbounded" minOccurs="0">
-          <xsd:element name="type" type="opendds:TopicField"/>
           <xsd:element name="durability_service" type="opendds:DurabilityServiceQosPolicy"/>
           <xsd:element name="transport_priority" type="opendds:TransportPriorityQosPolicy"/>
           <xsd:element name="topic_data" type="opendds:TopicDataQosPolicy"/>
@@ -131,7 +130,6 @@
           <xsd:element name="deadline" type="opendds:DeadlineQosPolicy"/>
           <xsd:element name="latency_budget" type="opendds:LatencyBudgetQosPolicy"/>
         </xsd:choice>
-        <xsd:attribute name="type" type="xsd:string"/>
         <xsd:attribute name="durability_service" type="xsd:string"/>
         <xsd:attribute name="transport_priority" type="xsd:string"/>
         <xsd:attribute name="topic_data" type="xsd:string"/>
@@ -150,7 +148,7 @@
   <xsd:element name="Topic" type="opendds:Topic"/>
   <xsd:complexType abstract="true" name="TopicDescription">
     <xsd:complexContent>
-      <xsd:extension base="opendds:NamedEntity">
+      <xsd:extension base="opendds:DomainEntity">
         <xsd:choice maxOccurs="unbounded" minOccurs="0">
           <xsd:element name="type" type="opendds:TopicField"/>
         </xsd:choice>
@@ -300,9 +298,12 @@
   </xsd:complexType>
   <xsd:element name="TopicStruct" type="opendds:TopicStruct"/>
   <xsd:complexType abstract="true" name="TopicField">
-    <xsd:complexContent>
-      <xsd:extension base="opendds:NamedEntity"/>
-    </xsd:complexContent>
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="name" type="xsd:string" use="required"/>
   </xsd:complexType>
   <xsd:element name="TopicField" type="opendds:TopicField"/>
   <xsd:complexType name="Typedef">
@@ -712,12 +713,28 @@
   </xsd:complexType>
   <xsd:element name="ApplicationTarget" type="opendds:ApplicationTarget"/>
   <xsd:complexType name="Transport">
+    <xsd:complexContent>
+      <xsd:extension base="opendds:Entity">
+        <xsd:attribute name="transport_id" type="xsd:long" use="required"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Transport" type="opendds:Transport"/>
+  <xsd:complexType name="Model">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="entities" type="opendds:ModelEntity"/>
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+  </xsd:complexType>
+  <xsd:element name="Model" type="opendds:Model"/>
+  <xsd:complexType abstract="true" name="ModelEntity">
     <xsd:choice maxOccurs="unbounded" minOccurs="0">
       <xsd:element ref="xmi:Extension"/>
     </xsd:choice>
     <xsd:attribute ref="xmi:id"/>
     <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
-    <xsd:attribute name="transport_id" type="xsd:long" use="required"/>
   </xsd:complexType>
-  <xsd:element name="Transport" type="opendds:Transport"/>
+  <xsd:element name="ModelEntity" type="opendds:ModelEntity"/>
 </xsd:schema>

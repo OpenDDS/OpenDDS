@@ -15,9 +15,8 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Publisher Subscriber</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Publisher Subscriber</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -44,8 +43,8 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * The cached value of the '{@link #getPresentation() <em>Presentation</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getPresentation()
      * @generated
      * @ordered
@@ -54,8 +53,8 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * The cached value of the '{@link #getGroup_data() <em>Group data</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getGroup_data()
      * @generated
      * @ordered
@@ -64,8 +63,8 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * The cached value of the '{@link #getPartition() <em>Partition</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getPartition()
      * @generated
      * @ordered
@@ -74,8 +73,8 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * The cached value of the '{@link #getTransport() <em>Transport</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getTransport()
      * @generated
      * @ordered
@@ -83,8 +82,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     protected Transport transport;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected PublisherSubscriberImpl() {
@@ -92,8 +90,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -102,8 +99,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EntityFactoryQosPolicy getEntity_factory() {
@@ -121,8 +117,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EntityFactoryQosPolicy basicGetEntity_factory() {
@@ -130,8 +125,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setEntity_factory(EntityFactoryQosPolicy newEntity_factory) {
@@ -144,8 +138,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public PresentationQosPolicy getPresentation() {
@@ -163,8 +156,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public PresentationQosPolicy basicGetPresentation() {
@@ -172,8 +164,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setPresentation(PresentationQosPolicy newPresentation) {
@@ -186,8 +177,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public GroupDataQosPolicy getGroup_data() {
@@ -205,8 +195,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public GroupDataQosPolicy basicGetGroup_data() {
@@ -214,8 +203,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setGroup_data(GroupDataQosPolicy newGroup_data) {
@@ -228,8 +216,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public PartitionQosPolicy getPartition() {
@@ -247,8 +234,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public PartitionQosPolicy basicGetPartition() {
@@ -256,8 +242,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setPartition(PartitionQosPolicy newPartition) {
@@ -270,8 +255,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public Transport getTransport() {
@@ -289,8 +273,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public Transport basicGetTransport() {
@@ -298,8 +281,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setTransport(Transport newTransport) {
@@ -312,8 +294,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -349,8 +330,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -376,8 +356,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -403,8 +382,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -424,4 +402,4 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
         return super.eIsSet(featureID);
     }
 
-} //PublisherSubscriberImpl
+} // PublisherSubscriberImpl

@@ -13,9 +13,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.EObjectImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Key Field</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Key Field</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
  *
@@ -23,8 +22,7 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
  */
 public class KeyFieldImpl extends EObjectImpl implements KeyField {
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected KeyFieldImpl() {
@@ -32,8 +30,7 @@ public class KeyFieldImpl extends EObjectImpl implements KeyField {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -41,4 +38,4 @@ public class KeyFieldImpl extends EObjectImpl implements KeyField {
         return OpenDDSPackage.Literals.KEY_FIELD;
     }
 
-} //KeyFieldImpl
+} // KeyFieldImpl

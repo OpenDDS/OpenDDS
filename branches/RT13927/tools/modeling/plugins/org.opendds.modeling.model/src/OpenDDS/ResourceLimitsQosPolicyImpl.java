@@ -14,9 +14,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Resource Limits Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Resource Limits Qos Policy</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -37,7 +36,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
      * @generated
      * @ordered
      */
-    protected static final long MAX_INSTANCES_EDEFAULT = 0L;
+    protected static final long MAX_INSTANCES_EDEFAULT = -1L;
 
     /**
      * The cached value of the '{@link #getMax_instances() <em>Max instances</em>}' attribute.
@@ -51,18 +50,18 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
 
     /**
      * The default value of the '{@link #getMax_samples() <em>Max samples</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getMax_samples()
      * @generated
      * @ordered
      */
-    protected static final long MAX_SAMPLES_EDEFAULT = 0L;
+    protected static final long MAX_SAMPLES_EDEFAULT = -1L;
 
     /**
      * The cached value of the '{@link #getMax_samples() <em>Max samples</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getMax_samples()
      * @generated
      * @ordered
@@ -70,19 +69,22 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     protected long max_samples = MAX_SAMPLES_EDEFAULT;
 
     /**
-     * The default value of the '{@link #getMax_samples_per_instance() <em>Max samples per instance</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * The default value of the '
+     * {@link #getMax_samples_per_instance()
+     * <em>Max samples per instance</em>}' attribute. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @see #getMax_samples_per_instance()
      * @generated
      * @ordered
      */
-    protected static final long MAX_SAMPLES_PER_INSTANCE_EDEFAULT = 0L;
+    protected static final long MAX_SAMPLES_PER_INSTANCE_EDEFAULT = -1L;
 
     /**
-     * The cached value of the '{@link #getMax_samples_per_instance() <em>Max samples per instance</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * The cached value of the '{@link #getMax_samples_per_instance()
+     * <em>Max samples per instance</em>}' attribute. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @see #getMax_samples_per_instance()
      * @generated
      * @ordered
@@ -90,8 +92,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     protected long max_samples_per_instance = MAX_SAMPLES_PER_INSTANCE_EDEFAULT;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected ResourceLimitsQosPolicyImpl() {
@@ -99,8 +100,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -109,8 +109,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public long getMax_instances() {
@@ -118,8 +117,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setMax_instances(long newMax_instances) {
@@ -132,8 +130,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public long getMax_samples() {
@@ -141,8 +138,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setMax_samples(long newMax_samples) {
@@ -155,8 +151,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public long getMax_samples_per_instance() {
@@ -164,8 +159,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setMax_samples_per_instance(long newMax_samples_per_instance) {
@@ -179,8 +173,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -197,8 +190,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -218,8 +210,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -239,8 +230,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -257,8 +247,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -278,4 +267,4 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
         return result.toString();
     }
 
-} //ResourceLimitsQosPolicyImpl
+} // ResourceLimitsQosPolicyImpl

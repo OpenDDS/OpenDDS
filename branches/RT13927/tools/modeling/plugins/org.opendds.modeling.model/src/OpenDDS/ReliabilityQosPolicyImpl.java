@@ -16,9 +16,8 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Reliability Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Reliability Qos Policy</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -32,8 +31,7 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements ReliabilityQosPolicy {
     /**
      * The default value of the '{@link #getKind() <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getKind()
      * @generated
      * @ordered
@@ -42,8 +40,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
 
     /**
      * The cached value of the '{@link #getKind() <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getKind()
      * @generated
      * @ordered
@@ -51,9 +48,10 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     protected ReliabilityQosPolicyKind kind = KIND_EDEFAULT;
 
     /**
-     * The cached value of the '{@link #getMax_blocking_time() <em>Max blocking time</em>}' containment reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * The cached value of the '{@link #getMax_blocking_time()
+     * <em>Max blocking time</em>}' containment reference. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @see #getMax_blocking_time()
      * @generated
      * @ordered
@@ -61,8 +59,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     protected Period max_blocking_time;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected ReliabilityQosPolicyImpl() {
@@ -70,8 +67,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -80,8 +76,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public ReliabilityQosPolicyKind getKind() {
@@ -89,8 +84,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setKind(ReliabilityQosPolicyKind newKind) {
@@ -103,8 +97,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public Period getMax_blocking_time() {
@@ -112,8 +105,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public NotificationChain basicSetMax_blocking_time(Period newMax_blocking_time, NotificationChain msgs) {
@@ -133,8 +125,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setMax_blocking_time(Period newMax_blocking_time) {
@@ -160,8 +151,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -174,8 +164,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -190,8 +179,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -208,8 +196,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -226,8 +213,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -242,8 +228,7 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -259,4 +244,4 @@ public class ReliabilityQosPolicyImpl extends QosPolicyImpl implements Reliabili
         return result.toString();
     }
 
-} //ReliabilityQosPolicyImpl
+} // ReliabilityQosPolicyImpl

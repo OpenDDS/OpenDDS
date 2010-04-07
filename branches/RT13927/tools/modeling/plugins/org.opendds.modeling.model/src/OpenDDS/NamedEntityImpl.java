@@ -14,9 +14,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Named Entity</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Named Entity</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -29,8 +28,7 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity {
     /**
      * The default value of the '{@link #getName() <em>Name</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getName()
      * @generated
      * @ordered
@@ -39,8 +37,7 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
 
     /**
      * The cached value of the '{@link #getName() <em>Name</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getName()
      * @generated
      * @ordered
@@ -48,8 +45,7 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
     protected String name = NAME_EDEFAULT;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected NamedEntityImpl() {
@@ -57,8 +53,7 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -67,8 +62,7 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public String getName() {
@@ -76,8 +70,7 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setName(String newName) {
@@ -89,8 +82,7 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -103,8 +95,7 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -118,8 +109,7 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -133,8 +123,7 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -147,8 +136,7 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -164,4 +152,4 @@ public abstract class NamedEntityImpl extends EntityImpl implements NamedEntity 
         return result.toString();
     }
 
-} //NamedEntityImpl
+} // NamedEntityImpl

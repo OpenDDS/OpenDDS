@@ -25,17 +25,18 @@ import org.eclipse.emf.edit.provider.ItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.ViewerNotification;
 
 /**
- * This is the item provider adapter for a {@link OpenDDS.PresentationQosPolicy} object.
- * <!-- begin-user-doc -->
- * <!-- end-user-doc -->
+ * This is the item provider adapter for a
+ * {@link OpenDDS.PresentationQosPolicy} object. <!-- begin-user-doc
+ * --> <!-- end-user-doc -->
+ * 
  * @generated
  */
 public class PresentationQosPolicyItemProvider extends QosPolicyItemProvider implements IEditingDomainItemProvider,
         IStructuredItemContentProvider, ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource {
     /**
-     * This constructs an instance from a factory and a notifier.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This constructs an instance from a factory and a notifier. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public PresentationQosPolicyItemProvider(AdapterFactory adapterFactory) {
@@ -44,8 +45,8 @@ public class PresentationQosPolicyItemProvider extends QosPolicyItemProvider imp
 
     /**
      * This returns the property descriptors for the adapted class.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -62,8 +63,8 @@ public class PresentationQosPolicyItemProvider extends QosPolicyItemProvider imp
 
     /**
      * This adds a property descriptor for the Access scope feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addAccess_scopePropertyDescriptor(Object object) {
@@ -77,9 +78,9 @@ public class PresentationQosPolicyItemProvider extends QosPolicyItemProvider imp
     }
 
     /**
-     * This adds a property descriptor for the Coherent access feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds a property descriptor for the Coherent access
+     * feature. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addCoherent_accessPropertyDescriptor(Object object) {
@@ -94,8 +95,8 @@ public class PresentationQosPolicyItemProvider extends QosPolicyItemProvider imp
 
     /**
      * This adds a property descriptor for the Ordered access feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected void addOrdered_accessPropertyDescriptor(Object object) {
@@ -109,9 +110,9 @@ public class PresentationQosPolicyItemProvider extends QosPolicyItemProvider imp
     }
 
     /**
-     * This returns PresentationQosPolicy.gif.
-     * <!-- begin-user-doc -->
+     * This returns PresentationQosPolicy.gif. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -120,9 +121,9 @@ public class PresentationQosPolicyItemProvider extends QosPolicyItemProvider imp
     }
 
     /**
-     * This returns the label text for the adapted class.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This returns the label text for the adapted class. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -134,10 +135,12 @@ public class PresentationQosPolicyItemProvider extends QosPolicyItemProvider imp
     }
 
     /**
-     * This handles model notifications by calling {@link #updateChildren} to update any cached
-     * children and by creating a viewer notification, which it passes to {@link #fireNotifyChanged}.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This handles model notifications by calling
+     * {@link #updateChildren} to update any cached children and by
+     * creating a viewer notification, which it passes to
+     * {@link #fireNotifyChanged}. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -155,10 +158,10 @@ public class PresentationQosPolicyItemProvider extends QosPolicyItemProvider imp
     }
 
     /**
-     * This adds {@link org.eclipse.emf.edit.command.CommandParameter}s describing the children
-     * that can be created under this object.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * This adds {@link org.eclipse.emf.edit.command.CommandParameter}
+     * s describing the children that can be created under this
+     * object. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

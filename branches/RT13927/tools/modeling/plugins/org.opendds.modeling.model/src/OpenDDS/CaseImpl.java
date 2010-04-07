@@ -15,9 +15,8 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Case</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Case</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -31,8 +30,7 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public class CaseImpl extends TopicFieldImpl implements Case {
     /**
      * The default value of the '{@link #getLabels() <em>Labels</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getLabels()
      * @generated
      * @ordered
@@ -41,8 +39,7 @@ public class CaseImpl extends TopicFieldImpl implements Case {
 
     /**
      * The cached value of the '{@link #getLabels() <em>Labels</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getLabels()
      * @generated
      * @ordered
@@ -51,8 +48,7 @@ public class CaseImpl extends TopicFieldImpl implements Case {
 
     /**
      * The cached value of the '{@link #getType() <em>Type</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getType()
      * @generated
      * @ordered
@@ -60,8 +56,7 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     protected TopicField type;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected CaseImpl() {
@@ -69,8 +64,7 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -79,8 +73,7 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public String getLabels() {
@@ -88,8 +81,7 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setLabels(String newLabels) {
@@ -101,8 +93,7 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public TopicField getType() {
@@ -119,8 +110,7 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public TopicField basicGetType() {
@@ -128,8 +118,7 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setType(TopicField newType) {
@@ -141,8 +130,7 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -160,8 +148,7 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -178,8 +165,7 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -196,8 +182,7 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -212,8 +197,7 @@ public class CaseImpl extends TopicFieldImpl implements Case {
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -229,4 +213,4 @@ public class CaseImpl extends TopicFieldImpl implements Case {
         return result.toString();
     }
 
-} //CaseImpl
+} // CaseImpl

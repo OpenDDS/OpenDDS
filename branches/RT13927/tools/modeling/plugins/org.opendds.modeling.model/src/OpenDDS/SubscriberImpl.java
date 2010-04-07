@@ -19,9 +19,8 @@ import org.eclipse.emf.ecore.util.EObjectContainmentEList;
 import org.eclipse.emf.ecore.util.InternalEList;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Subscriber</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Subscriber</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -34,8 +33,8 @@ import org.eclipse.emf.ecore.util.InternalEList;
 public class SubscriberImpl extends PublisherSubscriberImpl implements Subscriber {
     /**
      * The cached value of the '{@link #getReaders() <em>Readers</em>}' containment reference list.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getReaders()
      * @generated
      * @ordered
@@ -43,8 +42,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
     protected EList<DataReader> readers;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected SubscriberImpl() {
@@ -52,8 +50,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -62,8 +59,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EList<DataReader> getReaders() {
@@ -75,8 +71,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -89,8 +84,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -103,8 +97,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @SuppressWarnings("unchecked")
@@ -120,8 +113,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -135,8 +127,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -148,4 +139,4 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
         return super.eIsSet(featureID);
     }
 
-} //SubscriberImpl
+} // SubscriberImpl

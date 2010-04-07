@@ -19,9 +19,8 @@ import org.eclipse.emf.ecore.util.EObjectContainmentEList;
 import org.eclipse.emf.ecore.util.InternalEList;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Publisher</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Publisher</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -34,8 +33,8 @@ import org.eclipse.emf.ecore.util.InternalEList;
 public class PublisherImpl extends PublisherSubscriberImpl implements Publisher {
     /**
      * The cached value of the '{@link #getWriters() <em>Writers</em>}' containment reference list.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getWriters()
      * @generated
      * @ordered
@@ -43,8 +42,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
     protected EList<DataWriter> writers;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected PublisherImpl() {
@@ -52,8 +50,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -62,8 +59,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EList<DataWriter> getWriters() {
@@ -74,8 +70,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -88,8 +83,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -102,8 +96,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @SuppressWarnings("unchecked")
@@ -119,8 +112,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -134,8 +126,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -147,4 +138,4 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
         return super.eIsSet(featureID);
     }
 
-} //PublisherImpl
+} // PublisherImpl

@@ -12,9 +12,8 @@ package OpenDDS;
 import org.eclipse.emf.common.util.EList;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Domain Participant</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Domain Participant</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -31,14 +30,15 @@ import org.eclipse.emf.common.util.EList;
  * @model
  * @generated
  */
-public interface DomainParticipant extends DomainEntity {
+public interface DomainParticipant extends DomainEntity, ModelEntity {
     /**
      * Returns the value of the '<em><b>Subscribers</b></em>' containment reference list.
      * The list contents are of type {@link OpenDDS.Subscriber}.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Subscribers</em>' containment reference list isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Subscribers</em>' containment
+     * reference list isn't clear, there really should be more of a
+     * description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Subscribers</em>' containment reference list.
@@ -53,8 +53,9 @@ public interface DomainParticipant extends DomainEntity {
      * The list contents are of type {@link OpenDDS.Publisher}.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Publishers</em>' containment reference list isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Publishers</em>' containment
+     * reference list isn't clear, there really should be more of a
+     * description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Publishers</em>' containment reference list.
@@ -68,8 +69,8 @@ public interface DomainParticipant extends DomainEntity {
      * Returns the value of the '<em><b>Entity factory</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Entity factory</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Entity factory</em>' reference isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Entity factory</em>' reference.
@@ -94,8 +95,8 @@ public interface DomainParticipant extends DomainEntity {
      * Returns the value of the '<em><b>User data</b></em>' reference.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>User data</em>' reference isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>User data</em>' reference isn't
+     * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>User data</em>' reference.
@@ -108,8 +109,8 @@ public interface DomainParticipant extends DomainEntity {
 
     /**
      * Sets the value of the '{@link OpenDDS.DomainParticipant#getUser_data <em>User data</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @param value the new value of the '<em>User data</em>' reference.
      * @see #getUser_data()
      * @generated
@@ -134,8 +135,7 @@ public interface DomainParticipant extends DomainEntity {
 
     /**
      * Sets the value of the '{@link OpenDDS.DomainParticipant#getDomain <em>Domain</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @param value the new value of the '<em>Domain</em>' reference.
      * @see #getDomain()
      * @generated

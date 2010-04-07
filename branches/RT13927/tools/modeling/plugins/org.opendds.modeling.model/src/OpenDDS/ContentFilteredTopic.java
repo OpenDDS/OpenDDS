@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Content Filtered Topic</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Content Filtered Topic</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -30,8 +29,9 @@ public interface ContentFilteredTopic extends TopicDescription {
      * Returns the value of the '<em><b>Filter expression</b></em>' attribute.
      * <!-- begin-user-doc -->
      * <p>
-     * If the meaning of the '<em>Filter expression</em>' attribute isn't clear,
-     * there really should be more of a description here...
+     * If the meaning of the '<em>Filter expression</em>' attribute
+     * isn't clear, there really should be more of a description
+     * here...
      * </p>
      * <!-- end-user-doc -->
      * @return the value of the '<em>Filter expression</em>' attribute.

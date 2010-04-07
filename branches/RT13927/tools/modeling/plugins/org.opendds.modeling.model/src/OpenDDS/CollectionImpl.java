@@ -15,9 +15,8 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Collection</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Collection</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -30,8 +29,7 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 public abstract class CollectionImpl extends TopicFieldImpl implements Collection {
     /**
      * The cached value of the '{@link #getType() <em>Type</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getType()
      * @generated
      * @ordered
@@ -39,8 +37,7 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
     protected TopicField type;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected CollectionImpl() {
@@ -48,8 +45,7 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -58,8 +54,7 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public TopicField getType() {
@@ -77,8 +72,7 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public TopicField basicGetType() {
@@ -86,8 +80,7 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setType(TopicField newType) {
@@ -99,8 +92,7 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -116,8 +108,7 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -131,8 +122,7 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -146,8 +136,7 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -159,4 +148,4 @@ public abstract class CollectionImpl extends TopicFieldImpl implements Collectio
         return super.eIsSet(featureID);
     }
 
-} //CollectionImpl
+} // CollectionImpl

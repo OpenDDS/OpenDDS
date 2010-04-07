@@ -21,9 +21,8 @@ import org.eclipse.emf.ecore.util.EObjectContainmentEList;
 import org.eclipse.emf.ecore.util.InternalEList;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Domain Participant</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '
+ * <em><b>Domain Participant</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
@@ -39,9 +38,10 @@ import org.eclipse.emf.ecore.util.InternalEList;
  */
 public class DomainParticipantImpl extends DomainEntityImpl implements DomainParticipant {
     /**
-     * The cached value of the '{@link #getSubscribers() <em>Subscribers</em>}' containment reference list.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * The cached value of the '{@link #getSubscribers()
+     * <em>Subscribers</em>}' containment reference list. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @see #getSubscribers()
      * @generated
      * @ordered
@@ -49,9 +49,10 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     protected EList<Subscriber> subscribers;
 
     /**
-     * The cached value of the '{@link #getPublishers() <em>Publishers</em>}' containment reference list.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * The cached value of the '{@link #getPublishers()
+     * <em>Publishers</em>}' containment reference list. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     *
      * @see #getPublishers()
      * @generated
      * @ordered
@@ -70,8 +71,8 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
 
     /**
      * The cached value of the '{@link #getUser_data() <em>User data</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * @see #getUser_data()
      * @generated
      * @ordered
@@ -80,8 +81,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
 
     /**
      * The cached value of the '{@link #getDomain() <em>Domain</em>}' reference.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @see #getDomain()
      * @generated
      * @ordered
@@ -89,8 +89,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     protected Domain domain;
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     protected DomainParticipantImpl() {
@@ -98,8 +97,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -108,8 +106,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EList<Subscriber> getSubscribers() {
@@ -121,8 +118,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EList<Publisher> getPublishers() {
@@ -134,8 +130,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EntityFactoryQosPolicy getEntity_factory() {
@@ -153,8 +148,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public EntityFactoryQosPolicy basicGetEntity_factory() {
@@ -162,8 +156,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setEntity_factory(EntityFactoryQosPolicy newEntity_factory) {
@@ -176,8 +169,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public UserDataQosPolicy getUser_data() {
@@ -195,8 +187,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public UserDataQosPolicy basicGetUser_data() {
@@ -204,8 +195,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setUser_data(UserDataQosPolicy newUser_data) {
@@ -218,8 +208,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public Domain getDomain() {
@@ -237,8 +226,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public Domain basicGetDomain() {
@@ -246,8 +234,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     public void setDomain(Domain newDomain) {
@@ -260,8 +247,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -276,8 +262,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -307,8 +292,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @SuppressWarnings("unchecked")
@@ -337,8 +321,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -364,8 +347,7 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
     }
 
     /**
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
      */
     @Override
@@ -385,4 +367,4 @@ public class DomainParticipantImpl extends DomainEntityImpl implements DomainPar
         return super.eIsSet(featureID);
     }
 
-} //DomainParticipantImpl
+} // DomainParticipantImpl

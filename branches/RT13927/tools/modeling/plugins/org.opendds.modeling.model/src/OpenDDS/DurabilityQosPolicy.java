@@ -10,9 +10,8 @@
 package OpenDDS;
 
 /**
- * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Durability Qos Policy</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> A representation of the model object '
+ * <em><b>Durability Qos Policy</b></em>'. <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
@@ -27,27 +26,28 @@ package OpenDDS;
  */
 public interface DurabilityQosPolicy extends QosPolicy {
     /**
-     * Returns the value of the '<em><b>Kind</b></em>' attribute.
-     * The literals are from the enumeration {@link OpenDDS.DurabilityQosPolicyKind}.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Kind</b></em>' attribute. The
+     * default value is <code>"VOLATILE"</code>. The literals are from
+     * the enumeration {@link OpenDDS.DurabilityQosPolicyKind}. <!--
+     * begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Kind</em>' attribute isn't clear,
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     *
      * @return the value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.DurabilityQosPolicyKind
      * @see #setKind(DurabilityQosPolicyKind)
      * @see OpenDDS.OpenDDSPackage#getDurabilityQosPolicy_Kind()
-     * @model
+     * @model default="VOLATILE"
      * @generated
      */
     DurabilityQosPolicyKind getKind();
 
     /**
      * Sets the value of the '{@link OpenDDS.DurabilityQosPolicy#getKind <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @param value the new value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.DurabilityQosPolicyKind
      * @see #getKind()
