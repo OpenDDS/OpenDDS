@@ -12,29 +12,32 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Content Filtered Topic</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.ContentFilteredTopic#getFilter_expression <em>Filter expression</em>}</li>
+ * <li>{@link OpenDDS.ContentFilteredTopic#getFilter_expression <em>
+ * Filter expression</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getContentFilteredTopic()
  * @model
  * @generated
  */
 public interface ContentFilteredTopic extends TopicDescription {
     /**
-     * Returns the value of the '<em><b>Filter expression</b></em>' attribute.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Filter expression</b></em>'
+     * attribute. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Filter expression</em>' attribute
      * isn't clear, there really should be more of a description
      * here...
      * </p>
      * <!-- end-user-doc -->
-     * @return the value of the '<em>Filter expression</em>' attribute.
+     * 
+     * @return the value of the '<em>Filter expression</em>'
+     *         attribute.
      * @see #setFilter_expression(String)
      * @see OpenDDS.OpenDDSPackage#getContentFilteredTopic_Filter_expression()
      * @model
@@ -43,10 +46,14 @@ public interface ContentFilteredTopic extends TopicDescription {
     String getFilter_expression();
 
     /**
-     * Sets the value of the '{@link OpenDDS.ContentFilteredTopic#getFilter_expression <em>Filter expression</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * Sets the value of the '
+     * {@link OpenDDS.ContentFilteredTopic#getFilter_expression
+     * <em>Filter expression</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @param value the new value of the '<em>Filter expression</em>' attribute.
+     * 
+     * @param value
+     *            the new value of the '<em>Filter expression</em>'
+     *            attribute.
      * @see #getFilter_expression()
      * @generated
      */

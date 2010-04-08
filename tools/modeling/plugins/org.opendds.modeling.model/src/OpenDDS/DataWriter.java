@@ -12,15 +12,16 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Data Writer</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.DataWriter#getTopic <em>Topic</em>}</li>
- *   <li>{@link OpenDDS.DataWriter#getWriter_data_lifecycle <em>Writer data lifecycle</em>}</li>
+ * <li>{@link OpenDDS.DataWriter#getTopic <em>Topic</em>}</li>
+ * <li>{@link OpenDDS.DataWriter#getWriter_data_lifecycle <em>Writer
+ * data lifecycle</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getDataWriter()
  * @model
  * @generated
@@ -34,6 +35,7 @@ public interface DataWriter extends DataReaderWriter {
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Topic</em>' reference.
      * @see #setTopic(Topic)
      * @see OpenDDS.OpenDDSPackage#getDataWriter_Topic()
@@ -43,25 +45,29 @@ public interface DataWriter extends DataReaderWriter {
     Topic getTopic();
 
     /**
-     * Sets the value of the '{@link OpenDDS.DataWriter#getTopic <em>Topic</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.DataWriter#getTopic
+     * <em>Topic</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Topic</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Topic</em>' reference.
      * @see #getTopic()
      * @generated
      */
     void setTopic(Topic value);
 
     /**
-     * Returns the value of the '<em><b>Writer data lifecycle</b></em>' reference.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Writer data lifecycle</b></em>
+     * ' reference. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Writer data lifecycle</em>'
      * reference isn't clear, there really should be more of a
      * description here...
      * </p>
      * <!-- end-user-doc -->
-     * @return the value of the '<em>Writer data lifecycle</em>' reference.
+     * 
+     * @return the value of the '<em>Writer data lifecycle</em>'
+     *         reference.
      * @see #setWriter_data_lifecycle(WriterDataLifecycleQosPolicy)
      * @see OpenDDS.OpenDDSPackage#getDataWriter_Writer_data_lifecycle()
      * @model
@@ -70,10 +76,14 @@ public interface DataWriter extends DataReaderWriter {
     WriterDataLifecycleQosPolicy getWriter_data_lifecycle();
 
     /**
-     * Sets the value of the '{@link OpenDDS.DataWriter#getWriter_data_lifecycle <em>Writer data lifecycle</em>}' reference.
-     * <!-- begin-user-doc
+     * Sets the value of the '
+     * {@link OpenDDS.DataWriter#getWriter_data_lifecycle
+     * <em>Writer data lifecycle</em>}' reference. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
-     * @param value the new value of the '<em>Writer data lifecycle</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Writer data lifecycle</em>
+     *            ' reference.
      * @see #getWriter_data_lifecycle()
      * @generated
      */

@@ -12,29 +12,32 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Latency Budget Qos Policy</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.LatencyBudgetQosPolicy#getDuration <em>Duration</em>}</li>
+ * <li>{@link OpenDDS.LatencyBudgetQosPolicy#getDuration <em>Duration
+ * </em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getLatencyBudgetQosPolicy()
  * @model
  * @generated
  */
 public interface LatencyBudgetQosPolicy extends QosPolicy {
     /**
-     * Returns the value of the '<em><b>Duration</b></em>' containment reference.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Duration</b></em>' containment
+     * reference. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Duration</em>' containment reference
      * isn't clear, there really should be more of a description
      * here...
      * </p>
      * <!-- end-user-doc -->
-     * @return the value of the '<em>Duration</em>' containment reference.
+     * 
+     * @return the value of the '<em>Duration</em>' containment
+     *         reference.
      * @see #setDuration(Period)
      * @see OpenDDS.OpenDDSPackage#getLatencyBudgetQosPolicy_Duration()
      * @model containment="true"
@@ -43,10 +46,14 @@ public interface LatencyBudgetQosPolicy extends QosPolicy {
     Period getDuration();
 
     /**
-     * Sets the value of the '{@link OpenDDS.LatencyBudgetQosPolicy#getDuration <em>Duration</em>}' containment reference.
-     * <!-- begin-user-doc
+     * Sets the value of the '
+     * {@link OpenDDS.LatencyBudgetQosPolicy#getDuration
+     * <em>Duration</em>}' containment reference. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
-     * @param value the new value of the '<em>Duration</em>' containment reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Duration</em>' containment
+     *            reference.
      * @see #getDuration()
      * @generated
      */

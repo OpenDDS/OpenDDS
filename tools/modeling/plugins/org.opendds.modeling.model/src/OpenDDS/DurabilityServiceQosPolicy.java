@@ -13,7 +13,7 @@ package OpenDDS;
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Durability Service Qos Policy</b></em>'. <!-- end-user-doc
  * -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
@@ -33,7 +33,7 @@ package OpenDDS;
  * <em>Service cleanup delay</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getDurabilityServiceQosPolicy()
  * @model
  * @generated
@@ -48,7 +48,7 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @return the value of the '<em>History depth</em>' attribute.
      * @see #setHistory_depth(long)
      * @see OpenDDS.OpenDDSPackage#getDurabilityServiceQosPolicy_History_depth()
@@ -58,25 +58,30 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
     long getHistory_depth();
 
     /**
-     * Sets the value of the '{@link OpenDDS.DurabilityServiceQosPolicy#getHistory_depth <em>History depth</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * Sets the value of the '
+     * {@link OpenDDS.DurabilityServiceQosPolicy#getHistory_depth
+     * <em>History depth</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @param value the new value of the '<em>History depth</em>' attribute.
+     * 
+     * @param value
+     *            the new value of the '<em>History depth</em>'
+     *            attribute.
      * @see #getHistory_depth()
      * @generated
      */
     void setHistory_depth(long value);
 
     /**
-     * Returns the value of the '<em><b>History kind</b></em>' attribute.
-     * The default value is <code>"KEEP_LAST"</code>.
-     * The literals are from the enumeration {@link OpenDDS.HistoryQosPolicyKind}.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>History kind</b></em>'
+     * attribute. The default value is <code>"KEEP_LAST"</code>. The
+     * literals are from the enumeration
+     * {@link OpenDDS.HistoryQosPolicyKind}. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>History kind</em>' attribute isn't
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>History kind</em>' attribute.
      * @see OpenDDS.HistoryQosPolicyKind
      * @see #setHistory_kind(HistoryQosPolicyKind)
@@ -87,10 +92,14 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
     HistoryQosPolicyKind getHistory_kind();
 
     /**
-     * Sets the value of the '{@link OpenDDS.DurabilityServiceQosPolicy#getHistory_kind <em>History kind</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '
+     * {@link OpenDDS.DurabilityServiceQosPolicy#getHistory_kind
+     * <em>History kind</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>History kind</em>' attribute.
+     * 
+     * @param value
+     *            the new value of the '<em>History kind</em>'
+     *            attribute.
      * @see OpenDDS.HistoryQosPolicyKind
      * @see #getHistory_kind()
      * @generated
@@ -106,7 +115,7 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @return the value of the '<em>Max instances</em>' attribute.
      * @see #setMax_instances(long)
      * @see OpenDDS.OpenDDSPackage#getDurabilityServiceQosPolicy_Max_instances()
@@ -116,10 +125,14 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
     long getMax_instances();
 
     /**
-     * Sets the value of the '{@link OpenDDS.DurabilityServiceQosPolicy#getMax_instances <em>Max instances</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * Sets the value of the '
+     * {@link OpenDDS.DurabilityServiceQosPolicy#getMax_instances
+     * <em>Max instances</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @param value the new value of the '<em>Max instances</em>' attribute.
+     * 
+     * @param value
+     *            the new value of the '<em>Max instances</em>'
+     *            attribute.
      * @see #getMax_instances()
      * @generated
      */
@@ -134,7 +147,7 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @return the value of the '<em>Max samples</em>' attribute.
      * @see #setMax_samples(long)
      * @see OpenDDS.OpenDDSPackage#getDurabilityServiceQosPolicy_Max_samples()
@@ -144,26 +157,32 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
     long getMax_samples();
 
     /**
-     * Sets the value of the '{@link OpenDDS.DurabilityServiceQosPolicy#getMax_samples <em>Max samples</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '
+     * {@link OpenDDS.DurabilityServiceQosPolicy#getMax_samples
+     * <em>Max samples</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Max samples</em>' attribute.
+     * 
+     * @param value
+     *            the new value of the '<em>Max samples</em>'
+     *            attribute.
      * @see #getMax_samples()
      * @generated
      */
     void setMax_samples(long value);
 
     /**
-     * Returns the value of the '<em><b>Max samples per instance</b></em>' attribute.
-     * The default value is <code>"-1"</code>.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '
+     * <em><b>Max samples per instance</b></em>' attribute. The
+     * default value is <code>"-1"</code>. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Max samples per instance</em>'
      * attribute isn't clear, there really should be more of a
      * description here...
      * </p>
      * <!-- end-user-doc -->
-     * @return the value of the '<em>Max samples per instance</em>' attribute.
+     * 
+     * @return the value of the '<em>Max samples per instance</em>'
+     *         attribute.
      * @see #setMax_samples_per_instance(long)
      * @see OpenDDS.OpenDDSPackage#getDurabilityServiceQosPolicy_Max_samples_per_instance()
      * @model default="-1"
@@ -176,7 +195,7 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
      * {@link OpenDDS.DurabilityServiceQosPolicy#getMax_samples_per_instance
      * <em>Max samples per instance</em>}' attribute. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @param value
      *            the new value of the '
      *            <em>Max samples per instance</em>' attribute.
@@ -186,15 +205,17 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
     void setMax_samples_per_instance(long value);
 
     /**
-     * Returns the value of the '<em><b>Service cleanup delay</b></em>' containment reference.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Service cleanup delay</b></em>
+     * ' containment reference. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Service cleanup delay</em>'
      * containment reference isn't clear, there really should be more
      * of a description here...
      * </p>
      * <!-- end-user-doc -->
-     * @return the value of the '<em>Service cleanup delay</em>' containment reference.
+     * 
+     * @return the value of the '<em>Service cleanup delay</em>'
+     *         containment reference.
      * @see #setService_cleanup_delay(Period)
      * @see OpenDDS.OpenDDSPackage#getDurabilityServiceQosPolicy_Service_cleanup_delay()
      * @model containment="true"
@@ -207,7 +228,7 @@ public interface DurabilityServiceQosPolicy extends QosPolicy {
      * {@link OpenDDS.DurabilityServiceQosPolicy#getService_cleanup_delay
      * <em>Service cleanup delay</em>}' containment reference. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @param value
      *            the new value of the '<em>Service cleanup delay</em>
      *            ' containment reference.

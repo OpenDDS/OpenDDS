@@ -21,17 +21,19 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.DeadlineQosPolicyImpl#getPeriod <em>Period</em>}</li>
+ * <li>{@link OpenDDS.DeadlineQosPolicyImpl#getPeriod <em>Period</em>}
+ * </li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosPolicy {
     /**
-     * The cached value of the '{@link #getPeriod() <em>Period</em>}' containment reference.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getPeriod() <em>Period</em>}'
+     * containment reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getPeriod()
      * @generated
      * @ordered
@@ -40,6 +42,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected DeadlineQosPolicyImpl() {
@@ -48,6 +51,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -57,6 +61,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Period getPeriod() {
@@ -65,6 +70,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public NotificationChain basicSetPeriod(Period newPeriod, NotificationChain msgs) {
@@ -84,6 +90,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setPeriod(Period newPeriod) {
@@ -109,6 +116,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -122,6 +130,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -135,6 +144,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -149,6 +159,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -163,6 +174,7 @@ public class DeadlineQosPolicyImpl extends QosPolicyImpl implements DeadlineQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

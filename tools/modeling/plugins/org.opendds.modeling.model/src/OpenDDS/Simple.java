@@ -12,8 +12,8 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Simple</b></em>'. <!-- end-user-doc -->
- *
- *
+ * 
+ * 
  * @see OpenDDS.OpenDDSPackage#getSimple()
  * @model abstract="true"
  * @generated

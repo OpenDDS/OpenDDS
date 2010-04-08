@@ -9,16 +9,14 @@
 
 package OpenDDS;
 
-import org.eclipse.emf.ecore.EObject;
-
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>OU Short</b></em>'. <!-- end-user-doc -->
- *
- *
+ * 
+ * 
  * @see OpenDDS.OpenDDSPackage#getOUShort()
  * @model
  * @generated
  */
-public interface OUShort extends EObject {
+public interface OUShort extends Simple {
 } // OUShort

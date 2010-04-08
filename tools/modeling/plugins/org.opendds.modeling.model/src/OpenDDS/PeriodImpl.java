@@ -20,18 +20,19 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.PeriodImpl#getSeconds <em>Seconds</em>}</li>
- *   <li>{@link OpenDDS.PeriodImpl#getNanoseconds <em>Nanoseconds</em>}</li>
+ * <li>{@link OpenDDS.PeriodImpl#getSeconds <em>Seconds</em>}</li>
+ * <li>{@link OpenDDS.PeriodImpl#getNanoseconds <em>Nanoseconds</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class PeriodImpl extends EObjectImpl implements Period {
     /**
-     * The default value of the '{@link #getSeconds() <em>Seconds</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The default value of the '{@link #getSeconds()
+     * <em>Seconds</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getSeconds()
      * @generated
      * @ordered
@@ -39,8 +40,9 @@ public class PeriodImpl extends EObjectImpl implements Period {
     protected static final long SECONDS_EDEFAULT = -1L;
 
     /**
-     * The cached value of the '{@link #getSeconds() <em>Seconds</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The cached value of the '{@link #getSeconds() <em>Seconds</em>}
+     * ' attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getSeconds()
      * @generated
      * @ordered
@@ -48,9 +50,10 @@ public class PeriodImpl extends EObjectImpl implements Period {
     protected long seconds = SECONDS_EDEFAULT;
 
     /**
-     * The default value of the '{@link #getNanoseconds() <em>Nanoseconds</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The default value of the '{@link #getNanoseconds()
+     * <em>Nanoseconds</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getNanoseconds()
      * @generated
      * @ordered
@@ -58,9 +61,10 @@ public class PeriodImpl extends EObjectImpl implements Period {
     protected static final long NANOSECONDS_EDEFAULT = -1L;
 
     /**
-     * The cached value of the '{@link #getNanoseconds() <em>Nanoseconds</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getNanoseconds()
+     * <em>Nanoseconds</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getNanoseconds()
      * @generated
      * @ordered
@@ -69,6 +73,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected PeriodImpl() {
@@ -77,6 +82,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -86,6 +92,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public long getSeconds() {
@@ -94,6 +101,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setSeconds(long newSeconds) {
@@ -106,6 +114,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public long getNanoseconds() {
@@ -114,6 +123,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setNanoseconds(long newNanoseconds) {
@@ -127,6 +137,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -142,6 +153,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -159,6 +171,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -176,6 +189,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -191,6 +205,7 @@ public class PeriodImpl extends EObjectImpl implements Period {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

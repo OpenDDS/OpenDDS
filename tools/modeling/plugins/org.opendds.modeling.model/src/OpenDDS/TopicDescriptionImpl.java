@@ -20,24 +20,26 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.TopicDescriptionImpl#getType <em>Type</em>}</li>
+ * <li>{@link OpenDDS.TopicDescriptionImpl#getType <em>Type</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public abstract class TopicDescriptionImpl extends DomainEntityImpl implements TopicDescription {
     /**
-     * The cached value of the '{@link #getType() <em>Type</em>}' reference.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The cached value of the '{@link #getType() <em>Type</em>}'
+     * reference. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getType()
      * @generated
      * @ordered
      */
-    protected TopicField type;
+    protected TopicStruct type;
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected TopicDescriptionImpl() {
@@ -46,6 +48,7 @@ public abstract class TopicDescriptionImpl extends DomainEntityImpl implements T
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -55,12 +58,13 @@ public abstract class TopicDescriptionImpl extends DomainEntityImpl implements T
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
-    public TopicField getType() {
+    public TopicStruct getType() {
         if (type != null && type.eIsProxy()) {
             InternalEObject oldType = (InternalEObject) type;
-            type = (TopicField) eResolveProxy(oldType);
+            type = (TopicStruct) eResolveProxy(oldType);
             if (type != oldType) {
                 if (eNotificationRequired()) {
                     eNotify(new ENotificationImpl(this, Notification.RESOLVE, OpenDDSPackage.TOPIC_DESCRIPTION__TYPE,
@@ -73,18 +77,20 @@ public abstract class TopicDescriptionImpl extends DomainEntityImpl implements T
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
-    public TopicField basicGetType() {
+    public TopicStruct basicGetType() {
         return type;
     }
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
-    public void setType(TopicField newType) {
-        TopicField oldType = type;
+    public void setType(TopicStruct newType) {
+        TopicStruct oldType = type;
         type = newType;
         if (eNotificationRequired()) {
             eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.TOPIC_DESCRIPTION__TYPE, oldType, type));
@@ -93,6 +99,7 @@ public abstract class TopicDescriptionImpl extends DomainEntityImpl implements T
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -109,13 +116,14 @@ public abstract class TopicDescriptionImpl extends DomainEntityImpl implements T
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
     public void eSet(int featureID, Object newValue) {
         switch (featureID) {
             case OpenDDSPackage.TOPIC_DESCRIPTION__TYPE:
-                setType((TopicField) newValue);
+                setType((TopicStruct) newValue);
                 return;
         }
         super.eSet(featureID, newValue);
@@ -123,13 +131,14 @@ public abstract class TopicDescriptionImpl extends DomainEntityImpl implements T
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
     public void eUnset(int featureID) {
         switch (featureID) {
             case OpenDDSPackage.TOPIC_DESCRIPTION__TYPE:
-                setType((TopicField) null);
+                setType((TopicStruct) null);
                 return;
         }
         super.eUnset(featureID);
@@ -137,6 +146,7 @@ public abstract class TopicDescriptionImpl extends DomainEntityImpl implements T
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

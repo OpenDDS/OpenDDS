@@ -16,12 +16,13 @@ import org.eclipse.emf.ecore.EClass;
  * <em><b>Qos Policy</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
- *
+ * 
  * @generated
  */
 public abstract class QosPolicyImpl extends SpecificationImpl implements QosPolicy {
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected QosPolicyImpl() {
@@ -30,6 +31,7 @@ public abstract class QosPolicyImpl extends SpecificationImpl implements QosPoli
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

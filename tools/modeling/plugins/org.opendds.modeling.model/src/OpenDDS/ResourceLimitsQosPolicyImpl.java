@@ -19,19 +19,24 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.ResourceLimitsQosPolicyImpl#getMax_instances <em>Max instances</em>}</li>
- *   <li>{@link OpenDDS.ResourceLimitsQosPolicyImpl#getMax_samples <em>Max samples</em>}</li>
- *   <li>{@link OpenDDS.ResourceLimitsQosPolicyImpl#getMax_samples_per_instance <em>Max samples per instance</em>}</li>
+ * <li>{@link OpenDDS.ResourceLimitsQosPolicyImpl#getMax_instances
+ * <em>Max instances</em>}</li>
+ * <li>{@link OpenDDS.ResourceLimitsQosPolicyImpl#getMax_samples <em>
+ * Max samples</em>}</li>
+ * <li>
+ * {@link OpenDDS.ResourceLimitsQosPolicyImpl#getMax_samples_per_instance
+ * <em>Max samples per instance</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements ResourceLimitsQosPolicy {
     /**
-     * The default value of the '{@link #getMax_instances() <em>Max instances</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * The default value of the '{@link #getMax_instances()
+     * <em>Max instances</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #getMax_instances()
      * @generated
      * @ordered
@@ -39,9 +44,10 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     protected static final long MAX_INSTANCES_EDEFAULT = -1L;
 
     /**
-     * The cached value of the '{@link #getMax_instances() <em>Max instances</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * The cached value of the '{@link #getMax_instances()
+     * <em>Max instances</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #getMax_instances()
      * @generated
      * @ordered
@@ -49,9 +55,10 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     protected long max_instances = MAX_INSTANCES_EDEFAULT;
 
     /**
-     * The default value of the '{@link #getMax_samples() <em>Max samples</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The default value of the '{@link #getMax_samples()
+     * <em>Max samples</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getMax_samples()
      * @generated
      * @ordered
@@ -59,9 +66,10 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
     protected static final long MAX_SAMPLES_EDEFAULT = -1L;
 
     /**
-     * The cached value of the '{@link #getMax_samples() <em>Max samples</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getMax_samples()
+     * <em>Max samples</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getMax_samples()
      * @generated
      * @ordered
@@ -73,7 +81,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
      * {@link #getMax_samples_per_instance()
      * <em>Max samples per instance</em>}' attribute. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #getMax_samples_per_instance()
      * @generated
      * @ordered
@@ -84,7 +92,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
      * The cached value of the '{@link #getMax_samples_per_instance()
      * <em>Max samples per instance</em>}' attribute. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #getMax_samples_per_instance()
      * @generated
      * @ordered
@@ -93,6 +101,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected ResourceLimitsQosPolicyImpl() {
@@ -101,6 +110,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -110,6 +120,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public long getMax_instances() {
@@ -118,6 +129,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setMax_instances(long newMax_instances) {
@@ -131,6 +143,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public long getMax_samples() {
@@ -139,6 +152,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setMax_samples(long newMax_samples) {
@@ -152,6 +166,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public long getMax_samples_per_instance() {
@@ -160,6 +175,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setMax_samples_per_instance(long newMax_samples_per_instance) {
@@ -174,6 +190,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -191,6 +208,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -211,6 +229,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -231,6 +250,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -248,6 +268,7 @@ public class ResourceLimitsQosPolicyImpl extends QosPolicyImpl implements Resour
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

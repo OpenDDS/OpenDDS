@@ -12,16 +12,19 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Presentation Qos Policy</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.PresentationQosPolicy#getAccess_scope <em>Access scope</em>}</li>
- *   <li>{@link OpenDDS.PresentationQosPolicy#isCoherent_access <em>Coherent access</em>}</li>
- *   <li>{@link OpenDDS.PresentationQosPolicy#isOrdered_access <em>Ordered access</em>}</li>
+ * <li>{@link OpenDDS.PresentationQosPolicy#getAccess_scope <em>Access
+ * scope</em>}</li>
+ * <li>{@link OpenDDS.PresentationQosPolicy#isCoherent_access <em>
+ * Coherent access</em>}</li>
+ * <li>{@link OpenDDS.PresentationQosPolicy#isOrdered_access <em>
+ * Ordered access</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getPresentationQosPolicy()
  * @model
  * @generated
@@ -38,7 +41,7 @@ public interface PresentationQosPolicy extends QosPolicy {
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @return the value of the '<em>Access scope</em>' attribute.
      * @see OpenDDS.PresentationQosPolicyAccessScopeKind
      * @see #setAccess_scope(PresentationQosPolicyAccessScopeKind)
@@ -49,10 +52,14 @@ public interface PresentationQosPolicy extends QosPolicy {
     PresentationQosPolicyAccessScopeKind getAccess_scope();
 
     /**
-     * Sets the value of the '{@link OpenDDS.PresentationQosPolicy#getAccess_scope <em>Access scope</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '
+     * {@link OpenDDS.PresentationQosPolicy#getAccess_scope
+     * <em>Access scope</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Access scope</em>' attribute.
+     * 
+     * @param value
+     *            the new value of the '<em>Access scope</em>'
+     *            attribute.
      * @see OpenDDS.PresentationQosPolicyAccessScopeKind
      * @see #getAccess_scope()
      * @generated
@@ -69,7 +76,7 @@ public interface PresentationQosPolicy extends QosPolicy {
      * here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @return the value of the '<em>Coherent access</em>' attribute.
      * @see #setCoherent_access(boolean)
      * @see OpenDDS.OpenDDSPackage#getPresentationQosPolicy_Coherent_access()
@@ -79,10 +86,14 @@ public interface PresentationQosPolicy extends QosPolicy {
     boolean isCoherent_access();
 
     /**
-     * Sets the value of the '{@link OpenDDS.PresentationQosPolicy#isCoherent_access <em>Coherent access</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * Sets the value of the '
+     * {@link OpenDDS.PresentationQosPolicy#isCoherent_access
+     * <em>Coherent access</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @param value the new value of the '<em>Coherent access</em>' attribute.
+     * 
+     * @param value
+     *            the new value of the '<em>Coherent access</em>'
+     *            attribute.
      * @see #isCoherent_access()
      * @generated
      */
@@ -97,7 +108,7 @@ public interface PresentationQosPolicy extends QosPolicy {
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @return the value of the '<em>Ordered access</em>' attribute.
      * @see #setOrdered_access(boolean)
      * @see OpenDDS.OpenDDSPackage#getPresentationQosPolicy_Ordered_access()
@@ -107,10 +118,14 @@ public interface PresentationQosPolicy extends QosPolicy {
     boolean isOrdered_access();
 
     /**
-     * Sets the value of the '{@link OpenDDS.PresentationQosPolicy#isOrdered_access <em>Ordered access</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * Sets the value of the '
+     * {@link OpenDDS.PresentationQosPolicy#isOrdered_access
+     * <em>Ordered access</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @param value the new value of the '<em>Ordered access</em>' attribute.
+     * 
+     * @param value
+     *            the new value of the '<em>Ordered access</em>'
+     *            attribute.
      * @see #isOrdered_access()
      * @generated
      */

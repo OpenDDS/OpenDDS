@@ -14,32 +14,36 @@ import org.eclipse.emf.common.util.EList;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Application Target</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.ApplicationTarget#getComponent_type <em>Component type</em>}</li>
- *   <li>{@link OpenDDS.ApplicationTarget#getLanguage <em>Language</em>}</li>
- *   <li>{@link OpenDDS.ApplicationTarget#getPlatform <em>Platform</em>}</li>
- *   <li>{@link OpenDDS.ApplicationTarget#getParticipants <em>Participants</em>}</li>
- *   <li>{@link OpenDDS.ApplicationTarget#getService_arguments <em>Service arguments</em>}</li>
+ * <li>{@link OpenDDS.ApplicationTarget#getComponent_type <em>
+ * Component type</em>}</li>
+ * <li>{@link OpenDDS.ApplicationTarget#getLanguage <em>Language</em>}
+ * </li>
+ * <li>{@link OpenDDS.ApplicationTarget#getPlatform <em>Platform</em>}
+ * </li>
+ * <li>{@link OpenDDS.ApplicationTarget#getParticipants <em>
+ * Participants</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getApplicationTarget()
  * @model
  * @generated
  */
-public interface ApplicationTarget extends Entity, ModelEntity {
+public interface ApplicationTarget extends Entity {
     /**
-     * Returns the value of the '<em><b>Component type</b></em>' attribute.
-     * The literals are from the enumeration {@link OpenDDS.ComponentType}.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Component type</b></em>'
+     * attribute. The literals are from the enumeration
+     * {@link OpenDDS.ComponentType}. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Component type</em>' attribute isn't
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Component type</em>' attribute.
      * @see OpenDDS.ComponentType
      * @see #setComponent_type(ComponentType)
@@ -50,10 +54,14 @@ public interface ApplicationTarget extends Entity, ModelEntity {
     ComponentType getComponent_type();
 
     /**
-     * Sets the value of the '{@link OpenDDS.ApplicationTarget#getComponent_type <em>Component type</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * Sets the value of the '
+     * {@link OpenDDS.ApplicationTarget#getComponent_type
+     * <em>Component type</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @param value the new value of the '<em>Component type</em>' attribute.
+     * 
+     * @param value
+     *            the new value of the '<em>Component type</em>'
+     *            attribute.
      * @see OpenDDS.ComponentType
      * @see #getComponent_type()
      * @generated
@@ -62,13 +70,14 @@ public interface ApplicationTarget extends Entity, ModelEntity {
 
     /**
      * Returns the value of the '<em><b>Language</b></em>' attribute.
-     * The literals are from the enumeration {@link OpenDDS.LanguageType}.
-     * <!-- begin-user-doc -->
+     * The literals are from the enumeration
+     * {@link OpenDDS.LanguageType}. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Language</em>' attribute isn't
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Language</em>' attribute.
      * @see OpenDDS.LanguageType
      * @see #setLanguage(LanguageType)
@@ -79,9 +88,12 @@ public interface ApplicationTarget extends Entity, ModelEntity {
     LanguageType getLanguage();
 
     /**
-     * Sets the value of the '{@link OpenDDS.ApplicationTarget#getLanguage <em>Language</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
-     * @param value the new value of the '<em>Language</em>' attribute.
+     * Sets the value of the '
+     * {@link OpenDDS.ApplicationTarget#getLanguage <em>Language</em>}
+     * ' attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @param value
+     *            the new value of the '<em>Language</em>' attribute.
      * @see OpenDDS.LanguageType
      * @see #getLanguage()
      * @generated
@@ -90,13 +102,14 @@ public interface ApplicationTarget extends Entity, ModelEntity {
 
     /**
      * Returns the value of the '<em><b>Platform</b></em>' attribute.
-     * The literals are from the enumeration {@link OpenDDS.PlatformType}.
-     * <!-- begin-user-doc -->
+     * The literals are from the enumeration
+     * {@link OpenDDS.PlatformType}. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Platform</em>' attribute isn't
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Platform</em>' attribute.
      * @see OpenDDS.PlatformType
      * @see #setPlatform(PlatformType)
@@ -107,9 +120,12 @@ public interface ApplicationTarget extends Entity, ModelEntity {
     PlatformType getPlatform();
 
     /**
-     * Sets the value of the '{@link OpenDDS.ApplicationTarget#getPlatform <em>Platform</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
-     * @param value the new value of the '<em>Platform</em>' attribute.
+     * Sets the value of the '
+     * {@link OpenDDS.ApplicationTarget#getPlatform <em>Platform</em>}
+     * ' attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @param value
+     *            the new value of the '<em>Platform</em>' attribute.
      * @see OpenDDS.PlatformType
      * @see #getPlatform()
      * @generated
@@ -117,47 +133,22 @@ public interface ApplicationTarget extends Entity, ModelEntity {
     void setPlatform(PlatformType value);
 
     /**
-     * Returns the value of the '<em><b>Participants</b></em>' reference list.
-     * The list contents are of type {@link OpenDDS.DomainParticipant}.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Participants</b></em>'
+     * reference list. The list contents are of type
+     * {@link OpenDDS.DomainParticipant}. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Participants</em>' reference list
      * isn't clear, there really should be more of a description
      * here...
      * </p>
      * <!-- end-user-doc -->
-     * @return the value of the '<em>Participants</em>' reference list.
+     * 
+     * @return the value of the '<em>Participants</em>' reference
+     *         list.
      * @see OpenDDS.OpenDDSPackage#getApplicationTarget_Participants()
      * @model required="true"
      * @generated
      */
     EList<DomainParticipant> getParticipants();
-
-    /**
-     * Returns the value of the '<em><b>Service arguments</b></em>' attribute.
-     * <!-- begin-user-doc -->
-     * <p>
-     * If the meaning of the '<em>Service arguments</em>' attribute
-     * isn't clear, there really should be more of a description
-     * here...
-     * </p>
-     * <!-- end-user-doc -->
-     * @return the value of the '<em>Service arguments</em>' attribute.
-     * @see #setService_arguments(String)
-     * @see OpenDDS.OpenDDSPackage#getApplicationTarget_Service_arguments()
-     * @model
-     * @generated
-     */
-    String getService_arguments();
-
-    /**
-     * Sets the value of the '{@link OpenDDS.ApplicationTarget#getService_arguments <em>Service arguments</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @param value the new value of the '<em>Service arguments</em>' attribute.
-     * @see #getService_arguments()
-     * @generated
-     */
-    void setService_arguments(String value);
 
 } // ApplicationTarget

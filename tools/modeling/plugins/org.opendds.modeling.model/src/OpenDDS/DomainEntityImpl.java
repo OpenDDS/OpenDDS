@@ -16,12 +16,13 @@ import org.eclipse.emf.ecore.EClass;
  * <em><b>Domain Entity</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
- *
+ * 
  * @generated
  */
 public abstract class DomainEntityImpl extends NamedEntityImpl implements DomainEntity {
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected DomainEntityImpl() {
@@ -30,6 +31,7 @@ public abstract class DomainEntityImpl extends NamedEntityImpl implements Domain
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

@@ -24,17 +24,18 @@ import org.eclipse.emf.ecore.util.InternalEList;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.PublisherImpl#getWriters <em>Writers</em>}</li>
+ * <li>{@link OpenDDS.PublisherImpl#getWriters <em>Writers</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class PublisherImpl extends PublisherSubscriberImpl implements Publisher {
     /**
-     * The cached value of the '{@link #getWriters() <em>Writers</em>}' containment reference list.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getWriters() <em>Writers</em>}
+     * ' containment reference list. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getWriters()
      * @generated
      * @ordered
@@ -43,6 +44,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected PublisherImpl() {
@@ -51,6 +53,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -60,6 +63,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public EList<DataWriter> getWriters() {
@@ -71,6 +75,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -84,6 +89,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -97,6 +103,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @SuppressWarnings("unchecked")
@@ -113,6 +120,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -127,6 +135,7 @@ public class PublisherImpl extends PublisherSubscriberImpl implements Publisher 
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

@@ -14,7 +14,6 @@ import java.util.List;
 
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.util.ResourceLocator;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.edit.provider.IEditingDomainItemProvider;
 import org.eclipse.emf.edit.provider.IItemLabelProvider;
@@ -22,10 +21,7 @@ import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.IItemPropertySource;
 import org.eclipse.emf.edit.provider.IStructuredItemContentProvider;
 import org.eclipse.emf.edit.provider.ITreeItemContentProvider;
-import org.eclipse.emf.edit.provider.ItemProviderAdapter;
 import org.eclipse.emf.edit.provider.ViewerNotification;
-
-import org.opendds.modeling.edit.EditPlugin;
 
 /**
  * This is the item provider adapter for a {@link OpenDDS.Model}
@@ -33,7 +29,7 @@ import org.opendds.modeling.edit.EditPlugin;
  * 
  * @generated
  */
-public class ModelItemProvider extends ItemProviderAdapter implements IEditingDomainItemProvider,
+public class ModelItemProvider extends EntityItemProvider implements IEditingDomainItemProvider,
         IStructuredItemContentProvider, ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource {
     /**
      * This constructs an instance from a factory and a notifier. <!--
@@ -75,7 +71,13 @@ public class ModelItemProvider extends ItemProviderAdapter implements IEditingDo
     public Collection<? extends EStructuralFeature> getChildrenFeatures(Object object) {
         if (childrenFeatures == null) {
             super.getChildrenFeatures(object);
-            childrenFeatures.add(OpenDDSPackage.Literals.MODEL__ENTITIES);
+            childrenFeatures.add(OpenDDSPackage.Literals.MODEL__APPLICATIONS);
+            childrenFeatures.add(OpenDDSPackage.Literals.MODEL__DOMAINS);
+            childrenFeatures.add(OpenDDSPackage.Literals.MODEL__PARTICIPANTS);
+            childrenFeatures.add(OpenDDSPackage.Literals.MODEL__TOPICS);
+            childrenFeatures.add(OpenDDSPackage.Literals.MODEL__TOPIC_TYPES);
+            childrenFeatures.add(OpenDDSPackage.Literals.MODEL__QOS_POLICIES);
+            childrenFeatures.add(OpenDDSPackage.Literals.MODEL__TRANSPORTS);
         }
         return childrenFeatures;
     }
@@ -130,7 +132,13 @@ public class ModelItemProvider extends ItemProviderAdapter implements IEditingDo
         updateChildren(notification);
 
         switch (notification.getFeatureID(Model.class)) {
-            case OpenDDSPackage.MODEL__ENTITIES:
+            case OpenDDSPackage.MODEL__APPLICATIONS:
+            case OpenDDSPackage.MODEL__DOMAINS:
+            case OpenDDSPackage.MODEL__PARTICIPANTS:
+            case OpenDDSPackage.MODEL__TOPICS:
+            case OpenDDSPackage.MODEL__TOPIC_TYPES:
+            case OpenDDSPackage.MODEL__QOS_POLICIES:
+            case OpenDDSPackage.MODEL__TRANSPORTS:
                 fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), true, false));
                 return;
         }
@@ -148,106 +156,95 @@ public class ModelItemProvider extends ItemProviderAdapter implements IEditingDo
     protected void collectNewChildDescriptors(Collection<Object> newChildDescriptors, Object object) {
         super.collectNewChildDescriptors(newChildDescriptors, object);
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createContentFilteredTopic()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__APPLICATIONS,
+                OpenDDSFactory.eINSTANCE.createApplicationTarget()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createMultiTopic()));
-
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createTopic()));
-
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createTopicStruct()));
-
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__DOMAINS, OpenDDSFactory.eINSTANCE
                 .createDomain()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createDomainParticipant()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__PARTICIPANTS,
+                OpenDDSFactory.eINSTANCE.createDomainParticipant()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createDeadlineQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__TOPICS, OpenDDSFactory.eINSTANCE
+                .createContentFilteredTopic()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createDestinationOrderQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__TOPICS, OpenDDSFactory.eINSTANCE
+                .createMultiTopic()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createDurabilityQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__TOPICS, OpenDDSFactory.eINSTANCE
+                .createTopic()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createDurabilityServiceQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__TOPIC_TYPES,
+                OpenDDSFactory.eINSTANCE.createTopicStruct()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createEntityFactoryQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createDeadlineQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createGroupDataQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createDestinationOrderQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createHistoryQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createDurabilityQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createLatencyBudgetQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createDurabilityServiceQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createLifespanQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createEntityFactoryQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createLivelinessQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createGroupDataQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createOwnershipQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createHistoryQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createOwnershipStrengthQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createLatencyBudgetQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createPartitionQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createLifespanQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createPresentationQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createLivelinessQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createReaderDataLifecycleQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createOwnershipQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createReliabilityQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createOwnershipStrengthQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createResourceLimitsQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createPartitionQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createTimeBasedFilterQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createPresentationQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createTopicDataQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createReaderDataLifecycleQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createTransportPriorityQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createReliabilityQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createUserDataQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createResourceLimitsQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createWriterDataLifecycleQosPolicy()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createTimeBasedFilterQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createApplicationTarget()));
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createTopicDataQosPolicy()));
 
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__ENTITIES, OpenDDSFactory.eINSTANCE
-                .createTransport()));
-    }
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createTransportPriorityQosPolicy()));
 
-    /**
-     * Return the resource locator for this item provider's resources.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
-     * 
-     * @generated
-     */
-    @Override
-    public ResourceLocator getResourceLocator() {
-        return EditPlugin.INSTANCE;
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createUserDataQosPolicy()));
+
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__QOS_POLICIES,
+                OpenDDSFactory.eINSTANCE.createWriterDataLifecycleQosPolicy()));
+
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.MODEL__TRANSPORTS,
+                OpenDDSFactory.eINSTANCE.createTransport()));
     }
 
 }

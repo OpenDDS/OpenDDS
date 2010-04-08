@@ -12,8 +12,8 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Constructed Topic Type</b></em>'. <!-- end-user-doc -->
- *
- *
+ * 
+ * 
  * @see OpenDDS.OpenDDSPackage#getConstructedTopicType()
  * @model abstract="true"
  * @generated

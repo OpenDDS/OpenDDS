@@ -19,10 +19,11 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.MultiTopicImpl#getSubscription_expression <em>Subscription expression</em>}</li>
+ * <li>{@link OpenDDS.MultiTopicImpl#getSubscription_expression <em>
+ * Subscription expression</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
@@ -30,7 +31,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
      * The default value of the '{@link #getSubscription_expression()
      * <em>Subscription expression</em>}' attribute. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #getSubscription_expression()
      * @generated
      * @ordered
@@ -41,7 +42,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
      * The cached value of the '{@link #getSubscription_expression()
      * <em>Subscription expression</em>}' attribute. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #getSubscription_expression()
      * @generated
      * @ordered
@@ -50,6 +51,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected MultiTopicImpl() {
@@ -58,6 +60,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -67,6 +70,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String getSubscription_expression() {
@@ -75,6 +79,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setSubscription_expression(String newSubscription_expression) {
@@ -88,6 +93,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -101,6 +107,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -115,6 +122,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -129,6 +137,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -143,6 +152,7 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

@@ -12,30 +12,32 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Reliability Qos Policy</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.ReliabilityQosPolicy#getKind <em>Kind</em>}</li>
- *   <li>{@link OpenDDS.ReliabilityQosPolicy#getMax_blocking_time <em>Max blocking time</em>}</li>
+ * <li>{@link OpenDDS.ReliabilityQosPolicy#getKind <em>Kind</em>}</li>
+ * <li>{@link OpenDDS.ReliabilityQosPolicy#getMax_blocking_time <em>
+ * Max blocking time</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getReliabilityQosPolicy()
  * @model
  * @generated
  */
 public interface ReliabilityQosPolicy extends QosPolicy {
     /**
-     * Returns the value of the '<em><b>Kind</b></em>' attribute.
-     * The default value is <code>"BEST_EFFORT"</code>.
-     * The literals are from the enumeration {@link OpenDDS.ReliabilityQosPolicyKind}.
+     * Returns the value of the '<em><b>Kind</b></em>' attribute. The
+     * default value is <code>"BEST_EFFORT"</code>. The literals are
+     * from the enumeration {@link OpenDDS.ReliabilityQosPolicyKind}.
      * <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Kind</em>' attribute isn't clear,
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.ReliabilityQosPolicyKind
      * @see #setKind(ReliabilityQosPolicyKind)
@@ -46,9 +48,12 @@ public interface ReliabilityQosPolicy extends QosPolicy {
     ReliabilityQosPolicyKind getKind();
 
     /**
-     * Sets the value of the '{@link OpenDDS.ReliabilityQosPolicy#getKind <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
-     * @param value the new value of the '<em>Kind</em>' attribute.
+     * Sets the value of the '
+     * {@link OpenDDS.ReliabilityQosPolicy#getKind <em>Kind</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @param value
+     *            the new value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.ReliabilityQosPolicyKind
      * @see #getKind()
      * @generated
@@ -56,15 +61,17 @@ public interface ReliabilityQosPolicy extends QosPolicy {
     void setKind(ReliabilityQosPolicyKind value);
 
     /**
-     * Returns the value of the '<em><b>Max blocking time</b></em>' containment reference.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Max blocking time</b></em>'
+     * containment reference. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Max blocking time</em>' containment
      * reference isn't clear, there really should be more of a
      * description here...
      * </p>
      * <!-- end-user-doc -->
-     * @return the value of the '<em>Max blocking time</em>' containment reference.
+     * 
+     * @return the value of the '<em>Max blocking time</em>'
+     *         containment reference.
      * @see #setMax_blocking_time(Period)
      * @see OpenDDS.OpenDDSPackage#getReliabilityQosPolicy_Max_blocking_time()
      * @model containment="true"
@@ -77,7 +84,7 @@ public interface ReliabilityQosPolicy extends QosPolicy {
      * {@link OpenDDS.ReliabilityQosPolicy#getMax_blocking_time
      * <em>Max blocking time</em>}' containment reference. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @param value
      *            the new value of the '<em>Max blocking time</em>'
      *            containment reference.

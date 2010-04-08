@@ -12,14 +12,14 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Durability Qos Policy</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.DurabilityQosPolicy#getKind <em>Kind</em>}</li>
+ * <li>{@link OpenDDS.DurabilityQosPolicy#getKind <em>Kind</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getDurabilityQosPolicy()
  * @model
  * @generated
@@ -35,7 +35,7 @@ public interface DurabilityQosPolicy extends QosPolicy {
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @return the value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.DurabilityQosPolicyKind
      * @see #setKind(DurabilityQosPolicyKind)
@@ -46,9 +46,12 @@ public interface DurabilityQosPolicy extends QosPolicy {
     DurabilityQosPolicyKind getKind();
 
     /**
-     * Sets the value of the '{@link OpenDDS.DurabilityQosPolicy#getKind <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
-     * @param value the new value of the '<em>Kind</em>' attribute.
+     * Sets the value of the '
+     * {@link OpenDDS.DurabilityQosPolicy#getKind <em>Kind</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @param value
+     *            the new value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.DurabilityQosPolicyKind
      * @see #getKind()
      * @generated

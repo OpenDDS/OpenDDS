@@ -19,13 +19,14 @@ import org.eclipse.emf.ecore.plugin.EcorePlugin;
 /**
  * <!-- begin-user-doc --> An implementation of the model
  * <b>Factory</b>. <!-- end-user-doc -->
+ * 
  * @generated
  */
 public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
     /**
-     * Creates the default factory implementation.
-     * <!-- begin-user-doc
+     * Creates the default factory implementation. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public static OpenDDSFactory init() {
@@ -42,9 +43,9 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
     }
 
     /**
-     * Creates an instance of the factory.
-     * <!-- begin-user-doc -->
+     * Creates an instance of the factory. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OpenDDSFactoryImpl() {
@@ -53,6 +54,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -96,8 +98,6 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
                 return createOString();
             case OpenDDSPackage.TOPIC_STRUCT:
                 return createTopicStruct();
-            case OpenDDSPackage.TYPEDEF:
-                return createTypedef();
             case OpenDDSPackage.OU_LONG:
                 return createOULong();
             case OpenDDSPackage.OU_LONG_LONG:
@@ -177,11 +177,14 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
     public Object createFromString(EDataType eDataType, String initialValue) {
         switch (eDataType.getClassifierID()) {
+            case OpenDDSPackage.SIMPLE_TYPE:
+                return createSimpleTypeFromString(eDataType, initialValue);
             case OpenDDSPackage.DESTINATION_ORDER_QOS_POLICY_KIND:
                 return createDestinationOrderQosPolicyKindFromString(eDataType, initialValue);
             case OpenDDSPackage.DURABILITY_QOS_POLICY_KIND:
@@ -210,11 +213,14 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
     public String convertToString(EDataType eDataType, Object instanceValue) {
         switch (eDataType.getClassifierID()) {
+            case OpenDDSPackage.SIMPLE_TYPE:
+                return convertSimpleTypeToString(eDataType, instanceValue);
             case OpenDDSPackage.DESTINATION_ORDER_QOS_POLICY_KIND:
                 return convertDestinationOrderQosPolicyKindToString(eDataType, instanceValue);
             case OpenDDSPackage.DURABILITY_QOS_POLICY_KIND:
@@ -243,6 +249,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public ContentFilteredTopic createContentFilteredTopic() {
@@ -252,6 +259,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public MultiTopic createMultiTopic() {
@@ -261,6 +269,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Topic createTopic() {
@@ -270,6 +279,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Array createArray() {
@@ -279,6 +289,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OBoolean createOBoolean() {
@@ -288,6 +299,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Case createCase() {
@@ -297,6 +309,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OChar createOChar() {
@@ -306,6 +319,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public ODouble createODouble() {
@@ -315,6 +329,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Enum createEnum() {
@@ -324,6 +339,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OFloat createOFloat() {
@@ -333,6 +349,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Key createKey() {
@@ -342,6 +359,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public KeyField createKeyField() {
@@ -351,6 +369,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OLong createOLong() {
@@ -360,6 +379,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OLongLong createOLongLong() {
@@ -369,6 +389,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OOctet createOOctet() {
@@ -378,6 +399,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Sequence createSequence() {
@@ -387,6 +409,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OShort createOShort() {
@@ -396,6 +419,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OString createOString() {
@@ -405,6 +429,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public TopicStruct createTopicStruct() {
@@ -414,15 +439,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
-     * @generated
-     */
-    public Typedef createTypedef() {
-        TypedefImpl typedef = new TypedefImpl();
-        return typedef;
-    }
-
-    /**
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OULong createOULong() {
@@ -432,6 +449,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OULongLong createOULongLong() {
@@ -441,6 +459,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Union createUnion() {
@@ -450,6 +469,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OUShort createOUShort() {
@@ -459,6 +479,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DataReader createDataReader() {
@@ -468,6 +489,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DataWriter createDataWriter() {
@@ -477,6 +499,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Domain createDomain() {
@@ -486,6 +509,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DomainParticipant createDomainParticipant() {
@@ -495,6 +519,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Publisher createPublisher() {
@@ -504,6 +529,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Subscriber createSubscriber() {
@@ -513,6 +539,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DeadlineQosPolicy createDeadlineQosPolicy() {
@@ -522,6 +549,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DestinationOrderQosPolicy createDestinationOrderQosPolicy() {
@@ -531,6 +559,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DurabilityQosPolicy createDurabilityQosPolicy() {
@@ -540,6 +569,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DurabilityServiceQosPolicy createDurabilityServiceQosPolicy() {
@@ -549,6 +579,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public EntityFactoryQosPolicy createEntityFactoryQosPolicy() {
@@ -558,6 +589,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public GroupDataQosPolicy createGroupDataQosPolicy() {
@@ -567,6 +599,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public HistoryQosPolicy createHistoryQosPolicy() {
@@ -576,6 +609,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public LatencyBudgetQosPolicy createLatencyBudgetQosPolicy() {
@@ -585,6 +619,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public LifespanQosPolicy createLifespanQosPolicy() {
@@ -594,6 +629,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public LivelinessQosPolicy createLivelinessQosPolicy() {
@@ -603,6 +639,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OwnershipQosPolicy createOwnershipQosPolicy() {
@@ -612,6 +649,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OwnershipStrengthQosPolicy createOwnershipStrengthQosPolicy() {
@@ -621,6 +659,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public PartitionQosPolicy createPartitionQosPolicy() {
@@ -630,6 +669,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public PresentationQosPolicy createPresentationQosPolicy() {
@@ -639,6 +679,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public ReaderDataLifecycleQosPolicy createReaderDataLifecycleQosPolicy() {
@@ -648,6 +689,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public ReliabilityQosPolicy createReliabilityQosPolicy() {
@@ -657,6 +699,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public ResourceLimitsQosPolicy createResourceLimitsQosPolicy() {
@@ -666,6 +709,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public TimeBasedFilterQosPolicy createTimeBasedFilterQosPolicy() {
@@ -675,6 +719,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public TopicDataQosPolicy createTopicDataQosPolicy() {
@@ -684,6 +729,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public TransportPriorityQosPolicy createTransportPriorityQosPolicy() {
@@ -693,6 +739,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public UserDataQosPolicy createUserDataQosPolicy() {
@@ -702,6 +749,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Period createPeriod() {
@@ -711,6 +759,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public WriterDataLifecycleQosPolicy createWriterDataLifecycleQosPolicy() {
@@ -720,6 +769,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public ApplicationTarget createApplicationTarget() {
@@ -729,6 +779,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Transport createTransport() {
@@ -738,6 +789,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Model createModel() {
@@ -747,6 +799,30 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    public SimpleType createSimpleTypeFromString(EDataType eDataType, String initialValue) {
+        SimpleType result = SimpleType.get(initialValue);
+        if (result == null) {
+            throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '"
+                    + eDataType.getName() + "'");
+        }
+        return result;
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    public String convertSimpleTypeToString(EDataType eDataType, Object instanceValue) {
+        return instanceValue == null ? null : instanceValue.toString();
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DestinationOrderQosPolicyKind createDestinationOrderQosPolicyKindFromString(EDataType eDataType,
@@ -761,6 +837,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String convertDestinationOrderQosPolicyKindToString(EDataType eDataType, Object instanceValue) {
@@ -769,6 +846,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DurabilityQosPolicyKind createDurabilityQosPolicyKindFromString(EDataType eDataType, String initialValue) {
@@ -782,6 +860,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String convertDurabilityQosPolicyKindToString(EDataType eDataType, Object instanceValue) {
@@ -790,6 +869,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public HistoryQosPolicyKind createHistoryQosPolicyKindFromString(EDataType eDataType, String initialValue) {
@@ -803,6 +883,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String convertHistoryQosPolicyKindToString(EDataType eDataType, Object instanceValue) {
@@ -811,6 +892,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public LivelinessQosPolicyKind createLivelinessQosPolicyKindFromString(EDataType eDataType, String initialValue) {
@@ -824,6 +906,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String convertLivelinessQosPolicyKindToString(EDataType eDataType, Object instanceValue) {
@@ -832,6 +915,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OwnershipQosPolicyKind createOwnershipQosPolicyKindFromString(EDataType eDataType, String initialValue) {
@@ -845,6 +929,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String convertOwnershipQosPolicyKindToString(EDataType eDataType, Object instanceValue) {
@@ -853,6 +938,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public PresentationQosPolicyAccessScopeKind createPresentationQosPolicyAccessScopeKindFromString(
@@ -867,6 +953,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String convertPresentationQosPolicyAccessScopeKindToString(EDataType eDataType, Object instanceValue) {
@@ -875,6 +962,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public ReliabilityQosPolicyKind createReliabilityQosPolicyKindFromString(EDataType eDataType, String initialValue) {
@@ -888,6 +976,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String convertReliabilityQosPolicyKindToString(EDataType eDataType, Object instanceValue) {
@@ -896,6 +985,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public ComponentType createComponentTypeFromString(EDataType eDataType, String initialValue) {
@@ -909,6 +999,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String convertComponentTypeToString(EDataType eDataType, Object instanceValue) {
@@ -917,6 +1008,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public LanguageType createLanguageTypeFromString(EDataType eDataType, String initialValue) {
@@ -930,6 +1022,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String convertLanguageTypeToString(EDataType eDataType, Object instanceValue) {
@@ -938,6 +1031,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public PlatformType createPlatformTypeFromString(EDataType eDataType, String initialValue) {
@@ -951,6 +1045,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String convertPlatformTypeToString(EDataType eDataType, Object instanceValue) {
@@ -959,6 +1054,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OpenDDSPackage getOpenDDSPackage() {
@@ -967,6 +1063,7 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @deprecated
      * @generated
      */

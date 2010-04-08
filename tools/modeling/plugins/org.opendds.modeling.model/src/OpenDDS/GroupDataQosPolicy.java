@@ -12,14 +12,14 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Group Data Qos Policy</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.GroupDataQosPolicy#getValue <em>Value</em>}</li>
+ * <li>{@link OpenDDS.GroupDataQosPolicy#getValue <em>Value</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getGroupDataQosPolicy()
  * @model
  * @generated
@@ -33,6 +33,7 @@ public interface GroupDataQosPolicy extends QosPolicy {
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Value</em>' attribute.
      * @see #setValue(String)
      * @see OpenDDS.OpenDDSPackage#getGroupDataQosPolicy_Value()
@@ -42,9 +43,12 @@ public interface GroupDataQosPolicy extends QosPolicy {
     String getValue();
 
     /**
-     * Sets the value of the '{@link OpenDDS.GroupDataQosPolicy#getValue <em>Value</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
-     * @param value the new value of the '<em>Value</em>' attribute.
+     * Sets the value of the '
+     * {@link OpenDDS.GroupDataQosPolicy#getValue <em>Value</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @param value
+     *            the new value of the '<em>Value</em>' attribute.
      * @see #getValue()
      * @generated
      */

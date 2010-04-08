@@ -19,16 +19,17 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.OwnershipQosPolicyImpl#getKind <em>Kind</em>}</li>
+ * <li>{@link OpenDDS.OwnershipQosPolicyImpl#getKind <em>Kind</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQosPolicy {
     /**
-     * The default value of the '{@link #getKind() <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The default value of the '{@link #getKind() <em>Kind</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getKind()
      * @generated
      * @ordered
@@ -36,8 +37,9 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
     protected static final OwnershipQosPolicyKind KIND_EDEFAULT = OwnershipQosPolicyKind.SHARED;
 
     /**
-     * The cached value of the '{@link #getKind() <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The cached value of the '{@link #getKind() <em>Kind</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getKind()
      * @generated
      * @ordered
@@ -46,6 +48,7 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected OwnershipQosPolicyImpl() {
@@ -54,6 +57,7 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -63,6 +67,7 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OwnershipQosPolicyKind getKind() {
@@ -71,6 +76,7 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setKind(OwnershipQosPolicyKind newKind) {
@@ -84,6 +90,7 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -97,6 +104,7 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -111,6 +119,7 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -125,6 +134,7 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -138,6 +148,7 @@ public class OwnershipQosPolicyImpl extends QosPolicyImpl implements OwnershipQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

@@ -19,19 +19,23 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.PresentationQosPolicyImpl#getAccess_scope <em>Access scope</em>}</li>
- *   <li>{@link OpenDDS.PresentationQosPolicyImpl#isCoherent_access <em>Coherent access</em>}</li>
- *   <li>{@link OpenDDS.PresentationQosPolicyImpl#isOrdered_access <em>Ordered access</em>}</li>
+ * <li>{@link OpenDDS.PresentationQosPolicyImpl#getAccess_scope <em>
+ * Access scope</em>}</li>
+ * <li>{@link OpenDDS.PresentationQosPolicyImpl#isCoherent_access <em>
+ * Coherent access</em>}</li>
+ * <li>{@link OpenDDS.PresentationQosPolicyImpl#isOrdered_access <em>
+ * Ordered access</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class PresentationQosPolicyImpl extends QosPolicyImpl implements PresentationQosPolicy {
     /**
-     * The default value of the '{@link #getAccess_scope() <em>Access scope</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The default value of the '{@link #getAccess_scope()
+     * <em>Access scope</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getAccess_scope()
      * @generated
      * @ordered
@@ -39,9 +43,10 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     protected static final PresentationQosPolicyAccessScopeKind ACCESS_SCOPE_EDEFAULT = PresentationQosPolicyAccessScopeKind.INSTANCE;
 
     /**
-     * The cached value of the '{@link #getAccess_scope() <em>Access scope</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getAccess_scope()
+     * <em>Access scope</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getAccess_scope()
      * @generated
      * @ordered
@@ -49,9 +54,10 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     protected PresentationQosPolicyAccessScopeKind access_scope = ACCESS_SCOPE_EDEFAULT;
 
     /**
-     * The default value of the '{@link #isCoherent_access() <em>Coherent access</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * The default value of the '{@link #isCoherent_access()
+     * <em>Coherent access</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #isCoherent_access()
      * @generated
      * @ordered
@@ -59,9 +65,10 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     protected static final boolean COHERENT_ACCESS_EDEFAULT = false;
 
     /**
-     * The cached value of the '{@link #isCoherent_access() <em>Coherent access</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * The cached value of the '{@link #isCoherent_access()
+     * <em>Coherent access</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #isCoherent_access()
      * @generated
      * @ordered
@@ -69,9 +76,10 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     protected boolean coherent_access = COHERENT_ACCESS_EDEFAULT;
 
     /**
-     * The default value of the '{@link #isOrdered_access() <em>Ordered access</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * The default value of the '{@link #isOrdered_access()
+     * <em>Ordered access</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #isOrdered_access()
      * @generated
      * @ordered
@@ -79,9 +87,10 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
     protected static final boolean ORDERED_ACCESS_EDEFAULT = false;
 
     /**
-     * The cached value of the '{@link #isOrdered_access() <em>Ordered access</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * The cached value of the '{@link #isOrdered_access()
+     * <em>Ordered access</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #isOrdered_access()
      * @generated
      * @ordered
@@ -90,6 +99,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected PresentationQosPolicyImpl() {
@@ -98,6 +108,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -107,6 +118,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public PresentationQosPolicyAccessScopeKind getAccess_scope() {
@@ -115,6 +127,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setAccess_scope(PresentationQosPolicyAccessScopeKind newAccess_scope) {
@@ -128,6 +141,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public boolean isCoherent_access() {
@@ -136,6 +150,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setCoherent_access(boolean newCoherent_access) {
@@ -149,6 +164,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public boolean isOrdered_access() {
@@ -157,6 +173,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setOrdered_access(boolean newOrdered_access) {
@@ -170,6 +187,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -187,6 +205,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -207,6 +226,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -227,6 +247,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -244,6 +265,7 @@ public class PresentationQosPolicyImpl extends QosPolicyImpl implements Presenta
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

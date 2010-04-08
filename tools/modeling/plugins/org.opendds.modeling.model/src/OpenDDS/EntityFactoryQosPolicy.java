@@ -12,30 +12,34 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Entity Factory Qos Policy</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.EntityFactoryQosPolicy#isAutoenable_created_entities <em>Autoenable created entities</em>}</li>
+ * <li>
+ * {@link OpenDDS.EntityFactoryQosPolicy#isAutoenable_created_entities
+ * <em>Autoenable created entities</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getEntityFactoryQosPolicy()
  * @model
  * @generated
  */
 public interface EntityFactoryQosPolicy extends QosPolicy {
     /**
-     * Returns the value of the '<em><b>Autoenable created entities</b></em>' attribute.
-     * The default value is <code>"true"</code>.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '
+     * <em><b>Autoenable created entities</b></em>' attribute. The
+     * default value is <code>"true"</code>. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Autoenable created entities</em>'
      * attribute isn't clear, there really should be more of a
      * description here...
      * </p>
      * <!-- end-user-doc -->
-     * @return the value of the '<em>Autoenable created entities</em>' attribute.
+     * 
+     * @return the value of the '<em>Autoenable created entities</em>'
+     *         attribute.
      * @see #setAutoenable_created_entities(boolean)
      * @see OpenDDS.OpenDDSPackage#getEntityFactoryQosPolicy_Autoenable_created_entities()
      * @model default="true"
@@ -48,7 +52,7 @@ public interface EntityFactoryQosPolicy extends QosPolicy {
      * {@link OpenDDS.EntityFactoryQosPolicy#isAutoenable_created_entities
      * <em>Autoenable created entities</em>}' attribute. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @param value
      *            the new value of the '
      *            <em>Autoenable created entities</em>' attribute.

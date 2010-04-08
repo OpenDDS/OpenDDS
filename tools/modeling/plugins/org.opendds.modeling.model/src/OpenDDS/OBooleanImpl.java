@@ -16,12 +16,13 @@ import org.eclipse.emf.ecore.EClass;
  * <em><b>OBoolean</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
- *
+ * 
  * @generated
  */
 public class OBooleanImpl extends SimpleImpl implements OBoolean {
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected OBooleanImpl() {
@@ -30,6 +31,7 @@ public class OBooleanImpl extends SimpleImpl implements OBoolean {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

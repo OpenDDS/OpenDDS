@@ -24,13 +24,14 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * Value</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class OwnershipStrengthQosPolicyImpl extends QosPolicyImpl implements OwnershipStrengthQosPolicy {
     /**
-     * The default value of the '{@link #getValue() <em>Value</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The default value of the '{@link #getValue() <em>Value</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getValue()
      * @generated
      * @ordered
@@ -38,8 +39,9 @@ public class OwnershipStrengthQosPolicyImpl extends QosPolicyImpl implements Own
     protected static final long VALUE_EDEFAULT = 0L;
 
     /**
-     * The cached value of the '{@link #getValue() <em>Value</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The cached value of the '{@link #getValue() <em>Value</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getValue()
      * @generated
      * @ordered
@@ -48,6 +50,7 @@ public class OwnershipStrengthQosPolicyImpl extends QosPolicyImpl implements Own
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected OwnershipStrengthQosPolicyImpl() {
@@ -56,6 +59,7 @@ public class OwnershipStrengthQosPolicyImpl extends QosPolicyImpl implements Own
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -65,6 +69,7 @@ public class OwnershipStrengthQosPolicyImpl extends QosPolicyImpl implements Own
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public long getValue() {
@@ -73,6 +78,7 @@ public class OwnershipStrengthQosPolicyImpl extends QosPolicyImpl implements Own
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setValue(long newValue) {
@@ -86,6 +92,7 @@ public class OwnershipStrengthQosPolicyImpl extends QosPolicyImpl implements Own
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -99,6 +106,7 @@ public class OwnershipStrengthQosPolicyImpl extends QosPolicyImpl implements Own
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -113,6 +121,7 @@ public class OwnershipStrengthQosPolicyImpl extends QosPolicyImpl implements Own
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -127,6 +136,7 @@ public class OwnershipStrengthQosPolicyImpl extends QosPolicyImpl implements Own
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -140,6 +150,7 @@ public class OwnershipStrengthQosPolicyImpl extends QosPolicyImpl implements Own
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

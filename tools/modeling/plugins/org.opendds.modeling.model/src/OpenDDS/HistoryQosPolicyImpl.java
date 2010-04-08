@@ -19,17 +19,18 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.HistoryQosPolicyImpl#getDepth <em>Depth</em>}</li>
- *   <li>{@link OpenDDS.HistoryQosPolicyImpl#getKind <em>Kind</em>}</li>
+ * <li>{@link OpenDDS.HistoryQosPolicyImpl#getDepth <em>Depth</em>}</li>
+ * <li>{@link OpenDDS.HistoryQosPolicyImpl#getKind <em>Kind</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPolicy {
     /**
-     * The default value of the '{@link #getDepth() <em>Depth</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The default value of the '{@link #getDepth() <em>Depth</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getDepth()
      * @generated
      * @ordered
@@ -37,8 +38,9 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     protected static final long DEPTH_EDEFAULT = 1L;
 
     /**
-     * The cached value of the '{@link #getDepth() <em>Depth</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The cached value of the '{@link #getDepth() <em>Depth</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getDepth()
      * @generated
      * @ordered
@@ -46,8 +48,9 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     protected long depth = DEPTH_EDEFAULT;
 
     /**
-     * The default value of the '{@link #getKind() <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The default value of the '{@link #getKind() <em>Kind</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getKind()
      * @generated
      * @ordered
@@ -55,8 +58,9 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
     protected static final HistoryQosPolicyKind KIND_EDEFAULT = HistoryQosPolicyKind.KEEP_LAST;
 
     /**
-     * The cached value of the '{@link #getKind() <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The cached value of the '{@link #getKind() <em>Kind</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getKind()
      * @generated
      * @ordered
@@ -65,6 +69,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected HistoryQosPolicyImpl() {
@@ -73,6 +78,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -82,6 +88,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public long getDepth() {
@@ -90,6 +97,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setDepth(long newDepth) {
@@ -103,6 +111,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public HistoryQosPolicyKind getKind() {
@@ -111,6 +120,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setKind(HistoryQosPolicyKind newKind) {
@@ -124,6 +134,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -139,6 +150,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -156,6 +168,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -173,6 +186,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -188,6 +202,7 @@ public class HistoryQosPolicyImpl extends QosPolicyImpl implements HistoryQosPol
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

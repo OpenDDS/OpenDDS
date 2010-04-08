@@ -58,7 +58,6 @@ public class ApplicationTargetItemProvider extends EntityItemProvider implements
             addLanguagePropertyDescriptor(object);
             addPlatformPropertyDescriptor(object);
             addParticipantsPropertyDescriptor(object);
-            addService_argumentsPropertyDescriptor(object);
         }
         return itemPropertyDescriptors;
     }
@@ -122,21 +121,6 @@ public class ApplicationTargetItemProvider extends EntityItemProvider implements
     }
 
     /**
-     * This adds a property descriptor for the Service arguments
-     * feature. <!-- begin-user-doc --> <!-- end-user-doc -->
-     * 
-     * @generated
-     */
-    protected void addService_argumentsPropertyDescriptor(Object object) {
-        itemPropertyDescriptors.add(createItemPropertyDescriptor(((ComposeableAdapterFactory) adapterFactory)
-                .getRootAdapterFactory(), getResourceLocator(),
-                getString("_UI_ApplicationTarget_service_arguments_feature"), getString(
-                        "_UI_PropertyDescriptor_description", "_UI_ApplicationTarget_service_arguments_feature",
-                        "_UI_ApplicationTarget_type"), OpenDDSPackage.Literals.APPLICATION_TARGET__SERVICE_ARGUMENTS,
-                true, false, false, ItemPropertyDescriptor.GENERIC_VALUE_IMAGE, null, null));
-    }
-
-    /**
      * This returns ApplicationTarget.gif. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * 
@@ -178,7 +162,6 @@ public class ApplicationTargetItemProvider extends EntityItemProvider implements
             case OpenDDSPackage.APPLICATION_TARGET__COMPONENT_TYPE:
             case OpenDDSPackage.APPLICATION_TARGET__LANGUAGE:
             case OpenDDSPackage.APPLICATION_TARGET__PLATFORM:
-            case OpenDDSPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS:
                 fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
                 return;
         }

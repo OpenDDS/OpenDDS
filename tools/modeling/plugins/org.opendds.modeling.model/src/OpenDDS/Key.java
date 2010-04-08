@@ -14,14 +14,14 @@ import org.eclipse.emf.ecore.EObject;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Key</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.Key#getMember <em>Member</em>}</li>
+ * <li>{@link OpenDDS.Key#getMember <em>Member</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getKey()
  * @model
  * @generated
@@ -35,6 +35,7 @@ public interface Key extends EObject {
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Member</em>' reference.
      * @see #setMember(KeyField)
      * @see OpenDDS.OpenDDSPackage#getKey_Member()
@@ -44,10 +45,12 @@ public interface Key extends EObject {
     KeyField getMember();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Key#getMember <em>Member</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.Key#getMember
+     * <em>Member</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Member</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Member</em>' reference.
      * @see #getMember()
      * @generated
      */

@@ -20,6 +20,7 @@ import org.eclipse.emf.edit.provider.IItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.IItemPropertySource;
 import org.eclipse.emf.edit.provider.IStructuredItemContentProvider;
 import org.eclipse.emf.edit.provider.ITreeItemContentProvider;
+import org.eclipse.emf.edit.provider.ItemPropertyDescriptor;
 
 /**
  * This is the item provider adapter for a {@link OpenDDS.Collection}
@@ -65,7 +66,8 @@ public class CollectionItemProvider extends TopicFieldItemProvider implements IE
         itemPropertyDescriptors.add(createItemPropertyDescriptor(((ComposeableAdapterFactory) adapterFactory)
                 .getRootAdapterFactory(), getResourceLocator(), getString("_UI_Collection_type_feature"), getString(
                 "_UI_PropertyDescriptor_description", "_UI_Collection_type_feature", "_UI_Collection_type"),
-                OpenDDSPackage.Literals.COLLECTION__TYPE, true, false, true, null, null, null));
+                OpenDDSPackage.Literals.COLLECTION__TYPE, true, false, true,
+                ItemPropertyDescriptor.GENERIC_VALUE_IMAGE, null, null));
     }
 
     /**

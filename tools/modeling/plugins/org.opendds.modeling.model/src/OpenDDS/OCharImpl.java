@@ -16,12 +16,13 @@ import org.eclipse.emf.ecore.EClass;
  * <em><b>OChar</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
- *
+ * 
  * @generated
  */
 public class OCharImpl extends SimpleImpl implements OChar {
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected OCharImpl() {
@@ -30,6 +31,7 @@ public class OCharImpl extends SimpleImpl implements OChar {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

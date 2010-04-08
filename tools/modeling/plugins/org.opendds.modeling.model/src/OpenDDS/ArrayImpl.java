@@ -19,16 +19,17 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.ArrayImpl#getLength <em>Length</em>}</li>
+ * <li>{@link OpenDDS.ArrayImpl#getLength <em>Length</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class ArrayImpl extends CollectionImpl implements Array {
     /**
-     * The default value of the '{@link #getLength() <em>Length</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The default value of the '{@link #getLength() <em>Length</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getLength()
      * @generated
      * @ordered
@@ -36,8 +37,9 @@ public class ArrayImpl extends CollectionImpl implements Array {
     protected static final long LENGTH_EDEFAULT = 0L;
 
     /**
-     * The cached value of the '{@link #getLength() <em>Length</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The cached value of the '{@link #getLength() <em>Length</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getLength()
      * @generated
      * @ordered
@@ -46,6 +48,7 @@ public class ArrayImpl extends CollectionImpl implements Array {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected ArrayImpl() {
@@ -54,6 +57,7 @@ public class ArrayImpl extends CollectionImpl implements Array {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -63,6 +67,7 @@ public class ArrayImpl extends CollectionImpl implements Array {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public long getLength() {
@@ -71,6 +76,7 @@ public class ArrayImpl extends CollectionImpl implements Array {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setLength(long newLength) {
@@ -83,6 +89,7 @@ public class ArrayImpl extends CollectionImpl implements Array {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -96,6 +103,7 @@ public class ArrayImpl extends CollectionImpl implements Array {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -110,6 +118,7 @@ public class ArrayImpl extends CollectionImpl implements Array {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -124,6 +133,7 @@ public class ArrayImpl extends CollectionImpl implements Array {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -137,6 +147,7 @@ public class ArrayImpl extends CollectionImpl implements Array {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

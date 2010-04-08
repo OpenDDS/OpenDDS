@@ -14,30 +14,32 @@ import org.eclipse.emf.common.util.EList;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Subscriber</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.Subscriber#getReaders <em>Readers</em>}</li>
+ * <li>{@link OpenDDS.Subscriber#getReaders <em>Readers</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getSubscriber()
  * @model
  * @generated
  */
 public interface Subscriber extends PublisherSubscriber {
     /**
-     * Returns the value of the '<em><b>Readers</b></em>' containment reference list.
-     * The list contents are of type {@link OpenDDS.DataReader}.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Readers</b></em>' containment
+     * reference list. The list contents are of type
+     * {@link OpenDDS.DataReader}. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Readers</em>' containment reference
      * list isn't clear, there really should be more of a description
      * here...
      * </p>
      * <!-- end-user-doc -->
-     * @return the value of the '<em>Readers</em>' containment reference list.
+     * 
+     * @return the value of the '<em>Readers</em>' containment
+     *         reference list.
      * @see OpenDDS.OpenDDSPackage#getSubscriber_Readers()
      * @model containment="true" required="true"
      * @generated

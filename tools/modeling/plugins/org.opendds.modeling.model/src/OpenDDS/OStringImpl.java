@@ -16,12 +16,13 @@ import org.eclipse.emf.ecore.EClass;
  * <em><b>OString</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
- *
+ * 
  * @generated
  */
 public class OStringImpl extends SimpleImpl implements OString {
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected OStringImpl() {
@@ -30,6 +31,7 @@ public class OStringImpl extends SimpleImpl implements OString {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

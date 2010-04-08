@@ -12,29 +12,29 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>History Qos Policy</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.HistoryQosPolicy#getDepth <em>Depth</em>}</li>
- *   <li>{@link OpenDDS.HistoryQosPolicy#getKind <em>Kind</em>}</li>
+ * <li>{@link OpenDDS.HistoryQosPolicy#getDepth <em>Depth</em>}</li>
+ * <li>{@link OpenDDS.HistoryQosPolicy#getKind <em>Kind</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getHistoryQosPolicy()
  * @model
  * @generated
  */
 public interface HistoryQosPolicy extends QosPolicy {
     /**
-     * Returns the value of the '<em><b>Depth</b></em>' attribute.
-     * The default value is <code>"1"</code>.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Depth</b></em>' attribute. The
+     * default value is <code>"1"</code>. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Depth</em>' attribute isn't clear,
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Depth</em>' attribute.
      * @see #setDepth(long)
      * @see OpenDDS.OpenDDSPackage#getHistoryQosPolicy_Depth()
@@ -44,9 +44,12 @@ public interface HistoryQosPolicy extends QosPolicy {
     long getDepth();
 
     /**
-     * Sets the value of the '{@link OpenDDS.HistoryQosPolicy#getDepth <em>Depth</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
-     * @param value the new value of the '<em>Depth</em>' attribute.
+     * Sets the value of the '
+     * {@link OpenDDS.HistoryQosPolicy#getDepth <em>Depth</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @param value
+     *            the new value of the '<em>Depth</em>' attribute.
      * @see #getDepth()
      * @generated
      */
@@ -62,7 +65,7 @@ public interface HistoryQosPolicy extends QosPolicy {
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @return the value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.HistoryQosPolicyKind
      * @see #setKind(HistoryQosPolicyKind)
@@ -73,10 +76,12 @@ public interface HistoryQosPolicy extends QosPolicy {
     HistoryQosPolicyKind getKind();
 
     /**
-     * Sets the value of the '{@link OpenDDS.HistoryQosPolicy#getKind <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.HistoryQosPolicy#getKind
+     * <em>Kind</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Kind</em>' attribute.
+     * 
+     * @param value
+     *            the new value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.HistoryQosPolicyKind
      * @see #getKind()
      * @generated

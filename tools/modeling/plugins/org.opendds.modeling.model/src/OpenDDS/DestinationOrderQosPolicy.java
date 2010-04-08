@@ -13,7 +13,7 @@ package OpenDDS;
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Destination Order Qos Policy</b></em>'. <!-- end-user-doc
  * -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
@@ -21,7 +21,7 @@ package OpenDDS;
  * </li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getDestinationOrderQosPolicy()
  * @model
  * @generated
@@ -38,7 +38,7 @@ public interface DestinationOrderQosPolicy extends QosPolicy {
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @return the value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.DestinationOrderQosPolicyKind
      * @see #setKind(DestinationOrderQosPolicyKind)
@@ -49,9 +49,12 @@ public interface DestinationOrderQosPolicy extends QosPolicy {
     DestinationOrderQosPolicyKind getKind();
 
     /**
-     * Sets the value of the '{@link OpenDDS.DestinationOrderQosPolicy#getKind <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
-     * @param value the new value of the '<em>Kind</em>' attribute.
+     * Sets the value of the '
+     * {@link OpenDDS.DestinationOrderQosPolicy#getKind <em>Kind</em>}
+     * ' attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @param value
+     *            the new value of the '<em>Kind</em>' attribute.
      * @see OpenDDS.DestinationOrderQosPolicyKind
      * @see #getKind()
      * @generated

@@ -19,6 +19,7 @@ import org.eclipse.emf.common.util.Enumerator;
  * <!-- begin-user-doc --> A representation of the literals of the
  * enumeration '<em><b>Component Type</b></em>', and utility methods
  * for working with them. <!-- end-user-doc -->
+ * 
  * @see OpenDDS.OpenDDSPackage#getComponentType()
  * @model
  * @generated
@@ -27,7 +28,7 @@ public enum ComponentType implements Enumerator {
     /**
      * The '<em><b>EXECUTABLE</b></em>' literal object. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #EXECUTABLE_VALUE
      * @generated
      * @ordered
@@ -37,7 +38,7 @@ public enum ComponentType implements Enumerator {
     /**
      * The '<em><b>SHARED LIBRARY</b></em>' literal object. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #SHARED_LIBRARY_VALUE
      * @generated
      * @ordered
@@ -47,7 +48,7 @@ public enum ComponentType implements Enumerator {
     /**
      * The '<em><b>STATIC LIBRARY</b></em>' literal object. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #STATIC_LIBRARY_VALUE
      * @generated
      * @ordered
@@ -63,7 +64,7 @@ public enum ComponentType implements Enumerator {
      * here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #EXECUTABLE
      * @model
      * @generated
@@ -80,7 +81,7 @@ public enum ComponentType implements Enumerator {
      * description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #SHARED_LIBRARY
      * @model
      * @generated
@@ -97,7 +98,7 @@ public enum ComponentType implements Enumerator {
      * description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #STATIC_LIBRARY
      * @model
      * @generated
@@ -106,8 +107,9 @@ public enum ComponentType implements Enumerator {
     public static final int STATIC_LIBRARY_VALUE = 2;
 
     /**
-     * An array of all the '<em><b>Component Type</b></em>' enumerators.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * An array of all the '<em><b>Component Type</b></em>'
+     * enumerators. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private static final ComponentType[] VALUES_ARRAY = new ComponentType[] { EXECUTABLE, SHARED_LIBRARY,
@@ -117,15 +119,16 @@ public enum ComponentType implements Enumerator {
      * A public read-only list of all the '
      * <em><b>Component Type</b></em>' enumerators. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @generated
      */
     public static final List<ComponentType> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
 
     /**
-     * Returns the '<em><b>Component Type</b></em>' literal with the specified literal value.
-     * <!-- begin-user-doc --> <!--
+     * Returns the '<em><b>Component Type</b></em>' literal with the
+     * specified literal value. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @generated
      */
     public static ComponentType get(String literal) {
@@ -139,8 +142,9 @@ public enum ComponentType implements Enumerator {
     }
 
     /**
-     * Returns the '<em><b>Component Type</b></em>' literal with the specified name.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * Returns the '<em><b>Component Type</b></em>' literal with the
+     * specified name. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public static ComponentType getByName(String name) {
@@ -154,9 +158,10 @@ public enum ComponentType implements Enumerator {
     }
 
     /**
-     * Returns the '<em><b>Component Type</b></em>' literal with the specified integer value.
-     * <!-- begin-user-doc --> <!--
+     * Returns the '<em><b>Component Type</b></em>' literal with the
+     * specified integer value. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @generated
      */
     public static ComponentType get(int value) {
@@ -173,26 +178,29 @@ public enum ComponentType implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private final int value;
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private final String name;
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private final String literal;
 
     /**
-     * Only this class can construct instances.
-     * <!-- begin-user-doc
+     * Only this class can construct instances. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private ComponentType(int value, String name, String literal) {
@@ -203,6 +211,7 @@ public enum ComponentType implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public int getValue() {
@@ -211,6 +220,7 @@ public enum ComponentType implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String getName() {
@@ -219,6 +229,7 @@ public enum ComponentType implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String getLiteral() {
@@ -226,9 +237,10 @@ public enum ComponentType implements Enumerator {
     }
 
     /**
-     * Returns the literal value of the enumerator, which is its string representation.
-     * <!-- begin-user-doc --> <!--
+     * Returns the literal value of the enumerator, which is its
+     * string representation. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @generated
      */
     @Override

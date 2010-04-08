@@ -20,21 +20,27 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.PublisherSubscriberImpl#getEntity_factory <em>Entity factory</em>}</li>
- *   <li>{@link OpenDDS.PublisherSubscriberImpl#getPresentation <em>Presentation</em>}</li>
- *   <li>{@link OpenDDS.PublisherSubscriberImpl#getGroup_data <em>Group data</em>}</li>
- *   <li>{@link OpenDDS.PublisherSubscriberImpl#getPartition <em>Partition</em>}</li>
- *   <li>{@link OpenDDS.PublisherSubscriberImpl#getTransport <em>Transport</em>}</li>
+ * <li>{@link OpenDDS.PublisherSubscriberImpl#getEntity_factory <em>
+ * Entity factory</em>}</li>
+ * <li>{@link OpenDDS.PublisherSubscriberImpl#getPresentation <em>
+ * Presentation</em>}</li>
+ * <li>{@link OpenDDS.PublisherSubscriberImpl#getGroup_data <em>Group
+ * data</em>}</li>
+ * <li>{@link OpenDDS.PublisherSubscriberImpl#getPartition <em>
+ * Partition</em>}</li>
+ * <li>{@link OpenDDS.PublisherSubscriberImpl#getTransport <em>
+ * Transport</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public abstract class PublisherSubscriberImpl extends DomainEntityImpl implements PublisherSubscriber {
     /**
-     * The cached value of the '{@link #getEntity_factory() <em>Entity factory</em>}' reference.
-     * <!-- begin-user-doc -->
+     * The cached value of the '{@link #getEntity_factory()
+     * <em>Entity factory</em>}' reference. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #getEntity_factory()
      * @generated
      * @ordered
@@ -42,9 +48,10 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     protected EntityFactoryQosPolicy entity_factory;
 
     /**
-     * The cached value of the '{@link #getPresentation() <em>Presentation</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getPresentation()
+     * <em>Presentation</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getPresentation()
      * @generated
      * @ordered
@@ -52,9 +59,10 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     protected PresentationQosPolicy presentation;
 
     /**
-     * The cached value of the '{@link #getGroup_data() <em>Group data</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getGroup_data()
+     * <em>Group data</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getGroup_data()
      * @generated
      * @ordered
@@ -62,9 +70,10 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     protected GroupDataQosPolicy group_data;
 
     /**
-     * The cached value of the '{@link #getPartition() <em>Partition</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getPartition()
+     * <em>Partition</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getPartition()
      * @generated
      * @ordered
@@ -72,9 +81,10 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
     protected PartitionQosPolicy partition;
 
     /**
-     * The cached value of the '{@link #getTransport() <em>Transport</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getTransport()
+     * <em>Transport</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getTransport()
      * @generated
      * @ordered
@@ -83,6 +93,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected PublisherSubscriberImpl() {
@@ -91,6 +102,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -100,6 +112,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public EntityFactoryQosPolicy getEntity_factory() {
@@ -118,6 +131,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public EntityFactoryQosPolicy basicGetEntity_factory() {
@@ -126,6 +140,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setEntity_factory(EntityFactoryQosPolicy newEntity_factory) {
@@ -139,6 +154,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public PresentationQosPolicy getPresentation() {
@@ -157,6 +173,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public PresentationQosPolicy basicGetPresentation() {
@@ -165,6 +182,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setPresentation(PresentationQosPolicy newPresentation) {
@@ -178,6 +196,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public GroupDataQosPolicy getGroup_data() {
@@ -196,6 +215,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public GroupDataQosPolicy basicGetGroup_data() {
@@ -204,6 +224,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setGroup_data(GroupDataQosPolicy newGroup_data) {
@@ -217,6 +238,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public PartitionQosPolicy getPartition() {
@@ -235,6 +257,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public PartitionQosPolicy basicGetPartition() {
@@ -243,6 +266,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setPartition(PartitionQosPolicy newPartition) {
@@ -256,6 +280,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Transport getTransport() {
@@ -274,6 +299,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Transport basicGetTransport() {
@@ -282,6 +308,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setTransport(Transport newTransport) {
@@ -295,6 +322,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -331,6 +359,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -357,6 +386,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -383,6 +413,7 @@ public abstract class PublisherSubscriberImpl extends DomainEntityImpl implement
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

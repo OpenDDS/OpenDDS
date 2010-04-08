@@ -19,16 +19,17 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.UserDataQosPolicyImpl#getValue <em>Value</em>}</li>
+ * <li>{@link OpenDDS.UserDataQosPolicyImpl#getValue <em>Value</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosPolicy {
     /**
-     * The default value of the '{@link #getValue() <em>Value</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The default value of the '{@link #getValue() <em>Value</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getValue()
      * @generated
      * @ordered
@@ -36,8 +37,9 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
     protected static final String VALUE_EDEFAULT = null;
 
     /**
-     * The cached value of the '{@link #getValue() <em>Value</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The cached value of the '{@link #getValue() <em>Value</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getValue()
      * @generated
      * @ordered
@@ -46,6 +48,7 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected UserDataQosPolicyImpl() {
@@ -54,6 +57,7 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -63,6 +67,7 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String getValue() {
@@ -71,6 +76,7 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setValue(String newValue) {
@@ -84,6 +90,7 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -97,6 +104,7 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -111,6 +119,7 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -125,6 +134,7 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -138,6 +148,7 @@ public class UserDataQosPolicyImpl extends QosPolicyImpl implements UserDataQosP
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

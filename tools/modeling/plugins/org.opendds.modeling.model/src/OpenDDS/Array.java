@@ -12,14 +12,14 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Array</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.Array#getLength <em>Length</em>}</li>
+ * <li>{@link OpenDDS.Array#getLength <em>Length</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getArray()
  * @model
  * @generated
@@ -33,6 +33,7 @@ public interface Array extends Collection {
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Length</em>' attribute.
      * @see #setLength(long)
      * @see OpenDDS.OpenDDSPackage#getArray_Length()
@@ -42,10 +43,12 @@ public interface Array extends Collection {
     long getLength();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Array#getLength <em>Length</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.Array#getLength
+     * <em>Length</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Length</em>' attribute.
+     * 
+     * @param value
+     *            the new value of the '<em>Length</em>' attribute.
      * @see #getLength()
      * @generated
      */
