@@ -30,4 +30,9 @@ public class OpenDDSResourceImpl extends XMIResourceImpl {
         super(uri);
     }
 
+    @Override
+    protected boolean useUUIDs() {
+        return true;
+    }
+
 } // OpenDDSResourceImpl
