@@ -1,3 +1,9 @@
+Thu Apr  8 19:17:27 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/reduce-latency-data.pl:
+
+          Added plot data for quantile charts to the output data.
+
 Tue Apr 06 18:45:55 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * bin/PerlDDS/Cross_Sync_Common.pm:
