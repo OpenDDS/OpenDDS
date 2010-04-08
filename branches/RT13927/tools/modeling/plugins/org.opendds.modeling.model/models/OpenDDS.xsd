@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <xsd:schema xmlns:opendds="http://www.opendds.org/schemas/modeling/OpenDDS" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.opendds.org/schemas/modeling/OpenDDS">
   <xsd:import namespace="http://www.omg.org/XMI" schemaLocation="platform:/plugin/org.eclipse.emf.ecore/model/XMI.xsd"/>
+  <xsd:simpleType name="CollectionType">
+    <xsd:restriction base="xsd:NCName">
+      <xsd:enumeration value="BOOLEAN"/>
+      <xsd:enumeration value="CHAR"/>
+      <xsd:enumeration value="DOUBLE"/>
+      <xsd:enumeration value="FLOAT"/>
+      <xsd:enumeration value="LONG"/>
+      <xsd:enumeration value="LONGLONG"/>
+      <xsd:enumeration value="OCTET"/>
+      <xsd:enumeration value="STRING"/>
+      <xsd:enumeration value="UNSIGNED_LONG"/>
+      <xsd:enumeration value="UNSIGNED_LONGLONG"/>
+      <xsd:enumeration value="UNSIGNED_SHORT"/>
+    </xsd:restriction>
+  </xsd:simpleType>
   <xsd:simpleType name="DestinationOrderQosPolicyKind">
     <xsd:restriction base="xsd:NCName">
       <xsd:enumeration value="BY_RECEPTION_TIMESTAMP"/>
@@ -150,7 +165,7 @@
     <xsd:complexContent>
       <xsd:extension base="opendds:DomainEntity">
         <xsd:choice maxOccurs="unbounded" minOccurs="0">
-          <xsd:element name="type" type="opendds:TopicField"/>
+          <xsd:element name="type" type="opendds:TopicStruct"/>
         </xsd:choice>
         <xsd:attribute name="type" type="xsd:string"/>
       </xsd:extension>
@@ -192,10 +207,7 @@
   <xsd:complexType abstract="true" name="Collection">
     <xsd:complexContent>
       <xsd:extension base="opendds:TopicField">
-        <xsd:choice maxOccurs="unbounded" minOccurs="0">
-          <xsd:element name="type" type="opendds:TopicField"/>
-        </xsd:choice>
-        <xsd:attribute name="type" type="xsd:string"/>
+        <xsd:attribute name="type" type="opendds:CollectionType" use="required"/>
       </xsd:extension>
     </xsd:complexContent>
   </xsd:complexType>
@@ -318,19 +330,15 @@
   </xsd:complexType>
   <xsd:element name="Typedef" type="opendds:Typedef"/>
   <xsd:complexType name="OULong">
-    <xsd:choice maxOccurs="unbounded" minOccurs="0">
-      <xsd:element ref="xmi:Extension"/>
-    </xsd:choice>
-    <xsd:attribute ref="xmi:id"/>
-    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:complexContent>
+      <xsd:extension base="opendds:Simple"/>
+    </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="OULong" type="opendds:OULong"/>
   <xsd:complexType name="OULongLong">
-    <xsd:choice maxOccurs="unbounded" minOccurs="0">
-      <xsd:element ref="xmi:Extension"/>
-    </xsd:choice>
-    <xsd:attribute ref="xmi:id"/>
-    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:complexContent>
+      <xsd:extension base="opendds:Simple"/>
+    </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="OULongLong" type="opendds:OULongLong"/>
   <xsd:complexType name="Union">
@@ -347,11 +355,9 @@
   </xsd:complexType>
   <xsd:element name="Union" type="opendds:Union"/>
   <xsd:complexType name="OUShort">
-    <xsd:choice maxOccurs="unbounded" minOccurs="0">
-      <xsd:element ref="xmi:Extension"/>
-    </xsd:choice>
-    <xsd:attribute ref="xmi:id"/>
-    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:complexContent>
+      <xsd:extension base="opendds:Simple"/>
+    </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="OUShort" type="opendds:OUShort"/>
   <xsd:complexType name="DataReader">
@@ -706,7 +712,6 @@
         <xsd:attribute name="component_type" type="opendds:ComponentType" use="required"/>
         <xsd:attribute name="language" type="opendds:LanguageType" use="required"/>
         <xsd:attribute name="platform" type="opendds:PlatformType" use="required"/>
-        <xsd:attribute name="service_arguments" type="xsd:string"/>
         <xsd:attribute name="participants" type="xsd:string"/>
       </xsd:extension>
     </xsd:complexContent>
@@ -721,20 +726,20 @@
   </xsd:complexType>
   <xsd:element name="Transport" type="opendds:Transport"/>
   <xsd:complexType name="Model">
-    <xsd:choice maxOccurs="unbounded" minOccurs="0">
-      <xsd:element name="entities" type="opendds:ModelEntity"/>
-      <xsd:element ref="xmi:Extension"/>
-    </xsd:choice>
-    <xsd:attribute ref="xmi:id"/>
-    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:complexContent>
+      <xsd:extension base="opendds:Entity">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="applications" type="opendds:ApplicationTarget"/>
+          <xsd:element name="domains" type="opendds:Domain"/>
+          <xsd:element name="participants" type="opendds:DomainParticipant"/>
+          <xsd:element name="topics" type="opendds:TopicDescription"/>
+          <xsd:element name="topicTypes" type="opendds:TopicStruct"/>
+          <xsd:element name="qosPolicies" type="opendds:QosPolicy"/>
+          <xsd:element name="transports" type="opendds:Transport"/>
+        </xsd:choice>
+        <xsd:attribute name="domains" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="Model" type="opendds:Model"/>
-  <xsd:complexType abstract="true" name="ModelEntity">
-    <xsd:choice maxOccurs="unbounded" minOccurs="0">
-      <xsd:element ref="xmi:Extension"/>
-    </xsd:choice>
-    <xsd:attribute ref="xmi:id"/>
-    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
-  </xsd:complexType>
-  <xsd:element name="ModelEntity" type="opendds:ModelEntity"/>
 </xsd:schema>

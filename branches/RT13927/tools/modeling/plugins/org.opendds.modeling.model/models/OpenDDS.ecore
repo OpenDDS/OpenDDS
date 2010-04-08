@@ -30,8 +30,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="deadline" eType="#//DeadlineQosPolicy"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="latency_budget" eType="#//LatencyBudgetQosPolicy"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="TopicDescription" abstract="true" eSuperTypes="#//DomainEntity #//ModelEntity">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="type" lowerBound="1" eType="#//TopicField"/>
+  <eClassifiers xsi:type="ecore:EClass" name="TopicDescription" abstract="true" eSuperTypes="#//DomainEntity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" lowerBound="1" eType="#//TopicStruct"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Array" eSuperTypes="#//Collection">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="length" lowerBound="1"
@@ -44,7 +44,20 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OChar" eSuperTypes="#//Simple"/>
   <eClassifiers xsi:type="ecore:EClass" name="Collection" abstract="true" eSuperTypes="#//TopicField">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="type" lowerBound="1" eType="#//TopicField"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" lowerBound="1" eType="#//CollectionType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="CollectionType">
+    <eLiterals name="BOOLEAN"/>
+    <eLiterals name="CHAR" value="1"/>
+    <eLiterals name="DOUBLE" value="2"/>
+    <eLiterals name="FLOAT" value="3"/>
+    <eLiterals name="LONG" value="4"/>
+    <eLiterals name="LONGLONG" value="5"/>
+    <eLiterals name="OCTET" value="6"/>
+    <eLiterals name="STRING" value="7"/>
+    <eLiterals name="UNSIGNED_LONG" value="8"/>
+    <eLiterals name="UNSIGNED_LONGLONG" value="9"/>
+    <eLiterals name="UNSIGNED_SHORT" value="10"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ConstructedTopicType" abstract="true"
       eSuperTypes="#//TopicField"/>
@@ -65,7 +78,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="OShort" eSuperTypes="#//Simple"/>
   <eClassifiers xsi:type="ecore:EClass" name="Simple" abstract="true" eSuperTypes="#//TopicField #//KeyField"/>
   <eClassifiers xsi:type="ecore:EClass" name="OString" eSuperTypes="#//Simple"/>
-  <eClassifiers xsi:type="ecore:EClass" name="TopicStruct" eSuperTypes="#//ConstructedTopicType #//ModelEntity">
+  <eClassifiers xsi:type="ecore:EClass" name="TopicStruct" eSuperTypes="#//ConstructedTopicType">
     <eStructuralFeatures xsi:type="ecore:EReference" name="members" lowerBound="1"
         upperBound="-1" eType="#//TopicField" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="keys" upperBound="-1" eType="#//Key"
@@ -77,14 +90,14 @@
   <eClassifiers xsi:type="ecore:EClass" name="Typedef" eSuperTypes="#//TopicField">
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//TopicField"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="OULong"/>
-  <eClassifiers xsi:type="ecore:EClass" name="OULongLong"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OULong" eSuperTypes="#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OULongLong" eSuperTypes="#//Simple"/>
   <eClassifiers xsi:type="ecore:EClass" name="Union" eSuperTypes="#//ConstructedTopicType">
     <eStructuralFeatures xsi:type="ecore:EReference" name="switch" lowerBound="1"
         eType="#//TopicField"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="cases" lowerBound="1" eType="#//Case"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="OUShort"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OUShort" eSuperTypes="#//Simple"/>
   <eClassifiers xsi:type="ecore:EClass" name="DataReader" eSuperTypes="#//DataReaderWriter">
     <eStructuralFeatures xsi:type="ecore:EReference" name="topic" lowerBound="1" eType="#//TopicDescription"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="reader_data_lifecycle"
@@ -110,8 +123,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="writer_data_lifecycle"
         eType="#//WriterDataLifecycleQosPolicy"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Domain" eSuperTypes="#//NamedEntity #//ModelEntity"/>
-  <eClassifiers xsi:type="ecore:EClass" name="DomainParticipant" eSuperTypes="#//DomainEntity #//ModelEntity">
+  <eClassifiers xsi:type="ecore:EClass" name="Domain" eSuperTypes="#//NamedEntity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DomainParticipant" eSuperTypes="#//DomainEntity">
     <eStructuralFeatures xsi:type="ecore:EReference" name="subscribers" upperBound="-1"
         eType="#//Subscriber" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="publishers" upperBound="-1"
@@ -210,7 +223,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="ordered_access" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
         defaultValueLiteral="false"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="QosPolicy" abstract="true" eSuperTypes="#//Specification #//ModelEntity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="QosPolicy" abstract="true" eSuperTypes="#//Specification"/>
   <eClassifiers xsi:type="ecore:EClass" name="ReaderDataLifecycleQosPolicy" eSuperTypes="#//QosPolicy">
     <eStructuralFeatures xsi:type="ecore:EReference" name="autopurge_nowriter_samples_delay"
         eType="#//Period" containment="true"/>
@@ -285,7 +298,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="autodispose_unregistered_instances"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean" defaultValueLiteral="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ApplicationTarget" eSuperTypes="#//Entity #//ModelEntity">
+  <eClassifiers xsi:type="ecore:EClass" name="ApplicationTarget" eSuperTypes="#//Entity">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="component_type" lowerBound="1"
         eType="#//ComponentType"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="language" lowerBound="1"
@@ -294,7 +307,6 @@
         eType="#//PlatformType"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="participants" lowerBound="1"
         upperBound="-1" eType="#//DomainParticipant"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="service_arguments" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="ComponentType">
     <eLiterals name="EXECUTABLE"/>
@@ -312,13 +324,24 @@
     <eLiterals name="MPC_VC8" value="4"/>
     <eLiterals name="MPC_VC9" value="5"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Transport" eSuperTypes="#//Entity #//ModelEntity">
+  <eClassifiers xsi:type="ecore:EClass" name="Transport" eSuperTypes="#//Entity">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="transport_id" lowerBound="1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Model">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="entities" upperBound="-1"
-        eType="#//ModelEntity" containment="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Model" eSuperTypes="#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="applications" upperBound="-1"
+        eType="#//ApplicationTarget" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="domains" upperBound="-1"
+        eType="#//Domain"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="participants" upperBound="-1"
+        eType="#//DomainParticipant" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="topics" upperBound="-1"
+        eType="#//TopicDescription" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="topicTypes" upperBound="-1"
+        eType="#//TopicStruct" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="qosPolicies" upperBound="-1"
+        eType="#//QosPolicy" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="transports" upperBound="-1"
+        eType="#//Transport" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ModelEntity" abstract="true"/>
 </ecore:EPackage>

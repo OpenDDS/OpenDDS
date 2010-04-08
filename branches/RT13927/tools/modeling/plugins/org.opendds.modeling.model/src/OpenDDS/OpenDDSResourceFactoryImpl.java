@@ -9,9 +9,12 @@
 
 package OpenDDS;
 
+import java.util.Map;
+
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl;
+import org.eclipse.emf.ecore.xmi.XMIResource;
 
 /**
  * <!-- begin-user-doc --> The <b>Resource Factory</b> associated with
@@ -32,14 +35,20 @@ public class OpenDDSResourceFactoryImpl extends ResourceFactoryImpl {
 
     /**
      * Creates an instance of the resource.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
+     *
+     * @generated NOT
      */
     @Override
     public Resource createResource(URI uri) {
-        Resource result = new OpenDDSResourceImpl(uri);
-        return result;
+        XMIResource resource = new OpenDDSResourceImpl(uri);
+
+        Map<Object, Object> saveOptions = resource.getDefaultSaveOptions();
+
+        saveOptions.put(OpenDDSResourceImpl.OPTION_ENCODING, "UTF-8");
+        saveOptions.put(OpenDDSResourceImpl.OPTION_KEEP_DEFAULT_CONTENT, true);
+        saveOptions.put(OpenDDSResourceImpl.OPTION_USE_XMI_TYPE, true);
+                
+        return resource;
     }
 
 } // OpenDDSResourceFactoryImpl

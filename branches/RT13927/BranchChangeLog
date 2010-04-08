@@ -1,3 +1,12 @@
+Thu Apr  8 17:48:54 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/models/OpenDDS.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.model/models/OpenDDS.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/OpenDDS/OpenDDSResourceFactoryImpl.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/OpenDDS/OpenDDSResourceImpl.java:
+
+          Updated serialization options; fixed nits in domain model.
+
 Wed Apr  7 18:23:22 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.edit/icons/full/obj16/Model.gif:
