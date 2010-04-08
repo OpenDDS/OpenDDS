@@ -183,6 +183,28 @@ END {
   print "#     Minimum: " . sprintf( "%5.2e", $data->{minjitter}) . "\n";
   print "#\n";
   &bin( $data->{jitter}, 0, 100);
+
+  # Quantile data goes at the end.
+  # TODO: This could be rolled up into the processing above to reduce the
+  #       total number of data sorts done.
+  my @latencyQuantile = sort { $a <=> $b; } @{$data->{latency}};
+  my @jitterQuantile  = sort { $a <=> $b; } @{$data->{jitter}};
+
+  print "\n\n";
+  print "#\n";
+  print "# Index 3 - Latency Quantile data.\n";
+  print "#\n";
+  foreach my $datum (@latencyQuantile) {
+    print "$datum\n";
+  }
+
+  print "\n\n";
+  print "#\n";
+  print "# Index 4 - Jitter Quantile data.\n";
+  print "#\n";
+  foreach my $datum (@jitterQuantile) {
+    print "$datum\n";
+  }
 }
 
 # Bin data into histogram format.
