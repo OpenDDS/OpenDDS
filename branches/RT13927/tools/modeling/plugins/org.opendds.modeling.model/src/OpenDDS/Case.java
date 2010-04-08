@@ -9,23 +9,25 @@
 
 package OpenDDS;
 
+import org.eclipse.emf.ecore.EObject;
+
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Case</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.Case#getLabels <em>Labels</em>}</li>
- *   <li>{@link OpenDDS.Case#getType <em>Type</em>}</li>
+ * <li>{@link OpenDDS.Case#getLabels <em>Labels</em>}</li>
+ * <li>{@link OpenDDS.Case#getType <em>Type</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getCase()
  * @model
  * @generated
  */
-public interface Case extends TopicField {
+public interface Case extends EObject {
     /**
      * Returns the value of the '<em><b>Labels</b></em>' attribute.
      * <!-- begin-user-doc -->
@@ -34,6 +36,7 @@ public interface Case extends TopicField {
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Labels</em>' attribute.
      * @see #setLabels(String)
      * @see OpenDDS.OpenDDSPackage#getCase_Labels()
@@ -43,10 +46,12 @@ public interface Case extends TopicField {
     String getLabels();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Case#getLabels <em>Labels</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.Case#getLabels
+     * <em>Labels</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Labels</em>' attribute.
+     * 
+     * @param value
+     *            the new value of the '<em>Labels</em>' attribute.
      * @see #getLabels()
      * @generated
      */
@@ -60,23 +65,26 @@ public interface Case extends TopicField {
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @return the value of the '<em>Type</em>' reference.
      * @see #setType(TopicField)
      * @see OpenDDS.OpenDDSPackage#getCase_Type()
      * @model required="true"
      * @generated
      */
-    TopicField getType();
+    SimpleType getType();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Case#getType <em>Type</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.Case#getType
+     * <em>Type</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Type</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Type</em>' attribute.
+     * @see OpenDDS.SimpleType
      * @see #getType()
      * @generated
      */
-    void setType(TopicField value);
+    void setType(SimpleType value);
 
 } // Case

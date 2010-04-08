@@ -20,10 +20,12 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.WriterDataLifecycleQosPolicyImpl#isAutodispose_unregistered_instances <em>Autodispose unregistered instances</em>}</li>
+ * <li>
+ * {@link OpenDDS.WriterDataLifecycleQosPolicyImpl#isAutodispose_unregistered_instances
+ * <em>Autodispose unregistered instances</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class WriterDataLifecycleQosPolicyImpl extends QosPolicyImpl implements WriterDataLifecycleQosPolicy {
@@ -32,7 +34,7 @@ public class WriterDataLifecycleQosPolicyImpl extends QosPolicyImpl implements W
      * {@link #isAutodispose_unregistered_instances()
      * <em>Autodispose unregistered instances</em>}' attribute. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #isAutodispose_unregistered_instances()
      * @generated
      * @ordered
@@ -44,7 +46,7 @@ public class WriterDataLifecycleQosPolicyImpl extends QosPolicyImpl implements W
      * {@link #isAutodispose_unregistered_instances()
      * <em>Autodispose unregistered instances</em>}' attribute. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #isAutodispose_unregistered_instances()
      * @generated
      * @ordered
@@ -53,6 +55,7 @@ public class WriterDataLifecycleQosPolicyImpl extends QosPolicyImpl implements W
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected WriterDataLifecycleQosPolicyImpl() {
@@ -61,6 +64,7 @@ public class WriterDataLifecycleQosPolicyImpl extends QosPolicyImpl implements W
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -70,6 +74,7 @@ public class WriterDataLifecycleQosPolicyImpl extends QosPolicyImpl implements W
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public boolean isAutodispose_unregistered_instances() {
@@ -78,6 +83,7 @@ public class WriterDataLifecycleQosPolicyImpl extends QosPolicyImpl implements W
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setAutodispose_unregistered_instances(boolean newAutodispose_unregistered_instances) {
@@ -92,6 +98,7 @@ public class WriterDataLifecycleQosPolicyImpl extends QosPolicyImpl implements W
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -105,6 +112,7 @@ public class WriterDataLifecycleQosPolicyImpl extends QosPolicyImpl implements W
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -119,6 +127,7 @@ public class WriterDataLifecycleQosPolicyImpl extends QosPolicyImpl implements W
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -133,6 +142,7 @@ public class WriterDataLifecycleQosPolicyImpl extends QosPolicyImpl implements W
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -146,6 +156,7 @@ public class WriterDataLifecycleQosPolicyImpl extends QosPolicyImpl implements W
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

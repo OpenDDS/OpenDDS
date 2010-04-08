@@ -16,12 +16,13 @@ import org.eclipse.emf.ecore.EClass;
  * <em><b>OLong Long</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
- *
+ * 
  * @generated
  */
 public class OLongLongImpl extends SimpleImpl implements OLongLong {
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected OLongLongImpl() {
@@ -30,6 +31,7 @@ public class OLongLongImpl extends SimpleImpl implements OLongLong {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

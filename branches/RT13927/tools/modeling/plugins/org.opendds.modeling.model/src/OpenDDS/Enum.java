@@ -12,14 +12,14 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Enum</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.Enum#getLabels <em>Labels</em>}</li>
+ * <li>{@link OpenDDS.Enum#getLabels <em>Labels</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getEnum()
  * @model
  * @generated
@@ -33,6 +33,7 @@ public interface Enum extends TopicField {
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Labels</em>' attribute.
      * @see #setLabels(String)
      * @see OpenDDS.OpenDDSPackage#getEnum_Labels()
@@ -42,10 +43,12 @@ public interface Enum extends TopicField {
     String getLabels();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Enum#getLabels <em>Labels</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.Enum#getLabels
+     * <em>Labels</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Labels</em>' attribute.
+     * 
+     * @param value
+     *            the new value of the '<em>Labels</em>' attribute.
      * @see #getLabels()
      * @generated
      */

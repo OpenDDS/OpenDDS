@@ -15,22 +15,25 @@ import org.eclipse.emf.ecore.EFactory;
  * <!-- begin-user-doc --> The <b>Factory</b> for the model. It
  * provides a create method for each non-abstract class of the model.
  * <!-- end-user-doc -->
+ * 
  * @see OpenDDS.OpenDDSPackage
  * @generated
  */
 public interface OpenDDSFactory extends EFactory {
     /**
-     * The singleton instance of the factory.
-     * <!-- begin-user-doc -->
+     * The singleton instance of the factory. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @generated
      */
     OpenDDSFactory eINSTANCE = OpenDDS.OpenDDSFactoryImpl.init();
 
     /**
-     * Returns a new object of class '<em>Content Filtered Topic</em>'.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
-     * @return a new object of class '<em>Content Filtered Topic</em>'.
+     * Returns a new object of class '<em>Content Filtered Topic</em>
+     * '. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @return a new object of class '<em>Content Filtered Topic</em>
+     *         '.
      * @generated
      */
     ContentFilteredTopic createContentFilteredTopic();
@@ -38,7 +41,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Multi Topic</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Multi Topic</em>'.
      * @generated
      */
@@ -47,7 +50,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Topic</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Topic</em>'.
      * @generated
      */
@@ -56,7 +59,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Array</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Array</em>'.
      * @generated
      */
@@ -65,7 +68,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>OBoolean</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>OBoolean</em>'.
      * @generated
      */
@@ -74,7 +77,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Case</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Case</em>'.
      * @generated
      */
@@ -83,7 +86,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>OChar</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>OChar</em>'.
      * @generated
      */
@@ -92,7 +95,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>ODouble</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>ODouble</em>'.
      * @generated
      */
@@ -101,7 +104,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Enum</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Enum</em>'.
      * @generated
      */
@@ -110,7 +113,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>OFloat</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>OFloat</em>'.
      * @generated
      */
@@ -119,7 +122,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Key</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Key</em>'.
      * @generated
      */
@@ -128,7 +131,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Key Field</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Key Field</em>'.
      * @generated
      */
@@ -137,7 +140,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>OLong</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>OLong</em>'.
      * @generated
      */
@@ -146,7 +149,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>OLong Long</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>OLong Long</em>'.
      * @generated
      */
@@ -155,7 +158,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>OOctet</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>OOctet</em>'.
      * @generated
      */
@@ -164,7 +167,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Sequence</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Sequence</em>'.
      * @generated
      */
@@ -173,7 +176,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>OShort</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>OShort</em>'.
      * @generated
      */
@@ -182,7 +185,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>OString</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>OString</em>'.
      * @generated
      */
@@ -191,25 +194,16 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Topic Struct</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Topic Struct</em>'.
      * @generated
      */
     TopicStruct createTopicStruct();
 
     /**
-     * Returns a new object of class '<em>Typedef</em>'. <!--
-     * begin-user-doc --> <!-- end-user-doc -->
-     *
-     * @return a new object of class '<em>Typedef</em>'.
-     * @generated
-     */
-    Typedef createTypedef();
-
-    /**
      * Returns a new object of class '<em>OU Long</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>OU Long</em>'.
      * @generated
      */
@@ -218,7 +212,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>OU Long Long</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>OU Long Long</em>'.
      * @generated
      */
@@ -227,7 +221,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Union</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Union</em>'.
      * @generated
      */
@@ -236,7 +230,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>OU Short</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>OU Short</em>'.
      * @generated
      */
@@ -245,7 +239,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Data Reader</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Data Reader</em>'.
      * @generated
      */
@@ -254,7 +248,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Data Writer</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Data Writer</em>'.
      * @generated
      */
@@ -263,7 +257,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Domain</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Domain</em>'.
      * @generated
      */
@@ -272,6 +266,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Domain Participant</em>'.
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @return a new object of class '<em>Domain Participant</em>'.
      * @generated
      */
@@ -280,7 +275,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Publisher</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Publisher</em>'.
      * @generated
      */
@@ -289,7 +284,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Subscriber</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Subscriber</em>'.
      * @generated
      */
@@ -298,16 +293,19 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Deadline Qos Policy</em>'.
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @return a new object of class '<em>Deadline Qos Policy</em>'.
      * @generated
      */
     DeadlineQosPolicy createDeadlineQosPolicy();
 
     /**
-     * Returns a new object of class '<em>Destination Order Qos Policy</em>'.
-     * <!-- begin-user-doc -->
+     * Returns a new object of class '
+     * <em>Destination Order Qos Policy</em>'. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @return a new object of class '<em>Destination Order Qos Policy</em>'.
+     * 
+     * @return a new object of class '
+     *         <em>Destination Order Qos Policy</em>'.
      * @generated
      */
     DestinationOrderQosPolicy createDestinationOrderQosPolicy();
@@ -315,25 +313,30 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Durability Qos Policy</em>'.
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @return a new object of class '<em>Durability Qos Policy</em>'.
      * @generated
      */
     DurabilityQosPolicy createDurabilityQosPolicy();
 
     /**
-     * Returns a new object of class '<em>Durability Service Qos Policy</em>'.
-     * <!-- begin-user-doc
+     * Returns a new object of class '
+     * <em>Durability Service Qos Policy</em>'. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
-     * @return a new object of class '<em>Durability Service Qos Policy</em>'.
+     * 
+     * @return a new object of class '
+     *         <em>Durability Service Qos Policy</em>'.
      * @generated
      */
     DurabilityServiceQosPolicy createDurabilityServiceQosPolicy();
 
     /**
-     * Returns a new object of class '<em>Entity Factory Qos Policy</em>'.
-     * <!-- begin-user-doc -->
+     * Returns a new object of class '
+     * <em>Entity Factory Qos Policy</em>'. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @return a new object of class '<em>Entity Factory Qos Policy</em>'.
+     * 
+     * @return a new object of class '
+     *         <em>Entity Factory Qos Policy</em>'.
      * @generated
      */
     EntityFactoryQosPolicy createEntityFactoryQosPolicy();
@@ -341,6 +344,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Group Data Qos Policy</em>'.
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @return a new object of class '<em>Group Data Qos Policy</em>'.
      * @generated
      */
@@ -349,16 +353,19 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>History Qos Policy</em>'.
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @return a new object of class '<em>History Qos Policy</em>'.
      * @generated
      */
     HistoryQosPolicy createHistoryQosPolicy();
 
     /**
-     * Returns a new object of class '<em>Latency Budget Qos Policy</em>'.
-     * <!-- begin-user-doc -->
+     * Returns a new object of class '
+     * <em>Latency Budget Qos Policy</em>'. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @return a new object of class '<em>Latency Budget Qos Policy</em>'.
+     * 
+     * @return a new object of class '
+     *         <em>Latency Budget Qos Policy</em>'.
      * @generated
      */
     LatencyBudgetQosPolicy createLatencyBudgetQosPolicy();
@@ -366,6 +373,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Lifespan Qos Policy</em>'.
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @return a new object of class '<em>Lifespan Qos Policy</em>'.
      * @generated
      */
@@ -374,6 +382,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Liveliness Qos Policy</em>'.
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @return a new object of class '<em>Liveliness Qos Policy</em>'.
      * @generated
      */
@@ -382,16 +391,19 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Ownership Qos Policy</em>'.
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @return a new object of class '<em>Ownership Qos Policy</em>'.
      * @generated
      */
     OwnershipQosPolicy createOwnershipQosPolicy();
 
     /**
-     * Returns a new object of class '<em>Ownership Strength Qos Policy</em>'.
-     * <!-- begin-user-doc
+     * Returns a new object of class '
+     * <em>Ownership Strength Qos Policy</em>'. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
-     * @return a new object of class '<em>Ownership Strength Qos Policy</em>'.
+     * 
+     * @return a new object of class '
+     *         <em>Ownership Strength Qos Policy</em>'.
      * @generated
      */
     OwnershipStrengthQosPolicy createOwnershipStrengthQosPolicy();
@@ -399,50 +411,61 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Partition Qos Policy</em>'.
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @return a new object of class '<em>Partition Qos Policy</em>'.
      * @generated
      */
     PartitionQosPolicy createPartitionQosPolicy();
 
     /**
-     * Returns a new object of class '<em>Presentation Qos Policy</em>'.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
-     * @return a new object of class '<em>Presentation Qos Policy</em>'.
+     * Returns a new object of class '<em>Presentation Qos Policy</em>
+     * '. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @return a new object of class '<em>Presentation Qos Policy</em>
+     *         '.
      * @generated
      */
     PresentationQosPolicy createPresentationQosPolicy();
 
     /**
-     * Returns a new object of class '<em>Reader Data Lifecycle Qos Policy</em>'.
-     * <!-- begin-user-doc
+     * Returns a new object of class '
+     * <em>Reader Data Lifecycle Qos Policy</em>'. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
-     * @return a new object of class '<em>Reader Data Lifecycle Qos Policy</em>'.
+     * 
+     * @return a new object of class '
+     *         <em>Reader Data Lifecycle Qos Policy</em>'.
      * @generated
      */
     ReaderDataLifecycleQosPolicy createReaderDataLifecycleQosPolicy();
 
     /**
-     * Returns a new object of class '<em>Reliability Qos Policy</em>'.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
-     * @return a new object of class '<em>Reliability Qos Policy</em>'.
+     * Returns a new object of class '<em>Reliability Qos Policy</em>
+     * '. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @return a new object of class '<em>Reliability Qos Policy</em>
+     *         '.
      * @generated
      */
     ReliabilityQosPolicy createReliabilityQosPolicy();
 
     /**
-     * Returns a new object of class '<em>Resource Limits Qos Policy</em>'.
-     * <!-- begin-user-doc -->
+     * Returns a new object of class '
+     * <em>Resource Limits Qos Policy</em>'. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @return a new object of class '<em>Resource Limits Qos Policy</em>'.
+     * 
+     * @return a new object of class '
+     *         <em>Resource Limits Qos Policy</em>'.
      * @generated
      */
     ResourceLimitsQosPolicy createResourceLimitsQosPolicy();
 
     /**
-     * Returns a new object of class '<em>Time Based Filter Qos Policy</em>'.
-     * <!-- begin-user-doc -->
+     * Returns a new object of class '
+     * <em>Time Based Filter Qos Policy</em>'. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @return a new object of class '<em>Time Based Filter Qos Policy</em>'.
+     * 
+     * @return a new object of class '
+     *         <em>Time Based Filter Qos Policy</em>'.
      * @generated
      */
     TimeBasedFilterQosPolicy createTimeBasedFilterQosPolicy();
@@ -450,16 +473,19 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Topic Data Qos Policy</em>'.
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @return a new object of class '<em>Topic Data Qos Policy</em>'.
      * @generated
      */
     TopicDataQosPolicy createTopicDataQosPolicy();
 
     /**
-     * Returns a new object of class '<em>Transport Priority Qos Policy</em>'.
-     * <!-- begin-user-doc
+     * Returns a new object of class '
+     * <em>Transport Priority Qos Policy</em>'. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
-     * @return a new object of class '<em>Transport Priority Qos Policy</em>'.
+     * 
+     * @return a new object of class '
+     *         <em>Transport Priority Qos Policy</em>'.
      * @generated
      */
     TransportPriorityQosPolicy createTransportPriorityQosPolicy();
@@ -467,6 +493,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>User Data Qos Policy</em>'.
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @return a new object of class '<em>User Data Qos Policy</em>'.
      * @generated
      */
@@ -475,17 +502,19 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Period</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Period</em>'.
      * @generated
      */
     Period createPeriod();
 
     /**
-     * Returns a new object of class '<em>Writer Data Lifecycle Qos Policy</em>'.
-     * <!-- begin-user-doc
+     * Returns a new object of class '
+     * <em>Writer Data Lifecycle Qos Policy</em>'. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
-     * @return a new object of class '<em>Writer Data Lifecycle Qos Policy</em>'.
+     * 
+     * @return a new object of class '
+     *         <em>Writer Data Lifecycle Qos Policy</em>'.
      * @generated
      */
     WriterDataLifecycleQosPolicy createWriterDataLifecycleQosPolicy();
@@ -493,6 +522,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Application Target</em>'.
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @return a new object of class '<em>Application Target</em>'.
      * @generated
      */
@@ -501,7 +531,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Transport</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Transport</em>'.
      * @generated
      */
@@ -510,7 +540,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns a new object of class '<em>Model</em>'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return a new object of class '<em>Model</em>'.
      * @generated
      */
@@ -519,7 +549,7 @@ public interface OpenDDSFactory extends EFactory {
     /**
      * Returns the package supported by this factory. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return the package supported by this factory.
      * @generated
      */

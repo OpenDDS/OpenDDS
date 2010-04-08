@@ -16,12 +16,13 @@ import org.eclipse.emf.ecore.EClass;
  * <em><b>Specification</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
- *
+ * 
  * @generated
  */
 public abstract class SpecificationImpl extends EntityImpl implements Specification {
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected SpecificationImpl() {
@@ -30,6 +31,7 @@ public abstract class SpecificationImpl extends EntityImpl implements Specificat
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

@@ -15,22 +15,22 @@ import org.eclipse.emf.common.util.ResourceLocator;
 /**
  * This is the central singleton for the OpenDDS model plugin. <!--
  * begin-user-doc --> <!-- end-user-doc -->
- *
+ * 
  * @generated
  */
 public final class ModelPlugin extends EMFPlugin {
     /**
-     * Keep track of the singleton.
-     * <!-- begin-user-doc --> <!--
+     * Keep track of the singleton. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @generated
      */
     public static final ModelPlugin INSTANCE = new ModelPlugin();
 
     /**
-     * Keep track of the singleton.
-     * <!-- begin-user-doc --> <!--
+     * Keep track of the singleton. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @generated
      */
     private static Implementation plugin;
@@ -38,7 +38,7 @@ public final class ModelPlugin extends EMFPlugin {
     /**
      * Create the instance. <!-- begin-user-doc --> <!-- end-user-doc
      * -->
-     *
+     * 
      * @generated
      */
     public ModelPlugin() {
@@ -48,7 +48,7 @@ public final class ModelPlugin extends EMFPlugin {
     /**
      * Returns the singleton instance of the Eclipse plugin. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return the singleton instance.
      * @generated
      */
@@ -60,7 +60,7 @@ public final class ModelPlugin extends EMFPlugin {
     /**
      * Returns the singleton instance of the Eclipse plugin. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @return the singleton instance.
      * @generated
      */
@@ -71,14 +71,14 @@ public final class ModelPlugin extends EMFPlugin {
     /**
      * The actual implementation of the Eclipse <b>Plugin</b>. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @generated
      */
     public static class Implementation extends EclipsePlugin {
         /**
-         * Creates an instance.
-         * <!-- begin-user-doc --> <!--
+         * Creates an instance. <!-- begin-user-doc --> <!--
          * end-user-doc -->
+         * 
          * @generated
          */
         public Implementation() {

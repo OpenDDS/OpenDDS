@@ -15,10 +15,12 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.XMIResource;
+import org.eclipse.emf.ecore.xmi.XMLResource;
 
 /**
  * <!-- begin-user-doc --> The <b>Resource Factory</b> associated with
  * the package. <!-- end-user-doc -->
+ * 
  * @see OpenDDS.OpenDDSResourceImpl
  * @generated
  */
@@ -26,7 +28,7 @@ public class OpenDDSResourceFactoryImpl extends ResourceFactoryImpl {
     /**
      * Creates an instance of the resource factory. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @generated
      */
     public OpenDDSResourceFactoryImpl() {
@@ -35,7 +37,7 @@ public class OpenDDSResourceFactoryImpl extends ResourceFactoryImpl {
 
     /**
      * Creates an instance of the resource.
-     *
+     * 
      * @generated NOT
      */
     @Override
@@ -44,10 +46,10 @@ public class OpenDDSResourceFactoryImpl extends ResourceFactoryImpl {
 
         Map<Object, Object> saveOptions = resource.getDefaultSaveOptions();
 
-        saveOptions.put(OpenDDSResourceImpl.OPTION_ENCODING, "UTF-8");
-        saveOptions.put(OpenDDSResourceImpl.OPTION_KEEP_DEFAULT_CONTENT, true);
-        saveOptions.put(OpenDDSResourceImpl.OPTION_USE_XMI_TYPE, true);
-                
+        saveOptions.put(XMLResource.OPTION_ENCODING, "UTF-8");
+        saveOptions.put(XMLResource.OPTION_KEEP_DEFAULT_CONTENT, true);
+        saveOptions.put(XMIResource.OPTION_USE_XMI_TYPE, true);
+
         return resource;
     }
 

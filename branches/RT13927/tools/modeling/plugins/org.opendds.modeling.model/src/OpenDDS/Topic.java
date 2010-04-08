@@ -12,40 +12,47 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Topic</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.Topic#getDurability_service <em>Durability service</em>}</li>
- *   <li>{@link OpenDDS.Topic#getTransport_priority <em>Transport priority</em>}</li>
- *   <li>{@link OpenDDS.Topic#getTopic_data <em>Topic data</em>}</li>
- *   <li>{@link OpenDDS.Topic#getResource_limits <em>Resource limits</em>}</li>
- *   <li>{@link OpenDDS.Topic#getReliability <em>Reliability</em>}</li>
- *   <li>{@link OpenDDS.Topic#getOwnership <em>Ownership</em>}</li>
- *   <li>{@link OpenDDS.Topic#getLiveliness <em>Liveliness</em>}</li>
- *   <li>{@link OpenDDS.Topic#getHistory <em>History</em>}</li>
- *   <li>{@link OpenDDS.Topic#getDurability <em>Durability</em>}</li>
- *   <li>{@link OpenDDS.Topic#getDestination_order <em>Destination order</em>}</li>
- *   <li>{@link OpenDDS.Topic#getDeadline <em>Deadline</em>}</li>
- *   <li>{@link OpenDDS.Topic#getLatency_budget <em>Latency budget</em>}</li>
+ * <li>{@link OpenDDS.Topic#getDurability_service <em>Durability
+ * service</em>}</li>
+ * <li>{@link OpenDDS.Topic#getTransport_priority <em>Transport
+ * priority</em>}</li>
+ * <li>{@link OpenDDS.Topic#getTopic_data <em>Topic data</em>}</li>
+ * <li>{@link OpenDDS.Topic#getResource_limits <em>Resource limits
+ * </em>}</li>
+ * <li>{@link OpenDDS.Topic#getReliability <em>Reliability</em>}</li>
+ * <li>{@link OpenDDS.Topic#getOwnership <em>Ownership</em>}</li>
+ * <li>{@link OpenDDS.Topic#getLiveliness <em>Liveliness</em>}</li>
+ * <li>{@link OpenDDS.Topic#getHistory <em>History</em>}</li>
+ * <li>{@link OpenDDS.Topic#getDurability <em>Durability</em>}</li>
+ * <li>{@link OpenDDS.Topic#getDestination_order <em>Destination order
+ * </em>}</li>
+ * <li>{@link OpenDDS.Topic#getDeadline <em>Deadline</em>}</li>
+ * <li>{@link OpenDDS.Topic#getLatency_budget <em>Latency budget</em>}
+ * </li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getTopic()
  * @model
  * @generated
  */
 public interface Topic extends TopicDescription {
     /**
-     * Returns the value of the '<em><b>Durability service</b></em>' reference.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Durability service</b></em>'
+     * reference. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Durability service</em>' reference
      * isn't clear, there really should be more of a description
      * here...
      * </p>
      * <!-- end-user-doc -->
-     * @return the value of the '<em>Durability service</em>' reference.
+     * 
+     * @return the value of the '<em>Durability service</em>'
+     *         reference.
      * @see #setDurability_service(DurabilityServiceQosPolicy)
      * @see OpenDDS.OpenDDSPackage#getTopic_Durability_service()
      * @model
@@ -54,25 +61,31 @@ public interface Topic extends TopicDescription {
     DurabilityServiceQosPolicy getDurability_service();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Topic#getDurability_service <em>Durability service</em>}' reference.
-     * <!-- begin-user-doc
+     * Sets the value of the '
+     * {@link OpenDDS.Topic#getDurability_service
+     * <em>Durability service</em>}' reference. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
-     * @param value the new value of the '<em>Durability service</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Durability service</em>'
+     *            reference.
      * @see #getDurability_service()
      * @generated
      */
     void setDurability_service(DurabilityServiceQosPolicy value);
 
     /**
-     * Returns the value of the '<em><b>Transport priority</b></em>' reference.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Transport priority</b></em>'
+     * reference. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Transport priority</em>' reference
      * isn't clear, there really should be more of a description
      * here...
      * </p>
      * <!-- end-user-doc -->
-     * @return the value of the '<em>Transport priority</em>' reference.
+     * 
+     * @return the value of the '<em>Transport priority</em>'
+     *         reference.
      * @see #setTransport_priority(TransportPriorityQosPolicy)
      * @see OpenDDS.OpenDDSPackage#getTopic_Transport_priority()
      * @model
@@ -81,23 +94,28 @@ public interface Topic extends TopicDescription {
     TransportPriorityQosPolicy getTransport_priority();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Topic#getTransport_priority <em>Transport priority</em>}' reference.
-     * <!-- begin-user-doc
+     * Sets the value of the '
+     * {@link OpenDDS.Topic#getTransport_priority
+     * <em>Transport priority</em>}' reference. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
-     * @param value the new value of the '<em>Transport priority</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Transport priority</em>'
+     *            reference.
      * @see #getTransport_priority()
      * @generated
      */
     void setTransport_priority(TransportPriorityQosPolicy value);
 
     /**
-     * Returns the value of the '<em><b>Topic data</b></em>' reference.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Topic data</b></em>'
+     * reference. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Topic data</em>' reference isn't
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Topic data</em>' reference.
      * @see #setTopic_data(TopicDataQosPolicy)
      * @see OpenDDS.OpenDDSPackage#getTopic_Topic_data()
@@ -107,24 +125,28 @@ public interface Topic extends TopicDescription {
     TopicDataQosPolicy getTopic_data();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Topic#getTopic_data <em>Topic data</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.Topic#getTopic_data
+     * <em>Topic data</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Topic data</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Topic data</em>'
+     *            reference.
      * @see #getTopic_data()
      * @generated
      */
     void setTopic_data(TopicDataQosPolicy value);
 
     /**
-     * Returns the value of the '<em><b>Resource limits</b></em>' reference.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Resource limits</b></em>'
+     * reference. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Resource limits</em>' reference
      * isn't clear, there really should be more of a description
      * here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Resource limits</em>' reference.
      * @see #setResource_limits(ResourceLimitsQosPolicy)
      * @see OpenDDS.OpenDDSPackage#getTopic_Resource_limits()
@@ -134,23 +156,27 @@ public interface Topic extends TopicDescription {
     ResourceLimitsQosPolicy getResource_limits();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Topic#getResource_limits <em>Resource limits</em>}' reference.
-     * <!-- begin-user-doc -->
+     * Sets the value of the '{@link OpenDDS.Topic#getResource_limits
+     * <em>Resource limits</em>}' reference. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @param value the new value of the '<em>Resource limits</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Resource limits</em>'
+     *            reference.
      * @see #getResource_limits()
      * @generated
      */
     void setResource_limits(ResourceLimitsQosPolicy value);
 
     /**
-     * Returns the value of the '<em><b>Reliability</b></em>' reference.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Reliability</b></em>'
+     * reference. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Reliability</em>' reference isn't
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Reliability</em>' reference.
      * @see #setReliability(ReliabilityQosPolicy)
      * @see OpenDDS.OpenDDSPackage#getTopic_Reliability()
@@ -160,10 +186,13 @@ public interface Topic extends TopicDescription {
     ReliabilityQosPolicy getReliability();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Topic#getReliability <em>Reliability</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.Topic#getReliability
+     * <em>Reliability</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Reliability</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Reliability</em>'
+     *            reference.
      * @see #getReliability()
      * @generated
      */
@@ -177,6 +206,7 @@ public interface Topic extends TopicDescription {
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Ownership</em>' reference.
      * @see #setOwnership(OwnershipQosPolicy)
      * @see OpenDDS.OpenDDSPackage#getTopic_Ownership()
@@ -186,23 +216,26 @@ public interface Topic extends TopicDescription {
     OwnershipQosPolicy getOwnership();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Topic#getOwnership <em>Ownership</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.Topic#getOwnership
+     * <em>Ownership</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Ownership</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Ownership</em>' reference.
      * @see #getOwnership()
      * @generated
      */
     void setOwnership(OwnershipQosPolicy value);
 
     /**
-     * Returns the value of the '<em><b>Liveliness</b></em>' reference.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Liveliness</b></em>'
+     * reference. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Liveliness</em>' reference isn't
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Liveliness</em>' reference.
      * @see #setLiveliness(LivelinessQosPolicy)
      * @see OpenDDS.OpenDDSPackage#getTopic_Liveliness()
@@ -212,10 +245,13 @@ public interface Topic extends TopicDescription {
     LivelinessQosPolicy getLiveliness();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Topic#getLiveliness <em>Liveliness</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.Topic#getLiveliness
+     * <em>Liveliness</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Liveliness</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Liveliness</em>'
+     *            reference.
      * @see #getLiveliness()
      * @generated
      */
@@ -229,6 +265,7 @@ public interface Topic extends TopicDescription {
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>History</em>' reference.
      * @see #setHistory(HistoryQosPolicy)
      * @see OpenDDS.OpenDDSPackage#getTopic_History()
@@ -238,23 +275,26 @@ public interface Topic extends TopicDescription {
     HistoryQosPolicy getHistory();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Topic#getHistory <em>History</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.Topic#getHistory
+     * <em>History</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>History</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>History</em>' reference.
      * @see #getHistory()
      * @generated
      */
     void setHistory(HistoryQosPolicy value);
 
     /**
-     * Returns the value of the '<em><b>Durability</b></em>' reference.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Durability</b></em>'
+     * reference. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Durability</em>' reference isn't
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Durability</em>' reference.
      * @see #setDurability(DurabilityQosPolicy)
      * @see OpenDDS.OpenDDSPackage#getTopic_Durability()
@@ -264,25 +304,30 @@ public interface Topic extends TopicDescription {
     DurabilityQosPolicy getDurability();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Topic#getDurability <em>Durability</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.Topic#getDurability
+     * <em>Durability</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Durability</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Durability</em>'
+     *            reference.
      * @see #getDurability()
      * @generated
      */
     void setDurability(DurabilityQosPolicy value);
 
     /**
-     * Returns the value of the '<em><b>Destination order</b></em>' reference.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Destination order</b></em>'
+     * reference. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Destination order</em>' reference
      * isn't clear, there really should be more of a description
      * here...
      * </p>
      * <!-- end-user-doc -->
-     * @return the value of the '<em>Destination order</em>' reference.
+     * 
+     * @return the value of the '<em>Destination order</em>'
+     *         reference.
      * @see #setDestination_order(DestinationOrderQosPolicy)
      * @see OpenDDS.OpenDDSPackage#getTopic_Destination_order()
      * @model
@@ -291,10 +336,14 @@ public interface Topic extends TopicDescription {
     DestinationOrderQosPolicy getDestination_order();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Topic#getDestination_order <em>Destination order</em>}' reference.
-     * <!-- begin-user-doc -->
+     * Sets the value of the '
+     * {@link OpenDDS.Topic#getDestination_order
+     * <em>Destination order</em>}' reference. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @param value the new value of the '<em>Destination order</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Destination order</em>'
+     *            reference.
      * @see #getDestination_order()
      * @generated
      */
@@ -308,6 +357,7 @@ public interface Topic extends TopicDescription {
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Deadline</em>' reference.
      * @see #setDeadline(DeadlineQosPolicy)
      * @see OpenDDS.OpenDDSPackage#getTopic_Deadline()
@@ -317,23 +367,26 @@ public interface Topic extends TopicDescription {
     DeadlineQosPolicy getDeadline();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Topic#getDeadline <em>Deadline</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.Topic#getDeadline
+     * <em>Deadline</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Deadline</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Deadline</em>' reference.
      * @see #getDeadline()
      * @generated
      */
     void setDeadline(DeadlineQosPolicy value);
 
     /**
-     * Returns the value of the '<em><b>Latency budget</b></em>' reference.
-     * <!-- begin-user-doc -->
+     * Returns the value of the '<em><b>Latency budget</b></em>'
+     * reference. <!-- begin-user-doc -->
      * <p>
      * If the meaning of the '<em>Latency budget</em>' reference isn't
      * clear, there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
+     * 
      * @return the value of the '<em>Latency budget</em>' reference.
      * @see #setLatency_budget(LatencyBudgetQosPolicy)
      * @see OpenDDS.OpenDDSPackage#getTopic_Latency_budget()
@@ -343,10 +396,13 @@ public interface Topic extends TopicDescription {
     LatencyBudgetQosPolicy getLatency_budget();
 
     /**
-     * Sets the value of the '{@link OpenDDS.Topic#getLatency_budget <em>Latency budget</em>}' reference.
-     * <!-- begin-user-doc -->
+     * Sets the value of the '{@link OpenDDS.Topic#getLatency_budget
+     * <em>Latency budget</em>}' reference. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @param value the new value of the '<em>Latency budget</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Latency budget</em>'
+     *            reference.
      * @see #getLatency_budget()
      * @generated
      */

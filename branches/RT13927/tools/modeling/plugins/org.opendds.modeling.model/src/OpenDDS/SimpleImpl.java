@@ -16,12 +16,13 @@ import org.eclipse.emf.ecore.EClass;
  * <em><b>Simple</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
- *
+ * 
  * @generated
  */
 public abstract class SimpleImpl extends TopicFieldImpl implements Simple {
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected SimpleImpl() {
@@ -30,6 +31,7 @@ public abstract class SimpleImpl extends TopicFieldImpl implements Simple {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

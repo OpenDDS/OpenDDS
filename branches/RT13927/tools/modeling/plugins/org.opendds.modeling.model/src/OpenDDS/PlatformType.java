@@ -19,6 +19,7 @@ import org.eclipse.emf.common.util.Enumerator;
  * <!-- begin-user-doc --> A representation of the literals of the
  * enumeration '<em><b>Platform Type</b></em>', and utility methods
  * for working with them. <!-- end-user-doc -->
+ * 
  * @see OpenDDS.OpenDDSPackage#getPlatformType()
  * @model
  * @generated
@@ -27,7 +28,7 @@ public enum PlatformType implements Enumerator {
     /**
      * The '<em><b>MPC CDT</b></em>' literal object. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #MPC_CDT_VALUE
      * @generated
      * @ordered
@@ -37,7 +38,7 @@ public enum PlatformType implements Enumerator {
     /**
      * The '<em><b>MPC GNUACE</b></em>' literal object. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #MPC_GNUACE_VALUE
      * @generated
      * @ordered
@@ -47,7 +48,7 @@ public enum PlatformType implements Enumerator {
     /**
      * The '<em><b>MPC NMAKE</b></em>' literal object. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #MPC_NMAKE_VALUE
      * @generated
      * @ordered
@@ -57,7 +58,7 @@ public enum PlatformType implements Enumerator {
     /**
      * The '<em><b>MPC VC71</b></em>' literal object. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #MPC_VC71_VALUE
      * @generated
      * @ordered
@@ -67,7 +68,7 @@ public enum PlatformType implements Enumerator {
     /**
      * The '<em><b>MPC VC8</b></em>' literal object. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #MPC_VC8_VALUE
      * @generated
      * @ordered
@@ -77,7 +78,7 @@ public enum PlatformType implements Enumerator {
     /**
      * The '<em><b>MPC VC9</b></em>' literal object. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #MPC_VC9_VALUE
      * @generated
      * @ordered
@@ -93,7 +94,7 @@ public enum PlatformType implements Enumerator {
      * here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #MPC_CDT
      * @model
      * @generated
@@ -110,7 +111,7 @@ public enum PlatformType implements Enumerator {
      * here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #MPC_GNUACE
      * @model
      * @generated
@@ -127,7 +128,7 @@ public enum PlatformType implements Enumerator {
      * here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #MPC_NMAKE
      * @model
      * @generated
@@ -144,7 +145,7 @@ public enum PlatformType implements Enumerator {
      * here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #MPC_VC71
      * @model
      * @generated
@@ -161,7 +162,7 @@ public enum PlatformType implements Enumerator {
      * here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #MPC_VC8
      * @model
      * @generated
@@ -178,7 +179,7 @@ public enum PlatformType implements Enumerator {
      * here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #MPC_VC9
      * @model
      * @generated
@@ -187,25 +188,28 @@ public enum PlatformType implements Enumerator {
     public static final int MPC_VC9_VALUE = 5;
 
     /**
-     * An array of all the '<em><b>Platform Type</b></em>' enumerators.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * An array of all the '<em><b>Platform Type</b></em>'
+     * enumerators. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private static final PlatformType[] VALUES_ARRAY = new PlatformType[] { MPC_CDT, MPC_GNUACE, MPC_NMAKE, MPC_VC71,
             MPC_VC8, MPC_VC9, };
 
     /**
-     * A public read-only list of all the '<em><b>Platform Type</b></em>' enumerators.
-     * <!-- begin-user-doc
+     * A public read-only list of all the '
+     * <em><b>Platform Type</b></em>' enumerators. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public static final List<PlatformType> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
 
     /**
-     * Returns the '<em><b>Platform Type</b></em>' literal with the specified literal value.
-     * <!-- begin-user-doc --> <!--
+     * Returns the '<em><b>Platform Type</b></em>' literal with the
+     * specified literal value. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @generated
      */
     public static PlatformType get(String literal) {
@@ -219,8 +223,9 @@ public enum PlatformType implements Enumerator {
     }
 
     /**
-     * Returns the '<em><b>Platform Type</b></em>' literal with the specified name.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * Returns the '<em><b>Platform Type</b></em>' literal with the
+     * specified name. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public static PlatformType getByName(String name) {
@@ -234,9 +239,10 @@ public enum PlatformType implements Enumerator {
     }
 
     /**
-     * Returns the '<em><b>Platform Type</b></em>' literal with the specified integer value.
-     * <!-- begin-user-doc --> <!--
+     * Returns the '<em><b>Platform Type</b></em>' literal with the
+     * specified integer value. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @generated
      */
     public static PlatformType get(int value) {
@@ -259,26 +265,29 @@ public enum PlatformType implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private final int value;
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private final String name;
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private final String literal;
 
     /**
-     * Only this class can construct instances.
-     * <!-- begin-user-doc
+     * Only this class can construct instances. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private PlatformType(int value, String name, String literal) {
@@ -289,6 +298,7 @@ public enum PlatformType implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public int getValue() {
@@ -297,6 +307,7 @@ public enum PlatformType implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String getName() {
@@ -305,6 +316,7 @@ public enum PlatformType implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String getLiteral() {
@@ -312,9 +324,10 @@ public enum PlatformType implements Enumerator {
     }
 
     /**
-     * Returns the literal value of the enumerator, which is its string representation.
-     * <!-- begin-user-doc --> <!--
+     * Returns the literal value of the enumerator, which is its
+     * string representation. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @generated
      */
     @Override

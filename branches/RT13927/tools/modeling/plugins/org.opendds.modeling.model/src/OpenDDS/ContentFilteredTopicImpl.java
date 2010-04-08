@@ -19,17 +19,19 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.ContentFilteredTopicImpl#getFilter_expression <em>Filter expression</em>}</li>
+ * <li>{@link OpenDDS.ContentFilteredTopicImpl#getFilter_expression
+ * <em>Filter expression</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements ContentFilteredTopic {
     /**
-     * The default value of the '{@link #getFilter_expression() <em>Filter expression</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * The default value of the '{@link #getFilter_expression()
+     * <em>Filter expression</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #getFilter_expression()
      * @generated
      * @ordered
@@ -37,9 +39,10 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
     protected static final String FILTER_EXPRESSION_EDEFAULT = null;
 
     /**
-     * The cached value of the '{@link #getFilter_expression() <em>Filter expression</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * The cached value of the '{@link #getFilter_expression()
+     * <em>Filter expression</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #getFilter_expression()
      * @generated
      * @ordered
@@ -48,6 +51,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected ContentFilteredTopicImpl() {
@@ -56,6 +60,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -65,6 +70,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String getFilter_expression() {
@@ -73,6 +79,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setFilter_expression(String newFilter_expression) {
@@ -86,6 +93,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -99,6 +107,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -113,6 +122,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -127,6 +137,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -141,6 +152,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

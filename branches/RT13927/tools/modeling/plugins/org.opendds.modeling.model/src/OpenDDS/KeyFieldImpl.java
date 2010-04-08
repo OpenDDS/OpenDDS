@@ -17,12 +17,13 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
  * <em><b>Key Field</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
- *
+ * 
  * @generated
  */
 public class KeyFieldImpl extends EObjectImpl implements KeyField {
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected KeyFieldImpl() {
@@ -31,6 +32,7 @@ public class KeyFieldImpl extends EObjectImpl implements KeyField {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

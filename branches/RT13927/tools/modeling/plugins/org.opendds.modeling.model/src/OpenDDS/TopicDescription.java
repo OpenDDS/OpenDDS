@@ -12,19 +12,19 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Topic Description</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.TopicDescription#getType <em>Type</em>}</li>
+ * <li>{@link OpenDDS.TopicDescription#getType <em>Type</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getTopicDescription()
  * @model abstract="true"
  * @generated
  */
-public interface TopicDescription extends DomainEntity, ModelEntity {
+public interface TopicDescription extends DomainEntity {
     /**
      * Returns the value of the '<em><b>Type</b></em>' reference. <!--
      * begin-user-doc -->
@@ -33,23 +33,25 @@ public interface TopicDescription extends DomainEntity, ModelEntity {
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @return the value of the '<em>Type</em>' reference.
      * @see #setType(TopicField)
      * @see OpenDDS.OpenDDSPackage#getTopicDescription_Type()
      * @model required="true"
      * @generated
      */
-    TopicField getType();
+    TopicStruct getType();
 
     /**
-     * Sets the value of the '{@link OpenDDS.TopicDescription#getType <em>Type</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.TopicDescription#getType
+     * <em>Type</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Type</em>' reference.
+     * 
+     * @param value
+     *            the new value of the '<em>Type</em>' reference.
      * @see #getType()
      * @generated
      */
-    void setType(TopicField value);
+    void setType(TopicStruct value);
 
 } // TopicDescription

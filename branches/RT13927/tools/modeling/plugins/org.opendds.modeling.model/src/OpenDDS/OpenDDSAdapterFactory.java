@@ -18,22 +18,23 @@ import org.eclipse.emf.ecore.EObject;
  * <!-- begin-user-doc --> The <b>Adapter Factory</b> for the model.
  * It provides an adapter <code>createXXX</code> method for each class
  * of the model. <!-- end-user-doc -->
+ * 
  * @see OpenDDS.OpenDDSPackage
  * @generated
  */
 public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     /**
-     * The cached model package.
-     * <!-- begin-user-doc --> <!--
+     * The cached model package. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @generated
      */
     protected static OpenDDSPackage modelPackage;
 
     /**
-     * Creates an instance of the adapter factory.
-     * <!-- begin-user-doc
+     * Creates an instance of the adapter factory. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OpenDDSAdapterFactory() {
@@ -43,11 +44,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Returns whether this factory is applicable for the type of the object.
-     * <!-- begin-user-doc --> This implementation returns
+     * Returns whether this factory is applicable for the type of the
+     * object. <!-- begin-user-doc --> This implementation returns
      * <code>true</code> if the object is either the model's package
      * or is an instance object of the model. <!-- end-user-doc -->
-     * @return whether this factory is applicable for the type of the object.
+     * 
+     * @return whether this factory is applicable for the type of the
+     *         object.
      * @generated
      */
     @Override
@@ -62,8 +65,9 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * The switch that delegates to the <code>createXXX</code> methods.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The switch that delegates to the <code>createXXX</code>
+     * methods. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected OpenDDSSwitch<Adapter> modelSwitch = new OpenDDSSwitch<Adapter>() {
@@ -205,11 +209,6 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
         @Override
         public Adapter caseTopicField(TopicField object) {
             return createTopicFieldAdapter();
-        }
-
-        @Override
-        public Adapter caseTypedef(Typedef object) {
-            return createTypedefAdapter();
         }
 
         @Override
@@ -408,11 +407,6 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
         }
 
         @Override
-        public Adapter caseModelEntity(ModelEntity object) {
-            return createModelEntityAdapter();
-        }
-
-        @Override
         public Adapter defaultCase(EObject object) {
             return createEObjectAdapter();
         }
@@ -421,7 +415,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     /**
      * Creates an adapter for the <code>target</code>. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @param target
      *            the object to adapt.
      * @return the adapter for the <code>target</code>.
@@ -439,7 +433,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.Entity
      * @generated
@@ -455,7 +449,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.NamedEntity
      * @generated
@@ -471,7 +465,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.Specification
      * @generated
@@ -487,7 +481,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.DomainEntity
      * @generated
@@ -497,11 +491,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.ContentFilteredTopic <em>Content Filtered Topic</em>}'.
-     * <!-- begin-user-doc --> This
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.ContentFilteredTopic
+     * <em>Content Filtered Topic</em>}'. <!-- begin-user-doc --> This
      * default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.ContentFilteredTopic
      * @generated
@@ -517,7 +513,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.MultiTopic
      * @generated
@@ -527,11 +523,12 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.Topic <em>Topic</em>}'.
-     * <!-- begin-user-doc -->
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.Topic <em>Topic</em>}'. <!-- begin-user-doc -->
      * This default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.Topic
      * @generated
@@ -541,11 +538,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.TopicDescription <em>Topic Description</em>}'.
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.TopicDescription <em>Topic Description</em>}'.
      * <!-- begin-user-doc --> This default implementation returns
      * null so that we can easily ignore cases; it's useful to ignore
      * a case when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.TopicDescription
      * @generated
@@ -555,11 +554,12 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.Array <em>Array</em>}'.
-     * <!-- begin-user-doc -->
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.Array <em>Array</em>}'. <!-- begin-user-doc -->
      * This default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.Array
      * @generated
@@ -575,7 +575,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.OBoolean
      * @generated
@@ -585,11 +585,12 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.Case <em>Case</em>}'.
-     * <!-- begin-user-doc -->
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.Case <em>Case</em>}'. <!-- begin-user-doc -->
      * This default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.Case
      * @generated
@@ -599,11 +600,12 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.OChar <em>OChar</em>}'.
-     * <!-- begin-user-doc -->
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.OChar <em>OChar</em>}'. <!-- begin-user-doc -->
      * This default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.OChar
      * @generated
@@ -619,7 +621,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.Collection
      * @generated
@@ -629,11 +631,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.ConstructedTopicType <em>Constructed Topic Type</em>}'.
-     * <!-- begin-user-doc --> This
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.ConstructedTopicType
+     * <em>Constructed Topic Type</em>}'. <!-- begin-user-doc --> This
      * default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.ConstructedTopicType
      * @generated
@@ -649,7 +653,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.ODouble
      * @generated
@@ -659,11 +663,12 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.Enum <em>Enum</em>}'.
-     * <!-- begin-user-doc -->
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.Enum <em>Enum</em>}'. <!-- begin-user-doc -->
      * This default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.Enum
      * @generated
@@ -679,7 +684,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.OFloat
      * @generated
@@ -689,11 +694,12 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.Key <em>Key</em>}'.
-     * <!-- begin-user-doc --> This
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.Key <em>Key</em>}'. <!-- begin-user-doc --> This
      * default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.Key
      * @generated
@@ -709,7 +715,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.KeyField
      * @generated
@@ -719,11 +725,12 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.OLong <em>OLong</em>}'.
-     * <!-- begin-user-doc -->
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.OLong <em>OLong</em>}'. <!-- begin-user-doc -->
      * This default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.OLong
      * @generated
@@ -739,7 +746,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.OLongLong
      * @generated
@@ -755,7 +762,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.OOctet
      * @generated
@@ -771,7 +778,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.Sequence
      * @generated
@@ -787,7 +794,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.OShort
      * @generated
@@ -803,7 +810,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.Simple
      * @generated
@@ -819,7 +826,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.OString
      * @generated
@@ -835,7 +842,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.TopicStruct
      * @generated
@@ -851,7 +858,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.TopicField
      * @generated
@@ -862,28 +869,12 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
 
     /**
      * Creates a new adapter for an object of class '
-     * {@link OpenDDS.Typedef <em>Typedef</em>}'. <!-- begin-user-doc
-     * --> This default implementation returns null so that we can
-     * easily ignore cases; it's useful to ignore a case when
-     * inheritance will catch all the cases anyway. <!-- end-user-doc
-     * -->
-     *
-     * @return the new adapter.
-     * @see OpenDDS.Typedef
-     * @generated
-     */
-    public Adapter createTypedefAdapter() {
-        return null;
-    }
-
-    /**
-     * Creates a new adapter for an object of class '
      * {@link OpenDDS.OULong <em>OU Long</em>}'. <!-- begin-user-doc
      * --> This default implementation returns null so that we can
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.OULong
      * @generated
@@ -899,7 +890,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.OULongLong
      * @generated
@@ -909,11 +900,12 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.Union <em>Union</em>}'.
-     * <!-- begin-user-doc -->
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.Union <em>Union</em>}'. <!-- begin-user-doc -->
      * This default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.Union
      * @generated
@@ -929,7 +921,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.OUShort
      * @generated
@@ -945,7 +937,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.DataReader
      * @generated
@@ -955,11 +947,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.DataReaderWriter <em>Data Reader Writer</em>}'.
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.DataReaderWriter <em>Data Reader Writer</em>}'.
      * <!-- begin-user-doc --> This default implementation returns
      * null so that we can easily ignore cases; it's useful to ignore
      * a case when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.DataReaderWriter
      * @generated
@@ -975,7 +969,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.DataWriter
      * @generated
@@ -991,7 +985,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.Domain
      * @generated
@@ -1001,11 +995,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.DomainParticipant <em>Domain Participant</em>}'.
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.DomainParticipant <em>Domain Participant</em>}'.
      * <!-- begin-user-doc --> This default implementation returns
      * null so that we can easily ignore cases; it's useful to ignore
      * a case when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.DomainParticipant
      * @generated
@@ -1021,7 +1017,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.Publisher
      * @generated
@@ -1031,11 +1027,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.PublisherSubscriber <em>Publisher Subscriber</em>}'.
-     * <!-- begin-user-doc --> This
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.PublisherSubscriber
+     * <em>Publisher Subscriber</em>}'. <!-- begin-user-doc --> This
      * default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.PublisherSubscriber
      * @generated
@@ -1051,7 +1049,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.Subscriber
      * @generated
@@ -1061,11 +1059,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.DeadlineQosPolicy <em>Deadline Qos Policy</em>}'.
-     * <!-- begin-user-doc --> This default implementation returns
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.DeadlineQosPolicy <em>Deadline Qos Policy</em>}
+     * '. <!-- begin-user-doc --> This default implementation returns
      * null so that we can easily ignore cases; it's useful to ignore
      * a case when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.DeadlineQosPolicy
      * @generated
@@ -1082,7 +1082,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.DestinationOrderQosPolicy
      * @generated
@@ -1092,11 +1092,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.DurabilityQosPolicy <em>Durability Qos Policy</em>}'.
-     * <!-- begin-user-doc --> This
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.DurabilityQosPolicy
+     * <em>Durability Qos Policy</em>}'. <!-- begin-user-doc --> This
      * default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.DurabilityQosPolicy
      * @generated
@@ -1113,7 +1115,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.DurabilityServiceQosPolicy
      * @generated
@@ -1123,11 +1125,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.EntityFactoryQosPolicy <em>Entity Factory Qos Policy</em>}'.
-     * <!-- begin-user-doc -->
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.EntityFactoryQosPolicy
+     * <em>Entity Factory Qos Policy</em>}'. <!-- begin-user-doc -->
      * This default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.EntityFactoryQosPolicy
      * @generated
@@ -1137,11 +1141,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.GroupDataQosPolicy <em>Group Data Qos Policy</em>}'.
-     * <!-- begin-user-doc --> This
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.GroupDataQosPolicy
+     * <em>Group Data Qos Policy</em>}'. <!-- begin-user-doc --> This
      * default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.GroupDataQosPolicy
      * @generated
@@ -1151,11 +1157,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.HistoryQosPolicy <em>History Qos Policy</em>}'.
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.HistoryQosPolicy <em>History Qos Policy</em>}'.
      * <!-- begin-user-doc --> This default implementation returns
      * null so that we can easily ignore cases; it's useful to ignore
      * a case when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.HistoryQosPolicy
      * @generated
@@ -1165,11 +1173,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.LatencyBudgetQosPolicy <em>Latency Budget Qos Policy</em>}'.
-     * <!-- begin-user-doc -->
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.LatencyBudgetQosPolicy
+     * <em>Latency Budget Qos Policy</em>}'. <!-- begin-user-doc -->
      * This default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.LatencyBudgetQosPolicy
      * @generated
@@ -1179,11 +1189,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.LifespanQosPolicy <em>Lifespan Qos Policy</em>}'.
-     * <!-- begin-user-doc --> This default implementation returns
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.LifespanQosPolicy <em>Lifespan Qos Policy</em>}
+     * '. <!-- begin-user-doc --> This default implementation returns
      * null so that we can easily ignore cases; it's useful to ignore
      * a case when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.LifespanQosPolicy
      * @generated
@@ -1193,11 +1205,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.LivelinessQosPolicy <em>Liveliness Qos Policy</em>}'.
-     * <!-- begin-user-doc --> This
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.LivelinessQosPolicy
+     * <em>Liveliness Qos Policy</em>}'. <!-- begin-user-doc --> This
      * default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.LivelinessQosPolicy
      * @generated
@@ -1207,11 +1221,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.OwnershipQosPolicy <em>Ownership Qos Policy</em>}'.
-     * <!-- begin-user-doc --> This
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.OwnershipQosPolicy
+     * <em>Ownership Qos Policy</em>}'. <!-- begin-user-doc --> This
      * default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.OwnershipQosPolicy
      * @generated
@@ -1228,7 +1244,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.OwnershipStrengthQosPolicy
      * @generated
@@ -1238,11 +1254,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.PartitionQosPolicy <em>Partition Qos Policy</em>}'.
-     * <!-- begin-user-doc --> This
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.PartitionQosPolicy
+     * <em>Partition Qos Policy</em>}'. <!-- begin-user-doc --> This
      * default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.PartitionQosPolicy
      * @generated
@@ -1252,11 +1270,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.PresentationQosPolicy <em>Presentation Qos Policy</em>}'.
-     * <!-- begin-user-doc -->
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.PresentationQosPolicy
+     * <em>Presentation Qos Policy</em>}'. <!-- begin-user-doc -->
      * This default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.PresentationQosPolicy
      * @generated
@@ -1272,7 +1292,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.QosPolicy
      * @generated
@@ -1289,7 +1309,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.ReaderDataLifecycleQosPolicy
      * @generated
@@ -1299,11 +1319,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.ReliabilityQosPolicy <em>Reliability Qos Policy</em>}'.
-     * <!-- begin-user-doc --> This
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.ReliabilityQosPolicy
+     * <em>Reliability Qos Policy</em>}'. <!-- begin-user-doc --> This
      * default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.ReliabilityQosPolicy
      * @generated
@@ -1313,11 +1335,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.ResourceLimitsQosPolicy <em>Resource Limits Qos Policy</em>}'.
-     * <!-- begin-user-doc -->
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.ResourceLimitsQosPolicy
+     * <em>Resource Limits Qos Policy</em>}'. <!-- begin-user-doc -->
      * This default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.ResourceLimitsQosPolicy
      * @generated
@@ -1334,7 +1358,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.TimeBasedFilterQosPolicy
      * @generated
@@ -1344,11 +1368,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.TopicDataQosPolicy <em>Topic Data Qos Policy</em>}'.
-     * <!-- begin-user-doc --> This
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.TopicDataQosPolicy
+     * <em>Topic Data Qos Policy</em>}'. <!-- begin-user-doc --> This
      * default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.TopicDataQosPolicy
      * @generated
@@ -1365,7 +1391,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.TransportPriorityQosPolicy
      * @generated
@@ -1375,11 +1401,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.UserDataQosPolicy <em>User Data Qos Policy</em>}'.
-     * <!-- begin-user-doc --> This default implementation returns
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.UserDataQosPolicy <em>User Data Qos Policy</em>}
+     * '. <!-- begin-user-doc --> This default implementation returns
      * null so that we can easily ignore cases; it's useful to ignore
      * a case when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.UserDataQosPolicy
      * @generated
@@ -1395,7 +1423,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * easily ignore cases; it's useful to ignore a case when
      * inheritance will catch all the cases anyway. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.Period
      * @generated
@@ -1412,7 +1440,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.WriterDataLifecycleQosPolicy
      * @generated
@@ -1422,11 +1450,13 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.ApplicationTarget <em>Application Target</em>}'.
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.ApplicationTarget <em>Application Target</em>}'.
      * <!-- begin-user-doc --> This default implementation returns
      * null so that we can easily ignore cases; it's useful to ignore
      * a case when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.ApplicationTarget
      * @generated
@@ -1442,7 +1472,7 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * that we can easily ignore cases; it's useful to ignore a case
      * when inheritance will catch all the cases anyway. <!--
      * end-user-doc -->
-     *
+     * 
      * @return the new adapter.
      * @see OpenDDS.Transport
      * @generated
@@ -1452,11 +1482,12 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '{@link OpenDDS.Model <em>Model</em>}'.
-     * <!-- begin-user-doc -->
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.Model <em>Model</em>}'. <!-- begin-user-doc -->
      * This default implementation returns null so that we can easily
      * ignore cases; it's useful to ignore a case when inheritance
      * will catch all the cases anyway. <!-- end-user-doc -->
+     * 
      * @return the new adapter.
      * @see OpenDDS.Model
      * @generated
@@ -1466,26 +1497,10 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
     }
 
     /**
-     * Creates a new adapter for an object of class '
-     * {@link OpenDDS.ModelEntity <em>Model Entity</em>}'. <!--
-     * begin-user-doc --> This default implementation returns null so
-     * that we can easily ignore cases; it's useful to ignore a case
-     * when inheritance will catch all the cases anyway. <!--
-     * end-user-doc -->
-     *
-     * @return the new adapter.
-     * @see OpenDDS.ModelEntity
-     * @generated
-     */
-    public Adapter createModelEntityAdapter() {
-        return null;
-    }
-
-    /**
      * Creates a new adapter for the default case. <!-- begin-user-doc
      * --> This default implementation returns null. <!-- end-user-doc
      * -->
-     *
+     * 
      * @return the new adapter.
      * @generated
      */

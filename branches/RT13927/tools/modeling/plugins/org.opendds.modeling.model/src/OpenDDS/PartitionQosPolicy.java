@@ -12,14 +12,14 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Partition Qos Policy</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.PartitionQosPolicy#getName <em>Name</em>}</li>
+ * <li>{@link OpenDDS.PartitionQosPolicy#getName <em>Name</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getPartitionQosPolicy()
  * @model
  * @generated
@@ -33,7 +33,7 @@ public interface PartitionQosPolicy extends QosPolicy {
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @return the value of the '<em>Name</em>' attribute.
      * @see #setName(String)
      * @see OpenDDS.OpenDDSPackage#getPartitionQosPolicy_Name()
@@ -43,9 +43,12 @@ public interface PartitionQosPolicy extends QosPolicy {
     String getName();
 
     /**
-     * Sets the value of the '{@link OpenDDS.PartitionQosPolicy#getName <em>Name</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
-     * @param value the new value of the '<em>Name</em>' attribute.
+     * Sets the value of the '
+     * {@link OpenDDS.PartitionQosPolicy#getName <em>Name</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @param value
+     *            the new value of the '<em>Name</em>' attribute.
      * @see #getName()
      * @generated
      */

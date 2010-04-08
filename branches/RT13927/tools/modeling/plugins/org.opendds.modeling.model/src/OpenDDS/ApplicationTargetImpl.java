@@ -23,21 +23,25 @@ import org.eclipse.emf.ecore.util.EObjectResolvingEList;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.ApplicationTargetImpl#getComponent_type <em>Component type</em>}</li>
- *   <li>{@link OpenDDS.ApplicationTargetImpl#getLanguage <em>Language</em>}</li>
- *   <li>{@link OpenDDS.ApplicationTargetImpl#getPlatform <em>Platform</em>}</li>
- *   <li>{@link OpenDDS.ApplicationTargetImpl#getParticipants <em>Participants</em>}</li>
- *   <li>{@link OpenDDS.ApplicationTargetImpl#getService_arguments <em>Service arguments</em>}</li>
+ * <li>{@link OpenDDS.ApplicationTargetImpl#getComponent_type <em>
+ * Component type</em>}</li>
+ * <li>{@link OpenDDS.ApplicationTargetImpl#getLanguage <em>Language
+ * </em>}</li>
+ * <li>{@link OpenDDS.ApplicationTargetImpl#getPlatform <em>Platform
+ * </em>}</li>
+ * <li>{@link OpenDDS.ApplicationTargetImpl#getParticipants <em>
+ * Participants</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarget {
     /**
-     * The default value of the '{@link #getComponent_type() <em>Component type</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * The default value of the '{@link #getComponent_type()
+     * <em>Component type</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #getComponent_type()
      * @generated
      * @ordered
@@ -45,9 +49,10 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     protected static final ComponentType COMPONENT_TYPE_EDEFAULT = ComponentType.EXECUTABLE;
 
     /**
-     * The cached value of the '{@link #getComponent_type() <em>Component type</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * The cached value of the '{@link #getComponent_type()
+     * <em>Component type</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #getComponent_type()
      * @generated
      * @ordered
@@ -55,9 +60,10 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     protected ComponentType component_type = COMPONENT_TYPE_EDEFAULT;
 
     /**
-     * The default value of the '{@link #getLanguage() <em>Language</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The default value of the '{@link #getLanguage()
+     * <em>Language</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getLanguage()
      * @generated
      * @ordered
@@ -65,9 +71,10 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     protected static final LanguageType LANGUAGE_EDEFAULT = LanguageType.CXX;
 
     /**
-     * The cached value of the '{@link #getLanguage() <em>Language</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getLanguage()
+     * <em>Language</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getLanguage()
      * @generated
      * @ordered
@@ -75,9 +82,10 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     protected LanguageType language = LANGUAGE_EDEFAULT;
 
     /**
-     * The default value of the '{@link #getPlatform() <em>Platform</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The default value of the '{@link #getPlatform()
+     * <em>Platform</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getPlatform()
      * @generated
      * @ordered
@@ -85,9 +93,10 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     protected static final PlatformType PLATFORM_EDEFAULT = PlatformType.MPC_CDT;
 
     /**
-     * The cached value of the '{@link #getPlatform() <em>Platform</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getPlatform()
+     * <em>Platform</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getPlatform()
      * @generated
      * @ordered
@@ -95,9 +104,10 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     protected PlatformType platform = PLATFORM_EDEFAULT;
 
     /**
-     * The cached value of the '{@link #getParticipants() <em>Participants</em>}' reference list.
-     * <!-- begin-user-doc -->
+     * The cached value of the '{@link #getParticipants()
+     * <em>Participants</em>}' reference list. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #getParticipants()
      * @generated
      * @ordered
@@ -105,27 +115,8 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
     protected EList<DomainParticipant> participants;
 
     /**
-     * The default value of the '{@link #getService_arguments() <em>Service arguments</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @see #getService_arguments()
-     * @generated
-     * @ordered
-     */
-    protected static final String SERVICE_ARGUMENTS_EDEFAULT = null;
-
-    /**
-     * The cached value of the '{@link #getService_arguments() <em>Service arguments</em>}' attribute.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @see #getService_arguments()
-     * @generated
-     * @ordered
-     */
-    protected String service_arguments = SERVICE_ARGUMENTS_EDEFAULT;
-
-    /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected ApplicationTargetImpl() {
@@ -134,6 +125,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -143,6 +135,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public ComponentType getComponent_type() {
@@ -151,6 +144,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setComponent_type(ComponentType newComponent_type) {
@@ -164,6 +158,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public LanguageType getLanguage() {
@@ -172,6 +167,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setLanguage(LanguageType newLanguage) {
@@ -185,6 +181,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public PlatformType getPlatform() {
@@ -193,6 +190,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setPlatform(PlatformType newPlatform) {
@@ -206,6 +204,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public EList<DomainParticipant> getParticipants() {
@@ -218,27 +217,7 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
-     * @generated
-     */
-    public String getService_arguments() {
-        return service_arguments;
-    }
-
-    /**
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
-     * @generated
-     */
-    public void setService_arguments(String newService_arguments) {
-        String oldService_arguments = service_arguments;
-        service_arguments = newService_arguments;
-        if (eNotificationRequired()) {
-            eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS,
-                    oldService_arguments, service_arguments));
-        }
-    }
-
-    /**
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -252,14 +231,13 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
                 return getPlatform();
             case OpenDDSPackage.APPLICATION_TARGET__PARTICIPANTS:
                 return getParticipants();
-            case OpenDDSPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS:
-                return getService_arguments();
         }
         return super.eGet(featureID, resolve, coreType);
     }
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @SuppressWarnings("unchecked")
@@ -279,15 +257,13 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
                 getParticipants().clear();
                 getParticipants().addAll((Collection<? extends DomainParticipant>) newValue);
                 return;
-            case OpenDDSPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS:
-                setService_arguments((String) newValue);
-                return;
         }
         super.eSet(featureID, newValue);
     }
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -305,15 +281,13 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
             case OpenDDSPackage.APPLICATION_TARGET__PARTICIPANTS:
                 getParticipants().clear();
                 return;
-            case OpenDDSPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS:
-                setService_arguments(SERVICE_ARGUMENTS_EDEFAULT);
-                return;
         }
         super.eUnset(featureID);
     }
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -327,15 +301,13 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
                 return platform != PLATFORM_EDEFAULT;
             case OpenDDSPackage.APPLICATION_TARGET__PARTICIPANTS:
                 return participants != null && !participants.isEmpty();
-            case OpenDDSPackage.APPLICATION_TARGET__SERVICE_ARGUMENTS:
-                return SERVICE_ARGUMENTS_EDEFAULT == null ? service_arguments != null : !SERVICE_ARGUMENTS_EDEFAULT
-                        .equals(service_arguments);
         }
         return super.eIsSet(featureID);
     }
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -351,8 +323,6 @@ public class ApplicationTargetImpl extends EntityImpl implements ApplicationTarg
         result.append(language);
         result.append(", platform: ");
         result.append(platform);
-        result.append(", service_arguments: ");
-        result.append(service_arguments);
         result.append(')');
         return result.toString();
     }

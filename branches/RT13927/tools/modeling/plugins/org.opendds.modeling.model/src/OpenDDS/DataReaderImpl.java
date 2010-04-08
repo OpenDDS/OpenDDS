@@ -20,20 +20,25 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.DataReaderImpl#getTopic <em>Topic</em>}</li>
- *   <li>{@link OpenDDS.DataReaderImpl#getReader_data_lifecycle <em>Reader data lifecycle</em>}</li>
- *   <li>{@link OpenDDS.DataReaderImpl#getTransport_priority <em>Transport priority</em>}</li>
- *   <li>{@link OpenDDS.DataReaderImpl#getDurability_service <em>Durability service</em>}</li>
- *   <li>{@link OpenDDS.DataReaderImpl#getOwnership_strength <em>Ownership strength</em>}</li>
+ * <li>{@link OpenDDS.DataReaderImpl#getTopic <em>Topic</em>}</li>
+ * <li>{@link OpenDDS.DataReaderImpl#getReader_data_lifecycle <em>
+ * Reader data lifecycle</em>}</li>
+ * <li>{@link OpenDDS.DataReaderImpl#getTransport_priority <em>
+ * Transport priority</em>}</li>
+ * <li>{@link OpenDDS.DataReaderImpl#getDurability_service <em>
+ * Durability service</em>}</li>
+ * <li>{@link OpenDDS.DataReaderImpl#getOwnership_strength <em>
+ * Ownership strength</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
     /**
-     * The cached value of the '{@link #getTopic() <em>Topic</em>}' reference.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The cached value of the '{@link #getTopic() <em>Topic</em>}'
+     * reference. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getTopic()
      * @generated
      * @ordered
@@ -41,9 +46,10 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
     protected TopicDescription topic;
 
     /**
-     * The cached value of the '{@link #getReader_data_lifecycle() <em>Reader data lifecycle</em>}' reference.
-     * <!-- begin-user-doc
+     * The cached value of the '{@link #getReader_data_lifecycle()
+     * <em>Reader data lifecycle</em>}' reference. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @see #getReader_data_lifecycle()
      * @generated
      * @ordered
@@ -51,9 +57,10 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
     protected ReaderDataLifecycleQosPolicy reader_data_lifecycle;
 
     /**
-     * The cached value of the '{@link #getTransport_priority() <em>Transport priority</em>}' reference.
-     * <!-- begin-user-doc
+     * The cached value of the '{@link #getTransport_priority()
+     * <em>Transport priority</em>}' reference. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @see #getTransport_priority()
      * @generated
      * @ordered
@@ -61,9 +68,10 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
     protected TransportPriorityQosPolicy transport_priority;
 
     /**
-     * The cached value of the '{@link #getDurability_service() <em>Durability service</em>}' reference.
-     * <!-- begin-user-doc
+     * The cached value of the '{@link #getDurability_service()
+     * <em>Durability service</em>}' reference. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @see #getDurability_service()
      * @generated
      * @ordered
@@ -71,9 +79,10 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
     protected DurabilityServiceQosPolicy durability_service;
 
     /**
-     * The cached value of the '{@link #getOwnership_strength() <em>Ownership strength</em>}' reference.
-     * <!-- begin-user-doc
+     * The cached value of the '{@link #getOwnership_strength()
+     * <em>Ownership strength</em>}' reference. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @see #getOwnership_strength()
      * @generated
      * @ordered
@@ -82,6 +91,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected DataReaderImpl() {
@@ -90,6 +100,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -99,6 +110,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public TopicDescription getTopic() {
@@ -117,6 +129,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public TopicDescription basicGetTopic() {
@@ -125,6 +138,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setTopic(TopicDescription newTopic) {
@@ -137,6 +151,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public ReaderDataLifecycleQosPolicy getReader_data_lifecycle() {
@@ -156,6 +171,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public ReaderDataLifecycleQosPolicy basicGetReader_data_lifecycle() {
@@ -164,6 +180,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setReader_data_lifecycle(ReaderDataLifecycleQosPolicy newReader_data_lifecycle) {
@@ -177,6 +194,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public TransportPriorityQosPolicy getTransport_priority() {
@@ -195,6 +213,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public TransportPriorityQosPolicy basicGetTransport_priority() {
@@ -203,6 +222,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setTransport_priority(TransportPriorityQosPolicy newTransport_priority) {
@@ -216,6 +236,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DurabilityServiceQosPolicy getDurability_service() {
@@ -234,6 +255,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DurabilityServiceQosPolicy basicGetDurability_service() {
@@ -242,6 +264,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setDurability_service(DurabilityServiceQosPolicy newDurability_service) {
@@ -255,6 +278,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OwnershipStrengthQosPolicy getOwnership_strength() {
@@ -273,6 +297,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OwnershipStrengthQosPolicy basicGetOwnership_strength() {
@@ -281,6 +306,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setOwnership_strength(OwnershipStrengthQosPolicy newOwnership_strength) {
@@ -294,6 +320,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -330,6 +357,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -356,6 +384,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -382,6 +411,7 @@ public class DataReaderImpl extends DataReaderWriterImpl implements DataReader {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

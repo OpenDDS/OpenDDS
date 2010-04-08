@@ -20,24 +20,26 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.TopicFieldImpl#getName <em>Name</em>}</li>
+ * <li>{@link OpenDDS.TopicFieldImpl#getName <em>Name</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public abstract class TopicFieldImpl extends EObjectImpl implements TopicField {
     /**
-     * The default value of the '{@link #getName() <em>Name</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The default value of the '{@link #getName() <em>Name</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getName()
      * @generated
      * @ordered
      */
     protected static final String NAME_EDEFAULT = null;
     /**
-     * The cached value of the '{@link #getName() <em>Name</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The cached value of the '{@link #getName() <em>Name</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getName()
      * @generated
      * @ordered
@@ -46,6 +48,7 @@ public abstract class TopicFieldImpl extends EObjectImpl implements TopicField {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected TopicFieldImpl() {
@@ -54,6 +57,7 @@ public abstract class TopicFieldImpl extends EObjectImpl implements TopicField {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -63,6 +67,7 @@ public abstract class TopicFieldImpl extends EObjectImpl implements TopicField {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String getName() {
@@ -71,6 +76,7 @@ public abstract class TopicFieldImpl extends EObjectImpl implements TopicField {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setName(String newName) {
@@ -83,6 +89,7 @@ public abstract class TopicFieldImpl extends EObjectImpl implements TopicField {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -96,6 +103,7 @@ public abstract class TopicFieldImpl extends EObjectImpl implements TopicField {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -110,6 +118,7 @@ public abstract class TopicFieldImpl extends EObjectImpl implements TopicField {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -124,6 +133,7 @@ public abstract class TopicFieldImpl extends EObjectImpl implements TopicField {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -137,6 +147,7 @@ public abstract class TopicFieldImpl extends EObjectImpl implements TopicField {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

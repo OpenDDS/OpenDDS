@@ -16,12 +16,13 @@ import org.eclipse.emf.ecore.EClass;
  * <em><b>Constructed Topic Type</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
- *
+ * 
  * @generated
  */
 public abstract class ConstructedTopicTypeImpl extends TopicFieldImpl implements ConstructedTopicType {
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected ConstructedTopicTypeImpl() {
@@ -30,6 +31,7 @@ public abstract class ConstructedTopicTypeImpl extends TopicFieldImpl implements
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

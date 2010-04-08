@@ -19,17 +19,19 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.TransportImpl#getTransport_id <em>Transport id</em>}</li>
+ * <li>{@link OpenDDS.TransportImpl#getTransport_id <em>Transport id
+ * </em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class TransportImpl extends EntityImpl implements Transport {
     /**
-     * The default value of the '{@link #getTransport_id() <em>Transport id</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The default value of the '{@link #getTransport_id()
+     * <em>Transport id</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getTransport_id()
      * @generated
      * @ordered
@@ -37,9 +39,10 @@ public class TransportImpl extends EntityImpl implements Transport {
     protected static final long TRANSPORT_ID_EDEFAULT = 0L;
 
     /**
-     * The cached value of the '{@link #getTransport_id() <em>Transport id</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getTransport_id()
+     * <em>Transport id</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getTransport_id()
      * @generated
      * @ordered
@@ -48,6 +51,7 @@ public class TransportImpl extends EntityImpl implements Transport {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected TransportImpl() {
@@ -56,6 +60,7 @@ public class TransportImpl extends EntityImpl implements Transport {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -65,6 +70,7 @@ public class TransportImpl extends EntityImpl implements Transport {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public long getTransport_id() {
@@ -73,6 +79,7 @@ public class TransportImpl extends EntityImpl implements Transport {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setTransport_id(long newTransport_id) {
@@ -86,6 +93,7 @@ public class TransportImpl extends EntityImpl implements Transport {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -99,6 +107,7 @@ public class TransportImpl extends EntityImpl implements Transport {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -113,6 +122,7 @@ public class TransportImpl extends EntityImpl implements Transport {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -127,6 +137,7 @@ public class TransportImpl extends EntityImpl implements Transport {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -140,6 +151,7 @@ public class TransportImpl extends EntityImpl implements Transport {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

@@ -19,16 +19,17 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.PartitionQosPolicyImpl#getName <em>Name</em>}</li>
+ * <li>{@link OpenDDS.PartitionQosPolicyImpl#getName <em>Name</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQosPolicy {
     /**
-     * The default value of the '{@link #getName() <em>Name</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The default value of the '{@link #getName() <em>Name</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getName()
      * @generated
      * @ordered
@@ -36,8 +37,9 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
     protected static final String NAME_EDEFAULT = null;
 
     /**
-     * The cached value of the '{@link #getName() <em>Name</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The cached value of the '{@link #getName() <em>Name</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getName()
      * @generated
      * @ordered
@@ -46,6 +48,7 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected PartitionQosPolicyImpl() {
@@ -54,6 +57,7 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -63,6 +67,7 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String getName() {
@@ -71,6 +76,7 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setName(String newName) {
@@ -84,6 +90,7 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -97,6 +104,7 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -111,6 +119,7 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -125,6 +134,7 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -138,6 +148,7 @@ public class PartitionQosPolicyImpl extends QosPolicyImpl implements PartitionQo
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

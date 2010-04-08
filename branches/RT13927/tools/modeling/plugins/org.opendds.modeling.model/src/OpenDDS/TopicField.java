@@ -14,14 +14,14 @@ import org.eclipse.emf.ecore.EObject;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Topic Field</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.TopicField#getName <em>Name</em>}</li>
+ * <li>{@link OpenDDS.TopicField#getName <em>Name</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getTopicField()
  * @model abstract="true"
  * @generated
@@ -36,7 +36,7 @@ public interface TopicField extends EObject {
      * there really should be more of a description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @return the value of the '<em>Name</em>' attribute.
      * @see #setName(String)
      * @see OpenDDS.OpenDDSPackage#getTopicField_Name()
@@ -46,10 +46,12 @@ public interface TopicField extends EObject {
     String getName();
 
     /**
-     * Sets the value of the '{@link OpenDDS.TopicField#getName <em>Name</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * Sets the value of the '{@link OpenDDS.TopicField#getName
+     * <em>Name</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
-     * @param value the new value of the '<em>Name</em>' attribute.
+     * 
+     * @param value
+     *            the new value of the '<em>Name</em>' attribute.
      * @see #getName()
      * @generated
      */

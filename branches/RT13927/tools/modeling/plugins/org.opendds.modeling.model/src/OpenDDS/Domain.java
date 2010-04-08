@@ -12,11 +12,11 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Domain</b></em>'. <!-- end-user-doc -->
- *
- *
+ * 
+ * 
  * @see OpenDDS.OpenDDSPackage#getDomain()
  * @model
  * @generated
  */
-public interface Domain extends NamedEntity, ModelEntity {
+public interface Domain extends NamedEntity {
 } // Domain

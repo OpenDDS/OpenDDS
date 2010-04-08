@@ -19,6 +19,7 @@ import org.eclipse.emf.common.util.Enumerator;
  * <!-- begin-user-doc --> A representation of the literals of the
  * enumeration '<em><b>Liveliness Qos Policy Kind</b></em>', and
  * utility methods for working with them. <!-- end-user-doc -->
+ * 
  * @see OpenDDS.OpenDDSPackage#getLivelinessQosPolicyKind()
  * @model
  * @generated
@@ -27,7 +28,7 @@ public enum LivelinessQosPolicyKind implements Enumerator {
     /**
      * The '<em><b>AUTOMATIC</b></em>' literal object. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #AUTOMATIC_VALUE
      * @generated
      * @ordered
@@ -37,6 +38,7 @@ public enum LivelinessQosPolicyKind implements Enumerator {
     /**
      * The '<em><b>MANUAL BY PARTICIPANT</b></em>' literal object.
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #MANUAL_BY_PARTICIPANT_VALUE
      * @generated
      * @ordered
@@ -46,7 +48,7 @@ public enum LivelinessQosPolicyKind implements Enumerator {
     /**
      * The '<em><b>MANUAL BY TOPIC</b></em>' literal object. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #MANUAL_BY_TOPIC_VALUE
      * @generated
      * @ordered
@@ -62,7 +64,7 @@ public enum LivelinessQosPolicyKind implements Enumerator {
      * here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #AUTOMATIC
      * @model
      * @generated
@@ -79,7 +81,7 @@ public enum LivelinessQosPolicyKind implements Enumerator {
      * description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #MANUAL_BY_PARTICIPANT
      * @model
      * @generated
@@ -96,7 +98,7 @@ public enum LivelinessQosPolicyKind implements Enumerator {
      * description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #MANUAL_BY_TOPIC
      * @model
      * @generated
@@ -105,8 +107,9 @@ public enum LivelinessQosPolicyKind implements Enumerator {
     public static final int MANUAL_BY_TOPIC_VALUE = 2;
 
     /**
-     * An array of all the '<em><b>Liveliness Qos Policy Kind</b></em>' enumerators.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * An array of all the '<em><b>Liveliness Qos Policy Kind</b></em>
+     * ' enumerators. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private static final LivelinessQosPolicyKind[] VALUES_ARRAY = new LivelinessQosPolicyKind[] { AUTOMATIC,
@@ -116,16 +119,17 @@ public enum LivelinessQosPolicyKind implements Enumerator {
      * A public read-only list of all the '
      * <em><b>Liveliness Qos Policy Kind</b></em>' enumerators. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @generated
      */
     public static final List<LivelinessQosPolicyKind> VALUES = Collections
             .unmodifiableList(Arrays.asList(VALUES_ARRAY));
 
     /**
-     * Returns the '<em><b>Liveliness Qos Policy Kind</b></em>' literal with the specified literal value.
-     * <!-- begin-user-doc
+     * Returns the '<em><b>Liveliness Qos Policy Kind</b></em>'
+     * literal with the specified literal value. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public static LivelinessQosPolicyKind get(String literal) {
@@ -139,9 +143,10 @@ public enum LivelinessQosPolicyKind implements Enumerator {
     }
 
     /**
-     * Returns the '<em><b>Liveliness Qos Policy Kind</b></em>' literal with the specified name.
-     * <!-- begin-user-doc --> <!--
+     * Returns the '<em><b>Liveliness Qos Policy Kind</b></em>'
+     * literal with the specified name. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @generated
      */
     public static LivelinessQosPolicyKind getByName(String name) {
@@ -155,9 +160,10 @@ public enum LivelinessQosPolicyKind implements Enumerator {
     }
 
     /**
-     * Returns the '<em><b>Liveliness Qos Policy Kind</b></em>' literal with the specified integer value.
-     * <!-- begin-user-doc
+     * Returns the '<em><b>Liveliness Qos Policy Kind</b></em>'
+     * literal with the specified integer value. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public static LivelinessQosPolicyKind get(int value) {
@@ -174,26 +180,29 @@ public enum LivelinessQosPolicyKind implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private final int value;
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private final String name;
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private final String literal;
 
     /**
-     * Only this class can construct instances.
-     * <!-- begin-user-doc
+     * Only this class can construct instances. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private LivelinessQosPolicyKind(int value, String name, String literal) {
@@ -204,6 +213,7 @@ public enum LivelinessQosPolicyKind implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public int getValue() {
@@ -212,6 +222,7 @@ public enum LivelinessQosPolicyKind implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String getName() {
@@ -220,6 +231,7 @@ public enum LivelinessQosPolicyKind implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String getLiteral() {
@@ -227,9 +239,10 @@ public enum LivelinessQosPolicyKind implements Enumerator {
     }
 
     /**
-     * Returns the literal value of the enumerator, which is its string representation.
-     * <!-- begin-user-doc --> <!--
+     * Returns the literal value of the enumerator, which is its
+     * string representation. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @generated
      */
     @Override

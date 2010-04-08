@@ -19,6 +19,7 @@ import org.eclipse.emf.common.util.Enumerator;
  * <!-- begin-user-doc --> A representation of the literals of the
  * enumeration '<em><b>Durability Qos Policy Kind</b></em>', and
  * utility methods for working with them. <!-- end-user-doc -->
+ * 
  * @see OpenDDS.OpenDDSPackage#getDurabilityQosPolicyKind()
  * @model
  * @generated
@@ -27,7 +28,7 @@ public enum DurabilityQosPolicyKind implements Enumerator {
     /**
      * The '<em><b>VOLATILE</b></em>' literal object. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #VOLATILE_VALUE
      * @generated
      * @ordered
@@ -37,7 +38,7 @@ public enum DurabilityQosPolicyKind implements Enumerator {
     /**
      * The '<em><b>TRANSIENT</b></em>' literal object. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #TRANSIENT_VALUE
      * @generated
      * @ordered
@@ -47,7 +48,7 @@ public enum DurabilityQosPolicyKind implements Enumerator {
     /**
      * The '<em><b>TRANSIENT LOCAL</b></em>' literal object. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #TRANSIENT_LOCAL_VALUE
      * @generated
      * @ordered
@@ -57,7 +58,7 @@ public enum DurabilityQosPolicyKind implements Enumerator {
     /**
      * The '<em><b>PERSISTENT</b></em>' literal object. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #PERSISTENT_VALUE
      * @generated
      * @ordered
@@ -73,7 +74,7 @@ public enum DurabilityQosPolicyKind implements Enumerator {
      * here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #VOLATILE
      * @model
      * @generated
@@ -90,7 +91,7 @@ public enum DurabilityQosPolicyKind implements Enumerator {
      * here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #TRANSIENT
      * @model
      * @generated
@@ -107,7 +108,7 @@ public enum DurabilityQosPolicyKind implements Enumerator {
      * description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #TRANSIENT_LOCAL
      * @model
      * @generated
@@ -124,7 +125,7 @@ public enum DurabilityQosPolicyKind implements Enumerator {
      * here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @see #PERSISTENT
      * @model
      * @generated
@@ -133,8 +134,9 @@ public enum DurabilityQosPolicyKind implements Enumerator {
     public static final int PERSISTENT_VALUE = 3;
 
     /**
-     * An array of all the '<em><b>Durability Qos Policy Kind</b></em>' enumerators.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * An array of all the '<em><b>Durability Qos Policy Kind</b></em>
+     * ' enumerators. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private static final DurabilityQosPolicyKind[] VALUES_ARRAY = new DurabilityQosPolicyKind[] { VOLATILE, TRANSIENT,
@@ -144,16 +146,17 @@ public enum DurabilityQosPolicyKind implements Enumerator {
      * A public read-only list of all the '
      * <em><b>Durability Qos Policy Kind</b></em>' enumerators. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @generated
      */
     public static final List<DurabilityQosPolicyKind> VALUES = Collections
             .unmodifiableList(Arrays.asList(VALUES_ARRAY));
 
     /**
-     * Returns the '<em><b>Durability Qos Policy Kind</b></em>' literal with the specified literal value.
-     * <!-- begin-user-doc
+     * Returns the '<em><b>Durability Qos Policy Kind</b></em>'
+     * literal with the specified literal value. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public static DurabilityQosPolicyKind get(String literal) {
@@ -167,9 +170,10 @@ public enum DurabilityQosPolicyKind implements Enumerator {
     }
 
     /**
-     * Returns the '<em><b>Durability Qos Policy Kind</b></em>' literal with the specified name.
-     * <!-- begin-user-doc --> <!--
+     * Returns the '<em><b>Durability Qos Policy Kind</b></em>'
+     * literal with the specified name. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @generated
      */
     public static DurabilityQosPolicyKind getByName(String name) {
@@ -183,9 +187,10 @@ public enum DurabilityQosPolicyKind implements Enumerator {
     }
 
     /**
-     * Returns the '<em><b>Durability Qos Policy Kind</b></em>' literal with the specified integer value.
-     * <!-- begin-user-doc
+     * Returns the '<em><b>Durability Qos Policy Kind</b></em>'
+     * literal with the specified integer value. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public static DurabilityQosPolicyKind get(int value) {
@@ -204,26 +209,29 @@ public enum DurabilityQosPolicyKind implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private final int value;
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private final String name;
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private final String literal;
 
     /**
-     * Only this class can construct instances.
-     * <!-- begin-user-doc
+     * Only this class can construct instances. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     private DurabilityQosPolicyKind(int value, String name, String literal) {
@@ -234,6 +242,7 @@ public enum DurabilityQosPolicyKind implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public int getValue() {
@@ -242,6 +251,7 @@ public enum DurabilityQosPolicyKind implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String getName() {
@@ -250,6 +260,7 @@ public enum DurabilityQosPolicyKind implements Enumerator {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public String getLiteral() {
@@ -257,9 +268,10 @@ public enum DurabilityQosPolicyKind implements Enumerator {
     }
 
     /**
-     * Returns the literal value of the enumerator, which is its string representation.
-     * <!-- begin-user-doc --> <!--
+     * Returns the literal value of the enumerator, which is its
+     * string representation. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @generated
      */
     @Override

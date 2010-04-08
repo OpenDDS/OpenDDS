@@ -38,14 +38,15 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <em>Service cleanup delay</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements DurabilityServiceQosPolicy {
     /**
-     * The default value of the '{@link #getHistory_depth() <em>History depth</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * The default value of the '{@link #getHistory_depth()
+     * <em>History depth</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #getHistory_depth()
      * @generated
      * @ordered
@@ -53,9 +54,10 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     protected static final long HISTORY_DEPTH_EDEFAULT = 1L;
 
     /**
-     * The cached value of the '{@link #getHistory_depth() <em>History depth</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * The cached value of the '{@link #getHistory_depth()
+     * <em>History depth</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #getHistory_depth()
      * @generated
      * @ordered
@@ -63,9 +65,10 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     protected long history_depth = HISTORY_DEPTH_EDEFAULT;
 
     /**
-     * The default value of the '{@link #getHistory_kind() <em>History kind</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The default value of the '{@link #getHistory_kind()
+     * <em>History kind</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getHistory_kind()
      * @generated
      * @ordered
@@ -73,9 +76,10 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     protected static final HistoryQosPolicyKind HISTORY_KIND_EDEFAULT = HistoryQosPolicyKind.KEEP_LAST;
 
     /**
-     * The cached value of the '{@link #getHistory_kind() <em>History kind</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getHistory_kind()
+     * <em>History kind</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getHistory_kind()
      * @generated
      * @ordered
@@ -83,9 +87,10 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     protected HistoryQosPolicyKind history_kind = HISTORY_KIND_EDEFAULT;
 
     /**
-     * The default value of the '{@link #getMax_instances() <em>Max instances</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * The default value of the '{@link #getMax_instances()
+     * <em>Max instances</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #getMax_instances()
      * @generated
      * @ordered
@@ -93,9 +98,10 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     protected static final long MAX_INSTANCES_EDEFAULT = -1L;
 
     /**
-     * The cached value of the '{@link #getMax_instances() <em>Max instances</em>}' attribute.
-     * <!-- begin-user-doc -->
+     * The cached value of the '{@link #getMax_instances()
+     * <em>Max instances</em>}' attribute. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #getMax_instances()
      * @generated
      * @ordered
@@ -103,9 +109,10 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     protected long max_instances = MAX_INSTANCES_EDEFAULT;
 
     /**
-     * The default value of the '{@link #getMax_samples() <em>Max samples</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The default value of the '{@link #getMax_samples()
+     * <em>Max samples</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getMax_samples()
      * @generated
      * @ordered
@@ -113,9 +120,10 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
     protected static final long MAX_SAMPLES_EDEFAULT = -1L;
 
     /**
-     * The cached value of the '{@link #getMax_samples() <em>Max samples</em>}' attribute.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getMax_samples()
+     * <em>Max samples</em>}' attribute. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getMax_samples()
      * @generated
      * @ordered
@@ -127,7 +135,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
      * {@link #getMax_samples_per_instance()
      * <em>Max samples per instance</em>}' attribute. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #getMax_samples_per_instance()
      * @generated
      * @ordered
@@ -138,7 +146,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
      * The cached value of the '{@link #getMax_samples_per_instance()
      * <em>Max samples per instance</em>}' attribute. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #getMax_samples_per_instance()
      * @generated
      * @ordered
@@ -149,7 +157,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
      * The cached value of the '{@link #getService_cleanup_delay()
      * <em>Service cleanup delay</em>}' containment reference. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #getService_cleanup_delay()
      * @generated
      * @ordered
@@ -158,6 +166,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected DurabilityServiceQosPolicyImpl() {
@@ -166,6 +175,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -175,6 +185,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public long getHistory_depth() {
@@ -183,6 +194,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setHistory_depth(long newHistory_depth) {
@@ -196,6 +208,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public HistoryQosPolicyKind getHistory_kind() {
@@ -204,6 +217,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setHistory_kind(HistoryQosPolicyKind newHistory_kind) {
@@ -217,6 +231,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public long getMax_instances() {
@@ -225,6 +240,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setMax_instances(long newMax_instances) {
@@ -238,6 +254,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public long getMax_samples() {
@@ -246,6 +263,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setMax_samples(long newMax_samples) {
@@ -259,6 +277,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public long getMax_samples_per_instance() {
@@ -267,6 +286,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setMax_samples_per_instance(long newMax_samples_per_instance) {
@@ -281,6 +301,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public Period getService_cleanup_delay() {
@@ -289,6 +310,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public NotificationChain basicSetService_cleanup_delay(Period newService_cleanup_delay, NotificationChain msgs) {
@@ -309,6 +331,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setService_cleanup_delay(Period newService_cleanup_delay) {
@@ -335,6 +358,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -348,6 +372,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -371,6 +396,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -400,6 +426,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -429,6 +456,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -452,6 +480,7 @@ public class DurabilityServiceQosPolicyImpl extends QosPolicyImpl implements Dur
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

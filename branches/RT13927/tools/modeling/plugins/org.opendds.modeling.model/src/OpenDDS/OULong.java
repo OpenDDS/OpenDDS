@@ -9,16 +9,14 @@
 
 package OpenDDS;
 
-import org.eclipse.emf.ecore.EObject;
-
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>OU Long</b></em>'. <!-- end-user-doc -->
- *
- *
+ * 
+ * 
  * @see OpenDDS.OpenDDSPackage#getOULong()
  * @model
  * @generated
  */
-public interface OULong extends EObject {
+public interface OULong extends Simple {
 } // OULong

@@ -24,13 +24,14 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * </em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class DestinationOrderQosPolicyImpl extends QosPolicyImpl implements DestinationOrderQosPolicy {
     /**
-     * The default value of the '{@link #getKind() <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The default value of the '{@link #getKind() <em>Kind</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getKind()
      * @generated
      * @ordered
@@ -38,8 +39,9 @@ public class DestinationOrderQosPolicyImpl extends QosPolicyImpl implements Dest
     protected static final DestinationOrderQosPolicyKind KIND_EDEFAULT = DestinationOrderQosPolicyKind.BY_RECEPTION_TIMESTAMP;
 
     /**
-     * The cached value of the '{@link #getKind() <em>Kind</em>}' attribute.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The cached value of the '{@link #getKind() <em>Kind</em>}'
+     * attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getKind()
      * @generated
      * @ordered
@@ -48,6 +50,7 @@ public class DestinationOrderQosPolicyImpl extends QosPolicyImpl implements Dest
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected DestinationOrderQosPolicyImpl() {
@@ -56,6 +59,7 @@ public class DestinationOrderQosPolicyImpl extends QosPolicyImpl implements Dest
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -65,6 +69,7 @@ public class DestinationOrderQosPolicyImpl extends QosPolicyImpl implements Dest
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DestinationOrderQosPolicyKind getKind() {
@@ -73,6 +78,7 @@ public class DestinationOrderQosPolicyImpl extends QosPolicyImpl implements Dest
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setKind(DestinationOrderQosPolicyKind newKind) {
@@ -86,6 +92,7 @@ public class DestinationOrderQosPolicyImpl extends QosPolicyImpl implements Dest
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -99,6 +106,7 @@ public class DestinationOrderQosPolicyImpl extends QosPolicyImpl implements Dest
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -113,6 +121,7 @@ public class DestinationOrderQosPolicyImpl extends QosPolicyImpl implements Dest
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -127,6 +136,7 @@ public class DestinationOrderQosPolicyImpl extends QosPolicyImpl implements Dest
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -140,6 +150,7 @@ public class DestinationOrderQosPolicyImpl extends QosPolicyImpl implements Dest
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

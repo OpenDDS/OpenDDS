@@ -19,10 +19,12 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.EntityFactoryQosPolicyImpl#isAutoenable_created_entities <em>Autoenable created entities</em>}</li>
+ * <li>
+ * {@link OpenDDS.EntityFactoryQosPolicyImpl#isAutoenable_created_entities
+ * <em>Autoenable created entities</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityFactoryQosPolicy {
@@ -31,7 +33,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
      * {@link #isAutoenable_created_entities()
      * <em>Autoenable created entities</em>}' attribute. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #isAutoenable_created_entities()
      * @generated
      * @ordered
@@ -43,7 +45,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
      * {@link #isAutoenable_created_entities()
      * <em>Autoenable created entities</em>}' attribute. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @see #isAutoenable_created_entities()
      * @generated
      * @ordered
@@ -52,6 +54,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected EntityFactoryQosPolicyImpl() {
@@ -60,6 +63,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -69,6 +73,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public boolean isAutoenable_created_entities() {
@@ -77,6 +82,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setAutoenable_created_entities(boolean newAutoenable_created_entities) {
@@ -91,6 +97,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -104,6 +111,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -118,6 +126,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -132,6 +141,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -145,6 +155,7 @@ public class EntityFactoryQosPolicyImpl extends QosPolicyImpl implements EntityF
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

@@ -17,12 +17,13 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
  * <em><b>Entity</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
- *
+ * 
  * @generated
  */
 public abstract class EntityImpl extends EObjectImpl implements Entity {
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected EntityImpl() {
@@ -31,6 +32,7 @@ public abstract class EntityImpl extends EObjectImpl implements Entity {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

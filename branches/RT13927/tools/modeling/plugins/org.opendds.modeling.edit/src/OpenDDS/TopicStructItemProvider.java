@@ -155,9 +155,6 @@ public class TopicStructItemProvider extends ConstructedTopicTypeItemProvider im
                 OpenDDSFactory.eINSTANCE.createOBoolean()));
 
         newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.TOPIC_STRUCT__MEMBERS,
-                OpenDDSFactory.eINSTANCE.createCase()));
-
-        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.TOPIC_STRUCT__MEMBERS,
                 OpenDDSFactory.eINSTANCE.createOChar()));
 
         newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.TOPIC_STRUCT__MEMBERS,
@@ -191,10 +188,16 @@ public class TopicStructItemProvider extends ConstructedTopicTypeItemProvider im
                 OpenDDSFactory.eINSTANCE.createTopicStruct()));
 
         newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.TOPIC_STRUCT__MEMBERS,
-                OpenDDSFactory.eINSTANCE.createTypedef()));
+                OpenDDSFactory.eINSTANCE.createOULong()));
+
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.TOPIC_STRUCT__MEMBERS,
+                OpenDDSFactory.eINSTANCE.createOULongLong()));
 
         newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.TOPIC_STRUCT__MEMBERS,
                 OpenDDSFactory.eINSTANCE.createUnion()));
+
+        newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.TOPIC_STRUCT__MEMBERS,
+                OpenDDSFactory.eINSTANCE.createOUShort()));
 
         newChildDescriptors.add(createChildParameter(OpenDDSPackage.Literals.TOPIC_STRUCT__KEYS,
                 OpenDDSFactory.eINSTANCE.createKey()));

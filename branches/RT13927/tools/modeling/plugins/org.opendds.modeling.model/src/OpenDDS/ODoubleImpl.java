@@ -16,12 +16,13 @@ import org.eclipse.emf.ecore.EClass;
  * <em><b>ODouble</b></em>'. <!-- end-user-doc -->
  * <p>
  * </p>
- *
+ * 
  * @generated
  */
 public class ODoubleImpl extends SimpleImpl implements ODouble {
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected ODoubleImpl() {
@@ -30,6 +31,7 @@ public class ODoubleImpl extends SimpleImpl implements ODouble {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

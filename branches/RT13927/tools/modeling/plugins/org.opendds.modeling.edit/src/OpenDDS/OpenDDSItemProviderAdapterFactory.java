@@ -539,30 +539,6 @@ public class OpenDDSItemProviderAdapterFactory extends OpenDDSAdapterFactory imp
 
     /**
      * This keeps track of the one adapter used for all
-     * {@link OpenDDS.Typedef} instances. <!-- begin-user-doc --> <!--
-     * end-user-doc -->
-     * 
-     * @generated
-     */
-    protected TypedefItemProvider typedefItemProvider;
-
-    /**
-     * This creates an adapter for a {@link OpenDDS.Typedef}. <!--
-     * begin-user-doc --> <!-- end-user-doc -->
-     * 
-     * @generated
-     */
-    @Override
-    public Adapter createTypedefAdapter() {
-        if (typedefItemProvider == null) {
-            typedefItemProvider = new TypedefItemProvider(this);
-        }
-
-        return typedefItemProvider;
-    }
-
-    /**
-     * This keeps track of the one adapter used for all
      * {@link OpenDDS.OULong} instances. <!-- begin-user-doc --> <!--
      * end-user-doc -->
      * 
@@ -1599,9 +1575,6 @@ public class OpenDDSItemProviderAdapterFactory extends OpenDDSAdapterFactory imp
         }
         if (topicStructItemProvider != null) {
             topicStructItemProvider.dispose();
-        }
-        if (typedefItemProvider != null) {
-            typedefItemProvider.dispose();
         }
         if (ouLongItemProvider != null) {
             ouLongItemProvider.dispose();

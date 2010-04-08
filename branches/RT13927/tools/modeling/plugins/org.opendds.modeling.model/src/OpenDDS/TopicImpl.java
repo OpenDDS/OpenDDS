@@ -20,28 +20,34 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.TopicImpl#getDurability_service <em>Durability service</em>}</li>
- *   <li>{@link OpenDDS.TopicImpl#getTransport_priority <em>Transport priority</em>}</li>
- *   <li>{@link OpenDDS.TopicImpl#getTopic_data <em>Topic data</em>}</li>
- *   <li>{@link OpenDDS.TopicImpl#getResource_limits <em>Resource limits</em>}</li>
- *   <li>{@link OpenDDS.TopicImpl#getReliability <em>Reliability</em>}</li>
- *   <li>{@link OpenDDS.TopicImpl#getOwnership <em>Ownership</em>}</li>
- *   <li>{@link OpenDDS.TopicImpl#getLiveliness <em>Liveliness</em>}</li>
- *   <li>{@link OpenDDS.TopicImpl#getHistory <em>History</em>}</li>
- *   <li>{@link OpenDDS.TopicImpl#getDurability <em>Durability</em>}</li>
- *   <li>{@link OpenDDS.TopicImpl#getDestination_order <em>Destination order</em>}</li>
- *   <li>{@link OpenDDS.TopicImpl#getDeadline <em>Deadline</em>}</li>
- *   <li>{@link OpenDDS.TopicImpl#getLatency_budget <em>Latency budget</em>}</li>
+ * <li>{@link OpenDDS.TopicImpl#getDurability_service <em>Durability
+ * service</em>}</li>
+ * <li>{@link OpenDDS.TopicImpl#getTransport_priority <em>Transport
+ * priority</em>}</li>
+ * <li>{@link OpenDDS.TopicImpl#getTopic_data <em>Topic data</em>}</li>
+ * <li>{@link OpenDDS.TopicImpl#getResource_limits <em>Resource limits
+ * </em>}</li>
+ * <li>{@link OpenDDS.TopicImpl#getReliability <em>Reliability</em>}</li>
+ * <li>{@link OpenDDS.TopicImpl#getOwnership <em>Ownership</em>}</li>
+ * <li>{@link OpenDDS.TopicImpl#getLiveliness <em>Liveliness</em>}</li>
+ * <li>{@link OpenDDS.TopicImpl#getHistory <em>History</em>}</li>
+ * <li>{@link OpenDDS.TopicImpl#getDurability <em>Durability</em>}</li>
+ * <li>{@link OpenDDS.TopicImpl#getDestination_order <em>Destination
+ * order</em>}</li>
+ * <li>{@link OpenDDS.TopicImpl#getDeadline <em>Deadline</em>}</li>
+ * <li>{@link OpenDDS.TopicImpl#getLatency_budget <em>Latency budget
+ * </em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class TopicImpl extends TopicDescriptionImpl implements Topic {
     /**
-     * The cached value of the '{@link #getDurability_service() <em>Durability service</em>}' reference.
-     * <!-- begin-user-doc
+     * The cached value of the '{@link #getDurability_service()
+     * <em>Durability service</em>}' reference. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @see #getDurability_service()
      * @generated
      * @ordered
@@ -49,9 +55,10 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
     protected DurabilityServiceQosPolicy durability_service;
 
     /**
-     * The cached value of the '{@link #getTransport_priority() <em>Transport priority</em>}' reference.
-     * <!-- begin-user-doc
+     * The cached value of the '{@link #getTransport_priority()
+     * <em>Transport priority</em>}' reference. <!-- begin-user-doc
      * --> <!-- end-user-doc -->
+     * 
      * @see #getTransport_priority()
      * @generated
      * @ordered
@@ -59,9 +66,10 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
     protected TransportPriorityQosPolicy transport_priority;
 
     /**
-     * The cached value of the '{@link #getTopic_data() <em>Topic data</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getTopic_data()
+     * <em>Topic data</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getTopic_data()
      * @generated
      * @ordered
@@ -69,9 +77,10 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
     protected TopicDataQosPolicy topic_data;
 
     /**
-     * The cached value of the '{@link #getResource_limits() <em>Resource limits</em>}' reference.
-     * <!-- begin-user-doc -->
+     * The cached value of the '{@link #getResource_limits()
+     * <em>Resource limits</em>}' reference. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #getResource_limits()
      * @generated
      * @ordered
@@ -79,9 +88,10 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
     protected ResourceLimitsQosPolicy resource_limits;
 
     /**
-     * The cached value of the '{@link #getReliability() <em>Reliability</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getReliability()
+     * <em>Reliability</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getReliability()
      * @generated
      * @ordered
@@ -89,9 +99,10 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
     protected ReliabilityQosPolicy reliability;
 
     /**
-     * The cached value of the '{@link #getOwnership() <em>Ownership</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getOwnership()
+     * <em>Ownership</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getOwnership()
      * @generated
      * @ordered
@@ -99,9 +110,10 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
     protected OwnershipQosPolicy ownership;
 
     /**
-     * The cached value of the '{@link #getLiveliness() <em>Liveliness</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getLiveliness()
+     * <em>Liveliness</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getLiveliness()
      * @generated
      * @ordered
@@ -109,8 +121,9 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
     protected LivelinessQosPolicy liveliness;
 
     /**
-     * The cached value of the '{@link #getHistory() <em>History</em>}' reference.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The cached value of the '{@link #getHistory() <em>History</em>}
+     * ' reference. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @see #getHistory()
      * @generated
      * @ordered
@@ -118,9 +131,10 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
     protected HistoryQosPolicy history;
 
     /**
-     * The cached value of the '{@link #getDurability() <em>Durability</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getDurability()
+     * <em>Durability</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getDurability()
      * @generated
      * @ordered
@@ -128,9 +142,10 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
     protected DurabilityQosPolicy durability;
 
     /**
-     * The cached value of the '{@link #getDestination_order() <em>Destination order</em>}' reference.
-     * <!-- begin-user-doc -->
+     * The cached value of the '{@link #getDestination_order()
+     * <em>Destination order</em>}' reference. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #getDestination_order()
      * @generated
      * @ordered
@@ -138,9 +153,10 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
     protected DestinationOrderQosPolicy destination_order;
 
     /**
-     * The cached value of the '{@link #getDeadline() <em>Deadline</em>}' reference.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getDeadline()
+     * <em>Deadline</em>}' reference. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getDeadline()
      * @generated
      * @ordered
@@ -148,9 +164,10 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
     protected DeadlineQosPolicy deadline;
 
     /**
-     * The cached value of the '{@link #getLatency_budget() <em>Latency budget</em>}' reference.
-     * <!-- begin-user-doc -->
+     * The cached value of the '{@link #getLatency_budget()
+     * <em>Latency budget</em>}' reference. <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * 
      * @see #getLatency_budget()
      * @generated
      * @ordered
@@ -159,6 +176,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected TopicImpl() {
@@ -167,6 +185,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -176,6 +195,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DurabilityServiceQosPolicy getDurability_service() {
@@ -194,6 +214,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DurabilityServiceQosPolicy basicGetDurability_service() {
@@ -202,6 +223,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setDurability_service(DurabilityServiceQosPolicy newDurability_service) {
@@ -215,6 +237,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public TransportPriorityQosPolicy getTransport_priority() {
@@ -233,6 +256,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public TransportPriorityQosPolicy basicGetTransport_priority() {
@@ -241,6 +265,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setTransport_priority(TransportPriorityQosPolicy newTransport_priority) {
@@ -254,6 +279,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public TopicDataQosPolicy getTopic_data() {
@@ -272,6 +298,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public TopicDataQosPolicy basicGetTopic_data() {
@@ -280,6 +307,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setTopic_data(TopicDataQosPolicy newTopic_data) {
@@ -293,6 +321,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public ResourceLimitsQosPolicy getResource_limits() {
@@ -311,6 +340,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public ResourceLimitsQosPolicy basicGetResource_limits() {
@@ -319,6 +349,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setResource_limits(ResourceLimitsQosPolicy newResource_limits) {
@@ -332,6 +363,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public ReliabilityQosPolicy getReliability() {
@@ -350,6 +382,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public ReliabilityQosPolicy basicGetReliability() {
@@ -358,6 +391,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setReliability(ReliabilityQosPolicy newReliability) {
@@ -371,6 +405,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OwnershipQosPolicy getOwnership() {
@@ -389,6 +424,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public OwnershipQosPolicy basicGetOwnership() {
@@ -397,6 +433,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setOwnership(OwnershipQosPolicy newOwnership) {
@@ -410,6 +447,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public LivelinessQosPolicy getLiveliness() {
@@ -428,6 +466,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public LivelinessQosPolicy basicGetLiveliness() {
@@ -436,6 +475,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setLiveliness(LivelinessQosPolicy newLiveliness) {
@@ -449,6 +489,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public HistoryQosPolicy getHistory() {
@@ -467,6 +508,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public HistoryQosPolicy basicGetHistory() {
@@ -475,6 +517,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setHistory(HistoryQosPolicy newHistory) {
@@ -487,6 +530,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DurabilityQosPolicy getDurability() {
@@ -505,6 +549,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DurabilityQosPolicy basicGetDurability() {
@@ -513,6 +558,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setDurability(DurabilityQosPolicy newDurability) {
@@ -526,6 +572,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DestinationOrderQosPolicy getDestination_order() {
@@ -544,6 +591,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DestinationOrderQosPolicy basicGetDestination_order() {
@@ -552,6 +600,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setDestination_order(DestinationOrderQosPolicy newDestination_order) {
@@ -565,6 +614,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DeadlineQosPolicy getDeadline() {
@@ -583,6 +633,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public DeadlineQosPolicy basicGetDeadline() {
@@ -591,6 +642,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setDeadline(DeadlineQosPolicy newDeadline) {
@@ -603,6 +655,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public LatencyBudgetQosPolicy getLatency_budget() {
@@ -621,6 +674,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public LatencyBudgetQosPolicy basicGetLatency_budget() {
@@ -629,6 +683,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public void setLatency_budget(LatencyBudgetQosPolicy newLatency_budget) {
@@ -642,6 +697,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -713,6 +769,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -760,6 +817,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -807,6 +865,7 @@ public class TopicImpl extends TopicDescriptionImpl implements Topic {
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

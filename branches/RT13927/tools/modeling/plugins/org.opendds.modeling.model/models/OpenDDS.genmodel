@@ -28,6 +28,19 @@
     <genAnnotations source="http://www.eclipse.org/emf/2002/GenModel/exporter/org.eclipse.xsd.ecore.exporter.xmi">
       <genAnnotations source="OpenDDS.xsd"/>
     </genAnnotations>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="OpenDDS.ecore#//SimpleType">
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//SimpleType/OBoolean"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//SimpleType/OChar"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//SimpleType/ODouble"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//SimpleType/OFloat"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//SimpleType/OLong"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//SimpleType/OLongLong"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//SimpleType/OOctet"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//SimpleType/OString"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//SimpleType/OULong"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//SimpleType/OULongLong"/>
+      <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//SimpleType/OUShort"/>
+    </genEnums>
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="OpenDDS.ecore#//DestinationOrderQosPolicyKind">
       <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//DestinationOrderQosPolicyKind/BY_RECEPTION_TIMESTAMP"/>
       <genEnumLiterals ecoreEnumLiteral="OpenDDS.ecore#//DestinationOrderQosPolicyKind/BY_SOURCE_TIMESTAMP"/>
@@ -111,11 +124,11 @@
     <genClasses ecoreClass="OpenDDS.ecore#//OBoolean"/>
     <genClasses ecoreClass="OpenDDS.ecore#//Case">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//Case/labels"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Case/type"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//Case/type"/>
     </genClasses>
     <genClasses ecoreClass="OpenDDS.ecore#//OChar"/>
     <genClasses image="false" ecoreClass="OpenDDS.ecore#//Collection">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Collection/type"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//Collection/type"/>
     </genClasses>
     <genClasses image="false" ecoreClass="OpenDDS.ecore#//ConstructedTopicType"/>
     <genClasses ecoreClass="OpenDDS.ecore#//ODouble"/>
@@ -138,15 +151,13 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//TopicStruct/members"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//TopicStruct/keys"/>
     </genClasses>
-    <genClasses image="false" ecoreClass="OpenDDS.ecore#//TopicField"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//Typedef">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Typedef/type"/>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//TopicField">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//TopicField/name"/>
     </genClasses>
     <genClasses ecoreClass="OpenDDS.ecore#//OULong"/>
     <genClasses ecoreClass="OpenDDS.ecore#//OULongLong"/>
     <genClasses ecoreClass="OpenDDS.ecore#//Union">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Union/switch"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Union/cases"/>
+      <genFeatures children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Union/cases"/>
     </genClasses>
     <genClasses ecoreClass="OpenDDS.ecore#//OUShort"/>
     <genClasses ecoreClass="OpenDDS.ecore#//DataReader">
@@ -281,10 +292,18 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//ApplicationTarget/language"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//ApplicationTarget/platform"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//ApplicationTarget/participants"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//ApplicationTarget/service_arguments"/>
     </genClasses>
     <genClasses ecoreClass="OpenDDS.ecore#//Transport">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//Transport/transport_id"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//Model">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Model/applications"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Model/domains"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Model/participants"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Model/topics"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Model/topicTypes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Model/qosPolicies"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Model/transports"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>

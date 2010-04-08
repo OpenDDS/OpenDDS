@@ -24,17 +24,18 @@ import org.eclipse.emf.ecore.util.InternalEList;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link OpenDDS.SubscriberImpl#getReaders <em>Readers</em>}</li>
+ * <li>{@link OpenDDS.SubscriberImpl#getReaders <em>Readers</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class SubscriberImpl extends PublisherSubscriberImpl implements Subscriber {
     /**
-     * The cached value of the '{@link #getReaders() <em>Readers</em>}' containment reference list.
-     * <!-- begin-user-doc --> <!--
+     * The cached value of the '{@link #getReaders() <em>Readers</em>}
+     * ' containment reference list. <!-- begin-user-doc --> <!--
      * end-user-doc -->
+     * 
      * @see #getReaders()
      * @generated
      * @ordered
@@ -43,6 +44,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     protected SubscriberImpl() {
@@ -51,6 +53,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -60,6 +63,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     public EList<DataReader> getReaders() {
@@ -72,6 +76,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -85,6 +90,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -98,6 +104,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @SuppressWarnings("unchecked")
@@ -114,6 +121,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override
@@ -128,6 +136,7 @@ public class SubscriberImpl extends PublisherSubscriberImpl implements Subscribe
 
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
      * @generated
      */
     @Override

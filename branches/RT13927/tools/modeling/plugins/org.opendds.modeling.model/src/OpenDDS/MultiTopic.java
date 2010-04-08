@@ -12,14 +12,15 @@ package OpenDDS;
 /**
  * <!-- begin-user-doc --> A representation of the model object '
  * <em><b>Multi Topic</b></em>'. <!-- end-user-doc -->
- *
+ * 
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link OpenDDS.MultiTopic#getSubscription_expression <em>Subscription expression</em>}</li>
+ * <li>{@link OpenDDS.MultiTopic#getSubscription_expression <em>
+ * Subscription expression</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @see OpenDDS.OpenDDSPackage#getMultiTopic()
  * @model
  * @generated
@@ -35,7 +36,7 @@ public interface MultiTopic extends TopicDescription {
      * description here...
      * </p>
      * <!-- end-user-doc -->
-     *
+     * 
      * @return the value of the '<em>Subscription expression</em>'
      *         attribute.
      * @see #setSubscription_expression(String)
@@ -50,7 +51,7 @@ public interface MultiTopic extends TopicDescription {
      * {@link OpenDDS.MultiTopic#getSubscription_expression
      * <em>Subscription expression</em>}' attribute. <!--
      * begin-user-doc --> <!-- end-user-doc -->
-     *
+     * 
      * @param value
      *            the new value of the '
      *            <em>Subscription expression</em>' attribute.
