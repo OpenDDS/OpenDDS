@@ -96,6 +96,8 @@ public:
     entity_refs_--;
   };
 
+  const char* type_name ();
+
 private:
   /// The topic qos
   DDS::TopicQos                qos_;

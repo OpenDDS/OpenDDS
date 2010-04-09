@@ -109,7 +109,7 @@ char *
                  <%TYPE%>DataReaderImpl(),
                  ::DDS::DataReader::_nil());
 
-    return reader_impl;
+  return reader_impl;
 }
 
 <%NAMESPACEEND%>
@@ -1627,12 +1627,42 @@ void
     return;
   }
 
+
   if (it == instance_map_.end())
   {
+    // first find the instance mapin the participant instance map.
+    // if the instance map for the type is not refistered, then 
+    // create the instance map.
+    // if the instance map for the type exists, then find the 
+    // handle of the instance. If the instance is not registered
+    // 
+    InstanceMap* inst = 0;
+    bool new_handle = true;  
+    if (this->is_exclusive_ownership_) { 
+      if (this->owner_manager_->instance_lock_acquire () != 0) {
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) ")
+                    ACE_TEXT("<%TYPE%>DataReaderImpl::")
+                    ACE_TEXT("store_instance_data, ")
+                    ACE_TEXT("acquire instance_lock failed. \n")));
+        return;
+      }
+      
+      inst = (InstanceMap*)(
+        this->owner_manager_->get_instance_map(this->topic_servant_->type_name(), this));
+      if (inst != 0) {
+        InstanceMap::const_iterator const iter = inst->find(*instance_data);
+        if (iter != inst->end ()) {
+          handle = iter->second;
+          new_handle = false;
+        }
+      } 
+    }
+  
     just_registered = true;
     OpenDDS::DCPS::SubscriptionInstance* instance = 0;
     DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample( instance_data);
-    handle = get_next_handle( key);
+    handle = handle == ::DDS::HANDLE_NIL ? this->get_next_handle( key) : handle;
     ACE_NEW (instance,
              OpenDDS::DCPS::SubscriptionInstance(this,
                                                  this->qos_,
@@ -1652,8 +1682,40 @@ void
       return;
     }
 
-    std::pair<InstanceMap::iterator, bool> bpair
-        = instance_map_.insert(InstanceMap::value_type(*instance_data,
+    if (this->is_exclusive_ownership_) {
+      if (inst == 0) {
+        inst = new InstanceMap ();
+        this->owner_manager_->set_instance_map(
+          this->topic_servant_->type_name(), reinterpret_cast <void* > (inst), this);
+      }
+      
+      if (new_handle) {
+        std::pair<InstanceMap::iterator, bool> bpair = 
+          inst->insert(InstanceMap::value_type(*instance_data,
+                                handle));
+        if (bpair.second == false)
+        {
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("<%TYPE%>DataReaderImpl::")
+                      ACE_TEXT("store_instance_data, ")
+                      ACE_TEXT("insert to participant scope ::<%SCOPE%><%TYPE%> failed. \n")));
+          return;
+        }
+      }                            
+    
+      if (this->owner_manager_->instance_lock_release () != 0) {
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) ")
+                    ACE_TEXT("<%TYPE%>DataReaderImpl::")
+                    ACE_TEXT("store_instance_data, ")
+                    ACE_TEXT("release instance_lock failed. \n")));
+        return;
+      }
+    }
+            
+    std::pair<InstanceMap::iterator, bool> bpair =
+      instance_map_.insert(InstanceMap::value_type(*instance_data,
                                handle));
     if (bpair.second == false)
     {
@@ -1679,7 +1741,7 @@ void
     {
       // Check instance based QoS policy filters
       // (i.e. OWNERSHIP, TIME_BASED_FILTER)
-      filtered = filter_instance(instance_ptr);
+      filtered = this->filter_instance(instance_ptr,header.publication_id_);
 
       if (filtered)
       {
@@ -1770,6 +1832,10 @@ void
       instance_ptr->instance_state_.data_was_received(header.publication_id_) ;
     }
 
+    if (this->is_exclusive_ownership_ && is_unregister_msg) {
+      this->owner_manager_->unregister_reader (this->topic_servant_->type_name(),this);
+    }
+    
     if (! event_notify)
     {       
        return;
@@ -2041,6 +2107,14 @@ void
       ++ it;
   }
 }
+
+void 
+<%TYPE%>DataReaderImpl::delete_instance_map (void* map)
+{
+  InstanceMap* instances = reinterpret_cast <InstanceMap* > (map);
+  delete instances;
+}
+
 
 <%NAMESPACEEND%>
 !EOT

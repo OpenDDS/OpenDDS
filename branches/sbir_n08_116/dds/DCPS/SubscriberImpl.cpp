@@ -958,6 +958,24 @@ SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
   }
 }
 
+void 
+SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
+                                  const CORBA::Long& ownership_strength)
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   this->si_lock_,
+                   );
+
+  for (DataReaderMap::iterator iter = datareader_map_.begin();
+       iter != datareader_map_.end();
+       ++iter) {
+    if (! iter->second->local_reader_impl_->is_bit ()) {
+      iter->second->local_reader_impl_->update_ownership_strength (pub_id, ownership_strength);
+    } 
+  }
+}                               
+                                         
 } // namespace DCPS
 } // namespace OpenDDS
 

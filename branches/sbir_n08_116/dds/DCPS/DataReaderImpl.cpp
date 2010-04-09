@@ -25,7 +25,6 @@
 #include "RequestedDeadlineWatchdog.h"
 #include "QueryConditionImpl.h"
 #include "MonitorFactory.h"
-
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
@@ -47,11 +46,13 @@ DataReaderImpl::DataReaderImpl()
   : rd_allocator_(0),
     qos_(TheServiceParticipant->initial_DataReaderQos()),
     reverse_sample_lock_(sample_lock_),
+    participant_servant_(0),  
     topic_servant_(0),
+    is_exclusive_ownership_ (false),
+    owner_manager_ (0),
     topic_desc_(0),
     listener_mask_(DEFAULT_STATUS_MASK),
     fast_listener_(0),
-    participant_servant_(0),
     domain_id_(0),
     subscriber_servant_(0),
     subscription_id_(GUID_UNKNOWN),
@@ -178,6 +179,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
+  is_exclusive_ownership_ = this->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
   always_get_history_ = ext_qos.durability.always_get_history;
 
   listener_ = DDS::DataReaderListener::_duplicate(a_listener);
@@ -191,6 +193,11 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // Only store the participant pointer, since it is our "grand"
   // parent, we will exist as long as it does
   participant_servant_ = participant;
+  
+  if (is_exclusive_ownership_) {
+    owner_manager_ = participant_servant_->ownership_manager ();
+  }
+  
   domain_id_ = participant_servant_->get_domain_id();
   topic_desc_ =
     participant_servant_->lookup_topicdescription(topic_name.in());
@@ -273,7 +280,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
       for (CORBA::ULong i = 0; i < wr_len; i++) {
         PublicationId writer_id = writers[i].writerId;
-        infos[i] = new WriterInfo(this, writer_id);
+        infos[i] = new WriterInfo(this, writer_id, writers[i].writerQos);
         this->writers_.insert(
           // This insertion is idempotent.
           WriterMapType::value_type(
@@ -1426,9 +1433,12 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
     SubscriptionInstance* instance = 0;
     this->dispose(sample, instance);
-
-    if (this->watchdog_.get())
-      this->watchdog_->cancel_timer(instance);
+ 
+    if (this->watchdog_.get()) {
+      if (! this->is_exclusive_ownership_ || instance != 0) {
+        this->watchdog_->cancel_timer(instance);
+      }
+    }
   }
   this->notify_read_conditions();
   break;
@@ -1438,8 +1448,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     SubscriptionInstance* instance = 0;
     this->unregister(sample, instance);
 
-    if (this->watchdog_.get())
-      this->watchdog_->cancel_timer(instance);
+    if (this->watchdog_.get()) {
+      if (! this->is_exclusive_ownership_ || instance != 0) {
+        this->watchdog_->cancel_timer(instance);
+      }
+    }
   }
   this->notify_read_conditions();
   break;
@@ -1809,18 +1822,22 @@ OpenDDS::DCPS::WriterInfo::WriterInfo()
     reader_(0),
     writer_id_(GUID_UNKNOWN),
     handle_(DDS::HANDLE_NIL),
-    coherent_samples_(0)
+    coherent_samples_(0),
+    owner_evaluated_ (false)
 {
 }
 
-OpenDDS::DCPS::WriterInfo::WriterInfo(DataReaderImpl* reader,
-                                      PublicationId   writer_id)
+OpenDDS::DCPS::WriterInfo::WriterInfo(OpenDDS::DCPS::DataReaderImpl* reader,
+                                      const OpenDDS::DCPS::PublicationId& writer_id,
+                                      const ::DDS::DataWriterQos&  writer_qos)
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
     seen_data_(false),
     state_(NOT_SET),
     reader_(reader),
     writer_id_(writer_id),
-    coherent_samples_(0)
+    writer_qos_(writer_qos),
+    coherent_samples_(0),
+    owner_evaluated_ (false)
 {
   if (DCPS_debug_level >= 5) {
     RepoIdConverter writer_converter(writer_id);
@@ -2009,6 +2026,11 @@ DataReaderImpl::writer_removed(WriterInfo& info)
                std::string(writer_converter).c_str()));
   }
 
+  if (this->is_exclusive_ownership_) {
+    this->owner_manager_->remove_writer (info.writer_id_);
+    info.owner_evaluated_ = false;
+  }
+  
   bool liveliness_changed = false;
 
   if (info.state_ == WriterInfo::ALIVE) {
@@ -2121,6 +2143,11 @@ DataReaderImpl::writer_became_dead(WriterInfo & info,
                buffer.str().c_str()));
   }
 
+  if (this->is_exclusive_ownership_) {
+    this->owner_manager_->remove_writer (info.writer_id_); 
+    info.owner_evaluated_ = false;   
+  }
+  
   // caller should already have the samples_lock_ !!!
   bool liveliness_changed = false;
 
@@ -2570,12 +2597,53 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
     }
   }
 
+
   return false;
 }
 
 bool
-DataReaderImpl::filter_instance(SubscriptionInstance* instance)
+DataReaderImpl::filter_instance(SubscriptionInstance* instance, 
+                                const PublicationId& pubid)
 {
+  if (this->is_exclusive_ownership_) {
+
+    WriterMapType::iterator iter = writers_.find(pubid);
+    
+    if (iter == writers_.end()) {
+      if (DCPS_debug_level > 4) {
+        // This may not be an error since it could happen that the sample
+        // is delivered to the datareader after the write is dis-associated
+        // with this datareader.
+        RepoIdConverter reader_converter(subscription_id_);
+        RepoIdConverter writer_converter(pubid);
+        ACE_DEBUG((LM_DEBUG,
+                  ACE_TEXT("(%P|%t) DataReaderImpl::filter_instance: ")
+                  ACE_TEXT("reader %C is not associated with writer %C.\n"),
+                  std::string(reader_converter).c_str(),
+                  std::string(writer_converter).c_str()));
+      }
+      return true;
+    }
+    
+    // Evaulate the owner of the instance if not selected and filter
+    // current message if it's not from owner writer.
+    if ( instance->instance_state_.get_owner () == GUID_UNKNOWN 
+      || ! iter->second->owner_evaluated_) {
+      bool is_owner = this->owner_manager_->select_owner (
+                        instance->instance_handle_, 
+                        iter->second->writer_id_, 
+                        iter->second->writer_qos_.ownership_strength.value,
+                        &instance->instance_state_);
+      iter->second->owner_evaluated_ = true;
+      if (! is_owner) {
+        return true;
+      }
+    }
+    else if (! (instance->instance_state_.get_owner () == pubid)) {
+      return true;
+    }
+  }
+  
   ACE_Time_Value now(ACE_OS::gettimeofday());
 
   // TIME_BASED_FILTER processing; expire data samples
@@ -2729,6 +2797,36 @@ DataReaderImpl::get_writer_states(WriterStatePairVec& writer_states)
        ++iter) {
     writer_states.push_back(WriterStatePair(iter->first,
                                             iter->second->get_state()));
+  }
+}
+
+void 
+DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
+                                  const CORBA::Long& ownership_strength)
+{
+  ACE_READ_GUARD(ACE_RW_Thread_Mutex,
+    read_guard,
+    this->writers_lock_);
+  for (WriterMapType::iterator iter = writers_.begin();
+    iter != writers_.end();
+    ++iter) {
+      if (iter->second->writer_id_ == pub_id) {
+        if (ownership_strength != iter->second->writer_qos_.ownership_strength.value) {
+          if (DCPS_debug_level >= 1) {
+            RepoIdConverter reader_converter(this->subscription_id_);
+            RepoIdConverter writer_converter(pub_id);
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) DataReaderImpl::update_ownership_strength - ")
+              ACE_TEXT("local %C update remote %C strength from %d to %d \n"),
+              std::string(reader_converter).c_str(),
+              std::string(writer_converter).c_str(),
+              iter->second->writer_qos_.ownership_strength, ownership_strength));
+            }
+            iter->second->writer_qos_.ownership_strength.value = ownership_strength;
+            iter->second->owner_evaluated_ = false;
+          }
+        break;
+      }       
   }
 }
 

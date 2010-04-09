@@ -198,7 +198,7 @@ public:
   ACE_INLINE
   DataAllocator* data_allocator () const  {
     return data_allocator_;
-  }
+  };
 
 private:
 
@@ -384,6 +384,8 @@ public:
   void release_loan (::<%MODULE%><%TYPE%>Seq & received_data);
 
   void dec_ref_data_element(::OpenDDS::DCPS::ReceivedDataElement* r);
+
+  virtual void delete_instance_map (void* map);
 
  protected:
 
