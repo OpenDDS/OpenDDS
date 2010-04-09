@@ -17,7 +17,8 @@ $Id$
 
 =head1 DESCRIPTION
 
-This script runs one side of the throughput test for a cross host testing.
+This script runs one side of the throughput test for a cross host testing.  
+The script needs to be run on each of the two hosts involved in the test.
 
 The test consists of two halves, an originating (server) side and a reflecting 
 (client) side. The servers involved in the test are are stored in 
