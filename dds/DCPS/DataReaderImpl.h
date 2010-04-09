@@ -26,6 +26,8 @@
 #include "Cached_Allocator_With_Overflow_T.h"
 #include "ZeroCopyInfoSeq_T.h"
 #include "Stats_T.h"
+#include "OwnershipManager.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -50,6 +52,7 @@ class SubscriptionInstance;
 class TopicImpl;
 class RequestedDeadlineWatchdog;
 class Monitor;
+class DataReaderImpl;
 
 typedef Cached_Allocator_With_Overflow<OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
 ReceivedDataAllocator;
@@ -64,7 +67,8 @@ public:
   WriterInfo();  // needed for maps
 
   WriterInfo(DataReaderImpl* reader,
-             PublicationId   writer_id);
+             const PublicationId&  writer_id,
+             const ::DDS::DataWriterQos&  writer_qos);
 
   /// check to see if this writer is alive (called by handle_timeout).
   /// @param now next time this DataWriter will become not active (not alive)
@@ -124,11 +128,17 @@ private:
   /// DCPSInfoRepo ID of the DataWriter
   PublicationId writer_id_;
 
+  /// Writer qos
+  ::DDS::DataWriterQos writer_qos_;
+  
   /// The publication entity instance handle.
-  DDS::InstanceHandle_t handle_;
+  ::DDS::InstanceHandle_t handle_;
 
   /// Number of received coherent changes in active change set.
   ACE_Atomic_Op<ACE_Thread_Mutex, ACE_UINT32> coherent_samples_;
+
+  /// Is this writer evaluated for owner ?
+  bool owner_evaluated_;
 };
 
 /// Elements stored for managing statistical data.
@@ -174,7 +184,8 @@ class OpenDDS_Dcps_Export DataReaderImpl
     public virtual TransportReceiveListener,
     public virtual ACE_Event_Handler {
 public:
-
+  friend class RequestedDeadlineWatchdog;
+  
   typedef std::map<DDS::InstanceHandle_t, SubscriptionInstance*> SubscriptionInstanceMapType;
 
   /// Type of collection of statistics for writers to this reader.
@@ -458,6 +469,11 @@ public:
   typedef std::pair<PublicationId, WriterInfo::WriterState> WriterStatePair;
   typedef std::vector<WriterStatePair> WriterStatePairVec;
   void get_writer_states(WriterStatePairVec& writer_states);
+  
+  void update_ownership_strength (const PublicationId& pub_id,
+                                  const CORBA::Long& ownership_strength);
+
+  virtual void delete_instance_map (void* map) = 0;
 
 protected:
 
@@ -503,7 +519,8 @@ protected:
    *       QoS policy or DataReader's TIME_BASED_FILTER QoS policy.
    */
   bool filter_sample(const DataSampleHeader& header);
-  bool filter_instance(SubscriptionInstance* instance);
+  bool filter_instance(SubscriptionInstance* instance, 
+                       const PublicationId& pubid);
 
   ReceivedDataAllocator        *rd_allocator_;
   DDS::DataReaderQos           qos_;
@@ -517,7 +534,13 @@ protected:
 
   typedef ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> Reverse_Lock_t;
   Reverse_Lock_t reverse_sample_lock_;
+  
+  DomainParticipantImpl*       participant_servant_;
+  TopicImpl*                   topic_servant_;
 
+  bool is_exclusive_ownership_;
+  OwnershipManager* owner_manager_;  
+  
 private:
   /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
   bool send_sample_ack(
@@ -539,12 +562,10 @@ private:
 
   friend class ::DDS_TEST; //allows tests to get at dr_remote_objref_
 
-  TopicImpl*                   topic_servant_;
   DDS::TopicDescription_var    topic_desc_;
   DDS::StatusMask              listener_mask_;
   DDS::DataReaderListener_var  listener_;
   DDS::DataReaderListener*     fast_listener_;
-  DomainParticipantImpl*       participant_servant_;
   DDS::DomainId_t              domain_id_;
   SubscriberImpl*              subscriber_servant_;
   DataReaderRemote_var         dr_remote_objref_;

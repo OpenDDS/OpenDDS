@@ -207,6 +207,9 @@ public:
   /// of this Subscriber's Data Readers
   void get_subscription_ids(SubscriptionIdVec& subs);
 
+  void update_ownership_strength (const PublicationId& pub_id,
+                                  const CORBA::Long& ownership_strength);
+
 private:
   DDS::InstanceHandle_t        handle_;
 

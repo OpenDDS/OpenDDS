@@ -89,7 +89,7 @@ public:
                              bool &,
                              bool &) {}
   virtual void dec_ref_data_element(OpenDDS::DCPS::ReceivedDataElement *) {}
-
+  virtual void delete_instance_map (void *) {}
 };
 
 class MyDataWriterImpl :  public virtual OpenDDS::DCPS::DataWriterImpl

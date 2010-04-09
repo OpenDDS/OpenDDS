@@ -388,6 +388,7 @@ bool operator == (const DDS::DataWriterQos& qos1,
     && qos1.transport_priority == qos2.transport_priority
     && qos1.lifespan == qos2.lifespan
     && qos1.user_data == qos2.user_data
+    && qos1.ownership == qos2.ownership
     && qos1.ownership_strength == qos2.ownership_strength
     && qos1.writer_data_lifecycle == qos2.writer_data_lifecycle;
 }
@@ -732,14 +733,14 @@ ACE_INLINE
 bool Qos_Helper::valid(const DDS::OwnershipQosPolicy& qos)
 {
   return
-    qos == TheServiceParticipant->initial_OwnershipQosPolicy();
+    qos.kind == DDS::SHARED_OWNERSHIP_QOS 
+    || qos.kind == DDS::EXCLUSIVE_OWNERSHIP_QOS;
 }
 
 ACE_INLINE
-bool Qos_Helper::valid(const DDS::OwnershipStrengthQosPolicy& qos)
+bool Qos_Helper::valid(const DDS::OwnershipStrengthQosPolicy& /*qos*/)
 {
-  return
-    qos == TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
+  return true;
 }
 
 ACE_INLINE
@@ -888,6 +889,7 @@ bool Qos_Helper::valid(const DDS::DataWriterQos& qos)
     && valid(qos.transport_priority)
     && valid(qos.lifespan)
     && valid(qos.user_data)
+    && valid(qos.ownership)
     && valid(qos.ownership_strength)
     && valid(qos.writer_data_lifecycle);
 }
@@ -916,7 +918,8 @@ bool Qos_Helper::valid(const DDS::DataReaderQos& qos)
     && valid(qos.resource_limits)
     && valid(qos.user_data)
     && valid(qos.time_based_filter)
-    && valid(qos.reader_data_lifecycle);
+    && valid(qos.reader_data_lifecycle)
+    && valid(qos.ownership);
 }
 
 ACE_INLINE
@@ -1026,10 +1029,10 @@ bool Qos_Helper::changeable(
 }
 
 ACE_INLINE
-bool Qos_Helper::changeable(const DDS::OwnershipQosPolicy& /* qos1 */,
-                            const DDS::OwnershipQosPolicy& /* qos2 */)
+bool Qos_Helper::changeable(const DDS::OwnershipQosPolicy& qos1,
+                            const DDS::OwnershipQosPolicy& qos2)
 {
-  return true;
+  return qos1 == qos2;
 }
 // ---------------------------------------------------------------
 
@@ -1160,6 +1163,7 @@ bool Qos_Helper::changeable(const DDS::DataWriterQos& qos1,
     && changeable(qos1.transport_priority, qos2.transport_priority)
     && changeable(qos1.lifespan, qos2.lifespan)
     && changeable(qos1.user_data, qos2.user_data)
+    && changeable(qos1.ownership, qos2.ownership)
     && changeable(qos1.ownership_strength, qos2.ownership_strength)
     && changeable(qos1.writer_data_lifecycle, qos2.writer_data_lifecycle);
 }
@@ -1190,7 +1194,8 @@ bool Qos_Helper::changeable(const DDS::DataReaderQos& qos1,
     && changeable(qos1.resource_limits, qos2.resource_limits)
     && changeable(qos1.user_data, qos2.user_data)
     && changeable(qos1.time_based_filter, qos2.time_based_filter)
-    && changeable(qos1.reader_data_lifecycle, qos2.reader_data_lifecycle);
+    && changeable(qos1.reader_data_lifecycle, qos2.reader_data_lifecycle)
+    && changeable(qos1.ownership, qos2.ownership);
 }
 
 ACE_INLINE

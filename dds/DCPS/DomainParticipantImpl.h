@@ -14,6 +14,7 @@
 #include "Definitions.h"
 #include "InstanceHandle.h"
 #include "TopicImpl.h"
+#include "OwnershipManager.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DdsDcpsTopicC.h"
@@ -321,6 +322,17 @@ public:
   */
   void get_topic_ids(TopicIdVec& topics);
 
+  /** Accessor for ownership manager.
+  */
+  OwnershipManager* ownership_manager ();
+  
+  /** 
+  * Called upon receiving new BIT publication data to
+  * update the ownership strength of a publication.
+  */
+  void update_ownership_strength (const PublicationId& pub_id,
+                                  const CORBA::Long& ownership_strength);
+
 private:
 
   /** The implementation of create_topic.
@@ -432,6 +444,8 @@ private:
   DDS::SubscriptionBuiltinTopicDataDataReader_var bit_sub_dr_;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
   Monitor* monitor_;
+  
+  OwnershipManager owner_man_;
 };
 
 } // namespace DCPS

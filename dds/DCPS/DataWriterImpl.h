@@ -75,6 +75,8 @@ class OpenDDS_Dcps_Export DataWriterImpl
     // public virtual OpenDDS::DCPS::DataWriterLocal
 {
 public:
+  friend class WriteDataContainer;
+
   struct AckToken {
     ACE_Time_Value tstamp_;
     DDS::Duration_t max_wait_;
@@ -472,6 +474,16 @@ protected:
    */
   PublicationInstance* get_handle_instance(
     DDS::InstanceHandle_t handle);
+    
+  /// The type name of associated topic.
+  CORBA::String_var               type_name_;
+
+  /// The qos policy list of this datawriter.
+  DDS::DataWriterQos              qos_;
+  
+  /// The participant servant which creats the publisher that
+  /// creates this datawriter.
+  DomainParticipantImpl*          participant_servant_;
 
 private:
 
@@ -499,16 +511,13 @@ private:
 
   /// The name of associated topic.
   CORBA::String_var               topic_name_;
-  /// The type name of associated topic.
-  CORBA::String_var               type_name_;
   /// The associated topic repository id.
   RepoId                          topic_id_;
   /// The object reference of the associated topic.
   DDS::Topic_var                  topic_objref_;
   /// The topic servant.
   TopicImpl*                      topic_servant_;
-  /// The qos policy list of this datawriter.
-  DDS::DataWriterQos              qos_;
+  
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.
   DDS::StatusMask                 listener_mask_;
@@ -516,9 +525,6 @@ private:
   DDS::DataWriterListener_var     listener_;
   /// The datawriter listener servant.
   DDS::DataWriterListener*        fast_listener_;
-  /// The participant servant which creats the publisher that
-  /// creates this datawriter.
-  DomainParticipantImpl*          participant_servant_;
   /// The domain id.
   DDS::DomainId_t                 domain_id_;
   /// The publisher servant which creates this datawriter.

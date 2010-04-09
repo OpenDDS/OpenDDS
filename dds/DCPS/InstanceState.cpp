@@ -33,7 +33,10 @@ OpenDDS::DCPS::InstanceState::InstanceState(DataReaderImpl* reader,
     release_pending_(false),
     release_timer_id_(-1),
     reader_(reader),
-    handle_(handle)
+    handle_(handle),
+    owner_(GUID_UNKNOWN),
+    exclusive_(reader->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS),
+    registered_ (false)
 {}
 
 OpenDDS::DCPS::InstanceState::~InstanceState()
@@ -98,10 +101,15 @@ OpenDDS::DCPS::InstanceState::dispose_was_received(const PublicationId& writer_i
   //
   // Manage the instance state on disposal here.
   //
+  // If disposed by owner then the owner is not re-elected, it can
+  // resume if the writer sends message again.
   if (this->instance_state_ & DDS::ALIVE_INSTANCE_STATE) {
-    this->instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
-    schedule_release();
-    return true;
+    if (! this->exclusive_
+      || this->reader_->owner_manager_->is_owner (this->handle_, writer_id)) {
+      this->instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
+      schedule_release();
+      return true;
+    }
   }
 
   return false;
@@ -111,8 +119,15 @@ bool
 OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& writer_id)
 {
   writers_.erase(writer_id);
-
-  if (writers_.empty() && this->instance_state_ & DDS::ALIVE_INSTANCE_STATE) {
+  bool is_owner = false;
+  if (this->exclusive_) {
+    // If unregisted by owner then the ownership should be transferred to another
+    // writer.
+    is_owner = this->reader_->owner_manager_->remove_writer (
+                 this->handle_, writer_id);
+  }
+  
+  if (writers_.empty() && (this->instance_state_ & DDS::ALIVE_INSTANCE_STATE)) {
     this->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
     schedule_release();
     return true;
@@ -219,3 +234,45 @@ OpenDDS::DCPS::InstanceState::release()
 {
   this->reader_->release_instance(this->handle_);
 }
+
+void 
+OpenDDS::DCPS::InstanceState::set_owner (const PublicationId& owner)
+{
+  this->owner_ = owner; 
+}
+
+OpenDDS::DCPS::PublicationId& 
+OpenDDS::DCPS::InstanceState::get_owner ()
+{
+  return this->owner_; 
+}
+
+bool 
+OpenDDS::DCPS::InstanceState::is_exclusive () const
+{
+  return this->exclusive_;
+}
+
+bool 
+OpenDDS::DCPS::InstanceState::registered() 
+{
+  bool ret = this->registered_;
+  this->registered_ = true;
+  return ret;
+}
+
+void 
+OpenDDS::DCPS::InstanceState::registered (bool flag)
+{
+  this->registered_ = flag;
+}
+  
+OpenDDS::DCPS::DataReaderImpl* 
+OpenDDS::DCPS::InstanceState::get_reader () const 
+{
+  return this->reader_;
+}
+  
+  
+  
+  

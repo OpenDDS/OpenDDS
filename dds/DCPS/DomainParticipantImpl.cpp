@@ -21,8 +21,8 @@
 #include "DomainParticipantFactoryImpl.h"
 #include "Util.h"
 #include "MonitorFactory.h"
-
 #include "dds/DdsDcpsGuidC.h"
+#include "BitPubListenerImpl.h"
 
 #include <sstream>
 
@@ -2103,6 +2103,35 @@ DomainParticipantImpl::get_topic_ids(TopicIdVec& topics)
   for (TopicMap::iterator it(topics_.begin());
        it != topics_.end(); ++it) {
     topics.push_back(it->second.pair_.svt_->get_id());
+  }
+}
+
+OwnershipManager*
+DomainParticipantImpl::ownership_manager () 
+{
+#if !defined (DDS_HAS_MINIMUM_BIT)
+
+  DDS::DataReaderListener_var listener = this->bit_pub_dr_->get_listener ();
+  if (CORBA::is_nil (listener.in())) {
+    DDS::DataReaderListener_var bit_pub_listener(new BitPubListenerImpl(this));
+    this->bit_pub_dr_->set_listener (bit_pub_listener.in (), ::DDS::DATA_AVAILABLE_STATUS);
+  } 
+   
+#endif 
+  return &this->owner_man_;
+}
+
+void 
+DomainParticipantImpl::update_ownership_strength (const PublicationId& pub_id,
+                                                  const CORBA::Long& ownership_strength)
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+            tao_mon,
+            this->subscribers_protector_);
+
+  for (SubscriberSet::iterator it(subscribers_.begin());
+      it != subscribers_.end(); ++it) {
+    it->svt_->update_ownership_strength(pub_id, ownership_strength);
   }
 }
 
