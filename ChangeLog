@@ -1,3 +1,10 @@
+Fri Apr 09 21:27:04 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/tests/latency/run_test.pl:
+        * performance-tests/Bench/tests/thru/run_test.pl:
+
+          Fixed repo option to Info Repo.
+
 Fri Apr 09 18:37:50 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/tests/latency/run_test.pl:

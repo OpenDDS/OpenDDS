@@ -195,7 +195,7 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
     if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
         $DCPSREPO = PerlDDS::create_process
                   ("$bench_location/bin/run_test",
-                   "-S -t 180 -h iiop://$repo_host:$port1");
+                   "-S -t 150 -h $repo_host:$port1");
 
         print $DCPSREPO->CommandLine(). "\n";
         $DCPSREPO->Spawn ();
