@@ -5,6 +5,53 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+=head1 NAME
+
+run_test.pl - run one side of a latency cross host test
+
+$Id$
+
+=head1 SYNOPSIS
+
+  run_test.pl <transport> <message size>
+
+=head1 DESCRIPTION
+
+This script runs one side of the latency test for a cross host testing.
+
+The test consists of two halves, an originating (server) side and a reflecting 
+(client) side. The servers involved in the test are are stored in 
+test_list.txt file in test-host groupings.  The grouping consists of an
+ID, client host, and server host.  The script identifies the host's behavior 
+by identifying the test group ID and the local host's name.  The test group 
+ID is identified using the environement variable CROSS_GRP.
+
+The server (originiating) side starts the DCPSInfoRepo for the test.
+
+The transport has to be one of the following values:
+=over 8
+=item tcp
+SimpleTCP
+=item udp
+SimpleUDP
+=item multibe
+multicast (Best Effort)
+=item multire
+multicast (Reliable)
+=back
+
+Supported message sizes are B<50> B<100> B<250> B<500> B<1000>
+ B<2500> B<5000> B<8000> B<16000> B<32000>
+
+
+=head1 EXAMPLE
+
+  run_test.pl tcp 1000
+
+  run_test.pl multibe 50
+
+=cut
+
 use Sys::Hostname;
 
 use Env (DDS_ROOT);

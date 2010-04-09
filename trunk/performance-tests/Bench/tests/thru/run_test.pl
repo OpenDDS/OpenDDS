@@ -5,6 +5,49 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # $Id$
 # -*- perl -*-
 
+=head1 NAME
+
+run_test.pl - run one side of a throughput cross host test
+
+$Id$
+
+=head1 SYNOPSIS
+
+  run_test.pl <transport>
+
+=head1 DESCRIPTION
+
+This script runs one side of the throughput test for a cross host testing.
+
+The test consists of two halves, an originating (server) side and a reflecting 
+(client) side. The servers involved in the test are are stored in 
+test_list.txt file in test-host groupings.  The grouping consists of an
+ID, client host, and server host.  The script identifies the host's behavior 
+by identifying the test group ID and the local host's name.  The test group 
+ID is identified using the environement variable CROSS_GRP.
+
+The server (originiating) side starts the DCPSInfoRepo for the test.
+
+The transport has to be one of the following values:
+=over 8
+=item tcp
+SimpleTCP
+=item udp
+SimpleUDP
+=item multibe
+multicast (Best Effort)
+=item multire
+multicast (Reliable)
+=back
+
+=head1 EXAMPLE
+
+  run_test.pl tcp
+
+  run_test.pl multibe
+
+=cut
+
 use Sys::Hostname;
 
 use Env (DDS_ROOT);
