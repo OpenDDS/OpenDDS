@@ -1,3 +1,22 @@
+Mon Apr 12 14:24:38 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Implemented filter evaluation (first pass).  It still needs to handle
+          more data types, and it depends on some help from a code generation
+          tool (TAO_IDL or something else), which is not done yet.  For now
+          the support for the TopicBuiltinTopicData struct is implemented here
+          for testing.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+        * tests/DCPS/FilterExpression/FilterExpressionTest.mpc:
+        * tests/DCPS/FilterExpression/run_test.pl:
+
+          Added a test for parsing filter (and query) expressions.  Right now
+          this test only checks the syntax of the expressions.
+
 Fri Apr  9 18:11:38 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * bin/DCPS/CPPTemplate.pm:
