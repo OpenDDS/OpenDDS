@@ -9,6 +9,7 @@
 #include "ace/OS_NS_string.h"
 
 #include <string>
+#include <cstring>
 #include <iostream>
 
 namespace yard_test {
