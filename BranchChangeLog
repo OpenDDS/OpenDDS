@@ -1,3 +1,9 @@
+Mon Apr 12 19:23:58 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling
+
+          Updated domain model with top level entities for diagrams.
+
 Thu Apr  8 19:15:06 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.edit/plugin.properties:

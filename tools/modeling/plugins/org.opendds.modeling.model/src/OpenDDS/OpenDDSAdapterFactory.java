@@ -407,6 +407,31 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
         }
 
         @Override
+        public Adapter caseApplicationModel(ApplicationModel object) {
+            return createApplicationModelAdapter();
+        }
+
+        @Override
+        public Adapter caseDomainModel(DomainModel object) {
+            return createDomainModelAdapter();
+        }
+
+        @Override
+        public Adapter caseTypeModel(TypeModel object) {
+            return createTypeModelAdapter();
+        }
+
+        @Override
+        public Adapter caseQosModel(QosModel object) {
+            return createQosModelAdapter();
+        }
+
+        @Override
+        public Adapter caseTransportModel(TransportModel object) {
+            return createTransportModelAdapter();
+        }
+
+        @Override
         public Adapter defaultCase(EObject object) {
             return createEObjectAdapter();
         }
@@ -1493,6 +1518,86 @@ public class OpenDDSAdapterFactory extends AdapterFactoryImpl {
      * @generated
      */
     public Adapter createModelAdapter() {
+        return null;
+    }
+
+    /**
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.ApplicationModel <em>Application Model</em>}'.
+     * <!-- begin-user-doc --> This default implementation returns
+     * null so that we can easily ignore cases; it's useful to ignore
+     * a case when inheritance will catch all the cases anyway. <!--
+     * end-user-doc -->
+     * 
+     * @return the new adapter.
+     * @see OpenDDS.ApplicationModel
+     * @generated
+     */
+    public Adapter createApplicationModelAdapter() {
+        return null;
+    }
+
+    /**
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.DomainModel <em>Domain Model</em>}'. <!--
+     * begin-user-doc --> This default implementation returns null so
+     * that we can easily ignore cases; it's useful to ignore a case
+     * when inheritance will catch all the cases anyway. <!--
+     * end-user-doc -->
+     * 
+     * @return the new adapter.
+     * @see OpenDDS.DomainModel
+     * @generated
+     */
+    public Adapter createDomainModelAdapter() {
+        return null;
+    }
+
+    /**
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.TypeModel <em>Type Model</em>}'. <!--
+     * begin-user-doc --> This default implementation returns null so
+     * that we can easily ignore cases; it's useful to ignore a case
+     * when inheritance will catch all the cases anyway. <!--
+     * end-user-doc -->
+     * 
+     * @return the new adapter.
+     * @see OpenDDS.TypeModel
+     * @generated
+     */
+    public Adapter createTypeModelAdapter() {
+        return null;
+    }
+
+    /**
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.QosModel <em>Qos Model</em>}'. <!--
+     * begin-user-doc --> This default implementation returns null so
+     * that we can easily ignore cases; it's useful to ignore a case
+     * when inheritance will catch all the cases anyway. <!--
+     * end-user-doc -->
+     * 
+     * @return the new adapter.
+     * @see OpenDDS.QosModel
+     * @generated
+     */
+    public Adapter createQosModelAdapter() {
+        return null;
+    }
+
+    /**
+     * Creates a new adapter for an object of class '
+     * {@link OpenDDS.TransportModel <em>Transport Model</em>}'. <!--
+     * begin-user-doc --> This default implementation returns null so
+     * that we can easily ignore cases; it's useful to ignore a case
+     * when inheritance will catch all the cases anyway. <!--
+     * end-user-doc -->
+     * 
+     * @return the new adapter.
+     * @see OpenDDS.TransportModel
+     * @generated
+     */
+    public Adapter createTransportModelAdapter() {
         return null;
     }
 

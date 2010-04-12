@@ -1116,7 +1116,59 @@ public class OpenDDSSwitch<T> {
                 Model model = (Model) theEObject;
                 T result = caseModel(model);
                 if (result == null) {
-                    result = caseEntity(model);
+                    result = defaultCase(theEObject);
+                }
+                return result;
+            }
+            case OpenDDSPackage.APPLICATION_MODEL: {
+                ApplicationModel applicationModel = (ApplicationModel) theEObject;
+                T result = caseApplicationModel(applicationModel);
+                if (result == null) {
+                    result = caseModel(applicationModel);
+                }
+                if (result == null) {
+                    result = defaultCase(theEObject);
+                }
+                return result;
+            }
+            case OpenDDSPackage.DOMAIN_MODEL: {
+                DomainModel domainModel = (DomainModel) theEObject;
+                T result = caseDomainModel(domainModel);
+                if (result == null) {
+                    result = caseModel(domainModel);
+                }
+                if (result == null) {
+                    result = defaultCase(theEObject);
+                }
+                return result;
+            }
+            case OpenDDSPackage.TYPE_MODEL: {
+                TypeModel typeModel = (TypeModel) theEObject;
+                T result = caseTypeModel(typeModel);
+                if (result == null) {
+                    result = caseModel(typeModel);
+                }
+                if (result == null) {
+                    result = defaultCase(theEObject);
+                }
+                return result;
+            }
+            case OpenDDSPackage.QOS_MODEL: {
+                QosModel qosModel = (QosModel) theEObject;
+                T result = caseQosModel(qosModel);
+                if (result == null) {
+                    result = caseModel(qosModel);
+                }
+                if (result == null) {
+                    result = defaultCase(theEObject);
+                }
+                return result;
+            }
+            case OpenDDSPackage.TRANSPORT_MODEL: {
+                TransportModel transportModel = (TransportModel) theEObject;
+                T result = caseTransportModel(transportModel);
+                if (result == null) {
+                    result = caseModel(transportModel);
                 }
                 if (result == null) {
                     result = defaultCase(theEObject);
@@ -2266,6 +2318,91 @@ public class OpenDDSSwitch<T> {
      * @generated
      */
     public T caseModel(Model object) {
+        return null;
+    }
+
+    /**
+     * Returns the result of interpreting the object as an instance of
+     * '<em>Application Model</em>'. <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
+     * 
+     * @param object
+     *            the target of the switch.
+     * @return the result of interpreting the object as an instance of
+     *         '<em>Application Model</em>'.
+     * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+     * @generated
+     */
+    public T caseApplicationModel(ApplicationModel object) {
+        return null;
+    }
+
+    /**
+     * Returns the result of interpreting the object as an instance of
+     * '<em>Domain Model</em>'. <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
+     * 
+     * @param object
+     *            the target of the switch.
+     * @return the result of interpreting the object as an instance of
+     *         '<em>Domain Model</em>'.
+     * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+     * @generated
+     */
+    public T caseDomainModel(DomainModel object) {
+        return null;
+    }
+
+    /**
+     * Returns the result of interpreting the object as an instance of
+     * '<em>Type Model</em>'. <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
+     * 
+     * @param object
+     *            the target of the switch.
+     * @return the result of interpreting the object as an instance of
+     *         '<em>Type Model</em>'.
+     * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+     * @generated
+     */
+    public T caseTypeModel(TypeModel object) {
+        return null;
+    }
+
+    /**
+     * Returns the result of interpreting the object as an instance of
+     * '<em>Qos Model</em>'. <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
+     * 
+     * @param object
+     *            the target of the switch.
+     * @return the result of interpreting the object as an instance of
+     *         '<em>Qos Model</em>'.
+     * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+     * @generated
+     */
+    public T caseQosModel(QosModel object) {
+        return null;
+    }
+
+    /**
+     * Returns the result of interpreting the object as an instance of
+     * '<em>Transport Model</em>'. <!-- begin-user-doc --> This
+     * implementation returns null; returning a non-null result will
+     * terminate the switch. <!-- end-user-doc -->
+     * 
+     * @param object
+     *            the target of the switch.
+     * @return the result of interpreting the object as an instance of
+     *         '<em>Transport Model</em>'.
+     * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+     * @generated
+     */
+    public T caseTransportModel(TransportModel object) {
         return null;
     }
 

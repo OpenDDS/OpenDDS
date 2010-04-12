@@ -1397,26 +1397,122 @@ public class OpenDDSItemProviderAdapterFactory extends OpenDDSAdapterFactory imp
 
     /**
      * This keeps track of the one adapter used for all
-     * {@link OpenDDS.Model} instances. <!-- begin-user-doc --> <!--
-     * end-user-doc -->
+     * {@link OpenDDS.ApplicationModel} instances. <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
      * 
      * @generated
      */
-    protected ModelItemProvider modelItemProvider;
+    protected ApplicationModelItemProvider applicationModelItemProvider;
 
     /**
-     * This creates an adapter for a {@link OpenDDS.Model}. <!--
+     * This creates an adapter for a {@link OpenDDS.ApplicationModel}.
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    @Override
+    public Adapter createApplicationModelAdapter() {
+        if (applicationModelItemProvider == null) {
+            applicationModelItemProvider = new ApplicationModelItemProvider(this);
+        }
+
+        return applicationModelItemProvider;
+    }
+
+    /**
+     * This keeps track of the one adapter used for all
+     * {@link OpenDDS.DomainModel} instances. <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    protected DomainModelItemProvider domainModelItemProvider;
+
+    /**
+     * This creates an adapter for a {@link OpenDDS.DomainModel}. <!--
      * begin-user-doc --> <!-- end-user-doc -->
      * 
      * @generated
      */
     @Override
-    public Adapter createModelAdapter() {
-        if (modelItemProvider == null) {
-            modelItemProvider = new ModelItemProvider(this);
+    public Adapter createDomainModelAdapter() {
+        if (domainModelItemProvider == null) {
+            domainModelItemProvider = new DomainModelItemProvider(this);
         }
 
-        return modelItemProvider;
+        return domainModelItemProvider;
+    }
+
+    /**
+     * This keeps track of the one adapter used for all
+     * {@link OpenDDS.TypeModel} instances. <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    protected TypeModelItemProvider typeModelItemProvider;
+
+    /**
+     * This creates an adapter for a {@link OpenDDS.TypeModel}. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    @Override
+    public Adapter createTypeModelAdapter() {
+        if (typeModelItemProvider == null) {
+            typeModelItemProvider = new TypeModelItemProvider(this);
+        }
+
+        return typeModelItemProvider;
+    }
+
+    /**
+     * This keeps track of the one adapter used for all
+     * {@link OpenDDS.QosModel} instances. <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    protected QosModelItemProvider qosModelItemProvider;
+
+    /**
+     * This creates an adapter for a {@link OpenDDS.QosModel}. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    @Override
+    public Adapter createQosModelAdapter() {
+        if (qosModelItemProvider == null) {
+            qosModelItemProvider = new QosModelItemProvider(this);
+        }
+
+        return qosModelItemProvider;
+    }
+
+    /**
+     * This keeps track of the one adapter used for all
+     * {@link OpenDDS.TransportModel} instances. <!-- begin-user-doc
+     * --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    protected TransportModelItemProvider transportModelItemProvider;
+
+    /**
+     * This creates an adapter for a {@link OpenDDS.TransportModel}.
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    @Override
+    public Adapter createTransportModelAdapter() {
+        if (transportModelItemProvider == null) {
+            transportModelItemProvider = new TransportModelItemProvider(this);
+        }
+
+        return transportModelItemProvider;
     }
 
     /**
@@ -1681,8 +1777,20 @@ public class OpenDDSItemProviderAdapterFactory extends OpenDDSAdapterFactory imp
         if (transportItemProvider != null) {
             transportItemProvider.dispose();
         }
-        if (modelItemProvider != null) {
-            modelItemProvider.dispose();
+        if (applicationModelItemProvider != null) {
+            applicationModelItemProvider.dispose();
+        }
+        if (domainModelItemProvider != null) {
+            domainModelItemProvider.dispose();
+        }
+        if (typeModelItemProvider != null) {
+            typeModelItemProvider.dispose();
+        }
+        if (qosModelItemProvider != null) {
+            qosModelItemProvider.dispose();
+        }
+        if (transportModelItemProvider != null) {
+            transportModelItemProvider.dispose();
         }
     }
 

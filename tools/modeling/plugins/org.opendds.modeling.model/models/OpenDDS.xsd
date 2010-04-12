@@ -709,20 +709,64 @@
     </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="Transport" type="opendds:Transport"/>
-  <xsd:complexType name="Model">
+  <xsd:complexType abstract="true" name="Model">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+  </xsd:complexType>
+  <xsd:element name="Model" type="opendds:Model"/>
+  <xsd:complexType name="ApplicationModel">
     <xsd:complexContent>
-      <xsd:extension base="opendds:Entity">
+      <xsd:extension base="opendds:Model">
         <xsd:choice maxOccurs="unbounded" minOccurs="0">
           <xsd:element name="applications" type="opendds:ApplicationTarget"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="ApplicationModel" type="opendds:ApplicationModel"/>
+  <xsd:complexType name="DomainModel">
+    <xsd:complexContent>
+      <xsd:extension base="opendds:Model">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
           <xsd:element name="domains" type="opendds:Domain"/>
           <xsd:element name="participants" type="opendds:DomainParticipant"/>
           <xsd:element name="topics" type="opendds:TopicDescription"/>
-          <xsd:element name="topicTypes" type="opendds:TopicStruct"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="DomainModel" type="opendds:DomainModel"/>
+  <xsd:complexType name="TypeModel">
+    <xsd:complexContent>
+      <xsd:extension base="opendds:Model">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="types" type="opendds:TopicStruct"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="TypeModel" type="opendds:TypeModel"/>
+  <xsd:complexType name="QosModel">
+    <xsd:complexContent>
+      <xsd:extension base="opendds:Model">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
           <xsd:element name="qosPolicies" type="opendds:QosPolicy"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="QosModel" type="opendds:QosModel"/>
+  <xsd:complexType name="TransportModel">
+    <xsd:complexContent>
+      <xsd:extension base="opendds:Model">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
           <xsd:element name="transports" type="opendds:Transport"/>
         </xsd:choice>
       </xsd:extension>
     </xsd:complexContent>
   </xsd:complexType>
-  <xsd:element name="Model" type="opendds:Model"/>
+  <xsd:element name="TransportModel" type="opendds:TransportModel"/>
 </xsd:schema>

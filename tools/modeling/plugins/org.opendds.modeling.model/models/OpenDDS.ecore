@@ -324,19 +324,28 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="transport_id" lowerBound="1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Model" eSuperTypes="#//Entity">
+  <eClassifiers xsi:type="ecore:EClass" name="Model" abstract="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ApplicationModel" eSuperTypes="#//Model">
     <eStructuralFeatures xsi:type="ecore:EReference" name="applications" upperBound="-1"
         eType="#//ApplicationTarget" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DomainModel" eSuperTypes="#//Model">
     <eStructuralFeatures xsi:type="ecore:EReference" name="domains" upperBound="-1"
         eType="#//Domain" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="participants" upperBound="-1"
         eType="#//DomainParticipant" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="topics" upperBound="-1"
         eType="#//TopicDescription" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="topicTypes" upperBound="-1"
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TypeModel" eSuperTypes="#//Model">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="types" upperBound="-1"
         eType="#//TopicStruct" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="QosModel" eSuperTypes="#//Model">
     <eStructuralFeatures xsi:type="ecore:EReference" name="qosPolicies" upperBound="-1"
         eType="#//QosPolicy" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TransportModel" eSuperTypes="#//Model">
     <eStructuralFeatures xsi:type="ecore:EReference" name="transports" upperBound="-1"
         eType="#//Transport" containment="true"/>
   </eClassifiers>
