@@ -168,8 +168,16 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
                 return createApplicationTarget();
             case OpenDDSPackage.TRANSPORT:
                 return createTransport();
-            case OpenDDSPackage.MODEL:
-                return createModel();
+            case OpenDDSPackage.APPLICATION_MODEL:
+                return createApplicationModel();
+            case OpenDDSPackage.DOMAIN_MODEL:
+                return createDomainModel();
+            case OpenDDSPackage.TYPE_MODEL:
+                return createTypeModel();
+            case OpenDDSPackage.QOS_MODEL:
+                return createQosModel();
+            case OpenDDSPackage.TRANSPORT_MODEL:
+                return createTransportModel();
             default:
                 throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
         }
@@ -792,9 +800,49 @@ public class OpenDDSFactoryImpl extends EFactoryImpl implements OpenDDSFactory {
      * 
      * @generated
      */
-    public Model createModel() {
-        ModelImpl model = new ModelImpl();
-        return model;
+    public ApplicationModel createApplicationModel() {
+        ApplicationModelImpl applicationModel = new ApplicationModelImpl();
+        return applicationModel;
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    public DomainModel createDomainModel() {
+        DomainModelImpl domainModel = new DomainModelImpl();
+        return domainModel;
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    public TypeModel createTypeModel() {
+        TypeModelImpl typeModel = new TypeModelImpl();
+        return typeModel;
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    public QosModel createQosModel() {
+        QosModelImpl qosModel = new QosModelImpl();
+        return qosModel;
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    public TransportModel createTransportModel() {
+        TransportModelImpl transportModel = new TransportModelImpl();
+        return transportModel;
     }
 
     /**

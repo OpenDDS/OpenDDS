@@ -538,13 +538,49 @@ public interface OpenDDSFactory extends EFactory {
     Transport createTransport();
 
     /**
-     * Returns a new object of class '<em>Model</em>'. <!--
-     * begin-user-doc --> <!-- end-user-doc -->
+     * Returns a new object of class '<em>Application Model</em>'.
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
      * 
-     * @return a new object of class '<em>Model</em>'.
+     * @return a new object of class '<em>Application Model</em>'.
      * @generated
      */
-    Model createModel();
+    ApplicationModel createApplicationModel();
+
+    /**
+     * Returns a new object of class '<em>Domain Model</em>'. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @return a new object of class '<em>Domain Model</em>'.
+     * @generated
+     */
+    DomainModel createDomainModel();
+
+    /**
+     * Returns a new object of class '<em>Type Model</em>'. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @return a new object of class '<em>Type Model</em>'.
+     * @generated
+     */
+    TypeModel createTypeModel();
+
+    /**
+     * Returns a new object of class '<em>Qos Model</em>'. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @return a new object of class '<em>Qos Model</em>'.
+     * @generated
+     */
+    QosModel createQosModel();
+
+    /**
+     * Returns a new object of class '<em>Transport Model</em>'. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @return a new object of class '<em>Transport Model</em>'.
+     * @generated
+     */
+    TransportModel createTransportModel();
 
     /**
      * Returns the package supported by this factory. <!--

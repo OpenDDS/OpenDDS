@@ -497,6 +497,41 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
      * 
      * @generated
      */
+    private EClass applicationModelEClass = null;
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    private EClass domainModelEClass = null;
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    private EClass typeModelEClass = null;
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    private EClass qosModelEClass = null;
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    private EClass transportModelEClass = null;
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
     private EEnum simpleTypeEEnum = null;
 
     /**
@@ -2110,8 +2145,8 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
      * 
      * @generated
      */
-    public EReference getModel_Applications() {
-        return (EReference) modelEClass.getEStructuralFeatures().get(0);
+    public EClass getApplicationModel() {
+        return applicationModelEClass;
     }
 
     /**
@@ -2119,8 +2154,8 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
      * 
      * @generated
      */
-    public EReference getModel_Domains() {
-        return (EReference) modelEClass.getEStructuralFeatures().get(1);
+    public EReference getApplicationModel_Applications() {
+        return (EReference) applicationModelEClass.getEStructuralFeatures().get(0);
     }
 
     /**
@@ -2128,8 +2163,8 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
      * 
      * @generated
      */
-    public EReference getModel_Participants() {
-        return (EReference) modelEClass.getEStructuralFeatures().get(2);
+    public EClass getDomainModel() {
+        return domainModelEClass;
     }
 
     /**
@@ -2137,8 +2172,8 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
      * 
      * @generated
      */
-    public EReference getModel_Topics() {
-        return (EReference) modelEClass.getEStructuralFeatures().get(3);
+    public EReference getDomainModel_Domains() {
+        return (EReference) domainModelEClass.getEStructuralFeatures().get(0);
     }
 
     /**
@@ -2146,8 +2181,8 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
      * 
      * @generated
      */
-    public EReference getModel_TopicTypes() {
-        return (EReference) modelEClass.getEStructuralFeatures().get(4);
+    public EReference getDomainModel_Participants() {
+        return (EReference) domainModelEClass.getEStructuralFeatures().get(1);
     }
 
     /**
@@ -2155,8 +2190,8 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
      * 
      * @generated
      */
-    public EReference getModel_QosPolicies() {
-        return (EReference) modelEClass.getEStructuralFeatures().get(5);
+    public EReference getDomainModel_Topics() {
+        return (EReference) domainModelEClass.getEStructuralFeatures().get(2);
     }
 
     /**
@@ -2164,8 +2199,53 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
      * 
      * @generated
      */
-    public EReference getModel_Transports() {
-        return (EReference) modelEClass.getEStructuralFeatures().get(6);
+    public EClass getTypeModel() {
+        return typeModelEClass;
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    public EReference getTypeModel_Types() {
+        return (EReference) typeModelEClass.getEStructuralFeatures().get(0);
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    public EClass getQosModel() {
+        return qosModelEClass;
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    public EReference getQosModel_QosPolicies() {
+        return (EReference) qosModelEClass.getEStructuralFeatures().get(0);
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    public EClass getTransportModel() {
+        return transportModelEClass;
+    }
+
+    /**
+     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     */
+    public EReference getTransportModel_Transports() {
+        return (EReference) transportModelEClass.getEStructuralFeatures().get(0);
     }
 
     /**
@@ -2528,13 +2608,23 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
         createEAttribute(transportEClass, TRANSPORT__TRANSPORT_ID);
 
         modelEClass = createEClass(MODEL);
-        createEReference(modelEClass, MODEL__APPLICATIONS);
-        createEReference(modelEClass, MODEL__DOMAINS);
-        createEReference(modelEClass, MODEL__PARTICIPANTS);
-        createEReference(modelEClass, MODEL__TOPICS);
-        createEReference(modelEClass, MODEL__TOPIC_TYPES);
-        createEReference(modelEClass, MODEL__QOS_POLICIES);
-        createEReference(modelEClass, MODEL__TRANSPORTS);
+
+        applicationModelEClass = createEClass(APPLICATION_MODEL);
+        createEReference(applicationModelEClass, APPLICATION_MODEL__APPLICATIONS);
+
+        domainModelEClass = createEClass(DOMAIN_MODEL);
+        createEReference(domainModelEClass, DOMAIN_MODEL__DOMAINS);
+        createEReference(domainModelEClass, DOMAIN_MODEL__PARTICIPANTS);
+        createEReference(domainModelEClass, DOMAIN_MODEL__TOPICS);
+
+        typeModelEClass = createEClass(TYPE_MODEL);
+        createEReference(typeModelEClass, TYPE_MODEL__TYPES);
+
+        qosModelEClass = createEClass(QOS_MODEL);
+        createEReference(qosModelEClass, QOS_MODEL__QOS_POLICIES);
+
+        transportModelEClass = createEClass(TRANSPORT_MODEL);
+        createEReference(transportModelEClass, TRANSPORT_MODEL__TRANSPORTS);
 
         // Create enums
         simpleTypeEEnum = createEEnum(SIMPLE_TYPE);
@@ -2641,7 +2731,11 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
         writerDataLifecycleQosPolicyEClass.getESuperTypes().add(this.getQosPolicy());
         applicationTargetEClass.getESuperTypes().add(this.getEntity());
         transportEClass.getESuperTypes().add(this.getEntity());
-        modelEClass.getESuperTypes().add(this.getEntity());
+        applicationModelEClass.getESuperTypes().add(this.getModel());
+        domainModelEClass.getESuperTypes().add(this.getModel());
+        typeModelEClass.getESuperTypes().add(this.getModel());
+        qosModelEClass.getESuperTypes().add(this.getModel());
+        transportModelEClass.getESuperTypes().add(this.getModel());
 
         // Initialize classes and features; add operations and
         // parameters
@@ -3102,28 +3196,42 @@ public class OpenDDSPackageImpl extends EPackageImpl implements OpenDDSPackage {
                 Transport.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE,
                 !IS_DERIVED, IS_ORDERED);
 
-        initEClass(modelEClass, Model.class, "Model", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-        initEReference(getModel_Applications(), this.getApplicationTarget(), null, "applications", null, 0, -1,
-                Model.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES,
+        initEClass(modelEClass, Model.class, "Model", IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+
+        initEClass(applicationModelEClass, ApplicationModel.class, "ApplicationModel", !IS_ABSTRACT, !IS_INTERFACE,
+                IS_GENERATED_INSTANCE_CLASS);
+        initEReference(getApplicationModel_Applications(), this.getApplicationTarget(), null, "applications", null, 0,
+                -1, ApplicationModel.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE,
+                !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+        initEClass(domainModelEClass, DomainModel.class, "DomainModel", !IS_ABSTRACT, !IS_INTERFACE,
+                IS_GENERATED_INSTANCE_CLASS);
+        initEReference(getDomainModel_Domains(), this.getDomain(), null, "domains", null, 0, -1, DomainModel.class,
+                !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE,
+                IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+        initEReference(getDomainModel_Participants(), this.getDomainParticipant(), null, "participants", null, 0, -1,
+                DomainModel.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES,
                 !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-        initEReference(getModel_Domains(), this.getDomain(), null, "domains", null, 0, -1, Model.class, !IS_TRANSIENT,
-                !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED,
-                IS_ORDERED);
-        initEReference(getModel_Participants(), this.getDomainParticipant(), null, "participants", null, 0, -1,
-                Model.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES,
+        initEReference(getDomainModel_Topics(), this.getTopicDescription(), null, "topics", null, 0, -1,
+                DomainModel.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES,
                 !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-        initEReference(getModel_Topics(), this.getTopicDescription(), null, "topics", null, 0, -1, Model.class,
+
+        initEClass(typeModelEClass, TypeModel.class, "TypeModel", !IS_ABSTRACT, !IS_INTERFACE,
+                IS_GENERATED_INSTANCE_CLASS);
+        initEReference(getTypeModel_Types(), this.getTopicStruct(), null, "types", null, 0, -1, TypeModel.class,
                 !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE,
                 IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-        initEReference(getModel_TopicTypes(), this.getTopicStruct(), null, "topicTypes", null, 0, -1, Model.class,
-                !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE,
-                IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-        initEReference(getModel_QosPolicies(), this.getQosPolicy(), null, "qosPolicies", null, 0, -1, Model.class,
-                !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE,
-                IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-        initEReference(getModel_Transports(), this.getTransport(), null, "transports", null, 0, -1, Model.class,
-                !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE,
-                IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+        initEClass(qosModelEClass, QosModel.class, "QosModel", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+        initEReference(getQosModel_QosPolicies(), this.getQosPolicy(), null, "qosPolicies", null, 0, -1,
+                QosModel.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES,
+                !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+        initEClass(transportModelEClass, TransportModel.class, "TransportModel", !IS_ABSTRACT, !IS_INTERFACE,
+                IS_GENERATED_INSTANCE_CLASS);
+        initEReference(getTransportModel_Transports(), this.getTransport(), null, "transports", null, 0, -1,
+                TransportModel.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES,
+                !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
         // Initialize enums and add enum literals
         initEEnum(simpleTypeEEnum, SimpleType.class, "SimpleType");

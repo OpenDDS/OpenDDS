@@ -2939,6 +2939,26 @@ public interface OpenDDSPackage extends EPackage {
     int MODEL = 66;
 
     /**
+     * The number of structural features of the '<em>Model</em>'
+     * class. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     * @ordered
+     */
+    int MODEL_FEATURE_COUNT = 0;
+
+    /**
+     * The meta object id for the '
+     * {@link OpenDDS.ApplicationModelImpl <em>Application Model</em>}
+     * ' class. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @see OpenDDS.ApplicationModelImpl
+     * @see OpenDDS.OpenDDSPackageImpl#getApplicationModel()
+     * @generated
+     */
+    int APPLICATION_MODEL = 67;
+
+    /**
      * The feature id for the '<em><b>Applications</b></em>'
      * containment reference list. <!-- begin-user-doc --> <!--
      * end-user-doc -->
@@ -2946,7 +2966,28 @@ public interface OpenDDSPackage extends EPackage {
      * @generated
      * @ordered
      */
-    int MODEL__APPLICATIONS = ENTITY_FEATURE_COUNT + 0;
+    int APPLICATION_MODEL__APPLICATIONS = MODEL_FEATURE_COUNT + 0;
+
+    /**
+     * The number of structural features of the '
+     * <em>Application Model</em>' class. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
+     * 
+     * @generated
+     * @ordered
+     */
+    int APPLICATION_MODEL_FEATURE_COUNT = MODEL_FEATURE_COUNT + 1;
+
+    /**
+     * The meta object id for the '{@link OpenDDS.DomainModelImpl
+     * <em>Domain Model</em>}' class. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
+     * 
+     * @see OpenDDS.DomainModelImpl
+     * @see OpenDDS.OpenDDSPackageImpl#getDomainModel()
+     * @generated
+     */
+    int DOMAIN_MODEL = 68;
 
     /**
      * The feature id for the '<em><b>Domains</b></em>' containment
@@ -2955,7 +2996,7 @@ public interface OpenDDSPackage extends EPackage {
      * @generated
      * @ordered
      */
-    int MODEL__DOMAINS = ENTITY_FEATURE_COUNT + 1;
+    int DOMAIN_MODEL__DOMAINS = MODEL_FEATURE_COUNT + 0;
 
     /**
      * The feature id for the '<em><b>Participants</b></em>'
@@ -2965,7 +3006,7 @@ public interface OpenDDSPackage extends EPackage {
      * @generated
      * @ordered
      */
-    int MODEL__PARTICIPANTS = ENTITY_FEATURE_COUNT + 2;
+    int DOMAIN_MODEL__PARTICIPANTS = MODEL_FEATURE_COUNT + 1;
 
     /**
      * The feature id for the '<em><b>Topics</b></em>' containment
@@ -2974,17 +3015,56 @@ public interface OpenDDSPackage extends EPackage {
      * @generated
      * @ordered
      */
-    int MODEL__TOPICS = ENTITY_FEATURE_COUNT + 3;
+    int DOMAIN_MODEL__TOPICS = MODEL_FEATURE_COUNT + 2;
 
     /**
-     * The feature id for the '<em><b>Topic Types</b></em>'
-     * containment reference list. <!-- begin-user-doc --> <!--
-     * end-user-doc -->
+     * The number of structural features of the '<em>Domain Model</em>
+     * ' class. <!-- begin-user-doc --> <!-- end-user-doc -->
      * 
      * @generated
      * @ordered
      */
-    int MODEL__TOPIC_TYPES = ENTITY_FEATURE_COUNT + 4;
+    int DOMAIN_MODEL_FEATURE_COUNT = MODEL_FEATURE_COUNT + 3;
+
+    /**
+     * The meta object id for the '{@link OpenDDS.TypeModelImpl
+     * <em>Type Model</em>}' class. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
+     * 
+     * @see OpenDDS.TypeModelImpl
+     * @see OpenDDS.OpenDDSPackageImpl#getTypeModel()
+     * @generated
+     */
+    int TYPE_MODEL = 69;
+
+    /**
+     * The feature id for the '<em><b>Types</b></em>' containment
+     * reference list. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     * @ordered
+     */
+    int TYPE_MODEL__TYPES = MODEL_FEATURE_COUNT + 0;
+
+    /**
+     * The number of structural features of the '<em>Type Model</em>'
+     * class. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     * @ordered
+     */
+    int TYPE_MODEL_FEATURE_COUNT = MODEL_FEATURE_COUNT + 1;
+
+    /**
+     * The meta object id for the '{@link OpenDDS.QosModelImpl
+     * <em>Qos Model</em>}' class. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
+     * 
+     * @see OpenDDS.QosModelImpl
+     * @see OpenDDS.OpenDDSPackageImpl#getQosModel()
+     * @generated
+     */
+    int QOS_MODEL = 70;
 
     /**
      * The feature id for the '<em><b>Qos Policies</b></em>'
@@ -2994,7 +3074,27 @@ public interface OpenDDSPackage extends EPackage {
      * @generated
      * @ordered
      */
-    int MODEL__QOS_POLICIES = ENTITY_FEATURE_COUNT + 5;
+    int QOS_MODEL__QOS_POLICIES = MODEL_FEATURE_COUNT + 0;
+
+    /**
+     * The number of structural features of the '<em>Qos Model</em>'
+     * class. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @generated
+     * @ordered
+     */
+    int QOS_MODEL_FEATURE_COUNT = MODEL_FEATURE_COUNT + 1;
+
+    /**
+     * The meta object id for the '{@link OpenDDS.TransportModelImpl
+     * <em>Transport Model</em>}' class. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
+     * 
+     * @see OpenDDS.TransportModelImpl
+     * @see OpenDDS.OpenDDSPackageImpl#getTransportModel()
+     * @generated
+     */
+    int TRANSPORT_MODEL = 71;
 
     /**
      * The feature id for the '<em><b>Transports</b></em>' containment
@@ -3003,16 +3103,17 @@ public interface OpenDDSPackage extends EPackage {
      * @generated
      * @ordered
      */
-    int MODEL__TRANSPORTS = ENTITY_FEATURE_COUNT + 6;
+    int TRANSPORT_MODEL__TRANSPORTS = MODEL_FEATURE_COUNT + 0;
 
     /**
-     * The number of structural features of the '<em>Model</em>'
-     * class. <!-- begin-user-doc --> <!-- end-user-doc -->
+     * The number of structural features of the '
+     * <em>Transport Model</em>' class. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * 
      * @generated
      * @ordered
      */
-    int MODEL_FEATURE_COUNT = ENTITY_FEATURE_COUNT + 7;
+    int TRANSPORT_MODEL_FEATURE_COUNT = MODEL_FEATURE_COUNT + 1;
 
     /**
      * The meta object id for the '{@link OpenDDS.SimpleType
@@ -3023,7 +3124,7 @@ public interface OpenDDSPackage extends EPackage {
      * @see OpenDDS.OpenDDSPackageImpl#getSimpleType()
      * @generated
      */
-    int SIMPLE_TYPE = 67;
+    int SIMPLE_TYPE = 72;
 
     /**
      * The meta object id for the '
@@ -3035,7 +3136,7 @@ public interface OpenDDSPackage extends EPackage {
      * @see OpenDDS.OpenDDSPackageImpl#getDestinationOrderQosPolicyKind()
      * @generated
      */
-    int DESTINATION_ORDER_QOS_POLICY_KIND = 68;
+    int DESTINATION_ORDER_QOS_POLICY_KIND = 73;
 
     /**
      * The meta object id for the '
@@ -3047,7 +3148,7 @@ public interface OpenDDSPackage extends EPackage {
      * @see OpenDDS.OpenDDSPackageImpl#getDurabilityQosPolicyKind()
      * @generated
      */
-    int DURABILITY_QOS_POLICY_KIND = 69;
+    int DURABILITY_QOS_POLICY_KIND = 74;
 
     /**
      * The meta object id for the '
@@ -3059,7 +3160,7 @@ public interface OpenDDSPackage extends EPackage {
      * @see OpenDDS.OpenDDSPackageImpl#getHistoryQosPolicyKind()
      * @generated
      */
-    int HISTORY_QOS_POLICY_KIND = 70;
+    int HISTORY_QOS_POLICY_KIND = 75;
 
     /**
      * The meta object id for the '
@@ -3071,7 +3172,7 @@ public interface OpenDDSPackage extends EPackage {
      * @see OpenDDS.OpenDDSPackageImpl#getLivelinessQosPolicyKind()
      * @generated
      */
-    int LIVELINESS_QOS_POLICY_KIND = 71;
+    int LIVELINESS_QOS_POLICY_KIND = 76;
 
     /**
      * The meta object id for the '
@@ -3083,7 +3184,7 @@ public interface OpenDDSPackage extends EPackage {
      * @see OpenDDS.OpenDDSPackageImpl#getOwnershipQosPolicyKind()
      * @generated
      */
-    int OWNERSHIP_QOS_POLICY_KIND = 72;
+    int OWNERSHIP_QOS_POLICY_KIND = 77;
 
     /**
      * The meta object id for the '
@@ -3095,7 +3196,7 @@ public interface OpenDDSPackage extends EPackage {
      * @see OpenDDS.OpenDDSPackageImpl#getPresentationQosPolicyAccessScopeKind()
      * @generated
      */
-    int PRESENTATION_QOS_POLICY_ACCESS_SCOPE_KIND = 73;
+    int PRESENTATION_QOS_POLICY_ACCESS_SCOPE_KIND = 78;
 
     /**
      * The meta object id for the '
@@ -3107,7 +3208,7 @@ public interface OpenDDSPackage extends EPackage {
      * @see OpenDDS.OpenDDSPackageImpl#getReliabilityQosPolicyKind()
      * @generated
      */
-    int RELIABILITY_QOS_POLICY_KIND = 74;
+    int RELIABILITY_QOS_POLICY_KIND = 79;
 
     /**
      * The meta object id for the '{@link OpenDDS.ComponentType
@@ -3118,7 +3219,7 @@ public interface OpenDDSPackage extends EPackage {
      * @see OpenDDS.OpenDDSPackageImpl#getComponentType()
      * @generated
      */
-    int COMPONENT_TYPE = 75;
+    int COMPONENT_TYPE = 80;
 
     /**
      * The meta object id for the '{@link OpenDDS.LanguageType
@@ -3129,7 +3230,7 @@ public interface OpenDDSPackage extends EPackage {
      * @see OpenDDS.OpenDDSPackageImpl#getLanguageType()
      * @generated
      */
-    int LANGUAGE_TYPE = 76;
+    int LANGUAGE_TYPE = 81;
 
     /**
      * The meta object id for the '{@link OpenDDS.PlatformType
@@ -3140,7 +3241,7 @@ public interface OpenDDSPackage extends EPackage {
      * @see OpenDDS.OpenDDSPackageImpl#getPlatformType()
      * @generated
      */
-    int PLATFORM_TYPE = 77;
+    int PLATFORM_TYPE = 82;
 
     /**
      * Returns the meta object for class '{@link OpenDDS.Entity
@@ -5178,95 +5279,153 @@ public interface OpenDDSPackage extends EPackage {
     EClass getModel();
 
     /**
-     * Returns the meta object for the containment reference list '
-     * {@link OpenDDS.Model#getApplications <em>Applications</em>}'.
+     * Returns the meta object for class '
+     * {@link OpenDDS.ApplicationModel <em>Application Model</em>}'.
      * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @return the meta object for class '<em>Application Model</em>'.
+     * @see OpenDDS.ApplicationModel
+     * @generated
+     */
+    EClass getApplicationModel();
+
+    /**
+     * Returns the meta object for the containment reference list '
+     * {@link OpenDDS.ApplicationModel#getApplications
+     * <em>Applications</em>}'. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * 
      * @return the meta object for the containment reference list '
      *         <em>Applications</em>'.
-     * @see OpenDDS.Model#getApplications()
-     * @see #getModel()
+     * @see OpenDDS.ApplicationModel#getApplications()
+     * @see #getApplicationModel()
      * @generated
      */
-    EReference getModel_Applications();
+    EReference getApplicationModel_Applications();
 
     /**
-     * Returns the meta object for the reference list '
-     * {@link OpenDDS.Model#getDomains <em>Domains</em>}'. <!--
-     * begin-user-doc --> <!-- end-user-doc -->
+     * Returns the meta object for class '{@link OpenDDS.DomainModel
+     * <em>Domain Model</em>}'. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * 
-     * @return the meta object for the reference list '
-     *         <em>Domains</em>'.
-     * @see OpenDDS.Model#getDomains()
-     * @see #getModel()
+     * @return the meta object for class '<em>Domain Model</em>'.
+     * @see OpenDDS.DomainModel
      * @generated
      */
-    EReference getModel_Domains();
+    EClass getDomainModel();
 
     /**
      * Returns the meta object for the containment reference list '
-     * {@link OpenDDS.Model#getParticipants <em>Participants</em>}'.
-     * <!-- begin-user-doc --> <!-- end-user-doc -->
+     * {@link OpenDDS.DomainModel#getDomains <em>Domains</em>}'. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @return the meta object for the containment reference list '
+     *         <em>Domains</em>'.
+     * @see OpenDDS.DomainModel#getDomains()
+     * @see #getDomainModel()
+     * @generated
+     */
+    EReference getDomainModel_Domains();
+
+    /**
+     * Returns the meta object for the containment reference list '
+     * {@link OpenDDS.DomainModel#getParticipants
+     * <em>Participants</em>}'. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * 
      * @return the meta object for the containment reference list '
      *         <em>Participants</em>'.
-     * @see OpenDDS.Model#getParticipants()
-     * @see #getModel()
+     * @see OpenDDS.DomainModel#getParticipants()
+     * @see #getDomainModel()
      * @generated
      */
-    EReference getModel_Participants();
+    EReference getDomainModel_Participants();
 
     /**
      * Returns the meta object for the containment reference list '
-     * {@link OpenDDS.Model#getTopics <em>Topics</em>}'. <!--
+     * {@link OpenDDS.DomainModel#getTopics <em>Topics</em>}'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
      * 
      * @return the meta object for the containment reference list '
      *         <em>Topics</em>'.
-     * @see OpenDDS.Model#getTopics()
-     * @see #getModel()
+     * @see OpenDDS.DomainModel#getTopics()
+     * @see #getDomainModel()
      * @generated
      */
-    EReference getModel_Topics();
+    EReference getDomainModel_Topics();
+
+    /**
+     * Returns the meta object for class '{@link OpenDDS.TypeModel
+     * <em>Type Model</em>}'. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
+     * 
+     * @return the meta object for class '<em>Type Model</em>'.
+     * @see OpenDDS.TypeModel
+     * @generated
+     */
+    EClass getTypeModel();
 
     /**
      * Returns the meta object for the containment reference list '
-     * {@link OpenDDS.Model#getTopicTypes <em>Topic Types</em>}'. <!--
+     * {@link OpenDDS.TypeModel#getTypes <em>Types</em>}'. <!--
      * begin-user-doc --> <!-- end-user-doc -->
      * 
      * @return the meta object for the containment reference list '
-     *         <em>Topic Types</em>'.
-     * @see OpenDDS.Model#getTopicTypes()
-     * @see #getModel()
+     *         <em>Types</em>'.
+     * @see OpenDDS.TypeModel#getTypes()
+     * @see #getTypeModel()
      * @generated
      */
-    EReference getModel_TopicTypes();
+    EReference getTypeModel_Types();
+
+    /**
+     * Returns the meta object for class '{@link OpenDDS.QosModel
+     * <em>Qos Model</em>}'. <!-- begin-user-doc --> <!-- end-user-doc
+     * -->
+     * 
+     * @return the meta object for class '<em>Qos Model</em>'.
+     * @see OpenDDS.QosModel
+     * @generated
+     */
+    EClass getQosModel();
 
     /**
      * Returns the meta object for the containment reference list '
-     * {@link OpenDDS.Model#getQosPolicies <em>Qos Policies</em>}'.
+     * {@link OpenDDS.QosModel#getQosPolicies <em>Qos Policies</em>}'.
      * <!-- begin-user-doc --> <!-- end-user-doc -->
      * 
      * @return the meta object for the containment reference list '
      *         <em>Qos Policies</em>'.
-     * @see OpenDDS.Model#getQosPolicies()
-     * @see #getModel()
+     * @see OpenDDS.QosModel#getQosPolicies()
+     * @see #getQosModel()
      * @generated
      */
-    EReference getModel_QosPolicies();
+    EReference getQosModel_QosPolicies();
+
+    /**
+     * Returns the meta object for class '
+     * {@link OpenDDS.TransportModel <em>Transport Model</em>}'. <!--
+     * begin-user-doc --> <!-- end-user-doc -->
+     * 
+     * @return the meta object for class '<em>Transport Model</em>'.
+     * @see OpenDDS.TransportModel
+     * @generated
+     */
+    EClass getTransportModel();
 
     /**
      * Returns the meta object for the containment reference list '
-     * {@link OpenDDS.Model#getTransports <em>Transports</em>}'. <!--
-     * begin-user-doc --> <!-- end-user-doc -->
+     * {@link OpenDDS.TransportModel#getTransports
+     * <em>Transports</em>}'. <!-- begin-user-doc --> <!--
+     * end-user-doc -->
      * 
      * @return the meta object for the containment reference list '
      *         <em>Transports</em>'.
-     * @see OpenDDS.Model#getTransports()
-     * @see #getModel()
+     * @see OpenDDS.TransportModel#getTransports()
+     * @see #getTransportModel()
      * @generated
      */
-    EReference getModel_Transports();
+    EReference getTransportModel_Transports();
 
     /**
      * Returns the meta object for enum '{@link OpenDDS.SimpleType
@@ -7070,12 +7229,35 @@ public interface OpenDDSPackage extends EPackage {
 
         /**
          * The meta object literal for the '
+         * {@link OpenDDS.ApplicationModelImpl
+         * <em>Application Model</em>}' class. <!-- begin-user-doc -->
+         * <!-- end-user-doc -->
+         * 
+         * @see OpenDDS.ApplicationModelImpl
+         * @see OpenDDS.OpenDDSPackageImpl#getApplicationModel()
+         * @generated
+         */
+        EClass APPLICATION_MODEL = eINSTANCE.getApplicationModel();
+
+        /**
+         * The meta object literal for the '
          * <em><b>Applications</b></em>' containment reference list
          * feature. <!-- begin-user-doc --> <!-- end-user-doc -->
          * 
          * @generated
          */
-        EReference MODEL__APPLICATIONS = eINSTANCE.getModel_Applications();
+        EReference APPLICATION_MODEL__APPLICATIONS = eINSTANCE.getApplicationModel_Applications();
+
+        /**
+         * The meta object literal for the '
+         * {@link OpenDDS.DomainModelImpl <em>Domain Model</em>}'
+         * class. <!-- begin-user-doc --> <!-- end-user-doc -->
+         * 
+         * @see OpenDDS.DomainModelImpl
+         * @see OpenDDS.OpenDDSPackageImpl#getDomainModel()
+         * @generated
+         */
+        EClass DOMAIN_MODEL = eINSTANCE.getDomainModel();
 
         /**
          * The meta object literal for the '<em><b>Domains</b></em>'
@@ -7084,7 +7266,7 @@ public interface OpenDDSPackage extends EPackage {
          * 
          * @generated
          */
-        EReference MODEL__DOMAINS = eINSTANCE.getModel_Domains();
+        EReference DOMAIN_MODEL__DOMAINS = eINSTANCE.getDomainModel_Domains();
 
         /**
          * The meta object literal for the '
@@ -7093,7 +7275,7 @@ public interface OpenDDSPackage extends EPackage {
          * 
          * @generated
          */
-        EReference MODEL__PARTICIPANTS = eINSTANCE.getModel_Participants();
+        EReference DOMAIN_MODEL__PARTICIPANTS = eINSTANCE.getDomainModel_Participants();
 
         /**
          * The meta object literal for the '<em><b>Topics</b></em>'
@@ -7102,16 +7284,38 @@ public interface OpenDDSPackage extends EPackage {
          * 
          * @generated
          */
-        EReference MODEL__TOPICS = eINSTANCE.getModel_Topics();
+        EReference DOMAIN_MODEL__TOPICS = eINSTANCE.getDomainModel_Topics();
 
         /**
          * The meta object literal for the '
-         * <em><b>Topic Types</b></em>' containment reference list
-         * feature. <!-- begin-user-doc --> <!-- end-user-doc -->
+         * {@link OpenDDS.TypeModelImpl <em>Type Model</em>}' class.
+         * <!-- begin-user-doc --> <!-- end-user-doc -->
+         * 
+         * @see OpenDDS.TypeModelImpl
+         * @see OpenDDS.OpenDDSPackageImpl#getTypeModel()
+         * @generated
+         */
+        EClass TYPE_MODEL = eINSTANCE.getTypeModel();
+
+        /**
+         * The meta object literal for the '<em><b>Types</b></em>'
+         * containment reference list feature. <!-- begin-user-doc -->
+         * <!-- end-user-doc -->
          * 
          * @generated
          */
-        EReference MODEL__TOPIC_TYPES = eINSTANCE.getModel_TopicTypes();
+        EReference TYPE_MODEL__TYPES = eINSTANCE.getTypeModel_Types();
+
+        /**
+         * The meta object literal for the '
+         * {@link OpenDDS.QosModelImpl <em>Qos Model</em>}' class.
+         * <!-- begin-user-doc --> <!-- end-user-doc -->
+         * 
+         * @see OpenDDS.QosModelImpl
+         * @see OpenDDS.OpenDDSPackageImpl#getQosModel()
+         * @generated
+         */
+        EClass QOS_MODEL = eINSTANCE.getQosModel();
 
         /**
          * The meta object literal for the '
@@ -7120,7 +7324,18 @@ public interface OpenDDSPackage extends EPackage {
          * 
          * @generated
          */
-        EReference MODEL__QOS_POLICIES = eINSTANCE.getModel_QosPolicies();
+        EReference QOS_MODEL__QOS_POLICIES = eINSTANCE.getQosModel_QosPolicies();
+
+        /**
+         * The meta object literal for the '
+         * {@link OpenDDS.TransportModelImpl <em>Transport Model</em>}
+         * ' class. <!-- begin-user-doc --> <!-- end-user-doc -->
+         * 
+         * @see OpenDDS.TransportModelImpl
+         * @see OpenDDS.OpenDDSPackageImpl#getTransportModel()
+         * @generated
+         */
+        EClass TRANSPORT_MODEL = eINSTANCE.getTransportModel();
 
         /**
          * The meta object literal for the '<em><b>Transports</b></em>
@@ -7129,7 +7344,7 @@ public interface OpenDDSPackage extends EPackage {
          * 
          * @generated
          */
-        EReference MODEL__TRANSPORTS = eINSTANCE.getModel_Transports();
+        EReference TRANSPORT_MODEL__TRANSPORTS = eINSTANCE.getTransportModel_Transports();
 
         /**
          * The meta object literal for the '{@link OpenDDS.SimpleType
