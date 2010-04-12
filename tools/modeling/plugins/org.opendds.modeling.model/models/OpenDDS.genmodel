@@ -296,14 +296,23 @@
     <genClasses ecoreClass="OpenDDS.ecore#//Transport">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//Transport/transport_id"/>
     </genClasses>
-    <genClasses ecoreClass="OpenDDS.ecore#//Model">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Model/applications"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Model/domains"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Model/participants"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Model/topics"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Model/topicTypes"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Model/qosPolicies"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//Model/transports"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//Model"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//ApplicationModel">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//ApplicationModel/applications"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//DomainModel">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DomainModel/domains"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DomainModel/participants"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DomainModel/topics"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//TypeModel">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//TypeModel/types"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//QosModel">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//QosModel/qosPolicies"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//TransportModel">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//TransportModel/transports"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>
