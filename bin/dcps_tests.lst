@@ -171,7 +171,10 @@ tests/DCPS/StringKey/run_test.pl: !DCPS_MIN
 tests/DCPS/GuardCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/StatusCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/ReadCondition/run_test.pl: !DCPS_MIN
-tests/DCPS/QueryCondition/run_test.pl: !DCPS_MIN
+
+tests/DCPS/QueryCondition/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
+tests/DCPS/FilterExpression/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
+
 tests/DCPS/Federation/run_test.pl: !DCPS_MIN
 tests/DCPS/FileSystemStorage/run_test.pl: !DCPS_MIN
 tests/DCPS/Priority/run_test.pl: !DCPS_MIN !QNX
