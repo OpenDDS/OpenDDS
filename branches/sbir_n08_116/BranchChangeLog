@@ -1,3 +1,34 @@
+Tue Apr 13 21:58:14 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataCollector_T.cpp:
+
+          Fixed 64-bit warnings that show up when compiling DataReaderImpl.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fixed 64-bit warnings and improved error handling in
+          create_querycondition().
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Added support for unsigned int (CORBA::ULong) types in the filter
+          structs.  Also improved the support for conversion between data
+          types.  Improved error handling in the case where the parse fails.
+          Fixed logic for short-circuiting ANDs and ORs.  Refactored
+          implementation of Value to use a Boost.Variant-like visitor instead
+          of switch statements.
+
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+
+          Added tests that actually evaluate filter expressions using the
+          struct TopicBuiltinTopicData.
+
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+
+          Removed some extraneous namespace scoping in preparation for
+          enhancing this test once we have the code generation support.
+
 Mon Apr 12 14:24:38 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/FilterEvaluator.h:
@@ -59,15 +90,15 @@ Fri Apr  9 18:11:38 UTC 2010  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/Ownership/tcp.conf:
 
           New test.
-          
+
         * tests/DCPS/unit/MyTypeSupportImpl.h:
-        
+
           Accommodated the changes.
 
         * bin/dcps_tests.lst:
 
           Added Ownership test cases.
-          
+
 Wed Apr  7 15:32:56 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         The following is for the Content-Subscription Profile implementation

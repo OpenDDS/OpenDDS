@@ -13,6 +13,53 @@
 #include <cstdio>
 #include <iostream>
 
+template<size_t N, typename T>
+bool doEvalTest(const char* (&input)[N], bool expected, const T& sample,
+                const DDS::StringSeq& params) {
+  bool pass = true;
+  for (size_t i = 0; i < N; ++i) {
+    OpenDDS::DCPS::FilterEvaluator fe(input[i], false);
+    const bool result = fe.eval(sample, params);
+    if (result != expected) pass = false;
+    std::cout << input[i] << " => " << result << std::endl;
+  }
+  return pass;
+}
+
+bool testEval() {
+  DDS::TopicBuiltinTopicData sample;
+  sample.name = "Adam";
+  sample.durability.kind = DDS::PERSISTENT_DURABILITY_QOS;
+  sample.durability_service.history_depth = 15;
+  sample.durability_service.service_cleanup_delay.sec = 0;
+  sample.durability_service.service_cleanup_delay.nanosec = 10;
+  DDS::StringSeq params;
+  params.length(1);
+  params[0] = "3";
+
+  static const char* filters_pass[] = {"name LIKE 'Ad%'",
+    "durability.kind = 'PERSISTENT_DURABILITY_QOS'",
+    "durability_service.history_depth > %0",
+    "durability_service.service_cleanup_delay.sec = 0 AND "
+      "durability_service.service_cleanup_delay.nanosec >= 10",
+    "durability_service.service_cleanup_delay.sec < "
+      "durability_service.service_cleanup_delay.nanosec"};
+
+  static const char* filters_fail[] = {"name LIKE 'ZZ%'",
+    "durability.kind = 'TRANSIENT_DURABILITY_QOS'",
+    "durability_service.history_depth < %0",
+    "durability_service.service_cleanup_delay.sec = 0 AND "
+      "durability_service.service_cleanup_delay.nanosec BETWEEN 3 AND 5",
+    "durability_service.service_cleanup_delay.sec = "
+      "durability_service.service_cleanup_delay.nanosec"};
+
+  std::cout << std::boolalpha;
+  bool ok = doEvalTest(filters_pass, true, sample, params);
+  ok &= doEvalTest(filters_fail, false, sample, params);
+  return ok;
+}
+
+// parsing test helpers
 namespace yard_test {
 
   template<typename Rule_T>
@@ -57,21 +104,18 @@ bool parserTest(const char* (&input)[N]) {
   return pass;
 }
 
-int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
-{
-  using namespace OpenDDS::DCPS;
 
-  if (argc > 1 && ACE_OS::strncmp(argv[1], ACE_TEXT("-d"), 2) == 0) {
-    debug = true;
+bool testParsing() {
+  using namespace OpenDDS::DCPS;
+  bool ok = true;
+
+  try {
+    FilterEvaluator eval("a = 3 AND b = 4 OR Z ! 5", false);
+    ok = false;
+  } catch (const std::exception& e) {
+    std::cout << e.what() << std::endl;
   }
 
-  //scratch
-  FilterEvaluator fe("name LIKE 'Ad%'", false);
-  DDS::TopicBuiltinTopicData sample;
-  sample.name = "Eve ";
-  std::cout << std::boolalpha << fe.eval(sample, DDS::StringSeq()) << std::endl;
-
-  bool ok = true;
   const char* inttests[] = {"3", "+4", "-5", "1348907505135", "0x135135",
     "0X43514651", "0xABCD", "0x132fabe"};
   ok &= parserTest<FilterExpressionGrammar::IntVal>(inttests);
@@ -116,6 +160,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   const char* queries[] = {"ORDER BY x", "ORDER BY x,y", "ORDER BY x.a.b.cde",
     "ORDER BY a.b.cd134.f_g5, e, h.i,   j.k.l", "x > 10 ORDER BY y"};
   ok &= parserTest<FilterExpressionGrammar::Query>(queries);
+
+  return ok;
+}
+
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+{
+  if (argc > 1 && ACE_OS::strncmp(argv[1], ACE_TEXT("-d"), 2) == 0) {
+    debug = true;
+  }
+
+  bool ok = testParsing();
+  ok &= testEval();
 
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

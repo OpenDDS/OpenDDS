@@ -46,23 +46,27 @@ struct FilterEvaluator::AstNodeWrapper {
 };
 
 FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
-  : filter_root_(0)
+  : filter_(filter), filter_root_(0)
 {
   const char* out = filter + std::strlen(filter);
   yard::SimpleTextParser parser(filter, out);
-  if (allowOrderBy) {
-    if (!parser.Parse<QueryCompleteInput>()) {
-      throw std::runtime_error("Invalid expression");
+  if (!(allowOrderBy ? parser.Parse<QueryCompleteInput>()
+      : parser.Parse<FilterCompleteInput>())) {
+    AstNode* prev = 0;
+    for (AstNode* iter = parser.GetAstRoot()->GetFirstChild(); iter;
+        iter = iter->GetSibling()) {
+      prev = iter;
     }
-  } else {
-    if (!parser.Parse<FilterCompleteInput>()) {
-      throw std::runtime_error("Invalid expression");
-    }
+    ptrdiff_t pos = prev ? prev->GetLastToken() - parser.Begin() : 0;
+    std::ostringstream oss;
+    oss << pos;
+    throw std::runtime_error("Invalid expression [" + filter_
+      + "] at character " + oss.str());
   }
 
-  AstNode* root = parser.GetAstRoot();
   bool found_order_by = false;
-  for (AstNode* iter = root->GetFirstChild(); iter; iter = iter->GetSibling()) {
+  for (AstNode* iter = parser.GetAstRoot()->GetFirstChild(); iter;
+      iter = iter->GetSibling()) {
     if (iter->TypeMatches<ORDERBY>()) {
       found_order_by = true;
     } else if (found_order_by && iter->TypeMatches<FieldName>()) {
@@ -139,7 +143,7 @@ namespace {
 
     Value eval(const void*, const MetaStruct&, const DDS::StringSeq&)
     {
-      return value_;
+      return Value(value_, true);
     }
 
     int value_;
@@ -153,7 +157,7 @@ namespace {
 
     Value eval(const void*, const MetaStruct&, const DDS::StringSeq&)
     {
-      return value_;
+      return Value(value_, true);
     }
 
     char value_;
@@ -167,7 +171,7 @@ namespace {
 
     Value eval(const void*, const MetaStruct&, const DDS::StringSeq&)
     {
-      return value_;
+      return Value(value_, true);
     }
 
     double value_;
@@ -183,7 +187,7 @@ namespace {
 
     Value eval(const void*, const MetaStruct&, const DDS::StringSeq&)
     {
-      return value_.c_str();
+      return Value(value_.c_str(), true);
     }
 
     std::string value_;
@@ -197,9 +201,7 @@ namespace {
 
     Value eval(const void*, const MetaStruct&, const DDS::StringSeq& params)
     {
-      Value v = params[param_].in();
-      v.convertable_ = true;
-      return v;
+      return Value(params[param_].in(), true);
     }
 
     int param_;
@@ -349,8 +351,10 @@ namespace {
         return !left.b_;
       case LG_AND:
         if (!left.b_) return false;
+        break;
       case LG_OR:
         if (left.b_) return true;
+        break;
       }
       return children_[1]->eval(sample, meta, params);
     }
@@ -396,8 +400,7 @@ bool
 FilterEvaluator::eval_i(const void* sample, const MetaStruct& meta,
                         const DDS::StringSeq& params) const
 {
-  Value v = filter_root_->eval(sample, meta, params);
-  return v.b_;
+  return filter_root_->eval(sample, meta, params).b_;
 }
 
 std::vector<std::string>
@@ -412,46 +415,100 @@ FilterEvaluator::hasFilter() const
   return filter_root_ != 0;
 }
 
-Value::Value(bool b)
-  : type_(VAL_BOOL), b_(b), convertable_(false)
+Value::Value(bool b, bool conversion_preferred)
+  : type_(VAL_BOOL), b_(b), conversion_preferred_(conversion_preferred)
 {}
 
-Value::Value(int i)
-  : type_(VAL_INT), i_(i), convertable_(false)
+Value::Value(int i, bool conversion_preferred)
+  : type_(VAL_INT), i_(i), conversion_preferred_(conversion_preferred)
 {}
 
-Value::Value(char c)
-  : type_(VAL_CHAR), c_(c), convertable_(false)
+Value::Value(unsigned int u, bool conversion_preferred)
+  : type_(VAL_UINT), u_(u), conversion_preferred_(conversion_preferred)
 {}
 
-Value::Value(double f)
-  : type_(VAL_FLOAT), f_(f), convertable_(false)
+Value::Value(char c, bool conversion_preferred)
+  : type_(VAL_CHAR), c_(c), conversion_preferred_(conversion_preferred)
 {}
 
-Value::Value(const char* s)
-  : type_(VAL_STRING), s_(ACE_OS::strdup(s)), convertable_(false)
+Value::Value(double f, bool conversion_preferred)
+  : type_(VAL_FLOAT), f_(f), conversion_preferred_(conversion_preferred)
 {}
+
+Value::Value(const char* s, bool conversion_preferred)
+  : type_(VAL_STRING), s_(ACE_OS::strdup(s))
+  , conversion_preferred_(conversion_preferred)
+{}
+
+template<> bool& Value::get() { return b_; }
+template<> int& Value::get() { return i_; }
+template<> unsigned int& Value::get() { return u_; }
+template<> char& Value::get() { return c_; }
+template<> double& Value::get() { return f_; }
+template<> const char*& Value::get() { return s_; }
+template<> const bool& Value::get() const { return b_; }
+template<> const int& Value::get() const { return i_; }
+template<> const unsigned int& Value::get() const { return u_; }
+template<> const char& Value::get() const { return c_; }
+template<> const double& Value::get() const { return f_; }
+template<> const char* const& Value::get() const { return s_; }
 
 Value::~Value()
 {
   if (type_ == VAL_STRING) ACE_OS::free((void*)s_);
 }
 
-Value::Value(const Value& v)
-  : type_(v.type_), convertable_(v.convertable_)
-{
-  switch (type_) {
-  case VAL_BOOL:
-    b_ = v.b_; break;
-  case VAL_INT:
-    i_ = v.i_; break;
-  case VAL_CHAR:
-    c_ = v.c_; break;
-  case VAL_FLOAT:
-    f_ = v.f_; break;
-  case VAL_STRING:
-    s_ = ACE_OS::strdup(v.s_); break;
+namespace {
+  template<typename Visitor, typename Val>
+  typename Visitor::result_type visit(Visitor& vis, Val& val)
+  {
+    switch (val.type_) {
+    case Value::VAL_BOOL:
+      return vis(val.b_);
+    case Value::VAL_INT:
+      return vis(val.i_);
+    case Value::VAL_UINT:
+      return vis(val.u_);
+    case Value::VAL_FLOAT:
+      return vis(val.f_);
+    case Value::VAL_CHAR:
+      return vis(val.c_);
+    case Value::VAL_STRING:
+      return vis(val.s_);
+    default:
+      throw std::runtime_error("Unexpected type of Value");
+    }
   }
+
+  template<typename ResultType = void>
+  struct VisitorBase {
+    typedef ResultType result_type;
+  };
+
+  struct Assign : VisitorBase<> {
+    explicit Assign(Value& target, bool steal = false)
+      : tgt_(target), steal_(steal) {}
+
+    void operator()(const char* s)
+    {
+      tgt_.s_ = steal_ ? s : ACE_OS::strdup(s);
+    }
+
+    template <typename T> void operator()(const T& s)
+    {
+      tgt_.get<T>() = s;
+    }
+
+    Value& tgt_;
+    bool steal_;
+  };
+}
+
+Value::Value(const Value& v)
+  : type_(v.type_), conversion_preferred_(v.conversion_preferred_)
+{
+  Assign visitor(*this);
+  visit(visitor, v);
 }
 
 Value&
@@ -465,18 +522,60 @@ Value::operator=(const Value& v)
 void
 Value::swap(Value& v)
 {
-  switch (type_) {
-  case VAL_BOOL:
-    std::swap(b_, v.b_); break;
-  case VAL_INT:
-    std::swap(i_, v.i_); break;
-  case VAL_CHAR:
-    std::swap(c_, v.c_); break;
-  case VAL_FLOAT:
-    std::swap(f_, v.f_); break;
-  case VAL_STRING:
-    std::swap(s_, v.s_); break;
+  Value t(v);
+
+  if (v.type_ == VAL_STRING) {
+    ACE_OS::free((void*)v.s_);
   }
+
+  Assign visitor1(v, true);
+  visit(visitor1, *this);
+  if (type_ == VAL_STRING) {
+    s_ = 0;
+  }
+
+  Assign visitor2(*this, true);
+  visit(visitor2, t);
+  if (t.type_ == VAL_STRING) {
+    t.s_ = 0;
+  }
+
+  std::swap(conversion_preferred_, v.conversion_preferred_);
+  std::swap(type_, v.type_);
+}
+
+namespace {
+  struct Equals : VisitorBase<bool> {
+    explicit Equals(const Value& lhs) : lhs_(lhs) {}
+
+    bool operator()(const char* s) const
+    {
+      return std::strcmp(lhs_.s_, s) == 0;
+    }
+
+    template <typename T> bool operator()(const T& rhs) const
+    {
+      return lhs_.get<T>() == rhs;
+    }
+
+    const Value& lhs_;
+  };
+
+  struct Less : VisitorBase<bool> {
+    explicit Less(const Value& lhs) : lhs_(lhs) {}
+
+    bool operator()(const char* s) const
+    {
+      return std::strcmp(lhs_.s_, s) < 0;
+    }
+
+    template <typename T> bool operator()(const T& rhs) const
+    {
+      return lhs_.get<T>() < rhs;
+    }
+
+    const Value& lhs_;
+  };
 }
 
 bool
@@ -485,20 +584,8 @@ Value::operator==(const Value& v) const
   Value lhs = *this;
   Value rhs = v;
   conversion(lhs, rhs);
-
-  switch (lhs.type_) {
-  case VAL_BOOL:
-    return lhs.b_ == rhs.b_;
-  case VAL_INT:
-    return lhs.i_ == rhs.i_;
-  case VAL_CHAR:
-    return lhs.c_ == rhs.c_;
-  case VAL_FLOAT:
-    return lhs.f_ == rhs.f_;
-  case VAL_STRING:
-    return std::strcmp(lhs.s_, rhs.s_) == 0;
-  }
-  return false; // not reached
+  Equals visitor(lhs);
+  return visit(visitor, rhs);
 }
 
 bool
@@ -507,20 +594,8 @@ Value::operator<(const Value& v) const
   Value lhs = *this;
   Value rhs = v;
   conversion(lhs, rhs);
-
-  switch (lhs.type_) {
-  case VAL_BOOL:
-    return lhs.b_ < rhs.b_;
-  case VAL_INT:
-    return lhs.i_ < rhs.i_;
-  case VAL_CHAR:
-    return lhs.c_ < rhs.c_;
-  case VAL_FLOAT:
-    return lhs.f_ < rhs.f_;
-  case VAL_STRING:
-    return std::strcmp(lhs.s_, rhs.s_) < 0;
-  }
-  return false; // not reached
+  Less visitor(lhs);
+  return visit(visitor, rhs);
 }
 
 bool
@@ -543,57 +618,168 @@ Value::like(const Value& v) const
   return ACE::wild_match(s_, pattern.c_str(), true, true);
 }
 
-void
+namespace {
+  struct StreamInsert : VisitorBase<> {
+    explicit StreamInsert(std::ostream& os) : os_(os) {}
+
+    template<typename T> void operator()(const T& t)
+    {
+      os_ << t;
+    }
+
+    std::ostream& os_;
+  };
+
+  struct StreamExtract : VisitorBase<> {
+    explicit StreamExtract(std::istream& is) : is_(is) {}
+
+    void operator()(const char*) {}
+    // not called.  prevents instantiation of the following with T = const char*
+
+    template<typename T> void operator()(T& t)
+    {
+      is_ >> t;
+    }
+
+    std::istream& is_;
+  };
+}
+
+bool
 Value::convert(Value::Type t)
 {
-  std::ostringstream oss;
-  switch (type_) {
-  case VAL_BOOL:
-    oss << b_; break;
-  case VAL_INT:
-    oss << i_; break;
-  case VAL_CHAR:
-    oss << c_; break;
-  case VAL_FLOAT:
-    oss << f_; break;
+  std::string asString; 
+  if (type_ == VAL_STRING) {
+    asString = s_;
+  } else {
+    std::ostringstream oss;
+    StreamInsert visitor(oss);
+    visit(visitor, *this);
+    asString = oss.str();
   }
-  std::string asString = (type_ == VAL_STRING) ? s_ : oss.str();
 
-  std::istringstream iss(asString);
-  Value newval(*this);
+  Value newval = 0;
   newval.type_ = t;
-  newval.convertable_ = false;
-  switch (t) {
-  case VAL_BOOL:
-    iss >> newval.b_; break;
-  case VAL_INT:
-    iss >> newval.i_; break;
-  case VAL_CHAR:
-    iss >> newval.c_; break;
-  case VAL_FLOAT:
-    iss >> newval.f_; break;
-  case VAL_STRING:
-    newval.s_ = ACE_OS::strdup(asString.c_str()); break;
+  newval.conversion_preferred_ = false;
+  if (t == VAL_STRING) {
+    newval.s_ = ACE_OS::strdup(asString.c_str());
+    swap(newval);
+    return true;
+  } else {
+    std::istringstream iss(asString);
+    StreamExtract visitor(iss);
+    visit(visitor, newval);
+    if (iss.eof() && !iss.bad()) {
+      swap(newval);
+      return true;
+    }
+    return false;
   }
-  swap(newval);
 }
 
 void
 Value::conversion(Value& lhs, Value& rhs)
 {
-  if (lhs.type_ != rhs.type_) {
-    if (lhs.convertable_) {
-      lhs.convert(rhs.type_);
-    } else if (rhs.convertable_) {
-      rhs.convert(lhs.type_);
+  if (lhs.type_ == rhs.type_) {
+    return;
+  }
+  bool ok = false;
+  Value& smaller = (lhs.type_ < rhs.type_) ? lhs : rhs;
+  Value& larger = (lhs.type_ < rhs.type_) ? rhs : lhs;
+  if (smaller.conversion_preferred_) {
+    ok = smaller.convert(larger.type_);
+  } else if (larger.conversion_preferred_) {
+    ok = larger.convert(smaller.type_);
+  } else if (smaller.type_ == VAL_CHAR && larger.type_ == VAL_STRING) {
+    ok = smaller.convert(VAL_STRING);
+  } else if (larger.type_ <= VAL_LARGEST_NUMERIC) {
+    ok = smaller.convert(larger.type_);
+  } else if (larger.type_ == VAL_STRING) {
+    if (larger.convert(smaller.type_)) {
+      ok = true;
     } else {
-      throw std::runtime_error("Types don't match and aren't convertable.");
+      ok = smaller.convert(VAL_STRING);
     }
+  }
+  if (!ok) {
+    throw std::runtime_error("Types don't match and aren't convertible.");
   }
 }
 
 
 // -- will be generated --
+
+template<>
+struct MetaStructImpl<DDS::DurabilityQosPolicy> : MetaStruct {
+  Value getValue(const void* stru, const char* fieldSpec) const
+  {
+    const DDS::DurabilityQosPolicy& typed =
+      *static_cast<const DDS::DurabilityQosPolicy*>(stru);
+    if (std::string(fieldSpec) == "kind") {
+      static const char* kind_enumerator_names[] = {
+        "VOLATILE_DURABILITY_QOS",
+        "TRANSIENT_LOCAL_DURABILITY_QOS",
+        "TRANSIENT_DURABILITY_QOS",
+        "PERSISTENT_DURABILITY_QOS"
+      };
+      return kind_enumerator_names[typed.kind];
+    }
+    return 0;
+  }
+};
+
+template<>
+const MetaStruct& getMetaStruct<DDS::DurabilityQosPolicy>()
+{
+  static MetaStructImpl<DDS::DurabilityQosPolicy> meta_DDS_DurabilityQosPolicy;
+  return meta_DDS_DurabilityQosPolicy;
+}
+
+template<>
+struct MetaStructImpl<DDS::Duration_t> : MetaStruct {
+  Value getValue(const void* stru, const char* fieldSpec) const
+  {
+    const DDS::Duration_t& typed = *static_cast<const DDS::Duration_t*>(stru);
+    if (std::string(fieldSpec) == "sec") {
+      return typed.sec;
+    }
+    if (std::string(fieldSpec) == "nanosec") {
+      return typed.nanosec;
+    }
+    return 0;
+  }
+};
+
+template<>
+const MetaStruct& getMetaStruct<DDS::Duration_t>()
+{
+  static MetaStructImpl<DDS::Duration_t> meta_DDS_Duration_t;
+  return meta_DDS_Duration_t;
+}
+
+template<>
+struct MetaStructImpl<DDS::DurabilityServiceQosPolicy> : MetaStruct {
+  Value getValue(const void* stru, const char* fieldSpec) const
+  {
+    const DDS::DurabilityServiceQosPolicy& typed =
+      *static_cast<const DDS::DurabilityServiceQosPolicy*>(stru);
+    if (std::string(fieldSpec).find("service_cleanup_delay.") == 0) {
+      return getMetaStruct<DDS::Duration_t>()
+        .getValue(&typed.service_cleanup_delay, fieldSpec + 22);
+    }
+    if (std::string(fieldSpec) == "history_depth") {
+      return typed.history_depth;
+    }
+    return 0;
+  }
+};
+
+template<>
+const MetaStruct& getMetaStruct<DDS::DurabilityServiceQosPolicy>()
+{
+  static MetaStructImpl<DDS::DurabilityServiceQosPolicy> meta_DDS_DurabilityServiceQosPolicy;
+  return meta_DDS_DurabilityServiceQosPolicy;
+}
 
 template<>
 struct MetaStructImpl<DDS::TopicBuiltinTopicData> : MetaStruct {
@@ -604,15 +790,25 @@ struct MetaStructImpl<DDS::TopicBuiltinTopicData> : MetaStruct {
     if (std::string(fieldSpec) == "name") {
       return typed.name.in();
     }
+    if (std::string(fieldSpec) == "type_name") {
+      return typed.type_name.in();
+    }
+    if (std::string(fieldSpec).find("durability.") == 0) {
+      return getMetaStruct<DDS::DurabilityQosPolicy>()
+        .getValue(&typed.durability, fieldSpec + 11);
+    }
+    if (std::string(fieldSpec).find("durability_service.") == 0) {
+      return getMetaStruct<DDS::DurabilityServiceQosPolicy>()
+        .getValue(&typed.durability_service, fieldSpec + 19);
+    }
     return 0;
   }
 };
 
-MetaStructImpl<DDS::TopicBuiltinTopicData> meta_DDS_TopicBuiltinTopicData;
-
 template<>
 const MetaStruct& getMetaStruct<DDS::TopicBuiltinTopicData>()
 {
+  static MetaStructImpl<DDS::TopicBuiltinTopicData> meta_DDS_TopicBuiltinTopicData;
   return meta_DDS_TopicBuiltinTopicData;
 }
 
