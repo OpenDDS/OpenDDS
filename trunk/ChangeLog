@@ -1,3 +1,16 @@
+Tue Apr 13 00:06:06 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Added files for running scripted tests in packaged environment.
+
+        * performance-tests/Bench/bin/extract-throughput.pl:
+        * performance-tests/Bench/bin/plot-throughput-testformats.gp:
+        * performance-tests/Bench/bin/plot-throughput-transports.gp:
+        * performance-tests/Bench/tools/plot-throughput.gp:
+
+          Added more graphing scripts for throughput results.
+
 Fri Apr 09 21:27:04 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/tests/latency/run_test.pl:

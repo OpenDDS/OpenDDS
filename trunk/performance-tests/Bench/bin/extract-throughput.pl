@@ -67,7 +67,8 @@ fields:
 # rate      - current message rate being processed.
 # time      - current time of test being processed.
 # data      - data that has been processed.
-our ($current, $transport, $size, $rate, $time, $data);
+# test      - current test number being processed.
+our ($current, $transport, $size, $rate, $time, $data, $test);
 
 if( not defined $current or $ARGV ne "$current") {
   # Starting a new file.
@@ -76,46 +77,100 @@ if( not defined $current or $ARGV ne "$current") {
   undef $rate;
   undef $transport;
   undef $time;
+  undef $test;
+  if ($current =~ /bidir(\d+)-.*/){
+    $test = $1;
+  }
+#  elsif ($current =~ /test(\d+)-.*/) {
+#    $test = $1 + 13;
+#  }
 }
+
 
 /Options::loadPublication\(\) -   \[publication\/\S+] MessageRate == (\d+)\.$/ and do { $rate = $1; };
 /Options::loadPublication\(\) -   \[publication\/\S+] MessageSize == (\d+)\.$/ and do { $size = $1; };
 /::enable\(\) - (publication|subscription) \S+: obtained (.+) transport with index \d+\.$/ and do { $transport = $2; };
 
 # No need to examine data if we have not found required information.
-next if ((not defined $transport) or (not defined $rate) or (not defined $size));
+next if ((not defined $transport) or (not defined $test));
+
 
 # Store data as it is recognized.
-/DataReaderListener::on_data_available\(\) - received a non-data sample.  After messages: total: \d+, valid: (\d+)./ and do {$data->{ $transport}->{ $size}->{ $rate}->{actual} = $1; };
-/test elapsed time: (\d+\.?\d+)/ and do { $data->{ $transport}->{ $size}->{ $rate}->{time} = $1; };
+/DataReaderListener::on_data_available\(\) - received a non-data sample.  After messages: total: \d+, valid: (\d+)./ and do {$data->{ $transport}->{ $test}->{actual} = $1; };
+/^Valid Messages Received: (\d+)$/ and do {$data->{ $transport}->{ $test}->{actual} = $1; };
+/test elapsed time: (\d+\.?\d+)/ and do {
+  $data->{ $transport}->{ $test}->{time} = $1;
+  $data->{ $transport}->{ $test}->{size} = $size;
+  $data->{ $transport}->{ $test}->{rate} = $rate;
+};
+
+sub printtestresult ($$$$) {
+  my $size = shift;
+  my $rate = shift;
+  my $messages = shift;
+  my $time = shift;
+  my $actual = $messages * $size * 8 / $time;
+  print "$size $rate $actual\n";
+}
 
 
 END {
   die "No actual data gathered." if not $data or not scalar keys %$data;
 
-  # Format output as CSV data.
   my $index = 0;
   foreach my $transport (sort keys %$data) {
     print "#\n";
-    print "# Index " . $index++ . " data for $transport.\n";
+    print "# Index " . $index++ . " data for $transport\n";
     print "#\n";
-    print "# transport, size, rate, throughput per second,\n";
-    print "#   expected throughput per second\n";
+    print "# size (bytes per sample),\n";
+    print "# rate (samples per second),\n";
+    print "# throughput per second (bits per second)\n";
     print "#\n";
-    foreach my $size (sort { $a <=> $b; } keys %{$data->{$transport}}) {
-      foreach my $rate (sort { $a <=> $b; } keys %{$data->{$transport}->{$size}}) {
-        my $expected = $size * $rate;
-        my $elapsed = $data->{ $transport}->{ $size}->{ $rate}->{time};
-        next if not $elapsed;
-        my $actual = ($data->{$transport}->{$size}->{$rate}->{actual} * $size / $elapsed);
-        print "$transport,";
-        print "$size,";
-        print "$rate,";
-        print "$actual,";
-        print "$expected";
-        print "\n";
-      }
-    }
+    print "# expected throughput per second == size * rate * 8\n";
+    print "#  -- using x:(column(1)*column(2)*8))\n";
+    print "#\n";
+    print "# Bidirectional / steepest ascent\n";
+    printtestresult ($data->{ $transport}->{ 1}->{size}, $data->{ $transport}->{ 1}->{rate}, $data->{ $transport}->{ 1}->{actual}, $data->{ $transport}->{ 1}->{time});
+    printtestresult ($data->{ $transport}->{ 2}->{size}, $data->{ $transport}->{ 2}->{rate}, $data->{ $transport}->{ 2}->{actual}, $data->{ $transport}->{ 2}->{time});
+    printtestresult ($data->{ $transport}->{ 3}->{size}, $data->{ $transport}->{ 3}->{rate}, $data->{ $transport}->{ 3}->{actual}, $data->{ $transport}->{ 3}->{time});
+    printtestresult ($data->{ $transport}->{ 4}->{size}, $data->{ $transport}->{ 4}->{rate}, $data->{ $transport}->{ 4}->{actual}, $data->{ $transport}->{ 4}->{time});
+    printtestresult ($data->{ $transport}->{ 5}->{size}, $data->{ $transport}->{ 5}->{rate}, $data->{ $transport}->{ 5}->{actual}, $data->{ $transport}->{ 5}->{time});
+    print "\n\n";
+
+    print "#\n";
+    print "# Index " . $index++ . " data for $transport\n";
+    print "#\n";
+    print "# size (bytes per sample),\n";
+    print "# rate (samples per second),\n";
+    print "# throughput per second (bits per second)\n";
+    print "#\n";
+    print "# expected throughput per second == size * rate * 8\n";
+    print "#  -- using x:(column(1)*column(2)*8))\n";
+    print "#\n";
+    print "# Bidirectional / fixed rate\n";
+    printtestresult ($data->{ $transport}->{ 1}->{size}, $data->{ $transport}->{ 1}->{rate}, $data->{ $transport}->{ 1}->{actual}, $data->{ $transport}->{ 1}->{time});
+    printtestresult ($data->{ $transport}->{ 6}->{size}, $data->{ $transport}->{ 6}->{rate}, $data->{ $transport}->{ 6}->{actual}, $data->{ $transport}->{ 6}->{time});
+    printtestresult ($data->{ $transport}->{ 7}->{size}, $data->{ $transport}->{ 7}->{rate}, $data->{ $transport}->{ 7}->{actual}, $data->{ $transport}->{ 7}->{time});
+    printtestresult ($data->{ $transport}->{ 8}->{size}, $data->{ $transport}->{ 8}->{rate}, $data->{ $transport}->{ 8}->{actual}, $data->{ $transport}->{ 8}->{time});
+    printtestresult ($data->{ $transport}->{ 9}->{size}, $data->{ $transport}->{ 9}->{rate}, $data->{ $transport}->{ 9}->{actual}, $data->{ $transport}->{ 9}->{time});
+    print "\n\n";
+
+    print "#\n";
+    print "# Index " . $index++ . " data for $transport\n";
+    print "#\n";
+    print "# size (bytes per sample),\n";
+    print "# rate (samples per second),\n";
+    print "# throughput per second (bits per second)\n";
+    print "#\n";
+    print "# expected throughput per second == size * rate * 8\n";
+    print "#  -- using x:(column(1)*column(2)*8))\n";
+    print "#\n";
+    print "# Bidirectional / fixed size\n";
+    printtestresult ($data->{ $transport}->{ 1}->{size}, $data->{ $transport}->{ 1}->{rate}, $data->{ $transport}->{ 1}->{actual}, $data->{ $transport}->{ 1}->{time});
+    printtestresult ($data->{ $transport}->{ 10}->{size}, $data->{ $transport}->{ 10}->{rate}, $data->{ $transport}->{ 10}->{actual}, $data->{ $transport}->{ 10}->{time});
+    printtestresult ($data->{ $transport}->{ 11}->{size}, $data->{ $transport}->{ 11}->{rate}, $data->{ $transport}->{ 11}->{actual}, $data->{ $transport}->{ 11}->{time});
+    printtestresult ($data->{ $transport}->{ 12}->{size}, $data->{ $transport}->{ 12}->{rate}, $data->{ $transport}->{ 12}->{actual}, $data->{ $transport}->{ 12}->{time});
+    printtestresult ($data->{ $transport}->{ 13}->{size}, $data->{ $transport}->{ 13}->{rate}, $data->{ $transport}->{ 13}->{actual}, $data->{ $transport}->{ 13}->{time});
     print "\n\n";
   }
 }
