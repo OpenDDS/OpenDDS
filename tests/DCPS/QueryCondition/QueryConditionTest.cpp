@@ -23,16 +23,15 @@ int run_test(int argc, ACE_TCHAR *argv[])
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
   DomainParticipant_var dp =
     dpf->create_participant(23, PARTICIPANT_QOS_DEFAULT, 0,
-                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                            DEFAULT_STATUS_MASK);
   MessageTypeSupport_var ts = new MessageTypeSupportImpl;
-  // leave type name not speficied would register it with _interface_repository_id
   ts->register_type(dp, ""); 
   Topic_var topic = dp->create_topic("MyTopic", ts->get_type_name(),
                                      TOPIC_QOS_DEFAULT, 0,
-                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                     DEFAULT_STATUS_MASK);
 
   Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
-                                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                           DEFAULT_STATUS_MASK);
   TransportImpl_rch pub_tport =
     TheTransportFactory->create_transport_impl(1, AUTO_CONFIG);
   PublisherImpl* pub_impl = dynamic_cast<PublisherImpl*> (pub.in());
@@ -41,10 +40,10 @@ int run_test(int argc, ACE_TCHAR *argv[])
   pub->get_default_datawriter_qos(dw_qos);
   dw_qos.history.kind = KEEP_ALL_HISTORY_QOS;
   DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
-                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                             DEFAULT_STATUS_MASK);
 
   Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
-                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                             DEFAULT_STATUS_MASK);
   TransportImpl_rch sub_tport =
     TheTransportFactory->create_transport_impl(2, AUTO_CONFIG);
   SubscriberImpl* sub_impl = dynamic_cast<SubscriberImpl*> (sub.in());
@@ -53,7 +52,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.history.kind = KEEP_ALL_HISTORY_QOS;
   DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
-                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                             DEFAULT_STATUS_MASK);
 
   StatusCondition_var dw_sc = dw->get_statuscondition();
   dw_sc->set_enabled_statuses(PUBLICATION_MATCHED_STATUS);

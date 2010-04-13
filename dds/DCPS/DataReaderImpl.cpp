@@ -416,7 +416,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
       // We need to adjust these after the insertions have all completed
       // since insertions are not guaranteed to increase the number of
       // currently matched publications.
-      int matchedPublications = this->id_to_handle_map_.size();
+      int matchedPublications = static_cast<int>(this->id_to_handle_map_.size());
       this->subscription_match_status_.current_count_change
       = matchedPublications - this->subscription_match_status_.current_count;
       this->subscription_match_status_.current_count = matchedPublications;
@@ -559,7 +559,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // Mirror the add_associations SUBSCRIPTION_MATCHED_STATUS processing.
   if (!this->is_bit_) {
     // Derive the change in the number of publications writing to this reader.
-    int matchedPublications = this->id_to_handle_map_.size();
+    int matchedPublications = static_cast<int>(this->id_to_handle_map_.size());
     this->subscription_match_status_.current_count_change
     = matchedPublications - this->subscription_match_status_.current_count;
 
@@ -616,7 +616,7 @@ void DataReaderImpl::remove_all_associations()
   {
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
-    size = writers_.size();
+    size = static_cast<int>(writers_.size());
     writers.length(size);
 
     WriterMapType::iterator curr_writer = writers_.begin();
@@ -712,7 +712,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
     DDS::ReadCondition_var rc = DDS::ReadCondition::_duplicate(qc);
     read_conditions_.insert(rc);
     return qc._retn();
-  } catch (std::exception&) {
+  } catch (const std::exception& e) {
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ")
+                 ACE_TEXT("DataReaderImpl::create_querycondition - %C\n"),
+                 e.what()));
+    }
     return 0;
   }
 }
@@ -986,7 +991,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   // Copy out the handles for the current set of publications.
   int index = 0;
-  publication_handles.length(this->id_to_handle_map_.size());
+  publication_handles.length(static_cast<CORBA::ULong>(this->id_to_handle_map_.size()));
 
   for (RepoIdToHandleMap::iterator
        current = this->id_to_handle_map_.begin();
@@ -1489,7 +1494,7 @@ DataReaderImpl::send_sample_ack(
   outbound_header.message_id_               = SAMPLE_ACK;
   outbound_header.byte_order_               = byteOrder,
                                               outbound_header.coherent_change_          = 0;
-  outbound_header.message_length_           = data->total_length();
+  outbound_header.message_length_           = static_cast<ACE_UINT32>(data->total_length());
   outbound_header.sequence_                 = 0;
   outbound_header.source_timestamp_sec_     = when.sec;
   outbound_header.source_timestamp_nanosec_ = when.nanosec;
@@ -1672,8 +1677,8 @@ void DataReaderImpl::sample_info(DDS::SampleInfo & sample_info,
   //      S.no_writers_generation_count)
   //
   sample_info.absolute_generation_rank =
-    (ptr->disposed_generation_count_ +
-     ptr->no_writers_generation_count_) -
+    (static_cast<CORBA::Long>(ptr->disposed_generation_count_) +
+     static_cast<CORBA::Long>(ptr->no_writers_generation_count_)) -
     sample_info.absolute_generation_rank;
 }
 
@@ -1687,7 +1692,7 @@ CORBA::Long DataReaderImpl::total_samples() const
        ++iter) {
     SubscriptionInstance *ptr = iter->second;
 
-    count += ptr->rcvd_samples_.size_;
+    count += static_cast<CORBA::Long>(ptr->rcvd_samples_.size_);
   }
 
   return count;
@@ -2344,7 +2349,7 @@ DataReaderImpl::get_latency_stats(
   OpenDDS::DCPS::LatencyStatisticsSeq & stats)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  stats.length(this->statistics_.size());
+  stats.length(static_cast<CORBA::ULong>(this->statistics_.size()));
   int index = 0;
 
   for (StatsMapType::const_iterator current = this->statistics_.begin();
