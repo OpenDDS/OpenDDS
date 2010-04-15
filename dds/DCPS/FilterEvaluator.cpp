@@ -708,7 +708,7 @@ Value::conversion(Value& lhs, Value& rhs)
 
 
 // -- will be generated --
-
+#if 0
 template<>
 struct MetaStructImpl<DDS::DurabilityQosPolicy> : MetaStruct {
   Value getValue(const void* stru, const char* fieldSpec) const
@@ -811,6 +811,7 @@ const MetaStruct& getMetaStruct<DDS::TopicBuiltinTopicData>()
   static MetaStructImpl<DDS::TopicBuiltinTopicData> meta_DDS_TopicBuiltinTopicData;
   return meta_DDS_TopicBuiltinTopicData;
 }
+#endif
 
 }
 }
