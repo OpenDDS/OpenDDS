@@ -69,6 +69,24 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_to
     DdsDcpsGuid.idl
     DdsDcpsInfrastructure.idl
   }
+
+  Define_Custom(DDSIDL) {
+    automatic_in = 0
+    automatic_out = 1
+    command = $(DDS_ROOT)/bin/opendds_idl
+    dependent = $(DDS_ROOT)/bin/opendds_idl
+    keyword ddsidl_flags = commandflags
+    inputext              = .idl
+    source_outputext      = D.cpp
+    header_outputext      = D.h
+   // generic_outputext     = D.idl
+  }
+  ddsidl_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
+                  -Wb,export_macro=OpenDDS_Dcps_Export -I$(DDS_ROOT)
+  DDSIDL_Files {
+    DdsDcpsInfrastructure.idl
+  }
+  after += opendds_idl
 }
 
 project (DdsDcps_lem_gen) : dds4ccm_opendds, taoidldefaults {

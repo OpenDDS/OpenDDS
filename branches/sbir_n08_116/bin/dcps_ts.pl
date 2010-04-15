@@ -42,6 +42,7 @@ my $cpp_only = 0;
 my @extensions;
 my $ext_only;
 my $ext_args;
+my $openddsidlcompat;
 
 ########################################################################
 #
@@ -63,6 +64,7 @@ GetOptions( "verbose!"    => \$verbose,
             "extension=s" => \@extensions,
             "extension_args=s" => \$ext_args,
             "extensions_only" => \$ext_only,
+            "openddsidlcompat|z" => \$openddsidlcompat,
 
 ) or pod2usage( 0) ;
 pod2usage( 1)             if $help ;
@@ -186,6 +188,7 @@ $h_content =~ s/<%IDLBASE%>/$idlbase/g;
 $h_content =~ s/<%UPPERIDLBASE%>/uc($idlbase)/ge;
 
 my $cpp_content = DCPS::CPPTemplate::header();
+$cpp_content .= '#include "<%IDLBASE%>D.h"' . "\n" if $openddsidlcompat;
 my $pchinclude = "";
 $pchinclude = "#include \"${pchfile}\"" if $pchfile ;
 $cpp_content =~ s/<%PCHINCLUDE%>/$pchinclude/g ;

@@ -107,7 +107,6 @@ struct MetaStructImpl;
 
 /// Until code generation is ready, this will be the fall-back implementation
 /// so that all OpenDDS test code will continue to build.
-template<typename T>
 struct NoOpMetaStructImpl : MetaStruct {
   Value getValue(const void*, const char*) const
   {
@@ -118,17 +117,19 @@ struct NoOpMetaStructImpl : MetaStruct {
 template<typename T>
 inline const MetaStruct& getMetaStruct()
 {
-  static NoOpMetaStructImpl<T> nomsi;
+  static NoOpMetaStructImpl nomsi;
   return nomsi;
 }
 
-
+#if 0
 // Our .cpp file will contain the implementation for the topic built-in topic
 // struct, so declare it here.  This is for testing.
 
 template<>
 OpenDDS_Dcps_Export
 const MetaStruct& getMetaStruct<DDS::TopicBuiltinTopicData>();
+
+#endif
 
 }
 }
