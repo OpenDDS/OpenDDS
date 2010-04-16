@@ -124,13 +124,23 @@ Writer::svc()
       
       if (i == num_messages/2) {
         ::DDS::DataWriterQos qos;
-        ACE_ASSERT (this->writer_->get_qos (qos) == ::DDS::RETCODE_OK);
+        error = this->writer_->get_qos (qos);
+        if (error != ::DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("%N:%l: svc()")
+                   ACE_TEXT(" ERROR: get_qos returned %d!\n"), error));
+        }
         CORBA::Long old = qos.ownership_strength.value;
         if (reset_ownership_strength != -1 && old != reset_ownership_strength) {
           qos.ownership_strength.value = reset_ownership_strength;
-          //std::cout << ownership_dw_id << ": reset ownership strength from " 
-          //          << old << " to " << reset_ownership_strength << std::endl;
-          ACE_ASSERT (this->writer_->set_qos (qos) == ::DDS::RETCODE_OK);
+          std::cout << ownership_dw_id << ": reset ownership strength from " 
+                    << old << " to " << reset_ownership_strength << std::endl;
+          error = this->writer_->set_qos (qos);
+          if (error != ::DDS::RETCODE_OK) {
+            ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("%N:%l: svc()")
+                   ACE_TEXT(" ERROR: set_qos returned %d!\n"), error));
+          }  
         }
         
       }

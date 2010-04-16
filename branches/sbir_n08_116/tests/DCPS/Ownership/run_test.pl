@@ -55,6 +55,7 @@ elsif ($ARGV[0] ne '') {
 $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
+unlink <*.log>;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                   "-ORBDebugLevel 10 -ORBVerboseLogging 1 -DCPSDebugLevel $debuglevel -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior ");
