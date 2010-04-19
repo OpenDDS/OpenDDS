@@ -12,9 +12,13 @@
 ACE_INLINE
 OpenDDS::DCPS::TransportReplacedElement::TransportReplacedElement
 (TransportQueueElement* orig_elem,
- TransportReplacedElementAllocator* allocator)
+ TransportReplacedElementAllocator* allocator,
+ MessageBlockAllocator* mb_allocator,
+ DataBlockAllocator* db_allocator)
   : TransportQueueElement(1),
-    allocator_(allocator)
+    allocator_(allocator),
+    mb_allocator_ (mb_allocator),
+    db_allocator_ (db_allocator)
 {
   DBG_ENTRY_LVL("TransportReplacedElement","TransportReplacedElement",6);
 
@@ -22,5 +26,5 @@ OpenDDS::DCPS::TransportReplacedElement::TransportReplacedElement
   this->publisher_id_ = orig_elem->publication_id();
 
   // Make a deep-copy of the orig_elem->msg() chain of ACE_Message_Blocks.
-  this->msg_ = orig_elem->msg()->clone();
+  this->msg_ = this->clone (orig_elem->msg ());
 }

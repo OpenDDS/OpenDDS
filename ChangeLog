@@ -1,3 +1,20 @@
+Mon Apr 19 05:29:23 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/TransportReplacedElement.h:
+        * dds/DCPS/transport/framework/TransportReplacedElement.inl:
+        * dds/DCPS/transport/framework/TransportReplacedElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Fixed bugs that TransportReplacedElement clones samples owned
+          by DataWriter using the cached allocators from DataWriter.This 
+          causes SEGV when releasing TransportReplacedElement after 
+          DataWrite is deleted.
+          
 Tue Apr 13 00:06:06 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/tools/mkpkg:
