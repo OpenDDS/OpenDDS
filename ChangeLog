@@ -1,3 +1,22 @@
+Mon Apr 19 19:19:09 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/extract-throughput.pl:
+
+          Adjusted to produce a single data file with the test and
+          transport data partitioned into separate indices.
+
+        * performance-tests/Bench/bin/plot-density.gp:
+        * performance-tests/Bench/bin/plot-quantiles.gp:
+
+          Candidate plotting commands for Quantile and Kernel Density
+          Estimation charts.  These currently assume specific file names
+          and locations.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Updated to generate output files useful for the current
+          throughput extraction script.
+
 Mon Apr 19 05:29:23 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
@@ -11,10 +30,10 @@ Mon Apr 19 05:29:23 UTC 2010  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
 
           Fixed bugs that TransportReplacedElement clones samples owned
-          by DataWriter using the cached allocators from DataWriter.This 
-          causes SEGV when releasing TransportReplacedElement after 
+          by DataWriter using the cached allocators from DataWriter.This
+          causes SEGV when releasing TransportReplacedElement after
           DataWrite is deleted.
-          
+
 Tue Apr 13 00:06:06 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/tools/mkpkg:
