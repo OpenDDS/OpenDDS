@@ -9,8 +9,12 @@
 
 #include "../Version.h"
 
+#include "tao/Version.h"
 #include "global_extern.h"
 #include "be_extern.h"
+#include "drv_extern.h"
+
+#include "ace/OS_NS_stdlib.h"
 
 void
 BE_version()
@@ -29,4 +33,19 @@ BE_init(int&, ACE_TCHAR*[])
 void
 BE_post_init(char*[], long)
 {
+  const char* env = ACE_OS::getenv("DDS_ROOT");
+  if (env && env[0]) {
+    std::string dds_root = env;
+    if (dds_root.find(' ') != std::string::npos && dds_root[0] != '"') {
+      dds_root.insert(dds_root.begin(), '"');
+      dds_root.insert(dds_root.end(), '"');
+    }
+    ACE_CString included;
+    DRV_add_include_path(included, dds_root.c_str(), 0
+#if TAO_MAJOR_VERSION > 1 || (TAO_MAJOR_VERSION == 1 && TAO_MINOR_VERSION > 6)
+, true);
+#else
+);
+#endif
+  }
 }

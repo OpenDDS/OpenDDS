@@ -10,18 +10,16 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
     $(DDS_ROOT)/dds/DdsDcpsInfrastructureTypeSupport.idl << DdsDcpsTypeSupportExtJC.h
   }
 
-  Define_Custom(TypeSupportJavaOnly) {
-    automatic_in  = 0
-    automatic_out = 1
-    command       = perl $(DDS_ROOT)/bin/dcps_ts.pl --extensions_only --extension=$(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl
-    dependent     = $(DDS_ROOT)/bin/dcps_ts.pl \
-                    $(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl.pm
-    inputext      = .idl
+  Define_Custom(TypeSupportJavaOnly) : TypeSupport {
+    command       = $(DDS_ROOT)/bin/opendds_idl
     keyword dcps_ts_java_flags = commandflags
+    source_outputext =
+    header_outputext =
+    generic_outputext =
   }
 
   TypeSupportJavaOnly_Files {
-    dcps_ts_java_flags += --extension_args=cpp_file=BitsJC.cpp
+    dcps_ts_java_flags += -Wb,java=BitsJC.cpp
     $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl >> BitsJC.cpp DDS/ParticipantBuiltinTopicDataTypeSupportImpl.java DDS/TopicBuiltinTopicDataTypeSupportImpl.java DDS/PublicationBuiltinTopicDataTypeSupportImpl.java DDS/SubscriptionBuiltinTopicDataTypeSupportImpl.java
   }
 

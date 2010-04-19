@@ -12,31 +12,33 @@
 
 #include "utl_identifier.h"
 
-struct ContentSubscriptionGuard {
-  ContentSubscriptionGuard()
-  {
-    be_global->header_ << "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n";
-    be_global->impl_ << "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n";
-  }
-  ~ContentSubscriptionGuard()
-  {
-    be_global->header_ << "#endif\n";
-    be_global->impl_ << "#endif\n";
-  }
-};
+namespace {
+  struct ContentSubscriptionGuard {
+    ContentSubscriptionGuard()
+    {
+      be_global->header_ << "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n";
+      be_global->impl_ << "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n";
+    }
+    ~ContentSubscriptionGuard()
+    {
+      be_global->header_ << "#endif\n";
+      be_global->impl_ << "#endif\n";
+    }
+  };
 
-struct NamespaceGuard : ContentSubscriptionGuard {
-  NamespaceGuard()
-  {
-    be_global->header_ << "namespace OpenDDS { namespace DCPS {\n";
-    be_global->impl_ << "namespace OpenDDS { namespace DCPS {\n";
-  }
-  ~NamespaceGuard()
-  {
-    be_global->header_ << "}  }\n";
-    be_global->impl_ << "}  }\n";
-  }
-};
+  struct NamespaceGuard : ContentSubscriptionGuard {
+    NamespaceGuard()
+    {
+      be_global->header_ << "namespace OpenDDS { namespace DCPS {\n";
+      be_global->impl_ << "namespace OpenDDS { namespace DCPS {\n";
+    }
+    ~NamespaceGuard()
+    {
+      be_global->header_ << "}  }\n";
+      be_global->impl_ << "}  }\n";
+    }
+  };
+}
 
 bool metaclass_generator::gen_enum(UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>& contents, const char*)

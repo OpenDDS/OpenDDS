@@ -1,15 +1,102 @@
+Mon Apr 19 22:08:53 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_java.mpb:
+        * MPC/config/dcps_ts_defaults.mpb:
+        * java/dds/dcps_java_optional.mpb:
+
+          Use the new generator, opendds_idl, in place of dcps_ts.pl.
+
+        * MPC/modules/TYPESUPPORTHelper.pm:
+
+          Adjusted for opendds_idl's command-line arguments.
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Added support for 64-bit (signed and unsigned) integral types.
+
+        * dds/DCPS/ZeroCopySeq_T.inl:
+
+          Avoid macro expansion of "max" in std::max().
+
+        * dds/DdsDcps.mpc:
+
+          Removed temporary settings from last commit.
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/IDLTemplate.txt:
+
+          Moved the 3 perl modules from bin/DCPS here.  Renamed them to .txt
+          and removed the perl-specific parts.  These will be read at runtime
+          by opendds_idl.
+
+        * dds/idl/be_global.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_produce.cpp:
+
+          Added support for Java bindings (used to be JavaTypeSupportImpl.pm).
+          Changed output file naming for opendds_idl to what dcps_ts.pl used.
+          Thus the output files are FooTypeSupportImpl.{h,cpp} and
+          FooTypeSupport.idl.
+
+        * dds/idl/be_init.cpp:
+
+          Use $DDS_ROOT as an implicit pre-processor include path (-I).
+
+        * dds/idl/dds_visitor.h:
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/idl/ts_generator.h:
+        * dds/idl/ts_generator.cpp:
+
+          Moved the logic that used to be in dcps_ts.pl here (ts_generator).
+          The majority of the code-generation is done by reading the plain-text
+          template files (see above).
+
+        * java/build_scripts/jni_check.pl:
+
+          Added support for 64-bit DLLs on Windows.
+
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+
+          Changed the #include to the new name of the generated header.
+
+        * dds/dcps_bits.mpb:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/monitor/monitor.mpc:
+        * contrib/wrapper/example/WrapperStockQuoter.mpc:
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+        * java/jms/native/opendds_jms_native.mpc:
+        * java/tests/complex_idl/complex_idl_test.mpc:
+        * java/tests/messenger/messenger_idl/messenger_idl_test.mpc:
+        * java/tests/multirepo/multirepo_test.mpc:
+        * performance-tests/DCPS/TypeNoKeyBounded/TypeNoKeyBounded.mpc:
+        * tests/DCPS/Compiler/idl_test2_lib/idl_test2_lib.mpc:
+        * tests/DCPS/FooType/FooType.mpc:
+        * tests/DCPS/FooType3/DcpsFooType3.mpc:
+        * tests/DCPS/FooType3NoKey/DcpsFooType3NoKey.mpc:
+        * tests/DCPS/FooType3Unbounded/DcpsFooType3Unbounded.mpc:
+        * tests/DCPS/FooType4/DcpsFooType4.mpc:
+        * tests/DCPS/FooType5/DcpsFooType5.mpc:
+        * tests/DCPS/MultiTopicTypes/MultiTopicTypes.mpc:
+        * tests/DCPS/TestFramework/TestFramework.mpc:
+
+          Changed dcps_ts_flags settings to use new options for opendds_idl.
+          Mostly this is just a simple s/--export=/-Wb,export_macro=/.
+
 Fri Apr 16 23:13:41 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Ownership/Writer.cpp:
-        
-          Replaced function call in ACE_ASSERT with if statement to 
+
+          Replaced function call in ACE_ASSERT with if statement to
           fix test failure on non-debug build because ACE_ASSERT does
           nothing.
-          
+
         * tests/DCPS/Ownership/run_test.pl:
 
           Made to remove old logs.
-          
+
 Thu Apr 15 22:02:07 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         The Content-Subscription Profile requires some support from the code

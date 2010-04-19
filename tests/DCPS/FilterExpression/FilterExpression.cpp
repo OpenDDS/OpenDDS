@@ -1,7 +1,7 @@
 #include "stdio.h" // yard references printf() without including this
 #include "string.h" // yard references strncpy() without including this
 
-#include "dds/DdsDcpsInfrastructureD.h"
+#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 #include "dds/DCPS/FilterExpressionGrammar.h"
 #include "dds/DCPS/yard/yard_parser.hpp"
 #include "dds/DCPS/FilterEvaluator.h"

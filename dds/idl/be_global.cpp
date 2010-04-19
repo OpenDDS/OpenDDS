@@ -28,7 +28,7 @@ using namespace std;
 BE_GlobalData* be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
-  : filename_(0)
+  : filename_(0), java_(false)
 {
 }
 
@@ -83,6 +83,27 @@ ACE_CString BE_GlobalData::pch_include() const
   return this->pch_include_;
 }
 
+void BE_GlobalData::java_arg(const ACE_CString& str)
+{
+  this->java_arg_ = str;
+}
+
+ACE_CString BE_GlobalData::java_arg() const
+{
+  return this->java_arg_;
+}
+
+void BE_GlobalData::java(bool b)
+{
+  this->java_ = b;
+}
+
+bool BE_GlobalData::java() const
+{
+  return this->java_;
+}
+
+
 bool
 BE_GlobalData::do_included_files() const
 {
@@ -112,15 +133,11 @@ BE_GlobalData::open_streams(const char* filename)
     filebase = filebase.substr(idx + 1);
   }
 
-  header_name_ = (filebase + "D.h").c_str();
-  impl_name_ = (filebase + "D.cpp").c_str();
-  idl_name_ = (filebase + "D.idl").c_str();
+  header_name_ = (filebase + "TypeSupportImpl.h").c_str();
+  impl_name_ = (filebase + "TypeSupportImpl.cpp").c_str();
+  idl_name_ = (filebase + "TypeSupport.idl").c_str();
 }
 
-void
-BE_GlobalData::close_streams()
-{
-}
 
 void
 BE_GlobalData::multicast(const char* str)
@@ -177,6 +194,8 @@ BE_GlobalData::prep_be_arg(char* arg)
   static const size_t SZ_WB_EXPORT_INCLUDE = sizeof(WB_EXPORT_INCLUDE) - 1;
   static const char WB_PCH_INCLUDE[] = "pch_include=";
   static const size_t SZ_WB_PCH_INCLUDE = sizeof(WB_PCH_INCLUDE) - 1;
+  static const char WB_JAVA[] = "java";
+  static const size_t SZ_WB_JAVA = sizeof(WB_JAVA) - 1;
 
   if (0 == ACE_OS::strncasecmp(arg, WB_EXPORT_MACRO, SZ_WB_EXPORT_MACRO)) {
     this->export_macro(arg + SZ_WB_EXPORT_MACRO);
@@ -188,6 +207,11 @@ BE_GlobalData::prep_be_arg(char* arg)
   } else if (0 == ACE_OS::strncasecmp(arg, WB_PCH_INCLUDE, SZ_WB_PCH_INCLUDE)) {
     this->pch_include(arg + SZ_WB_PCH_INCLUDE);
 
+  } else if (0 == ACE_OS::strncasecmp(arg, WB_JAVA, SZ_WB_JAVA)) {
+    this->java(true);
+    if (ACE_OS::strlen(arg + SZ_WB_JAVA)) {
+      this->java_arg(arg + SZ_WB_JAVA + 1 /* = */);
+    }
   }
 }
 
@@ -200,6 +224,23 @@ BE_GlobalData::arg_post_proc()
 void
 BE_GlobalData::usage() const
 {
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT(" -Wb,export_macro=<macro name>\t\tsets export macro ")
+    ACE_TEXT("for all files\n")
+  ));
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT(" -Wb,export_include=<include path>\tsets export include ")
+    ACE_TEXT("file for all files\n")
+  ));
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT(" -Wb,pch_include=<include path>\t\tsets include ")
+    ACE_TEXT("file for precompiled header mechanism\n")
+  ));
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT(" -Wb,java[=<output_file>]\t\tenables Java support ")
+    ACE_TEXT("for TypeSupport files.  Do not specify an 'output_file' ")
+    ACE_TEXT("except for special cases.\n")
+  ));
 }
 
 AST_Generator* 
