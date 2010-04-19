@@ -122,15 +122,6 @@ string to_header(const char* cpp_name)
   return base_name + ".h";
 }
 
-/// change *D.h to *C.h
-string to_tao(const char* c)
-{
-  size_t len = strlen(c);
-  assert(len >= 4 && (0 == ACE_OS::strcasecmp(c + len - 3, "D.h")));
-  string base_name(c, len - 3);
-  return base_name + "C.h";
-}
-
 void postprocess(const char* fn, ostringstream& content,
                  BE_GlobalData::stream_enum_t which)
 {
@@ -143,7 +134,8 @@ void postprocess(const char* fn, ostringstream& content,
     macrofied = to_macro(fn);
     out << "/* -*- C++ -*- */\n";
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
-    string taoheader = to_tao(fn);
+    string taoheader = be_global->header_name_.c_str();
+    taoheader.replace(taoheader.find("TypeSupportImpl.h"), 17, "C.h");
     out << "#include \"" << taoheader << "\"\n";
 
   } else if (which == BE_GlobalData::STREAM_CPP) {
@@ -151,8 +143,15 @@ void postprocess(const char* fn, ostringstream& content,
     if (pch.length()) {
       out << "#include \"" << pch << "\"\n";
     }
-    string header = to_header(fn);
-    out << "#include \"" << header << "\"\n\n";
+    if (be_global->java_arg().length() == 0) {
+      string header = to_header(fn);
+      out << "#include \"" << header << "\"\n\n";
+    } else {
+      out << "#include \"" << be_global->header_name_.c_str() << "\"\n\n";
+    }
+
+  } else { //STREAM_IDL
+    out << "#include \"" << be_global->filename() << "\"\n\n";
   }
 
   out << be_global->get_include_block(which);
@@ -208,7 +207,9 @@ BE_produce()
       }
 
       string stb_inc = base_name + "C.h";
-      be_global->add_include(stb_inc.c_str());
+      if (stb_inc != "tao/orbC.h") {
+        be_global->add_include(stb_inc.c_str());
+      }
 
     }
   }
@@ -234,25 +235,26 @@ BE_produce()
   be_global->multicast(idl_global->filename()->get_string());
   be_global->multicast(" */\n");
 
-  dds_visitor visitor(d);
+  const bool java_ts_only = be_global->java_arg().length() > 0;
+
+  dds_visitor visitor(d, java_ts_only);
 
   if (root->ast_accept(&visitor) == -1) {
-    ACE_ERROR((
-                LM_ERROR,
-                ACE_TEXT("(%N:%l) BE_produce -")
-                ACE_TEXT(" failed to accept adding visitor\n")));
-
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%N:%l) BE_produce -")
+               ACE_TEXT(" failed to accept adding visitor\n")));
     BE_abort();
   }
 
-  postprocess(be_global->header_name_.c_str(),
-              be_global->header_, BE_GlobalData::STREAM_H);
+  if (!java_ts_only) {
+    postprocess(be_global->header_name_.c_str(),
+                be_global->header_, BE_GlobalData::STREAM_H);
+    postprocess(be_global->idl_name_.c_str(),
+                be_global->idl_, BE_GlobalData::STREAM_IDL);
+  }
+
   postprocess(be_global->impl_name_.c_str(),
               be_global->impl_, BE_GlobalData::STREAM_CPP);
-  //postprocess(be_global->idl_name_.c_str(),
-  //            be_global->idl_, BE_GlobalData::STREAM_IDL);
-
-  be_global->close_streams();
 
   BE_cleanup();
 }

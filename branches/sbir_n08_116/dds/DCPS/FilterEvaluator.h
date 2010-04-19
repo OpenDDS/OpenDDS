@@ -63,6 +63,8 @@ struct OpenDDS_Dcps_Export Value {
   Value(bool b, bool conversion_preferred = false);
   Value(int i, bool conversion_preferred = false);
   Value(unsigned int u, bool conversion_preferred = false);
+  Value(ACE_INT64 l, bool conversion_preferred = false);
+  Value(ACE_UINT64 m, bool conversion_preferred = false);
   Value(char c, bool conversion_preferred = false);
   Value(double f, bool conversion_preferred = false);
   Value(const char* s, bool conversion_preferred = false);
@@ -76,7 +78,8 @@ struct OpenDDS_Dcps_Export Value {
   bool operator<(const Value& v) const;
   bool like(const Value& v) const;
 
-  enum Type {VAL_BOOL, VAL_INT, VAL_UINT, VAL_FLOAT, VAL_CHAR, VAL_STRING};
+  enum Type {VAL_BOOL, VAL_INT, VAL_UINT, VAL_I64, VAL_UI64, VAL_FLOAT,
+    VAL_CHAR, VAL_STRING};
   enum {VAL_LARGEST_NUMERIC = VAL_FLOAT};
   bool convert(Type t);
   static void conversion(Value& lhs, Value& rhs);
@@ -88,6 +91,8 @@ struct OpenDDS_Dcps_Export Value {
     bool b_;
     int i_;
     unsigned int u_;
+    ACE_INT64 l_;
+    ACE_UINT64 m_;
     char c_;
     double f_;
     const char* s_;

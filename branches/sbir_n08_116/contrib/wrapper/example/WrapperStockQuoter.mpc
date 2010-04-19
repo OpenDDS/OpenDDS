@@ -7,7 +7,7 @@ project(*Common) : dcps {
   idlflags      += -I$(TAO_ROOT)/orbsvcs \
                    -Wb,export_macro=StockQuoterCommon_Export \
                    -Wb,export_include=StockQuoterCommon_Export.h
-  dcps_ts_flags += --export=StockQuoterCommon_Export
+  dcps_ts_flags += -Wb,export_macro=StockQuoterCommon_Export
 
   TypeSupport_Files {
     StockQuoter.idl >> StockQuoterTypeSupport.idl StockQuoterTypeSupportImpl.h StockQuoterTypeSupportImpl.cpp

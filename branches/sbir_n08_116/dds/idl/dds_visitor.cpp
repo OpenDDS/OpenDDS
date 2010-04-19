@@ -36,6 +36,7 @@
 
 #include "dds_visitor.h"
 #include "metaclass_generator.h"
+#include "ts_generator.h"
 
 #include <iostream>
 #include <vector>
@@ -46,7 +47,8 @@ using namespace std;
 namespace {
 
 metaclass_generator mc_gen_;
-dds_generator* generators_[] = {&mc_gen_};
+ts_generator ts_gen_;
+dds_generator* generators_[] = {&mc_gen_, &ts_gen_};
 const size_t N_MAP = sizeof(generators_) / sizeof(generators_[0]);
 
 composite_generator gen_target_(&generators_[0], &generators_[N_MAP]);
@@ -67,8 +69,8 @@ void scope2vector(vector<T*>& v, UTL_Scope* s, AST_Decl::NodeType nt)
 
 } // namespace
 
-dds_visitor::dds_visitor(AST_Decl* scope)
-  : scope_(scope)
+dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
+  : scope_(scope), error_(false), java_ts_only_(java_ts_only)
 {
 }
 
@@ -178,9 +180,11 @@ dds_visitor::visit_interface(AST_Interface* node)
 
   scope2vector(ops, node, AST_Decl::NT_op);
 
-  error_ |= !gen_target_.gen_interf(node->name(), node->is_local(),
-                                    inherits, inherits_flat, attrs, ops,
-                                    node->repoID());
+  if (!java_ts_only_) {
+    error_ |= !gen_target_.gen_interf(node->name(), node->is_local(),
+                                      inherits, inherits_flat, attrs, ops,
+                                      node->repoID());
+  }
 
   if (this->visit_scope(node) == -1) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -214,7 +218,14 @@ dds_visitor::visit_structure(AST_Structure* node)
     fields.push_back(*f);
   }
 
-  error_ |= !gen_target_.gen_struct(node->name(), fields, node->repoID());
+  if (!java_ts_only_) {
+    error_ |= !gen_target_.gen_struct(node->name(), fields, node->repoID());
+  }
+
+  if (be_global->java()) {
+    java_ts_generator::generate(node->name());
+  }
+
   return 0;
 }
 
@@ -247,8 +258,10 @@ dds_visitor::visit_typedef(AST_Typedef* node)
 
   ACE_UNUSED_ARG(g);
 
-  error_ |= !gen_target_.gen_typedef(node->name(), node->base_type(),
-                                     node->repoID());
+  if (!java_ts_only_) {
+    error_ |= !gen_target_.gen_typedef(node->name(), node->base_type(),
+                                       node->repoID());
+  }
 
   return 0;
 }
@@ -270,7 +283,9 @@ dds_visitor::visit_enum(AST_Enum* node)
 
   scope2vector(contents, node, AST_Decl::NT_enum_val);
 
-  error_ |= !gen_target_.gen_enum(node->name(), contents, node->repoID());
+  if (!java_ts_only_) {
+    error_ |= !gen_target_.gen_enum(node->name(), contents, node->repoID());
+  }
 
   return 0;
 }
@@ -282,7 +297,10 @@ dds_visitor::visit_interface_fwd(AST_InterfaceFwd* node)
   BE_Comment_Guard g("INTERFACE-FWD", name);
   ACE_UNUSED_ARG(g);
 
-  error_ |= !gen_target_.gen_interf_fwd(node->name());
+  if (!java_ts_only_) {
+    error_ |= !gen_target_.gen_interf_fwd(node->name());
+  }
+
   return 0;
 }
 
@@ -303,8 +321,10 @@ dds_visitor::visit_constant(AST_Constant* node)
 
   bool nested = d && (d->node_type() == AST_Decl::NT_interface);
 
-  error_ |= !gen_target_.gen_const(node->name(), nested, node->et(),
-                                   node->constant_value()->ev());
+  if (!java_ts_only_) {
+    error_ |= !gen_target_.gen_const(node->name(), nested, node->et(),
+                                     node->constant_value()->ev());
+  }
 
   return 0;
 }
@@ -322,7 +342,9 @@ dds_visitor::visit_native(AST_Native* node)
 
   ACE_UNUSED_ARG(g);
 
-  error_ |= !gen_target_.gen_native(node->name(), node->repoID());
+  if (!java_ts_only_) {
+    error_ |= !gen_target_.gen_native(node->name(), node->repoID());
+  }
 
   return 0;
 }
@@ -363,8 +385,12 @@ dds_visitor::visit_union(AST_Union* node)
   AST_Union::DefaultValue defval;
   node->default_value(defval);
 
-  error_ |= !gen_target_.gen_union(node->name(), branches, node->disc_type(),
-                                   node->udisc_type(), defval, node->repoID());
+  if (!java_ts_only_) {
+    error_ |= !gen_target_.gen_union(node->name(), branches, node->disc_type(),
+                                     node->udisc_type(), defval,
+                                     node->repoID());
+  }
+
   return 0;
 }
 
@@ -410,92 +436,49 @@ dds_visitor::visit_array(AST_Array*)
 int
 dds_visitor::visit_valuetype(AST_ValueType* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
-    return 0;
-  }
-
-  cout << "ERROR: valuetypes not currently supported" << endl;
-
-  return -1;
+  return 0;
 }
 
 int
 dds_visitor::visit_valuetype_fwd(AST_ValueTypeFwd* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
-    return 0;
-  }
-
-  cout << "ERROR: valuetypes not currently supported" << endl;
-
-  return -1;
+  return 0;
 }
 
 int
 dds_visitor::visit_component(AST_Component* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
-    return 0;
-  }
-
-  cout << "ERROR: components not currently supported" << endl;
-
-  return -1;
+  return 0;
 }
 
 int
 dds_visitor::visit_component_fwd(AST_ComponentFwd* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
-    return 0;
-  }
-
-  cout << "ERROR: components not currently supported" << endl;
-
-  return -1;
+  return 0;
 }
 
 int
 dds_visitor::visit_eventtype(AST_EventType* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
-    return 0;
-  }
-
-  cout << "ERROR: components not currently supported" << endl;
-
-  return -1;
+  return 0;
 }
 
 int
 dds_visitor::visit_eventtype_fwd(AST_EventTypeFwd* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
-    return 0;
-  }
-
-  cout << "ERROR: components not currently supported" << endl;
-
-  return -1;
+  return 0;
 }
 
 int
 dds_visitor::visit_home(AST_Home* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
-    return 0;
-  }
-
-  cout << "ERROR: homes not currently supported" << endl;
-
-  return -1;
+  return 0;
 }
 
 int
 dds_visitor::visit_factory(AST_Factory*)
 {
-  cout << "ERROR: factories not currently supported" << endl;
-  return -1;
+  return 0;
 }
 
 //no need to implement these at this level

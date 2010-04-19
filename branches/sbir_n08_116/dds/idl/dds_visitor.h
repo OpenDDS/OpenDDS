@@ -27,7 +27,7 @@ class AST_Finder;
 
 class dds_visitor : public ast_visitor {
 public:
-  explicit dds_visitor(AST_Decl* scope);
+  dds_visitor(AST_Decl* scope, bool java_ts_only);
 
   virtual ~dds_visitor();
 
@@ -141,6 +141,7 @@ public:
 protected:
   AST_Decl* scope_;
   bool error_;
+  bool java_ts_only_;
 };
 
 #endif /* dds_visitor_H */

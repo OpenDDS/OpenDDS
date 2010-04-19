@@ -2,10 +2,9 @@
 // or not the built_in_topics feature is enabled (which it is by default).
 
 feature (built_in_topics): dcps_ts_defaults, taoidldefaults, dds_suppress_any_support {
-  dcps_ts_flags += --export OpenDDS_Dcps_Export --pch DCPS/DdsDcps_pch.h
-
+  dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
+                   -Wb,export_macro=OpenDDS_Dcps_Export
   TypeSupport_Files {
-    dcps_ts_flags += -z
     DdsDcpsInfrastructure.idl
   }
 

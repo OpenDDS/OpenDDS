@@ -427,6 +427,14 @@ Value::Value(unsigned int u, bool conversion_preferred)
   : type_(VAL_UINT), u_(u), conversion_preferred_(conversion_preferred)
 {}
 
+Value::Value(ACE_INT64 l, bool conversion_preferred)
+  : type_(VAL_I64), l_(l), conversion_preferred_(conversion_preferred)
+{}
+
+Value::Value(ACE_UINT64 m, bool conversion_preferred)
+  : type_(VAL_UI64), m_(m), conversion_preferred_(conversion_preferred)
+{}
+
 Value::Value(char c, bool conversion_preferred)
   : type_(VAL_CHAR), c_(c), conversion_preferred_(conversion_preferred)
 {}
@@ -443,12 +451,16 @@ Value::Value(const char* s, bool conversion_preferred)
 template<> bool& Value::get() { return b_; }
 template<> int& Value::get() { return i_; }
 template<> unsigned int& Value::get() { return u_; }
+template<> ACE_INT64& Value::get() { return l_; }
+template<> ACE_UINT64& Value::get() { return m_; }
 template<> char& Value::get() { return c_; }
 template<> double& Value::get() { return f_; }
 template<> const char*& Value::get() { return s_; }
 template<> const bool& Value::get() const { return b_; }
 template<> const int& Value::get() const { return i_; }
 template<> const unsigned int& Value::get() const { return u_; }
+template<> const ACE_INT64& Value::get() const { return l_; }
+template<> const ACE_UINT64& Value::get() const { return m_; }
 template<> const char& Value::get() const { return c_; }
 template<> const double& Value::get() const { return f_; }
 template<> const char* const& Value::get() const { return s_; }
@@ -469,6 +481,10 @@ namespace {
       return vis(val.i_);
     case Value::VAL_UINT:
       return vis(val.u_);
+    case Value::VAL_I64:
+      return vis(val.l_);
+    case Value::VAL_UI64:
+      return vis(val.m_);
     case Value::VAL_FLOAT:
       return vis(val.f_);
     case Value::VAL_CHAR:

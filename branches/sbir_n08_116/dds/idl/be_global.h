@@ -69,7 +69,6 @@ public:
   // Create an AST node generator.
 
   void open_streams(const char* filename);
-  void close_streams();
 
   std::ostringstream header_, impl_, idl_;
   ACE_CString header_name_, impl_name_, idl_name_;
@@ -96,15 +95,21 @@ public:
   ACE_CString pch_include() const;
   void pch_include(const ACE_CString& str);
 
+  bool java() const;
+  void java(bool b);
+
+  ACE_CString java_arg() const;
+  void java_arg(const ACE_CString& str);
+
   static bool writeFile(const char* fileName, const std::string &content);
 
 private:
   const char* filename_;
   // Name of the IDL file we are processing.
 
-  bool do_server_side_;
+  bool java_;
 
-  ACE_CString export_macro_, export_include_, pch_include_;
+  ACE_CString export_macro_, export_include_, pch_include_, java_arg_;
 };
 
 class BE_Comment_Guard {

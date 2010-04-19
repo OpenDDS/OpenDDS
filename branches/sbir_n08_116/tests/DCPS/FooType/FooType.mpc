@@ -2,7 +2,7 @@ project(DcpsFooType) : dcps {
   libout       = .
   idlflags    += -Wb,export_macro=FooType_Export -Wb,export_include=footype_export.h
   dynamicflags = FOOTYPE_BUILD_DLL
-  dcps_ts_flags += --export=FooType_Export
+  dcps_ts_flags += -Wb,export_macro=FooType_Export
 
   TypeSupport_Files {
     FooType.idl

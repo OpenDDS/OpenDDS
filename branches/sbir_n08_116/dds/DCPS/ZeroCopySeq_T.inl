@@ -244,7 +244,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::internal_set_length(CORBA::ULong len)
 
   } else if (len > ptrs_.size()) {
     //We need the vector to grow efficiently (not reallocate on each call)...
-    ptrs_.resize(std::max(len, CORBA::ULong(ptrs_.size()) * 2), 0);
+    ptrs_.resize((std::max)(len, CORBA::ULong(ptrs_.size()) * 2), 0);
     //...but maintain the invariant that the size of ptrs_ is our length
     ptrs_.resize(len, 0);
   }

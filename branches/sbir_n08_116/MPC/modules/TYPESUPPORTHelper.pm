@@ -11,7 +11,7 @@ sub get_output {
   my @out = ($tsidl);
   my $i2j = CommandHelper::get('idl2jni_files');
 
-  if ($flags =~ /JavaTypeSupportImpl/) {
+  if ($flags =~ /-Wb,java/) {
 
     $i2j->do_cached_parse($file, $flags);
 
