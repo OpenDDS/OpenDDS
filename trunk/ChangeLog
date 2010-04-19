@@ -1,3 +1,12 @@
+Mon Apr 19 23:50:09 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/tests/latency/run_test.pl:
+        * performance-tests/Bench/tests/thru/run_test.pl:
+
+          Adjusted to have the run_test on the server side handle the repo.
+          Running the repo as a separate run_test was leaving cases of the repo
+          still running after terminating the run_test.
+
 Mon Apr 19 19:19:09 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/extract-throughput.pl:

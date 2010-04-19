@@ -18,7 +18,8 @@ $Id$
 =head1 DESCRIPTION
 
 This script runs one side of the latency test for a cross host testing.  The 
-script needs to be run on each of the two hosts involved in the test.
+script needs to be run on each of the two hosts involved in the test using 
+the same parameters on each host.
 
 The test consists of two halves, an originating (server) side and a reflecting 
 (client) side. The servers involved in the test are are stored in 
@@ -46,6 +47,8 @@ Supported message sizes are B<50> B<100> B<250> B<500> B<1000>
 
 
 =head1 EXAMPLE
+
+  run the same command on both hosts:
 
   run_test.pl tcp 1000
 
@@ -173,29 +176,23 @@ my $common_args = "-P -t 120 -h $repo_host:$port1 -i $trans_config_file ";
 
 if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
     unlink $dcpsrepo_ior;
-    $DCPSREPO = PerlDDS::create_process
-          ("$bench_location/bin/run_test",
-           "-S -t 150 -h $repo_host:$port1");
-
-    print $DCPSREPO->CommandLine(). "\n";
-    $DCPSREPO->Spawn ();
-    if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-        print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
-        $DCPSREPO->Kill ();
-        exit 1;
-    }
 
     $Publisher = PerlDDS::create_process
           ("$bench_location/bin/run_test",
-           "$common_args -s $pub_config_file");
+           "$common_args -S -s $pub_config_file");
 
     print $Publisher->CommandLine(). "\n";
     $Publisher->Spawn ();
 
+    if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
+        print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
+        $Publisher->Kill ();
+        exit 1;
+    }
+
     if ($CS->ready () == -1) {
         print STDERR "ERROR: subscriber failed to initialize.\n";
         $status = 1;
-        $DCPSREPO->Kill ();
         $Publisher->Kill ();
         exit 1;
     }
@@ -205,14 +202,6 @@ if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
         print STDERR "ERROR: publisher returned $PublisherResult \n";
         $status = 1;
     }
-
-    $ir = $DCPSREPO->TerminateWaitKill(30);
-    ## Ignore the return value because the run_test does not cleanly
-    ## shutdown the repo when run with a duration.
-    #if ($ir != 0) {
-    #    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    #    $status = 1;
-    #}
 
     unlink $dcpsrepo_ior;
 } else {
