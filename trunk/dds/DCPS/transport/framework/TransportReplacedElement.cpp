@@ -48,3 +48,41 @@ OpenDDS::DCPS::TransportReplacedElement::msg() const
   DBG_ENTRY_LVL("TransportReplacedElement","msg",6);
   return this->msg_;
 }
+
+
+ACE_Message_Block*
+OpenDDS::DCPS::TransportReplacedElement::clone(const ACE_Message_Block* msg)
+{
+  DBG_ENTRY_LVL("TransportReplacedElement","msg",6);
+  ACE_Message_Block* cur_block = const_cast<ACE_Message_Block* > (msg);
+  ACE_Message_Block* copy = 0;
+  ACE_Message_Block* cur_copy = 0;
+  // deep copy sample data
+  while (cur_block != 0) {
+    ACE_NEW_MALLOC_RETURN(cur_copy,
+                          static_cast<ACE_Message_Block*>(
+                          this->mb_allocator_->malloc(sizeof(ACE_Message_Block))),
+                          ACE_Message_Block(cur_block->size (),
+                                            ACE_Message_Block::MB_DATA,
+                                            0, //cont
+                                            0, //data
+                                            0, //alloc_strategy
+                                            0, //locking_strategy
+                                            ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                            ACE_Time_Value::zero,
+                                            ACE_Time_Value::max_time,
+                                            this->db_allocator_,
+                                            this->mb_allocator_),
+                          0);
+    cur_copy->copy (cur_block->base (), cur_block->size ());
+    if (copy == 0) {
+      copy = cur_copy;
+    }
+    else {
+      copy->cont (cur_copy);
+    }
+    cur_block = cur_block->cont();
+  }
+
+  return copy;
+}

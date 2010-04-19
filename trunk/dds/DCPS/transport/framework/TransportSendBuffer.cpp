@@ -31,7 +31,9 @@ TransportSendBuffer::TransportSendBuffer(size_t capacity,
   : capacity_(capacity),
     n_chunks_(capacity * max_samples_per_packet),
     retained_allocator_(this->n_chunks_),
-    replaced_allocator_(this->n_chunks_)
+    replaced_allocator_(this->n_chunks_),
+    replaced_mb_allocator_(this->n_chunks_ * 2),
+    replaced_db_allocator_(this->n_chunks_ * 2)
 {
 }
 
@@ -88,7 +90,9 @@ TransportSendBuffer::retain_all(RepoId pub_id)
     PacketRemoveVisitor visitor(sample,
                                 buffer.second,
                                 buffer.second,
-                                this->replaced_allocator_);
+                                this->replaced_allocator_,
+                                this->replaced_mb_allocator_,
+                                this->replaced_db_allocator_);
 
     buffer.first->accept_replace_visitor(visitor);
     if (visitor.status() < 0) {

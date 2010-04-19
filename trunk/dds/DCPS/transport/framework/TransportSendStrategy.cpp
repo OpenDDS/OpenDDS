@@ -67,6 +67,8 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
     synch_(0),
     lock_(),
     replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS),
+    replaced_element_mb_allocator_ (NUM_REPLACED_ELEMENT_CHUNKS * 2),
+    replaced_element_db_allocator_ (NUM_REPLACED_ELEMENT_CHUNKS * 2),
     retained_element_allocator_( 0),
     graceful_disconnecting_(false),
     link_released_(true),
@@ -745,21 +747,26 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications(TransportSendEl
 
   if (modes == NULL) {
     // optimization for the common case
-    if (! this->transport_shutdown_) {
       if (mode == MODE_TERMINATED) {
-        sample->data_dropped(true);
+        if (! this->transport_shutdown_) {
+          sample->data_dropped(true);
+        }
       } else {
-        sample->data_delivered();
+        if (! this->transport_shutdown_) {
+          sample->data_delivered();
+        }
       }
-    }
 
   } else {
     for (size_t i = 0; i < num_delayed_notifications; i++) {
       if (modes[i] == MODE_TERMINATED) {
-        samples[i]->data_dropped(true);
-
+        if (! this->transport_shutdown_) {
+          samples[i]->data_dropped(true);
+        }
       } else {
-        samples[i]->data_delivered();
+        if (! this->transport_shutdown_) {
+          samples[i]->data_delivered();
+        }
       }
     }
 
@@ -1334,7 +1341,9 @@ OpenDDS::DCPS::TransportSendStrategy::do_remove_sample(TransportQueueElement& cu
   PacketRemoveVisitor pac_rem_vis(current_sample,
                                   this->pkt_chain_,
                                   this->header_block_,
-                                  this->replaced_element_allocator_);
+                                  this->replaced_element_allocator_,
+                                  this->replaced_element_mb_allocator_,
+                                  this->replaced_element_db_allocator_);
 
   int status = 0;
 
