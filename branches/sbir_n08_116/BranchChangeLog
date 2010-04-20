@@ -1,3 +1,9 @@
+Tue Apr 20 13:55:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_ts_defaults.mpb:
+
+          Corrected the paths to the *Template.txt files.
+
 Mon Apr 19 22:08:53 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps_java.mpb:
