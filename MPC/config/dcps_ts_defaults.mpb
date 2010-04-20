@@ -10,8 +10,8 @@ project {
     automatic_out         = 1
     command   = $(DDS_ROOT)/bin/opendds_idl
     dependent = $(DDS_ROOT)/bin/opendds_idl \
-      $(DDS_ROOT)/bin/DCPS/CPPTemplate.txt \
-      $(DDS_ROOT)/bin/DCPS/HTemplate.txt $(DDS_ROOT)/bin/DCPS/IDLTemplate.txt
+      $(DDS_ROOT)/dds/idl/CPPTemplate.txt \
+      $(DDS_ROOT)/dds/idl/HTemplate.txt $(DDS_ROOT)/dds/idl/IDLTemplate.txt
     keyword dcps_ts_flags = commandflags
     inputext              = .idl
     source_outputext      = TypeSupportImpl.cpp
