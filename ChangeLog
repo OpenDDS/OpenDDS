@@ -1,3 +1,9 @@
+Wed Apr 21 19:25:35 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/src/testprocess.cpp:
+
+          Added static initialization feature for static builds.
+
 Mon Apr 19 23:50:09 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/tests/latency/run_test.pl:
