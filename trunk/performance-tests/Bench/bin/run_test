@@ -342,6 +342,52 @@ sub collectionCommand {
   return undef;
 }
 
+#
+# Statistics gathering filters by system type
+#
+# The collection processing includes calling a method to process each
+# line of command output.  Currently the optional parameters include the
+# PID of the process being monitored.
+#
+sub collectionFilter {
+  my ( $type, $params) = @_;
+  OSSWITCH:{
+    $^O =~ /MSWin32/ && do { last OSSWITCH; };
+    $^O =~ /cygwin/  && do { last OSSWITCH; };
+    $^O =~ /VMS/     && do { last OSSWITCH; };
+    $^O =~ /solaris/ && do {
+      if(    $type eq 'process') { return &defaultFilter(); }
+      elsif( $type eq 'system')  { return &defaultFilter(); }
+      elsif( $type eq 'network') { return &defaultFilter(); }
+    };
+  }
+
+  # All other system types.
+  if(    $type eq 'process') { return &defaultPidFilter( $params); }
+  elsif( $type eq 'system')  { return &defaultFilter(); }
+  elsif( $type eq 'network') { return &defaultPidFilter( $params); }
+}
+
+# Default filter timestamps and prints all lines.
+sub defaultFilter {
+  # Returns a closure.
+  return sub {
+    my ( $input, $output) = @_;
+    print $output localtime() . ": $input\n";
+  };
+}
+
+# Default PID filter timestamps and prints lines containing the PID.
+sub defaultPidFilter {
+  # Returns a closure.
+  my ( $pid) = @_;
+  return sub {
+    my ( $input, $output) = @_;
+    print $output localtime() . ": $input\n" if $input =~ /$pid/;
+  };
+}
+
+# Invoke process statistics collection.
 sub collectProcessStats {
   my $pid = shift;
   my $command = &collectionCommand( 'process', "$pid");
@@ -349,14 +395,12 @@ sub collectProcessStats {
     &runCollector(
       $command,
       "process-$pid.log",
-      sub { # Action to process each line of input.
-        my ( $input, $output) = @_;
-        print $output localtime() . ": $input\n" if $input =~ /$pid/;
-      }
+      &collectionFilter( 'process', $pid)
     );
   }
 }
 
+# Invoke system statistics collection.
 sub collectSystemStats {
   my $pid = shift;
   my $command = &collectionCommand( 'system');
@@ -364,14 +408,12 @@ sub collectSystemStats {
     &runCollector(
       $command,
       "system-$pid.log",
-      sub { # Action to process each line of input.
-        my ( $input, $output) = @_;
-        print $output localtime() . ": $input\n";
-      }
+      &collectionFilter( 'system', $pid)
     );
   }
 }
 
+# Invoke network statistics collection.
 sub collectNetworkStats {
   my $pid = shift;
   my $command = &collectionCommand( 'network');
@@ -379,14 +421,12 @@ sub collectNetworkStats {
     &runCollector(
       $command,
       "network-$pid.log",
-      sub { # Action to process each line of input.
-        my ( $input, $output) = @_;
-        print $output localtime() . ": $input\n" if $input =~ /$pid/;
-      }
+      &collectionFilter( 'network', $pid)
     );
   }
 }
 
+# Start and attach to a statistic collector.
 sub runCollector {
   my ( $command, $filename, $action) = @_;
 
@@ -419,7 +459,7 @@ sub runCollector {
     # Open and unbuffer the output.
     open( my $output, "> $filename")
       or die "Failed to open statistics output file <$filename>: $!";
-    select $output; $!=1;
+    select $output; $|=1;
 
     # Process all of the input.
     while(<STATSIN>) {

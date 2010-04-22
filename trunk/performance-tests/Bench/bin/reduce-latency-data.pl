@@ -24,7 +24,7 @@ The input file is expected to be in the format produced by the OpenDDS
 performance test bench latency data summary.
 
 The output consists of data suitable for plotting using GNUPlot.  There
-are 4 indexed sections with the following data in the columns of each
+are 5 indexed sections with the following data in the columns of each
 section:
 
 =over 8
@@ -40,7 +40,9 @@ using $0 for the x axis in the GNUPlot plot command.
 
 =item B<Column 1>
 
-Individual data points for 1/2 full path latency from the input file.
+Individual data points for 1/HOPS full path latency from the input file.
+HOPS is set internally to a value of 2 corresponding to the
+pre-configured OpenDDS-Bench latency tests.
 
 =item B<Column 2>
 
@@ -84,6 +86,32 @@ The frequency (number of samples) in the bin.
 
 =back
 
+=item B<Index 3>
+
+Latency quantile data.  This index has sorted latency data derived from
+the index 0 / column 1 data points.
+
+=over 8
+
+=item B<Column 1>
+
+Latency data from Index 0, sorted.
+
+=back
+
+=item B<Index 4>
+
+Jitter quantile data.  This index has sorted jitter data derived from
+the index 0 / column 2 data points.
+
+=over 8
+
+=item B<Column 1>
+
+Jitter data from Index 0, sorted.
+
+=back
+
 =back
 
 Each index section has a header comment.  The histogram sections (Index 1
@@ -93,9 +121,9 @@ plottable summary data.
 
 If the data produced by this script is to be used by the 'extract.pl'
 script, then the output file needs to be named such that it consists of
-two '-' separated fields followed by the extension ".gpd" (representing
-GNUPlot data file).  The fields represent the transport type and the
-message size of the test data.
+three '-' separated fields followed by the extension ".gpd" (representing
+GNUPlot data file).  The fields represent the test type, the transport
+type, and the message size of the test data.
 
 =head1 EXAMPLE
 
@@ -109,8 +137,8 @@ message size of the test data.
 # HOPS is the number of hops in the collected data.  This is normalized out.
 use constant LOWER => 0.05;
 use constant UPPER => 0.95;
-use constant BINS => 25;
-use constant HOPS => 2;
+use constant BINS  => 25;
+use constant HOPS  => 2;
 
 # skip     - indicates whether to process a record or not.
 # previous - is the previous record data.
@@ -168,6 +196,8 @@ END {
   print "#\n";
   print "#        Mean: " . sprintf( "%5.2e", &mean($data->{latency})) . "\n";
   print "#   Std. Dev.: " . sprintf( "%5.2e", &std_dev($data->{latency})) . "\n";
+  print "#      Median: " . sprintf( "%5.2e", &median($data->{latency})) . "\n";
+  print "#         MAD: " . sprintf( "%5.2e", &MAD($data->{latency})) . "\n";
   print "#     Maximum: " . sprintf( "%5.2e", $data->{maxlatency}) . "\n";
   print "#     Minimum: " . sprintf( "%5.2e", $data->{minlatency}) . "\n";
   print "#\n";
@@ -179,6 +209,8 @@ END {
   print "#\n";
   print "#        Mean: " . sprintf( "%5.2e", &mean($data->{jitter})) . "\n";
   print "#   Std. Dev.: " . sprintf( "%5.2e", &std_dev($data->{jitter})) . "\n";
+  print "#      Median: " . sprintf( "%5.2e", &median($data->{jitter})) . "\n";
+  print "#         MAD: " . sprintf( "%5.2e", &MAD($data->{jitter})) . "\n";
   print "#     Maximum: " . sprintf( "%5.2e", $data->{maxjitter}) . "\n";
   print "#     Minimum: " . sprintf( "%5.2e", $data->{minjitter}) . "\n";
   print "#\n";
@@ -240,6 +272,25 @@ sub bin {
     print scalar grep { (($current - $span) < $_) and ($_ <= $current) } @$values;
     print "\n";
   }
+}
+
+sub median {
+  my $values  = shift;
+  my @ordered = sort { $a <=> $b; } @$values;
+  my $size    = scalar @$values;
+  if( $size % 2) {
+    return $ordered[ $size / 2];
+  } else {
+    my $lower = int( $size / 2);
+    return ($ordered[ $lower] + $ordered[ $lower + 1]) / 2;
+  }
+}
+
+sub MAD {
+  my $values   = shift;
+  my $median   = median( $values);
+  my @deviants = sort map abs( $median - $_), @$values;
+  return median( \@deviants);
 }
 
 sub mean {

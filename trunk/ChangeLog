@@ -1,3 +1,16 @@
+Thu Apr 22 18:16:27 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/extract-latency.pl:
+        * performance-tests/Bench/bin/reduce-latency-data.pl:
+
+          Added median and median absolute deviation (MAD) statistics
+          gathering.
+
+        * performance-tests/Bench/bin/run_test:
+
+          Factored the filtering closures out and made them selectable by
+          OS type.
+
 Wed Apr 21 19:25:35 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/src/testprocess.cpp:
