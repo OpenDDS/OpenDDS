@@ -11,7 +11,6 @@ performance-tests/Bench/tests/latency/run_test.pl tcp 5000: !DCPS_MIN
 performance-tests/Bench/tests/latency/run_test.pl tcp 8000: !DCPS_MIN
 performance-tests/Bench/tests/latency/run_test.pl tcp 16000: !DCPS_MIN
 performance-tests/Bench/tests/latency/run_test.pl tcp 32000: !DCPS_MIN
-
 performance-tests/Bench/tests/latency/run_test.pl udp 50: !DCPS_MIN
 performance-tests/Bench/tests/latency/run_test.pl udp 100: !DCPS_MIN
 performance-tests/Bench/tests/latency/run_test.pl udp 250: !DCPS_MIN
@@ -22,29 +21,31 @@ performance-tests/Bench/tests/latency/run_test.pl udp 5000: !DCPS_MIN
 performance-tests/Bench/tests/latency/run_test.pl udp 8000: !DCPS_MIN
 performance-tests/Bench/tests/latency/run_test.pl udp 16000: !DCPS_MIN
 performance-tests/Bench/tests/latency/run_test.pl udp 32000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 50: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 100: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 250: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 1000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 2500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 5000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 8000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 16000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 32000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 50: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 100: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 250: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 1000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 2500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 5000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 8000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 16000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 32000: !DCPS_MIN
 
-performance-tests/Bench/tests/latency/run_test.pl multibe 50: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multibe 100: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multibe 250: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multibe 500: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multibe 1000: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multibe 2500: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multibe 5000: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multibe 8000: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multibe 16000: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multibe 32000: !DCPS_MIN
-
-performance-tests/Bench/tests/latency/run_test.pl multire 50: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multire 100: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multire 250: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multire 500: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multire 1000: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multire 2500: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multire 5000: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multire 8000: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multire 16000: !DCPS_MIN
-performance-tests/Bench/tests/latency/run_test.pl multire 32000: !DCPS_MIN
-
+performance-tests/Bench/tests/thru/run_test.pl tcp
+performance-tests/Bench/tests/thru/run_test.pl udp
+performance-tests/Bench/tests/thru/run_test.pl multi-be
+performance-tests/Bench/tests/thru/run_test.pl multi-rel
 
 
 ## Run local tests
