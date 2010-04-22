@@ -36,9 +36,9 @@ The transport has to be one of the following values:
 SimpleTCP
 =item udp
 SimpleUDP
-=item multibe
+=item multi-be
 multicast (Best Effort)
-=item multire
+=item multi-rel
 multicast (Reliable)
 =back
 
@@ -52,7 +52,7 @@ Supported message sizes are B<50> B<100> B<250> B<500> B<1000>
 
   run_test.pl tcp 1000
 
-  run_test.pl multibe 50
+  run_test.pl multi-be 50
 
 =cut
 
@@ -126,15 +126,15 @@ if ($ARGV[0] eq 'udp') {
     mkdir "udp", 0777 unless -d "udp";
     chdir "udp";
 }
-elsif ($ARGV[0] eq 'multibe') {
+elsif ($ARGV[0] eq 'multi-be') {
     $trans_config_file = "$bench_location/etc/transport-multi-be.ini ";
     mkdir "multibe", 0777 unless -d "multibe";
     chdir "multibe";
 }
-elsif ($ARGV[0] eq 'multire') {
+elsif ($ARGV[0] eq 'multi-rel') {
     $trans_config_file = "$bench_location/etc/transport-multi-rel.ini ";
-    mkdir "multire", 0777 unless -d "multire";
-    chdir "multire";
+    mkdir "multi-rel", 0777 unless -d "multi-rel";
+    chdir "multi-rel";
 }
 elsif ($ARGV[0] eq 'tcp') {
     mkdir "tcp", 0777 unless -d "tcp";

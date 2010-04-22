@@ -36,9 +36,9 @@ The transport has to be one of the following values:
 SimpleTCP
 =item udp
 SimpleUDP
-=item multibe
+=item multi-be
 multicast (Best Effort)
-=item multire
+=item multi-rel
 multicast (Reliable)
 =back
 
@@ -48,7 +48,7 @@ multicast (Reliable)
 
   run_test.pl tcp
 
-  run_test.pl multibe
+  run_test.pl multi-be
 
 =cut
 
@@ -128,17 +128,17 @@ if ($transport_type eq 'udp') {
     mkdir "udp", 0777 unless -d "udp";
     chdir "udp";
 }
-elsif ($transport_type eq 'multibe') {
+elsif ($transport_type eq 'multi-be') {
     $trans_config_file = "$bench_location/etc/transport-multi-be.ini ";
     $sub_config_file = "$bench_location/tests/thru/bidir-remote-be.ini";
-    mkdir "multibe", 0777 unless -d "multibe";
-    chdir "multibe";
+    mkdir "multi-be", 0777 unless -d "multi-be";
+    chdir "multi-be";
 }
-elsif ($transport_type eq 'multire') {
+elsif ($transport_type eq 'multi-rel') {
     $trans_config_file = "$bench_location/etc/transport-multi-rel.ini ";
     $sub_config_file = "$bench_location/tests/thru/bidir-remote-rel.ini";
-    mkdir "multire", 0777 unless -d "multire";
-    chdir "multire";
+    mkdir "multi-rel", 0777 unless -d "multi-rel";
+    chdir "multi-rel";
 }
 elsif ($transport_type eq 'tcp') {
    $trans_config_file = "$bench_location/etc/transport-tcp.ini";
