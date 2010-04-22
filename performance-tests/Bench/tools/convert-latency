@@ -44,5 +44,5 @@ reduce-latency-data.pl multi-rel/latency-16000.data > data/latency-mrel-16000.gp
 reduce-latency-data.pl multi-rel/latency-32000.data > data/latency-mrel-32000.gpd
 
 extract-latency.pl data/latency-*.gpd > data/latency.csv
-genstats.pl data/latency.csv
+gen-latency-stats.pl data/latency.csv
 
