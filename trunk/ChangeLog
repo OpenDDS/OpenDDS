@@ -1,3 +1,12 @@
+Thu Apr 22 22:55:09 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/genstats.pl:
+        * performance-tests/Bench/bin/gen-latency-stats.pl:
+        * performance-tests/Bench/tools/convert-latency:
+
+          Renamed latency stat generating script.  Changed stat output file
+          names to include latency prefix.
+
 Thu Apr 22 20:46:25 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * bin/performance_tests.lst:

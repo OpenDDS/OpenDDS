@@ -8,13 +8,13 @@ use File::Basename;
 
 =head1 NAME
 
-genstats.pl - create GNUPlot statistical summary data string variables
+gen-latency-stats.pl - create GNUPlot statistical summary data string variables
 
 $Id$
 
 =head1 SYNOPSIS
 
-  genstats.pl <infile>
+  gen-latency-stats.pl <infile>
 
 =head1 DESCRIPTION
 
@@ -23,7 +23,7 @@ creates an output file for each record of the input.  Each output file is
 placed in the same directory that the input file was located in.  The
 output file names are constructed using fields from the input record as:
 
-  <transport>-<size>.stats
+  latency-<transport>-<size>.stats
 
 The input file is expected to be in the format produced by the extract.pl
 data reduction script.  Each record (line) of the input file contains the
@@ -75,7 +75,7 @@ single string suitable for use as a label within GNUPlot.
 
 =head1 EXAMPLE
 
-  genstats.pl data/latency.csv
+  gen-latency-stats.pl data/latency.csv
 
 =cut
 
@@ -88,7 +88,7 @@ next if $#fields eq 0;
 chomp $fields[9];
 
 # Establish the output file using the transport and size information.
-my $filename = dirname($ARGV) . "/" . $fields[0] . "-" . $fields[1] . ".stats";
+my $filename = dirname($ARGV) . "/" . "latency-" . $fields[0] . "-" . $fields[1] . ".stats";
 die "Unable to open output: $filename - $!"
   if not open( OUT, ">$filename");
 
