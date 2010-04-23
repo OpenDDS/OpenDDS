@@ -717,7 +717,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications(TransportSendEl
       sample = delayed_delivered_notification_queue_ [0];
       mode = delayed_notification_mode_ [0];
 
-      if (element.sample () != 0 && element.msg () == sample->msg ())
+      if ((element.sample () != 0) && (element.msg () == sample->msg ()))
       {
         found_element = sample;
       }
@@ -733,7 +733,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications(TransportSendEl
         samples[i] = delayed_delivered_notification_queue_[i];
         modes[i] = delayed_notification_mode_[i];
 
-        if (element.sample () != 0 && element.msg () == samples[i]->msg ()) {
+        if ((element.sample () != 0) && (element.msg () == samples[i]->msg ())) {
           found_element = samples[i];
         }
         
@@ -749,11 +749,17 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications(TransportSendEl
     // optimization for the common case
       if (mode == MODE_TERMINATED) {
         if (! this->transport_shutdown_) {
-          sample->data_dropped(true);
+          bool deleted = sample->data_dropped(true);
+          if (found_element == sample) {
+            element.released (deleted);
+          }
         }
       } else {
         if (! this->transport_shutdown_) {
-          sample->data_delivered();
+          bool deleted = sample->data_delivered();
+          if (found_element == sample) {
+            element.released (deleted);
+          }
         }
       }
 
@@ -761,23 +767,23 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications(TransportSendEl
     for (size_t i = 0; i < num_delayed_notifications; i++) {
       if (modes[i] == MODE_TERMINATED) {
         if (! this->transport_shutdown_) {
-          samples[i]->data_dropped(true);
+          bool deleted = samples[i]->data_dropped(true);
+          if (found_element == samples[i]) {
+            element.released (deleted);
+          }
         }
       } else {
         if (! this->transport_shutdown_) {
-          samples[i]->data_delivered();
+          bool deleted = samples[i]->data_delivered();
+          if (found_element == samples[i]) {
+            element.released (deleted);
+          }
         }
       }
     }
 
     delete [] samples;
     delete [] modes;
-  }
-  
-  
-    
-  if (found_element) {    
-    element.released (found_element->released ());
   }
 }
 
