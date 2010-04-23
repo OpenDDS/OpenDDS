@@ -121,8 +121,8 @@ OwnershipManager::unregister_reader (const char* type_name,
   }
 
   if (instance->readers_.empty ()) {
-    unbind (type_instance_map_, type_name);
     reader->delete_instance_map (instance->map_);
+    unbind (type_instance_map_, type_name);
   }  
 }
 
