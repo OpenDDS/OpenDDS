@@ -31,6 +31,8 @@ TransportSendBuffer::TransportSendBuffer(size_t capacity,
   : capacity_(capacity),
     n_chunks_(capacity * max_samples_per_packet),
     retained_allocator_(this->n_chunks_),
+    retained_mb_allocator_(this->n_chunks_ * 2),
+    retained_db_allocator_(this->n_chunks_ * 2),
     replaced_allocator_(this->n_chunks_),
     replaced_mb_allocator_(this->n_chunks_ * 2),
     replaced_db_allocator_(this->n_chunks_ * 2)
@@ -139,12 +141,17 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
   TransportSendStrategy::QueueType*& elems = buffer.first;
   ACE_NEW(elems, TransportSendStrategy::QueueType(value.first->size(), 1));
 
-  CopyChainVisitor visitor(*elems, &this->retained_allocator_);
+  CopyChainVisitor visitor(*elems, 
+                           &this->retained_allocator_, 
+                           &this->retained_mb_allocator_, 
+                           &this->retained_db_allocator_);
   value.first->accept_visitor(visitor);
 
   // Copy sample's message/data block descriptors:
   ACE_Message_Block*& data = buffer.second;
-  data = value.second->duplicate();
+  data = TransportQueueElement::clone(value.second, 
+                                      &this->retained_mb_allocator_, 
+                                      &this->retained_db_allocator_);
 
   if ( OpenDDS::DCPS::Transport_debug_level >= 10) {
     ACE_DEBUG((LM_DEBUG,
@@ -159,6 +166,11 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
 bool
 TransportSendBuffer::resend(const SequenceRange& range)
 {
+  ACE_GUARD_RETURN( TransportSendStrategy::LockType,
+                    guard,
+                    this->strategy_->lock_,
+                    false);
+
   for (SequenceNumber sequence(range.first);
        sequence <= range.second; ++sequence) {
     // Re-send requested sample if still buffered; missing samples
@@ -184,10 +196,6 @@ TransportSendBuffer::resend(const SequenceRange& range)
 void
 TransportSendBuffer::resend(buffer_type& buffer)
 {
-  ACE_GUARD(TransportSendStrategy::LockType,
-            guard,
-            this->strategy_->lock_);
-
   int bp = 0;
   this->strategy_->do_send_packet(buffer.second, bp);
 }

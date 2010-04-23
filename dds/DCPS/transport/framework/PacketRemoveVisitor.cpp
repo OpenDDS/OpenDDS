@@ -350,7 +350,8 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
       element,
       (TransportQueueElement*)this->replaced_element_allocator_.malloc(),
       TransportReplacedElement(orig_elem, &this->replaced_element_allocator_,
-                               &replaced_element_mb_allocator_, &replaced_element_db_allocator_)
+                               &this->replaced_element_mb_allocator_, 
+                               &this->replaced_element_db_allocator_)
     );
     if( element == 0) {
       // Set fatal error and stop visitation.
@@ -458,10 +459,8 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
           "Tell original element that data_dropped().\n"));
 
     // Tell the original element (that we replaced), data_dropped().
-    orig_elem->data_dropped();
+    this->sample_.released (orig_elem->data_dropped());
     
-    this->sample_.released (orig_elem->released ());
-
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Return 0 to halt visitation.\n"));
 

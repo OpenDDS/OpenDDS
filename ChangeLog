@@ -1,3 +1,43 @@
+Fri Apr 23 20:39:23 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/CopyChainVisitor.h:
+        * dds/DCPS/transport/framework/CopyChainVisitor.inl:
+        * dds/DCPS/transport/framework/CopyChainVisitor.cpp:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+        * dds/DCPS/transport/framework/TransportReplacedElement.h:
+        * dds/DCPS/transport/framework/TransportReplacedElement.inl:
+        * dds/DCPS/transport/framework/TransportReplacedElement.cpp:
+        * dds/DCPS/transport/framework/TransportRetainedElement.h:
+        * dds/DCPS/transport/framework/TransportRetainedElement.inl:
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          - Made TransportSendBuffer clone the transport element and
+            packet with its own MessageBlock and DataBlock cached
+            allocators and heap allocation for the sample data.
+
+          - Fixed a potential issue in TransportSendBuffer due to buffers_
+            not mutex protected. The bug may cause invalid iterator(or
+            corruption) while iterating sequence buffers for resending
+            from reactor thread and the insert calls to release aged
+            buffer due to capacity limit from another thread (e.g. write
+            thread).
+
+          - Changed TransportQueueElement::data_dropped and
+            TransportQueueElement::data_delivered to have return value
+            to indicate if the element is released. This would fix
+            memory corruption due to access the release flag after
+            TransportQueueElement is released.
+
+          - Moved clone() from TransportReplacedElement to
+            TransportQueueElement so the TransportRetainElement
+            can use it.
+            
 Fri Apr 23 14:34:11 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
 
         * performance-tests/Bench/doc/userguide.html:

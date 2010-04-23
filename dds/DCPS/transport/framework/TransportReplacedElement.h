@@ -40,7 +40,6 @@ public:
 protected:
 
   virtual void release_element(bool dropped_by_transport);
-  ACE_Message_Block* clone(const ACE_Message_Block* msg);
 
 private:
 
