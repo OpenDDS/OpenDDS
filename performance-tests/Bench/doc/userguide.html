@@ -589,11 +589,11 @@ Throughput test analysis will rely on the number of samples received at the test
 }}}
 </pre>
 </div>
-<div title="Data Visualization" modifier="MikeMartinez" created="201003082219" modified="201003191855" tags="publish" changecount="2">
+<div title="Data Visualization" modifier="BrianJohnson" created="201003082219" modified="201004221355" tags="publish" changecount="3">
 <pre>!!NOTE: This is a documentation placeholder and needs to be expanded.
 There are several scripts to assist in visualizing the reduced test data.  These include:
 ;//[[$BENCH_ROOT/bin/mktable.pl|MktableManPage]]//
-:script to crate a table of results.  This currently creates only a TiddlyWiki format table.
+:script to create a table of results.  This currently creates only a TiddlyWiki format table.
 ;//[[$BENCH_ROOT/bin/expandColors.pl|ExpandcolorsManPage]]//
 :script to replace color table lookups from TiddlyWiki in the data table from //mktable.pl// with actual color references.
 ;//[[$BENCH_ROOT/bin/genstats.pl|GenstatsManPage]]//
@@ -2261,7 +2261,7 @@ h2,h3 {border-bottom:1px solid [[ColorPalette::TertiaryLight]];}
 #backstageCloak {background:[[ColorPalette::Foreground]]; opacity:0.6; filter:'alpha(opacity=60)';}
 /*}}}*/</pre>
 </div>
-<div title="Subscription Specifications" modifier="MikeMartinez" created="201003032230" modified="201003032323" tags="publish" changecount="7">
+<div title="Subscription Specifications" modifier="BrianJohnson" created="201003032230" modified="201004221443" tags="publish" changecount="13">
 <pre>!Definable Parameters
 {{centeredTable{
 | ''Subscription Section Keys'' |c
@@ -2299,16 +2299,15 @@ h2,h3 {border-bottom:1px solid [[ColorPalette::TertiaryLight]];}
 }}}
 !Test Execution Parameters
 The test execution parameters allow specification of the transport used for by the subscription and the data collection during the test.
-
-The transport is specified as an index into the transport definitions.
-
+;{{{TransportIndex}}}
+:this is specified as an index into the transport definitions.  The definitions are in the OpenDDS service configuration file read at startup.
 Data collection is specified as a combination of where to store the results, how much data to store, and if not all which data to store.  The data collected during test operation consists of per hop latency data along with path latency data.  Summary statistics for all observed data are reported at the end of the test.  The internal collection buffers are flushed to the filesystem after the test completes as well.  This avoids writes to disk affecting the performance being measured.  Data collection specification consists of:
 ;{{{DataCollectionFile}}}
 :if specified, this is the output file where data will be stored at the end of the test.  It will contain summary data at the top and (per sample) detailed data after that.  If not specified, no detailed data collection will occur.
 ;{{{DataCollectionBound}}}
 :this specifies the number of samples to retain data for if the {{{DataCollectionRetention}}} parameter has a value other than {{{ALL}}}.  This parameter is not needed if the {{{DataCollectionFile}}} parameter is not specified or if the {{{DataCollectionRetention}}} parameter has the value {{{ALL}}}.
 ;{{{DataCollectionRetention}}}
-:this specifies what data is to be retained during the test.  Data is collected for each sample.  To reduce the impact of storing this data on the performance being measured, the data is stored in RAM until the end of the test when it is written to the output file.  This parameter specifies what data should be stored.  If this has a value of {{{ALL}}} then all of the data will be stored in RAM.  Otherwise a fixed size buffer of size {{{DataCollectionBound}}} is created before the test starts and data stored there.  If this parameter has a value of {{{OLDEST}}} the buffer is not written once it fills up.  If the value is {{{NEWEST}}} then the buffer is treated as a ring buffer and the last {{{DataCollectionBound}}} samples will always be present.  Samples will be overwritten oldest sample first.
+:this specifies what data is to be retained during the test.  Data is collected for each sample.  To reduce the impact of storing this data on the performance being measured, the data is stored in RAM until the end of the test when it is written to the output file.  This parameter specifies what data should be stored.  If this has a value of {{{ALL}}} then all of the data will be stored in RAM.  Otherwise a fixed size buffer of size {{{DataCollectionBound}}} is created before the test starts and data stored there.  If this parameter has a value of {{{OLDEST}}} the buffer is not written to once it fills up.  If the value is {{{NEWEST}}} then the buffer is treated as a ring buffer and the last {{{DataCollectionBound}}} samples will always be present.  Samples will be overwritten oldest sample first.
 !Example
 An example subscription section like the following would result in a subscription with the name //result// that receives //status// topic data on partition //link2// and stores the most recent 5,000 samples of information and writes them to the file //latency.data// at the end of the test.
 {{{
