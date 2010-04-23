@@ -1,3 +1,9 @@
+Fri Apr 23 21:01:57 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/OwnershipManager.cpp:
+
+          Fixed a bug that access data after iterator is erased.
+
 Tue Apr 20 15:07:59 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps_ts_defaults.mpb:
