@@ -1,3 +1,8 @@
+Fri Apr 23 14:34:11 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * performance-tests/Bench/doc/userguide.html:
+          minor edits
+
 Thu Apr 22 22:55:09 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/bin/genstats.pl:
@@ -34,6 +39,7 @@ Wed Apr 21 19:25:35 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
           Added static initialization feature for static builds.
 
+>>>>>>> .r3230
 Mon Apr 19 23:50:09 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/tests/latency/run_test.pl:
