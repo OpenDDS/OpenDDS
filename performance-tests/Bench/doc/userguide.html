@@ -38,7 +38,9 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 DAMAGE.
 " />
 <!--PRE-HEAD-START-->
+
 <!--{{{-->
+
 <link rel='alternate' type='application/rss+xml' title='RSS' href='index.xml' />
 <!--}}}-->
 
@@ -532,7 +534,7 @@ Error: #f88
 <div title="DCPSInfoRepo" modifier="MikeMartinez" created="201003011936" changecount="1">
 <pre>This is the executable that manages metadata for OpenDDS.  This is where associations are made between publications and subscriptions.  Builtin Topics are distributed from here.  One process of this type is required for operaion of OpenDDS.  It implements CORBA interfaces that allow the individual DDS Participants to register for discovery and update internal state as necessary.</pre>
 </div>
-<div title="Data Reduction" modifier="MikeMartinez" created="201003082209" modified="201003192144" tags="publish" changecount="31">
+<div title="Data Reduction" modifier="TrevorFields" created="201003082209" modified="201004231913" tags="publish" changecount="33">
 <pre>Test execution will result in data being generated and stored.  This data can then be post processed to reduce it to understandable summaries as well as to visualize the results.  OpenDDS-Bench produces output to the console while operating and will create latency data files if directed to do so as part of the test configuration.
 
 {{chunk{
@@ -543,16 +545,16 @@ Latency tests will rely on the data stored to the [[test output files|LatencyDat
 Scripts are available to convert the data into plottable format.  These include the following:
 
 {{indent{
-;[[$BENCH_ROOT/bin/reduce.pl|ReduceManPage]]
+;[[$BENCH_ROOT/bin/reduce-latency-data.pl|ReduceLatencyManPage]]
 :This script will convert individual latency test output files into a format suitable for use by GNUPlot for [[visualization|Data Visualization]].
 }}}
 
 {{indent{
-;[[$BENCH_ROOT/bin/extract.pl|ExtractManPage]]
+;[[$BENCH_ROOT/bin/extract-latency.pl|ExtractLatencyManPage]]
 :This script will extract the data from the previously converted plot data and create a summary table for plotting overall trend data.
 }}}
 
-In addition to these scripts, a helper script to show how the other scripts can be used to reduce the data produced by the pre-defined [[existing tests|Existing Tests]] is available at //$~BENCH_ROOT/tools/convert-all//.  The commands in there assume a directory structure in which the tests were executed and in which the analysis will be performed.  You will need to tailor a set of commands similar to these to your test environment in order to effectively use the data reduction scripts.
+In addition to these scripts, a helper script to show how the other scripts can be used to reduce the data produced by the pre-defined [[existing tests|Existing Tests]] is available at //$~BENCH_ROOT/tools/convert-latency//.  The commands in there assume a directory structure in which the tests were executed and in which the analysis will be performed.  You will need to tailor a set of commands similar to these to your test environment in order to effectively use the data reduction scripts.
 
 The directory structure assumed for this analysis is the following, relative to a working directory acting as the root directory for the data reduction.
 {{centeredTable{
@@ -565,18 +567,18 @@ The directory structure assumed for this analysis is the following, relative to 
 The data reduction steps peformed include the following:
 #Convert the raw data files into plottable files:
 {{indent{
-{{{ reduce.pl &lt;testdir&gt;/tcp/latency-&lt;size&gt;.data &gt; data/tcp-&lt;size&gt;.gpd }}}
-{{{ reduce.pl &lt;testdir&gt;/udp/latency-&lt;size&gt;.data &gt; data/udp-&lt;size&gt;.gpd }}}
-{{{ reduce.pl &lt;testdir&gt;/mbe/latency-&lt;size&gt;.data &gt; data/mbe-&lt;size&gt;.gpd }}}
-{{{ reduce.pl &lt;testdir&gt;/mrel/latency-&lt;size&gt;.data &gt; data/mrel-&lt;size&gt;.gpd }}}
+{{{ reduce-latency-data.pl &lt;testdir&gt;/tcp/latency-&lt;size&gt;.data &gt; data/latency-tcp-&lt;size&gt;.gpd }}}
+{{{ reduce-latency-data.pl &lt;testdir&gt;/udp/latency-&lt;size&gt;.data &gt; data/latency-udp-&lt;size&gt;.gpd }}}
+{{{ reduce-latency-data.pl &lt;testdir&gt;/mbe/latency-&lt;size&gt;.data &gt; data/latency-mbe-&lt;size&gt;.gpd }}}
+{{{ reduce-latency-data.pl &lt;testdir&gt;/mrel/latency-&lt;size&gt;.data &gt; data/latency-mrel-&lt;size&gt;.gpd }}}
 }}}
 #Extract summary data from the plottable data files:
 {{indent{
-{{{ extract.pl data/*.gpd &gt; data/latency.csv }}}
+{{{ extract-latency.pl data/latency-*.gpd &gt; data/latency.csv }}}
 }}}
 #Generate GNUPlot suitable label strings for charts:
 {{indent{
-{{{ genstats.pl data/latency.csv }}}
+{{{ gen-latency-stats.pl data/latency.csv }}}
 }}}
 }}}
 
@@ -589,14 +591,14 @@ Throughput test analysis will rely on the number of samples received at the test
 }}}
 </pre>
 </div>
-<div title="Data Visualization" modifier="BrianJohnson" created="201003082219" modified="201004221355" tags="publish" changecount="3">
+<div title="Data Visualization" modifier="TrevorFields" created="201003082219" modified="201004231821" tags="publish" changecount="4">
 <pre>!!NOTE: This is a documentation placeholder and needs to be expanded.
 There are several scripts to assist in visualizing the reduced test data.  These include:
 ;//[[$BENCH_ROOT/bin/mktable.pl|MktableManPage]]//
 :script to create a table of results.  This currently creates only a TiddlyWiki format table.
 ;//[[$BENCH_ROOT/bin/expandColors.pl|ExpandcolorsManPage]]//
 :script to replace color table lookups from TiddlyWiki in the data table from //mktable.pl// with actual color references.
-;//[[$BENCH_ROOT/bin/genstats.pl|GenstatsManPage]]//
+;//[[$BENCH_ROOT/bin/gen-latency-stats.pl|GenstatsManPage]]//
 :script to create file with GNUPlot label string definitions containing summary statistics information to be added as labels to histogram charts.
 ;//$~BENCH_ROOT/bin/lj-plots.gp//
 :GNUPlot script to create Latency and Jitter timeline charts and histograms in a quad-plot format.
@@ -604,8 +606,14 @@ There are several scripts to assist in visualizing the reduced test data.  These
 :GNUPlot script to create a plot of jitter summary data for all tests.
 ;//$~BENCH_ROOT/bin/plot-transports.gp//
 :GNUPlot script to create a plot of summary latency data for all tests.
-;//$~BENCH_ROOT/tools/plot-all.gp//
-:notional GNUPlot script to create plots for all gathered data.
+;//$~BENCH_ROOT/bin/plot-throughput-testformats.gp//
+:GNUPlot script to create a plot of summary throughput data organized by test type.
+;//$~BENCH_ROOT/bin/plot-throughput-transports.gp//
+:GNUPlot script to create a plot of summary  throughput data organized by transport type.
+;//$~BENCH_ROOT/tools/plot-latency.gp//
+:notional GNUPlot script to create plots for gathered latency data.
+;//$~BENCH_ROOT/tools/plot-throughput.gp//
+:notional GNUPlot script to create plots for gathered throughput data.
 </pre>
 </div>
 <div title="DefaultTiddlers" modifier="MikeMartinez" created="201002181950" modified="201002182002" changecount="2">
@@ -624,10 +632,10 @@ In addition to the test specification files, the transport specification files m
 
 Included in the test specification directories is a file &quot;//test-commands.txt//&quot; which contains a set of bash script commands that can be used to execute the full set of tests in a Linux environment.  These can be used as an example and tailored to your specific test environment.  Beyond translating to the native shell type, the IP addresses used should be changed to those that are valid in your environment.</pre>
 </div>
-<div title="ExtractManPage" modifier="MikeMartinez" created="201003191853" tags="publish" changecount="1">
+<div title="ExtractLatencyManPage" modifier="TrevorFields" created="201003191853" modified="201004232244" tags="publish" changecount="3">
 <pre>&lt;html&gt;
 &lt;head&gt;
-&lt;title&gt;extract.pl - extract summary statistics from plot datafiles.&lt;/title&gt;
+&lt;title&gt;extract-latency.pl - extract summary statistics from plot datafiles.&lt;/title&gt;
 &lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
 &lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
 &lt;/head&gt;
@@ -654,14 +662,13 @@ Included in the test specification directories is a file &quot;//test-commands.t
 &lt;p&gt;
 &lt;/p&gt;
 &lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;extract.pl - extract summary statistics from plot datafiles.&lt;/p&gt;
-&lt;p&gt;$Id$&lt;/p&gt;
+&lt;p&gt;extract-latency.pl - extract summary statistics from plot datafiles.&lt;/p&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
 &lt;pre&gt;
-  extract.pl &amp;lt;infile&amp;gt; ...&lt;/pre&gt;
+  extract-latency.pl &amp;lt;infile&amp;gt; ...&lt;/pre&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
@@ -675,7 +682,7 @@ script and gathered from all input files.&lt;/p&gt;
 &lt;p&gt;This input file name is expected to be in a format that includes '-'
 separated fields and a fixed extension of &amp;quot;.gpd&amp;quot;.&lt;/p&gt;
 &lt;pre&gt;
-  &amp;lt;transport&amp;gt;-&amp;lt;size&amp;gt;.gpd&lt;/pre&gt;
+  latency-&amp;lt;transport&amp;gt;-&amp;lt;size&amp;gt;.gpd&lt;/pre&gt;
 &lt;p&gt;The &amp;lt;transport&amp;gt; and &amp;lt;size&amp;gt; fields are used to populate two columns in the
 output data.&lt;/p&gt;
 &lt;p&gt;This output consists of a single CSV file with a single record (line)
@@ -697,7 +704,7 @@ generated from each input file.  The output files include:&lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1&gt;&lt;a name=&quot;example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/h1&gt;
 &lt;pre&gt;
-  extract.pl data/*.gpd &amp;gt; data/latency.csv&lt;/pre&gt;
+  extract-latency.pl data/*.gpd &amp;gt; data/latency.csv&lt;/pre&gt;
 
 &lt;/body&gt;
 
@@ -720,10 +727,10 @@ This is a TiddlyWiki document.</pre>
 <div title="GNUPlot" modifier="MikeMartinez" created="201003082221" modified="201003082223" changecount="4">
 <pre>GNUPlot is a data visualization tool available as from [[gnuplot.info|http://gnuplot.info/]]</pre>
 </div>
-<div title="GenstatsManPage" modifier="MikeMartinez" created="201003191859" tags="publish" changecount="1">
+<div title="GenstatsManPage" modifier="TrevorFields" created="201003191859" modified="201004231825" tags="publish" changecount="2">
 <pre>&lt;html&gt;
 &lt;head&gt;
-&lt;title&gt;genstats.pl - create GNUPlot statistical summary data string variables&lt;/title&gt;
+&lt;title&gt;gen-latency-stats.pl - create GNUPlot statistical summary data string variables&lt;/title&gt;
 &lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
 &lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
 &lt;/head&gt;
@@ -750,14 +757,14 @@ This is a TiddlyWiki document.</pre>
 &lt;p&gt;
 &lt;/p&gt;
 &lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;genstats.pl - create GNUPlot statistical summary data string variables&lt;/p&gt;
+&lt;p&gt;gen-latency-stats.pl - create GNUPlot statistical summary data string variables&lt;/p&gt;
 &lt;p&gt;$Id$&lt;/p&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
 &lt;pre&gt;
-  genstats.pl &amp;lt;infile&amp;gt;&lt;/pre&gt;
+  gen-latency-stats.pl &amp;lt;infile&amp;gt;&lt;/pre&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
@@ -767,7 +774,7 @@ creates an output file for each record of the input.  Each output file is
 placed in the same directory that the input file was located in.  The
 output file names are constructed using fields from the input record as:&lt;/p&gt;
 &lt;pre&gt;
-  &amp;lt;transport&amp;gt;-&amp;lt;size&amp;gt;.stats&lt;/pre&gt;
+  latency-&amp;lt;transport&amp;gt;-&amp;lt;size&amp;gt;.stats&lt;/pre&gt;
 &lt;p&gt;The input file is expected to be in the format produced by the extract.pl
 data reduction script.  Each record (line) of the input file contains the
 following fields:&lt;/p&gt;
@@ -794,15 +801,19 @@ to place on some plots.  The variables are:&lt;/p&gt;
 data values for the output file (transport/size) in a newline separated
 single string suitable for use as a label within GNUPlot.&lt;/p&gt;
 &lt;p&gt;
+
 &lt;/p&gt;
 &lt;hr /&gt;
+
 &lt;h1&gt;&lt;a name=&quot;example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/h1&gt;
 &lt;pre&gt;
-  genstats.pl data/latency.csv&lt;/pre&gt;
+
+  gen-latency-stats.pl data/latency.csv&lt;/pre&gt;
 
 &lt;/body&gt;
 
 &lt;/html&gt;
+
 </pre>
 </div>
 <div title="GettingStarted" modifier="MikeMartinez" created="201002011551" modified="201002011553" changecount="3">
@@ -819,7 +830,7 @@ If you wish to publish the contents of this document as static HTML web pages, t
 * [[StyleSheet]]: modify the reference to the logo file in the //.publishLogo// class to be in a correct relative directory path
 * use the ''publish'' selection on the right sidebar to publish all tiddlers with the ''publish'' tag to individual HTML files.  They will all be located in the //./publish// directory</pre>
 </div>
-<div title="Installation" modifier="MikeMartinez" created="201003022306" modified="201003311545" tags="publish" changecount="26">
+<div title="Installation" modifier="TrevorFields" created="201003022306" modified="201004232327" tags="publish" changecount="27">
 <pre>Once the OpenDDS core is built, the OpenDDS-Bench software can be built and installed.  This software is located relative to the OpenDDS root directory and is part of the OpenDDS download.  For purposes of this documentation, we assume that you have set the ~BENCH_ROOT environment variable to a value of //$~DDS_ROOT/performance-tests/Bench//.  In a bash shell this can be done as:
 &lt;&lt;&lt;
  shell&gt; export ~BENCH_ROOT=$~DDS_ROOT/performance-tests/Bench
@@ -892,6 +903,7 @@ In addition to the software, there are configuration files that are available fo
 |*.ini |$~BENCH_ROOT/tests/scenarios |Preconfigured scenario tests.  These are old and should be considered deprecated. |
 |~|$~BENCH_ROOT/tests/latency |Preconfigured latency tests.|
 |~|$~BENCH_ROOT/tests/scaling |Preconfigured scaling tests.|
+|~|$~BENCH_ROOT/tests/thru |Preconfigured throughput tests.|
 |~|$~BENCH_ROOT/tests/spray |Preconfigured multicast multipoint tests.|
 }}}
 
@@ -1575,7 +1587,7 @@ String.prototype.filenameEncode = function()
 &lt;hr&gt;%4, %5&amp;nbsp;(created %6)
 &lt;/div&gt;</pre>
 </div>
-<div title="Quick Start" modifier="MikeMartinez" created="201003022013" modified="201003311543" tags="publish" changecount="28">
+<div title="Quick Start" modifier="TrevorFields" created="201003022013" modified="201004232344" tags="publish" changecount="29">
 <pre>The steps to run a test using this framework are described below.
 The description is based on a Linux platform using the GNU toolchain.  If you are using a different platform or tools the instructions will need to be modified to suit your environment.
 {{itemBlock{
@@ -1619,7 +1631,7 @@ Once the tarfile has been distributed unpack it and save the base directory of t
 Once the test software is available on each host participating in the test, the test can be executed.  A separate directory for each host is recommended to avoid inadvertently colliding output.
 The [[repository|DCPSInfoRepo]] needs to be started on one host prior to starting any {{{testprocess}}} executables.  The ''&lt;host&gt;'' and ''&lt;port&gt;'' are where the repository will listen for CORBA connection requests from the participating processes.
 &lt;&lt;&lt;
- shell&gt; $BASEDIR/bin/run_test -S -h iiop:&quot;&quot;&quot;//&quot;&quot;&quot;&lt;host&gt;:&lt;port&gt;
+ shell&gt; $BASEDIR/bin/run_test -S -h &lt;host&gt;:&lt;port&gt;
 &lt;&lt;&lt;
 The following steps need to be performed on each host for each test.  The ''&lt;host&gt;'' and ''&lt;port&gt;'' should refer to the location where the repository is listening and should be reachable from the current host.  The ''&lt;transportconfig&gt;'' file specifies the transport configuration information, and the ''&lt;testconfig&gt;'' file contains the [[test specification|Test Specification]] information.
 &lt;&lt;&lt;
@@ -1630,10 +1642,10 @@ The following steps need to be performed on each host for each test.  The ''&lt;
 Note that it is important to start the tests within 60 seconds of each other.  This is due to the script timeout value, which is set to 60 seconds after the specified duration.  The test execution does not start until the entire test is connected, so if any host is not started within the 60 seconds interval processes that were started first will time out before the test is complete.
 }}}</pre>
 </div>
-<div title="ReduceManPage" modifier="MikeMartinez" created="201003191851" tags="publish" changecount="1">
+<div title="ReduceLatencyManPage" modifier="TrevorFields" created="201003191851" modified="201004232243" tags="publish" changecount="4">
 <pre>&lt;html&gt;
 &lt;head&gt;
-&lt;title&gt;reduce.pl - reduce test results into plottable data&lt;/title&gt;
+&lt;title&gt;reduce-latency-data.pl - reduce test results into plottable data&lt;/title&gt;
 &lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
 &lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
 &lt;/head&gt;
@@ -1660,14 +1672,13 @@ Note that it is important to start the tests within 60 seconds of each other.  T
 &lt;p&gt;
 &lt;/p&gt;
 &lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;reduce.pl - reduce test results into plottable data&lt;/p&gt;
-&lt;p&gt;$Id$&lt;/p&gt;
+&lt;p&gt;reduce-latency-data.pl - reduce test results into plottable data&lt;/p&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
 &lt;pre&gt;
-  reduce.pl &amp;lt;infile&amp;gt;&lt;/pre&gt;
+  reduce-latency-data.pl &amp;lt;infile&amp;gt;&lt;/pre&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
@@ -1752,7 +1763,7 @@ message size of the test data.&lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1&gt;&lt;a name=&quot;example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/h1&gt;
 &lt;pre&gt;
-  reduce.pl tcp/run/latency-1000.data &amp;gt; data/tcp-1000.gpd&lt;/pre&gt;
+  reduce-latency-data.pl tcp/run/latency-1000.data &amp;gt; data/latency-tcp-1000.gpd&lt;/pre&gt;
 
 &lt;/body&gt;
 

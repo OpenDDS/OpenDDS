@@ -1,3 +1,21 @@
+Sat Apr 24 00:00:38 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/plot-throughput-testformats.gp:
+        * performance-tests/Bench/bin/plot-throughput-transports.gp:
+        * performance-tests/Bench/bin/plot-throughput.gp:
+
+          Removed plot-throughput.gp because all because graphs are made through
+          the more specific plots.
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Updated information about changed files.
+
+        * performance-tests/Bench/tests/latency/test_list.txt:
+        * performance-tests/Bench/tests/thru/test_list.txt:
+
+          Swapped the client and server for castor and pollux.
+
 Fri Apr 23 20:39:23 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/CopyChainVisitor.h:

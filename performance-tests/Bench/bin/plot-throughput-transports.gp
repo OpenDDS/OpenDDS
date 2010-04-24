@@ -11,6 +11,9 @@ set format x2 "%.1s%c"
 set format x  "%.1s%c"
 set format y  "%.1s%cbps"
 
+# # 1Gbps network
+# capacity=1000000000
+
 # 100Mbps network
 capacity=100000000
 
@@ -19,7 +22,34 @@ set x2label 'Message Rate (samples per second)'
 set ylabel 'Throughput'
 set xtics out nomirror rotate by 15 offset -5,-1
 set x2tics out rotate by 15
-set yrange [0:1.5*capacity]
+set yrange [0:1.1*capacity]
+
+
+# All throughputs on one chart
+set title 'Throughput'
+plot capacity with lines t 'Network Capacity',\
+     '$0' index 6 using 1:(column(1)*column(2)*8.):(0.1) with lines smooth acspline t 'Test Rate',\
+     ''             index 6 using 1:3:(0.1) with lines smooth acspline t 'TCP Bidir: rate & size vary',\
+     ''             index 7 using 1:3:(0.1) with lines smooth acspline t 'TCP Bidir: rate 1,000',\
+     ''             index 8 using 2:3:(0.1) with lines smooth acspline axes x2y1 t 'TCP Bidir: size 10,000',\
+     ''             index 9 using 1:3:(0.1) with lines smooth acspline t 'UDP Bidir: rate & size vary',\
+     ''             index 10 using 1:3:(0.1) with lines smooth acspline t 'UDP Bidir: rate 1,000',\
+     ''             index 11 using 2:3:(0.1) with lines smooth acspline axes x2y1 t 'UDP Bidir: size 10,000',\
+     ''             index 0 using 1:3:(0.1) with lines smooth acspline t 'MC Be Bidir: rate & size vary',\
+     ''             index 1 using 1:3:(0.1) with lines smooth acspline t 'MC Be Bidir: rate 1,000',\
+     ''             index 2 using 2:3:(0.1) with lines smooth acspline axes x2y1 t 'MC Be Bidir: size 10,000',\
+     ''             index 3 using 1:3:(0.1) with lines smooth acspline t 'MC Rel Bidir: rate & size vary',\
+     ''             index 4 using 1:3:(0.1) with lines smooth acspline t 'MC Rel Bidir: rate 1,000',\
+     ''             index 5 using 2:3:(0.1) with lines smooth acspline axes x2y1 t 'MC Rel Bidir: size 10,000'
+
+set terminal push
+set terminal png size 1000,750
+set output '$1/thru-lines.png'
+replot
+set output
+set terminal pop
+
+
 
 # TCP charts
 set title 'TCP Throughput'
