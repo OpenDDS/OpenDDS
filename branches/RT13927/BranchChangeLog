@@ -1,3 +1,9 @@
+Mon Apr 26 18:23:57 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.application:
+
+          Dropped generated project; will be re-generated again.
+
 Mon Apr 12 21:28:35 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.application:
