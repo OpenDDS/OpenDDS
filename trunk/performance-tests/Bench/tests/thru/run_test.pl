@@ -92,6 +92,7 @@ my $sub_config_file;
 my $starting_test_number = 1;
 my $ending_test_number = 14;
 my $current_dir = getcwd;
+my $run_time = 120;
 
 my @pub_be_config_files = ("$bench_location/tests/thru/bidir-1sub-be-80.ini",
                            "$bench_location/tests/thru/bidir-1sub-be-320.ini",
@@ -193,12 +194,12 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
     } else {
         $repo_host = $CS->peer();
     }
-    my $common_args = "-P -t 120 -h $repo_host:$port1 -i $trans_config_file ";
+    my $common_args = "-P -h $repo_host:$port1 -i $trans_config_file ";
 
     if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
         $Publisher = PerlDDS::create_process
                   ("$bench_location/bin/run_test",
-                   "$common_args -S -s $pub_config_file -v -f bidir$starting_test_number.results");
+                   "$common_args -t $run_time -S -s $pub_config_file -v -f bidir$starting_test_number.results");
 
         print $Publisher->CommandLine(). "\n";
         $Publisher->Spawn ();
@@ -224,9 +225,11 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
 
         unlink $dcpsrepo_ior;
     } else {
+        # add extra run time for waiting after the repo is created
+        $run_time += 15;
         $Subscriber = PerlDDS::create_process
               ("$bench_location/bin/run_test",
-               "$common_args -s $sub_config_file");
+               "$common_args -t $run_time -s $sub_config_file");
 
         print $Subscriber->CommandLine(). "\n";
         $Subscriber->Spawn ();

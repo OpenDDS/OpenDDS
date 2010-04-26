@@ -1,3 +1,10 @@
+Sun Apr 26 00:35:23 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/tests/thru/run_test.pl:
+
+          Changed to add time to the run time of the client side to compensate
+          for server side delay in starting repo. 
+
 Sat Apr 24 00:00:38 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/bin/plot-throughput-testformats.gp:
