@@ -1,3 +1,13 @@
+Mon Apr 26 20:33:01 UTC 2010  Scott Harris  <harris_s@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * Pdds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * tests/DCPS/Messenger/pub_multicast.ini:
+        * docs/html/multicast/multicast.html:
+
+          Added support to set TTL for multicast transport.
+          
 Sun Apr 26 00:35:23 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/tests/thru/run_test.pl:
