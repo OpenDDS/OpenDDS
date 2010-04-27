@@ -44,7 +44,7 @@ class <%EXPORT%> <%TYPE%>DataWriterImpl
 public:
 
   typedef std::map<<%SCOPED%>, DDS::InstanceHandle_t,
-      <%TYPE%>KeyLessThan> InstanceMap;
+      OpenDDSGenerated::<%TYPE%>_KeyLessThan> InstanceMap;
   typedef ::OpenDDS::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>  DataAllocator;
 
   //Constructor
@@ -195,7 +195,7 @@ class <%EXPORT%> <%TYPE%>DataReaderImpl
 public:
 
   typedef std::map<<%SCOPED%>, DDS::InstanceHandle_t,
-      <%TYPE%>KeyLessThan> InstanceMap;
+      OpenDDSGenerated::<%TYPE%>_KeyLessThan> InstanceMap;
   typedef ::OpenDDS::DCPS::Cached_Allocator_With_Overflow<<%SCOPED%>, ACE_Null_Mutex>  DataAllocator;
 
   //Constructor

@@ -13,6 +13,7 @@
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "Comparator_T.h"
 
 #include <vector>
 #include <string>
@@ -103,6 +104,8 @@ struct OpenDDS_Dcps_Export Value {
 class MetaStruct {
 public:
   virtual Value getValue(const void* stru, const char* fieldSpec) const = 0;
+  virtual ComparatorBase::Ptr create_qc_comparator(const char* fieldSpec,
+    ComparatorBase::Ptr next) const = 0;
 };
 
 /// Each user-defined struct type will have an instantiation of this template
@@ -117,6 +120,11 @@ struct NoOpMetaStructImpl : MetaStruct {
   {
     return 0;
   }
+  ComparatorBase::Ptr create_qc_comparator(const char*, ComparatorBase::Ptr)
+    const
+  {
+    return 0;
+  }
 };
 
 template<typename T>
@@ -125,16 +133,6 @@ inline const MetaStruct& getMetaStruct()
   static NoOpMetaStructImpl nomsi;
   return nomsi;
 }
-
-#if 0
-// Our .cpp file will contain the implementation for the topic built-in topic
-// struct, so declare it here.  This is for testing.
-
-template<>
-OpenDDS_Dcps_Export
-const MetaStruct& getMetaStruct<DDS::TopicBuiltinTopicData>();
-
-#endif
 
 }
 }

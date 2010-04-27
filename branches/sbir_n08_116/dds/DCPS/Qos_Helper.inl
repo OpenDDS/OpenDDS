@@ -7,7 +7,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-// TMB - I had to add the following line
 #include "Service_Participant.h"
 
 #include "ace/OS_NS_string.h"
@@ -18,6 +17,9 @@ namespace {
 const ACE_UINT32 NSECS_IN_SEC = 1000000000;
 
 } // namespace
+
+namespace OpenDDS {
+namespace DCPS {
 
 // These operators are used in some inline functions below.  Some
 // compilers require the inline definition to appear before its use.
@@ -442,8 +444,6 @@ bool operator == (const DDS::DomainParticipantFactoryQos& qos1,
 
 // ------------------------------------------------------------------
 
-namespace OpenDDS {
-namespace DCPS {
 ACE_INLINE
 ACE_Time_Value time_to_time_value(const DDS::Time_t& t)
 {

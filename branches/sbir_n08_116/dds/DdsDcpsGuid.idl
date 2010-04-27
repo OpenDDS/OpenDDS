@@ -44,6 +44,8 @@ module OpenDDS
     const octet ENTITYKIND_OPENDDS_TOPIC        = 0x45;
     const octet ENTITYKIND_OPENDDS_USER         = 0x4a;
 
+#if 0 // GUID_t is not actually a DCPS_DATA_TYPE (see comment below).
+      // We'll just commit the generated *KeyLessThan in GuidUtils.h.
 // Specifying the GUID type as a DCPS data type with a complex key forces
 // the generation of the logical less than functor for the type.
 #pragma DCPS_DATA_TYPE "OpenDDS::DCPS::GUID_t"
@@ -63,7 +65,7 @@ module OpenDDS
 #pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t entityId.entityKey[1]"
 #pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t entityId.entityKey[0]"
 #pragma DCPS_DATA_KEY  "OpenDDS::DCPS::GUID_t entityId.entityKind"
-
+#endif
     // The actual GUID itself.
     struct GUID_t {
       GuidPrefix_t guidPrefix;

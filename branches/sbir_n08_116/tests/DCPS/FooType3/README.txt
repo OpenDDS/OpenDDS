@@ -30,8 +30,8 @@ bool operator ()(const Xyz::Foo& v1, const Xyz::Foo& v2) const
 return v1.key < v2.key;
 }
 };
-FooType_Export CORBA::Boolean operator<< (TAO::DCPS::Serializer &, const Xyz::Foo &);
-FooType_Export CORBA::Boolean operator>> (TAO::DCPS::Serializer &, Xyz::Foo &);
+FooType_Export CORBA::Boolean operator<< (OpenDDS::DCPS::Serializer &, const Xyz::Foo &);
+FooType_Export CORBA::Boolean operator>> (OpenDDS::DCPS::Serializer &, Xyz::Foo &);
 
 
 

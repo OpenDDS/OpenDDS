@@ -1,4 +1,4 @@
-#include "../idl_test1_lib/FooDefC.h"
+#include "../idl_test1_lib/FooDefTypeSupportImpl.h"
 #include "ace/ACE.h"
 #include "ace/Log_Msg.h"
 #include <map>
@@ -17,11 +17,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   sau.sau_f1._d(Xyz::redx);
   sau.sau_f1.rsv((const char*) "joe");
   // size = union descr/4 + string length/4 + string contents/3
-  if (_dcps_find_size(sau) != 4+4+3)
+  if (OpenDDS::DCPS::gen_find_size(sau) != 4+4+3)
     {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("StructAUnion find_size failed with = %d\n"),
-        _dcps_find_size(sau)));
+        OpenDDS::DCPS::gen_find_size(sau)));
       failed = true;
     }
   }
@@ -30,7 +30,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   ass.length(2); //4 for seq length
   ass[0] = CORBA::string_dup ("four"); //4+4 strlen & string
   ass[1] = CORBA::string_dup ("five5"); //4+5 strlen + string
-  size_t size_ass = _dcps_find_size(ass);
+  size_t size_ass = OpenDDS::DCPS::gen_find_size(ass);
   if (size_ass != 21)
     {
       ACE_ERROR((LM_ERROR,
@@ -41,7 +41,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   {
   Xyz::ArrayOfShortsSeq ash;
   ash.length(2); //4 for seq length + 5*2 for arry *2 length
-  size_t size_ash = _dcps_find_size(ash);
+  size_t size_ash = OpenDDS::DCPS::gen_find_size(ash);
   if (size_ash != 24)
     {
       ACE_ERROR((LM_ERROR,
@@ -55,7 +55,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   aas.f1[0].v2s.length(2); //4 for v1 + 4 for length seq + 2*2
   aas.f1[1].v2s.length(1); //4 for v1 + 4 for length seq + 2
   aas.f1[2].v2s.length(0); //4 for v1 + 4 for length seq + 0
-  size_t size_aas = _dcps_find_size(aas);
+  size_t size_aas = OpenDDS::DCPS::gen_find_size(aas);
   if (size_aas != 30)
     {
       ACE_ERROR((LM_ERROR,
@@ -72,7 +72,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   aas.f1[1][0].v2s.length(1); //4 for v1 + 4 for length seq + 2
   aas.f1[2].length(1);//4 for length
   aas.f1[2][0].v2s.length(0); //4 for v1 + 4 for length seq + 0
-  size_t size_aas = _dcps_find_size(aas);
+  size_t size_aas = OpenDDS::DCPS::gen_find_size(aas);
   if (size_aas != 42)
     {
       ACE_ERROR((LM_ERROR,
@@ -84,7 +84,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
   {
   Xyz::StructOfArrayOfArrayOfShorts2 aas;
-  size_t size_aas = _dcps_find_size(aas);
+  size_t size_aas = OpenDDS::DCPS::gen_find_size(aas);
   if (size_aas != 18)
     {
       ACE_ERROR((LM_ERROR,
@@ -101,7 +101,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   }
 
   ACE_Message_Block *mb = new ACE_Message_Block(size_aas);
-  TAO::DCPS::Serializer ss(mb);
+  OpenDDS::DCPS::Serializer ss(mb);
 
   if (false == ss << aas)
     {
@@ -141,7 +141,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   }
 
   Xyz::AStruct a_struct;
-  if (!_dcps_has_key(a_struct))
+  if (!OpenDDS::DCPS::gen_has_key(a_struct))
     {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("_dcps_has_key(Xyz::AStruct) returned false when expecting true.\n")
@@ -149,7 +149,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     }
 
   Xyz::StructContainingArrayOfAStructSeq ascaoass;
-  if (_dcps_has_key(ascaoass))
+  if (OpenDDS::DCPS::gen_has_key(ascaoass))
     {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("_dcps_has_key(Xyz::StructContainingArrayOfAStructSeq) returned true when expecting false.\n")
@@ -198,9 +198,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   foo2.ushrtseq[1] = 11;
   foo2.theString = CORBA::string_dup ("four");
 
-  std::map<Xyz::Foo, Xyz::Foo*, FooKeyLessThan> foomap;
+  std::map<Xyz::Foo, Xyz::Foo*, Xyz::OpenDDSGenerated::Foo_KeyLessThan> foomap;
 
-  if (_dcps_has_key(my_foo))
+  if (OpenDDS::DCPS::gen_has_key(my_foo))
     {
       foomap[my_foo] = &my_foo;
       foomap[foo2] = &foo2;
@@ -239,17 +239,17 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   else
     ACE_DEBUG((LM_DEBUG, "NOTE: _dcps_has_key(foo) returned false\n"));
 
-  size_t ms = _dcps_max_marshaled_size(my_foo);
-  CORBA::Boolean bounded = _tao_is_bounded_size(my_foo);
-  size_t cs = _dcps_find_size(my_foo);
+  size_t ms = OpenDDS::DCPS::gen_max_marshaled_size(my_foo);
+  CORBA::Boolean bounded = OpenDDS::DCPS::gen_is_bounded_size(my_foo);
+  size_t cs = OpenDDS::DCPS::gen_find_size(my_foo);
 
-  ACE_DEBUG((LM_DEBUG,"_max_marshaled_size(my_foo) => %d\n", ms));
-  ACE_DEBUG((LM_DEBUG,"_tao_is_bounded_size(my_foo) => %d\n", bounded));
-  ACE_DEBUG((LM_DEBUG,"_dcps_find_size(my_foo) => %d\n", cs));
+  ACE_DEBUG((LM_DEBUG,"OpenDDS::DCPS::gen_max_marshaled_size(my_foo) => %d\n", ms));
+  ACE_DEBUG((LM_DEBUG,"OpenDDS::DCPS::gen_is_bounded_size(my_foo) => %d\n", bounded));
+  ACE_DEBUG((LM_DEBUG,"OpenDDS::DCPS::gen_find_size(my_foo) => %d\n", cs));
 
   if (bounded != expected_bounded)
     {
-      ACE_ERROR((LM_ERROR, "_tao_is_bounded_size(Foo) failed - expected %d got %d\n",
+      ACE_ERROR((LM_ERROR, "OpenDDS::DCPS::gen_is_bounded_size(Foo) failed - expected %d got %d\n",
         expected_bounded, bounded));
       failed = true;
     }
@@ -263,7 +263,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   if (!bounded && cs != expected_find_size)
     {
       ACE_ERROR((LM_ERROR,
-        "_dcps_find_size(Foo) returned %d when was expecting %d\n",
+        "OpenDDS::DCPS::gen_find_size(Foo) returned %d when was expecting %d\n",
         cs, expected_find_size));
       failed = true;
     }
@@ -283,7 +283,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
   const size_t buff_size = bounded ? ms : cs;
   ACE_Message_Block *mb = new ACE_Message_Block(buff_size);
-  TAO::DCPS::Serializer ss(mb);
+  OpenDDS::DCPS::Serializer ss(mb);
 
   if (dump_buffer) 
     {

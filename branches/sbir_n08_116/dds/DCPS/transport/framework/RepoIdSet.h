@@ -42,7 +42,7 @@ public:
 
   /// Serialize the map. The data order in the serialized
   /// stream: size of map, list of keys in the map.
-  void serialize(TAO::DCPS::Serializer & serializer);
+  void serialize(OpenDDS::DCPS::Serializer & serializer);
 
   bool exist(const RepoId& remote_id,
              bool& last);

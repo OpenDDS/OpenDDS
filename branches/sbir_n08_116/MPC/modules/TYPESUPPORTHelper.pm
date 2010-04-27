@@ -2,13 +2,26 @@ package TYPESUPPORTHelper;
 
 use strict;
 use CommandHelper;
+use File::Basename;
 our @ISA = qw(CommandHelper);
 
 sub get_output {
   my($self, $file, $flags) = @_;
+
+  my $dir = '';
+  if ($flags =~ /-o +(\S+)/) {
+    $dir = "$1/";
+  }
+
+  my @out = ();
+  if ($flags =~ /-SI/) {
+    return \@out;
+  }
+
   my $tsidl = $file;
   $tsidl =~ s/\.idl$/TypeSupport.idl/;
-  my @out = ($tsidl);
+  push(@out, $dir . basename($tsidl));
+
   my $i2j = CommandHelper::get('idl2jni_files');
 
   if ($flags =~ /-Wb,java/) {
@@ -24,7 +37,7 @@ sub get_output {
       my @types = split /;/, $tsinfo;
       foreach my $type (@types) {
         $type =~ s/::/\//g;
-        push(@out, $type . 'TypeSupportImpl.java');
+        push(@out, $dir . $type . 'TypeSupportImpl.java');
       }
     }
   }

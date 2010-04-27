@@ -25,24 +25,12 @@ namespace {
       be_global->impl_ << "#endif\n";
     }
   };
-
-  struct NamespaceGuard : ContentSubscriptionGuard {
-    NamespaceGuard()
-    {
-      be_global->header_ << "namespace OpenDDS { namespace DCPS {\n";
-      be_global->impl_ << "namespace OpenDDS { namespace DCPS {\n";
-    }
-    ~NamespaceGuard()
-    {
-      be_global->header_ << "}  }\n";
-      be_global->impl_ << "}  }\n";
-    }
-  };
 }
 
 bool metaclass_generator::gen_enum(UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>& contents, const char*)
 {
+  ContentSubscriptionGuard csg;
   NamespaceGuard ng;
   std::string decl = "const char* gen_" + scoped_helper(name, "_") + "_names[]";
   be_global->header_ << "extern " << decl << ";\n";
@@ -97,7 +85,7 @@ namespace {
     }
   }
 
-  void gen_field(AST_Field* field)
+  void gen_field_getValue(AST_Field* field)
   {
     Classification cls = classify(field->field_type());
     const std::string fieldName = field->local_name()->get_string();
@@ -117,8 +105,7 @@ namespace {
       be_global->add_include("cstring", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_STRUCTURE) {
       size_t n = fieldName.size() + 1 /* 1 for the dot */;
-      std::string fieldType =
-        dds_generator::scoped_helper(field->field_type()->name(), "::");
+      std::string fieldType = scoped(field->field_type()->name());
       be_global->impl_ <<
         "    if (std::strncmp(field, \"" << fieldName << ".\", " << n
         << ") == 0) {\n"
@@ -127,21 +114,53 @@ namespace {
         "    }\n";
     }
   }
+
+  struct gen_field_createQC {
+    std::string scoped_;
+    gen_field_createQC(const std::string& scoped)
+      : scoped_(scoped)
+    {}
+
+    void operator()(AST_Field* field) const
+    {
+      Classification cls = classify(field->field_type());
+      const std::string fieldName = field->local_name()->get_string();
+      if (cls & CL_SCALAR) {
+        be_global->impl_ <<
+          "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
+          "      return make_field_cmp(&" << scoped_ << "::" << fieldName
+          << ", next);\n"
+          "    }\n";
+      } else if (cls & CL_STRUCTURE) {
+        size_t n = fieldName.size() + 1 /* 1 for the dot */;
+        std::string fieldType = scoped(field->field_type()->name());
+        be_global->impl_ <<
+          "    if (std::strncmp(field, \"" << fieldName << ".\", " << n
+          << ") == 0) {\n"
+          "      return make_struct_cmp(&" << scoped_ << "::" << fieldName
+          << ", getMetaStruct<" << fieldType << ">().create_qc_comparator("
+          "field + " << n << ", 0), next);\n"
+          "    }\n";
+      }
+    }
+  };
 }
 
 bool metaclass_generator::gen_struct(UTL_ScopedName* name,
   const std::vector<AST_Field*>& fields, const char*)
 {
+  ContentSubscriptionGuard csg;
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/FilterEvaluator.h",
     BE_GlobalData::STREAM_CPP);
   if (first_struct_) {
     be_global->header_ <<
       "class MetaStruct;\n\n"
-      "template<typename T> const MetaStruct& getMetaStruct();\n\n";
+      "template<typename T>\n"
+      "const MetaStruct& getMetaStruct();\n\n";
     first_struct_ = false;
   }
-  std::string clazz = scoped_helper(name, "::");
+  std::string clazz = scoped(name);
   be_global->impl_ <<
     "template<>\n"
     "struct MetaStructImpl<" << clazz << "> : MetaStruct {\n"
@@ -149,14 +168,23 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
     "  {\n"
     "    const " << clazz << "& typed = *static_cast<const " << clazz
     << "*>(stru);\n";
-  std::for_each(fields.begin(), fields.end(), gen_field);
+  std::for_each(fields.begin(), fields.end(), gen_field_getValue);
   std::string decl = "const MetaStruct& getMetaStruct<" + clazz + ">()",
     exp = be_global->export_macro().c_str();
   be_global->header_ << "template<>\n" << exp << (exp.length() ? "\n" : "")
     << decl << ";\n";
-  be_global->impl_ <<
+  std::string exception =
     "    throw std::runtime_error(\"Field \" + std::string(field) + \" not "
-    "found or its type is not supported (in Struct " << clazz << ")\");\n"
+    "found or its type is not supported (in Struct " + clazz + ")\");\n";
+  be_global->impl_ <<
+    exception <<
+    "  }\n\n"
+    "  ComparatorBase::Ptr create_qc_comparator(const char* field, "
+    "ComparatorBase::Ptr next) const\n"
+    "  {\n";
+  std::for_each(fields.begin(), fields.end(), gen_field_createQC(clazz));
+  be_global->impl_ <<
+    exception <<
     "  }\n"
     "};\n\n"
     "template<>\n"

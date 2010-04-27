@@ -25,6 +25,7 @@ extern "C" {
 
 #include <dds/DCPS/DataSampleHeader.h>
 #include <dds/DCPS/RepoIdConverter.h>
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
 #include <dds/DCPS/transport/framework/TransportHeader.h>
 
 #include <cstring>
@@ -281,7 +282,7 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
   }
 
   // hf_sample_publication
-  len = _dcps_find_size(sample.publication_id_);
+  len = gen_find_size(sample.publication_id_);
   if (sample.message_id_ != TRANSPORT_CONTROL) {
     RepoIdConverter converter(sample.publication_id_);
     proto_tree_add_bytes_format_value(tree, hf_sample_publication, tvb, offset, len,

@@ -37,8 +37,8 @@ namespace {
     return oss.str();
   }
 
-  struct NamespaceGuard  {
-    NamespaceGuard(UTL_ScopedName* name, std::ostream& os,
+  struct TS_NamespaceGuard  {
+    TS_NamespaceGuard(UTL_ScopedName* name, std::ostream& os,
       const char* keyword = "namespace")
       : os_(os)
     {
@@ -53,7 +53,7 @@ namespace {
       }
       if (std::strcmp(keyword, "module") == 0) semi_ = ";";
     }
-    ~NamespaceGuard()
+    ~TS_NamespaceGuard()
     {
       for (int i = 0; i < n_; ++i) os_ << '}' << semi_ << '\n';
     }
@@ -129,21 +129,21 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
   add_includes(cpp_includes, BE_GlobalData::STREAM_CPP);
 
   std::map<std::string, std::string> replacements;
-  replacements["SCOPED"] = scoped_helper(name, "::");
+  replacements["SCOPED"] = scoped(name);
   replacements["TYPE"] = name->last_component()->get_string();
   replacements["EXPORT"] = be_global->export_macro().c_str();
 
-  NamespaceGuard idlGuard(name, be_global->idl_, "module");
+  TS_NamespaceGuard idlGuard(name, be_global->idl_, "module");
   std::string idl = idl_template_;
   replaceAll(idl, replacements);
   be_global->idl_ << idl;
 
-  NamespaceGuard hGuard(name, be_global->header_);
+  TS_NamespaceGuard hGuard(name, be_global->header_);
   std::string h = h_template_;
   replaceAll(h, replacements);
   be_global->header_ << h;
 
-  NamespaceGuard cppGuard(name, be_global->impl_);
+  TS_NamespaceGuard cppGuard(name, be_global->impl_);
   std::string cpp = cpp_template_;
   replaceAll(cpp, replacements);
   be_global->impl_ << cpp;
@@ -152,6 +152,7 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
 
 namespace java_ts_generator {
 
+  /// called directly by dds_visitor::visit_structure() if -Wb,java
   void generate(UTL_ScopedName* name) {
     if (idl_global->is_dcps_type(name) == 0) {
       // no #pragma DCPS_DATA_TYPE, so nothing to generate
@@ -164,7 +165,7 @@ namespace java_ts_generator {
     }
     be_global->add_include("idl2jni_jni.h", BE_GlobalData::STREAM_CPP);
 
-    std::string type = dds_generator::scoped_helper(name, "::");
+    std::string type = scoped(name);
 
     std::string file, jniclass, jpackage;
     for (UTL_ScopedName* sn = name; sn;

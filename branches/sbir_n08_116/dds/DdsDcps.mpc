@@ -1,7 +1,7 @@
 // $Id$
 
-project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_topic_support, dds4ccm_opendds {
-  requires    += exceptions
+project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_topic_support, dds4ccm_opendds, dcps_ts_defaults {
+
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
   libout       = $(DDS_ROOT)/lib
@@ -20,6 +20,7 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_to
   }
 
   idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
+  dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h
 
   Source_Files {
     DCPS
@@ -39,14 +40,14 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_to
 
   IDL_Files {
     // DDS specification defined
-    //
-    // Do not put DdsDcpsInfrastructure.idl here -- see below
+    DdsDcpsInfrastructure.idl
     DdsDcpsDomain.idl
     DdsDcpsPublication.idl
     DdsDcpsSubscription.idl
     DdsDcpsTopic.idl
     DdsDcps.idl
     // OpenDDS specific below
+    DdsDcpsInfrastructureTypeSupport.idl
     DdsDcpsInfo.idl
     DdsDcpsSubscriptionExt.idl
     DdsDcpsDataReaderRemote.idl
@@ -55,21 +56,19 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_to
     DdsDcpsTypeSupportExt.idl
     DdsDcpsSubscriptionExt.idl
     DdsDcpsDomainExt.idl
-  }
-
-  IDL_Files {
-    idlflags += -Gdcpsonly
-    idlflags -= -Glem
-    gendir = .
-    CorbaSeq/*.idl
-  }
-
-  IDL_Files {
-    idlflags += -Gdcps
     DdsDcpsGuid.idl
-    DdsDcpsInfrastructure.idl
   }
 
+  TypeSupport_Files {
+    dcps_ts_flags += -o CorbaSeq -SI -Wb,tao_include_prefix=tao/
+    gendir = CorbaSeq
+    CorbaSeq/*Seq.idl
+  }
+
+  TypeSupport_Files {
+    dcps_ts_flags += -SI
+    DdsDcpsGuid.idl
+  }
 }
 
 project (DdsDcps_lem_gen) : dds4ccm_opendds, taoidldefaults {

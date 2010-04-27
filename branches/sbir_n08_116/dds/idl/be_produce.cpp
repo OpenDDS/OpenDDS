@@ -136,7 +136,7 @@ void postprocess(const char* fn, ostringstream& content,
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
     string taoheader = be_global->header_name_.c_str();
     taoheader.replace(taoheader.find("TypeSupportImpl.h"), 17, "C.h");
-    out << "#include \"" << taoheader << "\"\n";
+    out << "#include \"" << be_global->tao_inc_pre_ << taoheader << "\"\n";
 
   } else if (which == BE_GlobalData::STREAM_CPP) {
     ACE_CString pch = be_global->pch_include();
@@ -235,6 +235,8 @@ BE_produce()
   be_global->multicast(idl_global->filename()->get_string());
   be_global->multicast(" */\n");
 
+  be_global->set_inc_paths(idl_global->idl_flags());
+
   const bool java_ts_only = be_global->java_arg().length() > 0;
 
   dds_visitor visitor(d, java_ts_only);
@@ -249,8 +251,10 @@ BE_produce()
   if (!java_ts_only) {
     postprocess(be_global->header_name_.c_str(),
                 be_global->header_, BE_GlobalData::STREAM_H);
-    postprocess(be_global->idl_name_.c_str(),
-                be_global->idl_, BE_GlobalData::STREAM_IDL);
+    if (!be_global->suppress_idl()) {
+      postprocess(be_global->idl_name_.c_str(),
+                  be_global->idl_, BE_GlobalData::STREAM_IDL);
+    }
   }
 
   postprocess(be_global->impl_name_.c_str(),
