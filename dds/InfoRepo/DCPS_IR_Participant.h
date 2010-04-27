@@ -15,6 +15,7 @@
 #include /**/ "dds/DdsDcpsInfoS.h"
 
 #include "dds/DCPS/RepoIdGenerator.h"
+#include "dds/DCPS/GuidUtils.h"
 
 #include /**/ "ace/Map_Manager.h"
 
@@ -37,12 +38,12 @@ class Manager;
 
 } // namespace Update
 
-typedef std::map<OpenDDS::DCPS::RepoId, DCPS_IR_Subscription*, GUID_tKeyLessThan>
-DCPS_IR_Subscription_Map;
-typedef std::map<OpenDDS::DCPS::RepoId, DCPS_IR_Publication*, GUID_tKeyLessThan>
-DCPS_IR_Publication_Map;
-typedef std::map<OpenDDS::DCPS::RepoId, DCPS_IR_Topic*, GUID_tKeyLessThan>
-DCPS_IR_Topic_Map;
+typedef std::map<OpenDDS::DCPS::RepoId, DCPS_IR_Subscription*,
+  OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Subscription_Map;
+typedef std::map<OpenDDS::DCPS::RepoId, DCPS_IR_Publication*,
+  OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Publication_Map;
+typedef std::map<OpenDDS::DCPS::RepoId, DCPS_IR_Topic*,
+  OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Topic_Map;
 
 typedef ACE_Unbounded_Set<OpenDDS::DCPS::RepoId> TAO_DDS_RepoId_Set;
 

@@ -26,6 +26,8 @@
 #include "QueryConditionImpl.h"
 #include "MonitorFactory.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
+#include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
@@ -1301,7 +1303,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     SequenceNumber ack;
     DDS::Duration_t delay;
-    TAO::DCPS::Serializer serializer(
+    Serializer serializer(
       sample.sample_,
       sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
     serializer >> ack.value_;
@@ -1362,7 +1364,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     this->writer_activity(sample.header_);
 
-    TAO::DCPS::Serializer serializer(
+    Serializer serializer(
       sample.sample_, sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
 
     serializer >> coherent_samples;
@@ -1478,7 +1480,7 @@ DataReaderImpl::send_sample_ack(
   DDS::Time_t when)
 {
   size_t dataSize = sizeof(sequence);
-  dataSize += _dcps_find_size(publication);
+  dataSize += gen_find_size(publication);
 
   ACE_Message_Block* data;
   ACE_NEW_RETURN(data, ACE_Message_Block(dataSize), false);
@@ -1486,7 +1488,7 @@ DataReaderImpl::send_sample_ack(
   bool doSwap    = this->subscriber_servant_->swap_bytes();
   bool byteOrder = (doSwap? !TAO_ENCAP_BYTE_ORDER: TAO_ENCAP_BYTE_ORDER);
 
-  TAO::DCPS::Serializer serializer(data, doSwap);
+  Serializer serializer(data, doSwap);
   serializer << publication;
   serializer << sequence;
 

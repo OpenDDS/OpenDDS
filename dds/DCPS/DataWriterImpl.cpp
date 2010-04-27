@@ -20,6 +20,7 @@
 #include "DataDurabilityCache.h"
 #include "OfferedDeadlineWatchdog.h"
 #include "MonitorFactory.h"
+#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
@@ -773,7 +774,7 @@ DDS::ReturnCode_t
 DataWriterImpl::send_ack_requests(const DataWriterImpl::AckToken& token)
 {
   size_t dataSize = sizeof(token.sequence_.value_); // Assume no padding.
-  dataSize += _dcps_find_size(token.max_wait_);
+  dataSize += gen_find_size(token.max_wait_);
 
   ACE_Message_Block* data;
   ACE_NEW_RETURN(
@@ -781,7 +782,7 @@ DataWriterImpl::send_ack_requests(const DataWriterImpl::AckToken& token)
     ACE_Message_Block(dataSize),
     DDS::RETCODE_OUT_OF_RESOURCES);
 
-  TAO::DCPS::Serializer serializer(
+  Serializer serializer(
     data,
     this->get_publisher_servant()->swap_bytes());
   serializer << token.sequence_.value_;
@@ -1717,7 +1718,7 @@ DataWriterImpl::deliver_ack(
 {
   SequenceNumber ack;
 
-  TAO::DCPS::Serializer serializer(
+  Serializer serializer(
     data,
     header.byte_order_ != TAO_ENCAP_BYTE_ORDER);
   serializer >> ack.value_;
@@ -1784,7 +1785,7 @@ DataWriterImpl::end_coherent_changes()
 
   ACE_NEW(data, ACE_Message_Block(size));
 
-  TAO::DCPS::Serializer serializer(
+  Serializer serializer(
     data, this->get_publisher_servant()->swap_bytes());
 
   serializer << this->coherent_samples_;

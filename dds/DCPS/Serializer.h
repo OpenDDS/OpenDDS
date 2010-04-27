@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_SERIALIZER_H
-#define TAO_DDS_DCPS_SERIALIZER_H
+#ifndef OPENDDS_DCPS_SERIALIZER_H
+#define OPENDDS_DCPS_SERIALIZER_H
 
 #include "ace/CDR_Base.h"
 #include "dcps_export.h"
@@ -19,8 +19,7 @@
 
 class ACE_Message_Block ;
 
-//This must stay in namespace "TAO" until the tao_idl compiler is changed
-namespace TAO {
+namespace OpenDDS {
 namespace DCPS {
 
 /**
@@ -194,7 +193,7 @@ private:
 };
 
 } // namespace DCPS
-} // namespace TAO
+} // namespace OpenDDS
 
 #if defined (__ACE_INLINE__)
 # include "Serializer.inl"
@@ -202,130 +201,136 @@ private:
 
 #include <ace/CDR_Stream.h>
 
+namespace OpenDDS {
+namespace DCPS {
+
 // Insertion operators.
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_CDR::Char x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_CDR::Short x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_CDR::UShort x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_CDR::Long x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_CDR::ULong x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_CDR::LongLong x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_CDR::ULongLong x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_CDR::LongDouble x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_CDR::Float x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_CDR::Double x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, const ACE_CDR::Char* x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, const ACE_CDR::WChar* x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::Char x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::Short x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::UShort x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::Long x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::ULong x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::LongLong x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::ULongLong x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::LongDouble x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::Float x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_CDR::Double x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, const ACE_CDR::Char* x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, const ACE_CDR::WChar* x);
 
 // Using the ACE CDR Stream disambiguators.
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_OutputCDR::from_boolean x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_OutputCDR::from_char x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_OutputCDR::from_wchar x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_OutputCDR::from_octet x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_OutputCDR::from_string x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator<< (TAO::DCPS::Serializer& s, ACE_OutputCDR::from_wstring x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_OutputCDR::from_boolean x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_OutputCDR::from_char x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_OutputCDR::from_wchar x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_OutputCDR::from_octet x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_OutputCDR::from_string x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator<<(Serializer& s, ACE_OutputCDR::from_wstring x);
 
 // Extraction operators.
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_CDR::Char& x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_CDR::Short& x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_CDR::UShort& x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_CDR::Long& x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_CDR::ULong& x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_CDR::LongLong& x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_CDR::ULongLong& x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_CDR::LongDouble& x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_CDR::Float& x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_CDR::Double& x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_CDR::Char*& x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_CDR::WChar*& x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::Char& x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::Short& x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::UShort& x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::Long& x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::ULong& x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::LongLong& x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::ULongLong& x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::LongDouble& x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::Float& x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::Double& x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::Char*& x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_CDR::WChar*& x);
 
 // Using the ACE CDR Stream disambiguators.
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_InputCDR::to_boolean x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_InputCDR::to_char x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_InputCDR::to_wchar x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_InputCDR::to_octet x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_InputCDR::to_string x);
-extern OpenDDS_Dcps_Export
-ACE_CDR::Boolean operator>> (TAO::DCPS::Serializer& s, ACE_InputCDR::to_wstring x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_InputCDR::to_boolean x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_InputCDR::to_char x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_InputCDR::to_wchar x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_InputCDR::to_octet x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_InputCDR::to_string x);
+OpenDDS_Dcps_Export
+ACE_CDR::Boolean operator>>(Serializer& s, ACE_InputCDR::to_wstring x);
 
-// predefined type _dcps_max_marshaled_size methods
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size(const ACE_CDR::Short& x);
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size(const ACE_CDR::UShort& x);
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size(const ACE_CDR::Long& x);
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size(const ACE_CDR::ULong& x);
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size(const ACE_CDR::LongLong& x);
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size(const ACE_CDR::ULongLong& x);
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size(const ACE_CDR::LongDouble& x);
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size(const ACE_CDR::Float& x);
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size(const ACE_CDR::Double& x);
+// predefined type gen_max_marshaled_size methods
+OpenDDS_Dcps_Export
+size_t gen_max_marshaled_size(const ACE_CDR::Short& x);
+OpenDDS_Dcps_Export
+size_t gen_max_marshaled_size(const ACE_CDR::UShort& x);
+OpenDDS_Dcps_Export
+size_t gen_max_marshaled_size(const ACE_CDR::Long& x);
+OpenDDS_Dcps_Export
+size_t gen_max_marshaled_size(const ACE_CDR::ULong& x);
+OpenDDS_Dcps_Export
+size_t gen_max_marshaled_size(const ACE_CDR::LongLong& x);
+OpenDDS_Dcps_Export
+size_t gen_max_marshaled_size(const ACE_CDR::ULongLong& x);
+OpenDDS_Dcps_Export
+size_t gen_max_marshaled_size(const ACE_CDR::LongDouble& x);
+OpenDDS_Dcps_Export
+size_t gen_max_marshaled_size(const ACE_CDR::Float& x);
+OpenDDS_Dcps_Export
+size_t gen_max_marshaled_size(const ACE_CDR::Double& x);
 
-// predefined type _dcps_max_marshaled_size method disambiguators.
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size(const ACE_OutputCDR::from_boolean x);
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size(const ACE_OutputCDR::from_char x);
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size(const ACE_OutputCDR::from_wchar x);
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size(const ACE_OutputCDR::from_octet x);
+// predefined type gen_max_marshaled_size method disambiguators.
+OpenDDS_Dcps_Export
+size_t gen_max_marshaled_size(const ACE_OutputCDR::from_boolean x);
+OpenDDS_Dcps_Export
+size_t gen_max_marshaled_size(const ACE_OutputCDR::from_char x);
+OpenDDS_Dcps_Export
+size_t gen_max_marshaled_size(const ACE_OutputCDR::from_wchar x);
+OpenDDS_Dcps_Export
+size_t gen_max_marshaled_size(const ACE_OutputCDR::from_octet x);
 
-/// predefined type _dcps_max_marshaled_size method explicit disambiguators.
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size_boolean();
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size_char();
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size_wchar();
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size_octet();
+/// predefined type max_marshaled_size method explicit disambiguators.
+OpenDDS_Dcps_Export
+size_t max_marshaled_size_boolean();
+OpenDDS_Dcps_Export
+size_t max_marshaled_size_char();
+OpenDDS_Dcps_Export
+size_t max_marshaled_size_wchar();
+OpenDDS_Dcps_Export
+size_t max_marshaled_size_octet();
 
 /// lengths of strings and sequences are ulong
-extern OpenDDS_Dcps_Export
-size_t _dcps_max_marshaled_size_ulong();
+OpenDDS_Dcps_Export
+size_t max_marshaled_size_ulong();
+
+} // namespace DCPS
+} // namespace OpenDDS
 
 #endif  /* __ACE_INLINE__ */
 
-#endif /* TAO_DDS_DCPS_SERIALIZER_H */
+#endif /* OPENDDS_DCPS_SERIALIZER_H */

@@ -3,10 +3,11 @@
 // $Id$
 #include  "SimpleDataReader.h"
 #include  "dds/DCPS/transport/framework/ReceivedDataSample.h"
-#include  "tests/DCPS/FooType3/FooDefC.h"
+#include  "tests/DCPS/FooType3/FooDefTypeSupportImpl.h"
 #include  "ace/Log_Msg.h"
 #include  "dds/DCPS/DataSampleHeader.h"
 
+#include "dds/DCPS/Serializer.h"
 
 SimpleDataReader::SimpleDataReader()
   : sub_id_( OpenDDS::DCPS::GUID_UNKNOWN),
@@ -36,7 +37,7 @@ SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
   // Shouldn't be printing this all the time.
   //ACE_DEBUG((LM_DEBUG, "(%P|%t) Data has been received:\n"));
 
-  ::TAO::DCPS::Serializer serializer (sample.sample_);
+  ::OpenDDS::DCPS::Serializer serializer (sample.sample_);
   ::Xyz::Foo foo;
   serializer >> foo;
 

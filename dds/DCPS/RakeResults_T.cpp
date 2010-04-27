@@ -43,7 +43,6 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
     do_sort_ = order_bys.size() > 0;
 
     if (do_sort_) {
-      typename SampleSeq::value_type* sample = 0;
       ComparatorBase::Ptr cmp = 0;
 
       // Iterate in reverse over the comma-separated fields so that the
@@ -51,7 +50,8 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
       for (size_t i = order_bys.size(); i > 0; --i) {
         const std::string& fieldspec = order_bys[i - 1];
         //FUTURE: handle ASC / DESC as an extension to the DDS spec?
-        cmp = create_qc_comparator(sample, fieldspec.c_str(), cmp);
+        cmp = getMetaStruct<typename SampleSeq::value_type>()
+          .create_qc_comparator(fieldspec.c_str(), cmp);
       }
 
       SortedSetCmp comparator(cmp);

@@ -1,7 +1,8 @@
 project: taolib, idl2jni {
   libout        = $(DDS_ROOT)/lib
   idl2jniflags += -SS -Wb,stub_export_include=tao_java_export.h \
-                      -Wb,stub_export_macro=tao_java_Export
+                      -Wb,stub_export_macro=tao_java_Export \
+                      -Wb,tao_include_prefix=tao/
   includes     += $(TAO_ROOT)/tao
   dynamicflags += TAO_JAVA_BUILD_DLL
   postclean    += <%rm%> CORBA

@@ -39,6 +39,9 @@ project(*Publisher) : dcpsexe, svc_utils {
   IDL_Files {
   }
 
+  TypeSupport_Files {
+  }
+
   Header_Files {
   }
 
@@ -64,6 +67,9 @@ project(*Subscriber) : dcpsexe {
 
   includes += $(TAO_ROOT)/orbsvcs
   libs     += StockQuoterCommon
+
+  TypeSupport_Files {
+  }
 
   IDL_Files {
   }

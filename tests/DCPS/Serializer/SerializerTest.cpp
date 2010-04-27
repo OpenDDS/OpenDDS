@@ -80,7 +80,7 @@ parse_args (int argc,
 void
 insertions ( ACE_Message_Block* chain, Values& values, bool swap)
 {
-  TAO::DCPS::Serializer serializer( chain, swap) ;
+  OpenDDS::DCPS::Serializer serializer( chain, swap) ;
 
   serializer << ACE_OutputCDR::from_octet(values.octetValue) ;
   serializer << values.shortValue ;
@@ -101,7 +101,7 @@ insertions ( ACE_Message_Block* chain, Values& values, bool swap)
 void
 array_insertions ( ACE_Message_Block* chain, ArrayValues& values, size_t length, bool swap)
 {
-  TAO::DCPS::Serializer serializer( chain, swap) ;
+  OpenDDS::DCPS::Serializer serializer( chain, swap) ;
 
   serializer.write_octet_array( values.octetValue, length) ;
   serializer.write_short_array( values.shortValue, length) ;
@@ -120,7 +120,7 @@ array_insertions ( ACE_Message_Block* chain, ArrayValues& values, size_t length,
 void
 extractions ( ACE_Message_Block* chain, Values& values, bool swap)
 {
-  TAO::DCPS::Serializer serializer( chain, swap) ;
+  OpenDDS::DCPS::Serializer serializer( chain, swap) ;
 
   serializer >> ACE_InputCDR::to_octet(values.octetValue) ;
   serializer >> values.shortValue ;
@@ -141,7 +141,7 @@ extractions ( ACE_Message_Block* chain, Values& values, bool swap)
 void
 array_extractions ( ACE_Message_Block* chain, ArrayValues& values, size_t length, bool swap)
 {
-  TAO::DCPS::Serializer serializer( chain, swap) ;
+  OpenDDS::DCPS::Serializer serializer( chain, swap) ;
 
   serializer.read_octet_array( values.octetValue, length) ;
   serializer.read_short_array( values.shortValue, length) ;

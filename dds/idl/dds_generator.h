@@ -10,6 +10,8 @@
 #ifndef dds_generator_H
 #define dds_generator_H
 
+#include "be_extern.h"
+
 #include "utl_scoped_name.h"
 #include "ast.h"
 
@@ -94,5 +96,62 @@ public:
 private:
   std::vector<dds_generator*> components_;
 };
+
+// common utilities for all "generator" derived classes
+
+struct NamespaceGuard {
+  NamespaceGuard()
+  {
+    be_global->header_ << "namespace OpenDDS { namespace DCPS {\n\n";
+    be_global->impl_ << "namespace OpenDDS { namespace DCPS {\n\n";
+  }
+  ~NamespaceGuard()
+  {
+    be_global->header_ << "}  }\n\n";
+    be_global->impl_ << "}  }\n\n";
+  }
+};
+
+struct Function {
+  bool has_arg_;
+
+  Function(const char* name, const char* returntype)
+    : has_arg_(false)
+  {
+    using std::string;
+    ACE_CString ace_exporter = be_global->export_macro();
+    bool use_exp = ace_exporter != "";
+    string exporter = use_exp ? (string(" ") + ace_exporter.c_str()) : "";
+    be_global->header_ << ace_exporter << (use_exp ? "\n" : "")
+      << returntype << " " << name << "(";
+    be_global->impl_ << returntype << " " << name << "(";
+  }
+
+  void addArg(const char* name, const std::string& type)
+  {
+    std::string sig = (has_arg_ ? ", " : "") + type + (name[0] ? " " : "")
+      + name;
+    be_global->header_ << sig;
+    be_global->impl_ << sig;
+    has_arg_ = true;
+  }
+
+  void endArgs()
+  {
+    be_global->header_ << ");\n\n";
+    be_global->impl_ << ")\n{\n";
+  }
+
+  ~Function()
+  {
+    be_global->impl_ << "}\n\n";
+  }
+};
+
+inline std::string scoped(UTL_ScopedName* sn)
+{
+  return dds_generator::scoped_helper(sn, "::");
+}
+
 
 #endif

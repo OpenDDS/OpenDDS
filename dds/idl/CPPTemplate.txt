@@ -360,13 +360,13 @@ void
                                        dw_remote_objref);
 
   ::<%SCOPED%> data;
-  if (_tao_is_bounded_size (data))
+  if (OpenDDS::DCPS::gen_is_bounded_size (data))
   {
-    marshaled_size_ = _dcps_max_marshaled_size (data);
+    marshaled_size_ = OpenDDS::DCPS::gen_max_marshaled_size (data);
   }
   else
   {
-    marshaled_size_ =  0;// should use _dcps_find_size when marshaling
+    marshaled_size_ =  0;// should use gen_find_size when marshaling
   }
 }
 
@@ -376,7 +376,7 @@ void
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
   ::<%SCOPED%> data;
-  if (_tao_is_bounded_size (data))
+  if (OpenDDS::DCPS::gen_is_bounded_size (data))
   {
     data_allocator_ = new DataAllocator (n_chunks_, marshaled_size_);
     if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
@@ -440,7 +440,7 @@ ACE_Message_Block*
                                sizeof (ACE_Message_Block))),
                            ACE_Message_Block(
                                marshaled_size_ ? marshaled_size_ :
-                                           _dcps_find_size(instance_data),
+                                   OpenDDS::DCPS::gen_find_size(instance_data),
                                ACE_Message_Block::MB_DATA,
                                0, //cont
                                0, //data
@@ -460,12 +460,12 @@ ACE_Message_Block*
     ACE_NEW_RETURN (mb,
                     ACE_Message_Block(marshaled_size_
                                       ? marshaled_size_
-                                      : _dcps_find_size(instance_data)),
+                                      : OpenDDS::DCPS::gen_find_size(instance_data)),
                     0);
   }
 
-  ::TAO::DCPS::Serializer serializer (mb,
-                                      this->get_publisher_servant()->swap_bytes());
+  ::OpenDDS::DCPS::Serializer serializer (mb,
+    this->get_publisher_servant()->swap_bytes());
   serializer << instance_data;
 
   return mb;
@@ -1536,7 +1536,7 @@ void
                                sizeof (::<%SCOPED%>))),
                            ::<%SCOPED%>);
 
-  TAO::DCPS::Serializer ser(
+  OpenDDS::DCPS::Serializer ser(
     sample.sample_,
     sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
 

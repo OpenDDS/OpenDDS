@@ -234,6 +234,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       //The SunOS compiler had problem resolving operator in a namespace.
       //To resolve the compilation errors, the operator is called explicitly.
+      using OpenDDS::DCPS::operator==;
       if (! (sub_qos_got == default_sub_qos))
       {
         ACE_ERROR ((LM_ERROR,

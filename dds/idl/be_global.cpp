@@ -15,6 +15,8 @@
 #include "utl_string.h"
 
 #include "ace/OS_NS_strings.h"
+#include "ace/OS_NS_sys_stat.h"
+#include "ace/ARGV.h"
 
 #include <iostream>
 #include <fstream>
@@ -28,7 +30,7 @@ using namespace std;
 BE_GlobalData* be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
-  : filename_(0), java_(false)
+  : filename_(0), java_(false), suppress_idl_(false)
 {
 }
 
@@ -178,11 +180,35 @@ BE_GlobalData::spawn_options()
 void
 BE_GlobalData::parse_args(long& i, char** av)
 {
-  ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C' option\n"),
-             av[i]));
-
-  idl_global->set_compile_flags(idl_global->compile_flags()
-                                | IDL_CF_ONLY_USAGE);
+  switch (av[i][1]) {
+  case 'o':
+    idl_global->append_idl_flag(av[i + 1]);
+    if (ACE_OS::mkdir(av[i + 1]) != 0 && errno != EEXIST) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("IDL: unable to create directory %C")
+        ACE_TEXT(" specified by -o option\n"), av[i + 1]));
+    } else {
+      output_dir_ = av[++i];
+    }
+    break;
+  case 'S':
+    switch (av[i][2]) {
+    case 'I':
+      suppress_idl_ = true;
+      break;
+    default:
+      ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
+        ACE_TEXT(" option\n"), av[i]));
+      idl_global->set_compile_flags(idl_global->compile_flags()
+                                    | IDL_CF_ONLY_USAGE);
+    }
+    break;
+  default:
+    ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C' option\n"),
+               av[i]));
+    idl_global->set_compile_flags(idl_global->compile_flags()
+                                  | IDL_CF_ONLY_USAGE);
+  }
 }
 
 void
@@ -196,6 +222,8 @@ BE_GlobalData::prep_be_arg(char* arg)
   static const size_t SZ_WB_PCH_INCLUDE = sizeof(WB_PCH_INCLUDE) - 1;
   static const char WB_JAVA[] = "java";
   static const size_t SZ_WB_JAVA = sizeof(WB_JAVA) - 1;
+  static const char WB_TAO_INC_PRE[] = "tao_include_prefix=";
+  static const size_t SZ_WB_TAO_INC_PRE = sizeof(WB_TAO_INC_PRE) - 1;
 
   if (0 == ACE_OS::strncasecmp(arg, WB_EXPORT_MACRO, SZ_WB_EXPORT_MACRO)) {
     this->export_macro(arg + SZ_WB_EXPORT_MACRO);
@@ -212,6 +240,10 @@ BE_GlobalData::prep_be_arg(char* arg)
     if (ACE_OS::strlen(arg + SZ_WB_JAVA)) {
       this->java_arg(arg + SZ_WB_JAVA + 1 /* = */);
     }
+
+  } else if (0 == ACE_OS::strncasecmp(arg, WB_TAO_INC_PRE, SZ_WB_TAO_INC_PRE)) {
+    this->tao_inc_pre_ = arg + SZ_WB_TAO_INC_PRE;
+
   }
 }
 
@@ -225,21 +257,19 @@ void
 BE_GlobalData::usage() const
 {
   ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT(" -o <dir>\t\tsets output directory for all files\n")
+    ACE_TEXT(" -SI\t\t\tsuppress generation of *TypeSupport.idl\n")
     ACE_TEXT(" -Wb,export_macro=<macro name>\t\tsets export macro ")
     ACE_TEXT("for all files\n")
-  ));
-  ACE_DEBUG((LM_DEBUG,
     ACE_TEXT(" -Wb,export_include=<include path>\tsets export include ")
     ACE_TEXT("file for all files\n")
-  ));
-  ACE_DEBUG((LM_DEBUG,
     ACE_TEXT(" -Wb,pch_include=<include path>\t\tsets include ")
     ACE_TEXT("file for precompiled header mechanism\n")
-  ));
-  ACE_DEBUG((LM_DEBUG,
     ACE_TEXT(" -Wb,java[=<output_file>]\t\tenables Java support ")
     ACE_TEXT("for TypeSupport files.  Do not specify an 'output_file' ")
     ACE_TEXT("except for special cases.\n")
+    ACE_TEXT(" -Wb,tao_include_prefix=<path>\t\tPrefix for including the TAO-")
+    ACE_TEXT("generated header file.\n")
   ));
 }
 
@@ -254,10 +284,12 @@ BE_GlobalData::generator_init()
 bool
 BE_GlobalData::writeFile(const char* fileName, const string& content)
 {
-  ofstream ofs(fileName);
+  string file = (be_global->output_dir_ == "")
+    ? fileName : (string(be_global->output_dir_.c_str()) + '/' + fileName);
+  ofstream ofs(file.c_str());
 
   if (!ofs) {
-    cerr << "ERROR - couldn't open " << fileName << " for writing.\n";
+    cerr << "ERROR - couldn't open " << file << " for writing.\n";
     return false;
   }
 
@@ -269,7 +301,7 @@ BE_GlobalData::writeFile(const char* fileName, const string& content)
 
 namespace {
   typedef set<string> Includes_t;
-  Includes_t inc_h_, inc_c_, inc_idl_;
+  Includes_t inc_h_, inc_c_, inc_idl_, referenced_idl_, inc_path_;
 }
 
 void
@@ -278,6 +310,27 @@ BE_GlobalData::reset_includes()
   inc_h_.clear();
   inc_c_.clear();
   inc_idl_.clear();
+  referenced_idl_.clear();
+}
+
+void
+BE_GlobalData::add_inc_path(const char* path)
+{
+  inc_path_.insert(path);
+}
+
+void
+BE_GlobalData::set_inc_paths(const char* cmdline)
+{
+  ACE_ARGV argv(cmdline, false);
+  for (int i = 0; i < argv.argc(); ++i) {
+    std::string arg = argv[i];
+    if (arg == "-I" && i + 1 < argv.argc()) {
+      inc_path_.insert(argv[++i]);
+    } else if (arg.substr(0, 2) == "-I") {
+      inc_path_.insert(arg.c_str() + 2);
+    }
+  }
 }
 
 void
@@ -301,6 +354,50 @@ BE_GlobalData::add_include(const char* file,
   }
 
   inc->insert(file);
+}
+
+void
+BE_GlobalData::add_referenced(const char* file)
+{
+  referenced_idl_.insert(file);
+}
+
+namespace {
+  std::string transform_referenced(const std::string& idl)
+  {
+    const size_t len = idl.size();
+    string base_name;
+    if (len >= 5 && 0 == ACE_OS::strcasecmp(idl.c_str() + len - 4, ".idl")) {
+      base_name.assign(idl.c_str(), len - 4);
+
+    } else if (len >= 6 &&
+        0 == ACE_OS::strcasecmp(idl.c_str() + len - 5, ".pidl")) {
+      base_name.assign(idl.c_str(), len - 5);
+      size_t slash = base_name.find_last_of("/\\");
+      if (slash != std::string::npos && slash > 3 && base_name.size() > 3
+          && base_name.substr(slash - 3, 3) == "tao"
+          && base_name.substr(base_name.size() - 3) == "Seq") {
+        base_name = "dds/CorbaSeq/" + base_name.substr(slash + 1);
+      }
+    }
+
+    return base_name + "TypeSupportImpl.h";
+  }
+
+  std::string make_relative(const std::string& absolute)
+  {
+    for (Includes_t::const_iterator iter = inc_path_.begin(),
+        end = inc_path_.upper_bound(absolute); iter != end; ++iter) {
+      if (absolute.find(*iter) == 0) {
+        string rel = absolute.substr(iter->size());
+        if (rel.size() && (rel[0] == '/' || rel[0] == '\\')) {
+          rel.erase(0, 1);
+        }
+        return rel;
+      }
+    }
+    return absolute;
+  }
 }
 
 ACE_CString
@@ -335,6 +432,12 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
     if (exports != "")
       ret += "#include \"" + exports + "\"\n";
 
+  } else if (which == STREAM_CPP) {
+    for (it = referenced_idl_.begin(), end = referenced_idl_.end(); it != end;
+        ++it) {
+      ret += ACE_CString("#include \"")
+        + transform_referenced(make_relative(*it)).c_str() + "\"\n";
+    }
   }
 
   return ret;

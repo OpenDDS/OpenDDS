@@ -37,6 +37,8 @@
 #include "dds_visitor.h"
 #include "metaclass_generator.h"
 #include "ts_generator.h"
+#include "marshal_generator.h"
+#include "keys_generator.h"
 
 #include <iostream>
 #include <vector>
@@ -46,26 +48,28 @@ using namespace std;
 
 namespace {
 
-metaclass_generator mc_gen_;
-ts_generator ts_gen_;
-dds_generator* generators_[] = {&mc_gen_, &ts_gen_};
-const size_t N_MAP = sizeof(generators_) / sizeof(generators_[0]);
+  marshal_generator mar_gen_;
+  keys_generator key_gen_;
+  ts_generator ts_gen_;
+  metaclass_generator mc_gen_;
+  dds_generator* generators_[] = {&mar_gen_, &key_gen_, &ts_gen_, &mc_gen_};
+  const size_t N_MAP = sizeof(generators_) / sizeof(generators_[0]);
 
-composite_generator gen_target_(&generators_[0], &generators_[N_MAP]);
+  composite_generator gen_target_(&generators_[0], &generators_[N_MAP]);
 
-template <typename T>
-void scope2vector(vector<T*>& v, UTL_Scope* s, AST_Decl::NodeType nt)
-{
-  UTL_ScopeActiveIterator it(s, UTL_Scope::IK_decls);
+  template <typename T>
+  void scope2vector(vector<T*>& v, UTL_Scope* s, AST_Decl::NodeType nt)
+  {
+    UTL_ScopeActiveIterator it(s, UTL_Scope::IK_decls);
 
-  for (; !it.is_done(); it.next()) {
-    AST_Decl* item = it.item();
+    for (; !it.is_done(); it.next()) {
+      AST_Decl* item = it.item();
 
-    if (item->node_type() == nt) {
-      v.push_back(T::narrow_from_decl(item));
+      if (item->node_type() == nt) {
+        v.push_back(T::narrow_from_decl(item));
+      }
     }
   }
-}
 
 } // namespace
 

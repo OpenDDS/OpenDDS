@@ -22,6 +22,7 @@
 #include "TopicImpl.h"
 #include "AssociationData.h"
 #include "Qos_Helper.h"
+#include "GuidUtils.h"
 
 #include "ace/Event_Handler.h"
 #include "ace/OS_NS_sys_time.h"

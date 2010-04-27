@@ -71,7 +71,7 @@ public:
   void open_streams(const char* filename);
 
   std::ostringstream header_, impl_, idl_;
-  ACE_CString header_name_, impl_name_, idl_name_;
+  ACE_CString header_name_, impl_name_, idl_name_, output_dir_, tao_inc_pre_;
 
   ///print message to all open streams
   void multicast(const char* message);
@@ -83,6 +83,16 @@ public:
   void reset_includes();
 
   void add_include(const char* file, stream_enum_t which = STREAM_H);
+
+  /// Called to indicate that OpenDDS marshaling (serialization) code for the
+  /// current file will depend on marshaling code generated for the indicated
+  /// file.  For example, if the current file is A.idl and it contains a struct
+  /// which has a field of type B, defined in B.idl, the full path to B.idl is
+  /// passed to this function.
+  void add_referenced(const char* file);
+
+  void set_inc_paths(const char* cmdline);
+  void add_inc_path(const char* path);
 
   ACE_CString get_include_block(stream_enum_t which);
 
@@ -101,13 +111,15 @@ public:
   ACE_CString java_arg() const;
   void java_arg(const ACE_CString& str);
 
+  bool suppress_idl() const { return suppress_idl_; }
+
   static bool writeFile(const char* fileName, const std::string &content);
 
 private:
   const char* filename_;
   // Name of the IDL file we are processing.
 
-  bool java_;
+  bool java_, suppress_idl_;
 
   ACE_CString export_macro_, export_include_, pch_include_, java_arg_;
 };

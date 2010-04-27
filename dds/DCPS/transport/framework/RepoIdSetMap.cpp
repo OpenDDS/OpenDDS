@@ -11,6 +11,7 @@
 #include "RepoIdSetMap.h"
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/Util.h"
+#include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include <sstream>
 
 #if !defined (__ACE_INLINE__)
@@ -201,7 +202,7 @@ OpenDDS::DCPS::RepoIdSetMap::marshal(bool byte_order)
                                    0),
                  0);
 
-  TAO::DCPS::Serializer writer(data, byte_order);
+  Serializer writer(data, byte_order);
   CORBA::ULong sz = this->size();
   writer << sz;
 
@@ -220,7 +221,7 @@ OpenDDS::DCPS::RepoIdSetMap::demarshal(ACE_Message_Block* acks, bool byte_order)
 {
   DBG_ENTRY_LVL("RepoIdSetMap","demarshal",6);
 
-  TAO::DCPS::Serializer reader(acks, byte_order);
+  Serializer reader(acks, byte_order);
 
   CORBA::ULong num_subs = 0;
   reader >> num_subs;
