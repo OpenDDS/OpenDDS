@@ -630,6 +630,62 @@ In addition to the test specification files, the transport specification files m
 
 Included in the test specification directories is a file &quot;//test-commands.txt//&quot; which contains a set of bash script commands that can be used to execute the full set of tests in a Linux environment.  These can be used as an example and tailored to your specific test environment.  Beyond translating to the native shell type, the IP addresses used should be changed to those that are valid in your environment.</pre>
 </div>
+<div title="ExpandcolorsManPage" modifier="MikeMartinez" created="201004272157" changecount="1">
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;expandColors.pl - Convert the TiddlyWiki ColorPalette slices to actual CSS colors&lt;/title&gt;
+&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
+&lt;/head&gt;
+
+&lt;body style=&quot;background-color: white&quot;&gt;
+
+
+&lt;!-- INDEX BEGIN --&gt;
+&lt;div name=&quot;index&quot;&gt;
+&lt;p&gt;&lt;a name=&quot;__index__&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+
+	&lt;li&gt;&lt;a href=&quot;#name&quot;&gt;NAME&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr name=&quot;index&quot; /&gt;
+&lt;/div&gt;
+&lt;!-- INDEX END --&gt;
+
+&lt;p&gt;
+&lt;/p&gt;
+&lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;expandColors.pl - Convert the TiddlyWiki ColorPalette slices to actual CSS colors&lt;/p&gt;
+&lt;p&gt;$Id$&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  expandColors.pl &amp;lt;stylesheet&amp;gt;&lt;/pre&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This script will replace the TiddlyWiki ColorPalette slice specifications
+in the CSS stylesheet(s).  The map is currently staticly defined in this
+script and needs to be synchronized manually with the TiddlyWiki
+ColorPalette.&lt;/p&gt;
+&lt;p&gt;Processing is performed in place.  That is, the input file is written
+back with the updated information.  The original file is saved with an
+appended '.bak' extension.&lt;/p&gt;
+&lt;p&gt;This script is intended to be run on the publish/style.css file created
+when publishing a TiddlyWiki file as a series of static HTML documents.
+The export plugin does not do this conversion for us.&lt;/p&gt;
+
+&lt;/body&gt;
+
+&lt;/html&gt;</pre>
+</div>
 <div title="ExtractLatencyManPage" modifier="TrevorFields" created="201003191853" modified="201004232244" tags="publish" changecount="3">
 <pre>&lt;html&gt;
 &lt;head&gt;
@@ -1759,7 +1815,7 @@ message size of the test data.&lt;/p&gt;
 &lt;/html&gt;
 </pre>
 </div>
-<div title="RunTestManPage" modifier="MikeMartinez" created="201002251721" modified="201004271837" tags="publish" changecount="9">
+<div title="RunTestManPage" modifier="MikeMartinez" created="201002251721" modified="201004272251" tags="publish" changecount="10">
 <pre>&lt;html&gt;
 &lt;head&gt;
 &lt;title&gt;run_test - Execute test processes for distributed testing&lt;/title&gt;
@@ -1888,28 +1944,30 @@ the ORBLogFile specification being omitted from the process command line.&lt;/p&
 &lt;dd&gt;
 &lt;p&gt;Starts statistics collection for the specified TYPES.  TYPES may contain
 one or more of the values: &lt;a href=&quot;#n&quot;&gt;&lt;code&gt;n&lt;/code&gt;&lt;/a&gt;, &lt;a href=&quot;#s&quot;&gt;&lt;code&gt;s&lt;/code&gt;&lt;/a&gt;, and &lt;a href=&quot;#p&quot;&gt;&lt;code&gt;p&lt;/code&gt;&lt;/a&gt;, or the collective
-specification &lt;a href=&quot;#all&quot;&gt;&lt;code&gt;all&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+specification &lt;a href=&quot;#all&quot;&gt;&lt;code&gt;all&lt;/code&gt;&lt;/a&gt;.
+The output for any given statistic is placed in a file named as specified
+by the &lt;strong&gt;-O FORMAT&lt;/strong&gt; command line option.  The default is to a file with a
+basename of the TYPE and a decorator of &lt;code&gt;-&amp;lt;pid&amp;gt;.log&lt;/code&gt;.&lt;/p&gt;
 &lt;dl&gt;
 &lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;n&quot; class=&quot;item&quot;&gt;&lt;strong&gt;n&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
 &lt;dd&gt;
 &lt;p&gt;Causes network statistics to be gathered.  A &lt;code&gt;netstat -ntpc&lt;/code&gt; command is
-started for each test process and the output filtered by its process Id.
-The output is stored to a file named &lt;em&gt;network-{pid}.log&lt;/em&gt;.&lt;/p&gt;
+started for each test process and the output filtered by its process Id.&lt;/p&gt;
 &lt;/dd&gt;
 &lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;s&quot; class=&quot;item&quot;&gt;&lt;strong&gt;s&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
 &lt;dd&gt;
 &lt;p&gt;Causes system statistics to be gathered.  A single &lt;code&gt;vmstat 1&lt;/code&gt; command is
-started and the output stored in a file named &lt;em&gt;system-{pid}.log&lt;/em&gt;, where
-the pid value is for the test script.&lt;/p&gt;
+started.  If the PID value is specified as part of the statistic
+filename, the PID value for the test script process is used.&lt;/p&gt;
 &lt;/dd&gt;
 &lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;p&quot; class=&quot;item&quot;&gt;&lt;strong&gt;p&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
 &lt;dd&gt;
 &lt;p&gt;Causes process statistics to be gathered.  A &lt;code&gt;top -bd 1 -p {pid}&lt;/code&gt;
 command is started for each test process and the output filtered by its
-process Id.  The output is stored to a file named &lt;em&gt;process-{pid}.log&lt;/em&gt;.&lt;/p&gt;
+process Id.&lt;/p&gt;
 &lt;/dd&gt;
 &lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;all&quot; class=&quot;item&quot;&gt;&lt;strong&gt;all&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
@@ -1943,9 +2001,9 @@ types of statistics currently include &lt;code&gt;system&lt;/code&gt;, &lt;code&
 &lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;t&quot; class=&quot;item&quot;&gt;&lt;strong&gt;T&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
 &lt;dd&gt;
-&lt;p&gt;replaces with a timestamp that includes a 4 digit year, 2 digit month, 2
+&lt;p&gt;replaced with a timestamp that includes a 4 digit year, 2 digit month, 2
 digit day of month, 2 digit hour, 2 digit minute, and 2 digit second.
-The timestamp is take near the time the statistics collection is started.&lt;/p&gt;
+The timestamp is taken near the time the statistics collection is started.&lt;/p&gt;
 &lt;/dd&gt;
 &lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;h&quot; class=&quot;item&quot;&gt;&lt;strong&gt;H&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
@@ -2053,9 +2111,13 @@ expecting to connect to the repository at &lt;code&gt;machine.domain.com:2112&lt
 will run with &lt;code&gt;DCPSDebugLevel&lt;/code&gt; of 10, &lt;code&gt;DCPSTransportDebugLevel&lt;/code&gt; of 4,
 &lt;code&gt;ORBVerboseLogging&lt;/code&gt; enabled and both the script and test process will
 execute in verbose mode.  The log output will be directed to the standard
-output.  All statistics - system, network, and process - will be
-gathered.  Statistics will be places in files name using the statistic
-type, the hostname, a timestamp, and the PID of the monitored process.&lt;/p&gt;
+output.&lt;/p&gt;
+&lt;p&gt;All statistics - system, network, and process - will be gathered.
+Statistics will be placed in files named using the statistic type, the
+hostname, a timestamp, and the PID of the monitored process.  These
+filenames will appear as: &lt;code&gt;system-&amp;lt;host&amp;gt;-&amp;lt;time&amp;gt;-&amp;lt;pid&amp;gt;.log&lt;/code&gt;,
+&lt;code&gt;process-&amp;lt;host&amp;gt;-&amp;lt;time&amp;gt;-&amp;lt;pid&amp;gt;.log&lt;/code&gt;, and
+&lt;code&gt;network-&amp;lt;host&amp;gt;-&amp;lt;time&amp;gt;-&amp;lt;pid&amp;gt;.log&lt;/code&gt;.&lt;/p&gt;
 &lt;/dd&gt;
 &lt;/dl&gt;
 
