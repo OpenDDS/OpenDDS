@@ -1,3 +1,31 @@
+Tue Apr 27 21:59:49 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Comparator_T.h:
+
+          Consider the global namespace for operator< because that's where the
+          operator< for TAO::String_Manager is defined.
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Removed code that's no longer needed now that the opendds_idl is used.
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Removed unnecessary namespace qualification and moved the typedef for
+          DataWriterAckMap down to the .cpp since it's only used there.
+
+        * dds/idl/keys_generator.cpp:
+
+          Applied the same fix from Comparator_T.h (above) to the code that
+          we're generating for KeyLessThan.
+
+        * dds/idl/marshal_generator.cpp:
+
+          Allow defaulted unions (that have no default: branch) to be
+          serialized and deserialized.
+
 Tue Apr 27 16:22:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         This commit switches the OpenDDS marshaling (serialization) code

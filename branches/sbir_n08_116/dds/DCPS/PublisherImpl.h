@@ -37,7 +37,7 @@ class Monitor;
 /// Information about a DataWriter
 struct OpenDDS_Dcps_Export PublisherDataWriterInfo {
   /// The remote datawriter object reference.
-  OpenDDS::DCPS::DataWriterRemote_ptr  remote_writer_objref_;
+  DataWriterRemote_ptr  remote_writer_objref_;
   /// The local datawriter object reference.
   DDS::DataWriter_ptr          local_writer_objref_;
   /// The datawriter servant.
@@ -52,9 +52,6 @@ struct OpenDDS_Dcps_Export PublisherDataWriterInfo {
 
 typedef std::multimap<ACE_CString, PublisherDataWriterInfo*>
 DataWriterMap;
-
-typedef std::map<DataWriterImpl*, DataWriterImpl::AckToken>
-DataWriterAckMap;
 
 typedef std::map<PublicationId, PublisherDataWriterInfo*, GUID_tKeyLessThan>
 PublicationMap;
@@ -75,7 +72,7 @@ typedef std::map<RepoId, DDS::DataWriterQos, GUID_tKeyLessThan> DwIdToQosMap;
 * the interface this class is implementing.
 */
 class OpenDDS_Dcps_Export PublisherImpl
-  : public virtual OpenDDS::DCPS::LocalObject<DDS::Publisher>,
+  : public virtual LocalObject<DDS::Publisher>,
     public virtual EntityImpl,
     public virtual TransportInterface {
 public:
@@ -182,7 +179,7 @@ public:
   * a new datawriter/publication is associated with the topic.
   */
   DDS::ReturnCode_t writer_enabled(
-    OpenDDS::DCPS::DataWriterRemote_ptr remote_writer,
+    DataWriterRemote_ptr remote_writer,
     DDS::DataWriter_ptr local_writer,
     const char* topic_name,
     //BuiltinTopicKey_t topic_key

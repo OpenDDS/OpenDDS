@@ -717,6 +717,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
                      DDS::RETCODE_NOT_ENABLED);
   }
 
+  typedef std::map<DataWriterImpl*, DataWriterImpl::AckToken> DataWriterAckMap;
   DataWriterAckMap ack_writers;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
