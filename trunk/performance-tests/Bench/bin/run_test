@@ -275,7 +275,7 @@ if( $startRepo) {
 }
 
 # Terminate the statistics collectors.
-kill 3, @COLLECTORS;
+kill 2, @COLLECTORS;
 
 # Report results.
 if( $failed == 0) {
@@ -578,6 +578,9 @@ The default value is unspecified.
 Starts statistics collection for the specified TYPES.  TYPES may contain
 one or more of the values: C<n>, C<s>, and C<p>, or the collective
 specification C<all>.
+The output for any given statistic is placed in a file named as specified
+by the B<-O FORMAT> command line option.  The default is to a file with a
+basename of the TYPE and a decorator of C<-<pidE<gt>.log>.
 
 =over 8
 
@@ -585,19 +588,18 @@ specification C<all>.
 
 Causes network statistics to be gathered.  A C<netstat -ntpc> command is
 started for each test process and the output filtered by its process Id.
-The output is stored to a file named I<network-{pid}.log>.
 
 =item B<s>
 
 Causes system statistics to be gathered.  A single C<vmstat 1> command is
-started and the output stored in a file named I<system-{pid}.log>, where
-the pid value is for the test script.
+started.  If the PID value is specified as part of the statistic
+filename, the PID value for the test script process is used.
 
 =item B<p>
 
 Causes process statistics to be gathered.  A C<top -bd 1 -p {pid}>
 command is started for each test process and the output filtered by its
-process Id.  The output is stored to a file named I<process-{pid}.log>.
+process Id.
 
 =item B<all>
 
@@ -632,9 +634,9 @@ replaced with the process PID for being monitored.
 
 =item B<T>
 
-replaces with a timestamp that includes a 4 digit year, 2 digit month, 2
+replaced with a timestamp that includes a 4 digit year, 2 digit month, 2
 digit day of month, 2 digit hour, 2 digit minute, and 2 digit second.
-The timestamp is take near the time the statistics collection is started.
+The timestamp is taken near the time the statistics collection is started.
 
 =item B<H>
 
@@ -741,9 +743,14 @@ expecting to connect to the repository at C<machine.domain.com:2112>.  It
 will run with C<DCPSDebugLevel> of 10, C<DCPSTransportDebugLevel> of 4,
 C<ORBVerboseLogging> enabled and both the script and test process will
 execute in verbose mode.  The log output will be directed to the standard
-output.  All statistics - system, network, and process - will be
-gathered.  Statistics will be places in files name using the statistic
-type, the hostname, a timestamp, and the PID of the monitored process.
+output.
+
+All statistics - system, network, and process - will be gathered.
+Statistics will be placed in files named using the statistic type, the
+hostname, a timestamp, and the PID of the monitored process.  These
+filenames will appear as: C<system-<hostE<gt>-<timeE<gt>-<pidE<gt>.log>,
+C<process-<hostE<gt>-<timeE<gt>-<pidE<gt>.log>, and
+C<network-<hostE<gt>-<timeE<gt>-<pidE<gt>.log>.
 
 =back
 

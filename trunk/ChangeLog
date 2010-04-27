@@ -1,3 +1,16 @@
+Tue Apr 27 22:53:33 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Changed statistics command termination from SIGQUIT (which
+          produces a core file) to SIGINT (which does not).
+
+          Updated POD documentation.
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Updated documentation.
+
 Tue Apr 27 18:39:41 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/reduce-latency-data.pl:
