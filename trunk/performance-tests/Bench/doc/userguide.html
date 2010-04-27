@@ -38,9 +38,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 DAMAGE.
 " />
 <!--PRE-HEAD-START-->
-
 <!--{{{-->
-
 <link rel='alternate' type='application/rss+xml' title='RSS' href='index.xml' />
 <!--}}}-->
 
@@ -534,7 +532,7 @@ Error: #f88
 <div title="DCPSInfoRepo" modifier="MikeMartinez" created="201003011936" changecount="1">
 <pre>This is the executable that manages metadata for OpenDDS.  This is where associations are made between publications and subscriptions.  Builtin Topics are distributed from here.  One process of this type is required for operaion of OpenDDS.  It implements CORBA interfaces that allow the individual DDS Participants to register for discovery and update internal state as necessary.</pre>
 </div>
-<div title="Data Reduction" modifier="TrevorFields" created="201003082209" modified="201004231913" tags="publish" changecount="33">
+<div title="Data Reduction" modifier="MikeMartinez" created="201003082209" modified="201004231451" tags="publish" changecount="33">
 <pre>Test execution will result in data being generated and stored.  This data can then be post processed to reduce it to understandable summaries as well as to visualize the results.  OpenDDS-Bench produces output to the console while operating and will create latency data files if directed to do so as part of the test configuration.
 
 {{chunk{
@@ -565,18 +563,18 @@ The directory structure assumed for this analysis is the following, relative to 
 }}}
 
 The data reduction steps peformed include the following:
-#Convert the raw data files into plottable files:
+1) Convert the raw data files into plottable files:
 {{indent{
 {{{ reduce-latency-data.pl &lt;testdir&gt;/tcp/latency-&lt;size&gt;.data &gt; data/latency-tcp-&lt;size&gt;.gpd }}}
 {{{ reduce-latency-data.pl &lt;testdir&gt;/udp/latency-&lt;size&gt;.data &gt; data/latency-udp-&lt;size&gt;.gpd }}}
 {{{ reduce-latency-data.pl &lt;testdir&gt;/mbe/latency-&lt;size&gt;.data &gt; data/latency-mbe-&lt;size&gt;.gpd }}}
 {{{ reduce-latency-data.pl &lt;testdir&gt;/mrel/latency-&lt;size&gt;.data &gt; data/latency-mrel-&lt;size&gt;.gpd }}}
 }}}
-#Extract summary data from the plottable data files:
+2) Extract summary data from the plottable data files:
 {{indent{
 {{{ extract-latency.pl data/latency-*.gpd &gt; data/latency.csv }}}
 }}}
-#Generate GNUPlot suitable label strings for charts:
+3) Generate GNUPlot suitable label strings for charts:
 {{indent{
 {{{ gen-latency-stats.pl data/latency.csv }}}
 }}}
@@ -711,18 +709,9 @@ generated from each input file.  The output files include:&lt;/p&gt;
 &lt;/html&gt;
 </pre>
 </div>
-<div title="FAQ" modifier="MikeMartinez" created="201003022001" modified="201003221739" tags="publish faq" changecount="3">
-<pre>#[[What kind of document is this?|FAQ1]]
-#[[What is the latency data output file format?|FAQ2]]</pre>
-</div>
-<div title="FAQ1" modifier="MikeMartinez" created="201003022001" modified="201003082219" tags="publish faq" changecount="2">
-<pre>&quot;What kind of document is this?&quot;
-
-This is a TiddlyWiki document.</pre>
-</div>
-<div title="FAQ2" modifier="MikeMartinez" created="201003221738" modified="201003221739" tags="publish faq" changecount="2">
-<pre>The output files generated when gathering latency data is: [[latency file format|LatencyDataFileFormat]].
-</pre>
+<div title="FAQ" modifier="MikeMartinez" created="201003022001" modified="201004231456" tags="publish faq" changecount="4">
+<pre>#''What kind of document is this?''&lt;br&gt;{{indent{This is a TiddlyWiki document.}}}
+#''What is the latency data output file format?''&lt;br&gt;{{indent{The output files generated when gathering latency data is: [[latency file format|LatencyDataFileFormat]].}}}</pre>
 </div>
 <div title="GNUPlot" modifier="MikeMartinez" created="201003082221" modified="201003082223" changecount="4">
 <pre>GNUPlot is a data visualization tool available as from [[gnuplot.info|http://gnuplot.info/]]</pre>
@@ -1770,7 +1759,7 @@ message size of the test data.&lt;/p&gt;
 &lt;/html&gt;
 </pre>
 </div>
-<div title="RunTestManPage" modifier="MikeMartinez" created="201002251721" modified="201003221757" tags="publish" changecount="6">
+<div title="RunTestManPage" modifier="MikeMartinez" created="201002251721" modified="201004271837" tags="publish" changecount="9">
 <pre>&lt;html&gt;
 &lt;head&gt;
 &lt;title&gt;run_test - Execute test processes for distributed testing&lt;/title&gt;
@@ -1932,6 +1921,41 @@ for &lt;em&gt;nsp&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;The default is unspecified.  This results in no statistics being
 collected.&lt;/p&gt;
 &lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;o_format_outputdecorator_format&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-O FORMAT&lt;/strong&gt; | &lt;strong&gt;--outputdecorator=FORMAT&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Establishes the format of the statistics gathering output file names.
+The format is specified as a string with simple substitution performed to
+replace some characters with other information.  This is a simple
+substitution and no escapes are allowed.&lt;/p&gt;
+&lt;p&gt;Statistics output filenames are formed starting with the type of
+statistic being gathered concatenated with the decorater defined here,
+expanded with the formatting information at the time of execution.  The
+types of statistics currently include &lt;code&gt;system&lt;/code&gt;, &lt;code&gt;process&lt;/code&gt;, and
+&lt;code&gt;network&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The characters replaced in the format specification are:&lt;/p&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;p&quot; class=&quot;item&quot;&gt;&lt;strong&gt;P&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;replaced with the process PID for being monitored.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;t&quot; class=&quot;item&quot;&gt;&lt;strong&gt;T&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;replaces with a timestamp that includes a 4 digit year, 2 digit month, 2
+digit day of month, 2 digit hour, 2 digit minute, and 2 digit second.
+The timestamp is take near the time the statistics collection is started.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;h&quot; class=&quot;item&quot;&gt;&lt;strong&gt;H&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;replaced by the hostname of the machine executing the script.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;The default is &amp;quot;-P.log&amp;quot; which results in output files with names similar
+to &lt;code&gt;system-5436.log&lt;/code&gt;.&lt;/p&gt;
+&lt;/dd&gt;
 &lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;h_fqdn_repohost_fqdn&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-h FQDN&lt;/strong&gt; | &lt;strong&gt;--repohost=FQDN&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
 &lt;dd&gt;
@@ -2021,7 +2045,7 @@ connections to the test process.&lt;/p&gt;
 two using the scenario1.ini specification file and one using the other.ini
 specification file.  The test would be scheduled to last for 2 minutes.&lt;/p&gt;
 &lt;/dd&gt;
-&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;bin_run_test_vd10t4vcall_s_test_ini_h_machine_domain_com_2112&quot; class=&quot;item&quot;&gt;&lt;strong&gt;bin/run_test -vd10T4VCall -s test.ini -h machine.domain.com:2112&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;bin_run_test_vd10t4vcall_o_h_t_p_log_s_test_ini_h_machine_domain_com_2112&quot; class=&quot;item&quot;&gt;&lt;strong&gt;bin/run_test -vd10T4VCall -O-H-T-P.log -s test.ini -h machine.domain.com:2112&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
 &lt;dd&gt;
 &lt;p&gt;starts a test process using the &lt;code&gt;test.ini&lt;/code&gt; specification file and
@@ -2029,7 +2053,9 @@ expecting to connect to the repository at &lt;code&gt;machine.domain.com:2112&lt
 will run with &lt;code&gt;DCPSDebugLevel&lt;/code&gt; of 10, &lt;code&gt;DCPSTransportDebugLevel&lt;/code&gt; of 4,
 &lt;code&gt;ORBVerboseLogging&lt;/code&gt; enabled and both the script and test process will
 execute in verbose mode.  The log output will be directed to the standard
-output.  All statistics - system, network, and process - will be gathered.&lt;/p&gt;
+output.  All statistics - system, network, and process - will be
+gathered.  Statistics will be places in files name using the statistic
+type, the hostname, a timestamp, and the PID of the monitored process.&lt;/p&gt;
 &lt;/dd&gt;
 &lt;/dl&gt;
 

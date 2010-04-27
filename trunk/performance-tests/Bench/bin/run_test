@@ -10,6 +10,9 @@ use FindBin;
 my $projectRoot;
 BEGIN { $projectRoot = "$FindBin::Bin/.."; }
 
+# Find the current hostname
+use Sys::Hostname;
+
 # Use information from the environment.
 use Env qw( @LD_LIBRARY_PATH
             @LIB_PATH
@@ -75,12 +78,13 @@ my $repoHost;
 my $iniFile  = $projectRoot . "/etc/transport.ini";
 my $scenarios;
 my $collectStats;
+my $statsOutputDecorator = "-P.log";
 
 ########################################################################
 #
 # Process the command line.
 #
-#   -v -V -? -d -T -R -x -f -C -r -h -s -i -S -P -t
+#   -v -V -? -d -T -R -x -f -C -O -r -h -s -i -S -P -t
 #
 GetOptions( "verbose!"            => \$verbose,
             "v"                   => \$verbose,
@@ -93,6 +97,7 @@ GetOptions( "verbose!"            => \$verbose,
             "noaction|x"          => \$noaction,
             "dfile|f=s"           => \$dFile,
             "collect|C=s"         => \$collectStats,
+            "outputdecorator|O=s" => \$statsOutputDecorator,
             "rawdatafile|r=s"     => \$rawData,
             "repohost|h=s"        => \$repoHost,
             "inifile|i=s"         => \$iniFile,
@@ -222,15 +227,15 @@ if( $noaction) {
 # Manage statistics collection processes.
 my @COLLECTORS;
 my @HANDLES;
-&collectSystemStats( $$)  if $collectStats =~ /s/;
+&runCollector( "system", $$)  if $collectStats =~ /s/;
 
 # Start and stop the test processes.
 map {
   print "\nTEST PROCESS\n";
   print $_->CommandLine() . "\n";
   $_->Spawn();
-  &collectProcessStats( $_->{PROCESS}) if $collectStats =~ /p/;
-  &collectNetworkStats( $_->{PROCESS}) if $collectStats =~ /n/;
+  &runCollector( "process", $_->{PROCESS}) if $collectStats =~ /p/;
+  &runCollector( "network", $_->{PROCESS}) if $collectStats =~ /n/;
   if( $startRepo and PerlACE::waitforfile_timed( $repo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for repository IOR file $repo_ior.\n";
     exit 1;
@@ -305,6 +310,44 @@ sub findCommand {
 }
 
 #
+# Decorate the statistics gathering filename with user specified
+# information.  This can include hostname, PID, a timestamp, and other
+# static information, such as an extension.
+#
+# The decorator string is passed in and all instances of 'P' are replaced
+# with the supplied PID value, all instances of 'H' are replaced with a
+# derived hostname value, and all instances of 'T' are replaced with a
+# derived timestamp.  This is a simple substitution and no escapes are
+# allowed.
+#
+# A filename is formed by appending the suitably modified decorator to
+# the base.
+#
+sub statsFilename {
+  my ($base, $decorator, $pid) = @_;
+
+  $decorator =~/T/ && do {
+    my @now = localtime ;
+    my $timestamp = sprintf "%04d%02d%02d%02d%02d%02d",
+                      (1900+$now[5]), (1+$now[4]), $now[3],
+                      $now[2], $now[1], $now[0] ;
+    $decorator =~ s/T/$timestamp/;
+  };
+
+  $decorator =~/P/ && do {
+    $decorator =~ s/P/$pid/;
+  };
+
+  # Hostname is last since it might contain a 'P' or a 'T'.
+  $decorator =~/H/ && do {
+    my $host  = hostname;
+    $decorator =~ s/H/$host/;
+  };
+
+  return "$base$decorator";
+}
+
+#
 # Statistics gathering commands by system type
 #
 # The collection processing will start the command /once/, then capture
@@ -343,11 +386,10 @@ sub collectionCommand {
 }
 
 #
-# Statistics gathering filters by system type
-#
-# The collection processing includes calling a method to process each
-# line of command output.  Currently the optional parameters include the
-# PID of the process being monitored.
+# Statistics gathering filters by system type.  This routine returns a
+# closure that will be executed for each line of output from the
+# statistics command.  Currently the optional parameters available for
+# use in the closures include the PID of the process being monitored.
 #
 sub collectionFilter {
   my ( $type, $params) = @_;
@@ -387,48 +429,16 @@ sub defaultPidFilter {
   };
 }
 
-# Invoke process statistics collection.
-sub collectProcessStats {
-  my $pid = shift;
-  my $command = &collectionCommand( 'process', "$pid");
-  if( $pid and $command) {
-    &runCollector(
-      $command,
-      "process-$pid.log",
-      &collectionFilter( 'process', $pid)
-    );
-  }
-}
-
-# Invoke system statistics collection.
-sub collectSystemStats {
-  my $pid = shift;
-  my $command = &collectionCommand( 'system');
-  if( $pid and $command) {
-    &runCollector(
-      $command,
-      "system-$pid.log",
-      &collectionFilter( 'system', $pid)
-    );
-  }
-}
-
-# Invoke network statistics collection.
-sub collectNetworkStats {
-  my $pid = shift;
-  my $command = &collectionCommand( 'network');
-  if( $pid and $command) {
-    &runCollector(
-      $command,
-      "network-$pid.log",
-      &collectionFilter( 'network', $pid)
-    );
-  }
-}
-
 # Start and attach to a statistic collector.
 sub runCollector {
-  my ( $command, $filename, $action) = @_;
+  my ( $type, $pid) = @_;
+  return if not $type or not $pid;
+
+  my $command  = &collectionCommand( $type, "$pid");
+  return if not $command;
+
+  my $filename = &statsFilename( $type, $statsOutputDecorator, $pid);
+  my $action   = &collectionFilter( $type, $pid);
 
   # Start a sub-process to collect statistics.
   my $child = open( my $handle, "-|");
@@ -599,6 +609,42 @@ for I<nsp>
 The default is unspecified.  This results in no statistics being
 collected.
 
+=item B<-O FORMAT> | B<--outputdecorator=FORMAT>
+
+Establishes the format of the statistics gathering output file names.
+The format is specified as a string with simple substitution performed to
+replace some characters with other information.  This is a simple
+substitution and no escapes are allowed.
+
+Statistics output filenames are formed starting with the type of
+statistic being gathered concatenated with the decorater defined here,
+expanded with the formatting information at the time of execution.  The
+types of statistics currently include C<system>, C<process>, and
+C<network>.
+
+The characters replaced in the format specification are:
+
+=over 8
+
+=item B<P>
+
+replaced with the process PID for being monitored.
+
+=item B<T>
+
+replaces with a timestamp that includes a 4 digit year, 2 digit month, 2
+digit day of month, 2 digit hour, 2 digit minute, and 2 digit second.
+The timestamp is take near the time the statistics collection is started.
+
+=item B<H>
+
+replaced by the hostname of the machine executing the script.
+
+=back
+
+The default is "-P.log" which results in output files with names similar
+to C<system-5436.log>.
+
 =item B<-h FQDN> | B<--repohost=FQDN>
 
 This is the fully qualified domain name and port where the OpenDDS
@@ -688,14 +734,16 @@ prints the commands that would be invoked when starting 3 test processes:
 two using the scenario1.ini specification file and one using the other.ini
 specification file.  The test would be scheduled to last for 2 minutes.
 
-=item B<bin/run_test -vd10T4VCall -s test.ini -h machine.domain.com:2112>
+=item B<bin/run_test -vd10T4VCall -O-H-T-P.log -s test.ini -h machine.domain.com:2112>
 
 starts a test process using the C<test.ini> specification file and
 expecting to connect to the repository at C<machine.domain.com:2112>.  It
 will run with C<DCPSDebugLevel> of 10, C<DCPSTransportDebugLevel> of 4,
 C<ORBVerboseLogging> enabled and both the script and test process will
 execute in verbose mode.  The log output will be directed to the standard
-output.  All statistics - system, network, and process - will be gathered.
+output.  All statistics - system, network, and process - will be
+gathered.  Statistics will be places in files name using the statistic
+type, the hostname, a timestamp, and the PID of the monitored process.
 
 =back
 
