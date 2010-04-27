@@ -200,6 +200,7 @@ END {
   print "#         MAD: " . sprintf( "%5.2e", &MAD($data->{latency})) . "\n";
   print "#     Maximum: " . sprintf( "%5.2e", $data->{maxlatency}) . "\n";
   print "#     Minimum: " . sprintf( "%5.2e", $data->{minlatency}) . "\n";
+  print "#    Pearson2: " . sprintf( "%5.2e", (3*&median($data->{latency}) - &mean($data->{latency})/3.0)) . "\n";
   print "#\n";
   &bin( $data->{latency}, LOWER, UPPER);
 
@@ -289,7 +290,7 @@ sub median {
 sub MAD {
   my $values   = shift;
   my $median   = median( $values);
-  my @deviants = sort map abs( $median - $_), @$values;
+  my @deviants = map abs( $median - $_), @$values;
   return median( \@deviants);
 }
 

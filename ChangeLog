@@ -1,3 +1,24 @@
+Tue Apr 27 18:39:41 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/reduce-latency-data.pl:
+
+          Simplified the MAD determination.  Added a Pearson 2 parameter
+          estimation of skewness for investigative purposes.
+
+        * performance-tests/Bench/bin/run_test:
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Incorporated some more of Brian's comments.  Updated run_test
+          man page with new statistics output filename decorator
+          specification feature documentation.
+
+        * performance-tests/Bench/src/Process.cpp:
+
+          Extended signal handling to be a bit more robust.  Control can
+          now fall out of the publication wait as well as allowing the
+          subscription wait to be gracefully terminated as well.
+
 Mon Apr 26 20:33:01 UTC 2010  Scott Harris  <harris_s@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
@@ -7,13 +28,13 @@ Mon Apr 26 20:33:01 UTC 2010  Scott Harris  <harris_s@ociweb.com>
         * docs/html/multicast/multicast.html:
 
           Added support to set TTL for multicast transport.
-          
+
 Sun Apr 26 00:35:23 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/tests/thru/run_test.pl:
 
           Changed to add time to the run time of the client side to compensate
-          for server side delay in starting repo. 
+          for server side delay in starting repo.
 
 Sat Apr 24 00:00:38 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
@@ -72,7 +93,7 @@ Fri Apr 23 20:39:23 UTC 2010  Yan Dai  <dai_y@ociweb.com>
           - Moved clone() from TransportReplacedElement to
             TransportQueueElement so the TransportRetainElement
             can use it.
-            
+
 Fri Apr 23 14:34:11 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
 
         * performance-tests/Bench/doc/userguide.html:
