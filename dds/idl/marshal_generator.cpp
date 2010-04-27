@@ -953,7 +953,10 @@ namespace {
       }
     }
     if (!has_default && needSyntheticDefault(discriminator, n_labels)) {
-      be_global->impl_ << "  default:\n    break;\n";
+      be_global->impl_ <<
+        "  default:\n" <<
+        ((namePrefix == string(">> ")) ? "    uni._d(disc);\n" : "") <<
+        "    break;\n";
     }
   }
 }
@@ -1003,7 +1006,7 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
       "return", "<< ");
     be_global->impl_ <<
       "  }\n"
-      "  return false;\n";
+      "  return true;\n";
   }
   {
     Function extraction("operator>>", "bool");
@@ -1018,7 +1021,7 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
       "if", ">> ");
     be_global->impl_ <<
       "  }\n"
-      "  return false;\n";
+      "  return true;\n";
   }
   return true;
 }

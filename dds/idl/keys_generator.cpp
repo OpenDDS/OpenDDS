@@ -61,7 +61,9 @@ bool keys_generator::gen_struct(UTL_ScopedName* name,
     name->last_component()->get_string() << "_KeyLessThan {\n"
     "  bool operator()(const " << cxx << "& v1, const " << cxx
     << "& v2) const\n"
-    "  {\n";
+    "  {\n"
+    "    using ::operator<; // TAO::String_Manager's operator< is "
+    "in global NS\n";
 
   if (empty) {
     be_global->header_ <<

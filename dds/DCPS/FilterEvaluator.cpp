@@ -510,7 +510,7 @@ namespace {
       tgt_.s_ = steal_ ? s : ACE_OS::strdup(s);
     }
 
-    template <typename T> void operator()(const T& s)
+    template<typename T> void operator()(const T& s)
     {
       tgt_.get<T>() = s;
     }
@@ -569,7 +569,7 @@ namespace {
       return std::strcmp(lhs_.s_, s) == 0;
     }
 
-    template <typename T> bool operator()(const T& rhs) const
+    template<typename T> bool operator()(const T& rhs) const
     {
       return lhs_.get<T>() == rhs;
     }
@@ -585,7 +585,7 @@ namespace {
       return std::strcmp(lhs_.s_, s) < 0;
     }
 
-    template <typename T> bool operator()(const T& rhs) const
+    template<typename T> bool operator()(const T& rhs) const
     {
       return lhs_.get<T>() < rhs;
     }
@@ -721,113 +721,6 @@ Value::conversion(Value& lhs, Value& rhs)
     throw std::runtime_error("Types don't match and aren't convertible.");
   }
 }
-
-
-// -- will be generated --
-#if 0
-template<>
-struct MetaStructImpl<DDS::DurabilityQosPolicy> : MetaStruct {
-  Value getValue(const void* stru, const char* fieldSpec) const
-  {
-    const DDS::DurabilityQosPolicy& typed =
-      *static_cast<const DDS::DurabilityQosPolicy*>(stru);
-    if (std::string(fieldSpec) == "kind") {
-      static const char* kind_enumerator_names[] = {
-        "VOLATILE_DURABILITY_QOS",
-        "TRANSIENT_LOCAL_DURABILITY_QOS",
-        "TRANSIENT_DURABILITY_QOS",
-        "PERSISTENT_DURABILITY_QOS"
-      };
-      return kind_enumerator_names[typed.kind];
-    }
-    return 0;
-  }
-};
-
-template<>
-const MetaStruct& getMetaStruct<DDS::DurabilityQosPolicy>()
-{
-  static MetaStructImpl<DDS::DurabilityQosPolicy> meta_DDS_DurabilityQosPolicy;
-  return meta_DDS_DurabilityQosPolicy;
-}
-
-template<>
-struct MetaStructImpl<DDS::Duration_t> : MetaStruct {
-  Value getValue(const void* stru, const char* fieldSpec) const
-  {
-    const DDS::Duration_t& typed = *static_cast<const DDS::Duration_t*>(stru);
-    if (std::string(fieldSpec) == "sec") {
-      return typed.sec;
-    }
-    if (std::string(fieldSpec) == "nanosec") {
-      return typed.nanosec;
-    }
-    return 0;
-  }
-};
-
-template<>
-const MetaStruct& getMetaStruct<DDS::Duration_t>()
-{
-  static MetaStructImpl<DDS::Duration_t> meta_DDS_Duration_t;
-  return meta_DDS_Duration_t;
-}
-
-template<>
-struct MetaStructImpl<DDS::DurabilityServiceQosPolicy> : MetaStruct {
-  Value getValue(const void* stru, const char* fieldSpec) const
-  {
-    const DDS::DurabilityServiceQosPolicy& typed =
-      *static_cast<const DDS::DurabilityServiceQosPolicy*>(stru);
-    if (std::string(fieldSpec).find("service_cleanup_delay.") == 0) {
-      return getMetaStruct<DDS::Duration_t>()
-        .getValue(&typed.service_cleanup_delay, fieldSpec + 22);
-    }
-    if (std::string(fieldSpec) == "history_depth") {
-      return typed.history_depth;
-    }
-    return 0;
-  }
-};
-
-template<>
-const MetaStruct& getMetaStruct<DDS::DurabilityServiceQosPolicy>()
-{
-  static MetaStructImpl<DDS::DurabilityServiceQosPolicy> meta_DDS_DurabilityServiceQosPolicy;
-  return meta_DDS_DurabilityServiceQosPolicy;
-}
-
-template<>
-struct MetaStructImpl<DDS::TopicBuiltinTopicData> : MetaStruct {
-  Value getValue(const void* stru, const char* fieldSpec) const
-  {
-    const DDS::TopicBuiltinTopicData& typed =
-      *static_cast<const DDS::TopicBuiltinTopicData*>(stru);
-    if (std::string(fieldSpec) == "name") {
-      return typed.name.in();
-    }
-    if (std::string(fieldSpec) == "type_name") {
-      return typed.type_name.in();
-    }
-    if (std::string(fieldSpec).find("durability.") == 0) {
-      return getMetaStruct<DDS::DurabilityQosPolicy>()
-        .getValue(&typed.durability, fieldSpec + 11);
-    }
-    if (std::string(fieldSpec).find("durability_service.") == 0) {
-      return getMetaStruct<DDS::DurabilityServiceQosPolicy>()
-        .getValue(&typed.durability_service, fieldSpec + 19);
-    }
-    return 0;
-  }
-};
-
-template<>
-const MetaStruct& getMetaStruct<DDS::TopicBuiltinTopicData>()
-{
-  static MetaStructImpl<DDS::TopicBuiltinTopicData> meta_DDS_TopicBuiltinTopicData;
-  return meta_DDS_TopicBuiltinTopicData;
-}
-#endif
 
 }
 }
