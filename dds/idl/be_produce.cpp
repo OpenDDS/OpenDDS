@@ -107,7 +107,7 @@ string to_macro(const char* fn)
   string ret = "OPENDDS_IDL_GENERATED_";
 
   for (size_t i = 0; i < strlen(fn); ++i) {
-    ret += isalnum(fn[i]) ? toupper(fn[i]) : '_';
+    ret += isalnum(fn[i]) ? static_cast<char>(toupper(fn[i])) : '_';
   }
 
   return ret;

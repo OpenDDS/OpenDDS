@@ -18,7 +18,7 @@
 using std::string;
 
 bool marshal_generator::gen_enum(UTL_ScopedName* name,
-  const std::vector<AST_EnumVal*>& contents, const char*)
+  const std::vector<AST_EnumVal*>&, const char*)
 {
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
@@ -185,8 +185,9 @@ namespace {
       return "longdouble";
     case AST_PredefinedType::PT_boolean:
       return "boolean";
+    default:
+      return "";
     }
-    return "";
   }
 
   string nameOfSeqHeader(AST_Type* elem)
@@ -210,8 +211,8 @@ namespace {
   {
     string idt(indent, ' ');
     return idt + "if (!(strm " + expr + ")) {\n" +
-        idt + "  return false;\n" +
-        idt + "}\n";
+      idt + "  return false;\n" +
+      idt + "}\n";
   }
 
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
@@ -628,7 +629,7 @@ namespace {
 }
 
 bool marshal_generator::gen_typedef(UTL_ScopedName* name, AST_Type* base,
-  const char* repoid)
+  const char*)
 {
   switch (base->node_type()) {
   case AST_Decl::NT_sequence:
@@ -867,8 +868,9 @@ namespace {
       return o << '\'' << ev.u.cval << '\'';
     case AST_Expression::EV_bool:
       return o << std::boolalpha << static_cast<bool>(ev.u.bval);
+    default:
+      return o;
     }
-    return o;
   }
 
   string getEnumLabel(AST_Expression* label_val, AST_Type* disc)
@@ -963,8 +965,7 @@ namespace {
 
 bool marshal_generator::gen_union(UTL_ScopedName* name,
    const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
-   AST_Expression::ExprType udisc_type,
-   const AST_Union::DefaultValue& default_value, const char* repoid)
+   AST_Expression::ExprType, const AST_Union::DefaultValue&, const char*)
 {
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");

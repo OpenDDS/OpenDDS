@@ -82,7 +82,7 @@ namespace yard
     struct True_T 
     {    
         template<typename ParserState_T>
-        static bool Match(ParserState_T& p) {
+        static bool Match(ParserState_T&) {
             return true;
         }
     };
@@ -91,7 +91,7 @@ namespace yard
     // this rule always returns false, and doesn't update the input parser
     struct False_T {
         template<typename ParserState_T>
-        static bool Match(ParserState_T& p) {
+        static bool Match(ParserState_T&) {
             return false;
         }
     };

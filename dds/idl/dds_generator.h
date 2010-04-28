@@ -114,6 +114,7 @@ struct NamespaceGuard {
 
 struct Function {
   bool has_arg_;
+  std::string preamble_;
 
   Function(const char* name, const char* returntype)
     : has_arg_(false)
@@ -133,13 +134,16 @@ struct Function {
       + name;
     be_global->header_ << sig;
     be_global->impl_ << sig;
+    if (name[0]) {
+      preamble_ += "  ACE_UNUSED_ARG(" + std::string(name) + ");\n";
+    }
     has_arg_ = true;
   }
 
   void endArgs()
   {
     be_global->header_ << ");\n\n";
-    be_global->impl_ << ")\n{\n";
+    be_global->impl_ << ")\n{\n" << preamble_;
   }
 
   ~Function()

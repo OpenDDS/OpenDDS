@@ -16,7 +16,7 @@
 using std::string;
 
 bool keys_generator::gen_struct(UTL_ScopedName* name,
-  const std::vector<AST_Field*>& fields, const char*)
+  const std::vector<AST_Field*>&, const char*)
 {
   string cxx = scoped(name), under = scoped_helper(name, "_");
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);

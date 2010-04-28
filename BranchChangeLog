@@ -1,3 +1,23 @@
+Wed Apr 28 22:21:43 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/yard/yard_base_grammar.hpp:
+        * dds/DCPS/yard/yard_text_grammar.hpp:
+        * dds/DCPS/yard/yard_tree.hpp:
+        * dds/idl/be_produce.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/keys_generator.h:
+        * dds/idl/keys_generator.cpp:
+        * dds/idl/marshal_generator.h:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.h:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/idl/ts_generator.h:
+        * dds/idl/ts_generator.cpp:
+
+          Fixed warnings in the core library, the generator and generated code.
+
 Wed Apr 28 20:07:21 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps_ts_defaults.mpb:

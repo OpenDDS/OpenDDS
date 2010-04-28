@@ -80,8 +80,8 @@ struct OpenDDS_Dcps_Export Value {
   bool like(const Value& v) const;
 
   enum Type {VAL_BOOL, VAL_INT, VAL_UINT, VAL_I64, VAL_UI64, VAL_FLOAT,
+    VAL_LARGEST_NUMERIC = VAL_FLOAT,
     VAL_CHAR, VAL_STRING};
-  enum {VAL_LARGEST_NUMERIC = VAL_FLOAT};
   bool convert(Type t);
   static void conversion(Value& lhs, Value& rhs);
   template<typename T> T& get();

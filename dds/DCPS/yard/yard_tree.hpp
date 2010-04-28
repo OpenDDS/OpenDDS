@@ -294,7 +294,7 @@ namespace yard
         // AbandonNode is called when a Store<Rule_T> production rule
         // fails to match
         template<typename ParserState_T>
-        void AbandonNode(ParserState_T& p) {    
+        void AbandonNode(ParserState_T&) {    
             assert(current != NULL);
             AbstractNode* tmp = current;
             assert(!tmp->IsCompleted());

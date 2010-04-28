@@ -438,43 +438,43 @@ dds_visitor::visit_array(AST_Array*)
 //begin IDL syntactic elements that are not currently supported
 
 int
-dds_visitor::visit_valuetype(AST_ValueType* node)
+dds_visitor::visit_valuetype(AST_ValueType*)
 {
   return 0;
 }
 
 int
-dds_visitor::visit_valuetype_fwd(AST_ValueTypeFwd* node)
+dds_visitor::visit_valuetype_fwd(AST_ValueTypeFwd*)
 {
   return 0;
 }
 
 int
-dds_visitor::visit_component(AST_Component* node)
+dds_visitor::visit_component(AST_Component*)
 {
   return 0;
 }
 
 int
-dds_visitor::visit_component_fwd(AST_ComponentFwd* node)
+dds_visitor::visit_component_fwd(AST_ComponentFwd*)
 {
   return 0;
 }
 
 int
-dds_visitor::visit_eventtype(AST_EventType* node)
+dds_visitor::visit_eventtype(AST_EventType*)
 {
   return 0;
 }
 
 int
-dds_visitor::visit_eventtype_fwd(AST_EventTypeFwd* node)
+dds_visitor::visit_eventtype_fwd(AST_EventTypeFwd*)
 {
   return 0;
 }
 
 int
-dds_visitor::visit_home(AST_Home* node)
+dds_visitor::visit_home(AST_Home*)
 {
   return 0;
 }
