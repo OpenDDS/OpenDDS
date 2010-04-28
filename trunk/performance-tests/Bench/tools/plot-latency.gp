@@ -54,3 +54,9 @@ call 'lj-plots.gp' 'data/latency-mrel-8000.gpd'  'data/latency-mrel-8000.stats' 
 call 'lj-plots.gp' 'data/latency-mrel-16000.gpd' 'data/latency-mrel-16000.stats' 'images/latency-mrel-16000.png' 'Multicast - Reliable / Message Size 16000 bytes'
 call 'lj-plots.gp' 'data/latency-mrel-32000.gpd' 'data/latency-mrel-32000.stats' 'images/latency-mrel-32000.png' 'Multicast - Reliable / Message Size 32000 bytes'
 
+print 'Plotting Kernel Density Estimates'
+call 'plot-density.gp'
+
+print 'Plotting Quantile Distributions'
+call 'plot-quantiles.gp'
+

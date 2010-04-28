@@ -181,8 +181,8 @@ $data->{maxjitter}  = $jitter if not $data->{maxjitter}  or $jitter > $data->{ma
 $data->{minjitter}  = $jitter if not $data->{minjitter}  or $jitter < $data->{minjitter};
 
 # Print the raw latency and jitter data.
-print "$value ";
-print $jitter if defined $jitter;
+print "$value";
+print " $jitter" if defined $jitter;
 print "\n";
 
 # Move to the next sample.
