@@ -93,7 +93,7 @@ next if /#/;
 # Parse the CSV input file, ignoring blank lines and removing the line end.
 my @fields = split ',';
 next if $#fields eq 0;
-chomp $fields[9];
+chomp $fields[13];
 
 # Establish the output file using the transport and size information.
 my $filename = dirname($ARGV) . "/" . "latency-" . $fields[0] . "-" . $fields[1] . ".stats";
@@ -102,17 +102,17 @@ die "Unable to open output: $filename - $!"
 
 # Create the 'latency_stats' GNUPlot string variable.
 print OUT "latency_stats=\"";
-print OUT "Median: $fields[5],\\n";
-print OUT "MAD: $fields[6],\\n";
-print OUT "Maximum: $fields[7],\\n";
-print OUT "Minimum: $fields[8]\\n\"\n";
+print OUT "Median: $fields[4],\\n";
+print OUT "MAD: $fields[5],\\n";
+print OUT "Maximum: $fields[6],\\n";
+print OUT "Minimum: $fields[7]\\n\"\n";
 
 # Create the 'jitter_stats' GNUPlot string variable.
 print OUT "jitter_stats=\"";
-print OUT "Median: $fields[11],\\n";
-print OUT "MAD: $fields[12],\\n";
-print OUT "Maximum: $fields[13],\\n";
-print OUT "Minimum: $fields[14]\\n\"\n";
+print OUT "Median: $fields[10],\\n";
+print OUT "MAD: $fields[11],\\n";
+print OUT "Maximum: $fields[12],\\n";
+print OUT "Minimum: $fields[13]\\n\"\n";
 
 # Current file is done.
 close(OUT);

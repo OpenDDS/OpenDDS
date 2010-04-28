@@ -1,3 +1,31 @@
+Wed Apr 28 21:15:01 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/gen-latency-stats.pl:
+
+          Use zero-based array indices correctly.
+
+        * performance-tests/Bench/bin/plot-density.gp:
+
+          Removed incorrect hop adjustment.
+
+        * performance-tests/Bench/bin/plot-jitter.gp:
+        * performance-tests/Bench/bin/plot-transports.gp:
+
+          Migrated to robust statistics.
+
+        * performance-tests/Bench/bin/plot-quantiles.gp:
+
+          Removed incorrect hop adjustment.
+
+
+        * performance-tests/Bench/bin/reduce-latency-data.pl:
+
+          Corrected a minor formatting annoyance.
+
+        * performance-tests/Bench/tools/plot-latency.gp:
+
+          Added kernel density and quantile plots to generated results.
+
 Wed Apr 28 19:50:16 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/extract-latency.pl:

@@ -17,10 +17,10 @@ set format y "%.1s%cS"
 
 set output '$1.png'
 plot '$0'\
-     index 2 using 2:($$3/2) t "TCP"                   with linespoints,\
-  '' index 3 using 2:($$3/2) t "UDP"                   with linespoints,\
-  '' index 0 using 2:($$3/2) t "multicast/best effort" with linespoints,\
-  '' index 1 using 2:($$3/2) t "multicast/reliable"    with linespoints
+     index 2 using 2:(column(5)) t "TCP"                   with linespoints,\
+  '' index 3 using 2:(column(5)) t "UDP"                   with linespoints,\
+  '' index 0 using 2:(column(5)) t "multicast/best effort" with linespoints,\
+  '' index 1 using 2:(column(5)) t "multicast/reliable"    with linespoints
 
 set xrange [0:2500]
 set output '$1-zoom.png'
