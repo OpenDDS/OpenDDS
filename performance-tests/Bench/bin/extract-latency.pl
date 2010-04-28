@@ -64,16 +64,16 @@ generated from each input file.  The output lines include:
       Field  2: test message size (derived from input filename)
       Field  3: latency mean statistic
       Field  4: latency standard deviation statistic
-      Field  3: latency median statistic
-      Field  4: latency median absolute deviation statistic
-      Field  5: latency maximum statistic
-      Field  6: latency minimum statistic
-      Field  7: jitter mean statistic
-      Field  8: jitter standard deviation statistic
-      Field  7: jitter median statistic
-      Field  8: jitter median absolute deviation statistic
-      Field  9: jitter maximum statistic
-      Field 10: jitter minimum statistic
+      Field  5: latency median statistic
+      Field  6: latency median absolute deviation statistic
+      Field  7: latency maximum statistic
+      Field  8: latency minimum statistic
+      Field  9: jitter mean statistic
+      Field 10: jitter standard deviation statistic
+      Field 11: jitter median statistic
+      Field 12: jitter median absolute deviation statistic
+      Field 13: jitter maximum statistic
+      Field 14: jitter minimum statistic
 
 =head1 EXAMPLE
 

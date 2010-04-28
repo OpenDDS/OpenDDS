@@ -1,3 +1,22 @@
+Wed Apr 28 19:50:16 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/extract-latency.pl:
+
+          Updated documentation to be correct after adding the Median and
+          Median absolute deviation statistical data.
+
+        * performance-tests/Bench/bin/gen-latency-stats.pl:
+
+          Updated generated GNUPlot statistical legend data to contain
+          the Median and Median absolute deviation instead of the Mean
+          and Standard Deviation.  This is part of the move towards use
+          of robust statistics in the data reduction and visualization.
+
+        * performance-tests/Bench/bin/run_test:
+
+          Updated the 'netstat' command arguments to provide all inet
+          information instead of just active TCP connections.
+
 Wed Apr 28 00:21:25 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/tests/latency/run_test.pl:
