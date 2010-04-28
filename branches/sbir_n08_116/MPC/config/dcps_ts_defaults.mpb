@@ -9,6 +9,7 @@ project {
     automatic_in          = 0
     automatic_out         = 1
     output_follows_input  = 0
+    libpath               = $(ACE_ROOT)/lib
     command   = $(DDS_ROOT)/bin/opendds_idl
     dependent = $(DDS_ROOT)/bin/opendds_idl \
       $(DDS_ROOT)/dds/idl/CPPTemplate.txt \

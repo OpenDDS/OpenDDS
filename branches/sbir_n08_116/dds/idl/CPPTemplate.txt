@@ -1520,6 +1520,33 @@ DDS::ReturnCode_t
   }
 }  
 
+bool
+<%TYPE%>DataReaderImpl::contains_sample_filtered(DDS::SampleStateMask sample_states,
+  DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states,
+  const OpenDDS::DCPS::FilterEvaluator& evaluator, const DDS::StringSeq& params)
+{
+  using namespace OpenDDS::DCPS;
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, false);
+
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
+       end = instances_.end(); iter != end; ++iter) {
+    SubscriptionInstance& inst = *iter->second;
+
+    if ((inst.instance_state_.view_state() & view_states) &&
+        (inst.instance_state_.instance_state() & instance_states)) {
+      for (ReceivedDataElement* item = inst.rcvd_samples_.head_; item != 0;
+           item = item->next_data_sample_) {
+        if (item->sample_state_ & sample_states && !item->coherent_change_) {
+          if (evaluator.eval(*static_cast< ::<%SCOPED%>* >(item->registered_data_), params)) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+
+  return false;
+}
 
 void
 <%TYPE%>DataReaderImpl::dds_demarshal(

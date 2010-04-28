@@ -90,6 +90,9 @@ public:
                              bool &) {}
   virtual void dec_ref_data_element(OpenDDS::DCPS::ReceivedDataElement *) {}
   virtual void delete_instance_map (void *) {}
+  bool contains_sample_filtered(DDS::SampleStateMask, DDS::ViewStateMask,
+    DDS::InstanceStateMask, const OpenDDS::DCPS::FilterEvaluator&,
+    const DDS::StringSeq&) { return true; }
 };
 
 class MyDataWriterImpl :  public virtual OpenDDS::DCPS::DataWriterImpl
