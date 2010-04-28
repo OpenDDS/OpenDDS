@@ -90,6 +90,7 @@ my $bench_location = "$ENV{DDS_ROOT}/performance-tests/Bench";
 my $trans_config_file = "$bench_location/etc/transport-tcp.ini";
 my $pub_config_file = "$bench_location/tests/latency/p1-50.ini";
 my $sub_config_file = "$bench_location/tests/latency/p2.ini";
+my $run_time = 120;
 
 
 if ($ARGV[1] == 100) {
@@ -172,14 +173,14 @@ if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
 } else {
     $repo_host = $CS->peer();
 }
-my $common_args = "-P -t 120 -h $repo_host:$port1 -i $trans_config_file ";
+my $common_args = "-P -h $repo_host:$port1 -i $trans_config_file ";
 
 if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
     unlink $dcpsrepo_ior;
 
     $Publisher = PerlDDS::create_process
           ("$bench_location/bin/run_test",
-           "$common_args -S -s $pub_config_file");
+           "$common_args -t $run_time -S -s $pub_config_file");
 
     print $Publisher->CommandLine(). "\n";
     $Publisher->Spawn ();
@@ -197,7 +198,7 @@ if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
         exit 1;
     }
 
-    $PublisherResult = $Publisher->WaitKill (180);
+    $PublisherResult = $Publisher->WaitKill ($run_time + 60);
     if ($PublisherResult != 0) {
         print STDERR "ERROR: publisher returned $PublisherResult \n";
         $status = 1;
@@ -207,12 +208,12 @@ if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
 } else {
     $Subscriber = PerlDDS::create_process
           ("$bench_location/bin/run_test",
-           "$common_args -s $sub_config_file");
+           "$common_args -t $run_time -s $sub_config_file");
 
     print $Subscriber->CommandLine(). "\n";
     $Subscriber->Spawn ();
 
-    $SubscriberResult = $Subscriber->WaitKill (180);
+    $SubscriberResult = $Subscriber->WaitKill ($run_time + 60);
     if ($SubscriberResult != 0) {
         print STDERR "ERROR: subscriber returned $SubscriberResult \n";
         $status = 1;

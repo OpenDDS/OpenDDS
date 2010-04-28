@@ -1,3 +1,10 @@
+Wed Apr 28 00:21:25 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/tests/latency/run_test.pl:
+        * performance-tests/Bench/tests/thru/run_test.pl:
+
+          Adjusted running time handling.
+
 Tue Apr 27 22:53:33 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/run_test:
