@@ -33,31 +33,39 @@ following fields:
 
 <table border>
   <tr><th>Field</th><th>Description</th></tr>
-  <tr><td>1</td><td>transport type</td></tr>
-  <tr><td>2</td><td>test message size</td></tr>
+  <tr><td>1</td><td>transport type (derived from input filename)</td></tr>
+  <tr><td>2</td><td>test message size (derived from input filename)</td></tr>
   <tr><td>3</td><td>latency mean statistic</td></tr>
   <tr><td>4</td><td>latency standard deviation statistic</td></tr>
-  <tr><td>5</td><td>latency maximum statistic</td></tr>
-  <tr><td>6</td><td>latency minimum statistic</td></tr>
-  <tr><td>7</td><td>jitter mean statistic</td></tr>
-  <tr><td>8</td><td>jitter standard deviation statistic</td></tr>
-  <tr><td>9</td><td>jitter maximum statistic</td></tr>
-  <tr><td>10</td><td>jitter minimum statistic</td></tr>
+  <tr><td>5</td><td>latency median statistic</td></tr>
+  <tr><td>6</td><td>latency median absolute deviation statistic</td></tr>
+  <tr><td>7</td><td>latency maximum statistic</td></tr>
+  <tr><td>8</td><td>latency minimum statistic</td></tr>
+  <tr><td>9</td><td>jitter mean statistic</td></tr>
+  <tr><td>10</td><td>jitter standard deviation statistic</td></tr>
+  <tr><td>11</td><td>jitter median statistic</td></tr>
+  <tr><td>12</td><td>jitter median absolute deviation statistic</td></tr>
+  <tr><td>13</td><td>jitter maximum statistic</td></tr>
+  <tr><td>14</td><td>jitter minimum statistic</td></tr>
 </table>
 
 =end html
 
 =for text
-      Field  1: transport type
-      Field  2: test message size
+      Field  1: transport type (derived from input filename)
+      Field  2: test message size (derived from input filename)
       Field  3: latency mean statistic
       Field  4: latency standard deviation statistic
-      Field  5: latency maximum statistic
-      Field  6: latency minimum statistic
-      Field  7: jitter mean statistic
-      Field  8: jitter standard deviation statistic
-      Field  9: jitter maximum statistic
-      Field 10: jitter minimum statistic
+      Field  5: latency median statistic
+      Field  6: latency median absolute deviation statistic
+      Field  7: latency maximum statistic
+      Field  8: latency minimum statistic
+      Field  9: jitter mean statistic
+      Field 10: jitter standard deviation statistic
+      Field 11: jitter median statistic
+      Field 12: jitter median absolute deviation statistic
+      Field 13: jitter maximum statistic
+      Field 14: jitter minimum statistic
 
 =for text
 
@@ -69,9 +77,9 @@ to place on some plots.  The variables are:
   latency_stats
   jitter_stats
 
-Each variable contains the mean, standard deviation, maximum, and minimum
-data values for the output file (transport/size) in a newline separated
-single string suitable for use as a label within GNUPlot.
+Each variable contains the median, median absolute deviation, maximum,
+and minimum data values for the output file (transport/size) in a newline
+separated single string suitable for use as a label within GNUPlot.
 
 =head1 EXAMPLE
 
@@ -94,17 +102,17 @@ die "Unable to open output: $filename - $!"
 
 # Create the 'latency_stats' GNUPlot string variable.
 print OUT "latency_stats=\"";
-print OUT "Mean: $fields[2],\\n";
-print OUT "Std. Dev.: $fields[3],\\n";
-print OUT "Maximum: $fields[4],\\n";
-print OUT "Minimum: $fields[5]\\n\"\n";
+print OUT "Median: $fields[5],\\n";
+print OUT "MAD: $fields[6],\\n";
+print OUT "Maximum: $fields[7],\\n";
+print OUT "Minimum: $fields[8]\\n\"\n";
 
 # Create the 'jitter_stats' GNUPlot string variable.
 print OUT "jitter_stats=\"";
-print OUT "Mean: $fields[6],\\n";
-print OUT "Std. Dev.: $fields[7],\\n";
-print OUT "Maximum: $fields[8],\\n";
-print OUT "Minimum: $fields[9]\\n\"\n";
+print OUT "Median: $fields[11],\\n";
+print OUT "MAD: $fields[12],\\n";
+print OUT "Maximum: $fields[13],\\n";
+print OUT "Minimum: $fields[14]\\n\"\n";
 
 # Current file is done.
 close(OUT);
