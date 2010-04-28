@@ -92,7 +92,6 @@ my $sub_config_file;
 my $starting_test_number = 1;
 my $ending_test_number = 14;
 my $current_dir = getcwd;
-my $run_time = 120;
 
 my @pub_be_config_files = ("$bench_location/tests/thru/bidir-1sub-be-80.ini",
                            "$bench_location/tests/thru/bidir-1sub-be-320.ini",
@@ -161,6 +160,7 @@ if (scalar @ARGV > 1) {
 
 
 for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
+    my $run_time = 120;
     $status = 0;
     $pub_config_file = $pub_rel_config_files[$starting_test_number - 1];
     if (($transport_type eq 'udp') || ($transport_type eq 'multibe')){
@@ -217,7 +217,7 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
             exit 1;
         }
 
-        $PublisherResult = $Publisher->WaitKill (180);
+        $PublisherResult = $Publisher->WaitKill ($run_time + 60);
         if ($PublisherResult != 0) {
             print STDERR "ERROR: publisher returned $PublisherResult \n";
             $status = 1;
@@ -234,7 +234,7 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
         print $Subscriber->CommandLine(). "\n";
         $Subscriber->Spawn ();
 
-        $SubscriberResult = $Subscriber->WaitKill (180);
+        $SubscriberResult = $Subscriber->WaitKill ($run_time + 60);
         if ($SubscriberResult != 0) {
             print STDERR "ERROR: subscriber returned $SubscriberResult \n";
             $status = 1;
