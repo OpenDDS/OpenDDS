@@ -96,8 +96,8 @@ namespace FilterExpressionGrammar {
 
   struct ORDERBY
     : Keyword<CharSeqIgnoreCase<'o', 'r', 'd', 'e', 'r', ' ', 'b', 'y'> > {};
-  struct Query : Seq<Opt<Cond>, Store<ORDERBY>,
-    DelimitedList<ST<FieldName>, Tok<Char<','> > > > {};
+  struct Query : Seq<Opt<Cond>, Opt<Seq<Store<ORDERBY>,
+    DelimitedList<ST<FieldName>, Tok<Char<','> > > > > > {};
   struct QueryCompleteInput : Seq<Query, EndOfInput> {};
 }
 }

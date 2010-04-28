@@ -53,6 +53,7 @@ class TopicImpl;
 class RequestedDeadlineWatchdog;
 class Monitor;
 class DataReaderImpl;
+class FilterEvaluator;
 
 typedef Cached_Allocator_With_Overflow<OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
 ReceivedDataAllocator;
@@ -399,6 +400,11 @@ public:
   bool contains_sample(DDS::SampleStateMask sample_states,
                        DDS::ViewStateMask view_states,
                        DDS::InstanceStateMask instance_states);
+  virtual bool contains_sample_filtered(DDS::SampleStateMask sample_states,
+                                        DDS::ViewStateMask view_states,
+                                        DDS::InstanceStateMask instance_states,
+                                        const FilterEvaluator& evaluator,
+                                        const DDS::StringSeq& params) = 0;
 
   virtual void dds_demarshal(const ReceivedDataSample& sample,
                              SubscriptionInstance*& instance,

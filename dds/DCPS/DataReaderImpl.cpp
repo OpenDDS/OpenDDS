@@ -1630,8 +1630,7 @@ bool DataReaderImpl::contains_sample(DDS::SampleStateMask sample_states,
         (inst.instance_state_.instance_state() & instance_states)) {
       for (ReceivedDataElement* item = inst.rcvd_samples_.head_; item != 0;
            item = item->next_data_sample_) {
-        if (item->sample_state_ & sample_states
-            && !item->coherent_change_) {
+        if (item->sample_state_ & sample_states && !item->coherent_change_) {
           return true;
         }
       }

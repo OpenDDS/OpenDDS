@@ -50,7 +50,7 @@ public:
   DDS::DataReader_ptr get_datareader()
   ACE_THROW_SPEC((CORBA::SystemException));
 
-private:
+protected:
   DataReaderImpl* parent_;
   DDS::SampleStateMask sample_states_;
   DDS::ViewStateMask view_states_;

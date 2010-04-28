@@ -52,6 +52,9 @@ public:
     const DDS::StringSeq& query_parameters)
   ACE_THROW_SPEC((CORBA::SystemException));
 
+  CORBA::Boolean get_trigger_value()
+  ACE_THROW_SPEC((CORBA::SystemException));
+
   std::vector<std::string> getOrderBys() const;
 
   bool hasFilter() const;
@@ -59,6 +62,7 @@ public:
   template <typename Sample>
   bool filter(const Sample& s) const
   {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
     return evaluator_.eval(s, query_parameters_);
   }
 
@@ -66,6 +70,7 @@ private:
   CORBA::String_var query_expression_;
   DDS::StringSeq query_parameters_;
   FilterEvaluator evaluator_;
+  mutable ACE_Recursive_Thread_Mutex lock_; //concurrent access to query_parameters_
 };
 
 } // namespace DCPS
