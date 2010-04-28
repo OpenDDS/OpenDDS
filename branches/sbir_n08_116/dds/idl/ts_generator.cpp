@@ -92,7 +92,7 @@ ts_generator::ts_generator()
 }
 
 bool ts_generator::gen_struct(UTL_ScopedName* name,
-  const std::vector<AST_Field*>& fields, const char*)
+  const std::vector<AST_Field*>&, const char*)
 {
   if (idl_global->is_dcps_type(name) == 0) {
     // no #pragma DCPS_DATA_TYPE, so nothing to generate

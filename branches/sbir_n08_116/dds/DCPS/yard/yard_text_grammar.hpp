@@ -147,7 +147,7 @@ namespace text_grammar
 
 	// this represents the NULL string 
 	struct NS {
-		static char GetChar(int n) {
+		static char GetChar(int) {
 		  return '\0';
 		}
 	};

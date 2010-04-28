@@ -177,6 +177,7 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
     "    throw std::runtime_error(\"Field \" + std::string(field) + \" not "
     "found or its type is not supported (in Struct " + clazz + ")\");\n";
   be_global->impl_ <<
+    "    ACE_UNUSED_ARG(typed);\n" <<
     exception <<
     "  }\n\n"
     "  ComparatorBase::Ptr create_qc_comparator(const char* field, "
