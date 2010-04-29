@@ -1,3 +1,35 @@
+Thu Apr 29 21:37:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/built_in_topic_support.mpb:
+        * dds/dcps_bits.mpb:
+
+          Pass -DDDS_HAS_MINIMUM_BIT to opendds_idl when built-in topics are
+          disabled at compile time.
+
+        * dds/DCPS/ContentFilteredTopicImpl.h:
+        * dds/DCPS/ContentFilteredTopicImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/QueryConditionImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicDescriptionImpl.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/ts_generator.cpp:
+
+          Implemented Content-Filtered Topics.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopic.mpc:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/DCPS/ContentFilteredTopic/Messenger.idl:
+        * tests/DCPS/ContentFilteredTopic/dcps.ini:
+        * tests/DCPS/ContentFilteredTopic/run_test.pl:
+
+          Added a test for Content-Filtered Topics.
+
 Wed Apr 28 22:21:43 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/FilterEvaluator.h:

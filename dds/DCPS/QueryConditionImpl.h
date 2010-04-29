@@ -59,7 +59,7 @@ public:
 
   bool hasFilter() const;
 
-  template <typename Sample>
+  template<typename Sample>
   bool filter(const Sample& s) const
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);

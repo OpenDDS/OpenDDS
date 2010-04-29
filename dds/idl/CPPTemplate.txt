@@ -1569,6 +1569,18 @@ void
 
   ser >> *data;
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  using OpenDDS::DCPS::ContentFilteredTopicImpl;
+  if (ContentFilteredTopicImpl* cft =
+      dynamic_cast<ContentFilteredTopicImpl*>(content_filtered_topic_.in())) {
+    if (sample.header_.message_id_ == OpenDDS::DCPS::SAMPLE_DATA
+        && !cft->filter(*data)) {
+      filtered = true;
+      return;
+    }
+  }
+#endif
+
   store_instance_data(data, sample.header_, instance, just_registered, filtered);
 }
 

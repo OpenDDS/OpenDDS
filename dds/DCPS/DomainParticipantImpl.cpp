@@ -23,6 +23,7 @@
 #include "MonitorFactory.h"
 #include "dds/DdsDcpsGuidC.h"
 #include "BitPubListenerImpl.h"
+#include "ContentFilteredTopicImpl.h"
 
 #include <sstream>
 
@@ -358,6 +359,18 @@ ACE_THROW_SPEC((CORBA::SystemException))
                      this->topics_protector_,
                      DDS::Topic::_nil());
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    if (topic_descrs_.count(topic_name)) {
+      if (DCPS_debug_level > 3) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("DomainParticipantImpl::create_topic, ")
+          ACE_TEXT("can't create a Topic due to name \"%C\" already in use")
+          ACE_TEXT("by a TopicDescription.\n"), topic_name));
+      }
+      return 0;
+    }
+#endif
+
     if (Util::find(topics_, topic_name, entry) == 0) {
       found = true;
     }
@@ -646,11 +659,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
   return DDS::Topic::_nil();
 }
 
-//Note: caller should NOT assign to DataReader_var (without _duplicate'ing)
-//      because it will steal the framework's reference.
 DDS::TopicDescription_ptr
-DomainParticipantImpl::lookup_topicdescription(
-  const char * name)
+DomainParticipantImpl::lookup_topicdescription(const char* name)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -661,6 +671,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
   TopicMap::mapped_type* entry = 0;
 
   if (Util::find(topics_, name, entry) == -1) {
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    TopicDescriptionMap::iterator iter = topic_descrs_.find(name);
+    if (iter != topic_descrs_.end()) {
+      return DDS::TopicDescription::_duplicate(iter->second);
+    }
+#endif
     return DDS::TopicDescription::_nil();
 
   } else {
@@ -673,20 +689,68 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 DDS::ContentFilteredTopic_ptr
 DomainParticipantImpl::create_contentfilteredtopic(
-  const char * /*name*/,
-  DDS::Topic_ptr /*related_topic*/,
-  const char * /*filter_expression*/,
-  const DDS::StringSeq & /*expression_parameters*/)
+  const char* name,
+  DDS::Topic_ptr related_topic,
+  const char* filter_expression,
+  const DDS::StringSeq& expression_parameters)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  return 0;
+  if (CORBA::is_nil(related_topic)) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::create_contentfilteredtopic, ")
+        ACE_TEXT("can't create a content-filtered topic due to null related ")
+        ACE_TEXT("topic.\n")));
+    }
+    return 0;
+  }
+
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, topics_protector_, 0);
+
+  if (topics_.count(name)) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::create_contentfilteredtopic, ")
+        ACE_TEXT("can't create a content-filtered topic due to name \"%C\" ")
+        ACE_TEXT("already in use by a Topic.\n"), name));
+    }
+    return 0;
+  }
+
+  if (topic_descrs_.count(name)) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::create_contentfilteredtopic, ")
+        ACE_TEXT("can't create a content-filtered topic due to name \"%C\" ")
+        ACE_TEXT("already in use by a TopicDescription.\n"), name));
+    }
+    return 0;
+  }
+
+  DDS::ContentFilteredTopic_var cft = new ContentFilteredTopicImpl(name,
+    related_topic, filter_expression, expression_parameters, this);
+  DDS::TopicDescription_var td = DDS::TopicDescription::_duplicate(cft);
+  topic_descrs_[name] = td;
+  return cft._retn();
 }
 
 DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
-  DDS::ContentFilteredTopic_ptr /*a_contentfilteredtopic*/)
+  DDS::ContentFilteredTopic_ptr a_contentfilteredtopic)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  return DDS::RETCODE_UNSUPPORTED;
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, topics_protector_,
+                   DDS::RETCODE_OUT_OF_RESOURCES);
+  DDS::ContentFilteredTopic_var cft =
+    DDS::ContentFilteredTopic::_duplicate(a_contentfilteredtopic);
+  TopicDescriptionMap::iterator iter = topic_descrs_.find(cft->get_name());
+  if (iter == topic_descrs_.end()) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+  if (dynamic_cast<TopicDescriptionImpl*>(iter->second.in())->has_reader()) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+  topic_descrs_.erase(iter);
+  return DDS::RETCODE_OK;
 }
 
 DDS::MultiTopic_ptr DomainParticipantImpl::create_multitopic(

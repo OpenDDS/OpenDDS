@@ -93,6 +93,9 @@ public:
   };
 
   typedef std::map<std::string, RefCounted_Topic> TopicMap;
+
+  typedef std::map<std::string, DDS::TopicDescription_var> TopicDescriptionMap;
+
   typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> HandleMap;
 
   ///Constructor
@@ -396,6 +399,10 @@ private:
   SubscriberSet  subscribers_;
   /// Collection of topics.
   TopicMap       topics_;
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  /// Collection of TopicDescriptions which are not also Topics
+  TopicDescriptionMap topic_descrs_;
+#endif
   /// Collection of handles.
   HandleMap      handles_;
   /// Collection of ignored participants.
