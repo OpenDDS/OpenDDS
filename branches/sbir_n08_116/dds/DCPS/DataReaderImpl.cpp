@@ -131,6 +131,13 @@ DataReaderImpl::~DataReaderImpl()
   if (initialized_) {
     delete rd_allocator_;
   }
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  if (content_filtered_topic_.in()) {
+    dynamic_cast<TopicDescriptionImpl*>(content_filtered_topic_.in())
+      ->update_reader_count(false);
+  }
+#endif
 }
 
 // this method is called when delete_datawriter is called.
@@ -2835,6 +2842,16 @@ DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
       }       
   }
 }
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+void
+DataReaderImpl::enable_filtering(ContentFilteredTopicImpl* cft)
+{
+  cft->update_reader_count(true);
+  content_filtered_topic_ = DDS::ContentFilteredTopic::_duplicate(cft);
+}
+#endif
+
 
 } // namespace DCPS
 } // namespace OpenDDS

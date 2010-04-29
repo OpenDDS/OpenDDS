@@ -1,4 +1,5 @@
-feature (!built_in_topics) : taoidldefaults {
+feature (!built_in_topics) : taoidldefaults, dcps_ts_defaults {
   macros   += DDS_HAS_MINIMUM_BIT
   idlflags += -DDDS_HAS_MINIMUM_BIT
+  dcps_ts_flags += -DDDS_HAS_MINIMUM_BIT
 }

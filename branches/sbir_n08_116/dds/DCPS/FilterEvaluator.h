@@ -43,6 +43,11 @@ public:
                   getMetaStruct<T>(), params);
   }
 
+  const char* getFilterString() const
+  {
+    return filter_.c_str();
+  }
+
   class EvalNode;
 
 private:

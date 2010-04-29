@@ -27,6 +27,7 @@
 #include "ZeroCopyInfoSeq_T.h"
 #include "Stats_T.h"
 #include "OwnershipManager.h"
+#include "ContentFilteredTopicImpl.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 
 #include "ace/String_Base.h"
@@ -481,6 +482,10 @@ public:
 
   virtual void delete_instance_map (void* map) = 0;
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  void enable_filtering(ContentFilteredTopicImpl* cft);
+#endif
+
 protected:
 
   SubscriberImpl* get_subscriber_servant();
@@ -546,7 +551,11 @@ protected:
 
   bool is_exclusive_ownership_;
   OwnershipManager* owner_manager_;  
-  
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  DDS::ContentFilteredTopic_var content_filtered_topic_;
+#endif
+
 private:
   /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
   bool send_sample_ack(

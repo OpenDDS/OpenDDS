@@ -172,8 +172,9 @@ tests/DCPS/GuardCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/StatusCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/ReadCondition/run_test.pl: !DCPS_MIN
 
-tests/DCPS/QueryCondition/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
 tests/DCPS/FilterExpression/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
+tests/DCPS/QueryCondition/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
+tests/DCPS/ContentFilteredTopic/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
 
 tests/DCPS/Federation/run_test.pl: !DCPS_MIN
 tests/DCPS/FileSystemStorage/run_test.pl: !DCPS_MIN

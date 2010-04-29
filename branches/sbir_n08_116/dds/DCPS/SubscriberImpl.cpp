@@ -24,6 +24,7 @@
 #include "DataSampleList.h"
 #include "AssociationData.h"
 #include "Transient_Kludge.h"
+#include "ContentFilteredTopicImpl.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/DataLinkSet.h"
@@ -139,6 +140,17 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic_desc);
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  // only used for ContentFilteredTopic and MultiTopic
+  ContentFilteredTopicImpl* cft = 0;
+  if (!topic_servant) {
+    cft = dynamic_cast<ContentFilteredTopicImpl*>(a_topic_desc);
+    if (cft) {
+      topic_servant = dynamic_cast<TopicImpl*>(cft->get_related_topic());
+    }
+  }
+#endif
+
   if (qos == DATAREADER_QOS_DEFAULT) {
     this->get_default_datareader_qos(dr_qos);
 
@@ -175,7 +187,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     topic_servant->get_type_support();
 
   if (0 == typesupport) {
-    CORBA::String_var name = topic_servant->get_name();
+    CORBA::String_var name = a_topic_desc->get_name();
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("SubscriberImpl::create_datareader, ")
@@ -188,6 +200,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   DataReaderImpl* dr_servant =
     dynamic_cast<DataReaderImpl*>(dr_obj.in());
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  if (cft) {
+    dr_servant->enable_filtering(cft);
+  }
+#endif
 
   DataReaderRemoteImpl* reader_remote_impl = 0;
   ACE_NEW_RETURN(reader_remote_impl,
