@@ -48,3 +48,5 @@ OpenDDS::DCPS::TransportReplacedElement::msg() const
   DBG_ENTRY_LVL("TransportReplacedElement","msg",6);
   return this->msg_;
 }
+
+

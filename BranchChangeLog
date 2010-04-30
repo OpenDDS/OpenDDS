@@ -1,3 +1,394 @@
+Fri Apr 30 20:16:34 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        Merging trunk changes 3165:3253 out to branch.
+ 
+            Wed Apr 28 21:15:01 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/gen-latency-stats.pl:
+
+                      Use zero-based array indices correctly.
+
+                    * performance-tests/Bench/bin/plot-density.gp:
+
+                      Removed incorrect hop adjustment.
+
+                    * performance-tests/Bench/bin/plot-jitter.gp:
+                    * performance-tests/Bench/bin/plot-transports.gp:
+
+                      Migrated to robust statistics.
+
+                    * performance-tests/Bench/bin/plot-quantiles.gp:
+
+                      Removed incorrect hop adjustment.
+
+
+                    * performance-tests/Bench/bin/reduce-latency-data.pl:
+
+                      Corrected a minor formatting annoyance.
+
+                    * performance-tests/Bench/tools/plot-latency.gp:
+
+                      Added kernel density and quantile plots to generated results.
+
+            Wed Apr 28 19:50:16 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/extract-latency.pl:
+
+                      Updated documentation to be correct after adding the Median and
+                      Median absolute deviation statistical data.
+
+                    * performance-tests/Bench/bin/gen-latency-stats.pl:
+
+                      Updated generated GNUPlot statistical legend data to contain
+                      the Median and Median absolute deviation instead of the Mean
+                      and Standard Deviation.  This is part of the move towards use
+                      of robust statistics in the data reduction and visualization.
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Updated the 'netstat' command arguments to provide all inet
+                      information instead of just active TCP connections.
+
+            Wed Apr 28 00:21:25 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+
+                      Adjusted running time handling.
+
+            Tue Apr 27 22:53:33 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Changed statistics command termination from SIGQUIT (which
+                      produces a core file) to SIGINT (which does not).
+
+                      Updated POD documentation.
+
+                    * performance-tests/Bench/doc/userguide.html:
+
+                      Updated documentation.
+
+            Tue Apr 27 18:39:41 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/reduce-latency-data.pl:
+
+                      Simplified the MAD determination.  Added a Pearson 2 parameter
+                      estimation of skewness for investigative purposes.
+
+                    * performance-tests/Bench/bin/run_test:
+
+                    * performance-tests/Bench/doc/userguide.html:
+
+                      Incorporated some more of Brian's comments.  Updated run_test
+                      man page with new statistics output filename decorator
+                      specification feature documentation.
+
+                    * performance-tests/Bench/src/Process.cpp:
+
+                      Extended signal handling to be a bit more robust.  Control can
+                      now fall out of the publication wait as well as allowing the
+                      subscription wait to be gracefully terminated as well.
+
+            Mon Apr 26 20:33:01 UTC 2010  Scott Harris  <harris_s@ociweb.com>
+
+                    * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+                    * Pdds/DCPS/transport/multicast/MulticastConfiguration.h:
+                    * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+                    * tests/DCPS/Messenger/pub_multicast.ini:
+                    * docs/html/multicast/multicast.html:
+
+                      Added support to set TTL for multicast transport.
+
+            Sun Apr 26 00:35:23 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+
+                      Changed to add time to the run time of the client side to compensate
+                      for server side delay in starting repo.
+
+            Sat Apr 24 00:00:38 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/bin/plot-throughput-testformats.gp:
+                    * performance-tests/Bench/bin/plot-throughput-transports.gp:
+                    * performance-tests/Bench/bin/plot-throughput.gp:
+
+                      Removed plot-throughput.gp because all because graphs are made through
+                      the more specific plots.
+
+                    * performance-tests/Bench/doc/userguide.html:
+
+                      Updated information about changed files.
+
+                    * performance-tests/Bench/tests/latency/test_list.txt:
+                    * performance-tests/Bench/tests/thru/test_list.txt:
+
+                      Swapped the client and server for castor and pollux.
+
+            Fri Apr 23 20:39:23 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                    * dds/DCPS/transport/framework/CopyChainVisitor.h:
+                    * dds/DCPS/transport/framework/CopyChainVisitor.inl:
+                    * dds/DCPS/transport/framework/CopyChainVisitor.cpp:
+                    * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+                    * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+                    * dds/DCPS/transport/framework/TransportQueueElement.h:
+                    * dds/DCPS/transport/framework/TransportQueueElement.inl:
+                    * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+                    * dds/DCPS/transport/framework/TransportReplacedElement.h:
+                    * dds/DCPS/transport/framework/TransportReplacedElement.inl:
+                    * dds/DCPS/transport/framework/TransportReplacedElement.cpp:
+                    * dds/DCPS/transport/framework/TransportRetainedElement.h:
+                    * dds/DCPS/transport/framework/TransportRetainedElement.inl:
+                    * dds/DCPS/transport/framework/TransportSendBuffer.h:
+                    * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+                    * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+                      - Made TransportSendBuffer clone the transport element and
+                        packet with its own MessageBlock and DataBlock cached
+                        allocators and heap allocation for the sample data.
+
+                      - Fixed a potential issue in TransportSendBuffer due to buffers_
+                        not mutex protected. The bug may cause invalid iterator(or
+                        corruption) while iterating sequence buffers for resending
+                        from reactor thread and the insert calls to release aged
+                        buffer due to capacity limit from another thread (e.g. write
+                        thread).
+
+                      - Changed TransportQueueElement::data_dropped and
+                        TransportQueueElement::data_delivered to have return value
+                        to indicate if the element is released. This would fix
+                        memory corruption due to access the release flag after
+                        TransportQueueElement is released.
+
+                      - Moved clone() from TransportReplacedElement to
+                        TransportQueueElement so the TransportRetainElement
+                        can use it.
+
+            Fri Apr 23 14:34:11 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+                    * performance-tests/Bench/doc/userguide.html:
+                      minor edits
+
+            Thu Apr 22 22:55:09 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/bin/genstats.pl:
+                    * performance-tests/Bench/bin/gen-latency-stats.pl:
+                    * performance-tests/Bench/tools/convert-latency:
+
+                      Renamed latency stat generating script.  Changed stat output file
+                      names to include latency prefix.
+
+            Thu Apr 22 20:46:25 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * bin/performance_tests.lst:
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+
+                      Added running of throughput tests and corrected directory names.
+
+            Thu Apr 22 18:16:27 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/extract-latency.pl:
+                    * performance-tests/Bench/bin/reduce-latency-data.pl:
+
+                      Added median and median absolute deviation (MAD) statistics
+                      gathering.
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Factored the filtering closures out and made them selectable by
+                      OS type.
+
+            Wed Apr 21 19:25:35 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/src/testprocess.cpp:
+
+                      Added static initialization feature for static builds.
+
+            Mon Apr 19 23:50:09 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+
+                      Adjusted to have the run_test on the server side handle the repo.
+                      Running the repo as a separate run_test was leaving cases of the repo
+                      still running after terminating the run_test.
+
+            Mon Apr 19 19:19:09 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/extract-throughput.pl:
+
+                      Adjusted to produce a single data file with the test and
+                      transport data partitioned into separate indices.
+
+                    * performance-tests/Bench/bin/plot-density.gp:
+                    * performance-tests/Bench/bin/plot-quantiles.gp:
+
+                      Candidate plotting commands for Quantile and Kernel Density
+                      Estimation charts.  These currently assume specific file names
+                      and locations.
+
+                    * performance-tests/Bench/tests/thru/test-commands.txt:
+
+                      Updated to generate output files useful for the current
+                      throughput extraction script.
+
+            Mon Apr 19 05:29:23 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                    * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+                    * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+                    * dds/DCPS/transport/framework/TransportReplacedElement.h:
+                    * dds/DCPS/transport/framework/TransportReplacedElement.inl:
+                    * dds/DCPS/transport/framework/TransportReplacedElement.cpp:
+                    * dds/DCPS/transport/framework/TransportSendBuffer.h:
+                    * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+                    * dds/DCPS/transport/framework/TransportSendStrategy.h:
+                    * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+                      Fixed bugs that TransportReplacedElement clones samples owned
+                      by DataWriter using the cached allocators from DataWriter.This
+                      causes SEGV when releasing TransportReplacedElement after
+                      DataWrite is deleted.
+
+            Tue Apr 13 00:06:06 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/tools/mkpkg:
+
+                      Added files for running scripted tests in packaged environment.
+
+                    * performance-tests/Bench/bin/extract-throughput.pl:
+                    * performance-tests/Bench/bin/plot-throughput-testformats.gp:
+                    * performance-tests/Bench/bin/plot-throughput-transports.gp:
+                    * performance-tests/Bench/tools/plot-throughput.gp:
+
+                      Added more graphing scripts for throughput results.
+
+            Fri Apr 09 21:27:04 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+
+                      Fixed repo option to Info Repo.
+
+            Fri Apr 09 18:37:50 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+
+                      Added some basic POD documentation.
+
+            Thu Apr  8 19:17:27 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/reduce-latency-data.pl:
+
+                      Added plot data for quantile charts to the output data.
+
+            Tue Apr 06 18:45:55 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * bin/PerlDDS/Cross_Sync_Common.pm:
+
+                      Fix typo and separated output of failing to read file and
+                      failing to find the required instance.
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Improved handling of the Info Repo.
+
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+
+                      Fixed issues with running.
+
+            Thu Apr 01 22:36:25 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/bin/extract-throughput.pl:
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+                    * performance-tests/Bench/tests/thru/test-commands.txt:
+                    * performance-tests/Bench/tests/thru/test_list.txt:
+
+                      Minor fixes to run tests and data extraction script.
+
+            Thu Apr  1 15:20:09 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Explicitly search the environment PATH variable for the
+                      repository and test commands to execute.
+
+            Wed Mar 31 23:59:23 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * bin/performance_tests.lst:
+                    * performance-tests/Bench/bin/extract-latency.pl:
+                    * performance-tests/Bench/bin/extract-throughput.pl:
+                    * performance-tests/Bench/bin/plot-throughput.gp:
+                    * performance-tests/Bench/bin/reduce-latency-data.pl:
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/latency/test_list.txt:
+                    * performance-tests/Bench/tests/thru/test-commands.txt:
+                    * performance-tests/Bench/tools/convert-all:
+                    * performance-tests/Bench/tools/convert-latency:
+                    * performance-tests/Bench/tools/plot-latency.gp:
+                    * performance-tests/Bench/tools/plot-throughput.gp:
+                    * performance-tests/Bench/bin/reduce.pl:
+                    * performance-tests/Bench/bin/extract.pl:
+                    * performance-tests/Bench/tools/plot-all.gp:
+
+                      Added initial scripts for plotting throughput data and renamed
+                      the genericly name latency scripts.
+
+            Wed Mar 31 19:51:26 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Prepend the script directory to the command search path and
+                      then use that path to find commands.  This allows installations
+                      other than the 'mkpkg' ones to work as well.
+
+            Wed Mar 31 19:02:50 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Previous debug file specification change is now extended to the
+                      testprocess commands as well.
+
+                    * performance-tests/Bench/doc/userguide.html:
+                    * performance-tests/Bench/tests/latency/latency.mm:
+
+                      Adding and updating documentation.
+
+            Wed Mar 31 13:55:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Allow debug file to be specified in the absence of a debug
+                      level.  This allows the verbose test output to reach a logfile
+                      instead of the standard output.
+
+            Tue Mar 30 22:39:41 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Do not remove the repo.ior file unless we are going to start a
+                      repository process.
+                      Updated POD.
+
+                    * performance-tests/Bench/doc/userguide.html:
+
+                      Updated documentation.
+
+                    * performance-tests/Bench/src/Publication.cpp:
+                    * performance-tests/Bench/src/Subscription.cpp:
+
+                      Added more detail to the transport creation/obtain processing
+                      to ensure that the transport type is available in the logfile.
+
+            Tue Mar 23 20:33:39 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * NEWS:
+                    * README:
+
 Fri Apr 30 18:13:11 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/dcps_bits.mpb:

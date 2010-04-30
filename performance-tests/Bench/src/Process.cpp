@@ -380,6 +380,9 @@ Process::Process( const Options& options)
     publicationsAssociations_ += current->second->associations;
   }
 
+  // Allow the publication waiting to be interrupted.
+  this->publicationWaiter_->attach_condition( this->guardCondition_.in());
+
   // Go ahead and get the output files opened and ready for use.
   for( OutputFileMap::iterator current = this->outputFiles_.begin();
        current != this->outputFiles_.end();
@@ -406,7 +409,7 @@ Process::unblock()
 void
 Process::run()
 {
-  for(;;) {
+  while(!this->terminated_) {
     // Check each publication for its readiness to run.
     int  missing = 0;
     for( PublicationMap::const_iterator current = this->publications_.begin();
@@ -439,59 +442,42 @@ Process::run()
     }
   }
 
-  // Kluge to bias the race between BuiltinTopic samples and application
-  // samples towards the BuiltinTopics during association establishment.
-  ACE_OS::sleep( 2);
+  // Only proceed if we have not been instructed to terminate.
+  if(!this->terminated_) {
+    // Kluge to bias the race between BuiltinTopic samples and application
+    // samples towards the BuiltinTopics during association establishment.
+    ACE_OS::sleep( 2);
 
-  if( this->options_.verbose() && this->publications_.size() > 0) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Process::run() - ")
-      ACE_TEXT("starting to publish samples.\n")
-    ));
-  }
-
-  for( PublicationMap::const_iterator current = this->publications_.begin();
-       current != this->publications_.end();
-       ++current
-     ) {
-    current->second->start();
-  }
-
-  // Execute test for specified duration, or block until terminated externally.
-  if( this->options_.duration() > 0) {
-    ACE_Time_Value now = ACE_OS::gettimeofday();
-    ACE_Time_Value when = now + ACE_Time_Value( this->options_.duration(), 0);
-
-    if( this->options_.verbose()) {
+    if( this->options_.verbose() && this->publications_.size() > 0) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::run() - ")
-        ACE_TEXT("blocking main thread for %d seconds, ")
-        ACE_TEXT("from %d until %d.\n"),
-        this->options_.duration(),
-        now.sec(),
-        when.sec()
-      ));
-    }
-    int value = this->condition_.wait( &when);
-    if( value != 0) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Process::run() - ")
-        ACE_TEXT("unblocked main thread: %p.\n"),
-        ACE_TEXT("wait")
+        ACE_TEXT("starting to publish samples.\n")
       ));
     }
 
-  } else {
-    // Block the main thread, leaving the others working.
-    if( this->options_.verbose()) {
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Process::run() - ")
-        ACE_TEXT("blocking main thread until signaled by user.\n")
-      ));
+    for( PublicationMap::const_iterator current = this->publications_.begin();
+         current != this->publications_.end();
+         ++current
+       ) {
+      current->second->start();
     }
-    // Only unblock and continue on a commanded termination.
-    while( !this->terminated_) {
-      int value = this->condition_.wait();
+
+    // Execute test for specified duration, or block until terminated externally.
+    if( this->options_.duration() > 0) {
+      ACE_Time_Value now = ACE_OS::gettimeofday();
+      ACE_Time_Value when = now + ACE_Time_Value( this->options_.duration(), 0);
+
+      if( this->options_.verbose()) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) Process::run() - ")
+          ACE_TEXT("blocking main thread for %d seconds, ")
+          ACE_TEXT("from %d until %d.\n"),
+          this->options_.duration(),
+          now.sec(),
+          when.sec()
+        ));
+      }
+      int value = this->condition_.wait( &when);
       if( value != 0) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) Process::run() - ")
@@ -499,15 +485,35 @@ Process::run()
           ACE_TEXT("wait")
         ));
       }
+
+    } else {
+      // Block the main thread, leaving the others working.
+      if( this->options_.verbose()) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) Process::run() - ")
+          ACE_TEXT("blocking main thread until signaled by user.\n")
+        ));
+      }
+      // Only unblock and continue on a commanded termination.
+      while( !this->terminated_) {
+        int value = this->condition_.wait();
+        if( value != 0) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) Process::run() - ")
+            ACE_TEXT("unblocked main thread: %p.\n"),
+            ACE_TEXT("wait")
+          ));
+        }
+      }
     }
-  }
-  if( this->options_.verbose()) {
-    ACE_Time_Value now = ACE_OS::gettimeofday();
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Process::run() - ")
-      ACE_TEXT("continuing main thread at %d, starting to terminate.\n"),
-      now.sec()
-    ));
+    if( this->options_.verbose()) {
+      ACE_Time_Value now = ACE_OS::gettimeofday();
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Process::run() - ")
+        ACE_TEXT("continuing main thread at %d, starting to terminate.\n"),
+        now.sec()
+      ));
+    }
   }
 
   // Signal the writers to terminate.
@@ -552,7 +558,7 @@ Process::run()
   // stopped any forwarding.  We wait for the subscriptions to
   // become unassociated before we shut down entirely.
   //
-  for(;;) {
+  do {
     // Check for active subscriptions (associated with publications).
     int associations = 0;
     for( SubscriptionMap::const_iterator current = this->subscriptions_.begin();
@@ -572,8 +578,8 @@ Process::run()
       ));
     }
 
-    // Now wait for a change in associations.
-    DDS::Duration_t   timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
+    // Now wait for a change in associations.  Wait for up to 5 seconds.
+    DDS::Duration_t   timeout = { 5, 0 };
     DDS::ConditionSeq discard;
     if( DDS::RETCODE_OK != this->subscriptionWaiter_->wait( discard, timeout)) {
       ACE_ERROR((LM_ERROR,
@@ -582,7 +588,12 @@ Process::run()
       ));
       throw BadSyncException();
     }
-  }
+
+    // If we have been terminated by signal, only wait once.  If we
+    // haven't, wait until either the processes terminate nicely or the
+    // user sends a signal.
+  } while( !this->terminated_);
+
   // At this point, we are done sending and receiving data, so we can go
   // ahead and write any data that was requested.
 

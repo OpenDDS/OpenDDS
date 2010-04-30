@@ -65,7 +65,11 @@ private:
   size_t n_chunks_;
 
   TransportRetainedElementAllocator retained_allocator_;
+  MessageBlockAllocator retained_mb_allocator_;
+  DataBlockAllocator retained_db_allocator_;
   TransportReplacedElementAllocator replaced_allocator_;
+  MessageBlockAllocator replaced_mb_allocator_;
+  DataBlockAllocator replaced_db_allocator_;
 
   TransportSendStrategy* strategy_;
 

@@ -67,6 +67,8 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
     synch_(0),
     lock_(),
     replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS),
+    replaced_element_mb_allocator_ (NUM_REPLACED_ELEMENT_CHUNKS * 2),
+    replaced_element_db_allocator_ (NUM_REPLACED_ELEMENT_CHUNKS * 2),
     retained_element_allocator_( 0),
     graceful_disconnecting_(false),
     link_released_(true),
@@ -715,7 +717,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications(TransportSendEl
       sample = delayed_delivered_notification_queue_ [0];
       mode = delayed_notification_mode_ [0];
 
-      if (element.sample () != 0 && element.msg () == sample->msg ())
+      if ((element.sample () != 0) && (element.msg () == sample->msg ()))
       {
         found_element = sample;
       }
@@ -731,7 +733,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications(TransportSendEl
         samples[i] = delayed_delivered_notification_queue_[i];
         modes[i] = delayed_notification_mode_[i];
 
-        if (element.sample () != 0 && element.msg () == samples[i]->msg ()) {
+        if ((element.sample () != 0) && (element.msg () == samples[i]->msg ())) {
           found_element = samples[i];
         }
         
@@ -745,32 +747,43 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications(TransportSendEl
 
   if (modes == NULL) {
     // optimization for the common case
-    if (! this->transport_shutdown_) {
       if (mode == MODE_TERMINATED) {
-        sample->data_dropped(true);
+        if (! this->transport_shutdown_) {
+          bool deleted = sample->data_dropped(true);
+          if (found_element == sample) {
+            element.released (deleted);
+          }
+        }
       } else {
-        sample->data_delivered();
+        if (! this->transport_shutdown_) {
+          bool deleted = sample->data_delivered();
+          if (found_element == sample) {
+            element.released (deleted);
+          }
+        }
       }
-    }
 
   } else {
     for (size_t i = 0; i < num_delayed_notifications; i++) {
       if (modes[i] == MODE_TERMINATED) {
-        samples[i]->data_dropped(true);
-
+        if (! this->transport_shutdown_) {
+          bool deleted = samples[i]->data_dropped(true);
+          if (found_element == samples[i]) {
+            element.released (deleted);
+          }
+        }
       } else {
-        samples[i]->data_delivered();
+        if (! this->transport_shutdown_) {
+          bool deleted = samples[i]->data_delivered();
+          if (found_element == samples[i]) {
+            element.released (deleted);
+          }
+        }
       }
     }
 
     delete [] samples;
     delete [] modes;
-  }
-  
-  
-    
-  if (found_element) {    
-    element.released (found_element->released ());
   }
 }
 
@@ -1334,7 +1347,9 @@ OpenDDS::DCPS::TransportSendStrategy::do_remove_sample(TransportQueueElement& cu
   PacketRemoveVisitor pac_rem_vis(current_sample,
                                   this->pkt_chain_,
                                   this->header_block_,
-                                  this->replaced_element_allocator_);
+                                  this->replaced_element_allocator_,
+                                  this->replaced_element_mb_allocator_,
+                                  this->replaced_element_db_allocator_);
 
   int status = 0;
 

@@ -34,7 +34,9 @@ OpenDDS::DCPS::CopyChainVisitor::visit_element(TransportQueueElement* element)
     TransportRetainedElement(
       element->msg(),
       element->publication_id(),
-      this->allocator_
+      this->allocator_,
+      this->mb_allocator_,
+      this->db_allocator_
     )
   );
   if( copiedElement) {

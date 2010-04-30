@@ -73,6 +73,10 @@ public:
   /// The default value is: 30000 (30 seconds).
   ACE_Time_Value nak_timeout_;
 
+  /// time-to-live.
+  /// The default value is: 1 (in same subnet)
+  char ttl_;
+
   MulticastConfiguration();
 
   virtual int load(const TransportIdType& id,

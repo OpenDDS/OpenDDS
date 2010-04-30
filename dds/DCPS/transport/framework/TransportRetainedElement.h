@@ -28,7 +28,9 @@ public:
   TransportRetainedElement(
     const ACE_Message_Block*           message,
     const RepoId&                      pubId,
-    TransportRetainedElementAllocator* allocator = 0
+    TransportRetainedElementAllocator* allocator = 0,
+    MessageBlockAllocator*             mb_allocator_ = 0,
+    DataBlockAllocator*                db_allocator_ = 0
   );
 
   /// Copy constructor.
@@ -54,6 +56,10 @@ private:
 
   /// Reference to TransportRetainedElement allocator.
   TransportRetainedElementAllocator* allocator_;
+  /// Cached allocator for DataSampleHeader message block
+  MessageBlockAllocator*             mb_allocator_;
+  /// Cached allocator for DataSampleHeader data block
+  DataBlockAllocator*                db_allocator_;
 };
 
 } // namespace DCPS
