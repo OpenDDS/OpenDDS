@@ -1,50 +1,44 @@
-Last updated: 5/25/07
+The document describes how opendds_idl ($DDS_ROOT/dds/idl) generates code to
+support DDS sample types defined in IDL.
 
-The document describes how TAO_IDL and dcps_ts.pl generated code to support
-DDS sample types defined in IDL.
+Naming conventions:
+  Functions (& operators) that are overloaded on the IDL types are generated
+    in namespace OpenDDS::DCPS and they have the "gen_" (generated) prefix.
+  Structs not mentioned in the DDS spec (*_KeyLessThan) are generated in an
+  "OpenDDSGenerated" sub-namespace of the user's namespace.
 
-dcps_ts.pl generates IDL and implementation code for sample type specific
-objects: 
-	<type>TypeSupport IDL & <type>TypeSupportImpl C++
-	<type>DataWriter  IDL & <type>DataWriterImpl c++
-	<type>DataReader  IDL & <type>DataReader C++
-
-TAO_IDL generates code supporting:
-  (when -Gdcps flag is given)
-
-note: DDS sample types are identified by 
-	#pragma DCPS_DATA_TYPE "[<module>::]<type>"
-	
-a) key comparison
-	- _tao_has_key(type)
-	- <type>KeyLessThan(type) - used for maps of instances
-	
+opendds_idl generates code supporting:
+a) key comparison 
+	- gen_has_key(type)
+	- struct <type>_KeyLessThan - used for maps of instances
 	Keys are identified by zero or more
 	   #pragma DCPS_DATA_KEY "[<module>::]<type> <key>"
 	The key must be a scalar.
 
 b) marshalling 
-	- marshaling operators
-	- demarshaling operators
-	- _tao_max_marshaled_size(type) method - like marshal or at compile time
-	- _tao_is_bounded_size(type) method - like marshal or at compile time
-	- _tao_find_size(type) method -- like max_marshaled_size but use len - not max.
-	
-   An extra visitor pass procudes code for DDS marshalling.
-   This pass procudes code similar to CORBA serialization but
-   it uses DDS_OutputCDR and DDS_InputCDR instead of TAO_OutputCDR 
-   and TAO_InputCDR.  Also generates the extra sizing functions.
+	- marshaling operators (operator<<)
+	- demarshaling operators (operator>>)
+	- gen_max_marshaled_size(type) method - like marshal or at compile time
+	- gen_is_bounded_size(type) method - like marshal or at compile time
+	- gen_find_size(type) method -- like max_marshaled_size but use len,
+          not max.
 
-   Added other be_visitor_root_cdr_op passes starting 
-   in be_visitor_root::visit_root() with the following state =
+c) type-support
+        DDS sample types are identified by 
+	#pragma DCPS_DATA_TYPE "[<module>::]<type>"
+        opendds_idl generates IDL and implementation code for sample type
+        specific structs:
+	<type>TypeSupport IDL & <type>TypeSupportImpl C++
+	<type>DataWriter  IDL & <type>DataWriterImpl C++
+	<type>DataReader  IDL & <type>DataReaderImpl C++
 
-	TAO_ROOT_SERIALIZER_OP_CH  and
-	TAO_ROOT_SERIALIZER_OP_CI  
+TAO_IDL is still responsible for:
+a) parsing the #pragmas for DCPS_DATA_KEY and DCPS_DATA_TYPE
 
-c) zero-copy read type support ("native" type implementation)
+b) zero-copy read type support ("native" type implementation)
 	<type>Seq
 	DDS::SampleInfoSeq
-	
+
 	See TAO_IDL/be/be_visitor_native/native_ch.cpp and
 	support for #pragmas and generating needed #includes.
 

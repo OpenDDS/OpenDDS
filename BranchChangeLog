@@ -1,3 +1,21 @@
+Fri Apr 30 15:41:47 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * docs/design/IDL_COMPILER:
+        * java/README:
+        * tests/DCPS/Compiler/idl_test2_lib/README.txt:
+        * tests/DCPS/FooType3/README.txt:
+        * tests/DCPS/FooType3NoKey/README.txt:
+        * tests/DCPS/FooType3Unbounded/README.txt:
+        * tests/DCPS/FooType4/README.txt:
+        * tests/DCPS/FooType5/README.txt:
+        * tests/DCPS/SimpleFooTest/README:
+
+          Updated documentation for the dcps_ts.pl -> opendds_idl transition.
+
+        * bin/update_dcps.pl:
+
+          Removed this file.
+
 Thu Apr 29 21:37:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/built_in_topic_support.mpb:
