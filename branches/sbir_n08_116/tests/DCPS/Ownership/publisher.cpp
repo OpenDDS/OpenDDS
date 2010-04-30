@@ -31,7 +31,7 @@ int delay = 1;
 int reset_delay = 0;
 int ownership_strength = 0;
 int reset_ownership_strength = -1;
-char * ownership_dw_id = "OwnershipDataWriter";
+ACE_CString ownership_dw_id = "OwnershipDataWriter";
 
 namespace {
 
@@ -49,7 +49,7 @@ parse_args(int argc, ACE_TCHAR *argv[])
       ownership_strength = ACE_OS::atoi (get_opts.opt_arg());
       break;
     case 'i':
-      ownership_dw_id = get_opts.opt_arg();
+      ownership_dw_id = ACE_TEXT_ALWAYS_CHAR(get_opts.opt_arg());
       break;
     case 'r':
       reset_ownership_strength = ACE_OS::atoi (get_opts.opt_arg());
@@ -192,7 +192,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Start writing threads
-    Writer* writer = new Writer(dw.in());
+    Writer* writer = new Writer(dw.in(), ownership_dw_id.c_str());
     writer->start();
 
     while (!writer->is_finished()) {

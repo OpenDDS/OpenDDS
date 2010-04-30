@@ -16,7 +16,7 @@
 class Writer : public ACE_Task_Base {
 public:
 
-  Writer(DDS::DataWriter_ptr writer);
+  Writer(DDS::DataWriter_ptr writer, const char* ownership_dw_id);
 
   void start();
 
@@ -31,6 +31,7 @@ public:
 
 private:
   DDS::DataWriter_var writer_;
+  ACE_CString ownership_dw_id_;
   ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> finished_instances_;
   ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> timeout_writes_;
 };

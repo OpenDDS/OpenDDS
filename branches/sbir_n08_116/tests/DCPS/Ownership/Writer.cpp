@@ -19,13 +19,13 @@
 
 const int num_instances_per_writer = 1;
 const int num_messages = 10;
-extern char * ownership_dw_id;
 extern int reset_ownership_strength;
 extern int delay;
 extern int reset_delay;
 
-Writer::Writer(DDS::DataWriter_ptr writer)
+Writer::Writer(DDS::DataWriter_ptr writer, const char* ownership_dw_id)
   : writer_(DDS::DataWriter::_duplicate(writer)),
+    ownership_dw_id_(ownership_dw_id),
     finished_instances_(0),
     timeout_writes_(0)
 {
@@ -102,7 +102,7 @@ Writer::svc()
 
     DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-    message.from       = CORBA::string_dup(ownership_dw_id);
+    message.from       = ownership_dw_id_.c_str();
     message.subject    = CORBA::string_dup("Review");
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
     message.count      = 0;
@@ -133,7 +133,7 @@ Writer::svc()
         CORBA::Long old = qos.ownership_strength.value;
         if (reset_ownership_strength != -1 && old != reset_ownership_strength) {
           qos.ownership_strength.value = reset_ownership_strength;
-          std::cout << ownership_dw_id << ": reset ownership strength from " 
+          std::cout << ownership_dw_id_ << ": reset ownership strength from " 
                     << old << " to " << reset_ownership_strength << std::endl;
           error = this->writer_->set_qos (qos);
           if (error != ::DDS::RETCODE_OK) {

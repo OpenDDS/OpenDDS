@@ -182,7 +182,8 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
     "  }\n\n"
     "  ComparatorBase::Ptr create_qc_comparator(const char* field, "
     "ComparatorBase::Ptr next) const\n"
-    "  {\n";
+    "  {\n"
+    "    ACE_UNUSED_ARG(next);\n";
   std::for_each(fields.begin(), fields.end(), gen_field_createQC(clazz));
   be_global->impl_ <<
     exception <<
