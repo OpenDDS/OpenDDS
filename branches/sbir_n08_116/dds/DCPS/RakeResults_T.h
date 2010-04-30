@@ -18,25 +18,13 @@
 
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "RakeData.h"
+#include "Comparator_T.h"
 
 #include <vector>
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-#  include <set>
-#  include "Comparator_T.h" //TODO: remove once the generated code includes it
-#endif
+#include <set>
 
 namespace OpenDDS {
 namespace DCPS {
-
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-//TODO: this can be removed once code-generation is done
-template <class Sample>
-ComparatorBase::Ptr create_qc_comparator(Sample*, const char* field,
-                                         ComparatorBase::Ptr next)
-{
-  return 0;
-}
-#endif
 
 enum Operation_t { DDS_OPERATION_READ, DDS_OPERATION_TAKE };
 

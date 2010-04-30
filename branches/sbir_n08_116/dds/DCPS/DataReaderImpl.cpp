@@ -24,6 +24,7 @@
 #include "Util.h"
 #include "RequestedDeadlineWatchdog.h"
 #include "QueryConditionImpl.h"
+#include "ReadConditionImpl.h"
 #include "MonitorFactory.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"

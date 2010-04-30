@@ -7,10 +7,12 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DATAREADER_LISTENER_IMPL
-#define DATAREADER_LISTENER_IMPL
+#ifndef OPENDDS_DCPS_BITPUBLISTENERIMPL_H
+#define OPENDDS_DCPS_BITPUBLISTENERIMPL_H
 
-#include <dds/DdsDcpsSubscriptionS.h>
+#ifndef DDS_HAS_MINIMUM_BIT
+
+#include "dds/DdsDcpsSubscriptionS.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -34,36 +36,36 @@ public:
   virtual void on_requested_deadline_missed(
     DDS::DataReader_ptr reader,
     const DDS::RequestedDeadlineMissedStatus& status)
-  throw(CORBA::SystemException);
+  ACE_THROW_SPEC((CORBA::SystemException));
 
   virtual void on_requested_incompatible_qos(
     DDS::DataReader_ptr reader,
     const DDS::RequestedIncompatibleQosStatus& status)
-  throw(CORBA::SystemException);
+  ACE_THROW_SPEC((CORBA::SystemException));
 
   virtual void on_liveliness_changed(
     DDS::DataReader_ptr reader,
     const DDS::LivelinessChangedStatus& status)
-  throw(CORBA::SystemException);
+  ACE_THROW_SPEC((CORBA::SystemException));
 
   virtual void on_subscription_matched(
     DDS::DataReader_ptr reader,
     const DDS::SubscriptionMatchedStatus& status)
-  throw(CORBA::SystemException);
+  ACE_THROW_SPEC((CORBA::SystemException));
 
   virtual void on_sample_rejected(
     DDS::DataReader_ptr reader,
     const DDS::SampleRejectedStatus& status)
-  throw(CORBA::SystemException);
+  ACE_THROW_SPEC((CORBA::SystemException));
 
   virtual void on_data_available(
     DDS::DataReader_ptr reader)
-  throw(CORBA::SystemException);
+  ACE_THROW_SPEC((CORBA::SystemException));
 
   virtual void on_sample_lost(
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status)
-  throw(CORBA::SystemException);
+  ACE_THROW_SPEC((CORBA::SystemException));
   
 private:
   DomainParticipantImpl* partipant_;
@@ -73,4 +75,6 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* DATAREADER_LISTENER_IMPL  */
+#endif // DDS_HAS_MINIMUM_BIT
+
+#endif // OPENDDS_DCPS_BITPUBLISTENERIMPL_H

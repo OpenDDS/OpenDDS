@@ -1520,6 +1520,7 @@ DDS::ReturnCode_t
   }
 }  
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 bool
 <%TYPE%>DataReaderImpl::contains_sample_filtered(DDS::SampleStateMask sample_states,
   DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states,
@@ -1547,6 +1548,7 @@ bool
 
   return false;
 }
+#endif
 
 void
 <%TYPE%>DataReaderImpl::dds_demarshal(

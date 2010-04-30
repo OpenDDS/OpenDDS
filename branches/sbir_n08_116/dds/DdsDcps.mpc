@@ -1,6 +1,6 @@
 // $Id$
 
-project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_topic_support, dds4ccm_opendds, dcps_ts_defaults {
+project: taolib, portableserver, core, dcps_bits, coverage_optional, dcps_optional_features, dds4ccm_opendds, dcps_ts_defaults, dds_macros {
 
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
@@ -14,10 +14,6 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_to
   //The following is only to make the PCH work, client projects should not have
   //this as an include path.
   includes += $(DDS_ROOT)/dds
-
-  verbatim(gnuace, extension, 1) {
-    include $(DDS_ROOT)/rules.dds.GNU
-  }
 
   idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
   dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h
@@ -47,7 +43,6 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_to
     DdsDcpsTopic.idl
     DdsDcps.idl
     // OpenDDS specific below
-    DdsDcpsInfrastructureTypeSupport.idl
     DdsDcpsInfo.idl
     DdsDcpsSubscriptionExt.idl
     DdsDcpsDataReaderRemote.idl

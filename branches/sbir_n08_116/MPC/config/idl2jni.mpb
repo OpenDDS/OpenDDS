@@ -1,6 +1,6 @@
 // $Id$
 
-project: taolib_with_idl, portableserver, java {
+project: taolib_with_idl, portableserver, java, dds_macros {
 
   includes   += $(DDS_ROOT)/java/idl2jni/runtime $(JAVA_HOME)/include \
                 $(JAVA_HOME)/include/$(JAVA_PLATFORM)

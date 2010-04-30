@@ -40,3 +40,7 @@ feature (!built_in_topics): idl2jni {
   idl2jniflags += -DDDS_HAS_MINIMUM_BIT
 
 }
+
+feature (!content_subscription): dcps_ts_defaults {
+  idl2jniflags += -DOPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+}

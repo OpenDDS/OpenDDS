@@ -1,4 +1,4 @@
-project: dcps, idl2jni, dcps_java_bits {
+project: dcps, idl2jni, dcps_java_optional {
 
   after        += dcps_java
   libs         += OpenDDS_DCPS_Java tao_java
