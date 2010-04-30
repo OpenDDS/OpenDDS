@@ -73,7 +73,8 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   test_setup(dp, ts, pub, sub, "MyTopic2", dw, dr);
 
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
-  Message sample = {1};
+  Message sample;
+  sample.key = 1;
   ReturnCode_t ret = mdw->write(sample, HANDLE_NIL);
   if (ret != RETCODE_OK) return false;
   if (!waitForSample(dr)) return false;
@@ -87,7 +88,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   WaitSet_var ws = new WaitSet;
   ws->attach_condition(dr_qc);
   ConditionSeq active;
-  Duration_t three_sec = {3};
+  Duration_t three_sec = {3, 0};
   ret = ws->wait(active, three_sec);
   // expect a timeout because the sample doesn't match the query string
   if (ret != RETCODE_TIMEOUT) {

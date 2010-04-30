@@ -67,7 +67,8 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   ws->detach_condition(dw_sc);
 
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
-  Message sample = {1};
+  Message sample;
+  sample.key = 1;
   ReturnCode_t ret = mdw->write(sample, HANDLE_NIL);
   if (ret != RETCODE_OK) return false;
   sample.key = 2;

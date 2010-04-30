@@ -1,3 +1,14 @@
+Fri Apr 30 17:38:09 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/metaclass_generator.cpp:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/DCPS/Ownership/Writer.h:
+        * tests/DCPS/Ownership/Writer.cpp:
+        * tests/DCPS/Ownership/publisher.cpp:
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+
+          Fixed warnings.
+
 Fri Apr 30 17:33:35 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dds_macros.mpb:
