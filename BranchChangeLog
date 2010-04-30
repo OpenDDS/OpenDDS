@@ -1,7 +1,23 @@
+Fri Apr 30 20:41:15 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/performance_tests.lst:
+        * performance-tests/Bench/tests/latency/latency.mm:
+        * performance-tests/Bench/tests/latency/run_test.pl:
+        * performance-tests/Bench/tests/latency/test_list.txt:
+
+        * performance-tests/Bench/tests/thru/run_test.pl:
+        * performance-tests/Bench/tests/thru/test_list.txt:
+
+        * performance-tests/Bench/tools/convert-latency:
+        * performance-tests/Bench/tools/plot-latency.gp:
+        * performance-tests/Bench/tools/plot-throughput.gp:
+
+          Added files missed in last commit.
+          
 Fri Apr 30 20:16:34 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         Merging trunk changes 3165:3253 out to branch.
- 
+
             Wed Apr 28 21:15:01 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
                     * performance-tests/Bench/bin/gen-latency-stats.pl:
