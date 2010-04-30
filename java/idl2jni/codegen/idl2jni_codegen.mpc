@@ -1,4 +1,4 @@
-project: aceexe, crosscompile {
+project: aceexe, crosscompile, dds_macros {
 
   exename   = idl2jni
   exeout    = $(DDS_ROOT)/bin

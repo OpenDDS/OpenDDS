@@ -1,3 +1,38 @@
+Fri Apr 30 16:25:00 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps.mpb:
+        * MPC/config/dcps_java.mpb:
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+        * MPC/config/idl2jni.mpb:
+        * dds/DCPS/BitPubListenerImpl.h:
+        * dds/DCPS/BitPubListenerImpl.cpp:
+        * dds/DCPS/Comparator_T.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/FailoverListener.h:
+        * dds/DCPS/FailoverListener.cpp:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DdsDcps.mpc:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * java/dds/dcps_java_optional.mpb:
+        * java/idl2jni/codegen/idl2jni_codegen.mpc:
+        * java/idl2jni/runtime/idl2jni_runtime.mpc:
+        * rules.dds.GNU:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopic.mpc:
+        * tests/DCPS/FilterExpression/FilterExpressionTest.mpc:
+        * tests/DCPS/QueryCondition/QueryCondition.mpc:
+        * tools/odds_monitor/Monitor.mpc:
+
+          Added support for disabling the Content Subscription Profile at
+          compile-time (MPC feature content_subscription=0).
+
+        * MPC/config/built_in_topic_support.mpb:
+        * MPC/config/dcps_java_bits.mpb:
+
+          Removed these files.
+
 Fri Apr 30 15:41:47 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * docs/design/IDL_COMPILER:

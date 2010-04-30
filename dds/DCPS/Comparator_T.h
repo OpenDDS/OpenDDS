@@ -16,8 +16,6 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-
 #include "ace/OS_NS_string.h"
 
 #include "RcHandle_T.h"
@@ -128,7 +126,5 @@ ComparatorBase::Ptr make_struct_cmp(Field Sample::* mp,
 
 } // namespace DCPS
 } // namespace OpenDDS
-
-#endif /* OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */
 
 #endif

@@ -401,11 +401,14 @@ public:
   bool contains_sample(DDS::SampleStateMask sample_states,
                        DDS::ViewStateMask view_states,
                        DDS::InstanceStateMask instance_states);
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   virtual bool contains_sample_filtered(DDS::SampleStateMask sample_states,
                                         DDS::ViewStateMask view_states,
                                         DDS::InstanceStateMask instance_states,
                                         const FilterEvaluator& evaluator,
                                         const DDS::StringSeq& params) = 0;
+#endif
 
   virtual void dds_demarshal(const ReceivedDataSample& sample,
                              SubscriptionInstance*& instance,

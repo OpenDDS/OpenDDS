@@ -334,11 +334,13 @@ public:
 
   virtual void delete_instance_map (void* map);
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   bool contains_sample_filtered(DDS::SampleStateMask sample_states,
                                 DDS::ViewStateMask view_states,
                                 DDS::InstanceStateMask instance_states,
                                 const OpenDDS::DCPS::FilterEvaluator& evaluator,
                                 const DDS::StringSeq& params);
+#endif
 
  protected:
 
