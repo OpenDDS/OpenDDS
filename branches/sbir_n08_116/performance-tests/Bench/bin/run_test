@@ -10,6 +10,9 @@ use FindBin;
 my $projectRoot;
 BEGIN { $projectRoot = "$FindBin::Bin/.."; }
 
+# Find the current hostname
+use Sys::Hostname;
+
 # Use information from the environment.
 use Env qw( @LD_LIBRARY_PATH
             @LIB_PATH
@@ -38,6 +41,11 @@ unshift @SHLIB_PATH,      "$projectRoot/lib";
 if( $^O eq 'MSWin32') { unshift @PATH, "$projectRoot/lib"; }
 #
 ########################################
+
+# Locate the commands.
+unshift @PATH, "$FindBin::Bin";
+my $testprocessCommand = &findCommand('testprocess');
+my $repoCommand        = &findCommand('DCPSInfoRepo');
 
 use Getopt::Long qw( :config bundling) ;
 use Pod::Usage ;
@@ -70,12 +78,13 @@ my $repoHost;
 my $iniFile  = $projectRoot . "/etc/transport.ini";
 my $scenarios;
 my $collectStats;
+my $statsOutputDecorator = "-P.log";
 
 ########################################################################
 #
 # Process the command line.
 #
-#   -v -V -? -d -T -R -x -f -C -r -h -s -i -S -P -t
+#   -v -V -? -d -T -R -x -f -C -O -r -h -s -i -S -P -t
 #
 GetOptions( "verbose!"            => \$verbose,
             "v"                   => \$verbose,
@@ -88,6 +97,7 @@ GetOptions( "verbose!"            => \$verbose,
             "noaction|x"          => \$noaction,
             "dfile|f=s"           => \$dFile,
             "collect|C=s"         => \$collectStats,
+            "outputdecorator|O=s" => \$statsOutputDecorator,
             "rawdatafile|r=s"     => \$rawData,
             "repohost|h=s"        => \$repoHost,
             "inifile|i=s"         => \$iniFile,
@@ -112,7 +122,11 @@ $collectStats = "psn" if $collectStats =~ /al?l?/;
 print "Commands will be printed only and not executed.\n"
                                           if $verbose and $noaction;
 print "Repository will be started\n"      if $verbose and $startRepo;
+print "Repository is located at: $repoCommand\n"
+                                          if $verbose;
 print "Test process will be started\n"    if $verbose and $startTest;
+print "Test process is located at: $testprocessCommand\n"
+                                          if $verbose;
 print "Test will execute for at least $duration seconds before terminating\n"
                                           if $verbose and $duration;
 print "Test will execute continuously and not terminate\n"
@@ -147,7 +161,7 @@ my $debugFile;
 my $confFile  = $projectRoot . "/etc/svc.conf";
 
 # Clean out leftovers.
-unlink $repo_ior;
+unlink $repo_ior if $startRepo;
 unlink $debugFile if $debugFile;
 
 my $verboseDebug;
@@ -164,16 +178,16 @@ my $appDebug;
 $appDebug  = $debug if $debug;
 
 my $repoOpts = "$common_opts ";
-$repoOpts .= "-ORBListenEndpoints $repoHost " if $repoHost;
+$repoOpts .= "-ORBListenEndpoints iiop://$repoHost " if $repoHost;
 $repoOpts .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
-$repoOpts .= "-ORBLogFile $debugFile " if ($repoDebug or $transportDebug) and $debugFile;
+$repoOpts .= "-ORBLogFile $debugFile " if $debugFile;
 
 my $index = 0;
 my $testOpts = "$common_opts ";
 $testOpts .= "-v " if $verbose;
 $testOpts .= "-DCPSConfigFile $iniFile " if $iniFile;
 $testOpts .= "-DCPSDebugLevel $appDebug " if $appDebug;
-$testOpts .= "-ORBLogFile $debugFile " if ($appDebug or $transportDebug) and $debugFile;
+$testOpts .= "-ORBLogFile $debugFile " if $debugFile;
 $testOpts .= "-DCPSInfoRepo corbaloc:iiop:$repoHost/DCPSInfoRepo ";
 $testOpts .= "-d $duration " if $duration;
 $testOpts .= "-t newest -s $rawSize -r $rawData " if $rawData;
@@ -181,13 +195,15 @@ $testOpts .= "-t newest -s $rawSize -r $rawData " if $rawData;
 
 # Define the processes.
 my @PROCESSES;
-
+my $repoonly;
+my $repoArgs;
 if( $startRepo) {
-  my $repoArgs = "$repoOpts -o $repo_ior ";
+  $repoonly = 1 unless (scalar @scenario > 0);
+  $repoArgs = "$repoOpts -o $repo_ior ";
   if( PerlACE::is_vxworks_test()) {
-    push @PROCESSES, new PerlACE::ProcessVX( "$FindBin::Bin/DCPSInfoRepo", $repoArgs);
+    push @PROCESSES, new PerlACE::ProcessVX( $repoCommand, $repoArgs);
   } else {
-    push @PROCESSES, new PerlACE::Process( "$FindBin::Bin/DCPSInfoRepo", $repoArgs);
+    push @PROCESSES, new PerlACE::Process( $repoCommand, $repoArgs);
   }
 }
 
@@ -195,9 +211,9 @@ if( $startTest) {
   map {
     my $testArgs = "$testOpts -f $_ ";
     if( PerlACE::is_vxworks_test()) {
-      push @PROCESSES, new PerlACE::ProcessVX( "$FindBin::Bin/testprocess", $testArgs);
+      push @PROCESSES, new PerlACE::ProcessVX( $testprocessCommand, $testArgs);
     } else {
-      push @PROCESSES, new PerlACE::Process( "$FindBin::Bin/testprocess", $testArgs);
+      push @PROCESSES, new PerlACE::Process( $testprocessCommand, $testArgs);
     }
   } @scenario;
 }
@@ -211,15 +227,15 @@ if( $noaction) {
 # Manage statistics collection processes.
 my @COLLECTORS;
 my @HANDLES;
-&collectSystemStats( $$)  if $collectStats =~ /s/;
+&runCollector( "system", $$)  if $collectStats =~ /s/;
 
 # Start and stop the test processes.
 map {
   print "\nTEST PROCESS\n";
   print $_->CommandLine() . "\n";
   $_->Spawn();
-  &collectProcessStats( $_->{PROCESS}) if $collectStats =~ /p/;
-  &collectNetworkStats( $_->{PROCESS}) if $collectStats =~ /n/;
+  &runCollector( "process", $_->{PROCESS}) if $collectStats =~ /p/;
+  &runCollector( "network", $_->{PROCESS}) if $collectStats =~ /n/;
   if( $startRepo and PerlACE::waitforfile_timed( $repo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for repository IOR file $repo_ior.\n";
     exit 1;
@@ -229,11 +245,19 @@ map {
 # block forever if no duration was specified.
 WaitForUserInput() if not $duration;
 
+# The repo running alone will not wait the duration
+sleep $duration if $repoonly;
+
+
 # Wait for the test processes to terminate nicely.  Terminate in reverse
 # order from starting order.
 map {
-  if ($duration) {
-    $status = $_->WaitKill( $killDelay);
+  if ( $duration) {
+    if ( $startRepo && ($_->{ARGUMENTS} eq $repoArgs)) {
+      $status = $_->TerminateWaitKill( $killDelay);
+    } else {
+      $status = $_->WaitKill( $killDelay);
+    }
   } else {
     $status = $_->TerminateWaitKill( $killDelay);
   }
@@ -251,7 +275,7 @@ if( $startRepo) {
 }
 
 # Terminate the statistics collectors.
-kill 3, @COLLECTORS;
+kill 2, @COLLECTORS;
 
 # Report results.
 if( $failed == 0) {
@@ -267,6 +291,60 @@ sub WaitForUserInput {
   print "\n\nNo Duration specified.  Hit Enter to end the processes "
       . "and finish the test.\n\n";
   my $userinput = <STDIN>;
+}
+
+#
+# Search the environments command search path for a command to execute.
+# The PerlACE::Process needs to have a fully located command to operate
+# correctly, and does not honor the environment PATH.
+#
+# This is the equivalent of "return `which $command`;", but cross
+# platform.  I hope.
+#
+sub findCommand {
+  my $command = shift;
+  foreach my $location (@PATH) {
+    return "$location/$command" if -x "$location/$command";
+  }
+  die "Unable to locate command: $command for execution.";
+}
+
+#
+# Decorate the statistics gathering filename with user specified
+# information.  This can include hostname, PID, a timestamp, and other
+# static information, such as an extension.
+#
+# The decorator string is passed in and all instances of 'P' are replaced
+# with the supplied PID value, all instances of 'H' are replaced with a
+# derived hostname value, and all instances of 'T' are replaced with a
+# derived timestamp.  This is a simple substitution and no escapes are
+# allowed.
+#
+# A filename is formed by appending the suitably modified decorator to
+# the base.
+#
+sub statsFilename {
+  my ($base, $decorator, $pid) = @_;
+
+  $decorator =~/T/ && do {
+    my @now = localtime ;
+    my $timestamp = sprintf "%04d%02d%02d%02d%02d%02d",
+                      (1900+$now[5]), (1+$now[4]), $now[3],
+                      $now[2], $now[1], $now[0] ;
+    $decorator =~ s/T/$timestamp/;
+  };
+
+  $decorator =~/P/ && do {
+    $decorator =~ s/P/$pid/;
+  };
+
+  # Hostname is last since it might contain a 'P' or a 'T'.
+  $decorator =~/H/ && do {
+    my $host  = hostname;
+    $decorator =~ s/H/$host/;
+  };
+
+  return "$base$decorator";
 }
 
 #
@@ -301,59 +379,66 @@ sub collectionCommand {
     # Handle generic Unix types here.  Assume they have modern command
     # forms.  If not, add a stanza to handle them specifically above.
     return "vmstat 1"             if $type eq "system";
-    return "netstat -ntpc"        if $type eq "network";
+    return "netstat -anpc --inet" if $type eq "network";
     return "top -bd 1 -p $params" if $type eq "process";
   }
   return undef;
 }
 
-sub collectProcessStats {
-  my $pid = shift;
-  my $command = &collectionCommand( 'process', "$pid");
-  if( $pid and $command) {
-    &runCollector(
-      $command,
-      "process-$pid.log",
-      sub { # Action to process each line of input.
-        my ( $input, $output) = @_;
-        print $output localtime() . ": $input\n" if $input =~ /$pid/;
-      }
-    );
+#
+# Statistics gathering filters by system type.  This routine returns a
+# closure that will be executed for each line of output from the
+# statistics command.  Currently the optional parameters available for
+# use in the closures include the PID of the process being monitored.
+#
+sub collectionFilter {
+  my ( $type, $params) = @_;
+  OSSWITCH:{
+    $^O =~ /MSWin32/ && do { last OSSWITCH; };
+    $^O =~ /cygwin/  && do { last OSSWITCH; };
+    $^O =~ /VMS/     && do { last OSSWITCH; };
+    $^O =~ /solaris/ && do {
+      if(    $type eq 'process') { return &defaultFilter(); }
+      elsif( $type eq 'system')  { return &defaultFilter(); }
+      elsif( $type eq 'network') { return &defaultFilter(); }
+    };
   }
+
+  # All other system types.
+  if(    $type eq 'process') { return &defaultPidFilter( $params); }
+  elsif( $type eq 'system')  { return &defaultFilter(); }
+  elsif( $type eq 'network') { return &defaultPidFilter( $params); }
 }
 
-sub collectSystemStats {
-  my $pid = shift;
-  my $command = &collectionCommand( 'system');
-  if( $pid and $command) {
-    &runCollector(
-      $command,
-      "system-$pid.log",
-      sub { # Action to process each line of input.
-        my ( $input, $output) = @_;
-        print $output localtime() . ": $input\n";
-      }
-    );
-  }
+# Default filter timestamps and prints all lines.
+sub defaultFilter {
+  # Returns a closure.
+  return sub {
+    my ( $input, $output) = @_;
+    print $output localtime() . ": $input\n";
+  };
 }
 
-sub collectNetworkStats {
-  my $pid = shift;
-  my $command = &collectionCommand( 'network');
-  if( $pid and $command) {
-    &runCollector(
-      $command,
-      "network-$pid.log",
-      sub { # Action to process each line of input.
-        my ( $input, $output) = @_;
-        print $output localtime() . ": $input\n" if $input =~ /$pid/;
-      }
-    );
-  }
+# Default PID filter timestamps and prints lines containing the PID.
+sub defaultPidFilter {
+  # Returns a closure.
+  my ( $pid) = @_;
+  return sub {
+    my ( $input, $output) = @_;
+    print $output localtime() . ": $input\n" if $input =~ /$pid/;
+  };
 }
 
+# Start and attach to a statistic collector.
 sub runCollector {
-  my ( $command, $filename, $action) = @_;
+  my ( $type, $pid) = @_;
+  return if not $type or not $pid;
+
+  my $command  = &collectionCommand( $type, "$pid");
+  return if not $command;
+
+  my $filename = &statsFilename( $type, $statsOutputDecorator, $pid);
+  my $action   = &collectionFilter( $type, $pid);
 
   # Start a sub-process to collect statistics.
   my $child = open( my $handle, "-|");
@@ -384,7 +469,7 @@ sub runCollector {
     # Open and unbuffer the output.
     open( my $output, "> $filename")
       or die "Failed to open statistics output file <$filename>: $!";
-    select $output; $!=1;
+    select $output; $|=1;
 
     # Process all of the input.
     while(<STATSIN>) {
@@ -493,6 +578,9 @@ The default value is unspecified.
 Starts statistics collection for the specified TYPES.  TYPES may contain
 one or more of the values: C<n>, C<s>, and C<p>, or the collective
 specification C<all>.
+The output for any given statistic is placed in a file named as specified
+by the B<-O FORMAT> command line option.  The default is to a file with a
+basename of the TYPE and a decorator of C<-<pidE<gt>.log>.
 
 =over 8
 
@@ -500,24 +588,64 @@ specification C<all>.
 
 Causes network statistics to be gathered.  A C<netstat -ntpc> command is
 started for each test process and the output filtered by its process Id.
-The output is stored to a file named I<network-{pid}.log>.
 
 =item B<s>
 
 Causes system statistics to be gathered.  A single C<vmstat 1> command is
-started and the output stored in a file named I<system-{pid}.log>, where
-the pid value is for the test script.
+started.  If the PID value is specified as part of the statistic
+filename, the PID value for the test script process is used.
 
 =item B<p>
 
 Causes process statistics to be gathered.  A C<top -bd 1 -p {pid}>
 command is started for each test process and the output filtered by its
-process Id.  The output is stored to a file named I<process-{pid}.log>.
+process Id.
+
+=item B<all>
+
+Causes all statistics described above to be gathered.  This is a synonym
+for I<nsp>
 
 =back
 
 The default is unspecified.  This results in no statistics being
 collected.
+
+=item B<-O FORMAT> | B<--outputdecorator=FORMAT>
+
+Establishes the format of the statistics gathering output file names.
+The format is specified as a string with simple substitution performed to
+replace some characters with other information.  This is a simple
+substitution and no escapes are allowed.
+
+Statistics output filenames are formed starting with the type of
+statistic being gathered concatenated with the decorater defined here,
+expanded with the formatting information at the time of execution.  The
+types of statistics currently include C<system>, C<process>, and
+C<network>.
+
+The characters replaced in the format specification are:
+
+=over 8
+
+=item B<P>
+
+replaced with the process PID for being monitored.
+
+=item B<T>
+
+replaced with a timestamp that includes a 4 digit year, 2 digit month, 2
+digit day of month, 2 digit hour, 2 digit minute, and 2 digit second.
+The timestamp is taken near the time the statistics collection is started.
+
+=item B<H>
+
+replaced by the hostname of the machine executing the script.
+
+=back
+
+The default is "-P.log" which results in output files with names similar
+to C<system-5436.log>.
 
 =item B<-h FQDN> | B<--repohost=FQDN>
 
@@ -608,14 +736,21 @@ prints the commands that would be invoked when starting 3 test processes:
 two using the scenario1.ini specification file and one using the other.ini
 specification file.  The test would be scheduled to last for 2 minutes.
 
-=item B<bin/run_test -vd10T4VCall -s test.ini -h machine.domain.com:2112>
+=item B<bin/run_test -vd10T4VCall -O-H-T-P.log -s test.ini -h machine.domain.com:2112>
 
 starts a test process using the C<test.ini> specification file and
 expecting to connect to the repository at C<machine.domain.com:2112>.  It
 will run with C<DCPSDebugLevel> of 10, C<DCPSTransportDebugLevel> of 4,
 C<ORBVerboseLogging> enabled and both the script and test process will
 execute in verbose mode.  The log output will be directed to the standard
-output.  All statistics - system, network, and process - will be gathered.
+output.
+
+All statistics - system, network, and process - will be gathered.
+Statistics will be placed in files named using the statistic type, the
+hostname, a timestamp, and the PID of the monitored process.  These
+filenames will appear as: C<system-<hostE<gt>-<timeE<gt>-<pidE<gt>.log>,
+C<process-<hostE<gt>-<timeE<gt>-<pidE<gt>.log>, and
+C<network-<hostE<gt>-<timeE<gt>-<pidE<gt>.log>.
 
 =back
 

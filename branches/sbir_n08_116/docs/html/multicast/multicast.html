@@ -532,7 +532,7 @@ TertiaryDark: #666
 Error: #f88
 </pre>
 </div>
-<div title="Configuration" modifier="StevenStallion" created="200912011939" modified="201002022149" changecount="36">
+<div title="Configuration" modifier="ScottHarris" created="200912011939" modified="201004262037" changecount="37">
 <pre>As with other transports, dynamic configuration is provided by the ACE Service Configurator Framework. A svc.conf file should be created which contains the following:
 {{{
 dynamic OpenDDS_DCPS_Multicast_Service Service_Object * OpenDDS_Multicast:_make_MulticastLoader()
@@ -598,6 +598,10 @@ nak_interval=500
 # on a repair response (reliable only).
 # The default value is: 30000 (30 seconds).
 nak_timeout=30000
+
+# Set the time-to-live value.
+# The default value isL 1 (local subnet)
+ttl=1
 }}}
 Default examples of these files are provided under: {{{$DDS_ROOT/dds/DCPS/transport/multicast/}}}.</pre>
 </div>

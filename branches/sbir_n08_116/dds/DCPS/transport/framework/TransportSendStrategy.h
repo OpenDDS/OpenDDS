@@ -350,6 +350,8 @@ private:
 
   /// Cached allocator for TransportReplaceElement.
   TransportReplacedElementAllocator replaced_element_allocator_;
+  MessageBlockAllocator replaced_element_mb_allocator_;
+  DataBlockAllocator replaced_element_db_allocator_;
 
   /// Cached allocator for TransportRetainedElements used by reliable
   /// datagram transports to retain PDUs after they have been sent.  This
