@@ -1,3 +1,20 @@
+Sat May 01 00:59:12 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/gen-latency-tables.pl:
+        * performance-tests/Bench/bin/gen-run-info-table.pl:
+        * performance-tests/Bench/bin/gen-throughput-tables.pl:
+        * performance-tests/Bench/bin/generate-perf-html.sh:
+        * performance-tests/Bench/tools/formatting.css:
+
+          Adding scripts for generating html pages from results.
+
+        * performance-tests/Bench/bin/extract-throughput.pl:
+        * performance-tests/Bench/bin/plot-throughput-testformats.gp:
+        * performance-tests/Bench/bin/plot-throughput-transports.gp:
+
+          Changed the output of extract-throughput.pl to use commas and added
+          test type and transport fields.
+
 Wed Apr 28 21:15:01 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/gen-latency-stats.pl:
@@ -202,7 +219,6 @@ Wed Apr 21 19:25:35 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
           Added static initialization feature for static builds.
 
->>>>>>> .r3230
 Mon Apr 19 23:50:09 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/tests/latency/run_test.pl:

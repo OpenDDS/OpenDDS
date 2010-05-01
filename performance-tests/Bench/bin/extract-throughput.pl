@@ -168,15 +168,17 @@ sub print_header {
 }
 
 sub dataline {
-  my $dataline = shift;
-  my $scale    = shift || 8;
+  my $dataline  = shift;
+  my $scale     = shift || 8;
+  my $type      = shift || "NoType";
+  my $transport = shift || "NoTransport";
   return "# NO DATA\n"        if not $dataline;
   return "# NO SIZE\n"        if not $dataline->{size};
   return "# NO RATE\n"        if not $dataline->{rate};
   return "# NO MEASUREMENT\n" if not $dataline->{actual};
-  return "$dataline->{size} $dataline->{rate} "
+  return "$dataline->{size},$dataline->{rate},"
        . ($dataline->{actual} * $dataline->{size} * $scale / ($dataline->{time} || 120))
-       . "\n";
+       . ",$type,$transport\n";
 }
 
 END {
@@ -201,7 +203,7 @@ END {
         my $subtype = [ "steepest ascent", "fixed rate", "fixed size"]->[$current];
         &print_header( $index++, $transport, &testName($type), $subtype);
         foreach my $test (@{$groups->[$current]}) {
-          print &dataline( $data->{$type}->{$transport}->{$test}, $scale);
+          print &dataline( $data->{$type}->{$transport}->{$test}, $scale, $type, $transport);
         }
         print "\n\n";
       }

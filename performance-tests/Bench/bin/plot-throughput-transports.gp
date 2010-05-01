@@ -2,7 +2,7 @@
 #   $0 - datafile name
 #   $1 - output directory
 
-set datafile separator whitespace
+set datafile separator ","
 set grid
 set autoscale
 set key below
@@ -13,9 +13,11 @@ set format y  "%.1s%cbps"
 
 # # 1Gbps network
 # capacity=1000000000
+# ftpspeed=595000000
 
 # 100Mbps network
 capacity=100000000
+ftpspeed=89600000
 
 set xlabel 'Message Size (bytes)'
 set x2label 'Message Rate (samples per second)'
