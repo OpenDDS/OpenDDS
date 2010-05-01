@@ -484,6 +484,8 @@ public:
                                   const CORBA::Long& ownership_strength);
 
   virtual void delete_instance_map (void* map) = 0;
+  virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                               OpenDDS::DCPS::SubscriptionInstance*& instance) = 0;
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   void enable_filtering(ContentFilteredTopicImpl* cft);

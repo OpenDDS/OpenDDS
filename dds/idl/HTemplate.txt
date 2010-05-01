@@ -342,6 +342,9 @@ public:
                                 const DDS::StringSeq& params);
 #endif
 
+  virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                               OpenDDS::DCPS::SubscriptionInstance*& instance);
+  
  protected:
 
     virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,

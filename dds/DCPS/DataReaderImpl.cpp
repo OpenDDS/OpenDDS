@@ -1447,13 +1447,22 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   case DISPOSE_INSTANCE: {
     this->writer_activity(sample.header_);
     SubscriptionInstance* instance = 0;
-    this->dispose(sample, instance);
- 
+    
     if (this->watchdog_.get()) {
-      if (! this->is_exclusive_ownership_ || instance != 0) {
+      // Find the instance first for timer cancellation since 
+      // the instance may be deleted during dispose and can 
+      // not be accessed.
+      this->lookup_instance (sample, instance);
+      if (! this->is_exclusive_ownership_ 
+         || (this->is_exclusive_ownership_
+             && (instance != 0 )
+             && (this->owner_manager_->is_owner (instance->instance_handle_,
+                                                sample.header_.publication_id_)))) {
         this->watchdog_->cancel_timer(instance);
       }
     }
+    instance = 0;
+    this->dispose(sample, instance);
   }
   this->notify_read_conditions();
   break;
@@ -1461,13 +1470,22 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   case UNREGISTER_INSTANCE: {
     this->writer_activity(sample.header_);
     SubscriptionInstance* instance = 0;
-    this->unregister(sample, instance);
 
     if (this->watchdog_.get()) {
-      if (! this->is_exclusive_ownership_ || instance != 0) {
+      // Find the instance first for timer cancellation since 
+      // the instance may be deleted during dispose and can 
+      // not be accessed.
+      
+      this->lookup_instance (sample, instance);
+      if (! this->is_exclusive_ownership_ 
+         || (this->is_exclusive_ownership_ 
+             && (instance != 0 )
+             && instance->instance_state_.is_last (sample.header_.publication_id_))) {
         this->watchdog_->cancel_timer(instance);
       }
     }
+    instance = 0;    
+    this->unregister(sample, instance);
   }
   this->notify_read_conditions();
   break;
@@ -1811,6 +1829,10 @@ DataReaderImpl::handle_timeout(const ACE_Time_Value &tv,
 void
 DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 {
+  if (this->is_exclusive_ownership_) {
+    this->owner_manager_->remove_writers (handle);
+  }
+
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
   SubscriptionInstance* instance = this->get_handle_instance(handle);
 

@@ -124,6 +124,9 @@ public:
   bool registered();
   void registered (bool flag);
   DataReaderImpl* get_reader () const;
+  bool is_last (const PublicationId& pub);
+  
+  bool no_writer () const;
   
 private:
   ACE_Recursive_Thread_Mutex& lock_;
