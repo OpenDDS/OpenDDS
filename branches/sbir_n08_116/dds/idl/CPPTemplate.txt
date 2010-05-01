@@ -1586,6 +1586,36 @@ void
   store_instance_data(data, sample.header_, instance, just_registered, filtered);
 }
 
+
+void
+<%TYPE%>DataReaderImpl::lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                                        OpenDDS::DCPS::SubscriptionInstance*& instance)
+{
+  //!!! caller should already have the sample_lock_
+    
+  ::<%SCOPED%> data;
+
+  ::OpenDDS::DCPS::Serializer ser(
+    sample.sample_,
+    sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+
+  ser >> data;
+
+  DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
+  InstanceMap::const_iterator const it = instance_map_.find(data);
+  if (it != instance_map_.end()) {
+    handle = it->second;
+  }
+  
+  if (handle == ::DDS::HANDLE_NIL) {
+    instance = 0;
+  }
+  else {
+    instance = get_handle_instance(handle);
+  }
+}
+
+
 void
 <%TYPE%>DataReaderImpl::store_instance_data(
     ::<%SCOPED%> *instance_data,
