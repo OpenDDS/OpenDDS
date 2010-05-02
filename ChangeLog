@@ -1,3 +1,10 @@
+Sun May 02 06:00:41 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/gen-run-info-table.pl:
+        * performance-tests/Bench/bin/generate-perf-html.sh:
+
+          Fixed typos and adjusted archive to not fail on missing directory.
+
 Sat May 01 00:59:12 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/bin/gen-latency-tables.pl:

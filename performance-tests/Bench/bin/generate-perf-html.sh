@@ -91,7 +91,7 @@ store_result_files ()
 {
   pushd $BASEDIR
 
-  tar -czf $OUTDIR/perf_tests_logs_$DATE.tar.gz \
+  tar --ignore-failed-read -czf $OUTDIR/perf_tests_logs_$DATE.tar.gz \
     tests/latency/tcp \
     tests/latency/udp \
     tests/latency/multi-rel \
@@ -174,7 +174,7 @@ process_images ()
 
   for imgfile in `ls *.png`
   do
-    convert $imgfile -scale 200x $OUTDIR/thumbnails/$imgfile
+    convert $imgfile -scale 200x $OUTDIR/images/thumbnails/$imgfile
   done
 
   popd
