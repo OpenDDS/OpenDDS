@@ -93,6 +93,9 @@ public:
   bool contains_sample_filtered(DDS::SampleStateMask, DDS::ViewStateMask,
     DDS::InstanceStateMask, const OpenDDS::DCPS::FilterEvaluator&,
     const DDS::StringSeq&) { return true; }
+  virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample&,
+                               OpenDDS::DCPS::SubscriptionInstance*&) {}
+
 };
 
 class MyDataWriterImpl :  public virtual OpenDDS::DCPS::DataWriterImpl

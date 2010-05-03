@@ -1,13 +1,20 @@
+Mon May  3 03:46:34 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+        
+          Fixed a compilation error due to pure virtual function not 
+          implemented.
+
 Sat May  1 17:34:52 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:
         * dds/idl/HTemplate.txt:
-        
+
           Added new method lookup_instance() to get instance pointer
           without changing any state. This is called to find instance
           for RequestedDeadlineWatchdog to cancel timer upon unregister
-          or dispose before concrete datawriter handling unregister or 
-          dispose which might delete the instance. 
+          or dispose before concrete datawriter handling unregister or
+          dispose which might delete the instance.
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
@@ -16,7 +23,7 @@ Sat May  1 17:34:52 UTC 2010  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/OwnershipManager.cpp:
 
           Fixed memory overwrite issues in ownership implementation.
-          
+
 Fri Apr 30 20:41:15 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * bin/performance_tests.lst:
