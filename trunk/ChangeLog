@@ -1,3 +1,25 @@
+Tue May 04 20:42:29 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/plot-density.gp:
+        * performance-tests/Bench/bin/plot-quantiles.gp:
+        * performance-tests/Bench/bin/plot-test-results.sh:
+        * performance-tests/Bench/bin/generate-perf-html.sh:
+        * performance-tests/Bench/bin/generate-test-results.sh:
+
+          Adding scripts to generate html files from results.
+
+        * performance-tests/Bench/tests/latency/run_test.pl:
+
+          Corrected name of the multicast best effort output directory.
+
+        * performance-tests/Bench/tests/thru/run_test.pl:
+
+          Removed extra time added for the client side.
+
+        * performance-tests/Bench/tools/plot-latency.gp:
+
+          Changed order so gnuplot 4.4 plot is called last.
+
 Sun May 02 06:00:41 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/bin/gen-run-info-table.pl:
