@@ -12,15 +12,17 @@ usage ()
 {
   echo "Usage: `basename $0` <bench_directory> <destination_directory>"
   echo ""
-  echo "bench_directory       This is the location of the Bench performance"
-  echo "                      tests directory."
-  echo "                      e.g. \$DDS_ROOT/performance-tests/Bench"
-  echo "destination_directory This designates the location of the generated html."
+  echo "bench_directory         This is the location of the Bench performance"
+  echo "                        tests directory."
+  echo ""
+  echo "destination_directory   This designates the location of the generated"
+  echo "                        html."
   echo ""
   echo "Options must be specified in the order shown above."
   echo ""
-  echo "Example:"
+  echo "Examples:"
   echo "`basename $0` $DDS_ROOT/performance-tests/Bench /var/www/html/perf"
+  echo "`basename $0` /home/tester/perf-tests /home/tester/perf-results"
   exit
 }
 
@@ -60,22 +62,22 @@ parse_input ()
 create_output_directory ()
 {
   if ! [ -d "$OUTDIR" ]; then
-    mkdir -p $OUTDIR
+    mkdir -p "$OUTDIR"
     echo "Created  $OUTDIR"
   fi
 
   if ! [ -d "$OUTDIR/images" ]; then
-    mkdir -p $OUTDIR/images
+    mkdir -p "$OUTDIR/images"
     echo "Created  $OUTDIR/images"
   fi
 
   if ! [ -d "$OUTDIR/images/thumbnails" ]; then
-    mkdir -p $OUTDIR/images/thumbnails
+    mkdir -p "$OUTDIR/images/thumbnails"
     echo "Created  $OUTDIR/images/thumbnails"
   fi
 
   if ! [ -e "$OUTDIR/formatting.css" ]; then
-    cp $BASEDIR/tools/formatting.css $OUTDIR/formatting.css
+    cp "$BASEDIR/tools/formatting.css" "$OUTDIR/formatting.css"
   fi
 }
 
@@ -89,9 +91,9 @@ create_output_directory ()
 ###############################################################################
 store_result_files () 
 {
-  pushd $BASEDIR
+  pushd "$BASEDIR"
 
-  tar --ignore-failed-read -czf $OUTDIR/perf_tests_logs_$DATE.tar.gz \
+  tar --ignore-failed-read -czf "$OUTDIR/perf_tests_logs_$DATE.tar.gz" \
     tests/latency/tcp \
     tests/latency/udp \
     tests/latency/multi-rel \
@@ -109,29 +111,12 @@ store_result_files ()
 #
 # process_latency_test
 #
-# Generate the stats and graphs for the latency test and place in the output
-# directory.
+# Generate the tables for the latency test.
 #
 ###############################################################################
 process_latency_test ()
 {
-  pushd $BASEDIR/tests/latency/
-
-  mkdir -p data images
-
-  bash $DDS_ROOT/performance-tests/Bench/tools/convert-latency
-
-  gnuplot $DDS_ROOT/performance-tests/Bench/tools/plot-latency.gp
-
-#older version
-# bash -x $DDS_ROOT/performance-tests/Bench/tools/convert-all
-# gnuplot $DDS_ROOT/performance-tests/Bench/tools/plot-all.gp
-
-  bash $DDS_ROOT/performance-tests/Bench/bin/gen-latency-tables.pl data/latency.csv
-
-  cp images/*.png $OUTDIR/images
-
-  popd
+  $DDS_ROOT/performance-tests/Bench/bin/gen-latency-tables.pl "$BASEDIR/tests/latency/data/latency.csv"
 }
 
 
@@ -139,25 +124,12 @@ process_latency_test ()
 #
 # process_throughput_test
 #
-# Generate the stats and graphs for the thru test and place in the output
-# directory.
+# Generate the tables for the thru test.
 #
 ###############################################################################
 process_throughput_test ()
 {
-  pushd $BASEDIR/tests/thru/
-
-  mkdir -p data images
-
-  bash $DDS_ROOT/performance-tests/Bench/bin/extract-throughput.pl */*.results > data/throughput.csv
-
-  gnuplot $DDS_ROOT/performance-tests/Bench/tools/plot-throughput.gp
-
-  bash $DDS_ROOT/performance-tests/Bench/bin/gen-throughput-tables.pl data/throughput.csv
-
-  cp images/*.png $OUTDIR/images
-
-  popd
+  $DDS_ROOT/performance-tests/Bench/bin/gen-throughput-tables.pl "$BASEDIR/tests/thru/data/throughput.csv"
 }
 
 
@@ -170,11 +142,17 @@ process_throughput_test ()
 ###############################################################################
 process_images ()
 {
-  pushd $OUTDIR/images
+  pushd "$OUTDIR/images"
 
   for imgfile in `ls *.png`
   do
-    convert $imgfile -scale 200x $OUTDIR/images/thumbnails/$imgfile
+    if [ -s "$imgfile" ]; then
+      convert "$imgfile" -scale 200x "$OUTDIR/images/thumbnails/$imgfile"
+    else
+      # remove empty files - they usually are a result of a plotting failure
+      echo "Removing zero length file:  $imgfile"
+      rm -f "$imgfile"
+    fi
   done
 
   popd
@@ -253,7 +231,7 @@ generate_latency_html ()
   echo '  <td class="graph_thumbnails"><a href="images/udp-density.png"><img src="images/thumbnails/udp-density.png" alt="UDP Latency Density - all sizes"><br>UDP Latency Density - all sizes</a>'
   echo '  <td class="graph_thumbnails"><a href="images/mbe-density.png"><img src="images/thumbnails/mbe-density.png" alt="Best Effort Multicast Latency Density - all sizes"><br>Best Effort Multicast Latency Density - all sizes</a>'
   echo '  <td class="graph_thumbnails"><a href="images/mrel-density.png"><img src="images/thumbnails/mrel-density.png" alt="Reliable Multicast Latency Density - all sizes"><br>Reliable Multicast Latency Density - all sizes</a></tr>'
-  for sz in "50 100 250 500 1000 2500 5000 8000 16000 32000"
+  for sz in 50 100 250 500 1000 2500 5000 8000 16000 32000
   do
     echo '<tr class="graph_thumbnails">'
     echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-tcp-$sz.png\"><img src=\"images/thumbnails/latency-tcp-$sz.png\" alt=\"TCP Latency - $sz bytes\"><br>TCP Latency - $sz bytes</a>"
@@ -267,19 +245,19 @@ generate_latency_html ()
 
   # latency data tables
   if [ -e "$BASEDIR/tests/latency/data/latency-html-tables.txt" ]; then
-    cat $BASEDIR/tests/latency/data/latency-html-tables.txt
+    cat "$BASEDIR/tests/latency/data/latency-html-tables.txt"
     echo '<br />'
   fi
 
   # jitter data tables
   if [ -e "$BASEDIR/tests/latency/data/jitter-html-tables.txt" ]; then
-    cat $BASEDIR/tests/latency/data/jitter-html-tables.txt
+    cat "$BASEDIR/tests/latency/data/jitter-html-tables.txt"
     echo '<br />'
   fi
 
   # normalized jitter data tables
   if [ -e "$BASEDIR/tests/latency/data/normaljitter-html-tables.txt" ]; then
-    cat $BASEDIR/tests/latency/data/normaljitter-html-tables.txt
+    cat "$BASEDIR/tests/latency/data/normaljitter-html-tables.txt"
     echo '<br />'
   fi
 
@@ -357,7 +335,7 @@ generate_throughput_html ()
 
   # data tables
   if [ -e "$BASEDIR/tests/thru/data/throughput-html-tables.txt" ]; then
-    cat $BASEDIR/tests/thru/data/throughput-html-tables.txt
+    cat "$BASEDIR/tests/thru/data/throughput-html-tables.txt"
     echo '<br />'
   fi
 
@@ -442,7 +420,6 @@ DATE=$(date +%Y%m%d)
 export PATH=$DDS_ROOT/performance-tests/Bench/bin:$PATH
 RUNINFO_HTML=`bash $DDS_ROOT/performance-tests/Bench/bin/gen-run-info-table.pl $DATE`
 
-
 parse_input $@
 
 create_output_directory
@@ -453,10 +430,17 @@ process_latency_test
 
 process_throughput_test
 
+
+$DDS_ROOT/performance-tests/Bench/bin/generate-test-results.sh "$BASEDIR"
+
+
+$DDS_ROOT/performance-tests/Bench/bin/plot-test-results.sh "$BASEDIR" "$OUTDIR/images"
+
+
 process_images
 
-generate_latency_html > $OUTDIR/latency.html
+generate_latency_html > "$OUTDIR/latency.html"
 
-generate_throughput_html > $OUTDIR/throughput.html
+generate_throughput_html > "$OUTDIR/throughput.html"
 
-generate_main_html > $OUTDIR/index.html
+generate_main_html > "$OUTDIR/index.html"

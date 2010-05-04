@@ -226,7 +226,6 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
         unlink $dcpsrepo_ior;
     } else {
         # add extra run time for waiting after the repo is created
-        $run_time += 15;
         $Subscriber = PerlDDS::create_process
               ("$bench_location/bin/run_test",
                "$common_args -t $run_time -s $sub_config_file");
