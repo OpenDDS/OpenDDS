@@ -1,3 +1,11 @@
+Tue May 04 23:31:01 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/tests/thru/run_test.pl:
+
+          Adjusted so the run_test.pl timeout is longer than the run_test
+          timeout.  This should stop stranding testprocesses waiting on the
+          multicast transports.
+
 Tue May 04 20:42:29 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/bin/plot-density.gp:

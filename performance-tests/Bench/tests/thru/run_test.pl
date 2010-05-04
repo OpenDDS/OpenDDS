@@ -217,7 +217,7 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
             exit 1;
         }
 
-        $PublisherResult = $Publisher->WaitKill ($run_time + 60);
+        $PublisherResult = $Publisher->WaitKill ($run_time + 70);
         if ($PublisherResult != 0) {
             print STDERR "ERROR: publisher returned $PublisherResult \n";
             $status = 1;
@@ -233,7 +233,7 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
         print $Subscriber->CommandLine(). "\n";
         $Subscriber->Spawn ();
 
-        $SubscriberResult = $Subscriber->WaitKill ($run_time + 60);
+        $SubscriberResult = $Subscriber->WaitKill ($run_time + 70);
         if ($SubscriberResult != 0) {
             print STDERR "ERROR: subscriber returned $SubscriberResult \n";
             $status = 1;
