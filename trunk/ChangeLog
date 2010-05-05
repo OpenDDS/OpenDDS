@@ -1,3 +1,18 @@
+Wed May  5 17:14:34 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        
+          Moved the publisher->remove_associations call out of DataWriter
+          locking scope to fix a deadlock issue due to reverse locking with 
+          DataWriter lock and TransportImpl lock when remove/add associations
+          are handled concurrently.
+          
+        * dds/DCPS/transport/framework/DataLink.cpp:
+          
+          Added locking for pub_map_.release_subscriber to make pub_map_
+          update synchronized. This is a potential cause for a SEGV due
+          to ReceiveListenerSet destructed during remove_associations.
+            
 Tue May 05 06:31:35 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/tests/thru/run_test.pl:
