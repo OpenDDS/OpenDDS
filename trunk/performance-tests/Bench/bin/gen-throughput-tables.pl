@@ -38,8 +38,11 @@ sub transportName {
   # Lookup table for transport types.
   my $type = shift;
   return "UNKNOWN TRANSPORT TYPE"  if not $type;
+  return "TCP"      if $type eq "tcp";
   return "TCP"      if $type eq "SimpleTcp";
+  return "Multicast Best Effort"  if $type eq "mbe";
   return "Multicast Best Effort"  if $type eq "best effort multicast";
+  return "Multicast Reliable" if $type eq "mre";
   return "Multicast Reliable" if $type eq "reliable multicast";
   return "UDP" if $type eq "udp";
   return "UNKNOWN TRANSPORT TYPE";
@@ -75,7 +78,7 @@ die "Unable to open output: $thru_filename - $!"
           print THROUT "<tr class=\"data_tables\">" .
                        "<td class=\"data_tables\">$size</td>" .
                        "<td class=\"data_tables\">$rate</td>" .
-                       "<td class=\"data_tables\">" . $data->{$type}->{$transport}->{$size}->{$rate} . "</td>" .
+                       "<td class=\"data_tables\">" . sprintf("%.2e", $data->{$type}->{$transport}->{$size}->{$rate}) . "</td>" .
                        "<td class=\"data_tables\">" .
                        sprintf("%.2e", 100 * $data->{$type}->{$transport}->{$size}->{$rate} / $test_max) . "</td></tr>\n";
 

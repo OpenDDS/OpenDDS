@@ -1,3 +1,10 @@
+Wed May 05 23:16:41 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/gen-latency-tables.pl:
+        * performance-tests/Bench/bin/gen-throughput-tables.pl:
+
+          Corrected transport name recognition.
+
 Wed May 05 20:15:51 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/bin/generate-perf-html.sh:
