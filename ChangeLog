@@ -1,3 +1,10 @@
+Wed May 05 20:15:51 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/generate-perf-html.sh:
+
+          Corrected order of commands to generate tables _after_ the data
+          was processed.  Added in missing test run information.
+ 
 Wed May  5 17:14:34 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

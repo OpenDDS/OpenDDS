@@ -261,6 +261,9 @@ generate_latency_html ()
     echo '<br />'
   fi
 
+  # run information
+  echo "$RUNINFO_HTML"
+
   echo '</body>'
   echo '</html>'
 }
@@ -339,6 +342,9 @@ generate_throughput_html ()
     echo '<br />'
   fi
 
+  # run information
+  echo "$RUNINFO_HTML"
+
   echo '</body>'
   echo '</html>'
 }
@@ -407,6 +413,9 @@ generate_main_html ()
     echo '<br />'
   fi
 
+  # run information
+  echo "$RUNINFO_HTML"
+
   echo '</body>'
   echo '</html>'
 }
@@ -426,16 +435,13 @@ create_output_directory
 
 store_result_files
 
+$DDS_ROOT/performance-tests/Bench/bin/generate-test-results.sh "$BASEDIR"
+
 process_latency_test
 
 process_throughput_test
 
-
-$DDS_ROOT/performance-tests/Bench/bin/generate-test-results.sh "$BASEDIR"
-
-
 $DDS_ROOT/performance-tests/Bench/bin/plot-test-results.sh "$BASEDIR" "$OUTDIR/images"
-
 
 process_images
 
