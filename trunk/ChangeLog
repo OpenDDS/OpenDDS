@@ -1,3 +1,10 @@
+Tue May 05 06:31:35 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/tests/thru/run_test.pl:
+
+          Corrected typo that loaded incorrect configuration for multicast
+          best effort.
+
 Tue May 04 23:31:01 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/tests/thru/run_test.pl:

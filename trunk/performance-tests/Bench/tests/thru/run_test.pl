@@ -163,7 +163,7 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
     my $run_time = 120;
     $status = 0;
     $pub_config_file = $pub_rel_config_files[$starting_test_number - 1];
-    if (($transport_type eq 'udp') || ($transport_type eq 'multibe')){
+    if (($transport_type eq 'udp') || ($transport_type eq 'multi-be')){
         $pub_config_file = $pub_be_config_files[$starting_test_number - 1];
     }
 
