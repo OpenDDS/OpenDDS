@@ -1,3 +1,9 @@
+Thu May 06 23:28:13 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/tests/thru/run_test.pl:
+
+          Added remove of repo ior file before spawning.
+
 Wed May 05 23:16:41 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/bin/gen-latency-tables.pl:

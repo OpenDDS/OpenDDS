@@ -197,6 +197,8 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
     my $common_args = "-P -h $repo_host:$port1 -i $trans_config_file ";
 
     if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
+        unlink $dcpsrepo_ior;
+
         $Publisher = PerlDDS::create_process
                   ("$bench_location/bin/run_test",
                    "$common_args -t $run_time -S -s $pub_config_file -v -f bidir$starting_test_number.results");
