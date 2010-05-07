@@ -43,7 +43,10 @@ OpenDDS::DCPS::QueueRemoveVisitor::visit_element_remove(TransportQueueElement* e
 
     // Inform the element that we've made a decision - and it is
     // data_dropped() by transport.
-    this->sample_.released (element->data_dropped(true));
+    // This visitor is used in TransportSendStrategy::do_remove_sample
+    // The dropped_by_transport flag should be false(default) as the
+    // data_dropped is resulted from writer's remove_sample call.
+    this->sample_.released (element->data_dropped());
 
     // Adjust our status_ to indicate that we actually found (and removed)
     // the sample.

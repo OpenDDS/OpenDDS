@@ -1,19 +1,29 @@
+Fri May  7 16:03:44 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
+        
+          Reverted changes made in last commit and added comments
+          for dropped_by_transport flag used. These changes in last 
+          commit do not affect the duplicate message issue.
+
 Fri May  7 01:40:13 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportQueueElement.inl:
 
-          Fixed a bug that incorrectly callback 
+          Fixed a bug that incorrectly callback
           data_dropped(dropped_by_transport=false) when one link
-          drops sample and other links deliver successfully. It was 
+          drops sample and other links deliver successfully. It was
           corrected to call data_dropped(true). This fixed duplicate
           message issue caused by a lost link.
-          
+
         * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
         * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
-        
+
           Corrected dropped_by_transport flag passed to data_dropped
           callback.
-          
+
 Thu May 06 23:28:13 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/tests/thru/run_test.pl:
