@@ -42,8 +42,8 @@ OpenDDS::DCPS::QueueRemoveVisitor::visit_element_remove(TransportQueueElement* e
     this->removed_bytes_ += element->msg()->total_length();
 
     // Inform the element that we've made a decision - and it is
-    // data_dropped()
-    this->sample_.released (element->data_dropped());
+    // data_dropped() by transport.
+    this->sample_.released (element->data_dropped(true));
 
     // Adjust our status_ to indicate that we actually found (and removed)
     // the sample.

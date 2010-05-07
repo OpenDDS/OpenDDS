@@ -51,8 +51,10 @@ bool
 OpenDDS::DCPS::TransportQueueElement::data_delivered()
 {
   DBG_ENTRY_LVL("TransportQueueElement","data_delivered",6);
-  bool dropped = false;
-  return this->decision_made(dropped);
+  // Decision made depend on dropped_ flag. If any link drops
+  // the sample even other links deliver successfully, the
+  // data dropped by transport will called back to writer.
+  return this->decision_made(this->dropped_);
 }
 
 ACE_INLINE
