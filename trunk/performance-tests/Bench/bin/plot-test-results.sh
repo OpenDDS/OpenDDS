@@ -132,6 +132,7 @@ plot_throughput_results ()
       call "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-testformats.gp"  "$DATADIR/throughput.csv" "$OUTDIR"
       # Plotting transport charts
       call "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-transports.gp"  "$DATADIR/throughput.csv" "$OUTDIR"
+      call "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-transports.gp"  "$DATADIR/throughput.csv" "$OUTDIR" "smooth acspline"
       exit
 EOF
   else

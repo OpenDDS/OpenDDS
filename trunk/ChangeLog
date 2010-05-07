@@ -1,3 +1,12 @@
+Fri May 07 22:48:44 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/plot-test-results.sh:
+        * performance-tests/Bench/bin/plot-throughput-transports.gp:
+
+          Corrected graph mapping and changed to graph with simple lines by
+          default and try to graph with smooth on a second pass to ensure
+          that graphs are drawn even when one set of data is missing.
+
 Fri May  7 16:03:44 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
