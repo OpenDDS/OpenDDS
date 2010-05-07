@@ -458,8 +458,9 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Tell original element that data_dropped().\n"));
 
-    // Tell the original element (that we replaced), data_dropped().
-    this->sample_.released (orig_elem->data_dropped());
+    // Tell the original element (that we replaced), data_dropped()
+    // by transport.
+    this->sample_.released (orig_elem->data_dropped(true));
     
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Return 0 to halt visitation.\n"));
