@@ -38,6 +38,11 @@ OpenDDS::DCPS::RemoveAllVisitor::visit_element_remove(TransportQueueElement* ele
 
   // Inform the element that we've made a decision - and it is
   // data_dropped()
+  // This visitor is used in TransportSendStrategy::clear and 
+  // TransportSendBuffer::release. In formal case, the sample 
+  // is dropped by transport. In the later case, the 
+  // dropped_by_transport is not used as the sample is cloned 
+  // and no callback is made to writer.
   element->data_dropped(true);
 
   // Adjust our status_ to indicate that we actually found (and removed)
