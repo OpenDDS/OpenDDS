@@ -105,7 +105,7 @@ plot capacity with lines t 'Network Capacity',\
 
 set terminal push
 set terminal png size 1000,750
-set output '$1/thru-bemc.png'
+set output '$1/thru-mbe.png'
 replot
 set output
 set terminal pop
@@ -124,7 +124,7 @@ plot capacity with lines t 'Network Capacity',\
 
 set terminal push
 set terminal png size 1000,750
-set output '$1/thru-rmc.png'
+set output '$1/thru-mrel.png'
 replot
 set output
 set terminal pop
