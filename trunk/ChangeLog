@@ -1,3 +1,10 @@
+Mon May 10 06:37:48 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/bin/plot-throughput-transports.gp:
+
+          Adjusted name of mulitcast plot files to be similar to latency
+          and to fit the existing html.
+
 Fri May 07 22:59:20 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/bin/generate-perf-html.sh:
