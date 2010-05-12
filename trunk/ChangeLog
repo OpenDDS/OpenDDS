@@ -1,3 +1,12 @@
+Wed May 12 21:02:47 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+
+          Fixed bugs in QueueRemoveVisitor::visit_element_remove and
+          PacketRemoveVisitor::visit_element_ref that access samples
+          after it's released.
+
 Wed May 12 03:50:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/lj-plots.gpi:
