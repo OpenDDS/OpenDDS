@@ -52,7 +52,7 @@ OpenDDS::DCPS::QueueRemoveVisitor::visit_element_remove(TransportQueueElement* e
     // the sample.
     this->status_ = 1;
 
-    if (this->sample_.msg() != 0) {
+    if (this->sample_.released() || this->sample_.msg() != 0) {
       // Stop visitation since we've handled the element that matched
       // our sample_.
       // N.B. This test means that if we are comparing by sample, we

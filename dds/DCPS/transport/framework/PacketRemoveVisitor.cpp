@@ -470,7 +470,7 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Return 0 to halt visitation.\n"));
 
-    if (this->sample_.msg() != 0) {
+    if (this->sample_.released() ||  this->sample_.msg() != 0) {
       // Replace a single sample if one is specified, otherwise visit the
       // entire queue replacing each sample with the specified
       // publication Id value.
