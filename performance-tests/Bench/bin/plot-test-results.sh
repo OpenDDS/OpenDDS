@@ -69,8 +69,8 @@ plot_latency_results ()
   if [ -e "$DATADIR/latency.csv" ]; then
     # Plotting summary charts
     gnuplot <<EOF
-      call "$DDS_ROOT/performance-tests/Bench/bin/plot-transports.gp"  "$DATADIR/latency.csv" "$OUTDIR/transport-latency"
-      call "$DDS_ROOT/performance-tests/Bench/bin/plot-jitter.gp"  "$DATADIR/latency.csv" "$OUTDIR/transport-jitter"
+      call "$DDS_ROOT/performance-tests/Bench/bin/plot-transports.gpi"  "$DATADIR/latency.csv" "$OUTDIR/transport-latency"
+      call "$DDS_ROOT/performance-tests/Bench/bin/plot-jitter.gpi"  "$DATADIR/latency.csv" "$OUTDIR/transport-jitter"
       exit
 EOF
 
@@ -78,13 +78,13 @@ EOF
     do
       gnuplot <<EOF
         # Plotting TCP charts
-        call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gp" "$DATADIR/latency-tcp-$sz.gpd" "$DATADIR/latency-tcp-$sz.stats" "$OUTDIR/latency-tcp-$sz.png" "TCP / Message Size $sz bytes"
+        call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gpi" "$DATADIR/latency-tcp-$sz.gpd" "$DATADIR/latency-tcp-$sz.stats" "$OUTDIR/latency-tcp-$sz.png" "TCP / Message Size $sz bytes"
         # Plotting UDP charts
-        call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gp" "$DATADIR/latency-udp-$sz.gpd" "$DATADIR/latency-udp-$sz.stats" "$OUTDIR/latency-udp-$sz.png" "UDP / Message Size $sz bytes"
+        call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gpi" "$DATADIR/latency-udp-$sz.gpd" "$DATADIR/latency-udp-$sz.stats" "$OUTDIR/latency-udp-$sz.png" "UDP / Message Size $sz bytes"
         # Plotting Multicast / best effort charts
-        call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gp" "$DATADIR/latency-mbe-$sz.gpd" "$DATADIR/latency-mbe-$sz.stats" "$OUTDIR/latency-mbe-$sz.png" "Multicast - Best Effort / Message Size $sz bytes"
+        call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gpi" "$DATADIR/latency-mbe-$sz.gpd" "$DATADIR/latency-mbe-$sz.stats" "$OUTDIR/latency-mbe-$sz.png" "Multicast - Best Effort / Message Size $sz bytes"
         # Plotting Multicast / reliable charts
-        call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gp" "$DATADIR/latency-mrel-$sz.gpd" "$DATADIR/latency-mrel-$sz.stats" "$OUTDIR/latency-mrel-$sz.png" "Multicast - Reliable / Message Size $sz bytes"
+        call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gpi" "$DATADIR/latency-mrel-$sz.gpd" "$DATADIR/latency-mrel-$sz.stats" "$OUTDIR/latency-mrel-$sz.png" "Multicast - Reliable / Message Size $sz bytes"
        exit
 EOF
     done
@@ -92,15 +92,15 @@ EOF
 
     # Plotting Quantile Distributions
     gnuplot <<EOF
-      call "$DDS_ROOT/performance-tests/Bench/bin/plot-quantiles.gp" "$DATADIR"  "$OUTDIR"
+      call "$DDS_ROOT/performance-tests/Bench/bin/plot-quantiles.gpi" "$DATADIR"  "$OUTDIR"
       exit
 EOF
 
     # Plotting Kernel Density Estimates
-    # gnuplot 4.4 functionality in the plot-density.gp fails on earlier systems.
+    # gnuplot 4.4 functionality in the plot-density.gpi fails on earlier systems.
     if [ "$GNUPLOT_MAJORVERSION" -gt 3 -a "$GNUPLOT_MAJORVERSION" -gt 2 ]; then
       gnuplot <<EOF
-        call "$DDS_ROOT/performance-tests/Bench/bin/plot-density.gp" "$DATADIR"  "$OUTDIR"
+        call "$DDS_ROOT/performance-tests/Bench/bin/plot-density.gpi" "$DATADIR"  "$OUTDIR"
         exit
 EOF
     fi
@@ -129,10 +129,13 @@ plot_throughput_results ()
   if [ -e "$DATADIR/throughput.csv" ]; then
     gnuplot <<EOF
       # Plotting test format charts
-      call "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-testformats.gp"  "$DATADIR/throughput.csv" "$OUTDIR"
+      call
+      "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-testformats.gpi"  "$DATADIR/throughput.csv" "$OUTDIR"
       # Plotting transport charts
-      call "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-transports.gp"  "$DATADIR/throughput.csv" "$OUTDIR"
-      call "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-transports.gp"  "$DATADIR/throughput.csv" "$OUTDIR" "smooth acspline"
+      call
+      "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-transports.gpi"  "$DATADIR/throughput.csv" "$OUTDIR"
+      call
+      "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-transports.gpi"  "$DATADIR/throughput.csv" "$OUTDIR" "smooth acspline"
       exit
 EOF
   else
@@ -145,8 +148,8 @@ EOF
 
 OUTDIR="."
 BASEDIR="."
-GNUPLOT_MAJORVERSION=`gnuplot --version | sed -n -e "s/gnuplot \([0-9]*\).[0-9]* patchlevel.*/\1/gp"`
-GNUPLOT_MINORVERSION=`gnuplot --version | sed -n -e "s/gnuplot [0-9]*.\([0-9]*\) patchlevel.*/\1/gp"`
+GNUPLOT_MAJORVERSION=`gnuplot --version | sed -n -e "s/gnuplot \([0-9]*\).[0-9]* patchlevel.*/\1/gpi"`
+GNUPLOT_MINORVERSION=`gnuplot --version | sed -n -e "s/gnuplot [0-9]*.\([0-9]*\) patchlevel.*/\1/gpi"`
 
 parse_input $@
 

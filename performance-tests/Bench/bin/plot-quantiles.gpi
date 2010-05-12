@@ -78,5 +78,3 @@ plot '$0/latency-mrel-50.gpd'    index 3 using (100.*column(0)/samples):1:(weigh
 set output
 set terminal pop
 
-# vim: filetype=gnuplot tw=200
-
