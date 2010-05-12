@@ -1,3 +1,37 @@
+Wed May 12 03:50:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/lj-plots.gpi:
+        * performance-tests/Bench/bin/plot-density.gpi:
+        * performance-tests/Bench/bin/plot-jitter.gpi:
+        * performance-tests/Bench/bin/plot-quantiles.gpi:
+        * performance-tests/Bench/bin/plot-throughput-testformats.gpi:
+        * performance-tests/Bench/bin/plot-throughput-transports.gpi:
+        * performance-tests/Bench/bin/plot-transports-scaling.gpi:
+        * performance-tests/Bench/bin/plot-transports.gpi:
+        * performance-tests/Bench/tools/plot-latency.gpi:
+        * performance-tests/Bench/tools/plot-scaling.gpi:
+        * performance-tests/Bench/tools/plot-throughput.gpi:
+
+          Moved files to accepted GNUPlot file extension name.
+
+        * performance-tests/Bench/bin/plot-test-results.sh:
+
+          Fixed references to the files.
+
+        * performance-tests/Bench/bin/lj-plots.gp:
+        * performance-tests/Bench/bin/plot-density.gp:
+        * performance-tests/Bench/bin/plot-jitter.gp:
+        * performance-tests/Bench/bin/plot-quantiles.gp:
+        * performance-tests/Bench/bin/plot-throughput-testformats.gp:
+        * performance-tests/Bench/bin/plot-throughput-transports.gp:
+        * performance-tests/Bench/bin/plot-transports-scaling.gp:
+        * performance-tests/Bench/bin/plot-transports.gp:
+        * performance-tests/Bench/tools/plot-latency.gp:
+        * performance-tests/Bench/tools/plot-scaling.gp:
+        * performance-tests/Bench/tools/plot-throughput.gp:
+
+          Removed these files.
+
 Mon May 10 06:37:48 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
 
         * performance-tests/Bench/bin/plot-throughput-transports.gp:
@@ -25,9 +59,9 @@ Fri May  7 16:03:44 UTC 2010  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
         * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
         * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
-        
+
           Reverted changes made in last commit and added comments
-          for dropped_by_transport flag used. These changes in last 
+          for dropped_by_transport flag used. These changes in last
           commit do not affect the duplicate message issue.
 
 Fri May  7 01:40:13 UTC 2010  Yan Dai  <dai_y@ociweb.com>

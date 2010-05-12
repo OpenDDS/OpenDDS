@@ -79,5 +79,3 @@ plot '$0/latency-mrel-50.gpd'    index 0 using 1:(100.*bandwidth/samples):(bandw
 set output
 set terminal pop
 
-# vim: filetype=gnuplot tw=200
-
