@@ -12,23 +12,68 @@
 #include "Qos_Helper.h"
 #include "ReceivedDataElementList.h"
 #include "ReceivedDataStrategy.h"
+#include "GuidUtils.h"
 
 namespace {
 
 class CoherentFilter : public OpenDDS::DCPS::ReceivedDataFilter {
 public:
+  CoherentFilter (OpenDDS::DCPS::PublicationId& writer, 
+                  OpenDDS::DCPS::RepoId& publisher)
+  : writer_ (writer),
+    publisher_ (publisher),
+    group_coherent_ (! (this->publisher_ == ::OpenDDS::DCPS::GUID_UNKNOWN))
+  {}
+  
   bool operator()(OpenDDS::DCPS::ReceivedDataElement* data_sample) {
-    return data_sample->coherent_change_;
+    if (this->group_coherent_) {
+      return data_sample->coherent_change_  
+             && (this->publisher_ == data_sample->publisher_id_);
+    }
+    else {
+      return data_sample->coherent_change_ 
+             && (this->writer_ == data_sample->pub_);
+    }
   }
+  
+private:
+
+  OpenDDS::DCPS::PublicationId& writer_;
+  OpenDDS::DCPS::RepoId& publisher_;
+  bool group_coherent_;
 };
+
 
 class AcceptCoherent : public OpenDDS::DCPS::ReceivedDataOperation {
 public:
+  AcceptCoherent (OpenDDS::DCPS::PublicationId& writer, 
+                  OpenDDS::DCPS::RepoId& publisher)
+  : writer_ (writer),
+    publisher_ (publisher),
+    group_coherent_ (! (this->publisher_ == ::OpenDDS::DCPS::GUID_UNKNOWN))
+  {}
+  
   void operator()(OpenDDS::DCPS::ReceivedDataElement* data_sample) {
     // Clear coherent_change_ flag; this makes
     // the data available for read/take operations.
-    data_sample->coherent_change_ = false;
+    if (this->group_coherent_) {
+      if (data_sample->coherent_change_  
+          && (this->publisher_ == data_sample->publisher_id_)) {
+        data_sample->coherent_change_ = false;
+      }     
+    }
+    else {
+      if (data_sample->coherent_change_ && (this->writer_ == data_sample->pub_)) {
+        data_sample->coherent_change_ = false;
+      }
+    }
   }
+  
+private:
+
+  OpenDDS::DCPS::PublicationId& writer_;
+  OpenDDS::DCPS::RepoId& publisher_;
+  bool group_coherent_;
 };
 
 } // namespace
@@ -51,17 +96,19 @@ ReceivedDataStrategy::add(ReceivedDataElement* data_sample)
 }
 
 void
-ReceivedDataStrategy::accept_coherent()
+ReceivedDataStrategy::accept_coherent(PublicationId& writer, 
+                                      RepoId& publisher)
 {
-  CoherentFilter    filter = CoherentFilter();
-  AcceptCoherent operation = AcceptCoherent();
+  CoherentFilter    filter = CoherentFilter(writer, publisher);
+  AcceptCoherent operation = AcceptCoherent(writer, publisher);
   this->rcvd_samples_.apply_all(filter, operation);
 }
 
 void
-ReceivedDataStrategy::reject_coherent()
+ReceivedDataStrategy::reject_coherent(PublicationId& writer, 
+                                      RepoId& publisher)
 {
-  CoherentFilter filter = CoherentFilter();
+  CoherentFilter filter = CoherentFilter(writer, publisher);
   this->rcvd_samples_.remove(filter, true);
 }
 

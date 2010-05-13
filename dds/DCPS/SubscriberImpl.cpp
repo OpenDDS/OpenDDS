@@ -25,6 +25,7 @@
 #include "AssociationData.h"
 #include "Transient_Kludge.h"
 #include "ContentFilteredTopicImpl.h"
+#include "GroupRakeData.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/DataLinkSet.h"
@@ -52,7 +53,8 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t handle,
     domain_id_(participant->get_domain_id()),
     raw_latency_buffer_size_(0),
     raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
-    monitor_(0)
+    monitor_(0),
+    access_depth_ (0)
 {
   //Note: OK to duplicate a nil.
   listener_ = DDS::SubscriberListener::_duplicate(a_listener);
@@ -472,7 +474,30 @@ ACE_THROW_SPEC((CORBA::SystemException))
                    guard,
                    this->si_lock_,
                    DDS::RETCODE_ERROR);
+ 
+  if (this->qos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS) {
+    if (this->access_depth_ == 0) {
+      return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
+    
+    if (this->qos_.presentation.coherent_access 
+        && this->qos_.presentation.ordered_access) {
 
+      GroupRakeData data;
+      for (DataReaderSet::const_iterator pos = datareader_set_.begin() ;
+        pos != datareader_set_.end() ; ++pos) {
+          (*pos)->get_ordered_data (data, sample_states, view_states, instance_states); 
+      }
+
+      // Return list of readers in the order of the source timestamp of the received
+      // samples from readers.
+      data.get_datareaders (readers);
+      
+      return DDS::RETCODE_OK ;
+    }
+  }
+  
+  // Return set of datareaders.
   int count(0) ;
   readers.length(count);
 
@@ -635,7 +660,33 @@ DDS::ReturnCode_t
 SubscriberImpl::begin_access()
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  // For ACC, PRESENTATION != GROUP, so
+  if (enabled_ == false) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::begin_access:")
+                      ACE_TEXT(" Subscriber is not enabled!\n")),
+                     DDS::RETCODE_NOT_ENABLED);
+  }
+
+  if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
+    return DDS::RETCODE_OK;
+  }
+  
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   this->si_lock_,
+                   DDS::RETCODE_ERROR);
+
+  ++this->access_depth_;
+
+  // We should only notify subscription on the first
+  // and last change to the current change set:
+  if (this->access_depth_ == 1) {
+    for (DataReaderSet::iterator it = this->datareader_set_.begin();
+         it != this->datareader_set_.end(); ++it) {
+      (*it)->begin_access();
+    }
+  }
+
   return DDS::RETCODE_OK;
 }
 
@@ -643,7 +694,40 @@ DDS::ReturnCode_t
 SubscriberImpl::end_access()
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  // For ACC, PRESENTATION != GROUP, so
+  if (enabled_ == false) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
+                      ACE_TEXT(" Publisher is not enabled!\n")),
+                     DDS::RETCODE_NOT_ENABLED);
+  }
+
+  if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
+    return DDS::RETCODE_OK;
+  }
+  
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   this->si_lock_,
+                   DDS::RETCODE_ERROR);
+
+  if (this->access_depth_ == 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
+                      ACE_TEXT(" No matching call to begin_coherent_changes!\n")),
+                     DDS::RETCODE_PRECONDITION_NOT_MET);
+  }
+
+  --this->access_depth_;
+
+  // We should only notify subscription on the first
+  // and last change to the current change set:
+  if (this->access_depth_ == 0) {
+    for (DataReaderSet::iterator it = this->datareader_set_.begin();
+      it != this->datareader_set_.end(); ++it) {
+        (*it)->end_access();
+    }
+  }
+
   return DDS::RETCODE_OK;
 }
 
@@ -993,7 +1077,52 @@ SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
     } 
   }
 }                               
-                                         
+             
+             
+void
+SubscriberImpl::coherent_change_received (RepoId& publisher_id, 
+                                          DataReaderImpl* reader, 
+                                          Coherent_State& group_state)
+{   
+  // Verify if all readers complete the coherent changes. The result
+  // is either COMPLETED or REJECTED.
+  group_state = COMPLETED;  
+  DataReaderSet::const_iterator endIter = datareader_set_.end();  
+  for (DataReaderSet::const_iterator iter = datareader_set_.begin() ;
+    iter != endIter ; ++iter) {
+
+    Coherent_State state = COMPLETED;
+    (*iter)->coherent_change_received (publisher_id, state);
+    if (state == NOT_COMPLETED_YET) {
+      group_state = state;
+      return;
+    }
+    else if (state == REJECTED) {
+      group_state = REJECTED;
+    }
+  }
+  
+  PublicationId writerId = GUID_UNKNOWN;
+  for (DataReaderSet::const_iterator iter = datareader_set_.begin() ;
+    iter != endIter ; ++iter) {
+      if (group_state == COMPLETED) { 
+        (*iter)->accept_coherent (writerId, publisher_id);
+      }
+      else { //REJECTED
+        (*iter)->reject_coherent (writerId, publisher_id);
+      }
+  }
+  
+  if (group_state == COMPLETED) {
+    for (DataReaderSet::const_iterator iter = datareader_set_.begin() ;
+      iter != endIter ; ++iter) {
+      (*iter)->coherent_changes_completed (reader);
+      (*iter)->reset_coherent_info (writerId, publisher_id);
+    }
+  }
+}
+
+
 } // namespace DCPS
 } // namespace OpenDDS
 

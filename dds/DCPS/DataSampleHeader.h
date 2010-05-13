@@ -50,7 +50,7 @@ enum DataSampleHeaderFlag {
   COHERENT_CHANGE_FLAG,
   HISTORIC_SAMPLE_FLAG,
   LIFESPAN_DURATION_FLAG,
-  RESERVED_1_FLAG,
+  GROUP_COHERENT_FLAG,
   RESERVED_2_FLAG,
   RESERVED_3_FLAG,
   RESERVED_4_FLAG
@@ -83,9 +83,10 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// This flag indicates the sample header contains non-default
   /// LIFESPAN duration fields.
   bool lifespan_duration_ : 1;
+  
+  bool group_coherent_ : 1;
 
   /// reservered bits
-  bool reserved_1   : 1;
   bool reserved_2   : 1;
   bool reserved_3   : 1;
   bool reserved_4   : 1;
@@ -121,7 +122,10 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// Identify the DataWriter that produced the sample data being
   /// sent.
   PublicationId  publication_id_;
-
+  
+  /// Id represent coherent group.
+  RepoId         publisher_id_;
+  
   static long mask_flag(DataSampleHeaderFlag flag);
 
   static void clear_flag(DataSampleHeaderFlag flag,

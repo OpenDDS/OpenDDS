@@ -12,15 +12,17 @@
 
 #include "EntityImpl.h"
 #include "Definitions.h"
-#include "InstanceHandle.h"
 #include "TopicImpl.h"
+#include "InstanceHandle.h"
 #include "OwnershipManager.h"
+#include "RepoIdGenerator.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsDomainExtS.h"
 #include "dds/DdsDcpsInfoC.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "dds/DdsDcpsInfrastructureTypeSupportC.h"
@@ -453,6 +455,9 @@ private:
   Monitor* monitor_;
   
   OwnershipManager owner_man_;
+  
+  /// Publisher ID generator. 
+  RepoIdGenerator  pub_id_generator_;
 };
 
 } // namespace DCPS

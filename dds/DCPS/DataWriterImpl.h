@@ -22,6 +22,7 @@
 #include "TopicImpl.h"
 #include "AssociationData.h"
 #include "Qos_Helper.h"
+#include "CoherentChangeControl.h"
 #include "GuidUtils.h"
 
 #include "ace/Event_Handler.h"
@@ -77,6 +78,7 @@ class OpenDDS_Dcps_Export DataWriterImpl
 {
 public:
   friend class WriteDataContainer;
+  friend class PublisherImpl;
 
   struct AckToken {
     ACE_Time_Value tstamp_;
@@ -319,7 +321,7 @@ public:
   void begin_coherent_changes();
 
   /// Ends a coherent change set; should only be called once.
-  void end_coherent_changes();
+  void end_coherent_changes(const GroupCoherentSamples& group_samples);
 
   /**
    * Accessor of the associated topic name.

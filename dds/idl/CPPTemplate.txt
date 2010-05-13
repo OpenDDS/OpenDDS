@@ -631,6 +631,11 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
+
+  if (this->group_coherent_ordered_ && this->coherent_) {
+    max_samples = 1;
+  }
+    
   ::DDS::SubscriberQos qos;
 
   ::OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant(); 
@@ -644,30 +649,36 @@ DDS::ReturnCode_t
   }
 
   ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%>Seq >
-     results(this, received_data, info_seq, max_samples,
-             qos.presentation, a_condition,
-             ::OpenDDS::DCPS::DDS_OPERATION_READ);
+    results(this, received_data, info_seq, max_samples,
+            qos.presentation, a_condition,
+            ::OpenDDS::DCPS::DDS_OPERATION_READ);
 
-  for (InstanceMap::iterator it = instance_map_.begin(),
-         the_end = instance_map_.end(); it != the_end; ++it)
-  {
-    ::DDS::InstanceHandle_t handle = it->second;
-
-    OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(handle);
-
-    if ((inst->instance_state_.view_state() & view_states) &&
-        (inst->instance_state_.instance_state() & instance_states))
+  if (! this->group_coherent_ordered_) {
+    for (InstanceMap::iterator it = instance_map_.begin(),
+          the_end = instance_map_.end(); it != the_end; ++it)
     {
-      size_t i(0);
-      for (OpenDDS::DCPS::ReceivedDataElement *item = inst->rcvd_samples_.head_;
-           item != 0; item = item->next_data_sample_)
+      ::DDS::InstanceHandle_t handle = it->second;
+
+      OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(handle);
+
+      if ((inst->instance_state_.view_state() & view_states) &&
+          (inst->instance_state_.instance_state() & instance_states))
       {
-        if (item->sample_state_ & sample_states && !item->coherent_change_)
+        size_t i(0);
+        for (OpenDDS::DCPS::ReceivedDataElement *item = inst->rcvd_samples_.head_;
+            item != 0; item = item->next_data_sample_)
         {
-          results.insert_sample(item, inst, ++i);
+          if (item->sample_state_ & sample_states && !item->coherent_change_)
+          {
+            results.insert_sample(item, inst, ++i);
+          }
         }
       }
     }
+  }
+  else {
+    OpenDDS::DCPS::RakeData item = this->group_coherent_ordered_data_.get_data();
+    results.insert_sample(item.rde_, item.si_, item.index_in_instance_);
   }
 
   results.copy_to_user();
@@ -683,6 +694,7 @@ DDS::ReturnCode_t
   }
 
   post_read_or_take();
+ 
   return ret;
 }
 
@@ -724,6 +736,10 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
+  if (this->group_coherent_ordered_ && this->coherent_) {
+    max_samples = 1;
+  }
+  
   ::DDS::SubscriberQos qos;
 
   ::OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant(); 
@@ -741,28 +757,35 @@ DDS::ReturnCode_t
              qos.presentation, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_TAKE);
 
-  for (InstanceMap::iterator it = instance_map_.begin(),
-         the_end = instance_map_.end(); it != the_end; ++it)
-  {
-    ::DDS::InstanceHandle_t handle = it->second;
+  if (! this->group_coherent_ordered_) {
 
-    OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(handle);
-
-    if ((inst->instance_state_.view_state() & view_states) &&
-        (inst->instance_state_.instance_state() & instance_states))
+    for (InstanceMap::iterator it = instance_map_.begin(),
+          the_end = instance_map_.end(); it != the_end; ++it)
     {
-      size_t i(0);
-      for (OpenDDS::DCPS::ReceivedDataElement *item = inst->rcvd_samples_.head_;
-           item != 0; item = item->next_data_sample_)
+      ::DDS::InstanceHandle_t handle = it->second;
+
+      OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(handle);
+
+      if ((inst->instance_state_.view_state() & view_states) &&
+          (inst->instance_state_.instance_state() & instance_states))
       {
-        if (item->sample_state_ & sample_states && !item->coherent_change_)
+        size_t i(0);
+        for (OpenDDS::DCPS::ReceivedDataElement *item = inst->rcvd_samples_.head_;
+            item != 0; item = item->next_data_sample_)
         {
-          results.insert_sample(item, inst, ++i);
+          if (item->sample_state_ & sample_states && !item->coherent_change_)
+          {
+            results.insert_sample(item, inst, ++i);
+          }
         }
       }
     }
   }
-
+  else {
+    OpenDDS::DCPS::RakeData item = this->group_coherent_ordered_data_.get_data();
+    results.insert_sample(item.rde_, item.si_, item.index_in_instance_);
+  }
+  
   results.copy_to_user();
 
   ::DDS::ReturnCode_t ret = ::DDS::RETCODE_NO_DATA;
@@ -1862,23 +1885,14 @@ void
                     static_cast<OpenDDS::DCPS::ReceivedDataElement *> (
                         rd_allocator_->malloc (
                             sizeof (OpenDDS::DCPS::ReceivedDataElement))),
-                    OpenDDS::DCPS::ReceivedDataElement(header.publication_id_,
+                    OpenDDS::DCPS::ReceivedDataElement(header,
                                                        instance_data));
     
-    ptr->source_timestamp_.sec = header.source_timestamp_sec_;
-    ptr->source_timestamp_.nanosec = header.source_timestamp_nanosec_;
-
-    ptr->destination_timestamp_ =
-      OpenDDS::DCPS::time_value_to_time(ACE_OS::gettimeofday());
-
-    ptr->coherent_change_ = header.coherent_change_;
-
     ptr->disposed_generation_count_ =
         instance_ptr->instance_state_.disposed_generation_count();
     ptr->no_writers_generation_count_ =
         instance_ptr->instance_state_.no_writers_generation_count();
 
-    ptr->sequence_ = header.sequence_;
     instance_ptr->last_sequence_ = header.sequence_;
 
     instance_ptr->rcvd_strategy_->add(ptr);
@@ -1914,39 +1928,41 @@ void
       dec_ref_data_element(head_ptr);
     }
 
-    OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant ();
+    if (! ptr->coherent_change_) {
+      OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant ();
 
-    sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, true);
-    set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, true);
+      sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, true);
+      set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, true);
 
-    ::DDS::SubscriberListener* sub_listener =
-        sub->listener_for(::DDS::DATA_ON_READERS_STATUS);
-    if (sub_listener != 0)
-    {
-      ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-      
-      sub_listener->on_data_on_readers(get_subscriber()) ;
-      sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
-    }
-    else
-    {
-      sub->notify_status_condition();
-
-      ::DDS::DataReaderListener* listener =
-        listener_for (::DDS::DATA_AVAILABLE_STATUS);
-
-      if (listener != 0)
+      ::DDS::SubscriberListener* sub_listener =
+          sub->listener_for(::DDS::DATA_ON_READERS_STATUS);
+      if (sub_listener != 0 && !this->coherent_)
       {
-        ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+        ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
         
-        ::DDS::DataReader_var dr = get_dr_obj_ref();
-        listener->on_data_available(dr.in ());
-        set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
+        sub_listener->on_data_on_readers(get_subscriber()) ;
         sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
       }
       else
       {
-        notify_status_condition();
+        sub->notify_status_condition();
+
+        ::DDS::DataReaderListener* listener =
+          listener_for (::DDS::DATA_AVAILABLE_STATUS);
+
+        if (listener != 0)
+        {
+          ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+          
+          ::DDS::DataReader_var dr = get_dr_obj_ref();
+          listener->on_data_available(dr.in ());
+          set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
+          sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+        }
+        else
+        {
+          notify_status_condition();
+        }
       }
     }
   }

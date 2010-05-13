@@ -28,6 +28,8 @@
 #include "Stats_T.h"
 #include "OwnershipManager.h"
 #include "ContentFilteredTopicImpl.h"
+#include "GroupRakeData.h"
+#include "CoherentChangeControl.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 
 #include "ace/String_Base.h"
@@ -58,6 +60,12 @@ class FilterEvaluator;
 
 typedef Cached_Allocator_With_Overflow<OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
 ReceivedDataAllocator;
+
+enum Coherent_State {
+  NOT_COMPLETED_YET,
+  COMPLETED,
+  REJECTED
+};
 
 /// Keeps track of a DataWriter's liveliness for a DataReader.
 class OpenDDS_Dcps_Export WriterInfo {
@@ -108,8 +116,13 @@ public:
 
   /// Return the most recently observed contiguous sequence number.
   SequenceNumber ack_sequence() const;
+  
+  Coherent_State coherent_change_received ();
+  void reset_coherent_info ();
+  void set_group_info (const CoherentChangeControl& info);
 
 private:
+                                             
   /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
   ACE_Time_Value last_liveliness_activity_time_;
 
@@ -141,6 +154,14 @@ private:
 
   /// Is this writer evaluated for owner ?
   bool owner_evaluated_;
+  
+  /// Data to support GROUP access scope.
+  bool group_coherent_;
+  RepoId publisher_id_;
+  DisjointSequence coherent_sample_sequence_;   
+  WriterCoherentSample  writer_coherent_samples_;
+  GroupCoherentSamples  group_coherent_samples_;
+ 
 };
 
 /// Elements stored for managing statistical data.
@@ -167,6 +188,7 @@ private:
   /// Latency statistics for the DataWriter to this DataReader.
   Stats<double> stats_;
 };
+
 
 /**
 * @class DataReaderImpl
@@ -491,6 +513,25 @@ public:
   void enable_filtering(ContentFilteredTopicImpl* cft);
 #endif
 
+  void begin_access();
+  void end_access();
+  void get_ordered_data(GroupRakeData& data,
+                        DDS::SampleStateMask sample_states,
+                        DDS::ViewStateMask view_states,
+                        DDS::InstanceStateMask instance_states);
+
+  void accept_coherent (PublicationId& writer_id, 
+                        RepoId& publisher_id);
+  void reject_coherent (PublicationId& writer_id, 
+                        RepoId& publisher_id);
+  void coherent_change_received (RepoId publisher_id, Coherent_State& result);
+  
+  void coherent_changes_completed (DataReaderImpl* reader);
+  
+  void reset_coherent_info (const PublicationId& writer_id, 
+                            const RepoId& publisher_id);
+
+
 protected:
 
   SubscriberImpl* get_subscriber_servant();
@@ -561,6 +602,15 @@ protected:
   DDS::ContentFilteredTopic_var content_filtered_topic_;
 #endif
 
+  
+  /// Is accessing to Group coherent changes ? 
+  bool coherent_;
+  /// Is Group ordered qos ?
+  bool group_coherent_ordered_;
+  /// Ordered group samples.
+  GroupRakeData group_coherent_ordered_data_;
+
+
 private:
   /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
   bool send_sample_ack(
@@ -576,6 +626,9 @@ private:
   /// Lookup the instance handles by the publication repo ids
   bool lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
+
+  bool verify_coherent_changes_completion (WriterInfo* writer); 
+  bool coherent_change_received (WriterInfo* writer);
 
   friend class WriterInfo;
   friend class InstanceState;

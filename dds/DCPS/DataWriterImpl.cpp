@@ -20,6 +20,7 @@
 #include "DataDurabilityCache.h"
 #include "OfferedDeadlineWatchdog.h"
 #include "MonitorFactory.h"
+#include "CoherentChangeControl.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -167,6 +168,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
+  
   //Note: OK to _duplicate(nil).
   listener_ = DDS::DataWriterListener::_duplicate(a_listener);
 
@@ -1461,7 +1463,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   if (this->coherent_) {
     ++this->coherent_samples_;
   }
-
+  
   return DDS::RETCODE_OK;
 }
 
@@ -1596,6 +1598,7 @@ DataWriterImpl::create_control_message(enum MessageId message_id,
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
   header_data.publication_id_ = publication_id_;
+  header_data.publisher_id_ = this->publisher_servant_->publisher_id_;
 
   ACE_Message_Block* message;
   size_t max_marshaled_size = header_data.max_marshaled_size();
@@ -1644,6 +1647,9 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
     ? !TAO_ENCAP_BYTE_ORDER
   : TAO_ENCAP_BYTE_ORDER;
   header_data.coherent_change_ = this->coherent_;
+  header_data.group_coherent_ 
+    = this->publisher_servant_->qos_.presentation.access_scope 
+      == ::DDS::GROUP_PRESENTATION_QOS;
   header_data.message_length_ = data->total_length();
   ++this->sequence_number_;
   header_data.sequence_ = this->sequence_number_.value_;
@@ -1658,7 +1664,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
   }
 
   header_data.publication_id_ = publication_id_;
-
+  header_data.publisher_id_ = this->publisher_servant_->publisher_id_;
   size_t max_marshaled_size = header_data.max_marshaled_size();
 
   ACE_NEW_MALLOC_RETURN(message,
@@ -1773,22 +1779,33 @@ DataWriterImpl::begin_coherent_changes()
 }
 
 void
-DataWriterImpl::end_coherent_changes()
+DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
 {
   // PublisherImpl::pi_lock_ should be held.
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
             get_lock());
-
-  ACE_Message_Block* data;
-  size_t size = sizeof(this->coherent_samples_);
-
-  ACE_NEW(data, ACE_Message_Block(size));
+  
+  CoherentChangeControl end_msg;
+  end_msg.coherent_samples_.num_samples_ = this->coherent_samples_;
+  end_msg.coherent_samples_.last_sample_ = this->sequence_number_;
+  end_msg.group_coherent_
+    = this->publisher_servant_->qos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS;
+  if (end_msg.group_coherent_) {
+    end_msg.publisher_id_ = this->publisher_servant_->publisher_id_;
+    end_msg.group_coherent_samples_ = group_samples;
+  }
+  
+  ACE_Message_Block* data = 0;
+  size_t max_marshaled_size = end_msg.max_marshaled_size();
+  
+  ACE_NEW(data, ACE_Message_Block(max_marshaled_size));
 
   Serializer serializer(
-    data, this->get_publisher_servant()->swap_bytes());
+      data, 
+      this->publisher_servant_->swap_bytes());
 
-  serializer << this->coherent_samples_;
+  serializer << end_msg;
 
   DDS::Time_t source_timestamp =
     time_value_to_time(ACE_OS::gettimeofday());

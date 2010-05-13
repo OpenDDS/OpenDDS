@@ -79,7 +79,11 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
     dp_id_(dp_id),
     federated_(federated),
     failoverListener_(0),
-    monitor_(0)
+    monitor_(0),
+    pub_id_generator_ (
+      0,
+      OpenDDS::DCPS::RepoIdConverter(this->dp_id_).participantId(),
+      OpenDDS::DCPS::KIND_PUBLISHER)
 {
   DDS::ReturnCode_t ret;
   ret = this->set_listener(a_listener, mask);
@@ -129,6 +133,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   PublisherImpl* pub = 0;
   ACE_NEW_RETURN(pub,
                  PublisherImpl(participant_handles_.next(),
+                               pub_id_generator_.next (),
                                pub_qos,
                                a_listener,
                                mask,

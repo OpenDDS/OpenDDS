@@ -123,7 +123,6 @@ public:
   bool is_exclusive () const;
   bool registered();
   void registered (bool flag);
-  DataReaderImpl* get_reader () const;
   bool is_last (const PublicationId& pub);
   
   bool no_writer () const;

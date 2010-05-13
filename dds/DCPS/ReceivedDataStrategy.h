@@ -10,6 +10,8 @@
 #ifndef DCPS_RECEIVEDDATASTRATEGY_H
 #define DCPS_RECEIVEDDATASTRATEGY_H
 
+#include "CoherentChangeControl.h"
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -23,9 +25,11 @@ public:
 
   virtual void add(ReceivedDataElement* data_sample);
 
-  virtual void accept_coherent();
+  virtual void accept_coherent(PublicationId& writer, 
+                               RepoId& publisher);
 
-  virtual void reject_coherent();
+  virtual void reject_coherent(PublicationId& writer, 
+                               RepoId& publisher);
 
 protected:
   ReceivedDataElementList& rcvd_samples_;

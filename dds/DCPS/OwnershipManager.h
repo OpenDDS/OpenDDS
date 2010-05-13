@@ -12,7 +12,6 @@
 
 //#include "EntityImpl.h"
 #include "Definitions.h"
-#include "InstanceHandle.h"
 #include "GuidUtils.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include <map>
