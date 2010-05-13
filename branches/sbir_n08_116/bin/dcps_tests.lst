@@ -196,3 +196,4 @@ tests/DCPS/Ownership/run_test.pl: !DCPS_MIN
 tests/DCPS/Ownership/run_test.pl update_strength: !DCPS_MIN
 tests/DCPS/Ownership/run_test.pl liveliness_change: !DCPS_MIN
 tests/DCPS/Ownership/run_test.pl miss_deadline: !DCPS_MIN
+tests/DCPS/GroupPresentation/run_test.pl: !DCPS_MIN

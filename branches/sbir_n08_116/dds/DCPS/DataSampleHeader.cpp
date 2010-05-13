@@ -90,7 +90,7 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   this->coherent_change_    = byte & mask_flag(COHERENT_CHANGE_FLAG);
   this->historic_sample_    = byte & mask_flag(HISTORIC_SAMPLE_FLAG);
   this->lifespan_duration_  = byte & mask_flag(LIFESPAN_DURATION_FLAG);
-  this->reserved_1          = byte & mask_flag(RESERVED_1_FLAG);
+  this->group_coherent_     = byte & mask_flag(GROUP_COHERENT_FLAG);
   this->reserved_2          = byte & mask_flag(RESERVED_2_FLAG);
   this->reserved_3          = byte & mask_flag(RESERVED_3_FLAG);
   this->reserved_4          = byte & mask_flag(RESERVED_4_FLAG);
@@ -135,6 +135,14 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
 
   if (reader.good_bit() != true) return ;
   this->marshaled_size_ += gen_find_size(this->publication_id_);
+  
+  
+  if (this->group_coherent_) {
+    reader >> this->publisher_id_;
+    if (reader.good_bit() != true) return ;
+    this->marshaled_size_ += gen_find_size(this->publisher_id_);
+  }
+ 
 }
 
 ACE_CDR::Boolean
@@ -146,11 +154,11 @@ operator<< (ACE_Message_Block*& buffer, DataSampleHeader& value)
   writer << value.submessage_id_;
 
   // Write the flags as a single byte.
-  ACE_CDR::Octet flags = (value.byte_order_           << BYTE_ORDER_FLAG)
+  ACE_CDR::Octet flags = (value.byte_order_         << BYTE_ORDER_FLAG)
                          | (value.coherent_change_    << COHERENT_CHANGE_FLAG)
                          | (value.historic_sample_    << HISTORIC_SAMPLE_FLAG)
                          | (value.lifespan_duration_  << LIFESPAN_DURATION_FLAG)
-                         | (value.reserved_1          << RESERVED_1_FLAG)
+                         | (value.group_coherent_     << GROUP_COHERENT_FLAG)
                          | (value.reserved_2          << RESERVED_2_FLAG)
                          | (value.reserved_3          << RESERVED_3_FLAG)
                          | (value.reserved_4          << RESERVED_4_FLAG)
@@ -168,6 +176,10 @@ operator<< (ACE_Message_Block*& buffer, DataSampleHeader& value)
 
   writer << value.publication_id_;
 
+  if (value.group_coherent_) {
+    writer << value.publisher_id_;
+  }
+  
   return writer.good_bit() ;
 }
 
@@ -259,7 +271,10 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
           << std::dec << value.lifespan_duration_nanosec_ << ", ";
     }
 
-    str << "Publication: " << RepoIdConverter(value.publication_id_);
+    str << "Publication: " << RepoIdConverter(value.publication_id_) << ", ";
+    if (value.group_coherent_) {
+      str << "Publisher: " << RepoIdConverter(value.publisher_id_);
+    }
   }
 
   return str;

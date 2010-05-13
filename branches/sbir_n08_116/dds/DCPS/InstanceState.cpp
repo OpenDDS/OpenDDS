@@ -267,12 +267,6 @@ OpenDDS::DCPS::InstanceState::registered (bool flag)
   this->registered_ = flag;
 }
   
-OpenDDS::DCPS::DataReaderImpl* 
-OpenDDS::DCPS::InstanceState::get_reader () const 
-{
-  return this->reader_;
-}
-  
-  
+
   
   

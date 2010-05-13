@@ -32,6 +32,7 @@ namespace DCPS {
 
 // Implementation skeleton constructor
 PublisherImpl::PublisherImpl(DDS::InstanceHandle_t handle,
+                             RepoId                id,
                              const DDS::PublisherQos& qos,
                              DDS::PublisherListener_ptr a_listener,
                              const DDS::StatusMask& mask,
@@ -49,7 +50,8 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t handle,
     sequence_number_(),
     aggregation_period_start_(ACE_Time_Value::zero),
     reverse_pi_lock_(pi_lock_),
-    monitor_(0)
+    monitor_(0),
+    publisher_id_ (id)
 {
   if (!CORBA::is_nil(a_listener)) {
     fast_listener_ = listener_.in();
@@ -623,11 +625,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
                      DDS::RETCODE_ERROR);
   }
 
-  if (qos_.presentation.access_scope == DDS::GROUP_PRESENTATION_QOS) {
-    // GROUP access scope is not yet supported.
-    return DDS::RETCODE_UNSUPPORTED;
-  }
-
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    this->pi_lock_,
@@ -646,8 +643,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   if (this->change_depth_ == 1) {
     for (PublicationMap::iterator it = this->publication_map_.begin();
          it != this->publication_map_.end(); ++it) {
-      it->second->local_writer_impl_->
-      begin_coherent_changes();
+      it->second->local_writer_impl_->begin_coherent_changes();
     }
   }
 
@@ -695,10 +691,35 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // We should only notify publications on the first
   // and last change to the current change set:
   if (this->change_depth_ == 0) {
+    GroupCoherentSamples group_samples;
     for (PublicationMap::iterator it = this->publication_map_.begin();
          it != this->publication_map_.end(); ++it) {
-      it->second->local_writer_impl_->
-      end_coherent_changes();
+      
+      if (it->second->local_writer_impl_->coherent_samples_ == 0) {
+        continue;
+      }
+      
+      std::pair<GroupCoherentSamples::iterator, bool> pair
+        = group_samples.insert(GroupCoherentSamples::value_type(
+        it->second->local_writer_impl_->publication_id_,
+        WriterCoherentSample(it->second->local_writer_impl_->coherent_samples_,
+                             it->second->local_writer_impl_->sequence_number_)));
+
+      if (pair.second == false) {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes: ")
+          ACE_TEXT("failed to insert to GroupCoherentSamples.\n")),
+          DDS::RETCODE_ERROR);
+        }
+    }
+    
+    for (PublicationMap::iterator it = this->publication_map_.begin();
+         it != this->publication_map_.end(); ++it) {
+      if (it->second->local_writer_impl_->coherent_samples_ == 0) {
+        continue;
+      }
+      
+      it->second->local_writer_impl_->end_coherent_changes(group_samples);
     }
   }
 

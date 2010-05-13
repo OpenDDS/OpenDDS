@@ -1,8 +1,61 @@
+Thu May 13 05:51:44 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/CoherentChangeControl.h:
+        * dds/DCPS/CoherentChangeControl.inl:
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/GroupRakeData.h:
+        * dds/DCPS/GroupRakeData.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/OwnershipManager.h:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/RakeData.h:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/ReceivedDataStrategy.h:
+        * dds/DCPS/ReceivedDataStrategy.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/ts_generator.cpp:
+
+        Added support for GROUP presentation qos.
+        
+        * tests/DCPS/GroupPresentation/DataReaderListener.h:
+        * tests/DCPS/GroupPresentation/DataReaderListener.cpp:
+        * tests/DCPS/GroupPresentation/GroupPresentation.mpc:
+        * tests/DCPS/GroupPresentation/Messenger.idl:
+        * tests/DCPS/GroupPresentation/SubscriberListener.h:
+        * tests/DCPS/GroupPresentation/SubscriberListener.cpp:
+        * tests/DCPS/GroupPresentation/Writer.h:
+        * tests/DCPS/GroupPresentation/Writer.cpp:
+        * tests/DCPS/GroupPresentation/pub.ini:
+        * tests/DCPS/GroupPresentation/publisher.cpp:
+        * tests/DCPS/GroupPresentation/run_test.pl:
+        * tests/DCPS/GroupPresentation/sub.ini:
+        * tests/DCPS/GroupPresentation/subscriber.cpp:
+        * tests/DCPS/GroupPresentation/tcp.conf:
+
+        Added group presentation test.
+        
+        * bin/dcps_tests.lst:
+
+        Added group presentation test.
+                  
 Mon May  3 03:46:34 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/unit/MyTypeSupportImpl.h:
-        
-          Fixed a compilation error due to pure virtual function not 
+
+          Fixed a compilation error due to pure virtual function not
           implemented.
 
 Sat May  1 17:34:52 UTC 2010  Yan Dai  <dai_y@ociweb.com>

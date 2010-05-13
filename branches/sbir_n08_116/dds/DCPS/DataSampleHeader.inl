@@ -22,7 +22,7 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader()
   , coherent_change_(0)
   , historic_sample_(0)
   , lifespan_duration_(0)
-  , reserved_1(0)
+  , group_coherent_(0)
   , reserved_2(0)
   , reserved_3(0)
   , reserved_4(0)
@@ -31,6 +31,7 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader()
   , source_timestamp_sec_(0)
   , source_timestamp_nanosec_(0)
   , publication_id_(GUID_UNKNOWN)
+  , publisher_id_(GUID_UNKNOWN)
   , marshaled_size_(0)
 {
 }
@@ -43,7 +44,7 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block* buffer)
   , coherent_change_(0)
   , historic_sample_(0)
   , lifespan_duration_(0)
-  , reserved_1(0)
+  , group_coherent_(0)
   , reserved_2(0)
   , reserved_3(0)
   , reserved_4(0)
@@ -52,6 +53,8 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block* buffer)
   , source_timestamp_sec_(0)
   , source_timestamp_nanosec_(0)
   , publication_id_(GUID_UNKNOWN)
+  , publisher_id_(GUID_UNKNOWN)
+  , marshaled_size_(0)
 {
   this->init(buffer) ;
 }
@@ -64,7 +67,7 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block& buffer)
   , coherent_change_(0)
   , historic_sample_(0)
   , lifespan_duration_(0)
-  , reserved_1(0)
+  , group_coherent_(0)
   , reserved_2(0)
   , reserved_3(0)
   , reserved_4(0)
@@ -113,7 +116,8 @@ OpenDDS::DCPS::DataSampleHeader::max_marshaled_size()
          + sizeof(this->source_timestamp_nanosec_)
          + sizeof(this->lifespan_duration_sec_)
          + sizeof(this->lifespan_duration_nanosec_)
-         + sizeof(this->publication_id_) ;
+         + sizeof(this->publication_id_)
+         + (this->group_coherent_ ? sizeof(this->publisher_id_) : 0);
 }
 
 ACE_INLINE
