@@ -27,7 +27,7 @@
 #include "SubscriberListener.h"
 #include "MessengerTypeSupportImpl.h"
 
-int num_messages = 5;
+unsigned int num_messages = 5;
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 

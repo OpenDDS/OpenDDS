@@ -53,6 +53,8 @@ DataReaderImpl::DataReaderImpl()
     topic_servant_(0),
     is_exclusive_ownership_ (false),
     owner_manager_ (0),
+    coherent_(false),
+    group_coherent_ordered_(false),
     topic_desc_(0),
     listener_mask_(DEFAULT_STATUS_MASK),
     fast_listener_(0),
@@ -72,9 +74,7 @@ DataReaderImpl::DataReaderImpl()
     raw_latency_buffer_size_(0),
     raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
     monitor_(0),
-    periodic_monitor_(0),
-    coherent_(false),
-    group_coherent_ordered_(false)
+    periodic_monitor_(0)
 {
   CORBA::ORB_var orb = TheServiceParticipant->get_ORB();
   reactor_ = orb->orb_core()->reactor();

@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-extern int num_messages;
+extern unsigned int num_messages;
 
 SubscriberListenerImpl::SubscriberListenerImpl()
   : verify_result_ (true)
