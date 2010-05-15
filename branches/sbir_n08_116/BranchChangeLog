@@ -1,3 +1,9 @@
+Sat May 15 04:14:13 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/GroupPresentation/subscriber.cpp:
+         
+          Added result verify from subsriber listener.
+
 Fri May 14 17:37:54 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
