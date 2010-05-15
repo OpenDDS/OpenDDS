@@ -219,8 +219,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     } while (matches1.current_count > 0 && matches2.current_count > 0);
 
 
-    if (! listener_svt1->verify_result () || ! listener_svt2->verify_result ()
-        || ! listener_svt1->verify_result() || ! listener_svt2->verify_result()) {
+    if (! subscriber_listener_svt->verify_result () 
+        || ! listener_svt1->verify_result() 
+        || ! listener_svt2->verify_result()) {
       ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: failed to verify message!\n")), -1);
