@@ -1,3 +1,22 @@
+Wed May 19 16:26:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_ts_defaults.mpb:
+        * MPC/config/java.mpb:
+        * java/dds/dcps_java_optional.mpb:
+
+          Changed "command" to just the executable (perl) and put the
+          arguments in "commandflags".  This is for compatibility with the
+          latest gnuace changes in the DOC group repository.
+
+        * java/INSTALL:
+
+          Added vc9 projects to documentation.
+
+        * tools/odds_dissector/README:
+
+          Added notes on the difference between the wireshark install dir
+          and WIRESHARK_ROOT.
+
 Wed May 12 21:02:47 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:

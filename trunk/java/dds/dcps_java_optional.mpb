@@ -13,7 +13,8 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
   Define_Custom(TypeSupportJavaOnly) {
     automatic_in  = 0
     automatic_out = 1
-    command       = perl $(DDS_ROOT)/bin/dcps_ts.pl --extensions_only --extension=$(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl
+    command       = perl
+    commandflags  = $(DDS_ROOT)/bin/dcps_ts.pl --extensions_only --extension=$(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl
     dependent     = $(DDS_ROOT)/bin/dcps_ts.pl \
                     $(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl.pm
     inputext      = .idl
