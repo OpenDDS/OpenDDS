@@ -5,7 +5,8 @@ project {
   Define_Custom(TypeSupport) {
     automatic_in          = 0
     automatic_out         = 1
-    command               = perl $(DDS_ROOT)/bin/dcps_ts.pl
+    command               = perl
+    commandflags          = $(DDS_ROOT)/bin/dcps_ts.pl
     dependent             = $(DDS_ROOT)/bin/dcps_ts.pl $(DDS_ROOT)/bin/DCPS/CPPTemplate.pm $(DDS_ROOT)/bin/DCPS/HTemplate.pm $(DDS_ROOT)/bin/DCPS/IDLTemplate.pm
     keyword dcps_ts_flags = commandflags
     inputext              = .idl

@@ -207,9 +207,9 @@ general overview of OpenDDS.
                 make
 
      Windows => cd %DDS_ROOT%/java
-                Use either java.sln (VC 7.1) or java_vc8.sln (VC8, VC9)
-                Visual Studio: devenv java.sln (OR java_vc8.sln)
-                Visual C++ Express: vcexpress java.sln (OR java_vc8.sln)
+                Use either java.sln (VC7.1) or java_vc{8,9}.sln (VC8, VC9)
+                Visual Studio: devenv java.sln (OR java_vc{8,9}.sln)
+                Visual C++ Express: vcexpress java.sln (OR java_vc{8,9}.sln)
                 Select "Debug" or "Release" mode on the toolbar (matching your
                 selection from step 5)
                 Build this entire solution (Build menu -> Build Solution)
@@ -220,6 +220,7 @@ general overview of OpenDDS.
                 ./run_test.pl
      Windows => cd %DDS_ROOT%\java\tests\multirepo
                 run_test.pl
+                (for release mode, add -ExeSubDir Release)
 
 
 ======================================================================
