@@ -1,3 +1,9 @@
+Fri May 21 10:38:10 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Crossplatform/test_list.txt:
+
+          Changing Crossplatform nightly build to be on cicada2.
+
 Wed May 19 16:26:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps_ts_defaults.mpb:

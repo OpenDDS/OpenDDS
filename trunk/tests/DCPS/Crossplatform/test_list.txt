@@ -1,5 +1,5 @@
 # group		client	server
 
-  1		mosquito.ociweb.com	cicada.ociweb.com
+  1		mosquito.ociweb.com	cicada2.ociweb.com
   2		mantis.ociweb.com	mosquito.ociweb.com
-  3		cicada.ociweb.com	mantis.ociweb.com
+  3		cicada2.ociweb.com	mantis.ociweb.com
