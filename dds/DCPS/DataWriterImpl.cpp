@@ -444,119 +444,121 @@ ACE_THROW_SPEC((CORBA::SystemException))
   ReaderIdSeq rds;
   CORBA::ULong rds_len = 0;
   DDS::InstanceHandleSeq handles;
+  
+  {
+    // Ensure the same acquisition order as in wait_for_acknowledgments().
+    ACE_GUARD(ACE_SYNCH_MUTEX, wfaGuard, this->wfaLock_);
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-  // Ensure the same acquisition order as in wait_for_acknowledgments().
-  ACE_GUARD(ACE_SYNCH_MUTEX, wfaGuard, this->wfaLock_);
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+    //Remove the readers from fully associated reader list.
+    //If the supplied reader is not in the cached reader list then it is
+    //already removed. We just need remove the readers in the list that have
+    //not been removed.
 
-  //Remove the readers from fully associated reader list.
-  //If the supplied reader is not in the cached reader list then it is
-  //already removed. We just need remove the readers in the list that have
-  //not been removed.
+    CORBA::ULong len = readers.length();
 
-  CORBA::ULong len = readers.length();
+    for (CORBA::ULong i = 0; i < len; ++i) {
+      //Remove the readers from fully associated reader list. If it's not
+      //in there, the fully_associated() is not called yet and remove it
+      //from pending list.
 
-  for (CORBA::ULong i = 0; i < len; ++i) {
-    //Remove the readers from fully associated reader list. If it's not
-    //in there, the fully_associated() is not called yet and remove it
-    //from pending list.
+      if (OpenDDS::DCPS::remove(readers_, readers[i]) == 0) {
+        ++ fully_associated_len;
+        fully_associated_readers.length(fully_associated_len);
+        fully_associated_readers [fully_associated_len - 1] = readers[i];
 
-    if (OpenDDS::DCPS::remove(readers_, readers[i]) == 0) {
-      ++ fully_associated_len;
-      fully_associated_readers.length(fully_associated_len);
-      fully_associated_readers [fully_associated_len - 1] = readers[i];
+        // Remove this reader from the ACK sequence map if its there.
+        // This is where we need to be holding the wfaLock_ obtained
+        // above.
+        RepoIdToSequenceMap::iterator where
+        = this->idToSequence_.find(readers[i]);
 
-      // Remove this reader from the ACK sequence map if its there.
-      // This is where we need to be holding the wfaLock_ obtained
-      // above.
-      RepoIdToSequenceMap::iterator where
-      = this->idToSequence_.find(readers[i]);
+        if (where != this->idToSequence_.end()) {
+          this->idToSequence_.erase(where);
 
-      if (where != this->idToSequence_.end()) {
-        this->idToSequence_.erase(where);
+          // It is possible that this subscription was causing the wait
+          // to continue, so give the opportunity to find out.
+          this->wfaCondition_.broadcast();
+        }
 
-        // It is possible that this subscription was causing the wait
-        // to continue, so give the opportunity to find out.
-        this->wfaCondition_.broadcast();
+        ++ rds_len;
+        rds.length(rds_len);
+        rds [rds_len - 1] = readers[i];
+
+      } else if (OpenDDS::DCPS::remove(pending_readers_, readers[i]) == 0) {
+        ++ rds_len;
+        rds.length(rds_len);
+        rds [rds_len - 1] = readers[i];
+
+        RepoIdConverter converter(readers[i]);
+        ACE_DEBUG((LM_DEBUG,
+                  ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
+                  ACE_TEXT("removing reader %C before fully_associated() call.\n"),
+                  std::string(converter).c_str()));
       }
 
-      ++ rds_len;
-      rds.length(rds_len);
-      rds [rds_len - 1] = readers[i];
-
-    } else if (OpenDDS::DCPS::remove(pending_readers_, readers[i]) == 0) {
-      ++ rds_len;
-      rds.length(rds_len);
-      rds [rds_len - 1] = readers[i];
-
-      RepoIdConverter converter(readers[i]);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
-                 ACE_TEXT("removing reader %C before fully_associated() call.\n"),
-                 std::string(converter).c_str()));
+      //else reader is already removed which indicates remove_association()
+      //is called multiple times.
     }
 
-    //else reader is already removed which indicates remove_association()
-    //is called multiple times.
+    if (fully_associated_len > 0 && !is_bit_) {
+      // The reader should be in the id_to_handle map at this time so
+      // log with error.
+      if (this->lookup_instance_handles(fully_associated_readers, handles) == false) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::remove_associations: "
+                  "lookup_instance_handles failed, notify %d \n", notify_lost));
+        return;
+      }
+
+      for (CORBA::ULong i = 0; i < fully_associated_len; ++i) {
+        id_to_handle_map_.erase(fully_associated_readers[i]);
+      }
+    }
+
+    wfaGuard.release();
+
+    // Mirror the PUBLICATION_MATCHED_STATUS processing from
+    // fully_associated() here.
+    if (!this->is_bit_) {
+
+      // Derive the change in the number of subscriptions reading this writer.
+      int matchedSubscriptions = this->id_to_handle_map_.size();
+      this->publication_match_status_.current_count_change
+      = matchedSubscriptions - this->publication_match_status_.current_count;
+
+      // Only process status if the number of subscriptions has changed.
+      if (this->publication_match_status_.current_count_change != 0) {
+        this->publication_match_status_.current_count = matchedSubscriptions;
+
+        /// Section 7.1.4.1: total_count will not decrement.
+
+        /// @TODO: Reconcile this with the verbiage in section 7.1.4.1
+        this->publication_match_status_.last_subscription_handle
+        = handles[ rds_len - 1];
+
+        set_status_changed_flag(::DDS::PUBLICATION_MATCHED_STATUS, true);
+
+        DDS::DataWriterListener* listener
+        = this->listener_for(::DDS::SUBSCRIPTION_MATCHED_STATUS);
+
+        if (listener != 0) {
+          listener->on_publication_matched(
+            this->dw_local_objref_.in(),
+            this->publication_match_status_);
+
+          // Listener consumes the change.
+          this->publication_match_status_.total_count_change = 0;
+          this->publication_match_status_.current_count_change = 0;
+        }
+
+        this->notify_status_condition();
+      }
+    }
   }
-
-  if (fully_associated_len > 0 && !is_bit_) {
-    // The reader should be in the id_to_handle map at this time so
-    // log with error.
-    if (this->lookup_instance_handles(fully_associated_readers, handles) == false) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::remove_associations: "
-                 "lookup_instance_handles failed, notify %d \n", notify_lost));
-      return;
-    }
-
-    for (CORBA::ULong i = 0; i < fully_associated_len; ++i) {
-      id_to_handle_map_.erase(fully_associated_readers[i]);
-    }
-  }
-
-  wfaGuard.release();
-
+  
   if (rds_len > 0) {
     this->publisher_servant_->remove_associations(rds,
                                                   this->publication_id_);
-  }
-
-  // Mirror the PUBLICATION_MATCHED_STATUS processing from
-  // fully_associated() here.
-  if (!this->is_bit_) {
-
-    // Derive the change in the number of subscriptions reading this writer.
-    int matchedSubscriptions = this->id_to_handle_map_.size();
-    this->publication_match_status_.current_count_change
-    = matchedSubscriptions - this->publication_match_status_.current_count;
-
-    // Only process status if the number of subscriptions has changed.
-    if (this->publication_match_status_.current_count_change != 0) {
-      this->publication_match_status_.current_count = matchedSubscriptions;
-
-      /// Section 7.1.4.1: total_count will not decrement.
-
-      /// @TODO: Reconcile this with the verbiage in section 7.1.4.1
-      this->publication_match_status_.last_subscription_handle
-      = handles[ rds_len - 1];
-
-      set_status_changed_flag(::DDS::PUBLICATION_MATCHED_STATUS, true);
-
-      DDS::DataWriterListener* listener
-      = this->listener_for(::DDS::SUBSCRIPTION_MATCHED_STATUS);
-
-      if (listener != 0) {
-        listener->on_publication_matched(
-          this->dw_local_objref_.in(),
-          this->publication_match_status_);
-
-        // Listener consumes the change.
-        this->publication_match_status_.total_count_change = 0;
-        this->publication_match_status_.current_count_change = 0;
-      }
-
-      this->notify_status_condition();
-    }
   }
 
   // If this remove_association is invoked when the InfoRepo

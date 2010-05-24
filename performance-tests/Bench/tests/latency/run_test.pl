@@ -129,8 +129,8 @@ if ($ARGV[0] eq 'udp') {
 }
 elsif ($ARGV[0] eq 'multi-be') {
     $trans_config_file = "$bench_location/etc/transport-multi-be.ini ";
-    mkdir "multibe", 0777 unless -d "multibe";
-    chdir "multibe";
+    mkdir "multi-be", 0777 unless -d "multi-be";
+    chdir "multi-be";
 }
 elsif ($ARGV[0] eq 'multi-rel') {
     $trans_config_file = "$bench_location/etc/transport-multi-rel.ini ";

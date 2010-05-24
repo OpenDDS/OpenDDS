@@ -1,7 +1,223 @@
+Mon May 24 18:54:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        Merging trunk changes 3253:3278 out to branch.
+
+        Fri May 21 10:38:10 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+                * tests/DCPS/Crossplatform/test_list.txt:
+
+                  Changing Crossplatform nightly build to be on cicada2.
+
+        Wed May 19 16:26:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+                * MPC/config/dcps_ts_defaults.mpb:
+                * MPC/config/java.mpb:
+                * java/dds/dcps_java_optional.mpb:
+
+                  Changed "command" to just the executable (perl) and put the
+                  arguments in "commandflags".  This is for compatibility with the
+                  latest gnuace changes in the DOC group repository.
+
+                * java/INSTALL:
+
+                  Added vc9 projects to documentation.
+
+                * tools/odds_dissector/README:
+
+                  Added notes on the difference between the wireshark install dir
+                  and WIRESHARK_ROOT.
+
+        Wed May 12 21:02:47 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+                * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+
+                  Fixed bugs in QueueRemoveVisitor::visit_element_remove and
+                  PacketRemoveVisitor::visit_element_ref that access samples
+                  after it's released.
+
+        Wed May 12 03:50:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                * performance-tests/Bench/bin/lj-plots.gpi:
+                * performance-tests/Bench/bin/plot-density.gpi:
+                * performance-tests/Bench/bin/plot-jitter.gpi:
+                * performance-tests/Bench/bin/plot-quantiles.gpi:
+                * performance-tests/Bench/bin/plot-throughput-testformats.gpi:
+                * performance-tests/Bench/bin/plot-throughput-transports.gpi:
+                * performance-tests/Bench/bin/plot-transports-scaling.gpi:
+                * performance-tests/Bench/bin/plot-transports.gpi:
+                * performance-tests/Bench/tools/plot-latency.gpi:
+                * performance-tests/Bench/tools/plot-scaling.gpi:
+                * performance-tests/Bench/tools/plot-throughput.gpi:
+
+                  Moved files to accepted GNUPlot file extension name.
+
+                * performance-tests/Bench/bin/plot-test-results.sh:
+
+                  Fixed references to the files.
+
+                * performance-tests/Bench/bin/lj-plots.gp:
+                * performance-tests/Bench/bin/plot-density.gp:
+                * performance-tests/Bench/bin/plot-jitter.gp:
+                * performance-tests/Bench/bin/plot-quantiles.gp:
+                * performance-tests/Bench/bin/plot-throughput-testformats.gp:
+                * performance-tests/Bench/bin/plot-throughput-transports.gp:
+                * performance-tests/Bench/bin/plot-transports-scaling.gp:
+                * performance-tests/Bench/bin/plot-transports.gp:
+                * performance-tests/Bench/tools/plot-latency.gp:
+                * performance-tests/Bench/tools/plot-scaling.gp:
+                * performance-tests/Bench/tools/plot-throughput.gp:
+
+                  Removed these files.
+
+        Mon May 10 06:37:48 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/plot-throughput-transports.gp:
+
+                  Adjusted name of mulitcast plot files to be similar to latency
+                  and to fit the existing html.
+
+        Fri May 07 22:59:20 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/generate-perf-html.sh:
+
+                  Corrected throughput graph title and added pub and sub bounded graphs.
+
+        Fri May 07 22:48:44 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/plot-test-results.sh:
+                * performance-tests/Bench/bin/plot-throughput-transports.gp:
+
+                  Corrected graph mapping and changed to graph with simple lines by
+                  default and try to graph with smooth on a second pass to ensure
+                  that graphs are drawn even when one set of data is missing.
+
+        Fri May  7 16:03:44 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+                * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+                * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
+
+                  Reverted changes made in last commit and added comments
+                  for dropped_by_transport flag used. These changes in last
+                  commit do not affect the duplicate message issue.
+
+        Fri May  7 01:40:13 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                * dds/DCPS/transport/framework/TransportQueueElement.inl:
+
+                  Fixed a bug that incorrectly callback
+                  data_dropped(dropped_by_transport=false) when one link
+                  drops sample and other links deliver successfully. It was
+                  corrected to call data_dropped(true). This fixed duplicate
+                  message issue caused by a lost link.
+
+                * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+                * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+
+                  Corrected dropped_by_transport flag passed to data_dropped
+                  callback.
+
+        Thu May 06 23:28:13 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/tests/thru/run_test.pl:
+
+                  Added remove of repo ior file before spawning.
+
+        Wed May 05 23:16:41 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/gen-latency-tables.pl:
+                * performance-tests/Bench/bin/gen-throughput-tables.pl:
+
+                  Corrected transport name recognition.
+
+        Wed May 05 20:15:51 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/generate-perf-html.sh:
+
+                  Corrected order of commands to generate tables _after_ the data
+                  was processed.  Added in missing test run information.
+
+        Wed May  5 17:14:34 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                * dds/DCPS/DataWriterImpl.cpp:
+
+                  Moved the publisher->remove_associations call out of DataWriter
+                  locking scope to fix a deadlock issue due to reverse locking with
+                  DataWriter lock and TransportImpl lock when remove/add associations
+                  are handled concurrently.
+
+                * dds/DCPS/transport/framework/DataLink.cpp:
+
+                  Added locking for pub_map_.release_subscriber to make pub_map_
+                  update synchronized. This is a potential cause for a SEGV due
+                  to ReceiveListenerSet destructed during remove_associations.
+
+        Tue May 05 06:31:35 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/tests/thru/run_test.pl:
+
+                  Corrected typo that loaded incorrect configuration for multicast
+                  best effort.
+
+        Tue May 04 23:31:01 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/tests/thru/run_test.pl:
+
+                  Adjusted so the run_test.pl timeout is longer than the run_test
+                  timeout.  This should stop stranding testprocesses waiting on the
+                  multicast transports.
+
+        Tue May 04 20:42:29 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/plot-density.gp:
+                * performance-tests/Bench/bin/plot-quantiles.gp:
+                * performance-tests/Bench/bin/plot-test-results.sh:
+                * performance-tests/Bench/bin/generate-perf-html.sh:
+                * performance-tests/Bench/bin/generate-test-results.sh:
+
+                  Adding scripts to generate html files from results.
+
+                * performance-tests/Bench/tests/latency/run_test.pl:
+
+                  Corrected name of the multicast best effort output directory.
+
+                * performance-tests/Bench/tests/thru/run_test.pl:
+
+                  Removed extra time added for the client side.
+
+                * performance-tests/Bench/tools/plot-latency.gp:
+
+                  Changed order so gnuplot 4.4 plot is called last.
+
+        Sun May 02 06:00:41 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/gen-run-info-table.pl:
+                * performance-tests/Bench/bin/generate-perf-html.sh:
+
+                  Fixed typos and adjusted archive to not fail on missing directory.
+
+        Sat May 01 00:59:12 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/gen-latency-tables.pl:
+                * performance-tests/Bench/bin/gen-run-info-table.pl:
+                * performance-tests/Bench/bin/gen-throughput-tables.pl:
+                * performance-tests/Bench/bin/generate-perf-html.sh:
+                * performance-tests/Bench/tools/formatting.css:
+
+                  Adding scripts for generating html pages from results.
+
+                * performance-tests/Bench/bin/extract-throughput.pl:
+                * performance-tests/Bench/bin/plot-throughput-testformats.gp:
+                * performance-tests/Bench/bin/plot-throughput-transports.gp:
+
+                  Changed the output of extract-throughput.pl to use commas and added
+                  test type and transport fields.
+
 Sat May 15 04:14:13 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/GroupPresentation/subscriber.cpp:
-         
+
           Added result verify from subsriber listener.
 
 Fri May 14 17:37:54 UTC 2010  Yan Dai  <dai_y@ociweb.com>
