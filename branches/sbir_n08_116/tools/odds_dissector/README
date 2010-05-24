@@ -67,6 +67,8 @@ according to the Wireshark Developer's Guide (see above).
      cp odds.so $WIRESHARK_ROOT/lib/wireshark/plugins/<version>/
 
    Windows:
+     The default Wireshark install directory is the wireshark-gtk2
+     subdirectory of the WIRESHARK_ROOT (top of the source tree).
      copy odds.dll <full path to the Wireshark install>\plugins\<version>\
      -or-
      copy oddsd.dll <full path to the Wireshark install>\plugins\<version>\

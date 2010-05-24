@@ -712,8 +712,15 @@ OpenDDS::DCPS::DataLink::release_remote_subscriber
        ++itr) {
     if (publisher_id == itr->first) {
       // Remove the publisher_id => subscriber_id association.
-      if (this->pub_map_.release_subscriber(publisher_id,
-                                            subscriber_id) == 1) {
+      int ret = 0;
+      {
+        GuardType guard(this->pub_map_lock_);
+
+        ret = this->pub_map_.release_subscriber(publisher_id,
+                                                subscriber_id);
+      }
+      
+      if ( ret == 1) {
         // This means that this release() operation has caused the
         // publisher_id to no longer be associated with *any* subscribers.
         released_publishers.insert_link(publisher_id,this);

@@ -458,13 +458,19 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Tell original element that data_dropped().\n"));
 
-    // Tell the original element (that we replaced), data_dropped().
+    // Tell the original element (that we replaced), data_dropped()
+    // by transport.
+    // This visitor is used in TransportSendStrategy::do_remove_sample
+    // and TransportSendBuffer::retain_all. In formal case, the sample 
+    // is dropped as a result of writer's remove_sample call. In the 
+    // later case, the dropped_by_transport is not used as the sample 
+    // is retained sample and no callback is made to writer.
     this->sample_.released (orig_elem->data_dropped());
     
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Return 0 to halt visitation.\n"));
 
-    if (this->sample_.msg() != 0) {
+    if (this->sample_.released() ||  this->sample_.msg() != 0) {
       // Replace a single sample if one is specified, otherwise visit the
       // entire queue replacing each sample with the specified
       // publication Id value.

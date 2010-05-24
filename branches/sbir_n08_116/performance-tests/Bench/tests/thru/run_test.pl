@@ -163,7 +163,7 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
     my $run_time = 120;
     $status = 0;
     $pub_config_file = $pub_rel_config_files[$starting_test_number - 1];
-    if (($transport_type eq 'udp') || ($transport_type eq 'multibe')){
+    if (($transport_type eq 'udp') || ($transport_type eq 'multi-be')){
         $pub_config_file = $pub_be_config_files[$starting_test_number - 1];
     }
 
@@ -197,6 +197,8 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
     my $common_args = "-P -h $repo_host:$port1 -i $trans_config_file ";
 
     if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
+        unlink $dcpsrepo_ior;
+
         $Publisher = PerlDDS::create_process
                   ("$bench_location/bin/run_test",
                    "$common_args -t $run_time -S -s $pub_config_file -v -f bidir$starting_test_number.results");
@@ -217,7 +219,7 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
             exit 1;
         }
 
-        $PublisherResult = $Publisher->WaitKill ($run_time + 60);
+        $PublisherResult = $Publisher->WaitKill ($run_time + 70);
         if ($PublisherResult != 0) {
             print STDERR "ERROR: publisher returned $PublisherResult \n";
             $status = 1;
@@ -226,7 +228,6 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
         unlink $dcpsrepo_ior;
     } else {
         # add extra run time for waiting after the repo is created
-        $run_time += 15;
         $Subscriber = PerlDDS::create_process
               ("$bench_location/bin/run_test",
                "$common_args -t $run_time -s $sub_config_file");
@@ -234,7 +235,7 @@ for ( ; $starting_test_number < $ending_test_number; $starting_test_number++) {
         print $Subscriber->CommandLine(). "\n";
         $Subscriber->Spawn ();
 
-        $SubscriberResult = $Subscriber->WaitKill ($run_time + 60);
+        $SubscriberResult = $Subscriber->WaitKill ($run_time + 70);
         if ($SubscriberResult != 0) {
             print STDERR "ERROR: subscriber returned $SubscriberResult \n";
             $status = 1;

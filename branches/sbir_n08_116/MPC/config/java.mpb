@@ -16,8 +16,8 @@ project {
   Define_Custom(Java) {
     automatic            = 1
     inputext             = .java
-    command              = perl $(DDS_ROOT)/java/build_scripts/javac_wrapper.pl
-    commandflags         = -sourcepath . -d classes -classpath .
+    command              = perl
+    commandflags         = $(DDS_ROOT)/java/build_scripts/javac_wrapper.pl -sourcepath . -d classes -classpath .
     generic_outputext    = .class
     generic_pre_dirname  = classes/
     keyword javacflags   = commandflags
@@ -28,7 +28,8 @@ project {
     automatic_in  = 0
     automatic_out = 1
     inputext      = .class
-    command       = perl $(DDS_ROOT)/java/build_scripts/javah_wrapper.pl
+    command       = perl
+    commandflags  = $(DDS_ROOT)/java/build_scripts/javah_wrapper.pl
   }
 
   // Make the directory but ensure there are no error messages displayed and
