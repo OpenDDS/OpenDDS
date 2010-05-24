@@ -29,6 +29,13 @@ void OpenDDS::DCPS::SimpleTcpReconnectTask::execute(ReconnectOpType& op)
 {
   DBG_ENTRY_LVL("SimpleTcpReconnectTask","execute",6);
 
+  // Ignore all signals to avoid
+  //     ERROR: <something descriptive> Interrupted system call
+  // The main thread will handle signals.
+  sigset_t set;
+  ACE_OS::sigfillset(&set);
+  ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
+
   if (op == DO_RECONNECT) {
     if (this->connection_->reconnect() == -1) {
       this->connection_->tear_link();
