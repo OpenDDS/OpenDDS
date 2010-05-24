@@ -1,3 +1,14 @@
+Mon May 24 21:41:41 UTC 2010  Scott Harris  <harris_s@ociweb.com>
+
+         * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+         * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+         * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+         * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+
+          Avoid OpenDDS failures because of interupts while in system calls.
+          Example: ERROR: ACE::handle_write_ready return -1 while waiting  
+                         to unclog. handle_write_ready: Interrupted system call
+
 Fri May 21 10:38:10 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Crossplatform/test_list.txt:
