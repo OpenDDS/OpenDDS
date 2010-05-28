@@ -301,6 +301,7 @@ std::string idl_mapping_java::type(AST_Type *decl)
     return "String";
   case AST_Decl::NT_enum:
   case AST_Decl::NT_interface:
+  case AST_Decl::NT_interface_fwd:
   case AST_Decl::NT_native:
   case AST_Decl::NT_union:
   case AST_Decl::NT_struct:

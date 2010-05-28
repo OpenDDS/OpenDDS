@@ -1,3 +1,16 @@
+Fri May 28 16:29:14 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/jni_check.pl:
+
+          Merged 64-bit Windows support from the sbir branch.
+
+        * java/idl2jni/codegen/im_java.cpp:
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          Handle AST_Decl::NT_interface_fwd (forward declarations) as if they
+          were full declarations.  I don't think we should be seeing these,
+          but something has changed in the TAO_IDL_FE.
+
 Mon May 24 21:41:41 UTC 2010  Scott Harris  <harris_s@ociweb.com>
 
          * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
@@ -6,7 +19,7 @@ Mon May 24 21:41:41 UTC 2010  Scott Harris  <harris_s@ociweb.com>
          * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
 
           Avoid OpenDDS failures because of interupts while in system calls.
-          Example: ERROR: ACE::handle_write_ready return -1 while waiting  
+          Example: ERROR: ACE::handle_write_ready return -1 while waiting
                          to unclog. handle_write_ready: Interrupted system call
 
 Fri May 21 10:38:10 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
