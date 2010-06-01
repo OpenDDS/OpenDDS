@@ -107,9 +107,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Create Topic
+    CORBA::String_var type_name = mts->get_type_name();
     DDS::Topic_var topic =
       participant->create_topic("Movie Discussion List",
-                                mts->get_type_name(),
+                                type_name.in(),
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);

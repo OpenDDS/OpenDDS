@@ -33,7 +33,9 @@ public:
 
   /// Original sample from send listener.
   const DataSampleListElement* sample () const;
-  
+    
+  virtual bool owned_by_transport ();
+
 protected:
 
   virtual void release_element(bool dropped_by_transport);

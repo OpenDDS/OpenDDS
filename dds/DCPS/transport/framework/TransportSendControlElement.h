@@ -49,6 +49,7 @@ public:
 
   /// Is the element a "control" sample from the specified pub_id?
   virtual bool is_control(RepoId pub_id) const;
+  virtual bool owned_by_transport ();
 
 protected:
 
