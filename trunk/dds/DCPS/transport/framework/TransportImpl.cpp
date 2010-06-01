@@ -74,7 +74,7 @@ OpenDDS::DCPS::TransportImpl::shutdown()
 
   // Stop datalink clean task.
   this->dl_clean_task_.close(1);
-
+  
   if (!this->reactor_task_.is_nil()) {
     this->reactor_task_->stop();
   }
@@ -573,6 +573,7 @@ void OpenDDS::DCPS::TransportImpl::check_fully_association(const RepoId pub_id)
     }
 
     if (associations.size() == 0) {
+      delete penditer->second;
       pending_association_sub_map_.erase(penditer);
     }
   }

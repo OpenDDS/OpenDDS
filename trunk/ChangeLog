@@ -1,3 +1,37 @@
+Tue Jun  1 21:40:48 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/RcHandle_T.h:
+
+          The operator=(T* p) needs remove reference from current 
+          handle if it's same object as provided, otherwise, the
+          object will be leaked. This fixed RepoIdSet and 
+          ReceiveListenerSet leaks.
+          
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        
+          Fixed association info leak.
+          
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportReplacedElement.h:
+        * dds/DCPS/transport/framework/TransportReplacedElement.cpp:
+        * dds/DCPS/transport/framework/TransportRetainedElement.h:
+        * dds/DCPS/transport/framework/TransportRetainedElement.inl:
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/framework/TransportSendControlElement.inl:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        
+          Fixed the TransportControl message leaks.
+          
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Fixed leaks due to get_type_name() not assigned to String_var.
+          
 Fri May 28 16:29:14 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * java/build_scripts/jni_check.pl:

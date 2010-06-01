@@ -24,3 +24,12 @@ OpenDDS::DCPS::TransportSendControlElement::TransportSendControlElement
 {
   DBG_ENTRY_LVL("TransportSendControlElement","TransportSendControlElement",6);
 }
+
+
+ACE_INLINE
+bool 
+OpenDDS::DCPS::TransportSendControlElement::owned_by_transport ()
+{
+  return false;
+}
+

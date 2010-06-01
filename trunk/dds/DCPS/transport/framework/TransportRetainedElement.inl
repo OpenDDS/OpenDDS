@@ -43,3 +43,11 @@ OpenDDS::DCPS::TransportRetainedElement::TransportRetainedElement(
   DBG_ENTRY_LVL("TransportRetainedElement","TransportRetainedElement",6);
 }
 
+
+ACE_INLINE
+bool 
+OpenDDS::DCPS::TransportRetainedElement::owned_by_transport ()
+{
+  return true;
+}
+

@@ -67,3 +67,11 @@ OpenDDS::DCPS::TransportControlElement::msg() const
 {
   return this->msg_;
 }
+
+ACE_INLINE
+bool 
+OpenDDS::DCPS::TransportControlElement::owned_by_transport ()
+{
+  return true;
+}
+

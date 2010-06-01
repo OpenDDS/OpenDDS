@@ -49,4 +49,10 @@ OpenDDS::DCPS::TransportReplacedElement::msg() const
   return this->msg_;
 }
 
+ACE_INLINE
+bool 
+OpenDDS::DCPS::TransportReplacedElement::owned_by_transport ()
+{
+  return true;
+}
 

@@ -77,10 +77,15 @@ public:
   bool released() const;
   void released(bool flag);
 
+  /// Clone method with provided message block allocator and data block
+  /// allocators.
   static ACE_Message_Block* clone(const ACE_Message_Block* msg,
                                   MessageBlockAllocator* mb_allocator,
                                   DataBlockAllocator* db_allocator);
-
+  
+  /// Is the sample created by the transport?
+  virtual bool owned_by_transport () = 0;
+  
 protected:
 
   /// Ctor.  The initial_count is the number of DataLinks to which

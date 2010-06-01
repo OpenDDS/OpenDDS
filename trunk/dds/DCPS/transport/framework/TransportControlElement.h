@@ -38,6 +38,8 @@ public:
                            bool  owner = true);
 
   virtual ~TransportControlElement();
+  
+  virtual bool owned_by_transport ();
 
 protected:
 
