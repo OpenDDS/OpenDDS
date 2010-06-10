@@ -1,3 +1,11 @@
+
+Thu Jun 10 20:20:33 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/README:
+
+          Elaborate on plug-in purpose. Made explicit that generated
+          projects were not checked into a repository.
+
 Thu Jun 10 16:39:48 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/README:
