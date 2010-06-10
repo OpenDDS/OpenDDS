@@ -1,3 +1,16 @@
+Thu Jun 10 14:05:09 UTC 2010  Mike Martinez  <martinez_m@ocweb.com>
+
+        This changelog entry summarizes SVN entries made from within the
+        Eclipse development tool.  The information was extracted using
+        the 'svn2cl' tool and will be done for commits made from within
+        that tool.
+
+        * [r3283] 2010-06-10 13:52  martinezm
+          tools/modeling/org.opendds:
+
+          Migrate to an eclipse based development.
+          This will be the root of the plug-in set developed for the SDK.
+
 Mon Apr 26 18:23:57 UTC 2010  Steven Stallion  <stallions@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.application:
