@@ -1,6 +1,8 @@
 
 ************************************************************************
-These directories are only needed for plug-in development.
+The directory containing this README is only needed to develop the
+OpenDDS SDK, an eclipse plug-in that allows the elements used in an
+OpenDDS system to be modeled diagrammatically.
 
 For obtaining and installing the plug-in for capturing models and
 generating C++ code, use the software site at:
@@ -86,7 +88,7 @@ Source Projects (in repository https://svn.dre.vanderbilt.edu/DOC/DDS):
     - Feature branding data.
 
 ************************************************************************
-Generated Projects:
+Generated Projects (not checked into a repository):
 
   org.opendds.modeling.model.edit   (generated from org.opendds.modeling.model/models/OpenDDS.genmodel)
     - edit support for the ecore metamodels and profile.
@@ -100,4 +102,3 @@ Other Projects (not in this repository):
   org.opendds.site
     - defines and creates the artifacts available for installation or
       download at http://www.opendds.org/modeling/eclipse/plugins/
-
