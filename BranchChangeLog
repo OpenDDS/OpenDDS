@@ -1,3 +1,36 @@
+Thu Jun 10 16:39:48 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/README:
+
+          Added some initial information about obtaining and installing
+          the plug-in as well as defining the existing and some future
+          plug-in source projects.
+
+        * tools/modeling/etc/build-plugin.xml:
+
+          Sub-optimal solution for accomodating multiple plugin
+          directories.
+
+	* [r3290] 2010-06-10 15:46  martinezm
+	  tools/modeling/org.opendds/org.opendds.modeling.model/.classpath,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/.project,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/META-INF,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/META-INF/MANIFEST.MF,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/build.properties,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Core.ecore,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/DCPS.ecore,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Diagrams.ecore,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Domain.ecore,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/QoS.ecore,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Topics.ecore,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/plugin.properties,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/plugin.xml:
+
+	  Adding segregated ecore metamodels and profile.
+
 Thu Jun 10 14:05:09 UTC 2010  Mike Martinez  <martinez_m@ocweb.com>
 
         This changelog entry summarizes SVN entries made from within the
