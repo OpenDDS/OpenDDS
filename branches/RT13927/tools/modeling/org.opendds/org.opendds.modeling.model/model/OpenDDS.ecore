@@ -10,6 +10,8 @@
   <eClassifiers xsi:type="ecore:EClass" name="qosProperty" eSuperTypes="Domain.ecore#//QosProperty #//ddsProperty"/>
   <eClassifiers xsi:type="ecore:EClass" name="qosPolicy" abstract="true" eSuperTypes="#//ddsSpecification QoS.ecore#//QosPolicy"/>
   <eClassifiers xsi:type="ecore:EClass" name="topic" eSuperTypes="Topics.ecore#//Topic #//ddsProperty"/>
+  <eClassifiers xsi:type="ecore:EClass" name="topicStruct" eSuperTypes="Types.ecore#//TopicStruct"/>
+  <eClassifiers xsi:type="ecore:EClass" name="topicField" eSuperTypes="Types.ecore#//TopicField"/>
   <eClassifiers xsi:type="ecore:EClass" name="domainParticipant" eSuperTypes="DCPS.ecore#//DomainParticipant"/>
   <eClassifiers xsi:type="ecore:EClass" name="publisher" eSuperTypes="#//ddsProperty DCPS.ecore#//Publisher"/>
   <eClassifiers xsi:type="ecore:EClass" name="subscriber" eSuperTypes="#//ddsProperty DCPS.ecore#//Subscriber"/>
@@ -20,6 +22,15 @@
   <eClassifiers xsi:type="ecore:EClass" name="dataWriter" eSuperTypes="DCPS.ecore#//DataWriter">
     <eStructuralFeatures xsi:type="ecore:EReference" name="topic" eType="ecore:EClass Topics.ecore#//Topic"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ddsAppTarget" eSuperTypes="Application.ecore#//ApplicationTarget"/>
+  <eClassifiers xsi:type="ecore:EClass" name="idlTypedef" eSuperTypes="Types.ecore#//Typedef"/>
+  <eClassifiers xsi:type="ecore:EClass" name="idlInterface" eSuperTypes="Types.ecore#//TopicStruct"/>
+  <eClassifiers xsi:type="ecore:EClass" name="idlPrimitive" eSuperTypes="Types.ecore#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="idlStruct" eSuperTypes="Types.ecore#//TopicStruct"/>
+  <eClassifiers xsi:type="ecore:EClass" name="idlSequence" eSuperTypes="Types.ecore#//Sequence"/>
+  <eClassifiers xsi:type="ecore:EClass" name="idlUnion" eSuperTypes="Types.ecore#//Union"/>
+  <eClassifiers xsi:type="ecore:EClass" name="idlEnum" eSuperTypes="Types.ecore#//Enum"/>
+  <eClassifiers xsi:type="ecore:EClass" name="idlArray" eSuperTypes="Types.ecore#//Array"/>
   <eClassifiers xsi:type="ecore:EClass" name="historyQosPolicy" eSuperTypes="QoS.ecore#//HistoryQosPolicy #//qosPolicy"/>
   <eClassifiers xsi:type="ecore:EClass" name="lifespanQosPolicy" eSuperTypes="QoS.ecore#//LifespanQosPolicy #//qosPolicy"/>
   <eClassifiers xsi:type="ecore:EClass" name="ownershipQosPolicy" eSuperTypes="QoS.ecore#//OwnershipQosPolicy #//qosPolicy"/>

@@ -4,26 +4,111 @@
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="QoS"
     nsURI="http://www.opendds.org/modeling/schemas/QoS/1.0" nsPrefix="qos">
   <eClassifiers xsi:type="ecore:EClass" name="QosPolicy" abstract="true" eSuperTypes="Core.ecore#//Specification"/>
-  <eClassifiers xsi:type="ecore:EClass" name="DeadlineQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="DestinationOrderQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="DurabilityQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="DurabilityServiceQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="EntityFactoryQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="GroupDataQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="HistoryQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="LatencyBudgetQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="LifespanQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="LivelinessQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="OwnershipQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="OwnershipStrengthQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="PartitionQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="PresentationQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ReaderDataLifecycleQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ReliabilityQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="ResourceLimitsQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="TimeBasedFilterQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="TopicDataQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="TransportPriorityQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="UserDataQosPolicy" eSuperTypes="#//QosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="WriterDataLifecycleQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DeadlineQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="period" eType="ecore:EClass Enumerations.ecore#//Period"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DestinationOrderQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="kind" eType="ecore:EEnum Enumerations.ecore#//DestinationOrderQosPolicyKind"
+        defaultValueLiteral="BY_RECEPTION_TIMESTAMP"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DurabilityQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="kind" eType="ecore:EEnum Enumerations.ecore#//DurabilityQosPolicyKind"
+        defaultValueLiteral="VOLATILE"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DurabilityServiceQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="history_depth" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"
+        defaultValueLiteral="1"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="history_kind" eType="ecore:EEnum Enumerations.ecore#//HistoryQosPolicyKind"
+        defaultValueLiteral="KEEP_LAST"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="max_instances" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"
+        defaultValueLiteral="-1"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="max_samples" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"
+        defaultValueLiteral="-1"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="max_samples_per_instance"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong" defaultValueLiteral="-1"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="service_cleanup_delay"
+        eType="ecore:EClass Enumerations.ecore#//Period"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntityFactoryQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="autoenable_created_entities"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean" defaultValueLiteral="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GroupDataQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="datavalue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="HistoryQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="depth" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"
+        defaultValueLiteral="1"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="kind" eType="ecore:EEnum Enumerations.ecore#//HistoryQosPolicyKind"
+        defaultValueLiteral="KEEP_LAST"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="LatencyBudgetQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="duration" eType="ecore:EClass Enumerations.ecore#//Period"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="LifespanQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="duration" eType="ecore:EClass Enumerations.ecore#//Period"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="LivelinessQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="kind" eType="ecore:EEnum Enumerations.ecore#//LivelinessQosPolicyKind"
+        defaultValueLiteral="AUTOMATIC"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="lease_duration" eType="ecore:EClass Enumerations.ecore#//Period"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OwnershipQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="kind" eType="ecore:EEnum Enumerations.ecore#//OwnershipQosPolicyKind"
+        defaultValueLiteral="SHARED"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OwnershipStrengthQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"
+        defaultValueLiteral="0"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PartitionQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="names" upperBound="-1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PresentationQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="access_scope" eType="ecore:EEnum Enumerations.ecore#//PresentationQosPolicyAccessScopeKind"
+        defaultValueLiteral="INSTANCE"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coherent_access" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="ordered_access" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ReaderDataLifecycleQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="autopurge_nowriter_sample_delay"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong" defaultValueLiteral="-1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ReliabilityQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="kind" eType="ecore:EEnum Enumerations.ecore#//ReliabilityQosPolicyKind"
+        defaultValueLiteral="BEST_EFFORT"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="max_blocking_time" eType="ecore:EClass Enumerations.ecore#//Period"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ResourceLimitsQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="max_instances" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"
+        defaultValueLiteral="-1"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="max_samples" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"
+        defaultValueLiteral="-1"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="max_samples_per_instance"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong" defaultValueLiteral="-1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TimeBasedFilterQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="minimum_separation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"
+        defaultValueLiteral="0"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TopicDataQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TransportPriorityQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"
+        defaultValueLiteral="0"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="UserDataQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="WriterDataLifecycleQosPolicy" eSuperTypes="#//QosPolicy">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="autodispose_unregistered_instances"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean" defaultValueLiteral="true"/>
+  </eClassifiers>
 </ecore:EPackage>

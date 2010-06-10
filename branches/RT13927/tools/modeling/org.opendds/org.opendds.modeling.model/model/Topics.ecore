@@ -3,7 +3,9 @@
     xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="Topics"
     nsURI="http://www.opendds.org/modeling/schemas/Topics/1.0" nsPrefix="topics">
-  <eClassifiers xsi:type="ecore:EClass" name="TopicDescription" abstract="true" eSuperTypes="Core.ecore#//Entity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="TopicDescription" abstract="true" eSuperTypes="Core.ecore#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="datatype" eType="ecore:EClass Types.ecore#//TopicField"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Topic" eSuperTypes="Domain.ecore#//DomainEntity #//TopicDescription">
     <eStructuralFeatures xsi:type="ecore:EReference" name="deadline" eType="ecore:EClass QoS.ecore#//DeadlineQosPolicy"
         containment="true"/>
