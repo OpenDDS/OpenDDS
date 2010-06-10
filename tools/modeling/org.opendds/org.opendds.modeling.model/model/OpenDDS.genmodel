@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/org.opendds.modeling.model/src"
+    modelPluginID="org.opendds.modeling.model" modelName="OpenDDS" generateSchema="true"
+    featureMapWrapperInterface="" featureMapWrapperInternalInterface="" featureMapWrapperClass=""
+    booleanFlagsField="" importerID="org.eclipse.emf.importer.ecore" complianceLevel="6.0"
+    copyrightFields="false">
+  <foreignModel>OpenDDS.ecore</foreignModel>
+  <genPackages prefix="OpenDDS" disposableProviderFactory="true" contentTypeIdentifier=""
+      ecorePackage="OpenDDS.ecore#/">
+    <genClasses ecoreClass="OpenDDS.ecore#//policyLibrary"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//modelLibrary"/>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//ddsSpecification"/>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//ddsProperty"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//qosProperty"/>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//qosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//topic"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//domainParticipant"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//publisher"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//subscriber"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//domain"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//dataReader">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//dataReader/topic"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//dataWriter">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//dataWriter/topic"/>
+    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//historyQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//lifespanQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//ownershipQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//osQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//wdlQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//rdlQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//udQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//tdQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//lbQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//tbfQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//gdQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//tpQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//efQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//deadlineQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//rlQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//presentationQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//partitionQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//reliabilityQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//dsQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//livelinessQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//durabilityQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//destinationOrderQosPolicy"/>
+  </genPackages>
+  <genPackages prefix="Diagrams" disposableProviderFactory="true" ecorePackage="Diagrams.ecore#/">
+    <genClasses ecoreClass="Diagrams.ecore#//DcpsDomains">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Diagrams.ecore#//DcpsDomains/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Diagrams.ecore#//DcpsDomains/domain"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Diagrams.ecore#//DcpsDomains/participant"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Diagrams.ecore#//DcpsDomains/topic"/>
+    </genClasses>
+    <genClasses ecoreClass="Diagrams.ecore#//PolicyLibrary">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Diagrams.ecore#//PolicyLibrary/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Diagrams.ecore#//PolicyLibrary/policy"/>
+    </genClasses>
+    <genClasses ecoreClass="Diagrams.ecore#//DataTypes"/>
+  </genPackages>
+  <genPackages prefix="Core" disposableProviderFactory="true" ecorePackage="Core.ecore#/">
+    <genClasses ecoreClass="Core.ecore#//Entity">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Core.ecore#//Entity/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Core.ecore#//Entity/ownedEntity"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Core.ecore#//Entity/property"/>
+    </genClasses>
+    <genClasses ecoreClass="Core.ecore#//Specification"/>
+    <genClasses ecoreClass="Core.ecore#//TypedEntity">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Core.ecore#//TypedEntity/type"/>
+    </genClasses>
+  </genPackages>
+  <genPackages prefix="Domain" disposableProviderFactory="true" ecorePackage="Domain.ecore#/">
+    <genClasses ecoreClass="Domain.ecore#//QosProperty"/>
+    <genClasses ecoreClass="Domain.ecore#//DomainEntity">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Domain.ecore#//DomainEntity/qosPolicy"/>
+    </genClasses>
+  </genPackages>
+  <genPackages prefix="QoS" disposableProviderFactory="true" ecorePackage="QoS.ecore#/">
+    <genClasses image="false" ecoreClass="QoS.ecore#//QosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//DeadlineQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//DestinationOrderQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//DurabilityQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//DurabilityServiceQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//EntityFactoryQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//GroupDataQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//HistoryQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//LatencyBudgetQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//LifespanQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//LivelinessQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//OwnershipQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//OwnershipStrengthQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//PartitionQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//PresentationQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//ReaderDataLifecycleQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//ReliabilityQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//ResourceLimitsQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//TimeBasedFilterQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//TopicDataQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//TransportPriorityQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//UserDataQosPolicy"/>
+    <genClasses ecoreClass="QoS.ecore#//WriterDataLifecycleQosPolicy"/>
+  </genPackages>
+  <genPackages prefix="Topics" disposableProviderFactory="true" ecorePackage="Topics.ecore#/">
+    <genClasses image="false" ecoreClass="Topics.ecore#//TopicDescription"/>
+    <genClasses ecoreClass="Topics.ecore#//Topic">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/deadline"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/destination_order"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/durability"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/durability_service"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/history"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/latency_budget"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/liveliness"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/ownership"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/reliability"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/resource_limits"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/topic_data"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/transport_priority"/>
+    </genClasses>
+    <genClasses ecoreClass="Topics.ecore#//ContentFilteredTopic">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Topics.ecore#//ContentFilteredTopic/filter_expression"/>
+    </genClasses>
+    <genClasses ecoreClass="Topics.ecore#//MultiTopic">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Topics.ecore#//MultiTopic/subscription_expression"/>
+    </genClasses>
+  </genPackages>
+  <genPackages prefix="DCPS" disposableProviderFactory="true" ecorePackage="DCPS.ecore#/">
+    <genClasses ecoreClass="DCPS.ecore#//Domain"/>
+    <genClasses ecoreClass="DCPS.ecore#//DomainParticipant">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//DomainParticipant/domain"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DomainParticipant/publisher"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DomainParticipant/subscriber"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DomainParticipant/entity_factory"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DomainParticipant/user_data"/>
+    </genClasses>
+    <genClasses ecoreClass="DCPS.ecore#//PublisherSubscriber">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//PublisherSubscriber/entity_factory"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//PublisherSubscriber/group_data"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//PublisherSubscriber/presentation"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//PublisherSubscriber/partition"/>
+    </genClasses>
+    <genClasses ecoreClass="DCPS.ecore#//Subscriber">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//Subscriber/reader"/>
+    </genClasses>
+    <genClasses ecoreClass="DCPS.ecore#//Publisher">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//Publisher/writer"/>
+    </genClasses>
+    <genClasses ecoreClass="DCPS.ecore#//DataReaderWriter">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReaderWriter/deadline"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReaderWriter/destination_order"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReaderWriter/durability"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReaderWriter/history"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReaderWriter/latency_budget"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReaderWriter/liveliness"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReaderWriter/ownership"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReaderWriter/reliability"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReaderWriter/resource_limits"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReaderWriter/user_data"/>
+    </genClasses>
+    <genClasses ecoreClass="DCPS.ecore#//DataReader">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReader/reader_data_lifecycle"/>
+    </genClasses>
+    <genClasses ecoreClass="DCPS.ecore#//DataWriter">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataWriter/durability_service"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataWriter/ownership_strength"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataWriter/transport_priority"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataWriter/reader_data_lifecycle"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

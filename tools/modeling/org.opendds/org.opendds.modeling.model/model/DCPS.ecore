@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="DCPS"
+    nsURI="http://www.opendds.org/modeling/schemas/DCPS/1.0" nsPrefix="dcps">
+  <eClassifiers xsi:type="ecore:EClass" name="Domain" eSuperTypes="Core.ecore#//Entity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DomainParticipant" eSuperTypes="Domain.ecore#//DomainEntity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="domain" lowerBound="1"
+        eType="#//Domain"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="publisher" eType="#//Publisher"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subscriber" eType="#//Subscriber"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="entity_factory" eType="ecore:EClass QoS.ecore#//EntityFactoryQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="user_data" eType="ecore:EClass QoS.ecore#//UserDataQosPolicy"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PublisherSubscriber" eSuperTypes="Domain.ecore#//DomainEntity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="entity_factory" eType="ecore:EClass QoS.ecore#//EntityFactoryQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="group_data" eType="ecore:EClass QoS.ecore#//GroupDataQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="presentation" eType="ecore:EClass QoS.ecore#//PresentationQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="partition" eType="ecore:EClass QoS.ecore#//PartitionQosPolicy"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Subscriber" eSuperTypes="#//PublisherSubscriber">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reader" lowerBound="1"
+        upperBound="-1" eType="#//DataReader" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Publisher" eSuperTypes="#//PublisherSubscriber">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="writer" lowerBound="1"
+        upperBound="-1" eType="#//DataWriter" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataReaderWriter" eSuperTypes="Domain.ecore#//DomainEntity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="deadline" eType="ecore:EClass QoS.ecore#//DeadlineQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="destination_order" eType="ecore:EClass QoS.ecore#//DestinationOrderQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="durability" eType="ecore:EClass QoS.ecore#//DurabilityQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="history" eType="ecore:EClass QoS.ecore#//HistoryQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="latency_budget" eType="ecore:EClass QoS.ecore#//LatencyBudgetQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="liveliness" eType="ecore:EClass QoS.ecore#//LivelinessQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ownership" eType="ecore:EClass QoS.ecore#//OwnershipQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reliability" eType="ecore:EClass QoS.ecore#//ReliabilityQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="resource_limits" eType="ecore:EClass QoS.ecore#//ResourceLimitsQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="user_data" eType="ecore:EClass QoS.ecore#//UserDataQosPolicy"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataReader" eSuperTypes="#//DataReaderWriter">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reader_data_lifecycle"
+        eType="ecore:EClass QoS.ecore#//ReaderDataLifecycleQosPolicy" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataWriter" eSuperTypes="#//DataReaderWriter">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="durability_service" eType="ecore:EClass QoS.ecore#//DurabilityServiceQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ownership_strength" eType="ecore:EClass QoS.ecore#//OwnershipStrengthQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="transport_priority" eType="ecore:EClass QoS.ecore#//TransportPriorityQosPolicy"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reader_data_lifecycle"
+        eType="ecore:EClass QoS.ecore#//ReaderDataLifecycleQosPolicy" containment="true"/>
+  </eClassifiers>
+</ecore:EPackage>
