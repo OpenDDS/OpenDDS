@@ -14,6 +14,9 @@
     <property name="eclipse.home" value="${env.ECLIPSE_HOME}"/>
     <property name="eclipse.plugins.dir" value="${eclipse.home}/plugins"/>
 
+    <property name="eclipse.alt.home" value="${env.ECLIPSE_ALT_HOME}"/>
+    <property name="eclipse.alt.plugins.dir" value="${eclipse.alt.home}/plugins"/>
+
     <property name="install.dir" value="${eclipse.plugins.dir}"/>
 
     <!--
@@ -31,6 +34,9 @@
             </fileset>
             <path refid="cache.classpath"/>
             <fileset dir="${eclipse.plugins.dir}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${eclipse.alt.plugins.dir}">
                 <include name="*.jar"/>
             </fileset>
         </path>
