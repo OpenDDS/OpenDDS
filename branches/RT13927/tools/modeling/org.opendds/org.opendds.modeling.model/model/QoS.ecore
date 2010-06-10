@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="QoS"
+    nsURI="http://www.opendds.org/modeling/schemas/QoS/1.0" nsPrefix="qos">
+  <eClassifiers xsi:type="ecore:EClass" name="QosPolicy" abstract="true" eSuperTypes="Core.ecore#//Specification"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DeadlineQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DestinationOrderQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DurabilityQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DurabilityServiceQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="EntityFactoryQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="GroupDataQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="HistoryQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="LatencyBudgetQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="LifespanQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="LivelinessQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OwnershipQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="OwnershipStrengthQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="PartitionQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="PresentationQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ReaderDataLifecycleQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ReliabilityQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ResourceLimitsQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="TimeBasedFilterQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="TopicDataQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="TransportPriorityQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="UserDataQosPolicy" eSuperTypes="#//QosPolicy"/>
+  <eClassifiers xsi:type="ecore:EClass" name="WriterDataLifecycleQosPolicy" eSuperTypes="#//QosPolicy"/>
+</ecore:EPackage>

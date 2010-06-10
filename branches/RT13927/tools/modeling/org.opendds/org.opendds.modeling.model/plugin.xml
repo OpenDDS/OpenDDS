@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+
+<!--
+ <copyright>
+ </copyright>
+
+ $Id$
+-->
+
+<plugin>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <package
+            uri="http://www.opendds.org/modeling/schemas/OpenDDS/1.0"
+            class="OpenDDS.OpenDDSPackage"
+            genModel="model/OpenDDS.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <package
+            uri="http://www.opendds.org/modeling/schemas/Diagrams/1.0"
+            class="Diagrams.DiagramsPackage"
+            genModel="model/OpenDDS.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <package
+            uri="http://www.opendds.org/modeling/schemas/Core/1.0"
+            class="Core.CorePackage"
+            genModel="model/OpenDDS.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <package
+            uri="http://www.opendds.org/modeling/schemas/Domain/1.0"
+            class="Domain.DomainPackage"
+            genModel="model/OpenDDS.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <package
+            uri="http://www.opendds.org/modeling/schemas/QoS/1.0"
+            class="QoS.QoSPackage"
+            genModel="model/OpenDDS.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <package
+            uri="http://www.opendds.org/modeling/schemas/Topics/1.0"
+            class="Topics.TopicsPackage"
+            genModel="model/OpenDDS.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <package
+            uri="http://www.opendds.org/modeling/schemas/DCPS/1.0"
+            class="DCPS.DCPSPackage"
+            genModel="model/OpenDDS.genmodel"/>
+   </extension>
+
+</plugin>
