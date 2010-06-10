@@ -7,7 +7,9 @@ Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: Core,
+Export-Package: Application,
+ Application.util,
+ Core,
  Core.impl,
  Core.util,
  DCPS,
@@ -19,6 +21,8 @@ Export-Package: Core,
  Domain,
  Domain.impl,
  Domain.util,
+ Enumerations,
+ Enumerations.util,
  OpenDDS,
  OpenDDS.impl,
  OpenDDS.util,
@@ -27,7 +31,9 @@ Export-Package: Core,
  QoS.util,
  Topics,
  Topics.impl,
- Topics.util
+ Topics.util,
+ Types,
+ Types.util
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport
 Bundle-ActivationPolicy: lazy
