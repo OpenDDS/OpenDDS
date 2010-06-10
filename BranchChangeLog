@@ -1,3 +1,19 @@
+Thu Jun 10 23:42:07 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3294] 2010-06-10 23:38  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.model/.classpath,
+          tools/modeling/org.opendds/org.opendds.modeling.model/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Application.ecore,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Enumerations.ecore,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/QoS.ecore,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Topics.ecore,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Types.ecore:
+
+          Candidate implementation of ptc/08-07-02.  This includes
+          the class names that may be confused with those in the Java
+          namespace.  Use of the segregated model may have obviated
+          this issue.
 
 Thu Jun 10 20:20:33 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
@@ -19,25 +35,25 @@ Thu Jun 10 16:39:48 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
           Sub-optimal solution for accomodating multiple plugin
           directories.
 
-	* [r3290] 2010-06-10 15:46  martinezm
-	  tools/modeling/org.opendds/org.opendds.modeling.model/.classpath,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/.project,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/META-INF,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/META-INF/MANIFEST.MF,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/build.properties,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Core.ecore,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/DCPS.ecore,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Diagrams.ecore,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Domain.ecore,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/QoS.ecore,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Topics.ecore,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/plugin.properties,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/plugin.xml:
+        * [r3290] 2010-06-10 15:46  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.model/.classpath,
+          tools/modeling/org.opendds/org.opendds.modeling.model/.project,
+          tools/modeling/org.opendds/org.opendds.modeling.model/META-INF,
+          tools/modeling/org.opendds/org.opendds.modeling.model/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.model/build.properties,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Core.ecore,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/DCPS.ecore,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Diagrams.ecore,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Domain.ecore,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/QoS.ecore,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Topics.ecore,
+          tools/modeling/org.opendds/org.opendds.modeling.model/plugin.properties,
+          tools/modeling/org.opendds/org.opendds.modeling.model/plugin.xml:
 
-	  Adding segregated ecore metamodels and profile.
+          Adding segregated ecore metamodels and profile.
 
 Thu Jun 10 14:05:09 UTC 2010  Mike Martinez  <martinez_m@ocweb.com>
 
