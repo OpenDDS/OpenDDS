@@ -570,10 +570,12 @@ void DataWriterImpl::remove_all_associations()
 {
   OpenDDS::DCPS::ReaderIdSeq readers;
   CORBA::ULong size;
+  CORBA::ULong num_pending_readers;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
 
-    size = readers_.size();
+    num_pending_readers = pending_readers_.size();
+    size = readers_.size() + num_pending_readers;
     readers.length(size);
 
     IdSet::iterator itEnd = readers_.end();
@@ -581,6 +583,18 @@ void DataWriterImpl::remove_all_associations()
 
     for (IdSet::iterator it = readers_.begin(); it != itEnd; ++it) {
       readers[i ++] = *it;
+    }
+
+    itEnd = pending_readers_.end();
+    for (IdSet::iterator it = pending_readers_.begin(); it != itEnd; ++it) {
+      readers[i ++] = *it;
+    }
+    
+    if (num_pending_readers > 0) {
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::remove_all_associations() - ")
+                 ACE_TEXT("%d subscribers were pending and never fully associated"),
+                 num_pending_readers));
     }
   }
 

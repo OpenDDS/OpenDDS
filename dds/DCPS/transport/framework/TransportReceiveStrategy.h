@@ -54,6 +54,9 @@ protected:
   /// Check the transport header for suitability.
   virtual bool check_header(const TransportHeader& header);
 
+  /// Check the data sample header for suitability.
+  virtual bool check_header(const DataSampleHeader& header);
+
   /// Called when there is a ReceivedDataSample to be delivered.
   virtual void deliver_sample(ReceivedDataSample&  sample,
                               const ACE_INET_Addr& remote_address) = 0;
@@ -63,6 +66,9 @@ protected:
 
   /// Let the subclass stop.
   virtual void stop_i() = 0;
+
+  /// Ignore bad PDUs by skipping over them.
+  int skip_bad_pdus();
 
   /// Flag indicates if the GRACEFUL_DISCONNECT message is received.
   bool gracefully_disconnected_;

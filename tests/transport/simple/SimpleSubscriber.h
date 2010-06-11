@@ -28,6 +28,9 @@ class SimpleSubscriber : public OpenDDS::DCPS::TransportInterface
     /// the TransportReceiveListeners have been told of the data_received().
     int received_test_message() const;
 
+    void remove_associations(ssize_t size,
+                             const OpenDDS::DCPS::RepoId* remote_ids,
+                             const OpenDDS::DCPS::RepoId sub_id);
 
   protected:
 

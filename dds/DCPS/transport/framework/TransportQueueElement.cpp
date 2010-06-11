@@ -43,8 +43,9 @@ OpenDDS::DCPS::TransportQueueElement::clone(const ACE_Message_Block* msg,
 {
   DBG_ENTRY_LVL("TransportQueueElement","clone",6);
   ACE_Message_Block* cur_block = const_cast<ACE_Message_Block* > (msg);
-  ACE_Message_Block* copy = 0;
-  ACE_Message_Block* cur_copy = 0;
+  ACE_Message_Block* head_copy = 0;
+  ACE_Message_Block* cur_copy  = 0;
+  ACE_Message_Block* prev_copy = 0;
   // deep copy sample data
   while (cur_block != 0) {
     ACE_NEW_MALLOC_RETURN(cur_copy,
@@ -66,15 +67,17 @@ OpenDDS::DCPS::TransportQueueElement::clone(const ACE_Message_Block* msg,
     cur_copy->rd_ptr (cur_copy->base () + (cur_block->rd_ptr () - cur_block->base ()));
     cur_copy->wr_ptr (cur_copy->base () + (cur_block->wr_ptr () - cur_block->base ()));
 
-    if (copy == 0) {
-      copy = cur_copy;
+    if (head_copy == 0) {
+      head_copy = cur_copy;
+    } else {
+      prev_copy->cont (cur_copy);
     }
-    else {
-      copy->cont (cur_copy);
-    }
+
+    prev_copy = cur_copy;
+    
     cur_block = cur_block->cont();
   }
 
-  return copy;
+  return head_copy;
 }
 

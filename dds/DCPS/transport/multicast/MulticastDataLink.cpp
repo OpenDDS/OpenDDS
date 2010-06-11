@@ -15,7 +15,10 @@
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
 
+#include "tao/ORB_Core.h"
+
 #include "dds/DCPS/RepoIdBuilder.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #ifndef __ACE_INLINE__
 # include "MulticastDataLink.inl"
@@ -104,6 +107,47 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
                      false);	
 	}
 
+  int rcv_buffer_size = this->config_->rcv_buffer_size_;
+  if (rcv_buffer_size != 0 
+      && ACE_OS::setsockopt(handle, SOL_SOCKET,
+                            SO_RCVBUF,
+                            (char *) &rcv_buffer_size,
+                            sizeof (int)) < 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("MulticastDataLink::join: ")
+                      ACE_TEXT("ACE_OS::setsockopt RCVBUF failed: %p\n")),
+                     false);	
+	}
+
+  int enable_loop = static_cast<int> (TheServiceParticipant->get_ORB()->
+                      orb_core()->orb_params()->ip_multicastloop());
+#if defined (ACE_HAS_IPV6)
+  if (this->local_addr_.get_type () == AF_INET6) {
+    if (ACE_OS::setsockopt(handle, IPPROTO_IPV6,
+                           IPV6_MULTICAST_LOOP,
+                           (char *) &enable_loop,
+                           sizeof (int)) < 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("MulticastDataLink::join: ")
+                        ACE_TEXT("ACE_OS::setsockopt IPV6_MULTICAST_LOOP failed: %p\n")),
+                       false);	
+    } 
+  }
+  else
+#endif
+  if (ACE_OS::setsockopt(handle, IPPROTO_IP,
+                         IP_MULTICAST_LOOP,
+                         (char *) &enable_loop,
+                         sizeof (int)) < 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("MulticastDataLink::join: ")
+                      ACE_TEXT("ACE_OS::setsockopt IP_MULTICAST_LOOP failed: %p\n")),
+                     false);	
+	}
+
   if (start(this->send_strategy_.in(), this->recv_strategy_.in()) != 0) {
     this->socket_.close();
     ACE_ERROR_RETURN((LM_ERROR,
@@ -167,7 +211,7 @@ MulticastDataLink::acked(MulticastPeer remote_peer)
 }
 
 bool
-MulticastDataLink::header_received(const TransportHeader& header)
+MulticastDataLink::check_header(const TransportHeader& header)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
                    guard,
@@ -175,11 +219,26 @@ MulticastDataLink::header_received(const TransportHeader& header)
                    false);
 
   MulticastSessionMap::iterator it(this->sessions_.find(header.source_));
-  if (it != this->sessions_.end() && it->second->acked()) {
-    return it->second->header_received(header);
-  }
-
+  if (it == this->sessions_.end()) return false;
+  if (it->second->acked()) {
+    return it->second->check_header(header);
+  } 
+  
   return true;
+}
+
+bool
+MulticastDataLink::check_header(const DataSampleHeader& header)
+{
+  ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
+                   guard,
+                   this->session_lock_,
+                   false);
+
+  if (header.message_id_ == TRANSPORT_CONTROL) return true;
+
+  // Skip data sample unless there is a session for it.
+  return (this->sessions_.count(receive_strategy()->received_header().source_) > 0);
 }
 
 void
@@ -193,10 +252,13 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
               guard,
               this->session_lock_);
 
+    char* ptr = sample.sample_->rd_ptr();
     for (MulticastSessionMap::iterator it(this->sessions_.begin());
          it != this->sessions_.end(); ++it) {
       it->second->control_received(sample.header_.submessage_id_,
                                    sample.sample_);
+      // reset read pointer
+      sample.sample_->rd_ptr(ptr);      
     }
 
   } break;
