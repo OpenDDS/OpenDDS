@@ -1,3 +1,22 @@
+Fri Jun 11 16:20:31 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        Added modeling.feature project for plugin distribution.
+
+        * [r3299] 2010-06-11 16:08  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.feature:
+
+        * [r3300] 2010-06-11 16:14  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.feature/build.properties:
+
+          Added properties file with correct svn properties.
+
+
+        * [r3301] 2010-06-11 16:17  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.feature/.project,
+          tools/modeling/org.opendds/org.opendds.modeling.feature/feature.xml:
+
+          More files with correct svn properties.
+
 Fri Jun 11 02:33:35 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         Added Types library diagram to model.
