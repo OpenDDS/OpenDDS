@@ -503,9 +503,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
       if (it != this->writers_.end()) {
         it->second->removed();
+        delete it->second;
       }
-
-      delete it->second;
 
       if (this->writers_.erase(writer_id) == 0) {
         if (DCPS_debug_level >= 1) {

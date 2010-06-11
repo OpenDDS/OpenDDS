@@ -517,13 +517,16 @@ OpenDDS::DCPS::TransportImpl::demarshal_acks(ACE_Message_Block* acks, bool byte_
 {
   DBG_ENTRY_LVL("TransportImpl","demarshal_acks",6);
 
+  {
   GuardType guard(this->lock_);
+
   int status = this->acked_sub_map_.demarshal(acks, byte_order);
 
   if (status == -1)
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TransportImpl::demarshal_acks failed\n"),
                      -1);
+  }
 
   check_fully_association();
   return 0;
@@ -532,6 +535,8 @@ OpenDDS::DCPS::TransportImpl::demarshal_acks(ACE_Message_Block* acks, bool byte_
 void OpenDDS::DCPS::TransportImpl::check_fully_association()
 {
   DBG_ENTRY_LVL("TransportImpl","check_fully_association",6);
+
+  GuardType guard(this->lock_);
 
   if (OpenDDS::DCPS::Transport_debug_level > 8) {
     ACE_DEBUG((LM_DEBUG,

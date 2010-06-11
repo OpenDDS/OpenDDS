@@ -79,10 +79,10 @@ struct OpenDDS_Dcps_Export SequenceNumber {
   ///      shortest distance is from 2 to MAX/2.
   bool operator<(const SequenceNumber& rvalue) const {
     ACE_INT16 distance = rvalue.value_ - value_;
-    return (distance == 0)? false:                    // Equal is not less than.
-           (value_ < 0)? (value_ < rvalue.value_):    // Stem of lollipop.
-           (distance <  0)? (SHRT_MAX/2 < -distance): // Closest distance dominates.
-           (distance < (SHRT_MAX/2));
+    return (distance == 0)? false:                // Equal is not less than.
+       (value_ < 0 || rvalue.value_ < 0) ? (value_ < rvalue.value_): // Stem of lollipop.
+       (distance <  0)? (SHRT_MAX/2 < -distance): // Closest distance dominates.
+       (distance < (SHRT_MAX/2));
   }
 
   /// Derive a full suite of logical operations.

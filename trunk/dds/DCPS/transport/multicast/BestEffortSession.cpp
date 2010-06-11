@@ -27,7 +27,15 @@ BestEffortSession::acked()
 }
 
 bool
-BestEffortSession::header_received(const TransportHeader& /*header*/)
+BestEffortSession::check_header(const TransportHeader& /*header*/)
+{
+  // Assume header is valid; this does not prevent duplicate
+  // delivery of datagrams:
+  return true;
+}
+
+bool
+BestEffortSession::check_header(const DataSampleHeader& /*header*/)
 {
   // Assume header is valid; this does not prevent duplicate
   // delivery of datagrams:

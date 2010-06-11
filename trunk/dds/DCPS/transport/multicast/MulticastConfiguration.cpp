@@ -46,7 +46,12 @@ MulticastConfiguration::MulticastConfiguration()
     reliable_(DEFAULT_RELIABLE),
     syn_backoff_(DEFAULT_SYN_BACKOFF),
     nak_depth_(DEFAULT_NAK_DEPTH),
-	ttl_(DEFAULT_TTL)
+    ttl_(DEFAULT_TTL),
+#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+    rcv_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+#elif
+    rcv_buffer_size_(0) // Use system default value.
+#endif
 {
   default_group_address(this->group_address_, DEFAULT_MULTICAST_ID);
 
@@ -118,6 +123,9 @@ MulticastConfiguration::load(const TransportIdType& id,
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("ttl"),
                    this->ttl_, char)
+
+  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("rcv_buffer_size"),
+                   this->rcv_buffer_size_, size_t)
   return 0;
 }
 

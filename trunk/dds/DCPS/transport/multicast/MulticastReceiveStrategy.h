@@ -36,6 +36,7 @@ protected:
                                 ACE_INET_Addr& remote_address);
 
   virtual bool check_header(const TransportHeader& header);
+  virtual bool check_header(const DataSampleHeader& header);
 
   virtual void deliver_sample(ReceivedDataSample& sample,
                               const ACE_INET_Addr& remote_address);

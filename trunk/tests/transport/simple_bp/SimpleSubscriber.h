@@ -31,6 +31,10 @@ class SimpleSubscriber : public OpenDDS::DCPS::TransportInterface
 
     void print_time();
 
+    void remove_associations(ssize_t size,
+                             const OpenDDS::DCPS::RepoId* remote_ids,
+                             const OpenDDS::DCPS::RepoId sub_id);
+
   protected:
 
     /// Only called if the TransportImpl is shutdown() when this

@@ -74,7 +74,8 @@ public:
 
   bool acked(MulticastPeer remote_peer);
 
-  bool header_received(const TransportHeader& header);
+  bool check_header(const TransportHeader& header);
+  bool check_header(const DataSampleHeader& header);
   void sample_received(ReceivedDataSample& sample);
 
 private:
