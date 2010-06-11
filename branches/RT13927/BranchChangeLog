@@ -1,3 +1,11 @@
+Fri Jun 11 02:33:35 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        Added Types library diagram to model.
+
+        * [r3296] 2010-06-11 02:31  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Diagrams.ecore,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore:
+
 Thu Jun 10 23:42:07 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3294] 2010-06-10 23:38  martinezm
