@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.opendds.modeling.feature"
+      label="OpenDDS Modeling SDK"
+      version="1.0.0.dev20100611"
+      provider-name="Object Computing, Inc."
+      plugin="org.opendds.brand">
+
+   <description url="http://www.opendds.org/">
+      This is the OpenDDS Modeling SDK.  It provides the ability to
+capture UML middleware models and generate C++ code.
+   </description>
+
+   <copyright url="http://www.opendds.org/copyright.html">
+      (C)2010 Object Computing, Inc.
+   </copyright>
+
+   <license url="http://www.opendds.org/license.html">
+      OpenDDS (Licensed Product) is protected by copyright, and is
+distributed under the following terms.
+\
+OpenDDS is an open source implementation of the Object Management
+Group (OMG) Data Distribution Service (DDS), developed and copyrighted
+by Object Computing Incorporated (OCI). OpenDDS is both a multi-language
+and multi-platform implementation. The OMG DDS specification
+is intended to be suitable for systems whose requirements include
+real-time, high volume, robustness, failure tolerant data distribution
+utilizing a publish and subscribe model.
+\
+Since OpenDDS is open source and free of licensing fees, you
+are free to use, modify, and distribute the source code, as long
+as you include this copyright statement.
+\
+In particular, you can use OpenDDS to build proprietary software
+and are under no obligation to redistribute any of your source
+code that is built using OpenDDS. Note however, that you may
+not do anything to the OpenDDS code, such as copyrighting it
+yourself or claiming authorship of the OpenDDS code, that will
+prevent OpenDDS from being distributed freely using an open source
+development model.
+   </license>
+
+   <url>
+      <update label="OpenDDS Modeling SDK" url="https://maple.ociweb.com/~martinezm/opendds.org/modeling/eclipse/plugins/"/>
+   </url>
+
+   <plugin
+         id="org.opendds.modeling.model"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.opendds.modeling.model.edit"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.opendds.modeling.model.editor"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.opendds.brand"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+</feature>
