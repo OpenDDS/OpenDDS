@@ -1,3 +1,13 @@
+Fri Jun 11 20:08:40 UTC 2010  Byron Harris <harrisb@ociweb.com>
+
+        * [r3306] 2010-06-11 20:48  harrisb
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Diagrams.ecore,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore:
+
+          Renamed DcpsDomains to MiddlewareLibrary and DataTypes to
+          DataLibrary. Added class OpenDDSModel to act as a container for
+          elements that can show up on the main diagram as needed by GMF.
+
 Fri Jun 11 19:47:36 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3303] 2010-06-11 19:34  martinezm
