@@ -4,8 +4,8 @@
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="OpenDDS"
     nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" nsPrefix="opendds">
   <eClassifiers xsi:type="ecore:EClass" name="policyLibrary" eSuperTypes="Diagrams.ecore#//PolicyLibrary"/>
-  <eClassifiers xsi:type="ecore:EClass" name="modelLibrary" eSuperTypes="Diagrams.ecore#//DcpsDomains"/>
-  <eClassifiers xsi:type="ecore:EClass" name="datatypeLibrary" eSuperTypes="Diagrams.ecore#//DataTypes"/>
+  <eClassifiers xsi:type="ecore:EClass" name="modelLibrary" eSuperTypes="Diagrams.ecore#//MiddlewareLibrary"/>
+  <eClassifiers xsi:type="ecore:EClass" name="datatypeLibrary" eSuperTypes="Diagrams.ecore#//DataLibrary"/>
   <eClassifiers xsi:type="ecore:EClass" name="ddsSpecification" abstract="true" eSuperTypes="Core.ecore#//Specification"/>
   <eClassifiers xsi:type="ecore:EClass" name="ddsProperty" abstract="true" eSuperTypes="Core.ecore#//TypedEntity"/>
   <eClassifiers xsi:type="ecore:EClass" name="qosProperty" eSuperTypes="Domain.ecore#//QosProperty #//ddsProperty"/>
