@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenDDS Branding Information
+Bundle-SymbolicName: org.opendds.brand
+Bundle-Version: 1.0.0.dev100611
+Bundle-Vendor: Object Computing, Inc.
