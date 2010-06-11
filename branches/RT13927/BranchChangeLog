@@ -1,3 +1,25 @@
+Fri Jun 11 19:47:36 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3303] 2010-06-11 19:34  martinezm
+          tools/modeling/org.opendds/org.opendds.brand:
+
+          Location for the branding plug-in project.
+
+        * [r3304] 2010-06-11 19:45  martinezm
+          tools/modeling/org.opendds/org.opendds.brand/.project,
+          tools/modeling/org.opendds/org.opendds.brand/META-INF,
+          tools/modeling/org.opendds/org.opendds.brand/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.brand/about.html,
+          tools/modeling/org.opendds/org.opendds.brand/about.ini,
+          tools/modeling/org.opendds/org.opendds.brand/about.properties,
+          tools/modeling/org.opendds/org.opendds.brand/build.properties,
+          tools/modeling/org.opendds/org.opendds.brand/images,
+          tools/modeling/org.opendds/org.opendds.brand/images/logo-16x16.gif,
+          tools/modeling/org.opendds/org.opendds.brand/images/logo-32x32.gif,
+          tools/modeling/org.opendds/org.opendds.brand/images/logo-large-notext.gif:
+
+          Branding plug-in project.
+
 Fri Jun 11 16:20:31 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         Added modeling.feature project for plugin distribution.
