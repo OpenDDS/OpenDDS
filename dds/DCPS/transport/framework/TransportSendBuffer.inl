@@ -41,7 +41,7 @@ TransportSendBuffer::high() const
   return this->buffers_.rbegin()->first;
 }
 
-bool
+ACE_INLINE bool
 TransportSendBuffer::empty() const
 {
   return this->buffers_.empty();
