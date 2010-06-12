@@ -1,3 +1,14 @@
+Sat Jun 12 15:21:00 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.inl:
+
+          Added ACE_INLINE qualifier.
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+
+          Changed an empty #elif to #else to avoid a compilation
+          complaint.
+
 Fri Jun 11 12:27:24 UTC 2010  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
@@ -15,7 +26,7 @@ Fri Jun 11 12:27:24 UTC 2010  Don Hudson  <hudsond@ociweb.com>
         * dds/DCPS/DisjointSequence.inl:
 
           Corrected DisjointSequence::range_iterator when there is no gap between two elements in the sequence.
-         
+
         * dds/DCPS/DisjointSequence.cpp:
 
           Corrected shifting of low water mark.
@@ -27,7 +38,7 @@ Fri Jun 11 12:27:24 UTC 2010  Don Hudson  <hudsond@ociweb.com>
         * dds/DCPS/transport/framework/DataLink.cpp:
 
           Added debug warning to ack_received() for publication not found as the ack may be for
-          another link (ack for a publication that doesn't have a listener is still an error.)   
+          another link (ack for a publication that doesn't have a listener is still an error.)
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:
 
@@ -71,7 +82,7 @@ Fri Jun 11 12:27:24 UTC 2010  Don Hudson  <hudsond@ociweb.com>
        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
 
           Added support for configuring multicast loop back through use of ACE option -ORBIPMulticastLoop.
-          When multicast loop back is on (by default), everything in the send buffer is copied to the recieve buffer. 
+          When multicast loop back is on (by default), everything in the send buffer is copied to the recieve buffer.
           Multicast loop back can be turned off when producers are on separate machines from subscribers; this can improve performance.
 
         * dds/DCPS/transport/multicast/MulticastDataLink.h:

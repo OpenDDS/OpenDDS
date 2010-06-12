@@ -49,7 +49,7 @@ MulticastConfiguration::MulticastConfiguration()
     ttl_(DEFAULT_TTL),
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
     rcv_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
-#elif
+#else
     rcv_buffer_size_(0) // Use system default value.
 #endif
 {
