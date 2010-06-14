@@ -1,3 +1,38 @@
+Mon Jun 14 20:42:39 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3317] 2010-06-14 20:21  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.edit:
+
+          Edit support for the modeling SDK.
+
+        * [r3318] 2010-06-14 20:21  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.editor:
+
+          EMF Editor support for the modeling SDK.
+
+        * [r3319] 2010-06-14 20:33  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.edit/.classpath,
+          tools/modeling/org.opendds/org.opendds.modeling.edit/.project,
+          tools/modeling/org.opendds/org.opendds.modeling.edit/META-INF,
+          tools/modeling/org.opendds/org.opendds.modeling.edit/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.edit/build.properties,
+          tools/modeling/org.opendds/org.opendds.modeling.edit/plugin.properties,
+          tools/modeling/org.opendds/org.opendds.modeling.edit/plugin.xml,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/.classpath,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/.project,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/META-INF,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/build.properties,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/icons,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/icons/full,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/icons/full/wizban,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/icons/full/wizban/NewOpenDDS.gif,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/plugin.properties,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/plugin.xml:
+
+          Capture specifications for edit and editor support that should
+          survive code generation cycles.
+
 Mon Jun 14 20:11:22 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore:
