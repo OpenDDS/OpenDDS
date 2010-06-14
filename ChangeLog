@@ -1,3 +1,10 @@
+Mon Jun 14 06:28:29 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Corrected session_lock_ scope in sample_received() 
+          missed in last commit.
+          
 Mon Jun 14 04:26:23 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.h:
