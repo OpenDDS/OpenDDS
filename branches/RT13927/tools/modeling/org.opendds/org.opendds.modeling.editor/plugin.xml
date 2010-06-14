@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+
+<!--
+ <copyright>
+ </copyright>
+
+ $Id$
+-->
+
+<plugin>
+
+   <extension point="org.eclipse.ui.newWizards">
+      <category
+            id="org.opendds.modeling.Wizard.category.ID"
+            name="%_UI_Wizard_category"/>
+      <wizard
+            category="org.opendds.modeling.Wizard.category.ID"
+            class="OpenDDS.presentation.OpenDDSModelWizard"
+            icon="icons/full/obj16/OpenDDSModelFile.gif"
+            id="OpenDDS.presentation.OpenDDSModelWizardID"
+            name="%_UI_OpenDDSModelWizard_label">
+         <description>%_UI_OpenDDSModelWizard_description</description>
+         <selection class="org.eclipse.core.resources.IResource"/>
+      </wizard>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="OpenDDS.presentation.OpenDDSEditorID"
+            name="%_UI_OpenDDSEditor_label"
+            icon="icons/full/obj16/OpenDDSModelFile.gif"
+            extensions="opendds"
+            class="OpenDDS.presentation.OpenDDSEditor"
+            contributorClass="OpenDDS.presentation.OpenDDSActionBarContributor">
+      </editor>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="Diagrams.presentation.DiagramsEditorID"
+            name="%_UI_DiagramsEditor_label"
+            icon="icons/full/obj16/DiagramsModelFile.gif"
+            extensions="diagrams"
+            class="Diagrams.presentation.DiagramsEditor"
+            contributorClass="Diagrams.presentation.DiagramsActionBarContributor">
+      </editor>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="Core.presentation.CoreEditorID"
+            name="%_UI_CoreEditor_label"
+            icon="icons/full/obj16/CoreModelFile.gif"
+            extensions="core"
+            class="Core.presentation.CoreEditor"
+            contributorClass="Core.presentation.CoreActionBarContributor">
+      </editor>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="Domain.presentation.DomainEditorID"
+            name="%_UI_DomainEditor_label"
+            icon="icons/full/obj16/DomainModelFile.gif"
+            extensions="domain"
+            class="Domain.presentation.DomainEditor"
+            contributorClass="Domain.presentation.DomainActionBarContributor">
+      </editor>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="QoS.presentation.QoSEditorID"
+            name="%_UI_QoSEditor_label"
+            icon="icons/full/obj16/QoSModelFile.gif"
+            extensions="qos"
+            class="QoS.presentation.QoSEditor"
+            contributorClass="QoS.presentation.QoSActionBarContributor">
+      </editor>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="Topics.presentation.TopicsEditorID"
+            name="%_UI_TopicsEditor_label"
+            icon="icons/full/obj16/TopicsModelFile.gif"
+            extensions="topics"
+            class="Topics.presentation.TopicsEditor"
+            contributorClass="Topics.presentation.TopicsActionBarContributor">
+      </editor>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="DCPS.presentation.DCPSEditorID"
+            name="%_UI_DCPSEditor_label"
+            icon="icons/full/obj16/DCPSModelFile.gif"
+            extensions="dcps"
+            class="DCPS.presentation.DCPSEditor"
+            contributorClass="DCPS.presentation.DCPSActionBarContributor">
+      </editor>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="Types.presentation.TypesEditorID"
+            name="%_UI_TypesEditor_label"
+            icon="icons/full/obj16/TypesModelFile.gif"
+            extensions="types"
+            class="Types.presentation.TypesEditor"
+            contributorClass="Types.presentation.TypesActionBarContributor">
+      </editor>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="Application.presentation.ApplicationEditorID"
+            name="%_UI_ApplicationEditor_label"
+            icon="icons/full/obj16/ApplicationModelFile.gif"
+            extensions="application"
+            class="Application.presentation.ApplicationEditor"
+            contributorClass="Application.presentation.ApplicationActionBarContributor">
+      </editor>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="Enumerations.presentation.EnumerationsEditorID"
+            name="%_UI_EnumerationsEditor_label"
+            icon="icons/full/obj16/EnumerationsModelFile.gif"
+            extensions="enumerations"
+            class="Enumerations.presentation.EnumerationsEditor"
+            contributorClass="Enumerations.presentation.EnumerationsActionBarContributor">
+      </editor>
+   </extension>
+
+</plugin>
