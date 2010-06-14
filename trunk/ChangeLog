@@ -1,36 +1,46 @@
+Mon Jun 14 19:01:17 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/ZeroCopySeq_T.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/DataReaderListener.cpp:
+
+          Fixed warnings.
+          
 Mon Jun 14 06:28:29 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
 
-          Corrected session_lock_ scope in sample_received() 
+          Corrected session_lock_ scope in sample_received()
           missed in last commit.
-          
+
 Mon Jun 14 04:26:23 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.h:
         * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
         * dds/DCPS/transport/multicast/ReliableSession.h:
         * dds/DCPS/transport/multicast/ReliableSession.cpp:
-        
-          - Resolved a deadlock situation due to reverse locking during 
+
+          - Resolved a deadlock situation due to reverse locking during
             pub and sub association.
             One thread calls add_associations which acquires TransportImpl
-            reservation_lock_ and then MulticastDataLink session_lock_. 
+            reservation_lock_ and then MulticastDataLink session_lock_.
             The reactor thread handle the control message which acquires
             MulticastDataLink session_lock_ and then TransportImpl
-            reservation_lock_ due to check_fully_association() call to 
+            reservation_lock_ due to check_fully_association() call to
             TransportImpl. To solve the deadlock, the check_fully_association()
             is called outside of session_lock_ locking.
-            
-          - Updated to send one nak message per DisjointSequence with all ranges 
+
+          - Updated to send one nak message per DisjointSequence with all ranges
             instead of one per each range. This would reduce nak message overflow.
-            
+
         * performance-tests/DCPS/MulticastListenerTest/DataReaderListener.h:
         * performance-tests/DCPS/MulticastListenerTest/DataReaderListener.cpp:
         * performance-tests/DCPS/MulticastListenerTest/publisher.cpp:
         * performance-tests/DCPS/MulticastListenerTest/run_test-16p4s.pl:
         * performance-tests/DCPS/MulticastListenerTest/subscriber.cpp:
-        
+
           Added test result verify using DisjointSequence and added 16p4s test
           script.
 

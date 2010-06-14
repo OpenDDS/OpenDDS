@@ -108,7 +108,7 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
                      false);	
 	}
 
-  int rcv_buffer_size = this->config_->rcv_buffer_size_;
+  int rcv_buffer_size = ACE_Utils::truncate_cast<int>(this->config_->rcv_buffer_size_);
   if (rcv_buffer_size != 0 
       && ACE_OS::setsockopt(handle, SOL_SOCKET,
                             SO_RCVBUF,
