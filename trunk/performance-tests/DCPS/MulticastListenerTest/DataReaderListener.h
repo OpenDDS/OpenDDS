@@ -7,6 +7,7 @@
 #include "ace/Synch.h"
 #include "ace/Array.h"
 #include "dds/DdsDcpsSubscriptionExtS.h"
+#include "dds/DCPS/DisjointSequence.h"
 #include "TestStats.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -85,6 +86,11 @@ public:
 
 
   bool is_finished ();
+
+  OpenDDS::DCPS::DisjointSequence* samples_;
+
+  bool verify_result ();
+
 private:
 
   int read_samples (::DDS::DataReader_ptr reader);
@@ -112,7 +118,6 @@ private:
   int num_floats_per_sample_;
 
   TestStats stats_;
-
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

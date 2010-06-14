@@ -8,7 +8,8 @@
 
 
 template<class Tseq, class R, class R_ptr, class Rimpl>
-::DDS::ReturnCode_t read (::DDS::DataReader_ptr reader,
+::DDS::ReturnCode_t read (DataReaderListenerImpl* listener,
+                          ::DDS::DataReader_ptr reader,
                           ACE_Array<bool>& pub_finished)
 {
   R_ptr pt_dr
@@ -50,6 +51,7 @@ template<class Tseq, class R, class R_ptr, class Rimpl>
                 }
               else
                 {
+                  listener->samples_[samples[i].data_source].update (samples[i].sequence_num);
                   pub_finished[samples[i].data_source] = true;
                 }
             }
@@ -110,11 +112,15 @@ DataReaderListenerImpl::DataReaderListenerImpl (int num_publishers,
           total_samples));
       }
 
+    samples_ = new OpenDDS::DCPS::DisjointSequence[num_publishers_];
     pub_finished_.size(stats_.num_publishers_);
+    
     for (unsigned j = 0; j < stats_.num_publishers_; j++)
       {
         pub_finished_[j] = false;
+        this->samples_[j] = OpenDDS::DCPS::DisjointSequence (0); 
       }
+      
   }
 
 
@@ -122,6 +128,7 @@ DataReaderListenerImpl::~DataReaderListenerImpl (void)
   {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::~DataReaderListenerImpl\n")));
+    delete []samples_;
   }
 
 
@@ -273,7 +280,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                       ::Xyz::Pt128DataReader,
                       ::Xyz::Pt128DataReader_ptr,
                       ::Xyz::Pt128DataReaderImpl>
-                        (
+                        (this,
                         reader,
                         pub_finished_);
     }
@@ -285,7 +292,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                       ::Xyz::Pt512DataReader,
                       ::Xyz::Pt512DataReader_ptr,
                       ::Xyz::Pt512DataReaderImpl>
-                        (
+                        (this,
                         reader,
                         pub_finished_);
     }
@@ -297,7 +304,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                       ::Xyz::Pt2048DataReader,
                       ::Xyz::Pt2048DataReader_ptr,
                       ::Xyz::Pt2048DataReaderImpl>
-                        (
+                        (this,
                         reader,
                         pub_finished_);
     }
@@ -309,7 +316,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                       ::Xyz::Pt8192DataReader,
                       ::Xyz::Pt8192DataReader_ptr,
                       ::Xyz::Pt8192DataReaderImpl>
-                        (
+                        (this,
                         reader,
                         pub_finished_);
     }
@@ -355,7 +362,7 @@ ACE_DEBUG((LM_DEBUG,
 
 
 void DataReaderListenerImpl::check_finished ()
-{
+{ 
   bool all_finished = true;
   for (unsigned j = 0; j < stats_.num_publishers_; j++)
     {
@@ -366,4 +373,18 @@ void DataReaderListenerImpl::check_finished ()
     {
       stats_.finished();
     }
+}
+
+
+bool DataReaderListenerImpl::verify_result ()
+{ 
+  bool all_finished = true;
+  for (unsigned j = 0; j < stats_.num_publishers_; j++)
+    {
+      if (this->samples_[j].disjoint()) {
+        return false;
+      }
+    }
+
+  return true;
 }

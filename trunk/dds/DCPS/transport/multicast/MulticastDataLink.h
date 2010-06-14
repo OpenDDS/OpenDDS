@@ -78,6 +78,8 @@ public:
   bool check_header(const DataSampleHeader& header);
   void sample_received(ReceivedDataSample& sample);
 
+  void set_check_fully_association ();
+  
 private:
   MulticastTransport* transport_;
 
@@ -102,6 +104,8 @@ private:
   MulticastSessionMap sessions_;
 
   virtual void stop_i();
+  
+  bool check_fully_association_;
 };
 
 } // namespace DCPS

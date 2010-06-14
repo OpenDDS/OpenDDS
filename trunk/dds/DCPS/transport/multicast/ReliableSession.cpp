@@ -85,7 +85,7 @@ NakWatchdog::next_interval()
   // Apply random backoff to minimize potential collisions:
   interval *= static_cast<double>(std::rand()) /
               static_cast<double>(RAND_MAX) + 1.0;
-
+              
   return interval;
 }
 
@@ -261,9 +261,9 @@ ReliableSession::synack_received(ACE_Message_Block* control)
     this->acked_ = true;
   }
  
-  // Force the TransportImpl to re-evaluate pending associations:
-  MulticastTransport* transport = this->link_->transport();
-  transport->check_fully_association();
+  // Force the TransportImpl to re-evaluate pending associations
+  // after deliver synack to every session.
+  this->link_->set_check_fully_association();
 }
 
 void
@@ -346,21 +346,15 @@ ReliableSession::send_naks()
     missing.update(*it);
   }
 
-  for (DisjointSequence::range_iterator range(missing.range_begin());
-       range != missing.range_end(); ++range) {
-    // Send MULTICAST_NAK control samples to remote peer; the
-    // peer should respond with a resend of the missing data or
-    // a MULTICAST_NAKACK indicating the data is unrecoverable:
-    send_nak(range->first, range->second);
-  }
-
+  send_naks (missing);
+  
   // Clear peer repair requests:
   this->nak_peers_.clear();
 }
 
 void
 ReliableSession::nak_received(ACE_Message_Block* control)
-{
+{  
   if (this->send_naks_) return; // Sends naks, then doesn't receive them.
 
   const TransportHeader& header =
@@ -370,19 +364,27 @@ ReliableSession::nak_received(ACE_Message_Block* control)
     control, header.swap_bytes());
 
   MulticastPeer local_peer;
+  CORBA::ULong size = 0;
   serializer >> local_peer; // sent as remote_peer
+  serializer >> size; 
 
-  MulticastSequence low;
-  serializer >> low;
+  std::vector<SequenceRange> ranges;
 
-  MulticastSequence high;
-  serializer >> high;
+  for (CORBA::ULong i = 0; i < size; ++i) {
+    MulticastSequence low;
+    serializer >> low;
 
-  SequenceRange range(low, high);
+    MulticastSequence high;
+    serializer >> high;
 
+    ranges.push_back (SequenceRange (low, high));
+  }
+  
   // Track peer repair requests for later suppression:
   if (local_peer == this->remote_peer_) { 
-    this->nak_peers_.insert(range); 
+    for (CORBA::ULong i = 0; i < size; ++i) {
+      this->nak_peers_.insert(ranges[i]); 
+    }
     return;
   }
 
@@ -398,17 +400,30 @@ ReliableSession::nak_received(ACE_Message_Block* control)
     send_nakack(send_buffer->low()); 
   }
 
-  send_buffer->resend(range);
+  for (CORBA::ULong i = 0; i < size; ++i) {
+    send_buffer->resend(ranges[i]);
+  }
 }
 
 void
-ReliableSession::send_nak(MulticastSequence low,
-                          MulticastSequence high)
-{
-  size_t len = sizeof(this->remote_peer_)
-             + sizeof(low)
-             + sizeof(high);
+ReliableSession::send_naks (DisjointSequence& missing)
+{  
+  std::vector<DisjointSequence::range_iterator> ranges;
+  
+  for (DisjointSequence::range_iterator range(missing.range_begin());
+       range != missing.range_end(); ++range) {
+    // Send MULTICAST_NAK control samples to remote peer; the
+    // peer should respond with a resend of the missing data or
+    // a MULTICAST_NAKACK indicating the data is unrecoverable:
+    ranges.push_back (range);
+  }
+  
+  CORBA::ULong size = ranges.size();
 
+  size_t len = sizeof(this->remote_peer_)
+             + sizeof(size)
+             + size * 2 * sizeof(SequenceNumber);
+             
   ACE_Message_Block* data;
   ACE_NEW(data, ACE_Message_Block(len));
 
@@ -416,12 +431,15 @@ ReliableSession::send_nak(MulticastSequence low,
     data, this->link_->transport()->swap_bytes());
 
   serializer << this->remote_peer_;
-  serializer << low;
-  serializer << high;
-
+  serializer << size;
+  for (CORBA::ULong i = 0; i < size; ++i) {
+    serializer << ranges[i]->first;
+    serializer << ranges[i]->second;
+  }
   // Send control sample to remote peer:
   send_control(MULTICAST_NAK, data);
 }
+
 
 void
 ReliableSession::nakack_received(ACE_Message_Block* control)
@@ -444,9 +462,9 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
   if (!this->nak_sequence_.seen(low)) {
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: ")
-                 ACE_TEXT("ReliableSession::nakack_received from remote peer: 0x%x\n"),
-                 this->remote_peer_));
+                ACE_TEXT("(%P|%t) WARNING: ")
+                ACE_TEXT("ReliableSession::nakack_received from remote peer: 0x%x\n"),
+                this->remote_peer_));
     }
     this->nak_sequence_.shift(low);
   }

@@ -81,8 +81,7 @@ public:
   void send_naks();
 
   void nak_received(ACE_Message_Block* control);
-  void send_nak(MulticastSequence low,
-                MulticastSequence high);
+  void send_naks (DisjointSequence& missing);
 
   void nakack_received(ACE_Message_Block* control);
   void send_nakack(MulticastSequence low);
