@@ -249,18 +249,19 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
   case TRANSPORT_CONTROL: {
     // Transport control samples are delivered to all sessions
     // regardless of association status:
+    {
+      ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX,
+                guard,
+                this->session_lock_);
 
-    ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX,
-              guard,
-              this->session_lock_);
-
-    char* ptr = sample.sample_->rd_ptr();
-    for (MulticastSessionMap::iterator it(this->sessions_.begin());
-        it != this->sessions_.end(); ++it) {
-      it->second->control_received(sample.header_.submessage_id_,
-                                  sample.sample_);
-      // reset read pointer
-      sample.sample_->rd_ptr(ptr);      
+      char* ptr = sample.sample_->rd_ptr();
+      for (MulticastSessionMap::iterator it(this->sessions_.begin());
+          it != this->sessions_.end(); ++it) {
+        it->second->control_received(sample.header_.submessage_id_,
+                                    sample.sample_);
+        // reset read pointer
+        sample.sample_->rd_ptr(ptr);      
+      }
     }
     if (this->check_fully_association_) {
       this->transport_->check_fully_association ();
