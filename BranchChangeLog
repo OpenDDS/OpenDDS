@@ -1,3 +1,9 @@
+Mon Jun 14 12:45:42 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * [r3312] tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+          Updated to account for name changes in Diagrams.ecore.
+
 Fri Jun 11 20:08:40 UTC 2010  Byron Harris <harrisb@ociweb.com>
 
         * [r3306] 2010-06-11 20:48  harrisb
