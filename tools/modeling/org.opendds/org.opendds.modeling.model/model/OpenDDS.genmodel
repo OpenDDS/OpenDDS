@@ -63,19 +63,19 @@
   </genPackages>
   <genPackages prefix="Diagrams" disposableProviderFactory="true" generateExampleClass="false"
       generateModelWizard="false" ecorePackage="Diagrams.ecore#/">
-    <genClasses ecoreClass="Diagrams.ecore#//DcpsDomains">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Diagrams.ecore#//DcpsDomains/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Diagrams.ecore#//DcpsDomains/domain"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Diagrams.ecore#//DcpsDomains/participant"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Diagrams.ecore#//DcpsDomains/topic"/>
+    <genClasses ecoreClass="Diagrams.ecore#//MiddlewareLibrary">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Diagrams.ecore#//MiddlewareLibrary/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Diagrams.ecore#//MiddlewareLibrary/domain"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Diagrams.ecore#//MiddlewareLibrary/participant"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Diagrams.ecore#//MiddlewareLibrary/topic"/>
     </genClasses>
     <genClasses ecoreClass="Diagrams.ecore#//PolicyLibrary">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Diagrams.ecore#//PolicyLibrary/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Diagrams.ecore#//PolicyLibrary/policy"/>
     </genClasses>
-    <genClasses ecoreClass="Diagrams.ecore#//DataTypes">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Diagrams.ecore#//DataTypes/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Diagrams.ecore#//DataTypes/datatype"/>
+    <genClasses ecoreClass="Diagrams.ecore#//DataLibrary">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Diagrams.ecore#//DataLibrary/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Diagrams.ecore#//DataLibrary/datatype"/>
     </genClasses>
   </genPackages>
   <genPackages prefix="Core" disposableProviderFactory="true" generateExampleClass="false"
