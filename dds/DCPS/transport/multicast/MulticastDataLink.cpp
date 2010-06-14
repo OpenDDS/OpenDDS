@@ -35,7 +35,8 @@ MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
     session_factory_(session_factory),
     local_peer_(local_peer),
     config_(0),
-    reactor_task_(0)
+    reactor_task_(0),
+    check_fully_association_ (false)
 {
 }
 
@@ -248,19 +249,23 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
   case TRANSPORT_CONTROL: {
     // Transport control samples are delivered to all sessions
     // regardless of association status:
+
     ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX,
               guard,
               this->session_lock_);
 
     char* ptr = sample.sample_->rd_ptr();
     for (MulticastSessionMap::iterator it(this->sessions_.begin());
-         it != this->sessions_.end(); ++it) {
+        it != this->sessions_.end(); ++it) {
       it->second->control_received(sample.header_.submessage_id_,
-                                   sample.sample_);
+                                  sample.sample_);
       // reset read pointer
       sample.sample_->rd_ptr(ptr);      
     }
-
+    if (this->check_fully_association_) {
+      this->transport_->check_fully_association ();
+      this->check_fully_association_ = false;
+    }
   } break;
 
   case SAMPLE_ACK:
@@ -288,5 +293,11 @@ MulticastDataLink::stop_i()
   this->socket_.close();
 }
 
+
+void 
+MulticastDataLink::set_check_fully_association ()
+{
+  this->check_fully_association_ = true;
+}
 } // namespace DCPS
 } // namespace OpenDDS

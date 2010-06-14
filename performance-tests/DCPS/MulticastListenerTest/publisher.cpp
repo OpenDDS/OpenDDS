@@ -332,7 +332,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       Writer** writers = new Writer* [num_datawriters] ;
 
       for (int p = 0; p < num_datawriters; p ++)
-      {
+      { 
         writers[p] = new Writer(dws[p].in (),
                                 NUM_SAMPLES,
                                 DATA_SIZE,
