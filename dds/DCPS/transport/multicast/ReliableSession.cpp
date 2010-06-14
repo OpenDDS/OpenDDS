@@ -418,7 +418,7 @@ ReliableSession::send_naks (DisjointSequence& missing)
     ranges.push_back (range);
   }
   
-  CORBA::ULong size = ranges.size();
+  CORBA::ULong size = ACE_Utils::truncate_cast<CORBA::ULong> (ranges.size());
 
   size_t len = sizeof(this->remote_peer_)
              + sizeof(size)

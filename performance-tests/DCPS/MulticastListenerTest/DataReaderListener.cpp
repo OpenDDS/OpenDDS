@@ -35,7 +35,7 @@ template<class Tseq, class R, class R_ptr, class Rimpl>
 
   if (status == ::DDS::RETCODE_OK)
     {
-      size_t len = samples.length ();
+      CORBA::ULong len = ACE_Utils::truncate_cast<CORBA::ULong> (samples.length ());
       //for (unsigned i = 0; i < len; i ++)
       // ACE_DEBUG ((LM_DEBUG, "(%P|%t) received %d\n", samples[i].sequence_num));
 
@@ -378,7 +378,6 @@ void DataReaderListenerImpl::check_finished ()
 
 bool DataReaderListenerImpl::verify_result ()
 { 
-  bool all_finished = true;
   for (unsigned j = 0; j < stats_.num_publishers_; j++)
     {
       if (this->samples_[j].disjoint()) {

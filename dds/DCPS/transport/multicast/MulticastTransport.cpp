@@ -164,7 +164,8 @@ MulticastTransport::connection_info_i(TransportInterfaceInfo& info) const
   // for DataLink establishment.
   info.transport_id = TRANSPORT_INTERFACE_ID;
 
-  info.data = TransportInterfaceBLOB(len, len,
+  info.data = TransportInterfaceBLOB(ACE_Utils::truncate_cast<CORBA::ULong>(len), 
+                                     ACE_Utils::truncate_cast<CORBA::ULong>(len),
     reinterpret_cast<CORBA::Octet*>(buffer));
 
   info.publication_transport_priority = 0;
