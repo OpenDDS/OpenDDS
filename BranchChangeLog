@@ -1,3 +1,15 @@
+Mon Jun 14 20:11:22 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+          Moved content from Diagrams.ecore to OpenDDS.ecore to aid in
+          generation of GMF diagrams.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/Diagrams.ecore:
+
+          Removed this file.
+
 Mon Jun 14 12:45:42 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * [r3312] tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
