@@ -4,19 +4,10 @@ Bundle-Name: %pluginName
 Bundle-SymbolicName: org.opendds.modeling.model.editor;singleton:=true
 Bundle-Version: 1.0.0.dev20100614
 Bundle-ClassPath: .
-Bundle-Activator: OpenDDS.presentation.OpenDDSEditorPlugin$Implementation
+Bundle-Activator: org.opendds.modeling.model.OpenDDS.presentation.OpenDDSEditorPlugin$Implementation
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: Application.presentation,
- Core.presentation,
- DCPS.presentation,
- Domain.presentation,
- Enumerations.presentation,
- OpenDDS.presentation,
- QoS.presentation,
- Topics.presentation,
- Types.presentation
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources;visibility:=reexport,
  org.opendds.modeling.model.edit;visibility:=reexport,
