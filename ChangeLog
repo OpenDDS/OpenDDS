@@ -1,9 +1,17 @@
+Tue Jun 15 19:35:29 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Removed support for IP_MULTICAST_LOOP as it isn't supported by TAO 1.5 and it
+          isn't a required feature for OpenDDS multicast.
+
 Tue Jun 15 17:01:42 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
 
           Fixed a warning.
-          
+
 Tue Jun 15 16:52:06 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
