@@ -511,6 +511,16 @@ Also see [[AdvancedOptions]]</pre>
 </div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
+<div title="ApplicationPackage" modifier="MikeMartinez" created="201006152310" tags="publish" changecount="1">
+<pre>Section 7.1.11 of the specification defines the ''Application'' package of the metamodel.  The ecore model for this includes the //~ApplicationTarget// classifier as well as definitions for the //~LanguageType//, //~PlatformType//, and //~ComponentType// enumerations used as fields of the //~ApplicationTarget// classifier.  This model has the following properties:
+* package: org.opendds.modeling.model
+* file: org.opendds.modeling.model/models/Application.ecore
+* namespace: Application
+* ns prefix: application
+* location: //{{{http://www.opendds.org/modeling/schemas/Application/1.0}}}//
+{{imgcenter{[img[images/Application.png]]}}}
+</pre>
+</div>
 <div title="ColorPalette" modifier="OpenDDS" created="200911302008" modified="200912011920" changecount="17">
 <pre>Background: #fff
 Foreground: #000
@@ -529,8 +539,83 @@ TertiaryDark: #666
 Error: #f88
 </pre>
 </div>
+<div title="CorePackage" modifier="MikeMartinez" created="201006152303" tags="publish" changecount="1">
+<pre>Section 7.1.2 of the specification defines the ''Core'' package of the metamodel.  The ecore model for this includes the //Entity//, //~TypedEntity//, and //Specification// classifiers.  This model has the following properties:
+* package: org.opendds.modeling.model
+* file: org.opendds.modeling.model/models/Core.ecore
+* namespace: Core
+* ns prefix: core
+* location: //{{{http://www.opendds.org/modeling/schemas/Core/1.0}}}//
+{{imgcenter{[img[images/Core.png]]}}}
+</pre>
+</div>
+<div title="DCPSPackage" modifier="MikeMartinez" created="201006152307" tags="publish" changecount="1">
+<pre>Section 7.1.6 of the specification defines the ''DCPS'' package of the metamodel.  The ecore model for this includes the //Domain//, //~DomainParticipant//, //Publisher//, //Subscriber//, //~DataWriter// and //~DataReader// classifiers corresponding to DDS Entities as well as intermediate abstract classifiers of //~PublisherSubscriber// and //~DataReaderWriter// to group properties and interfaces with.  This model has the following properties:
+* package: org.opendds.modeling.model
+* file: org.opendds.modeling.model/models/DCPS.ecore
+* namespace: DCPS
+* ns prefix: dcps
+* location: //{{{http://www.opendds.org/modeling/schemas/DCPS/1.0}}}//
+{{imgcenter{[img[images/DCPS.png]]}}}
+</pre>
+</div>
+<div title="DCPSProfile" modifier="MikeMartinez" created="201006152310" tags="publish" changecount="1">
+<pre>Section 7.2 of the specification defines the DDS Profile using the previously defined metamodel classifiers.  Stereotypes are defined for each construct that can be added to a DDS model.  The ecore model for this includes the definitions for all of the specified stereotypes as well as some additional
+</pre>
+</div>
 <div title="DefaultTiddlers" modifier="MikeMartinez" created="201006151615" changecount="1">
 <pre>[[Plug-in Architecture]]</pre>
+</div>
+<div title="DomainPackage" modifier="MikeMartinez" created="201006152304" tags="publish" changecount="1">
+<pre>Section 7.1.3 of the specification defines the ''Domain'' package of the metamodel.  The ecore model for this includes the //~DomainEntity//, and //~QosProperty// classifiers.  This model has the following properties:
+* package: org.opendds.modeling.model
+* file: org.opendds.modeling.model/models/Domain.ecore
+* namespace: Domain
+* ns prefix: domain
+* location: //{{{http://www.opendds.org/modeling/schemas/Domain/1.0}}}//
+{{imgcenter{[img[images/Domain.png]]}}}
+</pre>
+</div>
+<div title="EMF Models" modifier="MikeMartinez" created="201006151906" modified="201006152312" tags="publish" changecount="36">
+<pre>The OpenDDS Modeling SDK is based on the OMG &quot;UML Profile for Data Distribution Specification&quot; ([[ptc/08-07-02|http://www.omg.org/spec/UML4DDS/1.0/Beta1/PDF/]]).  This specification contains metamodel definitions and a UML Profile.  The SDK defines the metamodel as Eclipse ecore models.  It then loads the metamodel resources into another ecore model and defines the stereotypes of the profile.  This is used to create a model with an EMF editor, which can be used to provide a tree based view and editing, that can then be mapped onto a Graphical Modeling Framework (GMF) model for graphical model capture.
+
+The Eclipse Modeling Framework (EMF) will take the captured ecore models defining the metamodel and profile and create edit support and a tree based EMF editor for the profile.  The model can also be mapped into the GMF models for graphical capture and the EMF and GMF editors coordinated to show the different views of the same underlying model.  The EMF Eclipse plug-in packages implementing this include:
+
+{{centeredTable{
+| ''EMF Model Packages'' |c
+|[[org.opendds.modeling.model]] |Package containing the ecore model files defining the metamodel and profile stereotypes. |
+|[[org.opendds.modeling.edit]] |Package generated from the ecore models containing edit support used by the editor. |
+|[[org.opendds.modeling.editor]] |Package generated from the ecore models containing the EMF editor for the metamodel. |
+}}}
+
+The generated packages include some specific tailoring as well.  The EMF editor generation steps will not overwrite the existing modfications.
+
+The individual metamodels are broken into separate packages by the specification.  This is mirrored by having separate ecore metamodels for each specification package.  This allows the metamodels to use the same namespaces as those in the specification.  The DLRL portion of the specification is not included in this SDK.  The metamodel packages / ecore models are:
+
+{{centeredTable{
+| ''Specification Metamodel / Ecore model'' |c
+| //Package// | //Specification Section// | //Ecore model file// |
+|[[CorePackage]] | 7.1.2 |Core.ecore |
+|[[DomainPackage]] | 7.1.3 |Domain.ecore |
+|[[TopicsPackage]] | 7.1.4 |Topics.ecore |
+|[[TypesPackage]] | 7.1.5 |Types.ecore |
+|[[DCPSPackage]] | 7.1.6 |DCPS.ecore |
+|[[QoSPackage]] | 7.1.7 |~QoS.ecore |
+|[[EnumerationsPackage]] | 7.1.8 |Enumerations.ecore |
+|[[ApplicationPackage]] | 7.1.11 |Application.ecore |
+|[[DCPSProfile]] | 7.2 |~OpenDDS.ecore |
+}}}
+</pre>
+</div>
+<div title="EnumerationsPackage" modifier="MikeMartinez" created="201006152309" tags="publish" changecount="1">
+<pre>Section 7.1.8 of the specification defines the ''Enumerations'' package of the metamodel.  The ecore model for this includes definitions for enumerations used as field of ~QoS policies.  Inexplicably, this also includes a structure definition for the //Period// classifier which is not an enumeration but a compound type used as a field type for various policies.  This model has the following properties:
+* package: org.opendds.modeling.model
+* file: org.opendds.modeling.model/models/Enumerations.ecore
+* namespace: Enumerations
+* ns prefix: enumerations
+* location: //{{{http://www.opendds.org/modeling/schemas/Enumerations/1.0}}}//
+{{imgcenter{[img[images/Enumerations.png]]}}}
+</pre>
 </div>
 <div title="GettingStarted" modifier="MikeMartinez" created="201002011551" modified="201002011553" changecount="3">
 <pre>To get started with this blank [[TiddlyWiki]], you'll need to modify the following tiddlers:
@@ -576,6 +661,27 @@ OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 &lt;div class='footer'&gt;$Id$&lt;/div&gt;
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
+</div>
+<div title="Plug-in Architecture" modifier="MikeMartinez" created="201006151743" modified="201006152336" tags="publish" changecount="10">
+<pre>The OpenDDS Modeling SDK is built from a set of Eclipse plug-in projects and distributed as a Feature that includes the set of plug-ins required.  The plug-ins include:
+
+{{centeredTable{
+| ''OpenDDS Modeling SDK Plug-ins'' |c
+|[[org.opendds.modeling.model]] |Ecore metamodel and profile definition derived from the OMG UML Profile for DDS ([[ptc/08-07-02|http://www.omg.org/spec/UML4DDS/1.0/Beta1/PDF/]]). |
+|[[org.opendds.modeling.model.edit]] |Edit support for the org.opendds.modeling.model ecore model. |
+|[[org.opendds.modeling.model.editor]] |Generated EMF editor for the org.opendds.modeling.model ecore model. |
+|[[org.opendds.modeling.gmf]] |GMF graphical modeling framework for graphical model capture based on the org.opendds.modeling.model ecore model. |
+|[[org.opendds.modeling.sdk]] |Top level SDK plug-in including the code generation capability from the capture models. |
+|[[org.opendds.modeling.feature]] |Feature definition for the OpenDDS Modeling SDK. |
+|[[org.opendds.modeling.tests]] |Regression tests for the feature. |
+|[[org.opendds.site]] |Plug-in distribution site.  This is where Eclipse can find the plug-ins for installation. |
+}}}
+
+These eclipse projects are stored in two separate subversion repositories.  Most are held in the OpenDDS source repository (//{{{https://svn.dre.vanderbilt.edu/DOC/DDS}}}//), while the org.opendds.site project is held in the [[Object Computing, Inc. (OCI)|http://www.ociweb.com/]] internal repository for the http://www.opendds.org/ website.  This allows updates to the site to be managed directly from the subversion sources.
+
+The public update site is located at: http://www.opendds.org/modeling/eclipse/plugins.
+
+The plug-in projects are being developed initially in the //'branches/~RT13927'// branch.  The source and associated information is located in the //'tools/modeling'// directory, with the plug-ins located in the //'tools/modeling/org.opendds'// directory.  An internal distribution site is available during development for testing the distribution mechanism.</pre>
 </div>
 <div title="PublishIndexTemplate" modifier="MikeMartinez" created="201002011539" server.type="file" server.host="jackparke.googlepages.com/jtw.html" changecount="1">
 <pre>&lt;div class='viewer' id='contentWrapper'&gt;&lt;small&gt;&lt;a href=&quot;index.html&quot;&gt;Home&lt;/a&gt; &gt; %1&lt;/small&gt;&lt;h1 class='publishLogo'&gt;%0&lt;/h1&gt;
@@ -830,6 +936,15 @@ String.prototype.filenameEncode = function()
 &lt;hr&gt;%4, %5&amp;nbsp;(created %6)
 &lt;/div&gt;</pre>
 </div>
+<div title="QoSPackage" modifier="MikeMartinez" created="201006152308" modified="201006152308" tags="publish" changecount="2">
+<pre>Section 7.1.7 of the specification defines the ''~QoS'' package of the metamodel.  The ecore model for this includes the abstract //~QosPolicy// classifier as well as a classifier for each policy in the DDS specification.  This model has the following properties:
+* package: org.opendds.modeling.model
+* file: org.opendds.modeling.model/models/~QoS.ecore
+* namespace: ~QoS
+* ns prefix: qos
+* location: //{{{http://www.opendds.org/modeling/schemas/QoS/1.0}}}//
+{{imgcenter{[img[images/QoS.png]]}}}</pre>
+</div>
 <div title="SideBarOptions" modifier="MikeMartinez" created="200911302023" modified="201002011534" changecount="2">
 <pre>&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;doPublish&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;options »&quot; &quot;Change TiddlyWiki advanced options&quot;&gt;&gt;</pre>
 </div>
@@ -842,7 +957,7 @@ String.prototype.filenameEncode = function()
 <div title="SiteUrl" modifier="OpenDDS" created="200911302027" changecount="1">
 <pre>http://www.ociweb.com/</pre>
 </div>
-<div title="StyleSheet" modifier="MikeMartinez" created="200911302014" modified="201002011554" changecount="67">
+<div title="StyleSheet" modifier="MikeMartinez" created="200911302014" modified="201006152300" changecount="70">
 <pre>a:hover {
     text-decoration: none;
 }
@@ -892,6 +1007,22 @@ String.prototype.filenameEncode = function()
 
 .toolbar {
     float: right;
+}
+
+.viewer div.centeredTable {
+	text-align: center;
+}
+
+.viewer div.centeredTable table {
+	margin: 0 auto;
+	text-align: left;
+}
+
+.imgcenter {
+  display: block;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #publishContentWrapper {margin: 0 5em 0 5em; padding: 0;}
@@ -1037,6 +1168,31 @@ h2,h3 {border-bottom:1px solid [[ColorPalette::TertiaryLight]];}
 .backstagePanelFooter .button:hover {color:[[ColorPalette::Foreground]];}
 #backstageCloak {background:[[ColorPalette::Foreground]]; opacity:0.6; filter:'alpha(opacity=60)';}
 /*}}}*/</pre>
+</div>
+<div title="TopicsPackage" modifier="MikeMartinez" created="201006152305" tags="publish" changecount="1">
+<pre>Section 7.1.4 of the specification defines the ''Topics'' package of the metamodel.  The ecore model for this includes the //~TopicDescription//, //Topic//, //~ContentFilteredTopic//, and //~MultiTopic// classifiers.  This model has the following properties:
+* package: org.opendds.modeling.model
+* file: org.opendds.modeling.model/models/Topics.ecore
+* namespace: Topics
+* ns prefix: topics
+* location: //{{{http://www.opendds.org/modeling/schemas/Topics/1.0}}}//
+{{imgcenter{[img[images/Topics.png]]}}}
+</pre>
+</div>
+<div title="TypesPackage" modifier="MikeMartinez" created="201006152306" tags="publish" changecount="1">
+<pre>Section 7.1.5 of the specification defines the ''Types'' package of the metamodel.  The ecore model for this includes many type definitions used for defining the data that can be transfered over DDS.  These types include both simple and compound data types.  This model has the following properties:
+* package: org.opendds.modeling.model
+* file: org.opendds.modeling.model/models/Types.ecore
+* namespace: Types
+* ns prefix: types
+* location: //{{{http://www.opendds.org/modeling/schemas/Types/1.0}}}//
+{{imgcenter{[img[images/Types.png]]</pre>
+</div>
+<div title="org.opendds.modeling.model" modifier="MikeMartinez" created="201006152326" modified="201006152334" tags="publish" changecount="2">
+<pre>This package is where the OpenDDS Modeling SDK metamodels and profile are captured.  These [[EMF Models]] provide the stereotype elements that are used to capture a middleware model using OpenDDS.  They include the individual specification package models as well as the overall OpenDDS profile model.
+
+This model was created as an EMF project and implements several extension points from within the EMF project.
+</pre>
 </div>
 </div>
 <!--POST-STOREAREA-->

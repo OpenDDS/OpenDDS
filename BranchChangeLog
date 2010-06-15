@@ -1,3 +1,40 @@
+Tue Jun 15 23:48:44 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/docs/design_notes/images/Application.png:
+        * tools/modeling/docs/design_notes/images/Core.png:
+        * tools/modeling/docs/design_notes/images/DCPS.png:
+        * tools/modeling/docs/design_notes/images/Domain.png:
+        * tools/modeling/docs/design_notes/images/Enumerations.png:
+        * tools/modeling/docs/design_notes/images/QoS.png:
+        * tools/modeling/docs/design_notes/images/Topics.png:
+        * tools/modeling/docs/design_notes/images/Types.png:
+
+          Diagrams from the ecore models.
+
+        * tools/modeling/docs/design_notes/index.html:
+
+          Started capturing information about the SDK design and
+          construction.  This is for developers.
+
+        * tools/modeling/docs/user_guide/index.html:
+
+          Added initial FAQ and link to TiddlyWiki site.
+
+	* [r3332] 2010-06-15 19:00  martinezm
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Application.ecore_diagram,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Core.ecore_diagram,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/DCPS.ecore_diagram,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Domain.ecore_diagram,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Enumerations.ecore_diagram,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/QoS.ecore_diagram,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Topics.ecore_diagram,
+	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Types.ecore_diagram:
+
+	  Added diagrams for the base Ecore models.  This does not include
+	  the profile ecore model (OpenDDS.ecore) until we finalize it.
+	  It is still subject to updates from the GMF modeling work
+	  being done.
+
 Tue Jun 15 17:34:10 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/docs/design_notes/index.html:
