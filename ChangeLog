@@ -1,3 +1,26 @@
+Tue Jun 15 16:52:06 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+
+          Fixed a deadlock situation during shutdown. One thread calls
+          the timer cancellation while the reactor thread handling timeout.
+          The DataLinkWatchdog internal lock and reactor lock are acquired
+          reversely. Added reverse lock to solve the issue.
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          - Set send_naks_ flag based on active/passive role of the session
+            instead of setting upon send_syn() call and not schedule nak timer
+            if session is for pub.
+          - Added debug outpt to help detect lost message.
+
+        * dds/DCPS/ZeroCopySeq_T.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/DataReaderListener.cpp:
+
+          Added missing include.
+
 Mon Jun 14 19:01:17 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/ZeroCopySeq_T.inl:
@@ -7,7 +30,7 @@ Mon Jun 14 19:01:17 UTC 2010  Yan Dai  <dai_y@ociweb.com>
         * performance-tests/DCPS/MulticastListenerTest/DataReaderListener.cpp:
 
           Fixed warnings.
-          
+
 Mon Jun 14 06:28:29 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.cpp:

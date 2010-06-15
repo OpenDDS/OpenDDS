@@ -16,8 +16,8 @@
 #include "ace/Mutex.h"
 #include "ace/Reactor.h"
 #include "ace/Time_Value.h"
-
 #include "ace/OS_NS_time.h"
+#include "ace/Reverse_Lock_T.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -54,8 +54,11 @@ public:
 
     if (this->timer_id_ == -1) return;
 
-    this->reactor_->cancel_timer(this->timer_id_);
-
+    {
+      ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
+      this->reactor_->cancel_timer(this->timer_id_);
+    }
+    
     this->timer_id_ = -1;
     this->reactor_ = 0;
 
@@ -90,7 +93,8 @@ protected:
   DataLinkWatchdog()
     : reactor_(0),
       timer_id_(-1),
-      cancelled_(false)
+      cancelled_(false),
+      reverse_lock_(lock_)
   {}
 
   virtual ACE_Time_Value next_interval() = 0;
@@ -101,7 +105,9 @@ protected:
 
 private:
   ACE_LOCK lock_;
-
+  typedef ACE_Reverse_Lock<ACE_LOCK> Reverse_Lock_t;
+  Reverse_Lock_t reverse_lock_;
+  
   ACE_Reactor* reactor_;
   long timer_id_;
 
@@ -119,9 +125,12 @@ private:
     }
 
     this->reactor_ = reactor;
-    this->timer_id_ = reactor->schedule_timer(this,  // event_handler
-                                              arg,
-                                              delay);
+    {
+      ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
+      this->timer_id_ = reactor->schedule_timer(this,  // event_handler
+                                                arg,
+                                                delay);
+    }
     return this->timer_id_ != -1;
   }
 };

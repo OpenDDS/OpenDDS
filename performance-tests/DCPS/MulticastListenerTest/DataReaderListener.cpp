@@ -5,6 +5,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "../TypeNoKeyBounded/PTDefTypeSupportC.h"
 #include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
+#include "ace/Truncate.h"
 
 
 template<class Tseq, class R, class R_ptr, class Rimpl>

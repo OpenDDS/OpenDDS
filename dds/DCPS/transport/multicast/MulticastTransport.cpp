@@ -16,6 +16,7 @@
 #include "ReliableSessionFactory.h"
 
 #include "ace/Log_Msg.h"
+#include "ace/Truncate.h"
 
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
