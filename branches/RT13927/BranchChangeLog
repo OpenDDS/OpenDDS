@@ -1,3 +1,30 @@
+Tue Jun 15 16:18:09 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/README.dev:
+        * tools/modeling/README.user:
+
+          Split the previous README into a user and developer section to
+          reduce confusion.  I hope.
+
+        * tools/modeling/docs/design_notes:
+        * tools/modeling/docs/design_notes/images:
+        * tools/modeling/docs/design_notes/images/opendds.png:
+        * tools/modeling/docs/design_notes/index.html:
+
+          Added design notes document to capture implementation details
+          and decision rationale.
+
+        * tools/modeling/docs/user_guide:
+        * tools/modeling/docs/user_guide/images:
+        * tools/modeling/docs/user_guide/images/opendds.png:
+        * tools/modeling/docs/user_guide/index.html:
+
+          Added user guide document to describe SDK usage.
+
+        * tools/modeling/README:
+
+          Removed this file.
+
 Tue Jun 15 15:37:25 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3326] 2010-06-15 15:34  martinezm
