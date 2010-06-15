@@ -1,11 +1,41 @@
+Tue Jun 15 15:25:49 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3323] 2010-06-15 15:03  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.edit/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/META-INF/MANIFEST.MF:
+
+          Overriding some previous values to merge the last change into
+          current ones.
+
+        * [r3324] 2010-06-15 15:12  martinezm
+          tools/modeling/org.opendds/org.opendds.brand/.project,
+          tools/modeling/org.opendds/org.opendds.brand/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.edit/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.edit/plugin.properties,
+          tools/modeling/org.opendds/org.opendds.modeling.edit/plugin.xml,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/plugin.properties,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/plugin.xml,
+          tools/modeling/org.opendds/org.opendds.modeling.feature/feature.xml,
+          tools/modeling/org.opendds/org.opendds.modeling.model/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel,
+          tools/modeling/org.opendds/org.opendds.modeling.model/plugin.xml:
+
+          Added the base package of org.opendds.modeling to ensure
+          uniqueness.  Renamed the brand plugin to modeling.sdk to
+          prepare that as the feature implementation for code generation.
+          Branding will be done there as it is the end point for all the
+          other plug-ins.  Cleaned up all eclipse indicated 'problems'
+          due to these changes.  Updated version qualifier to dev100615.
+
 Tue Jun 15 13:49:35 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
-	* [r3321] 2010-06-15 14:02  harrisb
-	  tools/modeling/org.opendds/org.opendds.modeling.edit/META-INF/MANIFEST.MF,
-	  tools/modeling/org.opendds/org.opendds.modeling.editor/META-INF/MANIFEST.MF:
+        * [r3321] 2010-06-15 14:02  harrisb
+          tools/modeling/org.opendds/org.opendds.modeling.edit/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.editor/META-INF/MANIFEST.MF:
 
-	  Removed references to artifacts that no longer exist now that
-	  Diagrams.ecore has been removed.
+          Removed references to artifacts that no longer exist now that
+          Diagrams.ecore has been removed.
 
 Mon Jun 14 20:42:39 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
