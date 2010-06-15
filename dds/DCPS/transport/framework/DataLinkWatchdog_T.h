@@ -91,10 +91,10 @@ public:
 
 protected:
   DataLinkWatchdog()
-    : reactor_(0),
+    : reverse_lock_(lock_),
+      reactor_(0),
       timer_id_(-1),
-      cancelled_(false),
-      reverse_lock_(lock_)
+      cancelled_(false)
   {}
 
   virtual ACE_Time_Value next_interval() = 0;
