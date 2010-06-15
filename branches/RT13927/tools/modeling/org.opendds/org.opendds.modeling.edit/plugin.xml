@@ -13,7 +13,7 @@
    <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
       <factory
             uri="http://www.opendds.org/modeling/schemas/OpenDDS/1.0"
-            class="OpenDDS.provider.OpenDDSItemProviderAdapterFactory"
+            class="org.opendds.modeling.model.OpenDDS.provider.OpenDDSItemProviderAdapterFactory"
             supportedTypes=
               "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
                org.eclipse.emf.edit.provider.IStructuredItemContentProvider
@@ -22,22 +22,11 @@
                org.eclipse.emf.edit.provider.IItemPropertySource"/>
    </extension>
 
-   <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
-      <factory
-            uri="http://www.opendds.org/modeling/schemas/Diagrams/1.0"
-            class="Diagrams.provider.DiagramsItemProviderAdapterFactory"
-            supportedTypes=
-              "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
-               org.eclipse.emf.edit.provider.IStructuredItemContentProvider
-               org.eclipse.emf.edit.provider.ITreeItemContentProvider
-               org.eclipse.emf.edit.provider.IItemLabelProvider
-               org.eclipse.emf.edit.provider.IItemPropertySource"/>
-   </extension>
 
    <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
       <factory
             uri="http://www.opendds.org/modeling/schemas/Core/1.0"
-            class="Core.provider.CoreItemProviderAdapterFactory"
+            class="org.opendds.modeling.model.Core.provider.CoreItemProviderAdapterFactory"
             supportedTypes=
               "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
                org.eclipse.emf.edit.provider.IStructuredItemContentProvider
@@ -49,7 +38,7 @@
    <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
       <factory
             uri="http://www.opendds.org/modeling/schemas/Domain/1.0"
-            class="Domain.provider.DomainItemProviderAdapterFactory"
+            class="org.opendds.modeling.model.Domain.provider.DomainItemProviderAdapterFactory"
             supportedTypes=
               "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
                org.eclipse.emf.edit.provider.IStructuredItemContentProvider
@@ -61,7 +50,7 @@
    <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
       <factory
             uri="http://www.opendds.org/modeling/schemas/QoS/1.0"
-            class="QoS.provider.QoSItemProviderAdapterFactory"
+            class="org.opendds.modeling.model.QoS.provider.QoSItemProviderAdapterFactory"
             supportedTypes=
               "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
                org.eclipse.emf.edit.provider.IStructuredItemContentProvider
@@ -73,7 +62,7 @@
    <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
       <factory
             uri="http://www.opendds.org/modeling/schemas/Topics/1.0"
-            class="Topics.provider.TopicsItemProviderAdapterFactory"
+            class="org.opendds.modeling.model.Topics.provider.TopicsItemProviderAdapterFactory"
             supportedTypes=
               "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
                org.eclipse.emf.edit.provider.IStructuredItemContentProvider
@@ -85,7 +74,7 @@
    <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
       <factory
             uri="http://www.opendds.org/modeling/schemas/DCPS/1.0"
-            class="DCPS.provider.DCPSItemProviderAdapterFactory"
+            class="org.opendds.modeling.model.DCPS.provider.DCPSItemProviderAdapterFactory"
             supportedTypes=
               "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
                org.eclipse.emf.edit.provider.IStructuredItemContentProvider
@@ -97,7 +86,7 @@
    <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
       <factory
             uri="http://www.opendds.org/modeling/schemas/Types/1.0"
-            class="Types.provider.TypesItemProviderAdapterFactory"
+            class="org.opendds.modeling.model.Types.provider.TypesItemProviderAdapterFactory"
             supportedTypes=
               "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
                org.eclipse.emf.edit.provider.IStructuredItemContentProvider
@@ -109,7 +98,7 @@
    <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
       <factory
             uri="http://www.opendds.org/modeling/schemas/Application/1.0"
-            class="Application.provider.ApplicationItemProviderAdapterFactory"
+            class="org.opendds.modeling.model.Application.provider.ApplicationItemProviderAdapterFactory"
             supportedTypes=
               "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
                org.eclipse.emf.edit.provider.IStructuredItemContentProvider
@@ -121,7 +110,7 @@
    <extension point="org.eclipse.emf.edit.itemProviderAdapterFactories">
       <factory
             uri="http://www.opendds.org/modeling/schemas/Enumerations/1.0"
-            class="Enumerations.provider.EnumerationsItemProviderAdapterFactory"
+            class="org.opendds.modeling.model.Enumerations.provider.EnumerationsItemProviderAdapterFactory"
             supportedTypes=
               "org.eclipse.emf.edit.provider.IEditingDomainItemProvider
                org.eclipse.emf.edit.provider.IStructuredItemContentProvider
