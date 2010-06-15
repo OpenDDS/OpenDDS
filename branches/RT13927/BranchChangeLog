@@ -1,3 +1,12 @@
+Tue Jun 15 13:49:35 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+	* [r3321] 2010-06-15 14:02  harrisb
+	  tools/modeling/org.opendds/org.opendds.modeling.edit/META-INF/MANIFEST.MF,
+	  tools/modeling/org.opendds/org.opendds.modeling.editor/META-INF/MANIFEST.MF:
+
+	  Removed references to artifacts that no longer exist now that
+	  Diagrams.ecore has been removed.
+
 Mon Jun 14 20:42:39 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3317] 2010-06-14 20:21  martinezm
