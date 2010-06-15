@@ -1,3 +1,11 @@
+Tue Jun 15 15:37:25 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3326] 2010-06-15 15:34  martinezm
+          tools/modeling/org.opendds/org.opendds.brand[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk[CPY]:
+
+          renaming to match renamed plug-in package.
+
 Tue Jun 15 15:25:49 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3323] 2010-06-15 15:03  martinezm
