@@ -14,6 +14,7 @@
 
 #include "ace/Global_Macros.h"
 #include "ace/Time_Value.h"
+#include "ace/Truncate.h"
 
 #include "dds/DCPS/Serializer.h"
 
@@ -212,9 +213,6 @@ ReliableSession::syn_received(ACE_Message_Block* control)
 void
 ReliableSession::send_syn()
 {
-  // Producer, so doesn't send naks.
-  this->send_naks_ = false;
-
   size_t len = sizeof(this->remote_peer_);
 
   ACE_Message_Block* data;
@@ -293,7 +291,6 @@ ReliableSession::send_synack()
 void
 ReliableSession::expire_naks()
 {
-  if (!this->send_naks_) return; // Doesn't send naks, then nothing to expire.
   if (this->nak_requests_.empty()) return; // nothing to expire
 
   ACE_Time_Value deadline(ACE_OS::gettimeofday());
@@ -325,7 +322,6 @@ ReliableSession::expire_naks()
 void
 ReliableSession::send_naks()
 {
-  if (!this->send_naks_) return;
   if (!this->nak_sequence_.disjoint()) return;  // nothing to send
 
   ACE_Time_Value now(ACE_OS::gettimeofday());
@@ -401,7 +397,13 @@ ReliableSession::nak_received(ACE_Message_Block* control)
   }
 
   for (CORBA::ULong i = 0; i < size; ++i) {
-    send_buffer->resend(ranges[i]);
+    bool ret = send_buffer->resend(ranges[i]);
+    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)ReliableSession::nak_received")
+                            ACE_TEXT (" %d <- %d %d - %d resend result %d\n"),
+                            this->link_->local_peer(), this->remote_peer_, 
+                            ranges[i].first.value_, ranges[i].second.value_, ret));  
+    }
   }
 }
 
@@ -435,6 +437,12 @@ ReliableSession::send_naks (DisjointSequence& missing)
   for (CORBA::ULong i = 0; i < size; ++i) {
     serializer << ranges[i]->first;
     serializer << ranges[i]->second;
+    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)ReliableSession::send_naks")
+                            ACE_TEXT (" %d -> %d %d - %d \n"), 
+                            this->link_->local_peer(), remote_peer_,
+                            ranges[i]->first.value_, ranges[i]->second.value_));
+    }
   }
   // Send control sample to remote peer:
   send_control(MULTICAST_NAK, data);
@@ -463,8 +471,10 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_WARNING,
                 ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("ReliableSession::nakack_received from remote peer: 0x%x\n"),
-                this->remote_peer_));
+                ACE_TEXT("ReliableSession::nakack_received %d <- %d %d - %d ")
+                ACE_TEXT("not repaired.\n"),
+                this->link_->local_peer(), this->remote_peer_, 
+                this->nak_sequence_.low().value_, low));
     }
     this->nak_sequence_.shift(low);
   }
@@ -506,10 +516,12 @@ ReliableSession::start(bool active)
                      false);
   }
 
+  this->send_naks_ = !active;
   // A watchdog timer is scheduled to periodically check for gaps in
   // received data. If a gap is discovered, MULTICAST_NAK control
   // samples will be sent to initiate repairs.
-  if (!this->nak_watchdog_.schedule(reactor)) {
+  // Only subscriber send naks so just schedule for sub role.
+  if (!active && !this->nak_watchdog_.schedule(reactor)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("ReliableSession::start: ")
@@ -521,6 +533,7 @@ ReliableSession::start(bool active)
   // handshake to verify that passive endpoints can send/receive
   // data reliably. This process must be executed using the
   // transport reactor thread to prevent blocking.
+  // Only publisher send syn so just schedule for pub role.
   if (active && !this->syn_watchdog_.schedule_now(reactor)) {
     this->nak_watchdog_.cancel();
     ACE_ERROR_RETURN((LM_ERROR,

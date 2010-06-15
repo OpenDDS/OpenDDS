@@ -9,6 +9,7 @@
 
 #include "dds/DCPS/ReceivedDataElementList.h"
 #include "dds/DCPS/DataReaderImpl.h"
+#include "ace/Truncate.h"
 
 #include <utility>
 #include <algorithm>

@@ -14,6 +14,7 @@
 
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
+#include "ace/Truncate.h"
 
 #include "tao/ORB_Core.h"
 
