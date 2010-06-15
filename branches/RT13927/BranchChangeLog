@@ -1,3 +1,11 @@
+Tue Jun 15 17:34:10 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/docs/design_notes/index.html:
+        * tools/modeling/docs/user_guide/index.html:
+
+          Set the svn:needs-lock property on these to reduce merge
+          issues.
+
 Tue Jun 15 16:18:09 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/README.dev:
