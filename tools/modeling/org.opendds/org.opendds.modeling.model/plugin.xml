@@ -13,50 +13,54 @@
    <extension point="org.eclipse.emf.ecore.generated_package">
       <package
             uri="http://www.opendds.org/modeling/schemas/OpenDDS/1.0"
-            class="OpenDDS.OpenDDSPackage"
+            class="org.opendds.modeling.model.OpenDDS.OpenDDSPackage"
             genModel="model/OpenDDS.genmodel"/>
    </extension>
 
-   <extension point="org.eclipse.emf.ecore.generated_package">
-      <package
-            uri="http://www.opendds.org/modeling/schemas/Diagrams/1.0"
-            class="Diagrams.DiagramsPackage"
-            genModel="model/OpenDDS.genmodel"/>
-   </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
       <package
             uri="http://www.opendds.org/modeling/schemas/Core/1.0"
-            class="Core.CorePackage"
+            class="org.opendds.modeling.model.Core.CorePackage"
             genModel="model/OpenDDS.genmodel"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
       <package
             uri="http://www.opendds.org/modeling/schemas/Domain/1.0"
-            class="Domain.DomainPackage"
+            class="org.opendds.modeling.model.Domain.DomainPackage"
             genModel="model/OpenDDS.genmodel"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
       <package
             uri="http://www.opendds.org/modeling/schemas/QoS/1.0"
-            class="QoS.QoSPackage"
+            class="org.opendds.modeling.model.QoS.QoSPackage"
             genModel="model/OpenDDS.genmodel"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
       <package
             uri="http://www.opendds.org/modeling/schemas/Topics/1.0"
-            class="Topics.TopicsPackage"
+            class="org.opendds.modeling.model.Topics.TopicsPackage"
             genModel="model/OpenDDS.genmodel"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
       <package
             uri="http://www.opendds.org/modeling/schemas/DCPS/1.0"
-            class="DCPS.DCPSPackage"
+            class="org.opendds.modeling.model.DCPS.DCPSPackage"
             genModel="model/OpenDDS.genmodel"/>
+   </extension>
+   <extension
+         id="openddsnature"
+         name="OpenDDS Project"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="org.opendds.modeling.model.OpenDDSProjectNature">
+         </run>
+      </runtime>
    </extension>
 
 </plugin>

@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: OpenDDS Branding Information
-Bundle-SymbolicName: org.opendds.brand
-Bundle-Version: 1.0.0.dev100611
+Bundle-Name: OpenDDS Modeling SDK
+Bundle-SymbolicName: org.opendds.modeling.sdk;singleton:=true
+Bundle-Version: 1.0.0.dev100615
 Bundle-Vendor: Object Computing, Inc.
+Bundle-ActivationPolicy: lazy
