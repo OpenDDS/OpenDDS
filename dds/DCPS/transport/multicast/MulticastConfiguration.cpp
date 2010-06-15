@@ -50,7 +50,8 @@ MulticastConfiguration::MulticastConfiguration()
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
     rcv_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
 #else
-    rcv_buffer_size_(0) // Use system default value.
+    // Use system default values.
+    rcv_buffer_size_(0) 
 #endif
 {
   default_group_address(this->group_address_, DEFAULT_MULTICAST_ID);
@@ -126,7 +127,8 @@ MulticastConfiguration::load(const TransportIdType& id,
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("rcv_buffer_size"),
                    this->rcv_buffer_size_, size_t)
-  return 0;
+  
+   return 0;
 }
 
 void

@@ -122,34 +122,6 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
                      false);	
 	}
 
-  int enable_loop = static_cast<int> (TheServiceParticipant->get_ORB()->
-                      orb_core()->orb_params()->ip_multicastloop());
-#if defined (ACE_HAS_IPV6)
-  if (this->local_addr_.get_type () == AF_INET6) {
-    if (ACE_OS::setsockopt(handle, IPPROTO_IPV6,
-                           IPV6_MULTICAST_LOOP,
-                           (char *) &enable_loop,
-                           sizeof (int)) < 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("MulticastDataLink::join: ")
-                        ACE_TEXT("ACE_OS::setsockopt IPV6_MULTICAST_LOOP failed: %p\n")),
-                       false);	
-    } 
-  }
-  else
-#endif
-  if (ACE_OS::setsockopt(handle, IPPROTO_IP,
-                         IP_MULTICAST_LOOP,
-                         (char *) &enable_loop,
-                         sizeof (int)) < 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastDataLink::join: ")
-                      ACE_TEXT("ACE_OS::setsockopt IP_MULTICAST_LOOP failed: %p\n")),
-                     false);	
-	}
-
   if (start(this->send_strategy_.in(), this->recv_strategy_.in()) != 0) {
     this->socket_.close();
     ACE_ERROR_RETURN((LM_ERROR,
