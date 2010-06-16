@@ -58,7 +58,7 @@
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="org.opendds.modeling.model.OpenDDSProjectNature">
+               class="org.opendds.modeling.model.OpenDDS.OpenDDSProjectNature">
          </run>
       </runtime>
    </extension>
