@@ -1,3 +1,23 @@
+Wed Jun 16 21:28:07 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+
+        * [r3339] 2010-06-16 19:24  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Core.ecore_diagram,
+          tools/modeling/org.opendds/org.opendds.modeling.model/plugin.xml,
+          tools/modeling/org.opendds/org.opendds.modeling.model/src,
+          tools/modeling/org.opendds/org.opendds.modeling.model/src/org,
+          tools/modeling/org.opendds/org.opendds.modeling.model/src/org/opendds,
+          tools/modeling/org.opendds/org.opendds.modeling.model/src/org/opendds/modeling,
+          tools/modeling/org.opendds/org.opendds.modeling.model/src/org/opendds/modeling/model,
+          tools/modeling/org.opendds/org.opendds.modeling.model/src/org/opendds/modeling/model/OpenDDS,
+          tools/modeling/org.opendds/org.opendds.modeling.model/src/org/opendds/modeling/model/OpenDDS/OpenDDSProjectNature.java:
+
+          Moved the nature interface into the OpenDDS sub package. Move things
+          around for readability on the Core diagram. Added the
+          OpenDDSProjectNature.java source file to version control; this was
+          generated as a template once, and will be customized only from this
+          point on.
+
 Tue Jun 15 23:48:44 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/docs/design_notes/images/Application.png:
@@ -20,20 +40,20 @@ Tue Jun 15 23:48:44 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
           Added initial FAQ and link to TiddlyWiki site.
 
-	* [r3332] 2010-06-15 19:00  martinezm
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Application.ecore_diagram,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Core.ecore_diagram,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/DCPS.ecore_diagram,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Domain.ecore_diagram,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Enumerations.ecore_diagram,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/QoS.ecore_diagram,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Topics.ecore_diagram,
-	  tools/modeling/org.opendds/org.opendds.modeling.model/model/Types.ecore_diagram:
+        * [r3332] 2010-06-15 19:00  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Application.ecore_diagram,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Core.ecore_diagram,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/DCPS.ecore_diagram,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Domain.ecore_diagram,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Enumerations.ecore_diagram,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/QoS.ecore_diagram,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Topics.ecore_diagram,
+          tools/modeling/org.opendds/org.opendds.modeling.model/model/Types.ecore_diagram:
 
-	  Added diagrams for the base Ecore models.  This does not include
-	  the profile ecore model (OpenDDS.ecore) until we finalize it.
-	  It is still subject to updates from the GMF modeling work
-	  being done.
+          Added diagrams for the base Ecore models.  This does not include
+          the profile ecore model (OpenDDS.ecore) until we finalize it.
+          It is still subject to updates from the GMF modeling work
+          being done.
 
 Tue Jun 15 17:34:10 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
