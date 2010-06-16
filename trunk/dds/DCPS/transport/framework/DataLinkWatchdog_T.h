@@ -53,16 +53,17 @@ public:
               this->lock_);
 
     if (this->timer_id_ == -1) return;
-
-    {
-      ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
-      this->reactor_->cancel_timer(this->timer_id_);
-    }
-    
+      
+    long timer_id = this->timer_id_;
+    ACE_Reactor* reactor = this->reactor_;
     this->timer_id_ = -1;
     this->reactor_ = 0;
-
     this->cancelled_ = true;
+    
+    {
+      ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
+      reactor->cancel_timer(timer_id);
+    }
   }
 
   int handle_timeout(const ACE_Time_Value& now, const void* arg) {
@@ -124,13 +125,30 @@ private:
       this->epoch_ = ACE_OS::gettimeofday();
     }
 
-    this->reactor_ = reactor;
+    long timer_id = -1;
     {
       ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
-      this->timer_id_ = reactor->schedule_timer(this,  // event_handler
-                                                arg,
-                                                delay);
+      timer_id = reactor->schedule_timer(this,  // event_handler
+                                         arg,
+                                         delay);
+      if (timer_id == -1) {
+        ACE_ERROR_RETURN ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: ")
+                  ACE_TEXT("DataLinkWatchdog::schedule_i: ")
+                  ACE_TEXT("failed to register timer %p!\n"), 
+                  "schedule_timer"), false);
+      }
     }
+    
+    if (this->cancelled_) {
+      reactor->cancel_timer(timer_id);
+      return true;
+    }
+    else {
+      this->timer_id_ = timer_id;
+      this->reactor_ = reactor;
+    }
+    
     return this->timer_id_ != -1;
   }
 };

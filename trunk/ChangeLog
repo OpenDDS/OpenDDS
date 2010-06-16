@@ -1,3 +1,10 @@
+Wed Jun 16 06:25:37 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+
+          Fixed threading issue for internal state setting which causes 
+          access violation during shutdown.
+
 Tue Jun 15 19:35:29 UTC 2010  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
