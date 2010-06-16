@@ -95,7 +95,10 @@ DisjointSequence::normalize()
     second++;
 
     if (second == this->sequences_.end() ||
-        *second != *first + 1) break; // short-circuit
+      (first->value_ != 0x7fff && *second != *first + 1) || 
+      (first->value_ == 0x7fff && second->value_ != 0x0)) { // Wrap from max back to zero.
+        break; // short-circuit
+    }
 
     this->sequences_.erase(first);
     first = second;
