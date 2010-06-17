@@ -407,7 +407,7 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
       got_chunks = true;
 
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSChunkAssociationMutltiplier"))) != 0) {
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSChunkAssociationMultiplier"))) != 0) {
       association_chunk_multiplier_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
       got_chunk_association_multiplier = true;
