@@ -40,7 +40,7 @@ typedef RepoId PublicationId;
 struct OpenDDS_Dcps_Export SequenceNumber {
   /// Construct with a value, default to negative starting point.
   SequenceNumber(int value = SHRT_MIN) {
-    if (value > SHRT_MAX) this->value_ = ACE_INT16(value % SHRT_MAX);
+    if (value > SHRT_MAX) this->value_ = ACE_INT16(value % (SHRT_MAX + 1));
     else                  this->value_ = ACE_INT16(value);
   }
 
