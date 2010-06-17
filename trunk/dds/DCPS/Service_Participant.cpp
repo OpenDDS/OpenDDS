@@ -127,6 +127,13 @@ Service_Participant::svc()
   {
     bool done = false;
 
+    // Ignore all signals to avoid
+    //     ERROR: <something descriptive> Interrupted system call
+    // The main thread will handle signals.
+    sigset_t set;
+    ACE_OS::sigfillset(&set);
+    ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
+
     while (!done) {
       try {
         if (orb_->orb_core()->has_shutdown() == false) {

@@ -1,3 +1,9 @@
+Thu Jun 17 19:47:17 UTC 2010  Scott Harris  <harris_s@ociweb.com>
+
+         * dds/DCPS/Service_Participant.cpp:
+
+          Avoid OpenDDS failures because of interupts while in system calls.
+
 Thu Jun 17 19:44:59 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * NEWS:
