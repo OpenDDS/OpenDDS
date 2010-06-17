@@ -1,5 +1,19 @@
-Wed Jun 16 21:28:07 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+Thu Jun 17 16:06:47 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
+        * [r3344] 2010-06-17 16:04  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.editor[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.model.editor[CPY]:
+
+          Match the generated project name.
+
+
+        * [r3343] 2010-06-17 16:03  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.edit[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.model.edit[CPY]:
+
+          Match the generated project name.
+
+Wed Jun 16 21:28:07 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3339] 2010-06-16 19:24  martinezm
           tools/modeling/org.opendds/org.opendds.modeling.model/model/Core.ecore_diagram,
