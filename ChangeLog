@@ -1,17 +1,28 @@
+Thu Jun 17 20:05:08 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * ChangeLog:
+
+          Attempted to normalize the formatting and whitespace of the recent
+          ChangeLog messages.  Please use cle.pl and zap trailing whitespace.
+
+        * NEWS:
+
+          Formatted the NEWS to look like all the other releases.
+
 Thu Jun 17 19:59:05 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * performance-tests/Bench/src/Process.cpp:
-        
+
           Extended the sub timeout on waiting for pub termination.
 
         * NEWS:
-        
+
           Added changes after last release.
 
-Thu Jun 17 19:50:31 UTC 2010  Don Hudson <hudsond@ociweb.com>
+Thu Jun 17 19:50:31 UTC 2010  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
-		
+
           Increased RECEIVED_BUFFERS from 2 to 16 and BUFFER_LOW_WATER from 1500 to 4096.
           This is to better insure that the total available space in the receive buffers
           can hold the max size message (64K).
@@ -25,19 +36,19 @@ Thu Jun 17 19:50:31 UTC 2010  Don Hudson <hudsond@ociweb.com>
 
           Changed OUTCOME_SEND_ERROR from debug message to warning message because some
           errors may be non-recoverable.
-		  
-		* dds/DCPS/transport/multicast/MulticastDataLink.cpp:
-		
-		  Removed unused method name parameter from ACE_ERROR usages
-		  (not needed as method is described in error messages).
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+           Removed unused method name parameter from ACE_ERROR usages
+           (not needed as method is described in error messages).
 
         * dds/DCPS/transport/multicast/ReliableSession.cpp:
-		
-		  Changed send_naks() to do nothing if the session hasn't been acknowledged.
-		  
-		  Changed nak_received() to send nakack only if the send buffer no longer has
-		  the lowest sequence number requested.
-		  
+
+          Changed send_naks() to do nothing if the session hasn't been acknowledged.
+
+          Changed nak_received() to send nakack only if the send buffer no longer has
+          the lowest sequence number requested.
+
 Thu Jun 17 19:47:17 UTC 2010  Scott Harris  <harris_s@ociweb.com>
 
          * dds/DCPS/Service_Participant.cpp:
@@ -50,7 +61,7 @@ Thu Jun 17 19:44:59 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
           Added OpenDDS-Bench entry for point release.
 
-Thu Jun 17 15:51:26 UTC 2010  Don Hudson <hudsond@ociweb.com>
+Thu Jun 17 15:51:26 UTC 2010  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/Definitions.h:
 
@@ -694,7 +705,7 @@ Tue Apr 27 18:39:41 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 Mon Apr 26 20:33:01 UTC 2010  Scott Harris  <harris_s@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
-        * Pdds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
         * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
         * tests/DCPS/Messenger/pub_multicast.ini:
         * docs/html/multicast/multicast.html:
