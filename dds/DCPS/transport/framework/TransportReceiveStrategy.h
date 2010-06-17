@@ -83,13 +83,19 @@ private:
 
   /// Current receive TransportHeader.
   TransportHeader receive_transport_header_;
+  
+  //
+  // The total available space in the receive buffers must have enough to hold 
+  // a max sized message.  The max message is about 64K and the low water for 
+  // a buffer is 4096.  Therefore, 16 receive buffers is appropriate.
+  // 
+  enum { RECEIVE_BUFFERS  =   16 };
+  enum { BUFFER_LOW_WATER = 4096 };
 
   //
   // Message Block Allocators are more plentiful since they hold samples
   // as well as data read from the handle(s).
   //
-  enum { RECEIVE_BUFFERS  =    2 };
-  enum { BUFFER_LOW_WATER = 1500 };
   enum { MESSAGE_BLOCKS   = 1000 };
   enum { DATA_BLOCKS      =  100 };
 

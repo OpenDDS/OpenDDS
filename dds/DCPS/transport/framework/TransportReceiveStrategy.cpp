@@ -290,21 +290,10 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
                                                 vec_index,
                                                 remote_address);
 
-  VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   "
-            "recvv() return %d - we call this the bytes_remaining.\n",
-            bytes_remaining), 5);
-
-  if (bytes_remaining == 0 && this->gracefully_disconnected_) {
-    VDBG_LVL((LM_ERROR,
-              ACE_TEXT("(%P|%t) Peer has gracefully disconnected.\n"))
-             ,1);
-    return -1;
-
-  } else if ((bytes_remaining == 0 && !this->gracefully_disconnected_)
-             || bytes_remaining < 0) {
-    VDBG_LVL((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unrecoverable problem ")
+  if (bytes_remaining < 0) {
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Problem ")
               ACE_TEXT("with data link detected: %p.\n"),
-              ACE_TEXT("receive_bytes")), 1);
+              ACE_TEXT("receive_bytes")));
 
     // The relink() will handle the connection to the ReconnectTask to do
     // the reconnect so this reactor thread will not be block.
@@ -313,6 +302,32 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
     // Close connection anyway.
     return -1;
     // Returning -1 takes the handle out of the reactor read mask.
+  }
+
+  VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   "
+            "recvv() return %d - we call this the bytes_remaining.\n",
+            bytes_remaining), 5);
+
+  if (bytes_remaining == 0) {
+    if (this->gracefully_disconnected_) {
+      VDBG_LVL((LM_ERROR,
+                ACE_TEXT("(%P|%t) Peer has gracefully disconnected.\n"))
+               ,1);
+      return -1;
+
+    } else {
+      VDBG_LVL((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unrecoverable problem ")
+                ACE_TEXT("with data link detected: %p.\n"),
+                ACE_TEXT("receive_bytes")), 1);
+
+      // The relink() will handle the connection to the ReconnectTask to do
+      // the reconnect so this reactor thread will not be block.
+      this->relink();
+
+      // Close connection anyway.
+      return -1;
+      // Returning -1 takes the handle out of the reactor read mask.
+    }
   }
 
   VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   "

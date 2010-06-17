@@ -90,7 +90,7 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastDataLink::join: ")
-                      ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %p\n")),
+                      ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed.\n")),
                      false);
   }
 
@@ -105,7 +105,7 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastDataLink::join: ")
-                      ACE_TEXT("ACE_OS::setsockopt TTL failed: %p\n")),
+                      ACE_TEXT("ACE_OS::setsockopt TTL failed.\n")),
                      false);	
 	}
 
@@ -118,7 +118,7 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastDataLink::join: ")
-                      ACE_TEXT("ACE_OS::setsockopt RCVBUF failed: %p\n")),
+                      ACE_TEXT("ACE_OS::setsockopt RCVBUF failed.\n")),
                      false);	
 	}
 

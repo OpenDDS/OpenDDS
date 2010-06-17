@@ -1,3 +1,33 @@
+Thu Jun 17 19:50:31 UTC 2010  Don Hudson <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+		
+          Increased RECEIVED_BUFFERS from 2 to 16 and BUFFER_LOW_WATER from 1500 to 4096.
+          This is to better insure that the total available space in the receive buffers
+          can hold the max size message (64K).
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          Changed receive_bytes error from debug message to warning message because some
+          errors may be non-recoverable.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Changed OUTCOME_SEND_ERROR from debug message to warning message because some
+          errors may be non-recoverable.
+		  
+		* dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+		
+		  Removed unused method name parameter from ACE_ERROR usages
+		  (not needed as method is described in error messages).
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+		
+		  Changed send_naks() to do nothing if the session hasn't been acknowledged.
+		  
+		  Changed nak_received() to send nakack only if the send buffer no longer has
+		  the lowest sequence number requested.
+		  
 Thu Jun 17 19:47:17 UTC 2010  Scott Harris  <harris_s@ociweb.com>
 
          * dds/DCPS/Service_Participant.cpp:
