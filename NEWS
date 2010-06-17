@@ -7,6 +7,21 @@ New to this version are the following changes:
 
 ========================================================================
 
+Version 2.1.3 of OpenDDS.
+
+* This is a bugfix release to account for issues introduced by the
+  previous version.
+
+New to this version are the following changes:
+
+- Extended the capabilities of the OpenDDS-Bench performance test
+  framework.  This consists mostly of expanded pre-configured tests as
+  well as additional execution and plotting scripts.  The user guide at
+  performance-tests/Bench/doc/user_guide.html contains the details.
+
+
+========================================================================
+
 Version 2.1.2 of OpenDDS.
 
 * This is a bugfix release to account for issues introduced by the
