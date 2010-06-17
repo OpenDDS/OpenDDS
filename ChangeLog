@@ -1,3 +1,9 @@
+Thu Jun 17 20:09:07 UTC 2010  Scott Harris  <harris_s@ociweb.com>
+
+        * NEWS:
+
+          Added TTL and interupt suppression.
+
 Thu Jun 17 20:05:08 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * ChangeLog:
