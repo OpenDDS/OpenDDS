@@ -1515,9 +1515,16 @@ OpenDDS::DCPS::TransportSendStrategy::direct_send(bool relink)
 
     } else if ((outcome == OUTCOME_PEER_LOST) ||
                (outcome == OUTCOME_SEND_ERROR)) {
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "The outcome of the send_packet() was either "
-            "OUTCOME_PEER_LOST or OUTCOME_SEND_ERROR.\n"));
+      if (outcome == OUTCOME_SEND_ERROR) {
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) Warning: Problem detected in ")
+                   ACE_TEXT("send buffer management: %p.\n"),
+                   ACE_TEXT("send_bytes")));
+      } else {
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+              "The outcome of the send_packet() was "
+              "OUTCOME_PEER_LOST.\n"));
+      }      
 
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                 "Now flip to MODE_SUSPEND before we try to reconnect.\n"), 5);

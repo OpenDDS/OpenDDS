@@ -322,6 +322,10 @@ ReliableSession::expire_naks()
 void
 ReliableSession::send_naks()
 {
+  // Could get data samples before syn control message.
+  // No use nak'ing until syn control message is received and session is acked.
+  if (!this->acked_) return; 
+
   if (!this->nak_sequence_.disjoint()) return;  // nothing to send
 
   ACE_Time_Value now(ACE_OS::gettimeofday());
@@ -392,7 +396,7 @@ ReliableSession::nak_received(ACE_Message_Block* control)
   // Broadcast a MULTICAST_NAKACK control sample before resending to suppress
   // repair requests for unrecoverable samples by providing a
   // new low-water mark for affected peers:
-  if (!send_buffer->empty() && send_buffer->low() > ++SequenceNumber()) {
+  if (!send_buffer->empty() && send_buffer->low() > ranges.begin()->first) {
     send_nakack(send_buffer->low()); 
   }
 
