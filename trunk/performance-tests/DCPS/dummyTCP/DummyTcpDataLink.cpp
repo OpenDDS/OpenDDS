@@ -19,7 +19,7 @@
 OpenDDS::DCPS::DummyTcpDataLink::DummyTcpDataLink
                                         (const ACE_INET_Addr& remote_address,
                                          OpenDDS::DCPS::DummyTcpTransport*  transport_impl)
-  : DataLink(transport_impl),
+  : DataLink(transport_impl, 0, false, false), //priority=0, is_loopback=0, is_active=0
     remote_address_(remote_address),
     graceful_disconnect_sent_ (false)
 {

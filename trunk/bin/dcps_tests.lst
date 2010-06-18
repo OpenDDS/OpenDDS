@@ -188,3 +188,8 @@ tests/DCPS/DPFactoryQos/run_test.pl: !DCPS_MIN
 tests/DCPS/ManualAssertLiveliness/run_test.pl: !DCPS_MIN
 tests/DCPS/ManualAssertLiveliness/run_test.pl lost: !DCPS_MIN
 tests/DCPS/Serializer_wstring/run_test.pl: !DCPS_MIN
+tests/DCPS/SharedTransport/run_test.pl: !DCPS_MIN
+tests/DCPS/SharedTransport/run_test.pl udp: !DCPS_MIN
+tests/DCPS/SharedTransport/run_test.pl multicast: !DCPS_MIN
+
+
