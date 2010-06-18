@@ -21,6 +21,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <sstream>
+#include <algorithm>
 
 using namespace OpenDDS::DCPS::FilterExpressionGrammar;
 
@@ -86,7 +87,7 @@ public:
 
   virtual ~EvalNode()
   {
-    for_each(children_.begin(), children_.end(), deleteChild);
+    std::for_each(children_.begin(), children_.end(), deleteChild);
   }
 
   virtual Value eval(const void* sample, const MetaStruct& meta,
@@ -201,7 +202,7 @@ namespace {
 
     Value eval(const void*, const MetaStruct&, const DDS::StringSeq& params)
     {
-      return Value(params[param_].in(), true);
+      return Value(params[param_], true);
     }
 
     int param_;

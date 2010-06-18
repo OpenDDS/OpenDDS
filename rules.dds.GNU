@@ -70,4 +70,10 @@ endif # versioned_so
 
 -include $(DDS_ROOT)/user_macros.GNU
 
+# user_macros.GNU may not exist, but GNU make will try to "make" it using the
+# overly general rule for creating symlinks in rules.local.GNU.  To prevent
+# this, create a more specific rule for user_macros.GNU that does nothing.
+.DEFAULT_GOAL := all
+$(DDS_ROOT)/user_macros.GNU: ;
+
 endif # rules_dds_gnu_included

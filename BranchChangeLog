@@ -1,3 +1,14 @@
+Fri Jun 18 17:50:09 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/modules/TYPESUPPORTHelper.pm:
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/yard/yard_parser.hpp:
+        * dds/idl/be_global.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * rules.dds.GNU:
+
+          More fixes for SunCC and misc cleanup.
+
 Fri Jun 18 15:51:21 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/yard/yard_tree.hpp:

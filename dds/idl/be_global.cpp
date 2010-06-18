@@ -423,7 +423,8 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   Includes_t::const_iterator it = inc->begin(), end = inc->end();
 
   for (; it != end; ++it) {
-    ret += "#include \"" + ACE_CString(it->c_str()) + "\"\n";
+    ACE_CString quote = (it->size() > 0 && (*it)[0] != '<') ? "\"" : "";
+    ret += "#include " + quote + it->c_str() + quote + "\n";
   }
 
   if (which == STREAM_H) {
