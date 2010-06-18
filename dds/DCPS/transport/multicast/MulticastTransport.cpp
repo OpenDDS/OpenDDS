@@ -44,7 +44,7 @@ DataLink*
 MulticastTransport::find_or_create_datalink(
   RepoId local_id,
   const AssociationData* remote_association,
-  CORBA::Long /*priority*/,
+  CORBA::Long priority,
   bool active)
 {
   // To accommodate the one-to-many nature of multicast reservations,
@@ -54,7 +54,16 @@ MulticastTransport::find_or_create_datalink(
   // Subscribers or Publishers within the same DomainParticipant,
   // it may be assumed that the local_id always references the same
   // participant.
-  if (this->link_.is_nil()) {
+  MulticastDataLink_rch link;
+  if (active && ! this->client_link_.is_nil ()) {
+    link = this->client_link_;
+  }
+  
+  if (!active && ! this->server_link_.is_nil ()) {
+    link = this->server_link_;
+  }
+  
+  if (link.is_nil()) {
     MulticastSessionFactory* session_factory;
     if (this->config_i_->reliable_) {
       ACE_NEW_RETURN(session_factory, ReliableSessionFactory, 0);
@@ -63,10 +72,24 @@ MulticastTransport::find_or_create_datalink(
     }
 
     MulticastPeer local_peer = RepoIdConverter(local_id).participantId();
-
-    MulticastDataLink_rch link;
+    MulticastPeer remote_peer 
+      = RepoIdConverter(const_cast<AssociationData*> (remote_association)->remote_id_).participantId();
+         
+    bool is_loopback = local_peer == remote_peer;
+    
+    VDBG_LVL((LM_DEBUG, "(%P|%t)MulticastTransport::find_or_create_datalink remote addr str "
+              "\"%s\" priority %d is_loopback %d active %d\"\n",
+              const_cast<AssociationData*> (remote_association)->network_order_address_.addr_.c_str(),
+              priority, is_loopback, active),
+              2);
+     
+     
     ACE_NEW_RETURN(link,
-                   MulticastDataLink(this, session_factory, local_peer),
+                   MulticastDataLink(this, 
+                                     session_factory, 
+                                     local_peer, 
+                                     is_loopback, 
+                                     active),
                    0);
 
     // Configure link with transport configuration and reactor task:
@@ -93,14 +116,20 @@ MulticastTransport::find_or_create_datalink(
                         str),
                        0);
     }
-
-    this->link_ = link;
   }
 
+  if (active && this->client_link_.is_nil ()) {
+    this->client_link_ = link;
+  }
+
+  if (!active && this->server_link_.is_nil ()) {
+    this->server_link_ = link;
+  }
+  
   MulticastPeer remote_peer =
     RepoIdConverter(remote_association->remote_id_).participantId();
 
-  MulticastSession* session = this->link_->find_or_create_session(remote_peer);
+  MulticastSession* session = link->find_or_create_session(remote_peer);
   if (session == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -119,7 +148,7 @@ MulticastTransport::find_or_create_datalink(
                      0);
   }
 
-  return MulticastDataLink_rch(this->link_)._retn();
+  return MulticastDataLink_rch (link)._retn();
 }
 
 int
@@ -141,10 +170,12 @@ MulticastTransport::configure_i(TransportConfiguration* config)
 void
 MulticastTransport::shutdown_i()
 {
-  if (!this->link_.is_nil()) {
-    this->link_->transport_shutdown();
+  if (!this->client_link_.is_nil()) {
+    this->client_link_->transport_shutdown();
   }
-
+  if (!this->server_link_.is_nil()) {
+    this->server_link_->transport_shutdown();
+  }
   this->config_i_->_remove_ref();
   this->config_i_ = 0;
 }
@@ -177,11 +208,22 @@ MulticastTransport::connection_info_i(TransportInterfaceInfo& info) const
 bool
 MulticastTransport::acked(RepoId /*local_id*/, RepoId remote_id)
 {
-  if (!this->link_.is_nil()) {
+  bool is_client = ! (this->client_link_.is_nil());
+  bool is_server = ! (this->server_link_.is_nil());
+  bool acked = false;
+  
+  if (is_client || is_server) {
     MulticastPeer remote_peer =
       RepoIdConverter(remote_id).participantId();
-
-    return this->link_->acked(remote_peer);
+    
+     if (is_client) {
+       acked = acked || this->client_link_->acked(remote_peer);
+     }
+     if (is_server) {
+       acked = acked || this->server_link_->acked(remote_peer);
+     }
+      
+    return acked;
   }
 
   return false;
@@ -198,7 +240,8 @@ void
 MulticastTransport::release_datalink_i(DataLink* /*link*/,
                                        bool /*release_pending*/)
 {
-  this->link_ = 0;  // release ownership
+  this->client_link_ = 0;  // release ownership
+  this->server_link_ = 0;  // release ownership
 }
 
 } // namespace DCPS
