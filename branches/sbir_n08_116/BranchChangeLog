@@ -1,3 +1,15 @@
+Fri Jun 18 15:51:21 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/yard/yard_tree.hpp:
+
+          Re-worked some C++ template code that SunCC can't understand.
+          The original code can be re-enabled with the preprocessor macro
+          OPENDDS_USE_NESTED_TEMPLATE_FWDECL.
+
+        * java/dds/dcps_java_optional.mpb:
+
+          Changes for building java bindings with content_subscription=0.
+
 Mon May 24 18:54:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         Merging trunk changes 3253:3278 out to branch.

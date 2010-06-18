@@ -34,9 +34,11 @@ namespace yard
             current = &root;
         }
 
+#ifdef OPENDDS_USE_NESTED_TEMPLATE_FWDECL
         // a forward declaration
         template<typename T>
         struct TypedNode;
+#endif
 
         // a node of the tree
         struct AbstractNode
@@ -77,6 +79,7 @@ namespace yard
                 mpLastChildPtr = &(child->mpNext);
             }    
 
+#ifdef OPENDDS_USE_NESTED_TEMPLATE_FWDECL
             // adds a new concrete type node to the tree associated 
             // with a specific rule
             template<typename Rule_T>
@@ -88,6 +91,7 @@ namespace yard
                 AddChild(ret);
                 return ret;
             }  
+#endif
 
             // delete a child node 
             void DeleteChild(AbstractNode* p)
@@ -153,6 +157,7 @@ namespace yard
                 return GetRuleTypeInfo() == typeid(T);
             }
 
+#ifdef OPENDDS_USE_NESTED_TEMPLATE_FWDECL
             // returns a pointer to the first sibling node that matches the rule
             template<typename T>
             TypedNode<T>* GetTypedSibling()
@@ -176,7 +181,7 @@ namespace yard
                 if (ret->TypeMatches<T>()) return dynamic_cast<TypedNode<T>*>(ret);
                 return ret->GetTypedSibling<T>();
             }
-
+#endif
             // gets a pointer to the parent pointer of the node
             AbstractNode* GetParent()
             {
@@ -219,6 +224,7 @@ namespace yard
                     f(child);
             }
 
+#ifdef OPENDDS_USE_NESTED_TEMPLATE_FWDECL
             // calls the function "F" with each child node associated with the rule type
             template<typename Rule_T, typename F>
             void ForEachTyped(F f)
@@ -228,7 +234,7 @@ namespace yard
                     child = child->GetTypedSibling<Rule_T>())
                     f(child);
             }
-
+#endif
             // abstract member functions
             virtual const std::type_info& GetRuleTypeInfo() = 0;
             
@@ -264,6 +270,19 @@ namespace yard
             }
         };
 
+
+        template<typename Rule_T>
+        static TypedNode<Rule_T>*
+        NewChild(typename AbstractNode::TokenIter pos, AbstractNode* an)
+        {
+            //printf("%s\n", typeid(Rule_T).name());
+            assert(!an->IsCompleted());
+            TypedNode<Rule_T>* ret = new TypedNode<Rule_T>(pos, an);
+            an->AddChild(ret);
+            return ret;
+        }
+
+
         // acccess the root AbstractNode
         AbstractNode* GetRoot() {
             return &root;
@@ -275,7 +294,11 @@ namespace yard
         void CreateNode(ParserState_T& p) { 
             assert(current != NULL);
             typename ParserState_T::Iterator pos = p.GetPos();
+#ifdef OPENDDS_USE_NESTED_TEMPLATE_FWDECL
             current = current->template NewChild<Rule_T>(pos);
+#else
+            current = NewChild<Rule_T>(pos, current);
+#endif
             assert(current != NULL);
         }
 
