@@ -1,3 +1,33 @@
+Fri Jun 18 15:01:24 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * [3346] 2010-06-18 15:01 harrisb
+        * tools/modeling/org.opendds/org.opendds.modeling.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/org.opendds/org.opendds.modeling.model.edit/plugin.xml:
+        * tools/modeling/org.opendds/org.opendds.modeling.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/org.opendds/org.opendds.modeling.model.editor/plugin.xml:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/Application.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/Core.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/DCPS.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/Domain.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/Enumerations.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/QoS.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/Topics.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/Types.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/plugin.xml:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/OpenDDSProjectNature.java:
+
+        Due to a bug in GMF
+        (https://bugs.eclipse.org/bugs/show_bug.cgi?id=205066), when
+        overriding the Base Package property of the OpenDDS.genmodel to
+        something other than null it is necessary that the Ecore package
+        names start with a lowercase letter. Failure to do so causes the
+        GMF code generator to import packages rather than
+        classes. Therefore, the Ecore package names were changed to
+        lowercase (note in some cases this causes divergence from the DDF
+        Profile spec).
+
 Thu Jun 17 16:06:47 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3344] 2010-06-17 16:04  martinezm
