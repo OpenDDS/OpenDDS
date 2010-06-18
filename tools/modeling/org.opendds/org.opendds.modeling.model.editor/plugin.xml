@@ -16,7 +16,7 @@
             name="%_UI_Wizard_category"/>
       <wizard
             category="org.opendds.modeling.Wizard.category.ID"
-            class="org.opendds.modeling.model.OpenDDS.presentation.OpenDDSModelWizard"
+            class="org.opendds.modeling.model.opendds.presentation.OpenDDSModelWizard"
             icon="icons/full/obj16/OpenDDSModelFile.gif"
             id="OpenDDS.presentation.OpenDDSModelWizardID"
             name="%_UI_OpenDDSModelWizard_label">
@@ -31,8 +31,8 @@
             name="%_UI_OpenDDSEditor_label"
             icon="icons/full/obj16/OpenDDSModelFile.gif"
             extensions="opendds"
-            class="org.opendds.modeling.model.OpenDDS.presentation.OpenDDSEditor"
-            contributorClass="org.opendds.modeling.model.OpenDDS.presentation.OpenDDSActionBarContributor">
+            class="org.opendds.modeling.model.opendds.presentation.OpenDDSEditor"
+            contributorClass="org.opendds.modeling.model.opendds.presentation.OpenDDSActionBarContributor">
       </editor>
    </extension>
 
@@ -43,8 +43,8 @@
             name="%_UI_CoreEditor_label"
             icon="icons/full/obj16/CoreModelFile.gif"
             extensions="core"
-            class="org.opendds.modeling.model.Core.presentation.CoreEditor"
-            contributorClass="org.opendds.modeling.model.Core.presentation.CoreActionBarContributor">
+            class="org.opendds.modeling.model.core.presentation.CoreEditor"
+            contributorClass="org.opendds.modeling.model.core.presentation.CoreActionBarContributor">
       </editor>
    </extension>
 
@@ -54,8 +54,8 @@
             name="%_UI_DomainEditor_label"
             icon="icons/full/obj16/DomainModelFile.gif"
             extensions="domain"
-            class="org.opendds.modeling.model.Domain.presentation.DomainEditor"
-            contributorClass="org.opendds.modeling.model.Domain.presentation.DomainActionBarContributor">
+            class="org.opendds.modeling.model.domain.presentation.DomainEditor"
+            contributorClass="org.opendds.modeling.model.domain.presentation.DomainActionBarContributor">
       </editor>
    </extension>
 
@@ -65,8 +65,8 @@
             name="%_UI_QoSEditor_label"
             icon="icons/full/obj16/QoSModelFile.gif"
             extensions="qos"
-            class="org.opendds.modeling.model.QoS.presentation.QoSEditor"
-            contributorClass="org.opendds.modeling.model.QoS.presentation.QoSActionBarContributor">
+            class="org.opendds.modeling.model.qos.presentation.QoSEditor"
+            contributorClass="org.opendds.modeling.model.qos.presentation.QoSActionBarContributor">
       </editor>
    </extension>
 
@@ -76,8 +76,8 @@
             name="%_UI_TopicsEditor_label"
             icon="icons/full/obj16/TopicsModelFile.gif"
             extensions="topics"
-            class="org.opendds.modeling.model.Topics.presentation.TopicsEditor"
-            contributorClass="org.opendds.modeling.model.Topics.presentation.TopicsActionBarContributor">
+            class="org.opendds.modeling.model.topics.presentation.TopicsEditor"
+            contributorClass="org.opendds.modeling.model.topics.presentation.TopicsActionBarContributor">
       </editor>
    </extension>
 
@@ -87,8 +87,8 @@
             name="%_UI_DCPSEditor_label"
             icon="icons/full/obj16/DCPSModelFile.gif"
             extensions="dcps"
-            class="org.opendds.modeling.model.DCPS.presentation.DCPSEditor"
-            contributorClass="org.opendds.modeling.model.DCPS.presentation.DCPSActionBarContributor">
+            class="org.opendds.modeling.model.dcps.presentation.DCPSEditor"
+            contributorClass="org.opendds.modeling.model.dcps.presentation.DCPSActionBarContributor">
       </editor>
    </extension>
 
@@ -98,8 +98,8 @@
             name="%_UI_TypesEditor_label"
             icon="icons/full/obj16/TypesModelFile.gif"
             extensions="types"
-            class="org.opendds.modeling.model.Types.presentation.TypesEditor"
-            contributorClass="org.opendds.modeling.model.Types.presentation.TypesActionBarContributor">
+            class="org.opendds.modeling.model.types.presentation.TypesEditor"
+            contributorClass="org.opendds.modeling.model.types.presentation.TypesActionBarContributor">
       </editor>
    </extension>
 
@@ -109,8 +109,8 @@
             name="%_UI_ApplicationEditor_label"
             icon="icons/full/obj16/ApplicationModelFile.gif"
             extensions="application"
-            class="org.opendds.modeling.model.Application.presentation.ApplicationEditor"
-            contributorClass="org.opendds.modeling.model.Application.presentation.ApplicationActionBarContributor">
+            class="org.opendds.modeling.model.application.presentation.ApplicationEditor"
+            contributorClass="org.opendds.modeling.model.application.presentation.ApplicationActionBarContributor">
       </editor>
    </extension>
 
@@ -120,8 +120,8 @@
             name="%_UI_EnumerationsEditor_label"
             icon="icons/full/obj16/EnumerationsModelFile.gif"
             extensions="enumerations"
-            class="org.opendds.modeling.model.Enumerations.presentation.EnumerationsEditor"
-            contributorClass="org.opendds.modeling.model.Enumerations.presentation.EnumerationsActionBarContributor">
+            class="org.opendds.modeling.model.enumerations.presentation.EnumerationsEditor"
+            contributorClass="org.opendds.modeling.model.enumerations.presentation.EnumerationsActionBarContributor">
       </editor>
    </extension>
 

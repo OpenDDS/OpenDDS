@@ -4,19 +4,19 @@ Bundle-Name: %pluginName
 Bundle-SymbolicName: org.opendds.modeling.model.edit;singleton:=true
 Bundle-Version: 1.0.0.dev20100615
 Bundle-ClassPath: .
-Bundle-Activator: org.opendds.modeling.model.OpenDDS.provider.OpenDDSEditPlugin$Implementation
+Bundle-Activator: org.opendds.modeling.model.opendds.provider.OpenDDSEditPlugin$Implementation
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: org.opendds.modeling.model.Application.provider,
- org.opendds.modeling.model.Core.provider,
- org.opendds.modeling.model.DCPS.provider,
- org.opendds.modeling.model.Domain.provider,
- org.opendds.modeling.model.Enumerations.provider,
- org.opendds.modeling.model.OpenDDS.provider,
- org.opendds.modeling.model.QoS.provider,
- org.opendds.modeling.model.Topics.provider,
- org.opendds.modeling.model.Types.provider
+Export-Package: org.opendds.modeling.model.application.provider,
+ org.opendds.modeling.model.core.provider,
+ org.opendds.modeling.model.dcps.provider,
+ org.opendds.modeling.model.domain.provider,
+ org.opendds.modeling.model.enumerations.provider,
+ org.opendds.modeling.model.opendds.provider,
+ org.opendds.modeling.model.qos.provider,
+ org.opendds.modeling.model.topics.provider,
+ org.opendds.modeling.model.types.provider
 Require-Bundle: org.eclipse.core.runtime,
  org.opendds.modeling.model;visibility:=reexport,
  org.eclipse.emf.edit;visibility:=reexport

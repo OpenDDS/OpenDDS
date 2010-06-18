@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ecore:EPackage xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="Types"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="types"
     nsURI="http://www.opendds.org/modeling/schemas/Types/1.0" nsPrefix="types">
   <eClassifiers xsi:type="ecore:EClass" name="TopicField" eSuperTypes="Core.ecore#//Entity"/>
   <eClassifiers xsi:type="ecore:EClass" name="Simple" abstract="true" eSuperTypes="#//TopicField"/>

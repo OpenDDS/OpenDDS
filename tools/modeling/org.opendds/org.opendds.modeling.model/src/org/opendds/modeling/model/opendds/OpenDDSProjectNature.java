@@ -1,4 +1,4 @@
-package org.opendds.modeling.model.OpenDDS;
+package org.opendds.modeling.model.opendds;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;

@@ -13,7 +13,7 @@
    <extension point="org.eclipse.emf.ecore.generated_package">
       <package
             uri="http://www.opendds.org/modeling/schemas/OpenDDS/1.0"
-            class="org.opendds.modeling.model.OpenDDS.OpenDDSPackage"
+            class="org.opendds.modeling.model.opendds.OpenDDSPackage"
             genModel="model/OpenDDS.genmodel"/>
    </extension>
 
@@ -21,35 +21,35 @@
    <extension point="org.eclipse.emf.ecore.generated_package">
       <package
             uri="http://www.opendds.org/modeling/schemas/Core/1.0"
-            class="org.opendds.modeling.model.Core.CorePackage"
+            class="org.opendds.modeling.model.core.CorePackage"
             genModel="model/OpenDDS.genmodel"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
       <package
             uri="http://www.opendds.org/modeling/schemas/Domain/1.0"
-            class="org.opendds.modeling.model.Domain.DomainPackage"
+            class="org.opendds.modeling.model.domain.DomainPackage"
             genModel="model/OpenDDS.genmodel"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
       <package
             uri="http://www.opendds.org/modeling/schemas/QoS/1.0"
-            class="org.opendds.modeling.model.QoS.QoSPackage"
+            class="org.opendds.modeling.model.qos.QoSPackage"
             genModel="model/OpenDDS.genmodel"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
       <package
             uri="http://www.opendds.org/modeling/schemas/Topics/1.0"
-            class="org.opendds.modeling.model.Topics.TopicsPackage"
+            class="org.opendds.modeling.model.topics.TopicsPackage"
             genModel="model/OpenDDS.genmodel"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
       <package
             uri="http://www.opendds.org/modeling/schemas/DCPS/1.0"
-            class="org.opendds.modeling.model.DCPS.DCPSPackage"
+            class="org.opendds.modeling.model.dcps.DCPSPackage"
             genModel="model/OpenDDS.genmodel"/>
    </extension>
    <extension
@@ -58,7 +58,7 @@
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="org.opendds.modeling.model.OpenDDS.OpenDDSProjectNature">
+               class="org.opendds.modeling.model.opendds.OpenDDSProjectNature">
          </run>
       </runtime>
    </extension>
