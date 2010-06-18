@@ -264,6 +264,9 @@ OpenDDS::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message()
 
   ACE_NEW(send_element, TransportControlElement(message));
 
+  // give the message block ownership to TransportControlElement
+  message->release ();
+ 
   // I don't want to rebuild a connection in order to send
   // a graceful disconnect message.
   this->send_i(send_element, false);
@@ -324,6 +327,9 @@ OpenDDS::DCPS::SimpleTcpDataLink::fully_associated()
   TransportControlElement* send_element = 0;
 
   ACE_NEW(send_element, TransportControlElement(message));
+
+  // give the message block ownership to TransportControlElement
+  message->release ();
 
   this->send_i(send_element);
 }

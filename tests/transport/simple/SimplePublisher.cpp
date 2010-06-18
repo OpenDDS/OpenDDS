@@ -154,3 +154,11 @@ SimplePublisher::delivered_test_message()
 {
   return this->writer_.delivered_test_message();
 }
+
+void
+SimplePublisher::remove_associations(ssize_t size,
+                                     const OpenDDS::DCPS::RepoId* remote_ids,
+                                     const OpenDDS::DCPS::RepoId pub_id)
+{
+  TransportInterface::remove_associations(size, remote_ids, pub_id, true);
+}

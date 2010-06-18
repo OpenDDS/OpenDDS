@@ -64,6 +64,13 @@ OpenDDS::DCPS::PerConnectionSynch::svc()
 {
   DBG_ENTRY_LVL("PerConnectionSynch","svc",6);
 
+  // Ignore all signals to avoid
+  // ERROR: ACE::handle_write_ready return -1 while waiting  to unclog. handle_write_ready: Interrupted system call
+  // The main thread will handle signals.
+  sigset_t set;
+  ACE_OS::sigfillset(&set);
+  ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
+
   ThreadSynchWorker::WorkOutcome work_outcome =
     ThreadSynchWorker::WORK_OUTCOME_NO_MORE_TO_DO;
 

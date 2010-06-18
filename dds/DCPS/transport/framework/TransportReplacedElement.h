@@ -36,6 +36,7 @@ public:
 
   /// Accessor for the ACE_Message_Block
   virtual const ACE_Message_Block* msg() const;
+  virtual bool owned_by_transport ();
 
 protected:
 

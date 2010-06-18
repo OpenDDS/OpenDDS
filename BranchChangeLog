@@ -1,3 +1,14 @@
+Fri Jun 18 20:23:40 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        Merged changes from the trunk, revisions 3278:3352 which correspond to
+        the ChangeLog entries between
+        Mon May 24 21:41:41 UTC 2010  Scott Harris  <harris_s@ociweb.com>
+        and
+        Thu Jun 17 20:09:07 UTC 2010  Scott Harris  <harris_s@ociweb.com>
+        inclusive.  This brings the branch into sync with the trunk as of
+        OpenDDS release 2.1.3 (except for some documentation changes and the
+        actual version number change).
+
 Fri Jun 18 17:50:09 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/modules/TYPESUPPORTHelper.pm:

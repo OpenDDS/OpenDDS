@@ -35,6 +35,9 @@ DisjointSequence::range_iterator::operator++()
     if (this->pos_ != this->end_) {
       this->value_ = SequenceRange(SequenceNumber(prev->value_ + 1),
                                    SequenceNumber(this->pos_->value_ - 1));
+      if (this->value_.first > this->value_.second) {
+        operator++();
+      }
     }
   }
   return *this;

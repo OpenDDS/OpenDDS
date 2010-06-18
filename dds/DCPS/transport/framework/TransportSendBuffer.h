@@ -59,6 +59,7 @@ public:
 
   SequenceNumber low() const;
   SequenceNumber high() const;
+  bool empty() const;
 
 private:
   size_t capacity_;

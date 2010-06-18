@@ -43,12 +43,10 @@ public:
     this->bump_down();
   }
 
-  RcHandle& operator=(T* p) {
-    if (this->ptr_ != p) {
-      RcHandle tmp(p);
-      std::swap(this->ptr_, tmp.ptr_);
-    }
-
+  RcHandle& operator=(T* p) {   
+    RcHandle tmp(p);
+    std::swap(this->ptr_, tmp.ptr_);
+    
     return *this;
   }
 

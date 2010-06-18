@@ -46,12 +46,14 @@ DisjointSequence::shift(SequenceNumber value)
   this->sequences_.insert(value);
 
   SequenceSet::iterator first(this->sequences_.begin());
-  SequenceSet::iterator last(this->sequences_.upper_bound(value));
+  SequenceSet::iterator last(this->sequences_.lower_bound(value));
 
   if (first == last) return;  // nothing to shift
 
   // Shift low-water mark to inserted value:
   this->sequences_.erase(first, last);
+
+  normalize();
 }
 
 bool

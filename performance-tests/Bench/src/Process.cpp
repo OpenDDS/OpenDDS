@@ -578,8 +578,8 @@ Process::run()
       ));
     }
 
-    // Now wait for a change in associations.  Wait for up to 5 seconds.
-    DDS::Duration_t   timeout = { 5, 0 };
+    // Now wait for a change in associations.  Wait for up to 30 seconds.
+    DDS::Duration_t   timeout = { 30, 0 };
     DDS::ConditionSeq discard;
     if( DDS::RETCODE_OK != this->subscriptionWaiter_->wait( discard, timeout)) {
       ACE_ERROR((LM_ERROR,

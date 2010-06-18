@@ -41,5 +41,11 @@ TransportSendBuffer::high() const
   return this->buffers_.rbegin()->first;
 }
 
+ACE_INLINE bool
+TransportSendBuffer::empty() const
+{
+  return this->buffers_.empty();
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

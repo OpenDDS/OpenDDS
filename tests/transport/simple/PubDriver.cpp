@@ -297,6 +297,12 @@ PubDriver::run()
              "The SimplePublisher object is done running.  "
              "Release TheTransportFactory - causing all TransportImpl "
              "objects to be shutdown().\n"));
+ 
+  OpenDDS::DCPS::ReaderIdSeq readers;
+  readers.length(1);
+  readers[0] = this->sub_id_;
+
+  this->publisher_.remove_associations(1, readers.get_buffer(), this->pub_id_);
 
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();

@@ -42,6 +42,8 @@ public:
 
   virtual RepoId publication_id() const;
   virtual const ACE_Message_Block* msg() const;
+  virtual bool owned_by_transport ();
+
 protected:
   virtual void release_element(bool dropped_by_transport);
 
