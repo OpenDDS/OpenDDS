@@ -107,15 +107,15 @@ namespace yard
     struct SimpleTextParser
         : TreeBuildingParser<char>
     {                   
-        // Constructor
-        SimpleTextParser(Iterator first, Iterator last) 
-            : TreeBuildingParser<char>(first, last)
-        { }
-        
         // Public typedefs 
         typedef const char* Iterator;
         typedef char Token; 
         typedef Tree::AbstractNode Node;
+
+        // Constructor
+        SimpleTextParser(Iterator first, Iterator last) 
+            : TreeBuildingParser<char>(first, last)
+        { }
 
         // Parse function
         template<typename StartRule_T>

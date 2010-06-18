@@ -57,7 +57,7 @@ namespace {
     CL_SCALAR = 1,
     CL_STRUCTURE = 2,
     CL_STRING = 4,
-    CL_ENUM = 8,
+    CL_ENUM = 8
   };
 
   Classification classify(AST_Type* type)
@@ -102,7 +102,7 @@ namespace {
         "      return " + prefix + "typed." + fieldName
         + (cls & CL_STRING ? ".in()" : "") + suffix + ";\n"
         "    }\n";
-      be_global->add_include("cstring", BE_GlobalData::STREAM_CPP);
+      be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_STRUCTURE) {
       size_t n = fieldName.size() + 1 /* 1 for the dot */;
       std::string fieldType = scoped(field->field_type()->name());

@@ -9,6 +9,7 @@ sub get_output {
   my($self, $file, $flags) = @_;
 
   my $dir = '';
+  $flags = '' unless defined $flags;
   if ($flags =~ /-o +(\S+)/) {
     $dir = "$1/";
   }
