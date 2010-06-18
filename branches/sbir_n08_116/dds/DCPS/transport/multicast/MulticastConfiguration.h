@@ -77,6 +77,12 @@ public:
   /// The default value is: 1 (in same subnet)
   char ttl_;
 
+  /// The size of the socket receive buffer.
+  /// The default value is: ACE_DEFAULT_MAX_SOCKET_BUFSIZ if it's defined,
+  /// otherwise, 0.
+  /// If the value is 0, the system default value is used.
+  size_t rcv_buffer_size_;
+
   MulticastConfiguration();
 
   virtual int load(const TransportIdType& id,

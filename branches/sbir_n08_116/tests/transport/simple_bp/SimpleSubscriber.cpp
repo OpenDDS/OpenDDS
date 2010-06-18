@@ -117,3 +117,12 @@ SimpleSubscriber::print_time()
 {
   this->reader_.print_time();
 }
+
+void
+SimpleSubscriber::remove_associations(ssize_t size,
+                                      const OpenDDS::DCPS::RepoId* remote_ids,
+                                      const OpenDDS::DCPS::RepoId sub_id)
+{
+  TransportInterface::remove_associations(size, remote_ids, sub_id, false);
+}
+

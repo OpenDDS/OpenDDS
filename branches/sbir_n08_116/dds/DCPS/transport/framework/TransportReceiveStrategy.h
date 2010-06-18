@@ -54,6 +54,9 @@ protected:
   /// Check the transport header for suitability.
   virtual bool check_header(const TransportHeader& header);
 
+  /// Check the data sample header for suitability.
+  virtual bool check_header(const DataSampleHeader& header);
+
   /// Called when there is a ReceivedDataSample to be delivered.
   virtual void deliver_sample(ReceivedDataSample&  sample,
                               const ACE_INET_Addr& remote_address) = 0;
@@ -63,6 +66,9 @@ protected:
 
   /// Let the subclass stop.
   virtual void stop_i() = 0;
+
+  /// Ignore bad PDUs by skipping over them.
+  int skip_bad_pdus();
 
   /// Flag indicates if the GRACEFUL_DISCONNECT message is received.
   bool gracefully_disconnected_;
@@ -77,13 +83,19 @@ private:
 
   /// Current receive TransportHeader.
   TransportHeader receive_transport_header_;
+  
+  //
+  // The total available space in the receive buffers must have enough to hold 
+  // a max sized message.  The max message is about 64K and the low water for 
+  // a buffer is 4096.  Therefore, 16 receive buffers is appropriate.
+  // 
+  enum { RECEIVE_BUFFERS  =   16 };
+  enum { BUFFER_LOW_WATER = 4096 };
 
   //
   // Message Block Allocators are more plentiful since they hold samples
   // as well as data read from the handle(s).
   //
-  enum { RECEIVE_BUFFERS  =    2 };
-  enum { BUFFER_LOW_WATER = 1500 };
   enum { MESSAGE_BLOCKS   = 1000 };
   enum { DATA_BLOCKS      =  100 };
 

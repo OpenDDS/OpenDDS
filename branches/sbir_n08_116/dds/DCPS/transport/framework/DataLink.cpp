@@ -680,10 +680,21 @@ OpenDDS::DCPS::DataLink::ack_received(ReceivedDataSample& sample)
 
     if (where == this->send_listeners_.end()) {
       RepoIdConverter converter(publication);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) DataLink::ack_received: ")
-                 ACE_TEXT("listener for publication %C not found.\n"),
-                 std::string(converter).c_str()));
+
+      // Ack could be for a different publisher.
+      if (this->pub_map_.find(publication) == 0) {
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR((LM_WARNING,
+                     ACE_TEXT("(%P|%t) DataLink::ack_received: ")
+                     ACE_TEXT("publication %C not found.\n"),
+                     std::string(converter).c_str()));
+        }
+      } else {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) DataLink::ack_received: ")
+                   ACE_TEXT("listener for publication %C not found.\n"),
+                   std::string(converter).c_str()));
+      }
       return;
     }
 

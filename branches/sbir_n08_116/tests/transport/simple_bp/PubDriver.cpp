@@ -244,6 +244,12 @@ PubDriver::run()
   // Increase the time when more messages are sent.
   //ACE_OS::sleep (5);
 
+  OpenDDS::DCPS::ReaderIdSeq readers;
+  readers.length(1);
+  readers[0] = this->sub_id_;
+
+  this->publisher_.remove_associations(1, readers.get_buffer(), this->pub_id_);
+
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
   TheServiceParticipant->shutdown();

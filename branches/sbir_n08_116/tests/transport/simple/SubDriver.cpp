@@ -261,6 +261,12 @@ SubDriver::run()
              "Release TheTransportFactory - causing all TransportImpl "
              "objects to be shutdown().\n"));
 
+  OpenDDS::DCPS::WriterIdSeq writers;
+  writers.length(1);
+  writers[0] = this->pub_id_;
+
+  this->subscriber_.remove_associations(1, writers.get_buffer(), this->sub_id_);
+
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
   TheServiceParticipant->shutdown();

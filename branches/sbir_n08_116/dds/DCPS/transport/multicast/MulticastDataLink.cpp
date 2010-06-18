@@ -14,8 +14,12 @@
 
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
+#include "ace/Truncate.h"
+
+#include "tao/ORB_Core.h"
 
 #include "dds/DCPS/RepoIdBuilder.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #ifndef __ACE_INLINE__
 # include "MulticastDataLink.inl"
@@ -32,7 +36,8 @@ MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
     session_factory_(session_factory),
     local_peer_(local_peer),
     config_(0),
-    reactor_task_(0)
+    reactor_task_(0),
+    check_fully_association_ (false)
 {
 }
 
@@ -85,7 +90,7 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastDataLink::join: ")
-                      ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %p\n")),
+                      ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed.\n")),
                      false);
   }
 
@@ -100,7 +105,20 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastDataLink::join: ")
-                      ACE_TEXT("ACE_OS::setsockopt TTL failed: %p\n")),
+                      ACE_TEXT("ACE_OS::setsockopt TTL failed.\n")),
+                     false);	
+	}
+
+  int rcv_buffer_size = ACE_Utils::truncate_cast<int>(this->config_->rcv_buffer_size_);
+  if (rcv_buffer_size != 0 
+      && ACE_OS::setsockopt(handle, SOL_SOCKET,
+                            SO_RCVBUF,
+                            (char *) &rcv_buffer_size,
+                            sizeof (int)) < 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("MulticastDataLink::join: ")
+                      ACE_TEXT("ACE_OS::setsockopt RCVBUF failed.\n")),
                      false);	
 	}
 
@@ -167,7 +185,7 @@ MulticastDataLink::acked(MulticastPeer remote_peer)
 }
 
 bool
-MulticastDataLink::header_received(const TransportHeader& header)
+MulticastDataLink::check_header(const TransportHeader& header)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
                    guard,
@@ -175,11 +193,26 @@ MulticastDataLink::header_received(const TransportHeader& header)
                    false);
 
   MulticastSessionMap::iterator it(this->sessions_.find(header.source_));
-  if (it != this->sessions_.end() && it->second->acked()) {
-    return it->second->header_received(header);
-  }
-
+  if (it == this->sessions_.end()) return false;
+  if (it->second->acked()) {
+    return it->second->check_header(header);
+  } 
+  
   return true;
+}
+
+bool
+MulticastDataLink::check_header(const DataSampleHeader& header)
+{
+  ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
+                   guard,
+                   this->session_lock_,
+                   false);
+
+  if (header.message_id_ == TRANSPORT_CONTROL) return true;
+
+  // Skip data sample unless there is a session for it.
+  return (this->sessions_.count(receive_strategy()->received_header().source_) > 0);
 }
 
 void
@@ -189,16 +222,24 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
   case TRANSPORT_CONTROL: {
     // Transport control samples are delivered to all sessions
     // regardless of association status:
-    ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX,
-              guard,
-              this->session_lock_);
+    {
+      ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX,
+                guard,
+                this->session_lock_);
 
-    for (MulticastSessionMap::iterator it(this->sessions_.begin());
-         it != this->sessions_.end(); ++it) {
-      it->second->control_received(sample.header_.submessage_id_,
-                                   sample.sample_);
+      char* ptr = sample.sample_->rd_ptr();
+      for (MulticastSessionMap::iterator it(this->sessions_.begin());
+          it != this->sessions_.end(); ++it) {
+        it->second->control_received(sample.header_.submessage_id_,
+                                    sample.sample_);
+        // reset read pointer
+        sample.sample_->rd_ptr(ptr);      
+      }
     }
-
+    if (this->check_fully_association_) {
+      this->transport_->check_fully_association ();
+      this->check_fully_association_ = false;
+    }
   } break;
 
   case SAMPLE_ACK:
@@ -226,5 +267,11 @@ MulticastDataLink::stop_i()
   this->socket_.close();
 }
 
+
+void 
+MulticastDataLink::set_check_fully_association ()
+{
+  this->check_fully_association_ = true;
+}
 } // namespace DCPS
 } // namespace OpenDDS

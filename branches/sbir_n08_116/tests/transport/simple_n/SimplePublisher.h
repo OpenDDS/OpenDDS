@@ -31,6 +31,9 @@ class SimplePublisher : public OpenDDS::DCPS::TransportInterface
     /// called.
     int delivered_test_message();
 
+    void remove_associations(ssize_t size,
+                             const OpenDDS::DCPS::RepoId* remote_ids,
+                             const OpenDDS::DCPS::RepoId pub_id);
 
   protected:
 

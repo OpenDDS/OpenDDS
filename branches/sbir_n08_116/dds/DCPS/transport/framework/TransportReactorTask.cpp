@@ -79,6 +79,13 @@ OpenDDS::DCPS::TransportReactorTask::svc()
   // It's all done with the magic of intrusive reference counting!
   this->_add_ref();
 
+  // Ignore all signals to avoid
+  //     ERROR: <something descriptive> Interrupted system call
+  // The main thread will handle signals.
+  sigset_t set;
+  ACE_OS::sigfillset(&set);
+  ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
+
   // VERY IMPORTANT!Tell the reactor that this task's thread will be
   //                  its "owner".
   if (this->reactor_->owner(ACE_Thread_Manager::instance()->thr_self()) != 0) {

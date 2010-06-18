@@ -66,7 +66,7 @@ public:
 
   virtual bool acked();
 
-  virtual bool header_received(const TransportHeader& header);
+  virtual bool check_header(const TransportHeader& header);
 
   virtual void control_received(char submessage_id,
                                 ACE_Message_Block* control);
@@ -81,8 +81,7 @@ public:
   void send_naks();
 
   void nak_received(ACE_Message_Block* control);
-  void send_nak(MulticastSequence low,
-                MulticastSequence high);
+  void send_naks (DisjointSequence& missing);
 
   void nakack_received(ACE_Message_Block* control);
   void send_nakack(MulticastSequence low);
@@ -96,6 +95,15 @@ private:
 
   ACE_SYNCH_MUTEX start_lock_;
   bool started_;
+  
+  // A session must be for a producer
+  // or subscriber.  Implementation doesn't
+  // support being for both.
+  // Only subscribers need to send naks, because
+  // don't need to nak for control samples and
+  // only producers send data samples.  Only producers
+  // need to receive naks.
+  bool send_naks_; 
 
   SynWatchdog syn_watchdog_;
   NakWatchdog nak_watchdog_;

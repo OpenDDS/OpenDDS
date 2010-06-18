@@ -123,6 +123,13 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::svc()
 
   this->thr_id_ = ACE_OS::thr_self();
 
+  // Ignore all signals to avoid
+  //     ERROR: <something descriptive> Interrupted system call
+  // The main thread will handle signals.
+  sigset_t set;
+  ACE_OS::sigfillset(&set);
+  ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
+
   // Start the "GetWork-And-PerformWork" loop for the current worker thread.
   while (!this->shutdown_initiated_) {
     SendRequest* req;

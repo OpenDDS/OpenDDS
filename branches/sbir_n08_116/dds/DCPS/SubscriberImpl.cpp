@@ -527,12 +527,13 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   for (it = datareader_map_.begin() ; it != datareader_map_.end() ;
        it ++) {
-    DDS::DataReaderListener_var listener =
-      it->second->local_reader_impl_->get_listener() ;
+    if (it->second->local_reader_impl_->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
+      DDS::DataReaderListener_var listener =
+          it->second->local_reader_impl_->get_listener();
+      if (!CORBA::is_nil (listener)) {
+        listener->on_data_available(it->second->local_reader_objref_);
+      }
 
-    if (it->second->local_reader_impl_->have_sample_states(
-          DDS::NOT_READ_SAMPLE_STATE)) {
-      listener->on_data_available(it->second->local_reader_objref_);
       it->second->local_reader_impl_->set_status_changed_flag(
         DDS::DATA_AVAILABLE_STATUS, false);
     }
