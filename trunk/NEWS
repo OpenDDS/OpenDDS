@@ -1,3 +1,9 @@
+Version 2.2 of OpenDDS.
+
+
+
+========================================================================
+
 Version 2.1.3 of OpenDDS.
 
 - Various fixes for memory management issue on transport framework.
@@ -22,6 +28,7 @@ Version 2.1.3 of OpenDDS.
                   to unclog. handle_write_ready: Interrupted system call
 
 - Added support to set the TTL for multicast transports.
+
 
 ========================================================================
 
