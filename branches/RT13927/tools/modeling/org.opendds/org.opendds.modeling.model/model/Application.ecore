@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ecore:EPackage xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="Application"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="application"
     nsURI="http://www.opendds.org/modeling/schemas/Application/1.0" nsPrefix="application">
   <eClassifiers xsi:type="ecore:EClass" name="ApplicationTarget" eSuperTypes="Core.ecore#//Entity">
     <eStructuralFeatures xsi:type="ecore:EReference" name="participant" eType="ecore:EClass DCPS.ecore#//DomainParticipant"/>
