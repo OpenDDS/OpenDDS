@@ -1,14 +1,14 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en"><head>
+
+
 <script id="versionArea" type="text/javascript">
 //<![CDATA[
 var version = {title: "TiddlyWiki", major: 2, minor: 5, revision: 3, date: new Date("Aug 18, 2009"), extensions: {}};
 //]]>
 </script>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<meta name="copyright" content="
-TiddlyWiki created by Jeremy Ruston, (jeremy [at] osmosoft [dot] com)
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="copyright" content="TiddlyWiki created by Jeremy Ruston, (jeremy [at] osmosoft [dot] com)
 
 Copyright (c) UnaMesa Association 2004-2009
 
@@ -35,15 +35,14 @@ TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
 BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-DAMAGE.
-" />
+DAMAGE.">
 <!--PRE-HEAD-START-->
 <!--{{{-->
-<link rel='alternate' type='application/rss+xml' title='RSS' href='index.xml' />
+<link rel="alternate" type="application/rss+xml" title="RSS" href="file:///home/harrisb/vc/projects/dds/RT13927/tools/modeling/docs/design_notes/index.xml">
 <!--}}}-->
 
 <!--PRE-HEAD-END-->
-<title> OpenDDS Modeling SDK - Design Notes </title>
+<title>OpenDDS Modeling SDK - Design Notes</title>
 <style id="styleArea" type="text/css">
 #saveTest {display:none;}
 #messageArea {display:none;}
@@ -56,27 +55,484 @@ DAMAGE.
 <!--POST-HEAD-START-->
 
 <!--POST-HEAD-END-->
-</head>
-<body onload="main();" onunload="if(window.unload) unload();">
+<style id="StyleSheetLayout" type="text/css">/*{{{*/
+* html .tiddler {height:1%;}
+
+body {font-size:.75em; font-family:arial,helvetica; margin:0; padding:0;}
+
+h1,h2,h3,h4,h5,h6 {font-weight:bold; text-decoration:none;}
+h1,h2,h3 {padding-bottom:1px; margin-top:1.2em;margin-bottom:0.3em;}
+h4,h5,h6 {margin-top:1em;}
+h1 {font-size:1.35em;}
+h2 {font-size:1.25em;}
+h3 {font-size:1.1em;}
+h4 {font-size:1em;}
+h5 {font-size:.9em;}
+
+hr {height:1px;}
+
+a {text-decoration:none;}
+
+dt {font-weight:bold;}
+
+ol {list-style-type:decimal;}
+ol ol {list-style-type:lower-alpha;}
+ol ol ol {list-style-type:lower-roman;}
+ol ol ol ol {list-style-type:decimal;}
+ol ol ol ol ol {list-style-type:lower-alpha;}
+ol ol ol ol ol ol {list-style-type:lower-roman;}
+ol ol ol ol ol ol ol {list-style-type:decimal;}
+
+.txtOptionInput {width:11em;}
+
+#contentWrapper .chkOptionInput {border:0;}
+
+.externalLink {text-decoration:underline;}
+
+.indent {margin-left:3em;}
+.outdent {margin-left:3em; text-indent:-3em;}
+code.escaped {white-space:nowrap;}
+
+.tiddlyLinkExisting {font-weight:bold;}
+.tiddlyLinkNonExisting {font-style:italic;}
+
+/* the 'a' is required for IE, otherwise it renders the whole tiddler in bold */
+a.tiddlyLinkNonExisting.shadow {font-weight:bold;}
+
+#mainMenu .tiddlyLinkExisting,
+	#mainMenu .tiddlyLinkNonExisting,
+	#sidebarTabs .tiddlyLinkNonExisting {font-weight:normal; font-style:normal;}
+#sidebarTabs .tiddlyLinkExisting {font-weight:bold; font-style:normal;}
+
+.header {position:relative;}
+.header a:hover {background:transparent;}
+.headerShadow {position:relative; padding:4.5em 0 1em 1em; left:-1px; top:-1px;}
+.headerForeground {position:absolute; padding:4.5em 0 1em 1em; left:0px; top:0px;}
+
+.siteTitle {font-size:3em;}
+.siteSubtitle {font-size:1.2em;}
+
+#mainMenu {position:absolute; left:0; width:10em; text-align:right; line-height:1.6em; padding:1.5em 0.5em 0.5em 0.5em; font-size:1.1em;}
+
+#sidebar {position:absolute; right:3px; width:16em; font-size:.9em;}
+#sidebarOptions {padding-top:0.3em;}
+#sidebarOptions a {margin:0 0.2em; padding:0.2em 0.3em; display:block;}
+#sidebarOptions input {margin:0.4em 0.5em;}
+#sidebarOptions .sliderPanel {margin-left:1em; padding:0.5em; font-size:.85em;}
+#sidebarOptions .sliderPanel a {font-weight:bold; display:inline; padding:0;}
+#sidebarOptions .sliderPanel input {margin:0 0 0.3em 0;}
+#sidebarTabs .tabContents {width:15em; overflow:hidden;}
+
+.wizard {padding:0.1em 1em 0 2em;}
+.wizard h1 {font-size:2em; font-weight:bold; background:none; padding:0; margin:0.4em 0 0.2em;}
+.wizard h2 {font-size:1.2em; font-weight:bold; background:none; padding:0; margin:0.4em 0 0.2em;}
+.wizardStep {padding:1em 1em 1em 1em;}
+.wizard .button {margin:0.5em 0 0; font-size:1.2em;}
+.wizardFooter {padding:0.8em 0.4em 0.8em 0;}
+.wizardFooter .status {padding:0 0.4em; margin-left:1em;}
+.wizard .button {padding:0.1em 0.2em;}
+
+#messageArea {position:fixed; top:2em; right:0; margin:0.5em; padding:0.5em; z-index:2000; _position:absolute;}
+.messageToolbar {display:block; text-align:right; padding:0.2em;}
+#messageArea a {text-decoration:underline;}
+
+.tiddlerPopupButton {padding:0.2em;}
+.popupTiddler {position: absolute; z-index:300; padding:1em; margin:0;}
+
+.popup {position:absolute; z-index:300; font-size:.9em; padding:0; list-style:none; margin:0;}
+.popup .popupMessage {padding:0.4em;}
+.popup hr {display:block; height:1px; width:auto; padding:0; margin:0.2em 0;}
+.popup li.disabled {padding:0.4em;}
+.popup li a {display:block; padding:0.4em; font-weight:normal; cursor:pointer;}
+.listBreak {font-size:1px; line-height:1px;}
+.listBreak div {margin:2px 0;}
+
+.tabset {padding:1em 0 0 0.5em;}
+.tab {margin:0 0 0 0.25em; padding:2px;}
+.tabContents {padding:0.5em;}
+.tabContents ul, .tabContents ol {margin:0; padding:0;}
+.txtMainTab .tabContents li {list-style:none;}
+.tabContents li.listLink { margin-left:.75em;}
+
+#contentWrapper {display:block;}
+#splashScreen {display:none;}
+
+#displayArea {margin:1em 17em 0 14em;}
+
+.toolbar {text-align:right; font-size:.9em;}
+
+.tiddler {padding:1em 1em 0;}
+
+.missing .viewer,.missing .title {font-style:italic;}
+
+.title {font-size:1.6em; font-weight:bold;}
+
+.missing .subtitle {display:none;}
+.subtitle {font-size:1.1em;}
+
+.tiddler .button {padding:0.2em 0.4em;}
+
+.tagging {margin:0.5em 0.5em 0.5em 0; float:left; display:none;}
+.isTag .tagging {display:block;}
+.tagged {margin:0.5em; float:right;}
+.tagging, .tagged {font-size:0.9em; padding:0.25em;}
+.tagging ul, .tagged ul {list-style:none; margin:0.25em; padding:0;}
+.tagClear {clear:both;}
+
+.footer {font-size:.9em;}
+.footer li {display:inline;}
+
+.annotation {padding:0.5em; margin:0.5em;}
+
+* html .viewer pre {width:99%; padding:0 0 1em 0;}
+.viewer {line-height:1.4em; padding-top:0.5em;}
+.viewer .button {margin:0 0.25em; padding:0 0.25em;}
+.viewer blockquote {line-height:1.5em; padding-left:0.8em;margin-left:2.5em;}
+.viewer ul, .viewer ol {margin-left:0.5em; padding-left:1.5em;}
+
+.viewer table, table.twtable {border-collapse:collapse; margin:0.8em 1.0em;}
+.viewer th, .viewer td, .viewer tr,.viewer caption,.twtable th, .twtable td, .twtable tr,.twtable caption {padding:3px;}
+table.listView {font-size:0.85em; margin:0.8em 1.0em;}
+table.listView th, table.listView td, table.listView tr {padding:0px 3px 0px 3px;}
+
+.viewer pre {padding:0.5em; margin-left:0.5em; font-size:1.2em; line-height:1.4em; overflow:auto;}
+.viewer code {font-size:1.2em; line-height:1.4em;}
+
+.editor {font-size:1.1em;}
+.editor input, .editor textarea {display:block; width:100%; font:inherit;}
+.editorFooter {padding:0.25em 0; font-size:.9em;}
+.editorFooter .button {padding-top:0px; padding-bottom:0px;}
+
+.fieldsetFix {border:0; padding:0; margin:1px 0px;}
+
+.sparkline {line-height:1em;}
+.sparktick {outline:0;}
+
+.zoomer {font-size:1.1em; position:absolute; overflow:hidden;}
+.zoomer div {padding:1em;}
+
+* html #backstage {width:99%;}
+* html #backstageArea {width:99%;}
+#backstageArea {display:none; position:relative; overflow: hidden; z-index:150; padding:0.3em 0.5em;}
+#backstageToolbar {position:relative;}
+#backstageArea a {font-weight:bold; margin-left:0.5em; padding:0.3em 0.5em;}
+#backstageButton {display:none; position:absolute; z-index:175; top:0; right:0;}
+#backstageButton a {padding:0.1em 0.4em; margin:0.1em;}
+#backstage {position:relative; width:100%; z-index:50;}
+#backstagePanel {display:none; z-index:100; position:absolute; width:90%; margin-left:3em; padding:1em;}
+.backstagePanelFooter {padding-top:0.2em; float:right;}
+.backstagePanelFooter a {padding:0.2em 0.4em;}
+#backstageCloak {display:none; z-index:20; position:absolute; width:100%; height:100px;}
+
+.whenBackstage {display:none;}
+.backstageVisible .whenBackstage {display:block;}
+/*}}}*/
+</style><style id="StyleSheetColors" type="text/css">/*{{{*/
+body {background:#fff; color:#000;}
+
+a {color:#600;}
+a:hover {/*background-color:#600; color:#fff;*/}
+a img {border:0;}
+
+h1,h2,h3,h4,h5,h6 {color:#666; background:transparent;}
+h1 {border-bottom:2px solid #ccc;}
+h2,h3 {border-bottom:1px solid #ccc;}
+
+.button {color:#600; border:1px solid #fff;}
+.button:hover {color:#600; background:#ccc; border-color:#999;}
+.button:active {color:#fff; background:#999; border:1px solid #666;}
+
+.header {background:#600;}
+.headerShadow {color:#000;}
+.headerShadow a {font-weight:normal; color:#000;}
+.headerForeground {color:#fff;}
+.headerForeground a {font-weight:normal; color:#eee;}
+
+.tabSelected{color:#600;
+	background:#eee;
+	border-left:1px solid #ccc;
+	border-top:1px solid #ccc;
+	border-right:1px solid #ccc;
+}
+.tabUnselected {color:#fff; background:#999;}
+.tabContents {color:#600; background:#eee; border:1px solid #ccc;}
+.tabContents .button {border:0;}
+
+#sidebar {}
+#sidebarOptions input {border:1px solid #600;}
+#sidebarOptions .sliderPanel {background:#eee;}
+#sidebarOptions .sliderPanel a {border:none;color:#600;}
+#sidebarOptions .sliderPanel a:hover {color:#fff; background:#600;}
+#sidebarOptions .sliderPanel a:active {color:#600; background:#fff;}
+
+.wizard {background:#eee; border:1px solid #600;}
+.wizard h1 {color:#600; border:none;}
+.wizard h2 {color:#000; border:none;}
+.wizardStep {background:#fff; color:#000;
+	border:1px solid #600;}
+.wizardStep.wizardStepDone {background:#ccc;}
+.wizardFooter {background:#eee;}
+.wizardFooter .status {background:#600; color:#fff;}
+.wizard .button {color:#000; background:#ccc; border: 1px solid;
+	border-color:#eee #666 #666 #eee;}
+.wizard .button:hover {color:#000; background:#fff;}
+.wizard .button:active {color:#fff; background:#000; border: 1px solid;
+	border-color:#600 #eee #eee #600;}
+
+.wizard .notChanged {background:transparent;}
+.wizard .changedLocally {background:#80ff80;}
+.wizard .changedServer {background:#8080ff;}
+.wizard .changedBoth {background:#ff8080;}
+.wizard .notFound {background:#ffff80;}
+.wizard .putToServer {background:#ff80ff;}
+.wizard .gotFromServer {background:#80ffff;}
+
+#messageArea {border:1px solid #999; background:#ccc; color:#000;}
+#messageArea .button {color:#600; background:#eee; border:none;}
+
+.popupTiddler {background:#eee; border:2px solid #999;}
+
+.popup {background:#eee; color:#666; border-left:1px solid #999; border-top:1px solid #999; border-right:2px solid #666; border-bottom:2px solid #666;}
+.popup hr {color:#600; background:#600; border-bottom:1px;}
+.popup li.disabled {color:#999;}
+.popup li a, .popup li a:visited {color:#000; border: none;}
+.popup li a:hover {background:#ccc; color:#000; border: none;}
+.popup li a:active {background:#eee; color:#000; border: none;}
+.popupHighlight {background:#fff; color:#000;}
+.listBreak div {border-bottom:1px solid #666;}
+
+.tiddler .defaultCommand {font-weight:bold;}
+
+.shadow .title {color:#666;}
+
+.title {color:#666;}
+.subtitle {color:#666;}
+
+.toolbar {color:#600;}
+.toolbar a {color:#ccc;}
+.selected .toolbar a {color:#999;}
+.selected .toolbar a:hover {color:#000;}
+
+.tagging, .tagged {border:1px solid #eee; background-color:#eee;}
+.selected .tagging, .selected .tagged {background-color:#ccc; border:1px solid #999;}
+.tagging .listTitle, .tagged .listTitle {color:#600;}
+.tagging .button, .tagged .button {border:none;}
+
+.footer {color:#ccc;}
+.selected .footer {color:#999;}
+
+.sparkline {background:#eee; border:0;}
+.sparktick {background:#600;}
+
+.error, .errorButton {color:#000; background:#f88;}
+.warning {color:#000; background:#eee;}
+.lowlight {background:#ccc;}
+
+.zoomer {background:none; color:#999; border:3px solid #999;}
+
+.imageLink, #displayArea .imageLink {background:transparent;}
+
+.annotation {background:#ccc; color:#000; border:2px solid #999;}
+
+.viewer .listTitle {list-style-type:none; margin-left:-2em;}
+.viewer .button {border:1px solid #999;}
+.viewer blockquote {border-left:3px solid #666;}
+
+.viewer table, table.twtable {border:2px solid #666;}
+.viewer th, .viewer thead td, .twtable th, .twtable thead td {background:#999; border:1px solid #666; color:#fff;}
+.viewer td, .viewer tr, .twtable td, .twtable tr {border:1px solid #666;}
+
+.viewer pre {border:1px solid #ccc; background:#eee;}
+.viewer code {color:#666;}
+.viewer hr {border:0; border-top:dashed 1px #666; color:#666;}
+
+.highlight, .marked {background:#ccc;}
+
+.editor input {border:1px solid #600;}
+.editor textarea {border:1px solid #600; width:100%;}
+.editorFooter {color:#999;}
+
+#backstageArea {background:#000; color:#999;}
+#backstageArea a {background:#000; color:#fff; border:none;}
+#backstageArea a:hover {background:#ccc; color:#000; }
+#backstageArea a.backstageSelTab {background:#fff; color:#000;}
+#backstageButton a {background:none; color:#fff; border:none;}
+#backstageButton a:hover {background:#000; color:#fff; border:none;}
+#backstagePanel {background:#fff; border-color: #fff #666 #666 #666;}
+.backstagePanelFooter .button {border:none; color:#fff;}
+.backstagePanelFooter .button:hover {color:#000;}
+#backstageCloak {background:#000; opacity:0.6; filter:'alpha(opacity=60)';}
+/*}}}*/</style><style id="StyleSheet" type="text/css">a:hover {
+    text-decoration: none;
+}
+
+.publishLogo {
+    position: relative;
+    background-color:#fff;
+    background-image: url(images/opendds.png);
+    background-position: left;
+    background-repeat: no-repeat;
+    color:#666;
+    padding: 20px 0 5px 72px;
+    border-bottom: 1px solid #ccc;
+}
+
+
+.headerForeground {
+    position: relative;
+    background-color:#fff;
+    background-image: url(images/opendds.png);
+    background-position: left;
+    background-repeat: no-repeat;
+    color:#666;
+    padding: 20px 0 5px 72px;
+    border-bottom: 1px solid #ccc;
+}
+
+.headerForeground a {
+    color:#666;
+    font-weight: bold;
+}
+
+.footer {
+    border-top: 1px solid #ccc;
+    color:#ccc;
+    margin-top: 20px;
+    font-size: 1.1em;
+}
+
+.siteTitle {
+    font-weight: bold;
+}
+
+#mainMenu {
+    padding: 25px 0 0 20px;
+}
+
+.toolbar {
+    float: right;
+}
+
+.viewer div.centeredTable {
+	text-align: center;
+}
+
+.viewer div.centeredTable table {
+	margin: 0 auto;
+	text-align: left;
+}
+
+.imgcenter {
+  display: block;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#publishContentWrapper {margin: 0 5em 0 5em; padding: 0;}
+
+th { border-style: inset;}
+td { border-style: inset;}
+</style><style id="StyleSheetPrint" type="text/css">/*{{{*/
+@media print {
+#mainMenu, #sidebar, #messageArea, .toolbar, #backstageButton, #backstageArea {display: none !important;}
+#displayArea {margin: 1em 1em 0em;}
+noscript {display:none;} /* Fixes a feature in Firefox 1.5.0.2 where print preview displays the noscript content */
+}
+/*}}}*/</style><style id="forceReflow" type="text/css"></style></head><body onload="main();" onunload="if(window.unload) unload();">
 <!--PRE-BODY-START-->
 
 <!--PRE-BODY-END-->
 <div id="copyright">
-Welcome to TiddlyWiki created by Jeremy Ruston, Copyright &copy; 2007 UnaMesa Association
+Welcome to TiddlyWiki created by Jeremy Ruston, Copyright © 2007 UnaMesa Association
 </div>
 <noscript>
 <div id="javascriptWarning">
-This page requires JavaScript to function properly.<br /><br />If you are using Microsoft Internet Explorer you may need to click on the yellow bar above and select 'Allow Blocked Content'. You must then click 'Yes' on the following security warning.
+This page requires JavaScript to function properly.<br /><br />If you
+are using Microsoft Internet Explorer you may need to click on the
+yellow bar above and select 'Allow Blocked Content'. You must then
+click 'Yes' on the following security warning.
 </div>
 </noscript>
-<div id="saveTest"></div>
+<div id="saveTest">savetest</div>
 <div id="backstageCloak"></div>
-<div id="backstageButton"></div>
-<div id="backstageArea"><div id="backstageToolbar"></div></div>
+<div style="display: block;" id="backstageButton"><a style="display: block;" id="backstageShow" class="button" title="Open the backstage area to perform authoring and editing tasks" href="javascript:;">backstage ↩</a><a style="display: none;" id="backstageHide" class="button" title="Close the backstage area" href="javascript:;">↪ close</a></div>
+<div style="display: none;" id="backstageArea"><div style="left: 1132px;" id="backstageToolbar">backstage: <a task="save" class="backstageTab backstageAction" title="Save your changes to this TiddlyWiki" href="javascript:;">save</a><a task="sync" class="backstageTab backstageTask" title="Synchronise changes with other TiddlyWiki files and servers" href="javascript:;">sync▾</a><a task="importTask" class="backstageTab backstageTask" title="Import tiddlers and plugins from other TiddlyWiki files and servers" href="javascript:;">import▾</a><a task="tweak" class="backstageTab backstageTask" title="Tweak the appearance and behaviour of TiddlyWiki" href="javascript:;">tweak▾</a><a task="upgrade" class="backstageTab backstageTask" title="Upgrade TiddlyWiki core code" href="javascript:;">upgrade▾</a><a task="plugins" class="backstageTab backstageTask" title="Manage installed plugins" href="javascript:;">plugins▾</a></div></div>
 <div id="backstage">
-	<div id="backstagePanel"></div>
+	<div id="backstagePanel"><div class="backstagePanelFooter"></div><div class="backstagePanelBody"></div></div>
 </div>
-<div id="contentWrapper"></div>
+<div class="" id="contentWrapper"><!--{{{-->
+<div class="header">
+<div class="headerForeground">
+<span class="siteTitle" refresh="content" tiddler="SiteTitle"><a tiddlylink="OpenDDS" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="OpenDDS - OpenDDS, Mon 30 Nov 2009 03:57:00 PM CST" href="javascript:;">OpenDDS</a> Modeling SDK</span>&nbsp;
+<span class="siteSubtitle" refresh="content" tiddler="SiteSubtitle">Design Notes</span>
+</div>
+</div>
+<div id="mainMenu" refresh="content" tiddler="MainMenu"><a tiddlylink="Plug-in Architecture" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="Plug-in Architecture - MikeMartinez, Tue 15 Jun 2010 06:36:00 PM CST" href="javascript:;">Plug-in Architecture</a><br><a tiddlylink="EMF Models" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="EMF Models - YourName, Fri 18 Jun 2010 12:10:15 PM CST" href="javascript:;">EMF Models</a><br><a tiddlylink="GMF Models" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'GMF Models' doesn't yet exist" href="javascript:;">GMF Models</a><br><a tiddlylink="Code Generation" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'Code Generation' doesn't yet exist" href="javascript:;">Code Generation</a></div>
+<div id="sidebar">
+<div id="sidebarOptions" refresh="content" tiddler="SideBarOptions"><a class="searchButton" title="Search this TiddlyWiki" href="javascript:;">search</a><input lastsearchtext="" autocomplete="off" accesskey="F" size="15" class="txtOptionInput searchField" type="text"><a class="button" title="Close all displayed tiddlers (except any that are being edited)" href="javascript:;">close all</a><a class="button" title="Link to an URL that retrieves all the currently displayed tiddlers" href="javascript:;">permaview</a><a newtemplate="2" newfocus="title" isjournal="false" newtitle="New Tiddler" accesskey="N" class="button" title="Create a new tiddler" href="javascript:;">new tiddler</a><a accesskey="S" class="button" title="Save all tiddlers to create a new TiddlyWiki" href="javascript:;">save changes</a><a class="button" title="Publish Tiddlers as HTML files" href="javascript:;">publish</a><a class="button" title="Change TiddlyWiki advanced options" href="javascript:;">options »</a><div tiddler="OptionsPanel" refresh="content" style="display: none;" cookie="chkSliderOptionsPanel" class="sliderPanel">These <a tiddlylink="InterfaceOptions" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'InterfaceOptions' doesn't yet exist" href="javascript:;">InterfaceOptions</a> for customising <a tiddlylink="TiddlyWiki" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'TiddlyWiki' doesn't yet exist" href="javascript:;">TiddlyWiki</a> are saved in your browser<br><br>Your username for signing your edits. Write it as a <a tiddlylink="WikiWord" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'WikiWord' doesn't yet exist" href="javascript:;">WikiWord</a> (eg <a tiddlylink="JoeBloggs" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'JoeBloggs' doesn't yet exist" href="javascript:;">JoeBloggs</a>)<br><br><input value="YourName" title="Username for signing your edits" class="txtOptionInput" option="txtUserName"><br><input checked="checked" title="Keep backup file when saving changes" class="chkOptionInput" option="chkSaveBackups" type="checkbox"> <a tiddlylink="SaveBackups" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'SaveBackups' doesn't yet exist" href="javascript:;">SaveBackups</a><br><input title="Automatically save changes" class="chkOptionInput" option="chkAutoSave" type="checkbox"> <a tiddlylink="AutoSave" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'AutoSave' doesn't yet exist" href="javascript:;">AutoSave</a><br><input title="Enable regular expressions for searches" class="chkOptionInput" option="chkRegExpSearch" type="checkbox"> <a tiddlylink="RegExpSearch" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'RegExpSearch' doesn't yet exist" href="javascript:;">RegExpSearch</a><br><input title="Case-sensitive searching" class="chkOptionInput" option="chkCaseSensitiveSearch" type="checkbox"> <a tiddlylink="CaseSensitiveSearch" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'CaseSensitiveSearch' doesn't yet exist" href="javascript:;">CaseSensitiveSearch</a><br><input checked="checked" title="Enable animations" class="chkOptionInput" option="chkAnimate" type="checkbox"> <a tiddlylink="EnableAnimations" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'EnableAnimations' doesn't yet exist" href="javascript:;">EnableAnimations</a><br><br><hr>Also see <a tiddlylink="AdvancedOptions" refresh="link" class="tiddlyLink tiddlyLinkNonExisting shadow" title="This shadow tiddler provides access to several advanced options" href="javascript:;">AdvancedOptions</a></div></div>
+<div id="sidebarTabs" refresh="content" force="true" tiddler="SideBarTabs"><div class="tabsetWrapper txtMainTab"><div cookie="txtMainTab" class="tabset"><a content="TabTimeline" tab="Timeline" class="tab tabSelected" title="Timeline" href="javascript:;">Timeline</a><a content="TabAll" tab="All" class="tab tabUnselected" title="All tiddlers" href="javascript:;">All</a><a content="TabTags" tab="Tags" class="tab tabUnselected" title="All tags" href="javascript:;">Tags</a><a content="TabMore" tab="More" class="tab tabUnselected" title="More lists" href="javascript:;">More</a></div><div class="tabContents"><ul><li class="listTitle">18 June 2010</li><li class="listLink"><a tiddlylink="EMF Models" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="EMF Models - YourName, Fri 18 Jun 2010 12:10:15 PM CST" href="javascript:;">EMF Models</a></li></ul><ul><li class="listTitle">15 June 2010</li><li class="listLink"><a tiddlylink="Plug-in Architecture" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="Plug-in Architecture - MikeMartinez, Tue 15 Jun 2010 06:36:00 PM CST" href="javascript:;">Plug-in Architecture</a></li><li class="listLink"><a tiddlylink="org.opendds.modeling.model" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="org.opendds.modeling.model - MikeMartinez, Tue 15 Jun 2010 06:34:00 PM CST" href="javascript:;">org.opendds.modeling.model</a></li><li class="listLink"><a tiddlylink="ApplicationPackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="ApplicationPackage - MikeMartinez, Tue 15 Jun 2010 06:10:00 PM CST" href="javascript:;">ApplicationPackage</a></li><li class="listLink"><a tiddlylink="DCPSProfile" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="DCPSProfile - MikeMartinez, Tue 15 Jun 2010 06:10:00 PM CST" href="javascript:;">DCPSProfile</a></li><li class="listLink"><a tiddlylink="EnumerationsPackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="EnumerationsPackage - MikeMartinez, Tue 15 Jun 2010 06:09:00 PM CST" href="javascript:;">EnumerationsPackage</a></li><li class="listLink"><a tiddlylink="QoSPackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="QoSPackage - MikeMartinez, Tue 15 Jun 2010 06:08:00 PM CST" href="javascript:;">QoSPackage</a></li><li class="listLink"><a tiddlylink="DCPSPackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="DCPSPackage - MikeMartinez, Tue 15 Jun 2010 06:07:00 PM CST" href="javascript:;">DCPSPackage</a></li><li class="listLink"><a tiddlylink="TypesPackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="TypesPackage - MikeMartinez, Tue 15 Jun 2010 06:06:00 PM CST" href="javascript:;">TypesPackage</a></li><li class="listLink"><a tiddlylink="TopicsPackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="TopicsPackage - MikeMartinez, Tue 15 Jun 2010 06:05:00 PM CST" href="javascript:;">TopicsPackage</a></li><li class="listLink"><a tiddlylink="DomainPackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="DomainPackage - MikeMartinez, Tue 15 Jun 2010 06:04:00 PM CST" href="javascript:;">DomainPackage</a></li><li class="listLink"><a tiddlylink="CorePackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="CorePackage - MikeMartinez, Tue 15 Jun 2010 06:03:00 PM CST" href="javascript:;">CorePackage</a></li><li class="listLink"><a tiddlylink="StyleSheet" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="This tiddler can contain custom CSS definitions" href="javascript:;">StyleSheet</a></li><li class="listLink"><a tiddlylink="DefaultTiddlers" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="The tiddlers listed in this shadow tiddler will be automatically displayed when ~TiddlyWiki starts up" href="javascript:;">DefaultTiddlers</a></li><li class="listLink"><a tiddlylink="MainMenu" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="This shadow tiddler is used as the contents of the main menu in the left-hand column of the screen" href="javascript:;">MainMenu</a></li><li class="listLink"><a tiddlylink="SiteSubtitle" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="This shadow tiddler is used as the second part of the page title" href="javascript:;">SiteSubtitle</a></li><li class="listLink"><a tiddlylink="SiteTitle" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="This shadow tiddler is used as the first part of the page title" href="javascript:;">SiteTitle</a></li></ul><ul><li class="listTitle">1 February 2010</li><li class="listLink"><a tiddlylink="GettingStarted" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="This shadow tiddler provides basic usage instructions" href="javascript:;">GettingStarted</a></li><li class="listLink"><a tiddlylink="PublishTemplateBodySingle" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="PublishTemplateBodySingle - MikeMartinez, Mon 01 Feb 2010 09:42:00 AM CST" href="javascript:;">PublishTemplateBodySingle</a></li><li class="listLink"><a tiddlylink="PublishIndexTemplate" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="PublishIndexTemplate - MikeMartinez, Mon 01 Feb 2010 09:39:00 AM CST" href="javascript:;">PublishIndexTemplate</a></li><li class="listLink"><a tiddlylink="PublishTemplateBody" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="PublishTemplateBody - MikeMartinez, Mon 01 Feb 2010 09:37:00 AM CST" href="javascript:;">PublishTemplateBody</a></li><li class="listLink"><a tiddlylink="SideBarOptions" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="This shadow tiddler is used as the contents of the option panel in the right-hand sidebar" href="javascript:;">SideBarOptions</a></li></ul><ul><li class="listTitle">11 December 2009</li><li class="listLink"><a tiddlylink="PageTemplate" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="The HTML template in this shadow tiddler determines the overall ~TiddlyWiki layout" href="javascript:;">PageTemplate</a></li></ul><ul><li class="listTitle">1 December 2009</li><li class="listLink"><a tiddlylink="ColorPalette" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="These values in this shadow tiddler determine the colour scheme of the ~TiddlyWiki user interface" href="javascript:;">ColorPalette</a></li></ul><ul><li class="listTitle">30 November 2009</li><li class="listLink"><a tiddlylink="OpenDDS" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="OpenDDS - OpenDDS, Mon 30 Nov 2009 03:57:00 PM CST" href="javascript:;">OpenDDS</a></li><li class="listLink"><a tiddlylink="StyleSheetColors" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="This shadow tiddler contains CSS definitions related to the color of page elements. ''DO NOT EDIT THIS TIDDLER'', instead make your changes in the StyleSheet shadow tiddler" href="javascript:;">StyleSheetColors</a></li><li class="listLink"><a tiddlylink="SiteUrl" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="This shadow tiddler should be set to the full target URL for publication" href="javascript:;">SiteUrl</a></li></ul><ul><li class="listTitle">2 July 2008</li><li class="listLink"><a tiddlylink="PublishMacro" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="PublishMacro - Jack, Wed 02 Jul 2008 10:33:00 AM CST" href="javascript:;">PublishMacro</a></li></ul></div></div></div>
+</div>
+<div id="displayArea">
+<div style="display: none;" id="messageArea"></div>
+<div id="tiddlerDisplay"><div dirty="false" template="ViewTemplate" tiddler="GMF Models" tags="" refresh="tiddler" id="tiddlerGMF Models" class="tiddler missing"><!--{{{-->
+<div class="toolbar"><a tiddler="GMF Models" commandname="closeTiddler" class="button command_closeTiddler" title="Close this tiddler" href="javascript:;">close</a><a tiddler="GMF Models" commandname="closeOthers" class="button command_closeOthers" title="Close all other tiddlers" href="javascript:;">close others</a><a tiddler="GMF Models" commandname="editTiddler" class="button command_editTiddler defaultCommand" title="Edit this tiddler" href="javascript:;">edit</a><a class="button moreCommand" title="Show additional commands" href="javascript:;">more</a><span style="display: none;" class="moreCommand"><a tiddler="GMF Models" commandname="fields" class="button command_fields" title="Show the extended fields of this tiddler" href="javascript:;">fields</a><a tiddler="GMF Models" commandname="syncing" class="button command_syncing" title="Control synchronisation of this tiddler with a server or external file" href="javascript:;">syncing</a><a tiddler="GMF Models" commandname="permalink" class="button command_permalink" title="Permalink for this tiddler" href="javascript:;">permalink</a><a tiddler="GMF Models" commandname="references" class="button command_references" title="Show tiddlers that link to this one" href="javascript:;">references</a><a tiddler="GMF Models" commandname="jump" class="button command_jump" title="Jump to another open tiddler" href="javascript:;">jump</a></span></div>
+<div class="title">GMF Models</div>
+<div class="subtitle"><span><a tiddlylink="(missing)" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler '(missing)' doesn't yet exist" href="javascript:;">(missing)</a></span>, <span>18 August 2009</span> (<span>created</span> <span>18 August 2009</span>)</div>
+<div class="tagging"><ul title="List of tiddlers tagged with 'GMF Models'"><li class="listTitle">not tagging</li></ul></div>
+<div class="tagged"><ul><li class="listTitle">no tags</li></ul></div>
+<div class="viewer">The tiddler 'GMF Models' doesn't yet exist. Double-click to create it</div>
+<div class="tagClear"></div>
+<!--}}}--></div><div dirty="false" template="ViewTemplate" tiddler="EMF Models" tags="publish" refresh="tiddler" id="tiddlerEMF Models" class="tiddler selected"><!--{{{-->
+<div class="toolbar"><a tiddler="EMF Models" commandname="closeTiddler" class="button command_closeTiddler" title="Close this tiddler" href="javascript:;">close</a><a tiddler="EMF Models" commandname="closeOthers" class="button command_closeOthers" title="Close all other tiddlers" href="javascript:;">close others</a><a tiddler="EMF Models" commandname="editTiddler" class="button command_editTiddler defaultCommand" title="Edit this tiddler" href="javascript:;">edit</a><a class="button moreCommand" title="Show additional commands" href="javascript:;">more</a><span style="display: none;" class="moreCommand"><a tiddler="EMF Models" commandname="fields" class="button command_fields" title="Show the extended fields of this tiddler" href="javascript:;">fields</a><a tiddler="EMF Models" commandname="syncing" class="button command_syncing" title="Control synchronisation of this tiddler with a server or external file" href="javascript:;">syncing</a><a tiddler="EMF Models" commandname="permalink" class="button command_permalink" title="Permalink for this tiddler" href="javascript:;">permalink</a><a tiddler="EMF Models" commandname="references" class="button command_references" title="Show tiddlers that link to this one" href="javascript:;">references</a><a tiddler="EMF Models" commandname="jump" class="button command_jump" title="Jump to another open tiddler" href="javascript:;">jump</a></span></div>
+<div class="title">EMF Models</div>
+<div class="subtitle"><span><a tiddlylink="YourName" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'YourName' doesn't yet exist" href="javascript:;">YourName</a></span>, <span>18 June 2010</span> (<span>created</span> <span>15 June 2010</span>)</div>
+<div class="tagging"><ul title="List of tiddlers tagged with 'EMF Models'"><li class="listTitle">not tagging</li></ul></div>
+<div class="tagged"><ul><li class="listTitle">tags: </li><li><a tiddler="EMF Models" tag="publish" class="button" title="Show tiddlers tagged with 'publish'" href="javascript:;">publish</a></li></ul></div>
+<div class="viewer">The <a tiddlylink="OpenDDS" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="OpenDDS - OpenDDS, Mon 30 Nov 2009 03:57:00 PM CST" href="javascript:;">OpenDDS</a> Modeling SDK is based on the OMG "UML Profile for Data Distribution Specification" (<a target="_blank" title="External link to http://www.omg.org/spec/UML4DDS/1.0/Beta1/PDF/" href="http://www.omg.org/spec/UML4DDS/1.0/Beta1/PDF/" class="externalLink">ptc/08-07-02</a>).
+This specification contains metamodel definitions and a UML Profile.
+The SDK defines the metamodel as Eclipse ecore models. It then loads
+the metamodel resources into another ecore model and defines the
+stereotypes of the profile. This is used to create a model with an EMF
+editor, which can be used to provide a tree based view and editing,
+that can then be mapped onto a Graphical Modeling Framework (GMF) model
+for graphical model capture.<br><br>The Eclipse Modeling Framework
+(EMF) will take the captured ecore models defining the metamodel and
+profile and create edit support and a tree based EMF editor for the
+profile. The model can also be mapped into the GMF models for graphical
+capture and the EMF and GMF editors coordinated to show the different
+views of the same underlying model. The EMF Eclipse plug-in packages
+implementing this include:<br><br><div class="centeredTable"><table class="twtable"><caption align="top"> <strong>EMF Model Packages</strong> </caption><tbody><tr class="evenRow"><td align="left"><a tiddlylink="org.opendds.modeling.model" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="org.opendds.modeling.model - MikeMartinez, Tue 15 Jun 2010 06:34:00 PM CST" href="javascript:;">org.opendds.modeling.model</a></td><td align="left">Package containing the ecore model files defining the metamodel and profile stereotypes.</td></tr><tr class="oddRow"><td align="left"><a tiddlylink="org.opendds.modeling.edit" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'org.opendds.modeling.edit' doesn't yet exist" href="javascript:;">org.opendds.modeling.edit</a></td><td align="left">Package generated from the ecore models containing edit support used by the editor.</td></tr><tr class="evenRow"><td align="left"><a tiddlylink="org.opendds.modeling.editor" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'org.opendds.modeling.editor' doesn't yet exist" href="javascript:;">org.opendds.modeling.editor</a></td><td align="left">Package generated from the ecore models containing the EMF editor for the metamodel.</td></tr></tbody></table></div><br><br>The
+generated packages include some specific tailoring as well. The EMF
+editor generation steps will not overwrite the existing modfications.<br><br>The
+individual metamodels are broken into separate packages by the
+specification. This is mirrored by having separate ecore metamodels for
+each specification package. This allows the metamodels to use the same
+namespaces as those in the specification. The DLRL portion of the
+specification is not included in this SDK. The metamodel packages /
+ecore models are:<br><br><div class="centeredTable"><table class="twtable"><caption align="top"> <strong>Specification Metamodel / Ecore model</strong> </caption><tbody><tr class="evenRow"><td align="center"><em>Package</em></td><td align="center"><em>Specification Section</em></td><td align="center"><em>Ecore model file</em></td></tr><tr class="oddRow"><td align="left"><a tiddlylink="CorePackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="CorePackage - MikeMartinez, Tue 15 Jun 2010 06:03:00 PM CST" href="javascript:;">CorePackage</a></td><td align="center">7.1.2</td><td align="left">Core.ecore</td></tr><tr class="evenRow"><td align="left"><a tiddlylink="DomainPackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="DomainPackage - MikeMartinez, Tue 15 Jun 2010 06:04:00 PM CST" href="javascript:;">DomainPackage</a></td><td align="center">7.1.3</td><td align="left">Domain.ecore</td></tr><tr class="oddRow"><td align="left"><a tiddlylink="TopicsPackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="TopicsPackage - MikeMartinez, Tue 15 Jun 2010 06:05:00 PM CST" href="javascript:;">TopicsPackage</a></td><td align="center">7.1.4</td><td align="left">Topics.ecore</td></tr><tr class="evenRow"><td align="left"><a tiddlylink="TypesPackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="TypesPackage - MikeMartinez, Tue 15 Jun 2010 06:06:00 PM CST" href="javascript:;">TypesPackage</a></td><td align="center">7.1.5</td><td align="left">Types.ecore</td></tr><tr class="oddRow"><td align="left"><a tiddlylink="DCPSPackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="DCPSPackage - MikeMartinez, Tue 15 Jun 2010 06:07:00 PM CST" href="javascript:;">DCPSPackage</a></td><td align="center">7.1.6</td><td align="left">DCPS.ecore</td></tr><tr class="evenRow"><td align="left"><a tiddlylink="QoSPackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="QoSPackage - MikeMartinez, Tue 15 Jun 2010 06:08:00 PM CST" href="javascript:;">QoSPackage</a></td><td align="center">7.1.7</td><td align="left">QoS.ecore</td></tr><tr class="oddRow"><td align="left"><a tiddlylink="EnumerationsPackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="EnumerationsPackage - MikeMartinez, Tue 15 Jun 2010 06:09:00 PM CST" href="javascript:;">EnumerationsPackage</a></td><td align="center">7.1.8</td><td align="left">Enumerations.ecore</td></tr><tr class="evenRow"><td align="left"><a tiddlylink="ApplicationPackage" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="ApplicationPackage - MikeMartinez, Tue 15 Jun 2010 06:10:00 PM CST" href="javascript:;">ApplicationPackage</a></td><td align="center">7.1.11</td><td align="left">Application.ecore</td></tr><tr class="oddRow"><td align="left"><a tiddlylink="DCPSProfile" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="DCPSProfile - MikeMartinez, Tue 15 Jun 2010 06:10:00 PM CST" href="javascript:;">DCPSProfile</a></td><td align="center">7.2</td><td align="left">OpenDDS.ecore</td></tr></tbody></table></div><br><br><h2> Issues</h2><h3> GMF and Package Names</h3><br>There is a defect in GMF, <a target="_blank" title="External link to https://bugs.eclipse.org/bugs/show_bug.cgi?id=205066" href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=205066" class="externalLink">Code generation problems with upper case letters in metamodel package</a>,
+that causes GMF to emit a Java import of a package instead of a class
+(eclipse will report a "Only a type can be imported" error). To work
+around this the top-level package in the org.opendds.modeling.model
+Ecore files have all lowercase characters in their name. Note that this
+results in packages names that differ by case from what is in the DDS
+Profile specification (e.g. "dcps" instead of "DCPS").<br><br></div>
+<div class="tagClear"></div>
+<!--}}}--></div><div template="ViewTemplate" tiddler="Plug-in Architecture" tags="publish" refresh="tiddler" id="tiddlerPlug-in Architecture" class="tiddler"><!--{{{-->
+<div class="toolbar"><a tiddler="Plug-in Architecture" commandname="closeTiddler" class="button command_closeTiddler" title="Close this tiddler" href="javascript:;">close</a><a tiddler="Plug-in Architecture" commandname="closeOthers" class="button command_closeOthers" title="Close all other tiddlers" href="javascript:;">close others</a><a tiddler="Plug-in Architecture" commandname="editTiddler" class="button command_editTiddler defaultCommand" title="Edit this tiddler" href="javascript:;">edit</a><a class="button moreCommand" title="Show additional commands" href="javascript:;">more</a><span style="display: none;" class="moreCommand"><a tiddler="Plug-in Architecture" commandname="fields" class="button command_fields" title="Show the extended fields of this tiddler" href="javascript:;">fields</a><a tiddler="Plug-in Architecture" commandname="syncing" class="button command_syncing" title="Control synchronisation of this tiddler with a server or external file" href="javascript:;">syncing</a><a tiddler="Plug-in Architecture" commandname="permalink" class="button command_permalink" title="Permalink for this tiddler" href="javascript:;">permalink</a><a tiddler="Plug-in Architecture" commandname="references" class="button command_references" title="Show tiddlers that link to this one" href="javascript:;">references</a><a tiddler="Plug-in Architecture" commandname="jump" class="button command_jump" title="Jump to another open tiddler" href="javascript:;">jump</a></span></div>
+<div class="title">Plug-in Architecture</div>
+<div class="subtitle"><span><a tiddlylink="MikeMartinez" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'MikeMartinez' doesn't yet exist" href="javascript:;">MikeMartinez</a></span>, <span>15 June 2010</span> (<span>created</span> <span>15 June 2010</span>)</div>
+<div class="tagging"><ul title="List of tiddlers tagged with 'Plug-in Architecture'"><li class="listTitle">not tagging</li></ul></div>
+<div class="tagged"><ul><li class="listTitle">tags: </li><li><a tiddler="Plug-in Architecture" tag="publish" class="button" title="Show tiddlers tagged with 'publish'" href="javascript:;">publish</a></li></ul></div>
+<div class="viewer">The <a tiddlylink="OpenDDS" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="OpenDDS - OpenDDS, Mon 30 Nov 2009 03:57:00 PM CST" href="javascript:;">OpenDDS</a>
+Modeling SDK is built from a set of Eclipse plug-in projects and
+distributed as a Feature that includes the set of plug-ins required.
+The plug-ins include:<br><br><div class="centeredTable"><table class="twtable"><caption align="top"> <strong><a tiddlylink="OpenDDS" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="OpenDDS - OpenDDS, Mon 30 Nov 2009 03:57:00 PM CST" href="javascript:;">OpenDDS</a> Modeling SDK Plug-ins</strong> </caption><tbody><tr class="evenRow"><td align="left"><a tiddlylink="org.opendds.modeling.model" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="org.opendds.modeling.model - MikeMartinez, Tue 15 Jun 2010 06:34:00 PM CST" href="javascript:;">org.opendds.modeling.model</a></td><td align="left">Ecore metamodel and profile definition derived from the OMG UML Profile for DDS (<a target="_blank" title="External link to http://www.omg.org/spec/UML4DDS/1.0/Beta1/PDF/" href="http://www.omg.org/spec/UML4DDS/1.0/Beta1/PDF/" class="externalLink">ptc/08-07-02</a>).</td></tr><tr class="oddRow"><td align="left"><a tiddlylink="org.opendds.modeling.model.edit" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'org.opendds.modeling.model.edit' doesn't yet exist" href="javascript:;">org.opendds.modeling.model.edit</a></td><td align="left">Edit support for the org.opendds.modeling.model ecore model.</td></tr><tr class="evenRow"><td align="left"><a tiddlylink="org.opendds.modeling.model.editor" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'org.opendds.modeling.model.editor' doesn't yet exist" href="javascript:;">org.opendds.modeling.model.editor</a></td><td align="left">Generated EMF editor for the org.opendds.modeling.model ecore model.</td></tr><tr class="oddRow"><td align="left"><a tiddlylink="org.opendds.modeling.gmf" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'org.opendds.modeling.gmf' doesn't yet exist" href="javascript:;">org.opendds.modeling.gmf</a></td><td align="left">GMF graphical modeling framework for graphical model capture based on the org.opendds.modeling.model ecore model.</td></tr><tr class="evenRow"><td align="left"><a tiddlylink="org.opendds.modeling.sdk" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'org.opendds.modeling.sdk' doesn't yet exist" href="javascript:;">org.opendds.modeling.sdk</a></td><td align="left">Top level SDK plug-in including the code generation capability from the capture models.</td></tr><tr class="oddRow"><td align="left"><a tiddlylink="org.opendds.modeling.feature" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'org.opendds.modeling.feature' doesn't yet exist" href="javascript:;">org.opendds.modeling.feature</a></td><td align="left">Feature definition for the <a tiddlylink="OpenDDS" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="OpenDDS - OpenDDS, Mon 30 Nov 2009 03:57:00 PM CST" href="javascript:;">OpenDDS</a> Modeling SDK.</td></tr><tr class="evenRow"><td align="left"><a tiddlylink="org.opendds.modeling.tests" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'org.opendds.modeling.tests' doesn't yet exist" href="javascript:;">org.opendds.modeling.tests</a></td><td align="left">Regression tests for the feature.</td></tr><tr class="oddRow"><td align="left"><a tiddlylink="org.opendds.site" refresh="link" class="tiddlyLink tiddlyLinkNonExisting" title="The tiddler 'org.opendds.site' doesn't yet exist" href="javascript:;">org.opendds.site</a></td><td align="left">Plug-in distribution site.  This is where Eclipse can find the plug-ins for installation.</td></tr></tbody></table></div><br><br>These eclipse projects are stored in two separate subversion repositories.  Most are held in the <a tiddlylink="OpenDDS" refresh="link" class="tiddlyLink tiddlyLinkExisting" title="OpenDDS - OpenDDS, Mon 30 Nov 2009 03:57:00 PM CST" href="javascript:;">OpenDDS</a> source repository (<em><code>https://svn.dre.vanderbilt.edu/DOC/DDS</code></em>), while the org.opendds.site project is held in the <a target="_blank" title="External link to http://www.ociweb.com/" href="http://www.ociweb.com/" class="externalLink">Object Computing, Inc. (OCI)</a> internal repository for the <a target="_blank" title="External link to http://www.opendds.org/" href="http://www.opendds.org/" class="externalLink">http://www.opendds.org/</a> website.  This allows updates to the site to be managed directly from the subversion sources.<br><br>The public update site is located at: <a target="_blank" title="External link to http://www.opendds.org/modeling/eclipse/plugins" href="http://www.opendds.org/modeling/eclipse/plugins" class="externalLink">http://www.opendds.org/modeling/eclipse/plugins</a>.<br><br>The plug-in projects are being developed initially in the <em>'branches/RT13927'</em> branch.  The source and associated information is located in the <em>'tools/modeling'</em> directory, with the plug-ins located in the <em>'tools/modeling/org.opendds'</em> directory.  An internal distribution site is available during development for testing the distribution mechanism.</div>
+<div class="tagClear"></div>
+<!--}}}--></div></div>
+<div class="footer">$Id$</div>
+</div>
+<!--}}}--></div>
 <div id="contentStash"></div>
 <div id="shadowArea">
 <div title="MarkupPreHead">
@@ -577,7 +1033,7 @@ Error: #f88
 </pre>
 </div>
 <div title="EMF Models" modifier="MikeMartinez" created="201006151906" modified="201006152312" tags="publish" changecount="36">
-<pre>The OpenDDS Modeling SDK is based on the OMG &quot;UML Profile for Data Distribution Specification&quot; ([[ptc/08-07-02|http://www.omg.org/spec/UML4DDS/1.0/Beta1/PDF/]]).  This specification contains metamodel definitions and a UML Profile.  The SDK defines the metamodel as Eclipse ecore models.  It then loads the metamodel resources into another ecore model and defines the stereotypes of the profile.  This is used to create a model with an EMF editor, which can be used to provide a tree based view and editing, that can then be mapped onto a Graphical Modeling Framework (GMF) model for graphical model capture.
+<pre>The OpenDDS Modeling SDK is based on the OMG "UML Profile for Data Distribution Specification" ([[ptc/08-07-02|http://www.omg.org/spec/UML4DDS/1.0/Beta1/PDF/]]).  This specification contains metamodel definitions and a UML Profile.  The SDK defines the metamodel as Eclipse ecore models.  It then loads the metamodel resources into another ecore model and defines the stereotypes of the profile.  This is used to create a model with an EMF editor, which can be used to provide a tree based view and editing, that can then be mapped onto a Graphical Modeling Framework (GMF) model for graphical model capture.
 
 The Eclipse Modeling Framework (EMF) will take the captured ecore models defining the metamodel and profile and create edit support and a tree based EMF editor for the profile.  The model can also be mapped into the GMF models for graphical capture and the EMF and GMF editors coordinated to show the different views of the same underlying model.  The EMF Eclipse plug-in packages implementing this include:
 
@@ -684,7 +1140,7 @@ The public update site is located at: http://www.opendds.org/modeling/eclipse/pl
 The plug-in projects are being developed initially in the //'branches/~RT13927'// branch.  The source and associated information is located in the //'tools/modeling'// directory, with the plug-ins located in the //'tools/modeling/org.opendds'// directory.  An internal distribution site is available during development for testing the distribution mechanism.</pre>
 </div>
 <div title="PublishIndexTemplate" modifier="MikeMartinez" created="201002011539" server.type="file" server.host="jackparke.googlepages.com/jtw.html" changecount="1">
-<pre>&lt;div class='viewer' id='contentWrapper'&gt;&lt;small&gt;&lt;a href=&quot;index.html&quot;&gt;Home&lt;/a&gt; &gt; %1&lt;/small&gt;&lt;h1 class='publishLogo'&gt;%0&lt;/h1&gt;
+<pre>&lt;div class='viewer' id='contentWrapper'&gt;&lt;small&gt;&lt;a href="index.html"&gt;Home&lt;/a&gt; &gt; %1&lt;/small&gt;&lt;h1 class='publishLogo'&gt;%0&lt;/h1&gt;
 &lt;div id='publishContentWrapper'&gt;
 &lt;h2&gt;%1&lt;/h2&gt;
 &lt;ul&gt;%2
@@ -705,10 +1161,10 @@ The plug-in projects are being developed initially in the //'branches/~RT13927'/
 !Usage
 To publish all tagged tiddlers:
 {{{&lt;&lt;doPublish&gt;&gt;}}} &lt;&lt;doPublish&gt;&gt;
-To publish a single tiddler, use the {{{&lt;&lt;publishTiddler&gt;&gt;}}} macro or add the &quot;publishTiddler&quot; command to your ViewTemplate
+To publish a single tiddler, use the {{{&lt;&lt;publishTiddler&gt;&gt;}}} macro or add the "publishTiddler" command to your ViewTemplate
 !Template placeholders
 |!Placeholder|!Meaning|
-|%0|Your SiteTitle &quot;&lt;&lt;tiddler SiteTitle&gt;&gt;&quot;|
+|%0|Your SiteTitle "&lt;&lt;tiddler SiteTitle&gt;&gt;"|
 |%1|The current tiddler title|
 |%2|The rendered tiddler HTML|
 |%3|CSV list of tags|
@@ -731,17 +1187,17 @@ version.extensions.doPublish = {
  major: 2,
  minor: 4,
  revision: 1,
- date: new Date(&quot;July 2, 2008&quot;)
+ date: new Date("July 2, 2008")
 };
 config.macros.doPublish = {
- label: &quot;publish&quot;,
- prompt: &quot;Publish Tiddlers as HTML files&quot;
+ label: "publish",
+ prompt: "Publish Tiddlers as HTML files"
 };
-if (config.options.txtPublishTags == undefined) config.options.txtPublishTags = &quot;Publish&quot;;
-config.shadowTiddlers.PublishTemplateHead = '&lt;title&gt;%0 - %1&lt;/title&gt;\n&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;style.css&quot;/&gt;\n&lt;meta name=&quot;keywords&quot; content=&quot;%3&quot;/&gt;'
-config.shadowTiddlers.PublishTemplateBody = '&lt;div class=\'viewer\' id=\'contentWrapper\'&gt;&lt;small&gt;&lt;a href=\&quot;./publish/index.html\&quot;&gt;Home&lt;/a&gt; &gt; %1&lt;/small&gt;&lt;h1&gt;%0&lt;/h1&gt;\n&lt;h2&gt;%1&lt;/h2&gt;\n%2\n&lt;hr&gt;Tags: %3\n&lt;hr&gt;%4, %5&amp;nbsp;(created %6)\n&lt;/div&gt;\n'
+if (config.options.txtPublishTags == undefined) config.options.txtPublishTags = "Publish";
+config.shadowTiddlers.PublishTemplateHead = '&lt;title&gt;%0 - %1&lt;/title&gt;\n&lt;link rel="stylesheet" type="text/css" href="style.css"/&gt;\n&lt;meta name="keywords" content="%3"/&gt;'
+config.shadowTiddlers.PublishTemplateBody = '&lt;div class=\'viewer\' id=\'contentWrapper\'&gt;&lt;small&gt;&lt;a href=\"./publish/index.html\"&gt;Home&lt;/a&gt; &gt; %1&lt;/small&gt;&lt;h1&gt;%0&lt;/h1&gt;\n&lt;h2&gt;%1&lt;/h2&gt;\n%2\n&lt;hr&gt;Tags: %3\n&lt;hr&gt;%4, %5&amp;nbsp;(created %6)\n&lt;/div&gt;\n'
 config.shadowTiddlers.PublishTemplateBodySingle = '&lt;h1&gt;%0&lt;/h1&gt;\n&lt;h2&gt;%1&lt;/h2&gt;\n%2\n&lt;hr&gt;Tags: %3\n&lt;hr&gt;%4, %5&amp;nbsp;(created %6)\n&lt;/div&gt;\n'
-config.shadowTiddlers.PublishIndexTemplate = '&lt;div class=\'viewer\' id=\'contentWrapper\'&gt;&lt;small&gt;&lt;a href=&quot;./publish/index.html&quot;&gt;Home&lt;/a&gt; &gt; %1&lt;/small&gt;&lt;h1&gt;%0&lt;/h1&gt;&lt;h2&gt;%1&lt;/h2&gt;\n&lt;ul&gt;%2\n&lt;/ul&gt;\n&lt;small&gt;Published: %6&lt;/small&gt;\n&lt;/div&gt;\n';
+config.shadowTiddlers.PublishIndexTemplate = '&lt;div class=\'viewer\' id=\'contentWrapper\'&gt;&lt;small&gt;&lt;a href="./publish/index.html"&gt;Home&lt;/a&gt; &gt; %1&lt;/small&gt;&lt;h1&gt;%0&lt;/h1&gt;&lt;h2&gt;%1&lt;/h2&gt;\n&lt;ul&gt;%2\n&lt;/ul&gt;\n&lt;small&gt;Published: %6&lt;/small&gt;\n&lt;/div&gt;\n';
 config.macros.doPublish.handler = function(place)
  {
  if (!readOnly)
@@ -767,14 +1223,14 @@ config.macros.publishTiddler = {
   null, null, this.accessKey);
   btn.setAttribute('tiddler', tiddler.title);
 }}
-config.commands.publishTiddler = {handler : function(event,src,title) {publishTiddler(title);},text: &quot;publish&quot;, tooltip: &quot;Publish this tiddler as HTML&quot;};
+config.commands.publishTiddler = {handler : function(event,src,title) {publishTiddler(title);},text: "publish", tooltip: "Publish this tiddler as HTML"};
 function publishTiddler(title) {
  //debugger
  
  var PublishFolder = getWikiPath('publish');
  var place = document.getElementById(story.container)
- var HTMLTemplateHead = store.getTiddlerText(&quot;PublishTemplateHead&quot;);
- var HTMLTemplateBody = store.getTiddlerText(&quot;PublishTemplateBodySingle&quot;) || store.getTiddlerText(&quot;PublishTemplateBody&quot;);
+ var HTMLTemplateHead = store.getTiddlerText("PublishTemplateHead");
+ var HTMLTemplateBody = store.getTiddlerText("PublishTemplateBodySingle") || store.getTiddlerText("PublishTemplateBody");
  HTMLTemplateBody = renderTemplate(HTMLTemplateBody)
  HTMLTemplateBody = wiki2Web(HTMLTemplateBody);
  
@@ -783,37 +1239,37 @@ function publishTiddler(title) {
  var tiddlerHTML = wikifyStatic(tiddlerText);
  var HTML = '&lt;html&gt;\n\&lt;head&gt;\n' + HTMLTemplateHead + '\n&lt;/head&gt;\n&lt;body&gt;\n' + HTMLTemplateBody + '\n&lt;/body&gt;\n&lt;/html&gt;';
  HTML = HTML.format([
-  wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(), 
+  wikifyPlain("SiteTitle").htmlEncode(), 
   tiddler.title.htmlEncode(), 
   wiki2Web(tiddlerHTML), 
-  tiddler.tags.join(&quot;, &quot;), 
+  tiddler.tags.join(", "), 
   tiddler.modifier, 
   tiddler.modified.toLocaleString(), 
   tiddler.created.toLocaleString(),
   tiddlerText
  ]);
- saveFile(PublishFolder + tiddler.title.filenameEncode() + &quot;.html&quot;, HTML);
+ saveFile(PublishFolder + tiddler.title.filenameEncode() + ".html", HTML);
  //story.closeTiddler(tiddler.title);
- var indexWin = window.open((PublishFolder + title.filenameEncode() + &quot;.html&quot;).replace(/\\/g, &quot;/&quot;), null);
+ var indexWin = window.open((PublishFolder + title.filenameEncode() + ".html").replace(/\\/g, "/"), null);
  indexWin.focus();
 }
 function doPublish() {
  var savedTiddlers = [];
- var tiddlers = store.getTiddlers(&quot;title&quot;);
+ var tiddlers = store.getTiddlers("title");
  var place = document.getElementById(story.container)
- var HTMLTemplateHead = store.getTiddlerText(&quot;PublishTemplateHead&quot;);
- var HTMLTemplateBody = store.getTiddlerText(&quot;PublishTemplateBody&quot;);
+ var HTMLTemplateHead = store.getTiddlerText("PublishTemplateHead");
+ var HTMLTemplateBody = store.getTiddlerText("PublishTemplateBody");
  HTMLTemplateBody = renderTemplate(HTMLTemplateBody)
  HTMLTemplateBody = wiki2Web(HTMLTemplateBody);
 
- var PublishTags = config.options.txtPublishTags || &quot;publish&quot;;
- PublishTags = PublishTags.split(&quot;,&quot;)
+ var PublishTags = config.options.txtPublishTags || "publish";
+ PublishTags = PublishTags.split(",")
  var PublishFolder = getWikiPath('publish');
  if (!PublishFolder) return;
- var indexFile = &quot;&quot;;
+ var indexFile = "";
 
- var indexFileTemplate = store.getTiddlerText(&quot;PublishIndexTemplate&quot;);
- // This does not allow &lt;&lt;myMacro&gt;&gt; but wants &lt;div macro=&quot;myMacro&quot;&gt;
+ var indexFileTemplate = store.getTiddlerText("PublishIndexTemplate");
+ // This does not allow &lt;&lt;myMacro&gt;&gt; but wants &lt;div macro="myMacro"&gt;
  indexFileTemplate = renderTemplate(indexFileTemplate)
  // This option allows WIKI-syntax but is limited in it's HTML capabilities
  //indexFileTemplate = wikifyStatic(indexFileTemplate)
@@ -825,37 +1281,37 @@ function doPublish() {
    var tiddlerHTML = wikifyStatic(tiddlerText);
    var HTML = '&lt;html&gt;\n\&lt;head&gt;\n' + HTMLTemplateHead + '\n&lt;/head&gt;\n&lt;body&gt;\n' + HTMLTemplateBody + '\n&lt;/body&gt;\n&lt;/html&gt;';
    HTML = HTML.format([
-   wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(), 
+   wikifyPlain("SiteTitle").htmlEncode(), 
    tiddler.title.htmlEncode(), 
    wiki2Web(tiddlerHTML), 
-   tiddler.tags.join(&quot;, &quot;), 
+   tiddler.tags.join(", "), 
    tiddler.modifier, 
    tiddler.modified.toLocaleString(), 
    tiddler.created.toLocaleString(),
   tiddlerText
    ]);
-   //saveFile(PublishFolder + tiddler.created.formatString(&quot;YYYY0MM0DD&quot;) + &quot;.html&quot;, HTML);
-   saveFile(PublishFolder + tiddler.title.filenameEncode() + &quot;.html&quot;, HTML);
-   indexFile += &quot;&lt;li&gt;&lt;a href=\&quot;&quot; + tiddler.title.filenameEncode() + &quot;.html&quot; + &quot;\&quot; class=\&quot;tiddlyLink tiddlyLinkExisting\&quot;&gt;&quot; + tiddler.title + &quot;&lt;/a&gt;&lt;/li&gt;\n&quot;;
+   //saveFile(PublishFolder + tiddler.created.formatString("YYYY0MM0DD") + ".html", HTML);
+   saveFile(PublishFolder + tiddler.title.filenameEncode() + ".html", HTML);
+   indexFile += "&lt;li&gt;&lt;a href=\"" + tiddler.title.filenameEncode() + ".html" + "\" class=\"tiddlyLink tiddlyLinkExisting\"&gt;" + tiddler.title + "&lt;/a&gt;&lt;/li&gt;\n";
    story.closeTiddler(tiddler.title);
 
   }
 
  }
  indexFileTemplate = '&lt;html&gt;\n\&lt;head&gt;\n' + HTMLTemplateHead + '\n&lt;/head&gt;\n&lt;body&gt;\n' + indexFileTemplate + '\n&lt;/body&gt;\n&lt;/html&gt;';
- indexFileTemplate = indexFileTemplate.format([wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(), wikifyPlain(&quot;SiteSubtitle&quot;).htmlEncode(), &quot;%2&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, (new Date()).toLocaleString()])
+ indexFileTemplate = indexFileTemplate.format([wikifyPlain("SiteTitle").htmlEncode(), wikifyPlain("SiteSubtitle").htmlEncode(), "%2", "", "", "", (new Date()).toLocaleString()])
 
- indexFile = indexFileTemplate.replace(&quot;%2&quot;, indexFile)
+ indexFile = indexFileTemplate.replace("%2", indexFile)
  indexFile = wiki2Web(indexFile);
- saveFile(PublishFolder + &quot;index.html&quot;, indexFile)
- saveFile(PublishFolder + &quot;style.css&quot;, store.getTiddlerText(&quot;StyleSheet&quot;) + store.getTiddlerText(&quot;StyleSheetLayout&quot;) + store.getTiddlerText(&quot;StyleSheetColors&quot;))
- var indexWin = window.open(&quot;file://&quot; + PublishFolder.replace(/\\/g, &quot;/&quot;) + &quot;index.html&quot;, null);
+ saveFile(PublishFolder + "index.html", indexFile)
+ saveFile(PublishFolder + "style.css", store.getTiddlerText("StyleSheet") + store.getTiddlerText("StyleSheetLayout") + store.getTiddlerText("StyleSheetColors"))
+ var indexWin = window.open("file://" + PublishFolder.replace(/\\/g, "/") + "index.html", null);
  indexWin.focus();
 
 }
 
 function renderTemplate(html) {
- var result = document.createElement(&quot;div&quot;);
+ var result = document.createElement("div");
  result.innerHTML = html;
  applyHtmlMacros(result, null);
  var temp = result.innerHTML;
@@ -866,22 +1322,22 @@ function renderTemplate(html) {
 
 // Convert wikified text to html
 function wiki2Web(wikiHTML) {
- //var regexpLinks = new RegExp(&quot;&lt;a tiddlylink=.*?&lt;/a&gt;&quot;, &quot;img&quot;);
- var regexpLinks = /&lt;a[^&gt;]+tiddlylink\s*=\s*[&quot;']?\s*?([^ &quot;'&gt;]*)\s*[&quot;']?[^&gt;]*&gt;[^&lt;]+&lt;\/a&gt;/img;
+ //var regexpLinks = new RegExp("&lt;a tiddlylink=.*?&lt;/a&gt;", "img");
+ var regexpLinks = /&lt;a[^&gt;]+tiddlylink\s*=\s*["']?\s*?([^ "'&gt;]*)\s*["']?[^&gt;]*&gt;[^&lt;]+&lt;\/a&gt;/img;
  var result = wikiHTML.match(regexpLinks);
  if (result) {
   for (i = 0; i &lt; result.length; i++) {
-   var className = result[i].match(/ class=&quot;(.*?)&quot;/i) ? result[i].match(/ class=&quot;(.*?)&quot;/i)[1] : &quot;&quot;;
-   var tiddlerName = result[i].match(/ tiddlylink=&quot;(.*?)&quot;/i)[1]; 
-   var url = tiddlerName.htmlDecode().filenameEncode() + &quot;.html&quot;; 
-   var tiddlerLabel = result[i].match(/&quot;&gt;(.*?)&lt;\/a&gt;/i)[1]; 
+   var className = result[i].match(/ class="(.*?)"/i) ? result[i].match(/ class="(.*?)"/i)[1] : "";
+   var tiddlerName = result[i].match(/ tiddlylink="(.*?)"/i)[1]; 
+   var url = tiddlerName.htmlDecode().filenameEncode() + ".html"; 
+   var tiddlerLabel = result[i].match(/"&gt;(.*?)&lt;\/a&gt;/i)[1]; 
    if (!className.match(/tiddlyLinkNonExisting/i)) 
-   wikiHTML = wikiHTML.myReplace(result[i], &quot;&lt;a class=\&quot;&quot; + className + &quot;\&quot; href=\&quot;&quot; + url + &quot;\&quot;&gt;&quot; + tiddlerLabel + &quot;&lt;/a&gt;&quot;); 
+   wikiHTML = wikiHTML.myReplace(result[i], "&lt;a class=\"" + className + "\" href=\"" + url + "\"&gt;" + tiddlerLabel + "&lt;/a&gt;"); 
    else
-   wikiHTML = wikiHTML.myReplace(result[i], &quot;&lt;a class=\&quot;&quot; + className + &quot;\&quot; title=\&quot;Page does not exist\&quot; href=\&quot;#\&quot;&gt;&quot; + tiddlerName + &quot;&lt;/a&gt;&quot;);
+   wikiHTML = wikiHTML.myReplace(result[i], "&lt;a class=\"" + className + "\" title=\"Page does not exist\" href=\"#\"&gt;" + tiddlerName + "&lt;/a&gt;");
 
   }
-  wikiHTML = wikiHTML.replace(/ href=&quot;http:\/\//gi, &quot; target=\&quot;_blank\&quot; href=\&quot;http://&quot;);
+  wikiHTML = wikiHTML.replace(/ href="http:\/\//gi, " target=\"_blank\" href=\"http://");
 
  }
  return wikiHTML
@@ -915,13 +1371,13 @@ String.prototype.myReplace = function(sea, rep) {
 // Convert illegal characters to underscores
 String.prototype.filenameEncode = function()
  {
- return (this.toLowerCase().replace(/[^a-z0-9_-]/g, &quot;_&quot;));
+ return (this.toLowerCase().replace(/[^a-z0-9_-]/g, "_"));
 
 }
 //}}}</pre>
 </div>
 <div title="PublishTemplateBody" modifier="MikeMartinez" created="200806271146" modified="201002011537" server.type="file" server.host="jackparke.googlepages.com/jtw.html" server.page.revision="200806271146" changecount="1">
-<pre>&lt;div class='viewer' id='contentWrapper'&gt;&lt;small&gt;&lt;a href=&quot;./publish/index.html&quot;&gt;Home&lt;/a&gt; &gt; %1&lt;/small&gt;&lt;h1&gt;%0&lt;/h1&gt;
+<pre>&lt;div class='viewer' id='contentWrapper'&gt;&lt;small&gt;&lt;a href="./publish/index.html"&gt;Home&lt;/a&gt; &gt; %1&lt;/small&gt;&lt;h1&gt;%0&lt;/h1&gt;
 &lt;h2&gt;%1&lt;/h2&gt;
 %2
 &lt;hr&gt;Tags: %3
@@ -946,7 +1402,7 @@ String.prototype.filenameEncode = function()
 {{imgcenter{[img[images/QoS.png]]}}}</pre>
 </div>
 <div title="SideBarOptions" modifier="MikeMartinez" created="200911302023" modified="201002011534" changecount="2">
-<pre>&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;doPublish&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;options »&quot; &quot;Change TiddlyWiki advanced options&quot;&gt;&gt;</pre>
+<pre>&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;doPublish&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel "options »" "Change TiddlyWiki advanced options"&gt;&gt;</pre>
 </div>
 <div title="SiteSubtitle" modifier="MikeMartinez" created="200911302000" modified="201006151613" tags="OpenDDS" changecount="2">
 <pre>Design Notes</pre>
@@ -10167,5 +10623,4 @@ if(useJavaSaver)
 <!--POST-SCRIPT-START-->
 
 <!--POST-SCRIPT-END-->
-</body>
-</html>
+</body></html>
