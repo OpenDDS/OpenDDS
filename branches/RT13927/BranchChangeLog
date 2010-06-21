@@ -1,10 +1,10 @@
-Fri Jun 18 17:26:36 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+Mon Jun 21 12:15:00 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
-        * [3356] 2010-06-18 17:27 harrisb
+        * [3366] 2010-06-21 12:18:21 harrisb
         * tools/modeling/docs/design_notes/index.html:
 
-        Added discussion about why Ecore package names are lowercase in
-        org.opendds.modeling.model.
+          Added discussion about why Ecore package names are lowercase
+          in org.opendds.modeling.model.
 
 Fri Jun 18 15:01:24 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
