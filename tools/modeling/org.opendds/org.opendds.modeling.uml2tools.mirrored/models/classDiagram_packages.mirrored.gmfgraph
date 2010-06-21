@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="ASCII"?>
+<gmfgraph:Canvas xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gmfgraph="http://www.eclipse.org/gmf/2006/GraphicalDefinition">
+  <figures name="" implementationBundle="org.opendds.modeling.uml2tools.mirrored">
+    <descriptors name="PackageFigure">
+      <actualFigure xsi:type="gmfgraph:CustomFigure" qualifiedClassName="org.opendds.modeling.uml2tools.mirrored.PackageFigure">
+        <customChildren accessor="getFigurePackageFigure_name">
+          <typedFigure xsi:type="gmfgraph:Label"/>
+        </customChildren>
+        <customChildren accessor="getFigurePackageFigure_PackagesCompartment">
+          <typedFigure xsi:type="gmfgraph:Rectangle"/>
+        </customChildren>
+        <customChildren accessor="getFigurePackageFigure_ClassesCompartment">
+          <typedFigure xsi:type="gmfgraph:Rectangle"/>
+        </customChildren>
+        <customChildren accessor="getFigurePackageFigure_OthersCompartment">
+          <typedFigure xsi:type="gmfgraph:Rectangle"/>
+        </customChildren>
+      </actualFigure>
+      <accessors figure="//@figures.0/@descriptors.0/@actualFigure/@customChildren.0/@typedFigure"/>
+      <accessors figure="//@figures.0/@descriptors.0/@actualFigure/@customChildren.1/@typedFigure"/>
+      <accessors figure="//@figures.0/@descriptors.0/@actualFigure/@customChildren.2/@typedFigure"/>
+      <accessors figure="//@figures.0/@descriptors.0/@actualFigure/@customChildren.3/@typedFigure"/>
+    </descriptors>
+    <descriptors name="SecondaryPackageFigure">
+      <actualFigure xsi:type="gmfgraph:CustomFigure" qualifiedClassName="org.opendds.modeling.uml2tools.mirrored.SecondaryPackageFigure">
+        <customChildren accessor="getFigureSecondaryPackage_PackageLabel">
+          <typedFigure xsi:type="gmfgraph:Label"/>
+        </customChildren>
+        <customChildren accessor="getFigureSecondaryPackage_NameLabel">
+          <typedFigure xsi:type="gmfgraph:Label"/>
+        </customChildren>
+        <customChildren accessor="getFigureSecondaryPackage_Imports">
+          <typedFigure xsi:type="gmfgraph:Rectangle"/>
+        </customChildren>
+      </actualFigure>
+      <accessors figure="//@figures.0/@descriptors.1/@actualFigure/@customChildren.0/@typedFigure"/>
+      <accessors figure="//@figures.0/@descriptors.1/@actualFigure/@customChildren.1/@typedFigure"/>
+      <accessors accessor="getFigureSecondaryPackage_Imports" figure="//@figures.0/@descriptors.1/@actualFigure/@customChildren.2/@typedFigure"/>
+    </descriptors>
+  </figures>
+  <nodes name="PackageNode" figure="PackageFigure">
+    <facets xsi:type="gmfgraph:DefaultSizeFacet">
+      <defaultSize dx="100" dy="80"/>
+    </facets>
+  </nodes>
+  <compartments name="packages" figure="PackageFigure" collapsible="true" needsTitle="true" accessor="//@figures.0/@descriptors.0/@accessors.1"/>
+  <compartments name="classifiers" figure="PackageFigure" collapsible="true" needsTitle="true" accessor="//@figures.0/@descriptors.0/@accessors.2"/>
+  <compartments name="other" figure="PackageFigure" collapsible="true" needsTitle="true" accessor="//@figures.0/@descriptors.0/@accessors.3"/>
+  <compartments name="imports" figure="SecondaryPackageFigure" collapsible="true" accessor="//@figures.0/@descriptors.1/@accessors.2"/>
+  <labels name="PackageNode_name" figure="PackageFigure" accessor="//@figures.0/@descriptors.0/@accessors.0"/>
+</gmfgraph:Canvas>

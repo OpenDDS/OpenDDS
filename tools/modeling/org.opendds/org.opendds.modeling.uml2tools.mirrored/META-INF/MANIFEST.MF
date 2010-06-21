@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.opendds.modeling.uml2tools.mirrored; singleton:=true
+Bundle-Version: 1.0.0.dev100621
+Bundle-Vendor: %providerName
+Bundle-Activator: org.opendds.modeling.uml2tools.mirrored.activator.PluginActivator
+Bundle-Localization: plugin
+Export-Package: org.opendds.modeling.uml2tools.mirrored.activator,
+ org.opendds.modeling.uml2tools.mirrored
+Require-Bundle: org.eclipse.gmf.runtime.draw2d.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.uml2.diagram.common,
+ org.eclipse.draw2d
+Eclipse-LazyStart: true
