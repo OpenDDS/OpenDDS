@@ -12,7 +12,7 @@ project(*idl): dcps {
 
 project(*Publisher) : dcpsexe_with_tcp {
   exename = publisher
-  after  += DDS*idl
+  after  += *idl
 
   TypeSupport_Files {
     Messenger.idl

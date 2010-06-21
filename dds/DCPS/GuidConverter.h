@@ -96,9 +96,6 @@ protected:
   const GUID_t guid_;
 };
 
-} // namespace
-} // namespace
-
 OpenDDS_Dcps_Export std::ostream&
 operator<<(std::ostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 
@@ -106,5 +103,8 @@ operator<<(std::ostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 OpenDDS_Dcps_Export std::wostream&
 operator<<(std::wostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 #endif
+
+} // namespace
+} // namespace
 
 #endif /* DCPS_GUIDCONVERTER_H */

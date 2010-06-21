@@ -30,7 +30,7 @@ operator<<(ACE_Message_Block& buffer, OpenDDS::DCPS::TransportHeader& value)
 {
   DBG_ENTRY_LVL("TransportHeader","operator<<",6);
 
-  TAO::DCPS::Serializer writer(&buffer, value.swap_bytes());
+  OpenDDS::DCPS::Serializer writer(&buffer, value.swap_bytes());
 
   writer.write_octet_array(value.protocol_, sizeof(value.protocol_));
 
@@ -49,7 +49,7 @@ operator<<(ACE_Message_Block*& buffer, OpenDDS::DCPS::TransportHeader& value)
 {
   DBG_ENTRY_LVL("TransportHeader","operator<<",6);
 
-  TAO::DCPS::Serializer writer(buffer, value.swap_bytes());
+  OpenDDS::DCPS::Serializer writer(buffer, value.swap_bytes());
 
   writer.write_octet_array(value.protocol_, sizeof(value.protocol_));
 

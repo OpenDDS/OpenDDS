@@ -1,4 +1,4 @@
-project: taolib, java, optional_jni_check {
+project: taolib, java, optional_jni_check, dds_macros {
 
   // make sure this can't be built as a static lib
   sharedname   = idl2jni_runtime

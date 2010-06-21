@@ -1,7 +1,7 @@
 // $Id$
 
-project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_topic_support, dds4ccm_opendds {
-  requires    += exceptions
+project: taolib, portableserver, core, dcps_bits, coverage_optional, dcps_optional_features, dds4ccm_opendds, dcps_ts_defaults, dds_macros {
+
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
   libout       = $(DDS_ROOT)/lib
@@ -15,11 +15,8 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_to
   //this as an include path.
   includes += $(DDS_ROOT)/dds
 
-  verbatim(gnuace, extension, 1) {
-    include $(DDS_ROOT)/rules.dds.GNU
-  }
-
   idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
+  dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h
 
   Source_Files {
     DCPS
@@ -28,16 +25,18 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_to
 
   Header_Files {
     DCPS
+    DCPS/transport/framework
+    DCPS/yard
   }
 
   Template_Files {
     DCPS
+    DCPS/transport/framework
   }
 
   IDL_Files {
     // DDS specification defined
-    //
-    // Do not put DdsDcpsInfrastructure.idl here -- see below
+    DdsDcpsInfrastructure.idl
     DdsDcpsDomain.idl
     DdsDcpsPublication.idl
     DdsDcpsSubscription.idl
@@ -52,19 +51,18 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, built_in_to
     DdsDcpsTypeSupportExt.idl
     DdsDcpsSubscriptionExt.idl
     DdsDcpsDomainExt.idl
-  }
-
-  IDL_Files {
-    idlflags += -Gdcpsonly
-    idlflags -= -Glem
-    gendir = .
-    CorbaSeq/*.idl
-  }
-
-  IDL_Files {
-    idlflags += -Gdcps
     DdsDcpsGuid.idl
-    DdsDcpsInfrastructure.idl
+  }
+
+  TypeSupport_Files {
+    dcps_ts_flags += -o CorbaSeq -SI -Wb,tao_include_prefix=tao/
+    gendir = CorbaSeq
+    CorbaSeq/*Seq.idl
+  }
+
+  TypeSupport_Files {
+    dcps_ts_flags += -SI
+    DdsDcpsGuid.idl
   }
 }
 

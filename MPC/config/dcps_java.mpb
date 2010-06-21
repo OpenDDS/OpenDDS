@@ -1,4 +1,4 @@
-project: dcps, idl2jni, dcps_java_bits {
+project: dcps, idl2jni, dcps_java_optional {
 
   after        += dcps_java
   libs         += OpenDDS_DCPS_Java tao_java
@@ -9,9 +9,6 @@ project: dcps, idl2jni, dcps_java_bits {
 
   javacflags   += -classpath $(DDS_ROOT)/lib/OpenDDS_DCPS.jar
 
-  Modify_Custom(TypeSupport) {
-    commandflags += --extension=$(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl
-    dependent    += $(DDS_ROOT)/java/build_scripts/JavaTypeSupportImpl.pm
-  }
+  dcps_ts_flags += -Wb,java
 
 }

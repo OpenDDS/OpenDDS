@@ -1,0 +1,4 @@
+project: dcps {
+  requires += content_subscription
+  exename = FilterExpressionTest
+}

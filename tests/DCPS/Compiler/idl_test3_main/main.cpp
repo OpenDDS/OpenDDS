@@ -1,4 +1,4 @@
-#include "../idl_test3_lib/FooDefC.h"
+#include "../idl_test3_lib/FooDefTypeSupportImpl.h"
 #include "ace/ACE.h"
 #include "ace/Log_Msg.h"
 #include <map>
@@ -16,25 +16,25 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
                    size_t expected_cs, 
                    const char* name)
 {
-  CORBA::Boolean bounded = _tao_is_bounded_size(in_foo);
-  size_t ms = _dcps_max_marshaled_size(in_foo);
-  size_t cs = _dcps_find_size(in_foo);
+  CORBA::Boolean bounded = OpenDDS::DCPS::gen_is_bounded_size(in_foo);
+  size_t ms = OpenDDS::DCPS::gen_max_marshaled_size(in_foo);
+  size_t cs = OpenDDS::DCPS::gen_find_size(in_foo);
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%C: _tao_is_bounded_size(foo) => %d\n"), 
+    ACE_TEXT("%C: OpenDDS::DCPS::gen_is_bounded_size(foo) => %d\n"), 
     name, bounded));
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("%C: _max_marshaled_size(my_foo) => %d\n"), 
     name, ms));
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%C: _dcps_find_size(my_foo) => %d\n"), 
+    ACE_TEXT("%C: OpenDDS::DCPS::gen_find_size(my_foo) => %d\n"), 
     name, cs));
 
   // NOTE:_max_marshaled_size is not always > for unbounded.
   if (bounded && ms < cs)
     {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("%C: _dcps_max_marshaled_size(foo) %d < _dcps_find_size(foo) %d\n"),
+        ACE_TEXT("%C: OpenDDS::DCPS::gen_max_marshaled_size(foo) %d < OpenDDS::DCPS::gen_find_size(foo) %d\n"),
         name, ms, cs));
       failed = true;
       return false;
@@ -43,7 +43,7 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
   if (expected_cs != DONT_CHECK_CS && cs != expected_cs)
     {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("%C: _dcps_find_size(foo) got %d but expected %d\n"),
+        ACE_TEXT("%C: OpenDDS::DCPS::gen_find_size(foo) got %d but expected %d\n"),
         name, cs, expected_cs ));
       failed = true;
       return false;
@@ -52,13 +52,13 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
   if (expected_ms != DONT_CHECK_MS && ms != expected_ms)
     {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("%C: _dcps_max_marshaled_size(foo) got %d but expected %d\n"),
+        ACE_TEXT("%C: OpenDDS::DCPS::gen_max_marshaled_size(foo) got %d but expected %d\n"),
         name, ms, expected_ms ));
       failed = true;
       return false;
     }
 
-  // testing with _dcps_find_size is a stronger test
+  // testing with OpenDDS::DCPS::gen_find_size is a stronger test
   const size_t buff_size = cs; // bounded ? ms : cs;
   ACE_Message_Block *mb = new ACE_Message_Block(buff_size);
 
@@ -74,7 +74,7 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
   ACE_TCHAR ebuffer[51200] ; ebuffer[0] = ACE_TEXT('\0') ;
   ACE_TCHAR obuffer[51200] ; obuffer[0] = ACE_TEXT('\0') ;
 
-  TAO::DCPS::Serializer ss(mb);
+  OpenDDS::DCPS::Serializer ss(mb);
 
   if (dump_buffer) 
     {
@@ -578,9 +578,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   foo2.theString = CORBA::string_dup("four");
 
 
-  std::map<Xyz::Foo, Xyz::Foo*, FooKeyLessThan> foomap;
+  std::map<Xyz::Foo, Xyz::Foo*, Xyz::OpenDDSGenerated::Foo_KeyLessThan> foomap;
 
-  if (_dcps_has_key(my_foo))
+  if (OpenDDS::DCPS::gen_has_key(my_foo))
     {
       foomap[my_foo] = &my_foo;
       foomap[foo2] = &foo2;

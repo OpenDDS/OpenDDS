@@ -34,8 +34,10 @@ setopts(std::ostream& os)
 
 } // namespace
 
+namespace OpenDDS { namespace DCPS {
+
 std::ostream&
-operator<<(std::ostream& os, const OpenDDS::DCPS::GUID_t& rhs)
+operator<<(std::ostream& os, const GUID_t& rhs)
 {
   std::size_t len;
 
@@ -64,12 +66,12 @@ operator<<(std::ostream& os, const OpenDDS::DCPS::GUID_t& rhs)
 }
 
 std::istream&
-operator>>(std::istream& is, OpenDDS::DCPS::GUID_t& rhs)
+operator>>(std::istream& is, GUID_t& rhs)
 {
   long word;
   char discard;
 
-  OpenDDS::DCPS::GuidBuilder builder(rhs);
+  GuidBuilder builder(rhs);
 
   is >> std::hex >> word;
   builder.guidPrefix0(word);
@@ -88,3 +90,5 @@ operator>>(std::istream& is, OpenDDS::DCPS::GUID_t& rhs)
 
   return is;
 }
+
+}  }

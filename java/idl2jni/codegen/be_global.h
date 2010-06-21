@@ -76,7 +76,7 @@ public:
 
   std::ostringstream stub_header_, stub_impl_, skel_header_, skel_impl_;
   ACE_CString stub_header_name_, stub_impl_name_, skel_header_name_,
-  skel_impl_name_;
+    skel_impl_name_, tao_inc_pre_;
 
   ///print message to all open streams
   void multicast(const char *message);

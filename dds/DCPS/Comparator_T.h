@@ -16,8 +16,6 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-
 #include "ace/OS_NS_string.h"
 
 #include "RcHandle_T.h"
@@ -59,6 +57,7 @@ public:
   bool less(void* lhs_void, void* rhs_void) const {
     Sample* lhs = static_cast<Sample*>(lhs_void);
     Sample* rhs = static_cast<Sample*>(rhs_void);
+    using ::operator<; // TAO::String_Manager's operator< is in global NS
     return lhs->*mp_ < rhs->*mp_;
   }
 
@@ -67,6 +66,7 @@ public:
     Sample* rhs = static_cast<Sample*>(rhs_void);
     const Field& field_l = lhs->*mp_;
     const Field& field_r = rhs->*mp_;
+    using ::operator<; // TAO::String_Manager's operator< is in global NS
     return !(field_l < field_r) && !(field_r < field_l);
   }
 
@@ -126,7 +126,5 @@ ComparatorBase::Ptr make_struct_cmp(Field Sample::* mp,
 
 } // namespace DCPS
 } // namespace OpenDDS
-
-#endif /* OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */
 
 #endif

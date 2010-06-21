@@ -457,6 +457,8 @@ DDS::DataWriterQos* DCPS_IR_Publication::get_datawriter_qos()
   return &qos_;
 }
 
+using OpenDDS::DCPS::operator==;
+
 void
 DCPS_IR_Publication::set_qos(const DDS::DataWriterQos& qos)
 {

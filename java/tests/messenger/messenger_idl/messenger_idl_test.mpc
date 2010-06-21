@@ -2,7 +2,7 @@ project: dcps_java {
 
   idlflags     += -Wb,stub_export_include=messenger_idl_test_Export.h \
                   -Wb,stub_export_macro=messenger_idl_test_Export
-  dcps_ts_flags+= --export=messenger_idl_test_Export
+  dcps_ts_flags+= -Wb,export_macro=messenger_idl_test_Export
   idl2jniflags += -Wb,stub_export_include=messenger_idl_test_Export.h \
                   -Wb,stub_export_macro=messenger_idl_test_Export
   dynamicflags += MESSENGER_IDL_TEST_BUILD_DLL

@@ -11,6 +11,7 @@
 
 #include "RequestedDeadlineWatchdog.h"
 #include "DataReaderImpl.h"
+#include "DomainParticipantImpl.h"
 #include "Qos_Helper.h"
 
 #include "ace/Recursive_Thread_Mutex.h"
@@ -93,6 +94,10 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(void const * act, bool timer_c
         this->reader_impl_->listener_for(
           DDS::REQUESTED_DEADLINE_MISSED_STATUS);
 
+      if (instance->instance_state_.is_exclusive()) {
+        reader_impl_->owner_manager_->remove_writers (instance->instance_handle_);
+      }
+      
       if (listener != 0) {
         // Copy before releasing the lock.
         DDS::RequestedDeadlineMissedStatus const status = this->status_;

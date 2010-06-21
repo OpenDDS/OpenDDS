@@ -185,8 +185,7 @@ ReliableSession::syn_received(ACE_Message_Block* control)
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
  
-  TAO::DCPS::Serializer serializer(
-    control, header.swap_bytes());
+  Serializer serializer(control, header.swap_bytes());
 
   MulticastPeer local_peer;
   serializer >> local_peer; // sent as remote_peer
@@ -220,7 +219,7 @@ ReliableSession::send_syn()
   ACE_Message_Block* data;
   ACE_NEW(data, ACE_Message_Block(len));
 
-  TAO::DCPS::Serializer serializer(
+  Serializer serializer(
     data, this->link_->transport()->swap_bytes());
 
   serializer << this->remote_peer_;
@@ -243,8 +242,7 @@ ReliableSession::synack_received(ACE_Message_Block* control)
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
 
-  TAO::DCPS::Serializer serializer(
-    control, header.swap_bytes());
+  Serializer serializer(control, header.swap_bytes());
 
   MulticastPeer local_peer;
   serializer >> local_peer; // sent as remote_peer
@@ -285,7 +283,7 @@ ReliableSession::send_synack()
   ACE_Message_Block* data;
   ACE_NEW(data, ACE_Message_Block(len));
 
-  TAO::DCPS::Serializer serializer(
+  Serializer serializer(
     data, this->link_->transport()->swap_bytes());
 
   serializer << this->remote_peer_;
@@ -366,7 +364,7 @@ ReliableSession::nak_received(ACE_Message_Block* control)
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
-  TAO::DCPS::Serializer serializer(
+  Serializer serializer(
     control, header.swap_bytes());
 
   MulticastPeer local_peer;
@@ -439,7 +437,7 @@ ReliableSession::send_naks (DisjointSequence& missing)
   ACE_Message_Block* data;
   ACE_NEW(data, ACE_Message_Block(len));
 
-  TAO::DCPS::Serializer serializer(
+  Serializer serializer(
     data, this->link_->transport()->swap_bytes());
 
   serializer << this->remote_peer_;
@@ -470,7 +468,7 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return; 
 
-  TAO::DCPS::Serializer serializer(
+  Serializer serializer(
     control, header.swap_bytes());
 
   MulticastSequence low;
@@ -500,7 +498,7 @@ ReliableSession::send_nakack(MulticastSequence low)
   ACE_Message_Block* data;
   ACE_NEW(data, ACE_Message_Block(len));
 
-  TAO::DCPS::Serializer serializer(
+  Serializer serializer(
     data, this->link_->transport()->swap_bytes());
 
   serializer << low;

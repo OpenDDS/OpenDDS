@@ -13,6 +13,8 @@
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsDataWriterRemoteC.h"
+#include "dds/DCPS/GuidUtils.h"
+
 #include "ace/Synch.h"
 
 #include <map>

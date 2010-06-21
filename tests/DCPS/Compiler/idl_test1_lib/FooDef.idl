@@ -1,3 +1,4 @@
+#include "tao/ShortSeq.pidl"
 
 module Xyz {
 
@@ -7,6 +8,8 @@ module Xyz {
   typedef short ArrayOfShorts[5];
 
   typedef short ArrayOfShorts2[3];
+
+  typedef string MultiDimArray[2][3][4][5];
 
   typedef ArrayOfShorts2 ArrayOfArrayOfShorts2[3];
   struct StructOfArrayOfArrayOfShorts2 {
@@ -61,9 +64,9 @@ module Xyz {
   typedef sequence<MyChar, 5> AMyCharSeq;
 
   // +4+(3*12)
-  typedef sequence<AStruct,3> AStructSeq;
+  typedef sequence<AStruct,3> AStructSeqX;
 
-  typedef AStructSeq ArrayOfAStructSeq[3];
+  typedef AStructSeqX ArrayOfAStructSeq[3];
 
 #pragma DCPS_DATA_TYPE "Xyz::StructContainingArrayOfAStructSeq"
   struct StructContainingArrayOfAStructSeq {
@@ -89,7 +92,7 @@ module Xyz {
     OctetArray ooo; //+3 > 12
     UShortSeq ushrtseq; //+4+6 > 22
     AStruct thestruct; //+4+8 > 34
-    AStructSeq theStructSeq; //+4+36 > 74
+    AStructSeqX theStructSeq; //+4+36 > 74
     //string<5> theString; //+4+5 > 83
     string theString;
     ArrayOfAStruct structArray; //+36 > 119

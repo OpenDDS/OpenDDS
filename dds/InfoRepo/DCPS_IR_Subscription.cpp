@@ -479,6 +479,8 @@ const DDS::SubscriberQos* DCPS_IR_Subscription::get_subscriber_qos()
   return &subscriberQos_;
 }
 
+using OpenDDS::DCPS::operator==;
+
 void
 DCPS_IR_Subscription::set_qos(const DDS::DataReaderQos& qos)
 {

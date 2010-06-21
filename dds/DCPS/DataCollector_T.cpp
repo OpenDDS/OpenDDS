@@ -52,7 +52,7 @@ template<typename DatumType>
 unsigned int
 DataCollector<DatumType>::size() const
 {
-  if (this->onFull_ == Unbounded) return this->buffer_.size();
+  if (this->onFull_ == Unbounded) return static_cast<unsigned int>(this->buffer_.size());
 
   else if (this->full_)           return this->bound_;
 
@@ -78,7 +78,7 @@ DataCollector<DatumType>::insert(std::ostream& str) const
 
   if (end == 0) {
     // Unbounded case.
-    end = this->buffer_.size();
+    end = static_cast<int>(this->buffer_.size());
   }
 
   // Newest data last.

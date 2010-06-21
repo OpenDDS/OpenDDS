@@ -261,6 +261,8 @@ BE_GlobalData::prep_be_arg(char *arg)
   static const char WB_STUB_EXTRA_INCLUDE[] = "stub_extra_include=";
   static const size_t SZ_WB_STUB_EXTRA_INCLUDE =
     sizeof(WB_STUB_EXTRA_INCLUDE) - 1;
+  static const char WB_TAO_INC_PRE[] = "tao_include_prefix=";
+  static const size_t SZ_WB_TAO_INC_PRE = sizeof(WB_TAO_INC_PRE) - 1;
 
   if (0 == ACE_OS::strncasecmp(arg, WB_STUB_EXPORT_MACRO,
                                SZ_WB_STUB_EXPORT_MACRO)) {
@@ -285,6 +287,9 @@ BE_GlobalData::prep_be_arg(char *arg)
   } else if (0 == ACE_OS::strncasecmp(arg, WB_STUB_EXTRA_INCLUDE,
                                       SZ_WB_STUB_EXTRA_INCLUDE)) {
     this->add_include(arg + SZ_WB_STUB_EXTRA_INCLUDE, STUB_CPP);
+
+  } else if (0 == ACE_OS::strncasecmp(arg, WB_TAO_INC_PRE, SZ_WB_TAO_INC_PRE)) {
+    this->tao_inc_pre_ = arg + SZ_WB_TAO_INC_PRE;
   }
 }
 
