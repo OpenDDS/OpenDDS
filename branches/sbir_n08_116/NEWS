@@ -1,3 +1,9 @@
+Version 2.2 of OpenDDS.
+
+
+
+========================================================================
+
 Version 2.1.3 of OpenDDS.
 
 - Various fixes for memory management issue on transport framework.
@@ -16,12 +22,13 @@ Version 2.1.3 of OpenDDS.
   well as additional execution and plotting scripts.  The user guide at
   performance-tests/Bench/doc/user_guide.html contains the details.
 
-- Masked interupts in threads created by OpenDDS to avoid failures 
+- Masked interrupts in threads created by OpenDDS to avoid failures 
   while in system calls.
   Example: ERROR: ACE::handle_write_ready return -1 while waiting
                   to unclog. handle_write_ready: Interrupted system call
 
 - Added support to set the TTL for multicast transports.
+
 
 ========================================================================
 
