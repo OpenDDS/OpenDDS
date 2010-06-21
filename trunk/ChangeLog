@@ -1,3 +1,10 @@
+Mon Jun 21 20:11:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Fixed some GCC warnings.
+
 Mon Jun 21 19:45:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/WaitForAck/WaitForAck.mpc:
