@@ -576,7 +576,13 @@ Error: #f88
 {{imgcenter{[img[images/Domain.png]]}}}
 </pre>
 </div>
-<div title="EMF Models" modifier="Byron" created="201006151906" modified="201006211211" tags="publish" changecount="38">
+<div title="EMF Issues" modifier="Byron" created="201006211355" tags="publish issues" changecount="1">
+<pre>! GMF and Package Names
+
+There is a defect in GMF, [[Code generation problems with upper case letters in metamodel package | https://bugs.eclipse.org/bugs/show_bug.cgi?id=205066]], that causes GMF to emit a Java import of a package instead of a class (eclipse will report a &quot;Only a type can be imported&quot; error). To work around this the top-level package in the org.opendds.modeling.model Ecore files have all lowercase characters in their name. Note that this results in packages names that differ by case from what is in the DDS Profile specification (e.g. &quot;dcps&quot; instead of &quot;DCPS&quot;).
+</pre>
+</div>
+<div title="EMF Models" modifier="Byron" created="201006151906" modified="201006211421" tags="publish" changecount="43">
 <pre>The OpenDDS Modeling SDK is based on the OMG &quot;UML Profile for Data Distribution Specification&quot; ([[ptc/08-07-02|http://www.omg.org/spec/UML4DDS/1.0/Beta1/PDF/]]).  This specification contains metamodel definitions and a UML Profile.  The SDK defines the metamodel as Eclipse ecore models.  It then loads the metamodel resources into another ecore model and defines the stereotypes of the profile.  This is used to create a model with an EMF editor, which can be used to provide a tree based view and editing, that can then be mapped onto a Graphical Modeling Framework (GMF) model for graphical model capture.
 
 The Eclipse Modeling Framework (EMF) will take the captured ecore models defining the metamodel and profile and create edit support and a tree based EMF editor for the profile.  The model can also be mapped into the GMF models for graphical capture and the EMF and GMF editors coordinated to show the different views of the same underlying model.  The EMF Eclipse plug-in packages implementing this include:
@@ -606,11 +612,7 @@ The individual metamodels are broken into separate packages by the specification
 |[[DCPSProfile]] | 7.2 |~OpenDDS.ecore |
 }}}
 
-!! Issues
-
-!!! GMF and Package Names
-
-There is a defect in GMF, [[Code generation problems with upper case letters in metamodel package | https://bugs.eclipse.org/bugs/show_bug.cgi?id=205066]], that causes GMF to emit a Java import of a package instead of a class (eclipse will report a &quot;Only a type can be imported&quot; error). To work around this the top-level package in the org.opendds.modeling.model Ecore files have all lowercase characters in their name. Note that this results in packages names that differ by case from what is in the DDS Profile specification (e.g. &quot;dcps&quot; instead of &quot;DCPS&quot;).
+Issues related to usage can be found in [[EMF Issues]].
 </pre>
 </div>
 <div title="EnumerationsPackage" modifier="MikeMartinez" created="201006152309" tags="publish" changecount="1">
@@ -637,11 +639,23 @@ If you wish to publish the contents of this document as static HTML web pages, t
 * [[StyleSheet]]: modify the reference to the logo file in the //.publishLogo// class to be in a correct relative directory path
 * use the ''publish'' selection on the right sidebar to publish all tiddlers with the ''publish'' tag to individual HTML files.  They will all be located in the //./publish// directory</pre>
 </div>
-<div title="MainMenu" modifier="MikeMartinez" created="201006151614" changecount="1">
+<div title="Issues" modifier="Byron" created="201006211350" tags="publish issues" changecount="1">
+<pre>Here's are some issues.
+*[[EMF Issues]]
+*[[GMF Issues]]
+*[[Deployment Issues]]
+*[[Dependency Issues]]
+*[[Plug-in Issues]]
+
+</pre>
+</div>
+<div title="MainMenu" modifier="Byron" created="201006151614" modified="201006211347" changecount="2">
 <pre>[[Plug-in Architecture]]
 [[EMF Models]]
 [[GMF Models]]
-[[Code Generation]]</pre>
+[[Code Generation]]
+[[Issues]]
+</pre>
 </div>
 <div title="OpenDDS" modifier="OpenDDS" created="200911302157" tags="OpenDDS" changecount="1">
 <pre>OpenDDS is an open source C++ implementation of the Object Management Group (OMG) Data Distribution Service (DDS). OpenDDS also supports Java bindings through JNI and can be included with JBoss (ESB) frameworks by means of a JMS wrapper. OpenDDS leverages the ADAPTIVE Communication Environment (ACE) to provide a cross platform environment.
