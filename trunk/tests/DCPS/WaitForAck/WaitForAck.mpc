@@ -1,4 +1,4 @@
-project(wfa*idl): dcps {
+project(*idl): dcps {
   // This project ensures the common components get built first.
 
   TypeSupport_Files {
@@ -9,9 +9,9 @@ project(wfa*idl): dcps {
 }
 
 
-project(wfa*Publisher) : dcpsexe, dcps_tcp {
+project(*Publisher) : dcpsexe, dcps_tcp {
   exename = publisher
-  after  += perf*idl
+  after  += *idl
 
   TypeSupport_Files {
     Test.idl
@@ -25,9 +25,9 @@ project(wfa*Publisher) : dcpsexe, dcps_tcp {
   }
 }
 
-project(wfa*Subscriber) : dcpsexe, dcps_tcp {
+project(*Subscriber) : dcpsexe, dcps_tcp {
   exename = subscriber
-  after  += perf*idl
+  after  += *idl
 
   TypeSupport_Files {
     Test.idl
