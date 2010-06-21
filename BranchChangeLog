@@ -1,3 +1,10 @@
+Mon Jun 21 14:25:05 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * [3369] 2010-06-21 14:27:06 harrisb
+        * tools/modeling/docs/design_notes/index.html:
+
+          Refactored so that issues will be in their own section.
+
 Mon Jun 21 12:15:00 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * [3366] 2010-06-21 12:18:21 harrisb
