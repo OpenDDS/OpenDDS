@@ -1,3 +1,30 @@
+Mon Jun 21 18:09:13 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * [3376] 2010-06-21 19:04:59 harrisb
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/.classpath:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/.project:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/META-INF:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/META-INF/MANIFEST.MF:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/build.properties:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/models:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/models/classDiagram_packages.mirrored.gmfgraph:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/plugin.properties:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools/mirrored:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools/mirrored/PackageFigure.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools/mirrored/SecondaryPackageFigure.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools/mirrored/activator:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools/mirrored/activator/PluginActivator.java:
+
+          The UML2 Tools mirrored graphic model and generated code
+          plug-in. This plug-in is generated from the UML2 Tools GMF graphical
+          definition so that the UML2 Tools graphics can be reused.
+
 Mon Jun 21 14:59:42 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * [3371] 2010-06-21 15:02:00 harrisb
