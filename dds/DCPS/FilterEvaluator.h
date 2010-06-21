@@ -106,8 +106,9 @@ struct OpenDDS_Dcps_Export Value {
   bool conversion_preferred_;
 };
 
-class MetaStruct {
+class OpenDDS_Dcps_Export MetaStruct {
 public:
+  virtual ~MetaStruct();
   virtual Value getValue(const void* stru, const char* fieldSpec) const = 0;
   virtual ComparatorBase::Ptr create_qc_comparator(const char* fieldSpec,
     ComparatorBase::Ptr next) const = 0;

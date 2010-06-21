@@ -723,6 +723,10 @@ Value::conversion(Value& lhs, Value& rhs)
   }
 }
 
+MetaStruct::~MetaStruct()
+{
+}
+
 }
 }
 
