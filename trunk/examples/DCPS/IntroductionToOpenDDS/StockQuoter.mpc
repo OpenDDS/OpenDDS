@@ -8,7 +8,7 @@ project(*Common) : dcps {
   idlflags      += -I$(TAO_ROOT)/orbsvcs \
                    -Wb,export_macro=StockQuoterCommon_Export \
                    -Wb,export_include=StockQuoterCommon_Export.h
-  dcps_ts_flags += --export=StockQuoterCommon_Export
+  dcps_ts_flags += -Wb,export_macro=StockQuoterCommon_Export
 
   TypeSupport_Files {
     StockQuoter.idl
@@ -39,6 +39,9 @@ project(*Publisher) : dcpsexe, svc_utils {
   IDL_Files {
   }
 
+  TypeSupport_Files {
+  }
+
   Header_Files {
   }
 
@@ -64,6 +67,9 @@ project(*Subscriber) : dcpsexe {
 
   includes += $(TAO_ROOT)/orbsvcs
   libs     += StockQuoterCommon
+
+  TypeSupport_Files {
+  }
 
   IDL_Files {
   }

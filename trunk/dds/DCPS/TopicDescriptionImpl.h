@@ -13,6 +13,7 @@
 #include "dds/DdsDcpsTopicS.h"
 #include "dds/DdsDcpsTypeSupportExtS.h"
 #include "ace/SString.h"
+#include "ace/Atomic_Op.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -60,6 +61,21 @@ public:
   */
   OpenDDS::DCPS::TypeSupport_ptr get_type_support();
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
+  /// only used for ContentFilteredTopic and MultiTopic
+  bool has_reader() const {
+    return reader_count_ > 0;
+  }
+
+  /// only used for ContentFilteredTopic and MultiTopic
+  void update_reader_count(bool increment) {
+    if (increment) ++reader_count_;
+    else --reader_count_;
+  }
+
+#endif
+
 protected:
   /// The name of the topic.
   ACE_CString                    topic_name_;
@@ -71,6 +87,10 @@ protected:
 
   /// The type_support for this topic.
   OpenDDS::DCPS::TypeSupport_ptr type_support_;
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> reader_count_;
+#endif
 };
 
 } // namespace DCPS

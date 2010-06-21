@@ -26,6 +26,11 @@
 #include "Cached_Allocator_With_Overflow_T.h"
 #include "ZeroCopyInfoSeq_T.h"
 #include "Stats_T.h"
+#include "OwnershipManager.h"
+#include "ContentFilteredTopicImpl.h"
+#include "GroupRakeData.h"
+#include "CoherentChangeControl.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -50,9 +55,17 @@ class SubscriptionInstance;
 class TopicImpl;
 class RequestedDeadlineWatchdog;
 class Monitor;
+class DataReaderImpl;
+class FilterEvaluator;
 
 typedef Cached_Allocator_With_Overflow<OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
 ReceivedDataAllocator;
+
+enum Coherent_State {
+  NOT_COMPLETED_YET,
+  COMPLETED,
+  REJECTED
+};
 
 /// Keeps track of a DataWriter's liveliness for a DataReader.
 class OpenDDS_Dcps_Export WriterInfo {
@@ -64,7 +77,8 @@ public:
   WriterInfo();  // needed for maps
 
   WriterInfo(DataReaderImpl* reader,
-             PublicationId   writer_id);
+             const PublicationId&  writer_id,
+             const ::DDS::DataWriterQos&  writer_qos);
 
   /// check to see if this writer is alive (called by handle_timeout).
   /// @param now next time this DataWriter will become not active (not alive)
@@ -102,8 +116,13 @@ public:
 
   /// Return the most recently observed contiguous sequence number.
   SequenceNumber ack_sequence() const;
+  
+  Coherent_State coherent_change_received ();
+  void reset_coherent_info ();
+  void set_group_info (const CoherentChangeControl& info);
 
 private:
+                                             
   /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
   ACE_Time_Value last_liveliness_activity_time_;
 
@@ -124,11 +143,25 @@ private:
   /// DCPSInfoRepo ID of the DataWriter
   PublicationId writer_id_;
 
+  /// Writer qos
+  ::DDS::DataWriterQos writer_qos_;
+  
   /// The publication entity instance handle.
-  DDS::InstanceHandle_t handle_;
+  ::DDS::InstanceHandle_t handle_;
 
   /// Number of received coherent changes in active change set.
   ACE_Atomic_Op<ACE_Thread_Mutex, ACE_UINT32> coherent_samples_;
+
+  /// Is this writer evaluated for owner ?
+  bool owner_evaluated_;
+  
+  /// Data to support GROUP access scope.
+  bool group_coherent_;
+  RepoId publisher_id_;
+  DisjointSequence coherent_sample_sequence_;   
+  WriterCoherentSample  writer_coherent_samples_;
+  GroupCoherentSamples  group_coherent_samples_;
+ 
 };
 
 /// Elements stored for managing statistical data.
@@ -156,6 +189,7 @@ private:
   Stats<double> stats_;
 };
 
+
 /**
 * @class DataReaderImpl
 *
@@ -174,7 +208,8 @@ class OpenDDS_Dcps_Export DataReaderImpl
     public virtual TransportReceiveListener,
     public virtual ACE_Event_Handler {
 public:
-
+  friend class RequestedDeadlineWatchdog;
+  
   typedef std::map<DDS::InstanceHandle_t, SubscriptionInstance*> SubscriptionInstanceMapType;
 
   /// Type of collection of statistics for writers to this reader.
@@ -389,6 +424,14 @@ public:
                        DDS::ViewStateMask view_states,
                        DDS::InstanceStateMask instance_states);
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  virtual bool contains_sample_filtered(DDS::SampleStateMask sample_states,
+                                        DDS::ViewStateMask view_states,
+                                        DDS::InstanceStateMask instance_states,
+                                        const FilterEvaluator& evaluator,
+                                        const DDS::StringSeq& params) = 0;
+#endif
+
   virtual void dds_demarshal(const ReceivedDataSample& sample,
                              SubscriptionInstance*& instance,
                              bool & is_new_instance,
@@ -458,6 +501,36 @@ public:
   typedef std::pair<PublicationId, WriterInfo::WriterState> WriterStatePair;
   typedef std::vector<WriterStatePair> WriterStatePairVec;
   void get_writer_states(WriterStatePairVec& writer_states);
+  
+  void update_ownership_strength (const PublicationId& pub_id,
+                                  const CORBA::Long& ownership_strength);
+
+  virtual void delete_instance_map (void* map) = 0;
+  virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                               OpenDDS::DCPS::SubscriptionInstance*& instance) = 0;
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  void enable_filtering(ContentFilteredTopicImpl* cft);
+#endif
+
+  void begin_access();
+  void end_access();
+  void get_ordered_data(GroupRakeData& data,
+                        DDS::SampleStateMask sample_states,
+                        DDS::ViewStateMask view_states,
+                        DDS::InstanceStateMask instance_states);
+
+  void accept_coherent (PublicationId& writer_id, 
+                        RepoId& publisher_id);
+  void reject_coherent (PublicationId& writer_id, 
+                        RepoId& publisher_id);
+  void coherent_change_received (RepoId publisher_id, Coherent_State& result);
+  
+  void coherent_changes_completed (DataReaderImpl* reader);
+  
+  void reset_coherent_info (const PublicationId& writer_id, 
+                            const RepoId& publisher_id);
+
 
 protected:
 
@@ -503,7 +576,8 @@ protected:
    *       QoS policy or DataReader's TIME_BASED_FILTER QoS policy.
    */
   bool filter_sample(const DataSampleHeader& header);
-  bool filter_instance(SubscriptionInstance* instance);
+  bool filter_instance(SubscriptionInstance* instance, 
+                       const PublicationId& pubid);
 
   ReceivedDataAllocator        *rd_allocator_;
   DDS::DataReaderQos           qos_;
@@ -517,6 +591,25 @@ protected:
 
   typedef ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> Reverse_Lock_t;
   Reverse_Lock_t reverse_sample_lock_;
+  
+  DomainParticipantImpl*       participant_servant_;
+  TopicImpl*                   topic_servant_;
+
+  bool is_exclusive_ownership_;
+  OwnershipManager* owner_manager_;  
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  DDS::ContentFilteredTopic_var content_filtered_topic_;
+#endif
+
+  
+  /// Is accessing to Group coherent changes ? 
+  bool coherent_;
+  /// Is Group ordered qos ?
+  bool group_coherent_ordered_;
+  /// Ordered group samples.
+  GroupRakeData group_coherent_ordered_data_;
+
 
 private:
   /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
@@ -534,17 +627,18 @@ private:
   bool lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
+  bool verify_coherent_changes_completion (WriterInfo* writer); 
+  bool coherent_change_received (WriterInfo* writer);
+
   friend class WriterInfo;
   friend class InstanceState;
 
   friend class ::DDS_TEST; //allows tests to get at dr_remote_objref_
 
-  TopicImpl*                   topic_servant_;
   DDS::TopicDescription_var    topic_desc_;
   DDS::StatusMask              listener_mask_;
   DDS::DataReaderListener_var  listener_;
   DDS::DataReaderListener*     fast_listener_;
-  DomainParticipantImpl*       participant_servant_;
   DDS::DomainId_t              domain_id_;
   SubscriberImpl*              subscriber_servant_;
   DataReaderRemote_var         dr_remote_objref_;

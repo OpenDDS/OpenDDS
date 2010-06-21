@@ -251,6 +251,7 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
   // invalid if offered kind is less than requested kind OR
   //         if offered liveliness duration greater than requested
   //         liveliness duration
+  using OpenDDS::DCPS::operator>;
   if (writerQos->liveliness.kind < readerQos->liveliness.kind
       || writerQos->liveliness.lease_duration
       > readerQos->liveliness.lease_duration) {
@@ -276,6 +277,7 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
 
   // Check the LATENCY_BUDGET
   //   The reader's duration must be greater than or equal to the writer's
+  using OpenDDS::DCPS::operator<;
   if (readerQos->latency_budget.duration < writerQos->latency_budget.duration) {
     compatible = false;
 
@@ -285,8 +287,21 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
                                     DDS::LATENCYBUDGET_QOS_POLICY_ID);
   }
 
+  // The value of the OWNERSHIP kind offered must exactly match the one 
+  // requested or else they are considered incompatible.
+  if (writerQos->ownership.kind != readerQos->ownership.kind) {
+    compatible = false;
+
+    increment_incompatibility_count(writerStatus,
+                                    DDS::OWNERSHIP_QOS_POLICY_ID);
+    increment_incompatibility_count(readerStatus,
+                                    DDS::OWNERSHIP_QOS_POLICY_ID);
+  }
+  
   return compatible;
 }
+
+using OpenDDS::DCPS::operator==;
 
 bool should_check_compatibility_upon_change(const DDS::DataReaderQos & qos1,
                                             const DDS::DataReaderQos & qos2)

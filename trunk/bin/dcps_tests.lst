@@ -171,7 +171,11 @@ tests/DCPS/StringKey/run_test.pl: !DCPS_MIN
 tests/DCPS/GuardCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/StatusCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/ReadCondition/run_test.pl: !DCPS_MIN
-tests/DCPS/QueryCondition/run_test.pl: !DCPS_MIN
+
+tests/DCPS/FilterExpression/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
+tests/DCPS/QueryCondition/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
+tests/DCPS/ContentFilteredTopic/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
+
 tests/DCPS/Federation/run_test.pl: !DCPS_MIN
 tests/DCPS/FileSystemStorage/run_test.pl: !DCPS_MIN
 tests/DCPS/Priority/run_test.pl: !DCPS_MIN !QNX
@@ -191,5 +195,8 @@ tests/DCPS/Serializer_wstring/run_test.pl: !DCPS_MIN
 tests/DCPS/SharedTransport/run_test.pl: !DCPS_MIN
 tests/DCPS/SharedTransport/run_test.pl udp: !DCPS_MIN
 tests/DCPS/SharedTransport/run_test.pl multicast: !DCPS_MIN
-
-
+tests/DCPS/Ownership/run_test.pl: !DCPS_MIN
+tests/DCPS/Ownership/run_test.pl update_strength: !DCPS_MIN
+tests/DCPS/Ownership/run_test.pl liveliness_change: !DCPS_MIN
+tests/DCPS/Ownership/run_test.pl miss_deadline: !DCPS_MIN
+tests/DCPS/GroupPresentation/run_test.pl: !DCPS_MIN

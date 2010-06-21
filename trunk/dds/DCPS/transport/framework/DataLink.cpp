@@ -20,6 +20,7 @@
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
 #include "EntryExit.h"
 #include "tao/ORB_Core.h"
@@ -671,7 +672,7 @@ void
 OpenDDS::DCPS::DataLink::ack_received(ReceivedDataSample& sample)
 {
   RepoId publication = GUID_UNKNOWN;
-  TAO::DCPS::Serializer serializer(
+  Serializer serializer(
     sample.sample_,
     sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
   serializer >> publication;

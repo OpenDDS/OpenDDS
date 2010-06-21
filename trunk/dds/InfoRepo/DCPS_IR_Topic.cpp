@@ -290,6 +290,7 @@ bool DCPS_IR_Topic::set_topic_qos(const DDS::TopicQos& qos)
   // TopicQos changes since only datareader and datawriter QoS
   // are evaludated during normal associations establishment.
 
+  using OpenDDS::DCPS::operator==;
   bool pub_to_rd_wr = !(qos.topic_data == qos_.topic_data);
 
   qos_ = qos;

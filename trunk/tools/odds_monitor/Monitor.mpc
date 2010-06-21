@@ -2,6 +2,7 @@
 project(*App) : dcpsexe_with_tcp, dcps_monitor, qt4_gui {
   exename = odds_monitor
   exeout  = $(DDS_ROOT)/bin
+  requires += built_in_topics
 
   MOC_Files {
     MonitorDataModel.h

@@ -135,7 +135,8 @@ template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 CORBA::ULong
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::max_slots() const
 {
-  return is_zero_copy() ? ptrs_.max_size() : sc_maximum_;
+  return is_zero_copy() ? static_cast<CORBA::ULong>(ptrs_.max_size())
+    : sc_maximum_;
 }
 
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE
@@ -190,9 +191,9 @@ template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 void
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::make_single_copy(CORBA::ULong maximum)
 {
-  CORBA::ULong currentSize(ptrs_.size());
+  CORBA::ULong currentSize(static_cast<CORBA::ULong>(ptrs_.size()));
   ZeroCopyDataSeq<Sample_T, DEF_MAX> sc((std::max)(maximum, currentSize));
-  sc.length(ptrs_.size());
+  sc.length(currentSize);
 
   for (CORBA::ULong i(0); i < ptrs_.size(); ++i) {
     sc[i] = (*this)[i];
@@ -244,7 +245,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::internal_set_length(CORBA::ULong len)
 
   } else if (len > ptrs_.size()) {
     //We need the vector to grow efficiently (not reallocate on each call)...
-    ptrs_.resize(std::max(len, CORBA::ULong(ptrs_.size()) * 2), 0);
+    ptrs_.resize((std::max)(len, CORBA::ULong(ptrs_.size()) * 2), 0);
     //...but maintain the invariant that the size of ptrs_ is our length
     ptrs_.resize(len, 0);
   }

@@ -1,3 +1,24 @@
+Mon Jun 21 17:47:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged the branch "sbir_n08_116", which includes changes for spec
+          compliance.  See docs/history/ChangeLog-sbir_n08_116 for details.
+          Major features added are:
+
+          - Content-Subscription Profile: implemented ContentFilteredTopic and
+            the remaining functionality for QueryCondition
+          - QoS: OWNERSHIP; PRESENTATION (access_scope = GROUP)
+
+          The Content-Subscription Profile implementation required a change to
+          OpenDDS's strategy for code-generation.  OpenDDS-specific code has
+          been moved out of tao_idl's back-end library (enabled with -Gdcps)
+          and into a code generator here in the OpenDDS repository, called
+          opendds_idl (in dds/idl).  Existing applications that use MPC should
+          only need to change one of the arguments which may appear in
+          dcps_ts_flags: '--export=' has become '-Wb,export_macro='.
+          Also, note that for footprint-sensitive applications, the content-
+          subscription profile can be disabled at compile-time by setting the
+          MPC feature content_subscription=0.
+
 Fri Jun 18 22:42:30 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/AssociationData.h:
@@ -20,30 +41,30 @@ Fri Jun 18 22:42:30 UTC 2010  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
         * dds/DCPS/transport/udp/UdpDataLink.cpp:
         * dds/DCPS/transport/udp/UdpTransport.cpp:
-        
+
           Supported same transport pub-sub associations (see RT13902).
           - Added is_loopback and is_active flag to Datalink to help identify
-            the active(pub) end or passive(sub) end. 
+            the active(pub) end or passive(sub) end.
           - For SimpleTCP, the links to same remote are seperated for active
             and passive side.
-          - UDP was not changed as it's already seperated with the active 
+          - UDP was not changed as it's already seperated with the active
             and passive links.
           - Multicast transport creates two links (one link is for pubs and
             one is for subs) instead of single link per transport. As before,
             each link could have multiple sessions.
 
         * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.cpp:
-        
+
           Accommodated for function prototype changes.
-          
+
         * tests/DCPS/SharedTransport/TestCase.cpp:
-        
+
           Turned on message logging for verify.
-          
+
         * tests/DCPS/SharedTransport/run_test.pl:
-        
+
           Added TestFramework lib to libpath.
-          
+
         * bin/dcps_tests.lst:
 
           Added SharedTransport tests.

@@ -43,8 +43,8 @@ typedef std::set<DCPS_IR_Topic_Description*> DCPS_IR_Topic_Description_Set;
 class DCPS_IR_Participant;
 typedef ACE_Unbounded_Set<DCPS_IR_Participant*> DCPS_IR_Participant_Set;
 
-typedef std::map<OpenDDS::DCPS::RepoId, DCPS_IR_Participant*, GUID_tKeyLessThan>
-DCPS_IR_Participant_Map;
+typedef std::map<OpenDDS::DCPS::RepoId, DCPS_IR_Participant*,
+  OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Participant_Map;
 
 class DCPS_IR_Topic;
 class DCPS_IR_Subscription;
@@ -201,7 +201,8 @@ private:
   DCPS_IR_Topic_Description_Set topicDescriptions_;
 
   /// Mapping from RepoId values to Topic object references.
-  typedef std::map<OpenDDS::DCPS::RepoId, DCPS_IR_Topic*, GUID_tKeyLessThan> IdToTopicMap;
+  typedef std::map<OpenDDS::DCPS::RepoId, DCPS_IR_Topic*,
+    OpenDDS::DCPS::GUID_tKeyLessThan> IdToTopicMap;
 
   /// Actual mapping of Id values to Topic object references.
   IdToTopicMap idToTopicMap_;

@@ -7,17 +7,18 @@
  * See: http://www.opendds.org/license.html
  */
 
+
+namespace OpenDDS {
+namespace DCPS {
+
 template<typename DatumType>
 ACE_INLINE
 std::ostream& operator<<(
   std::ostream& str,
-  const OpenDDS::DCPS::DataCollector<DatumType>& value)
+  const DataCollector<DatumType>& value)
 {
   return value.insert(str);
 }
-
-namespace OpenDDS {
-namespace DCPS {
 
 template<typename DatumType>
 ACE_INLINE

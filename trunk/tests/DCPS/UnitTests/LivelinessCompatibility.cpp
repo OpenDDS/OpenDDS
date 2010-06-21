@@ -17,6 +17,7 @@ bool
 lease_greater_than (::DDS::LivelinessQosPolicy const & qos1,
                     ::DDS::LivelinessQosPolicy const & qos2)
 {
+  using OpenDDS::DCPS::operator>;
   return qos1.lease_duration > qos2.lease_duration;
 }
 

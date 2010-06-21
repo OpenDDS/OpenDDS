@@ -118,6 +118,15 @@ public:
   virtual int handle_timeout(const ACE_Time_Value& current_time,
                              const void* arg);
 
+  void set_owner (const PublicationId& owner);
+  PublicationId& get_owner ();
+  bool is_exclusive () const;
+  bool registered();
+  void registered (bool flag);
+  bool is_last (const PublicationId& pub);
+  
+  bool no_writer () const;
+  
 private:
   ACE_Recursive_Thread_Mutex& lock_;
 
@@ -186,6 +195,11 @@ private:
   typedef std::set <PublicationId, GUID_tKeyLessThan> Writers;
 
   Writers writers_;
+  PublicationId owner_;
+  bool exclusive_;
+  // registered with participant so it can be calledback as
+  // the owner is updated.
+  bool registered_;
 };
 
 } // namespace DCPS

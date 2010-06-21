@@ -5,7 +5,7 @@ project: dcps_tcp, dcps_java {
 
     idlflags        += -Wb,stub_export_include=complex_idl_test_Export.h \
                        -Wb,stub_export_macro=complex_idl_test_Export
-    dcps_ts_flags   += --export=complex_idl_test_Export
+    dcps_ts_flags   += -Wb,export_macro=complex_idl_test_Export
     idl2jniflags    += -Wb,stub_export_include=complex_idl_test_Export.h \
                        -Wb,stub_export_macro=complex_idl_test_Export
 
