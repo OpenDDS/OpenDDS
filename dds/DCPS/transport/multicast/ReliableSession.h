@@ -96,14 +96,13 @@ private:
   ACE_SYNCH_MUTEX start_lock_;
   bool started_;
   
-  // A session must be for a producer
+  // A session must be for a publisher
   // or subscriber.  Implementation doesn't
   // support being for both.
-  // Only subscribers need to send naks, because
-  // don't need to nak for control samples and
-  // only producers send data samples.  Only producers
-  // need to receive naks.
-  bool send_naks_; 
+  // As to control message, 
+  // only subscribers receive syn, send synack, send naks, receive nakack,
+  // and publisher only send syn, receive synack,receive naks, send nakack.
+  bool active_; 
 
   SynWatchdog syn_watchdog_;
   NakWatchdog nak_watchdog_;

@@ -108,7 +108,7 @@ ReliableSession::ReliableSession(MulticastDataLink* link,
   : MulticastSession(link, remote_peer),
     acked_(false),
     started_(false),
-    send_naks_(true),
+    active_(true),
     syn_watchdog_(this),
     nak_watchdog_(this)
 {
@@ -177,6 +177,8 @@ ReliableSession::control_received(char submessage_id,
 void
 ReliableSession::syn_received(ACE_Message_Block* control)
 {
+  if (this->active_) return; // pub send syn, then doesn't receive them.
+
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
@@ -229,6 +231,8 @@ ReliableSession::send_syn()
 void
 ReliableSession::synack_received(ACE_Message_Block* control)
 {
+  if (! this->active_) return; // sub send syn, then doesn't receive them.
+
   // Already received ack.
   if (this->acked_) return;
 
@@ -261,6 +265,8 @@ ReliableSession::synack_received(ACE_Message_Block* control)
   // after deliver synack to every session.
   this->link_->set_check_fully_association();
 }
+
+
 
 void
 ReliableSession::send_synack()
@@ -353,7 +359,7 @@ ReliableSession::send_naks()
 void
 ReliableSession::nak_received(ACE_Message_Block* control)
 {  
-  if (this->send_naks_) return; // Sends naks, then doesn't receive them.
+  if (! this->active_) return; // sub send naks, then doesn't receive them.
 
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
@@ -454,6 +460,8 @@ ReliableSession::send_naks (DisjointSequence& missing)
 void
 ReliableSession::nakack_received(ACE_Message_Block* control)
 {
+  if (this->active_) return; // pub send syn, then doesn't receive them.
+
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
@@ -518,7 +526,7 @@ ReliableSession::start(bool active)
                      false);
   }
 
-  this->send_naks_ = !active;
+  this->active_  = active;
   // A watchdog timer is scheduled to periodically check for gaps in
   // received data. If a gap is discovered, MULTICAST_NAK control
   // samples will be sent to initiate repairs.

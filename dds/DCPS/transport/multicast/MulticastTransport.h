@@ -50,7 +50,10 @@ protected:
 private:
   MulticastConfiguration* config_i_;
 
-  MulticastDataLink_rch link_;
+  /// link for pubs.
+  MulticastDataLink_rch client_link_;
+  /// link for subs.
+  MulticastDataLink_rch server_link_;
 };
 
 } // namespace DCPS

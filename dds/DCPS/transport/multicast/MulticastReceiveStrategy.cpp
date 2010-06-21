@@ -45,10 +45,6 @@ MulticastReceiveStrategy::receive_bytes(iovec iov[],
 bool
 MulticastReceiveStrategy::check_header(const TransportHeader& header)
 {
-  // Skip messages we just sent.
-  if (header.source_ == this->link_->local_peer()) {
-    return false;
-  }
   return this->link_->check_header(header);
 }
 
