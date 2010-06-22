@@ -37,6 +37,8 @@
         <features
             href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/name"/>
       </labelMappings>
+      <relatedDiagrams
+          href="PolicyLibrary.gmfmap#//@diagram"/>
       <tool
           xsi:type="gmftool:CreationTool"
           href="MainDiagram.gmftool#//@palette/@tools.0/@tools.0"/>

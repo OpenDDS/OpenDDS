@@ -27,6 +27,7 @@
         visualID="2001"
         editPartClassName="MiddlewareLibraryEditPart"
         itemSemanticEditPolicyClassName="MiddlewareLibraryItemSemanticEditPolicy"
+        notationViewFactoryClassName="MiddlewareLibraryViewFactory"
         canonicalEditPolicyClassName="MiddlewareLibraryCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="MiddlewareLibraryGraphicalNodeEditPolicy"
         createCommandClassName="MiddlewareLibraryCreateCommand">
@@ -55,6 +56,7 @@
           visualID="5001"
           editPartClassName="MiddlewareLibraryNameEditPart"
           itemSemanticEditPolicyClassName="MiddlewareLibraryNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="MiddlewareLibraryNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -74,6 +76,7 @@
         visualID="2002"
         editPartClassName="PolicyLibraryEditPart"
         itemSemanticEditPolicyClassName="PolicyLibraryItemSemanticEditPolicy"
+        notationViewFactoryClassName="PolicyLibraryViewFactory"
         canonicalEditPolicyClassName="PolicyLibraryCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="PolicyLibraryGraphicalNodeEditPolicy"
         createCommandClassName="PolicyLibraryCreateCommand">
@@ -90,6 +93,10 @@
             width="100"
             height="80"/>
       </viewmap>
+      <behaviour
+          xsi:type="gmfgen:OpenDiagramBehaviour"
+          diagramKind="OpenDDS PolicyLibrary"
+          editorID="org.opendds.modeling.model.opendds.diagram.policylibrary.part.OpenDDSPolicyLibraryDiagramEditorID"/>
       <modelFacet>
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/PolicyLibrary"/>
@@ -102,6 +109,7 @@
           visualID="5002"
           editPartClassName="PolicyLibraryNameEditPart"
           itemSemanticEditPolicyClassName="PolicyLibraryNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="PolicyLibraryNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -121,6 +129,7 @@
         visualID="2003"
         editPartClassName="DataLibraryEditPart"
         itemSemanticEditPolicyClassName="DataLibraryItemSemanticEditPolicy"
+        notationViewFactoryClassName="DataLibraryViewFactory"
         canonicalEditPolicyClassName="DataLibraryCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DataLibraryGraphicalNodeEditPolicy"
         createCommandClassName="DataLibraryCreateCommand">
@@ -149,6 +158,7 @@
           visualID="5003"
           editPartClassName="DataLibraryNameEditPart"
           itemSemanticEditPolicyClassName="DataLibraryNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="DataLibraryNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
