@@ -322,11 +322,11 @@ BE_GlobalData::add_inc_path(const char* path)
 void
 BE_GlobalData::set_inc_paths(const char* cmdline)
 {
-  ACE_ARGV argv(cmdline, false);
+  ACE_ARGV argv(ACE_TEXT_CHAR_TO_TCHAR(cmdline), false);
   for (int i = 0; i < argv.argc(); ++i) {
-    std::string arg = argv[i];
+    std::string arg = ACE_TEXT_ALWAYS_CHAR(argv[i]);
     if (arg == "-I" && i + 1 < argv.argc()) {
-      inc_path_.insert(argv[++i]);
+      inc_path_.insert(ACE_TEXT_ALWAYS_CHAR(argv[++i]));
     } else if (arg.substr(0, 2) == "-I") {
       inc_path_.insert(arg.c_str() + 2);
     }

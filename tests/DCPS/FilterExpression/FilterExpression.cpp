@@ -1,7 +1,8 @@
 #include "stdio.h" // yard references printf() without including this
 #include "string.h" // yard references strncpy() without including this
 
-#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
+#include "FilterStructTypeSupportImpl.h"
+
 #include "dds/DCPS/FilterExpressionGrammar.h"
 #include "dds/DCPS/yard/yard_parser.hpp"
 #include "dds/DCPS/FilterEvaluator.h"
@@ -25,7 +26,7 @@ bool doEvalTest(const char* (&input)[N], bool expected, const T& sample,
       if (result != expected) pass = false;
       std::cout << input[i] << " => " << result << std::endl;
     } catch (const std::exception& e) {
-      if (expected != false) pass = false;
+      if (expected) pass = false;
       std::cout << input[i] << " => exception " << e.what() << std::endl;
     }
   }
@@ -33,7 +34,7 @@ bool doEvalTest(const char* (&input)[N], bool expected, const T& sample,
 }
 
 bool testEval() {
-  DDS::TopicBuiltinTopicData sample;
+  TBTD sample;
   sample.name = "Adam";
   sample.durability.kind = DDS::PERSISTENT_DURABILITY_QOS;
   sample.durability_service.history_depth = 15;
