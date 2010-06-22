@@ -1,3 +1,22 @@
+Tue Jun 22 19:54:03 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        [3388] 2010-06-22 14:57:34 harrisb
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmftool:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.trace:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/META-INF/MANIFEST.MF:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools/mirrored/AssociationClassRhomb.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools/mirrored/ClassFigure.java:
+
+        Added Policy Library sub-diagram so that double-clicking on a
+        Policy Library package in the main diagram will open up a diagram
+        containing the elements of the Policy Library.
+
 Tue Jun 22 11:26:32 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         [3380] 2010-06-22 11:26:32 harrisb
