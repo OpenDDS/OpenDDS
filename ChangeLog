@@ -1,3 +1,13 @@
+Tue Jun 22 20:34:11 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/README:
+
+          Updated documentation.
+
+        * java/build_scripts/JavaTypeSupportImpl.pm:
+
+          Removed this file.  ts_generator.cpp now does this with -Wb,java.
+
 Tue Jun 22 19:05:34 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/ts_generator.cpp:
