@@ -1,3 +1,10 @@
+Tue Jun 22 16:39:35 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+
+          Make sure all code-generation happens in the *_idl project to avoid
+          the publisher and subscriber projects colliding in parallel builds.
+
 Tue Jun 22 16:13:59 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/opendds_idl.mpc:
