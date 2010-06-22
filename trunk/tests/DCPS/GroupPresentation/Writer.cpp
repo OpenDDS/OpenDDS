@@ -50,7 +50,7 @@ Writer::end()
 int
 Writer::svc()
 {
-  int thr_id = ACE_OS::thr_self();
+  ACE_thread_t thr_id = ACE_OS::thr_self();
   
   DDS::InstanceHandleSeq handles;
 

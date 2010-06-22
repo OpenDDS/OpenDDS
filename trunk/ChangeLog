@@ -1,3 +1,41 @@
+Tue Jun 22 14:29:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/CoherentChangeControl.cpp:
+
+          Added newline at the end of the file to avoid a GCC warning and for
+          general consistency.
+
+        * dds/idl/be_global.cpp:
+
+          WCHAR compatibility.
+
+        * dds/idl/opendds_idl.mpc:
+
+          Use the same logic from tao_idl.mpc to set a preprocessor macro that
+          tells opendds_idl which preprocessor to use at runtime.
+
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+        * tests/DCPS/FilterExpression/FilterExpressionTest.mpc:
+        * tests/DCPS/FilterExpression/FilterStruct.idl:
+
+          Added an IDL file so this test doesn't depend on the struct for one
+          of the Built-in Topics, which are not always available.
+
+        * tests/DCPS/GroupPresentation/SubscriberListener.h:
+        * tests/DCPS/GroupPresentation/SubscriberListener.cpp:
+
+          Use ACE_THROW_SPEC() so that throw() clauses disappear on platforms
+          that don't use them (certian compilers and newer versions of ACE+TAO)
+
+        * tests/DCPS/GroupPresentation/Writer.cpp:
+
+          Use ACE_thread_t as the platform-independent return type of
+          ACE_OS::thr_self().
+
+        * tests/DCPS/Ownership/Ownership.mpc:
+
+          Link multicast and udp libs for static builds.
+
 Mon Jun 21 20:11:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/FilterEvaluator.h:
