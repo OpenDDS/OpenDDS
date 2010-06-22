@@ -208,7 +208,7 @@ namespace java_ts_generator {
       "}\n";
     be_global->impl_ <<
       "extern \"C\" JNIEXPORT jlong JNICALL\n"
-      "Java_" << jniclass << "TypeSupportImpl__1_jni_1init(JNIEnv*, jclass) {\n"
+      "Java_" << jniclass << "TypeSupportImpl__1jni_1init(JNIEnv*, jclass) {\n"
       "  return reinterpret_cast<jlong>(static_cast<CORBA::Object_ptr>(new "
       << type << "TypeSupportImpl));\n"
       "}\n\n";
