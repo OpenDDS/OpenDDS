@@ -111,12 +111,6 @@ if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
         print STDERR "ERROR: publisher returned $PublisherResult \n";
         $status = 1;
     }
-
-    $ir = $DCPSREPO->TerminateWaitKill(5);
-    if ($ir != 0) {
-        print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-        $status = 1;
-    }
 } else {
     print $Subscriber->CommandLine(). "\n";
     $Subscriber->Spawn ();
@@ -124,6 +118,26 @@ if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
     $SubscriberResult = $Subscriber->WaitKill (15);
     if ($SubscriberResult != 0) {
         print STDERR "ERROR: subscriber returned $SubscriberResult \n";
+        $status = 1;
+    }
+}
+
+$role = $CS->wait();
+if ($role == -1) {
+    print "ERROR: Shutdown sync failed.\n";
+    $status = 1;
+    $DCPSREPO->Kill ();
+    exit 1;
+}
+
+if ($role == PerlDDS::Cross_Sync_Common::SERVER) {
+    if ($CS->ready () == -1) {
+        print STDERR "ERROR: subscriber failed to finish sync properly.\n";
+        $status = 1;
+    }
+    $ir = $DCPSREPO->TerminateWaitKill(5);
+    if ($ir != 0) {
+        print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
         $status = 1;
     }
 }
