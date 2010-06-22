@@ -17,5 +17,7 @@ project: aceexe, crosscompile {
     else
       CPPFLAGS += -DTAO_IDL_PREPROCESSOR=\\\"$(TAO_IDL_PREPROCESSOR)\\\"
     endif
+    idl_stubs: all
   }
+
 }
