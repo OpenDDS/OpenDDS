@@ -1,8 +1,16 @@
+Tue Jun 22 15:13:00 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Messenger/pub_multicast.ini:
+        * tests/DCPS/Messenger/sub_multicast.ini:
+		
+          Setting the multicast group id explicilty to avoid network
+          switch problem for cicada2.
+
 Tue Jun 22 14:41:11 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Crossplatform/Messenger_run_test.pl:
 
-          Fixing problem where info repo is terminated prior to 
+          Fixing problem where info repo is terminated prior to
           Subscriber unregistering.
 
 Tue Jun 22 14:29:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
