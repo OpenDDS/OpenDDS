@@ -566,6 +566,11 @@ Error: #f88
 <div title="DefaultTiddlers" modifier="MikeMartinez" created="201006151615" changecount="1">
 <pre>[[Plug-in Architecture]]</pre>
 </div>
+<div title="Details" modifier="Byron" created="201006231211" tags="publish details" changecount="1">
+<pre>For some of the SDK implementation steps there are limited or no instructions on how to reproduce the steps. For the situations the step details are captured in this section.
+*[[GMF Details]]
+</pre>
+</div>
 <div title="DomainPackage" modifier="MikeMartinez" created="201006152304" tags="publish" changecount="1">
 <pre>Section 7.1.3 of the specification defines the ''Domain'' package of the metamodel.  The ecore model for this includes the //~DomainEntity//, and //~QosProperty// classifiers.  This model has the following properties:
 * package: org.opendds.modeling.model
@@ -625,10 +630,126 @@ Issues related to usage can be found in [[EMF Issues]].
 {{imgcenter{[img[images/Enumerations.png]]}}}
 </pre>
 </div>
-<div title="GMF Models" modifier="Byron" created="201006211456" modified="201006211458" tags="publish" changecount="3">
-<pre>[[GMF TODO]] contains skipped tasks related to GMF that still need to be done.</pre>
+<div title="GMF Details" modifier="Byron" created="201006231304" modified="201006231810" tags="publish details" changecount="27">
+<pre>!Sub-diagrams
+GMF supports the capability to double-click on a diagram node and have it open up another diagram. GMF calls this //diagram partitioning//. Unfortunately, GMF 2.2.2 does not directly support diagram partitioning through it's views and wizards when the diagram node's domain element is not the same as the canvas mapping's domain element in the sub-diagram, which is how the SDK uses sub-diagrams. The steps given here were used to produce the sub-diagram capability of the SDK.
+
+The starting point for these steps are the [[Diagram Partitioning wiki page|http://wiki.eclipse.org/Diagram_Partitioning]] that was extract from a [[GMF newsgroup post|http://dev.eclipse.org/newslists/news.eclipse.modeling.gmf/msg06184.html]], and the discussion in section 4.5.6  of the eclipse Modeling Project book.
+
+!! Definitions
+
+The terms and definitions used here are taken from the Diagram Partitioning wiki. To help make them concrete, example usage taken from the Policy Library diagram are included.
+
+|!Term|!SDK Example|!Definition|h
+|Partitioning node|Policy Library package in the main diagram|The node that can be double-clicked on open the sub-diagram.|
+|Super-diagram|Main Diagram|The diagram that contains the partitioning node.|
+|Super-mapping|~MainDiagram.gmfmap|The GMF mapping file for the super-diagram.|
+|Sub-diagram|Policy Library diagram|The diagram that is opened after double-clicking on the partitioning node.|
+|Sub-mapping|~PolicyLibrary.gmfmap|The GMF mapping file for the sub-diagram.|
+
+!! Steps
+
+For the steps the Policy Library is used as an example. It is assumed that the ~UML2 Tools graphics will be used for the diagram elements so there will be no need to create graphic definition models.
+
+!!! 1. Define the Main Diagram tools
+File used: ~MainDiagram.gmftool
+Create ~MainDiagram.gmftool and have the palette only contain those elements that can show up on the main diagram. (GMF does not restrict what shows up on the palette based on the top level nodes and links that can be created on the diagram, so we want a single tooling definition for each diagram to avoid the user picking inappropriate elements.)
+
+!!! 2. Define the Main diagram mapping
+File used: ~MainDiagram.gmfmap
+
+Use the UML Package diagram in the project org.opendds.modeling.uml2tools.mirrored for the graphics definition model in ~MainDiagram.gmfmap and use ~OpenDDSModel found in ~OpenDDS.ecore as the Canvas mapping element.
+
+!!! 3. Define Policy Library diagram tools
+File used: ~PolicyLibrary.gmftool
+
+# Bring up the Tooling Definition wizard. From the context menu select New -&gt; Other -&gt; Graphical Modeling Framework -&gt; Simple Tooling Definition Model.
+# Pick ~OpenDDS.ecore as the file containing the ecore domain model.
+# Pick ~PolicyLibrary as the diagram element.
+# Unselect elements that shouldn't appear in the palette in the &quot;Domain model elements to process&quot; dialog.
+
+!!! 4. Define Policy Library diagram mapping
+File used: ~PolicyLibrary.gmfmap
+
+# Bring up the Mapping Definition wizard. From the context menu select New -&gt; Other -&gt; Graphical Modeling Framework -&gt; Guide Mapping Model Creation.
+# Pick ~OpenDDS.ecore as the file containing the ecore domain model.
+# Pick ~PolicyLibrary as the diagram element.
+# Pick ~PolicyLibrary.gmftool created from the previous step as the diagram palette.
+# Pick the appropriate mirrored graphic file in org.opendds.modeling.uml2tools.mirrored. For the Policy Library this is classDiagram_classifiers.mirrored.gmfgraph.
+# In the &quot;Map domain model elements&quot; dialog remove inappropriate links. In the case of the Policy Library this is all links. Verify that all the nodes used in the mapping are appropriate.
+
+!!! 5. (Optional) Check that the sub-diagram works
+File used: ~PolicyLibrary.gmfgen
+
+To verify that the sub-diagram works correctly, you can run launch the
+diagram editor for the sub-diagram after creating the Policy Library
+GMF generator model (~PolicyLibrary.gmfgen).
+
+Before doing this close project org.opendds.modeling.diagram.main if
+it exists. Otherwise you may see in the error log the message
+
+&gt; Both 'org.opendds.modeling.diagram.main' and 'org.opendds.modeling.diagram' register an extension parser for 'opendds_diagram'
+
+
+After verifying the sub-diagram works re-open project
+org.opendds.modeling.diagram.main.
+
+!!! 6. Update the sub-diagram GMF generator model
+File used: ~PolicyLibrary.gmfgen
+
+# Open the GMF generator model.
+# Select the sub-node Gen Editor Generator.
+# Make the Diagram File Extension property agree with that for the Main Diagram.
+# Make the Model ID property unique (.e.g. ~OpenDDS ~PolicyLibrary)
+
+!!! 7. Specify unique class name qualifier for sub-diagram GMF generator model
+Files used: ~PolicyLibrary.gmfgen, ~OpenDDS_dup_PolicyLibrary.genmodel
+
+The goal here is to change qualifer that prepends generated class names. As stated in step 6 of the Diagram Partitioning wiki, this is the &quot;hacky&quot; part needed because of how the dependency on EMF generator model is handled. Although this step is not mentioned in the eclipse Modeling Project book, failure to do this results the error
+
+&gt; Unable to open editor, unknown editor ID: org.opendds.modeling.model.opendds.diagram.policylibrary.part.~OpenDDSPolicyLibraryDiagramEditorID
+
+
+# Copy ~OpenDDS.genmodel to ~OpenDDS_dup_PolicyLibrary.genmodel.
+# In ~OpenDDS_dup_PolicyLibrary.genmodel change the Model Name property to ~OpenDDSPolicyLibrary.
+# Open ~PolicyLibrary.gmfgen in a text editor and replace all occurances of ~OpenDDS.genmodel with ~OpenDDS_dup_PolicyLibrary.genmodel.
+# Do EMF Validation on ~PolicyLibrary.gmfgen to make sure it is still valid.
+
+!!! 8. Relate the sub-diagram to the super-diagram
+File used: ~MainDiagram.gmfmap
+
+# Open ~MainDiagram.gmfmap with the GMF Map Model editor
+# Load as a resource ~PolicyLibrary.gmfmap
+# Go to the Node Mapping for the Policy Library
+# Under the Misc category edit the value for Related Diagrams
+# Add the second Canvas Mapping in the list
+# In a text editor verify that the relatedDiagrams element of the Policy Library node points to ~PolicyLibrary.gmfmap.
+
+!!! 9. Update Gen Editor View for the super-diagram GMF generator model
+Files used: ~MainDiagram.gmfgen, ~PolicyLibrary.gmfgen
+
+# Re-generate the ~MainDiagram.gmfgen to account for changes made in the previous step.
+# Open ~MainDiagram.gmfgen.
+# Go to node Gen Diagram -&gt; Gen Top Level Node ~PolicyLibraryEditPart
+# Set property Diagram Kind to OpenDDS PolicyLibrary
+# We need the Gen Editor View ID for the sub-diagram. The Open ~PolicyLibrary.gmfgen and go to Gen Editor Generator -&gt; Gen Editor View org.opendds.modeling.model.opendds.diagram.policylibrary.part and copy the value for ID into the clipboard.
+# Back in ~PolicyLibrary.gmfgen, node ~PolicyLibraryEditPart, set property Editor ID to what is in the clipboard.
+
+!!! 10. Test sub-diagram usage
+
+# Re-generate project org.opendds.modeling.diagram.main.
+# Generate project org.opendds.modeling.diagram.policylibrary.
+# Launch org.opendds.modeling.diagram.main as an eclipse application.
+# Create a new ~OpenDDS diagram.
+# Create a ~PolicyLIbrary package and double-click on the package.
+# Verify that the sub-diagram opens up allowing to to add elements to the package.
+</pre>
 </div>
-<div title="GMF TODO" modifier="Byron" created="201006211445" modified="201006211451" tags="publish todo" changecount="3">
+<div title="GMF Models" modifier="Byron" created="201006211456" modified="201006231215" tags="publish" changecount="5">
+<pre>[[GMF Details]] contains instructions not available elsewhere to reproduce the steps needed to for model diagram support.
+[[GMF TODO]] contains skipped tasks related to GMF that still need to be done.</pre>
+</div>
+<div title="GMF TODO" modifier="Byron" created="201006211445" modified="201006231215" tags="publish todo" changecount="4">
 <pre>! Attribution for ~UML2 Tools mirrored graphic plug-in
 
 As discussed in section 4.5.5 of the [[EMP book|http://www.informit.com/store/product.aspx?isbn=0321534077]], a separate plug-in needs to be generated that holds the &quot;mirrored&quot; [[UML2 Tools|http://wiki.eclipse.org/MDT-UML2Tools]] graphic definitions that are used by the SDK if we want to re-use these graphics. It's need to be determine how to properly attribute the ~UML2 Tools project in our mirrored plug-in.
@@ -648,7 +769,7 @@ If you wish to publish the contents of this document as static HTML web pages, t
 * [[StyleSheet]]: modify the reference to the logo file in the //.publishLogo// class to be in a correct relative directory path
 * use the ''publish'' selection on the right sidebar to publish all tiddlers with the ''publish'' tag to individual HTML files.  They will all be located in the //./publish// directory</pre>
 </div>
-<div title="Issues" modifier="Byron" created="201006211350" modified="201006211433" tags="publish issues" changecount="2">
+<div title="Issues" modifier="Byron" created="201006211350" modified="201006231215" tags="publish issues" changecount="3">
 <pre>Issues encountered during the development of the OpenDDS Modeling SDK are captured here.
 *[[EMF Issues]]
 *[[GMF Issues]]
@@ -658,12 +779,13 @@ If you wish to publish the contents of this document as static HTML web pages, t
 
 </pre>
 </div>
-<div title="MainMenu" modifier="Byron" created="201006151614" modified="201006211431" changecount="3">
+<div title="MainMenu" modifier="Byron" created="201006151614" modified="201006231202" changecount="4">
 <pre>[[Plug-in Architecture]]
 [[EMF Models]]
 [[GMF Models]]
 [[Code Generation]]
 [[Issues]]
+[[Details]]
 [[TODO]]
 </pre>
 </div>
