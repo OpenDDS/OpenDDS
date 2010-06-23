@@ -1,3 +1,10 @@
+Wed Jun 23 13:59:14 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/GroupPresentation/Writer.cpp:
+
+          Continued the fix from yesterday, need to cast ACE_thread_t back to
+          CORBA::Long for use in IDL struct.
+
 Tue Jun 22 20:34:11 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * java/README:
