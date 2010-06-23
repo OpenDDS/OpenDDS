@@ -51,7 +51,7 @@ int
 Writer::svc()
 {
   ACE_thread_t thr_id = ACE_OS::thr_self();
-  
+
   DDS::InstanceHandleSeq handles;
 
   try {
@@ -105,9 +105,9 @@ Writer::svc()
                    ACE_TEXT(" ERROR: begin_coherent_changes failed!\n")));
       ACE_OS::exit(-1);
     }
-     
+
     Messenger::Message message;
-    message.subject_id = thr_id;
+    message.subject_id = CORBA::Long(thr_id);
 
     DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
