@@ -1,3 +1,10 @@
+Wed Jun 23 18:12:57 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        [3392] 2010-06-23 18:14:45 harrisb
+        * tools/modeling/docs/design_notes/index.html:
+
+          Added details on how OpenDDS SDK sub-diagrams are constructed.
+
 Tue Jun 22 19:54:03 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         [3388] 2010-06-22 14:57:34 harrisb
