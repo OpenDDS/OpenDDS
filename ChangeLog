@@ -1,3 +1,15 @@
+Wed Jun 23 18:18:52 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+        
+          Added 2 seconds delay before writing samples for test with udp 
+          transport as the udp does not do fully association establishment
+          between pub and sub.
+
+Wed Jun 23 18:12:37 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
 Wed Jun 23 13:59:14 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/GroupPresentation/Writer.cpp:

@@ -71,10 +71,15 @@ TestCase::test()
 {
   wait_for_subscribers(); // wait for association
 
+  // As there are no fully assoication establishment between pub and sub for UDP
+  // transport, a delay is required for the test to receive all messages.
+  if (local_transport_type == ACE_TEXT("udp")) { 
+    ACE_OS::sleep (2);
+  }
+
   // Write test data to exercise the data paths:
   for (int i = 0; i < num_messages; ++i) {
     TestMessage message = { i, "Testing!" };
-
     if (this->writer_i_->write(message, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: test() -")
