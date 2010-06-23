@@ -1,8 +1,22 @@
+Wed Jun 23 21:44:45 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Comparator_T.h:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/yard/yard_base_grammar.hpp:
+        * dds/DCPS/yard/yard_text_grammar.hpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+        * dds/idl/keys_generator.cpp:
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+
+          Work-arounds for bugs in GCC 3.3.x.  See comment in Definitions.h.
+
 Wed Jun 23 18:18:52 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/SharedTransport/TestCase.cpp:
-        
-          Added 2 seconds delay before writing samples for test with udp 
+
+          Added 2 seconds delay before writing samples for test with udp
           transport as the udp does not do fully association establishment
           between pub and sub.
 

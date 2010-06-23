@@ -34,7 +34,7 @@ namespace yard
             bool b = false;
 
             try {
-                b = Rule_T::template Match(p);
+                b = Rule_T:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p);
             }
             catch(...) 
             {
@@ -61,7 +61,7 @@ namespace yard
     {
         template<typename ParserState_T>
         static bool Match(ParserState_T& p) {    
-            if (!Rule_T::template Match(p)) {
+            if (!Rule_T:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)) {
                 printf("Ill formed input, expected rule %s failed to match\n", 
                     typeid(Rule_T).name());
                 p.template OutputLocation<Rule_T>();
@@ -116,7 +116,7 @@ namespace yard
         template<typename ParserState_T>
         static bool Match(ParserState_T& p) {
             typename ParserState_T::Iterator pos = p.GetPos();                    
-            if (Rule_T::template Match(p)) {
+            if (Rule_T:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)) {
                 p.SetPos(pos); 
                 return true;
             } 
@@ -132,7 +132,7 @@ namespace yard
         template<typename ParserState_T>
         static bool Match(ParserState_T& p) {
             typename ParserState_T::Iterator pos = p.GetPos();                    
-            if (Rule_T::template Match(p)) {
+            if (Rule_T:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)) {
                 p.SetPos(pos); 
                 return false;
             } 
@@ -159,16 +159,16 @@ namespace yard
         template<typename ParserState_T>
         static bool Match(ParserState_T& p) {
           return 
-              T0::template Match(p)
-            || T1::template Match(p)
-            || T2::template Match(p)
-            || T3::template Match(p)
-            || T4::template Match(p)
-            || T5::template Match(p)
-            || T6::template Match(p)
-            || T7::template Match(p)
-            || T8::template Match(p)
-            || T9::template Match(p);
+              T0:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            || T1:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            || T2:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            || T3:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            || T4:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            || T5:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            || T6:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            || T7:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            || T8:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            || T9:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p);
         }
     };
 
@@ -193,16 +193,16 @@ namespace yard
         static bool Match(ParserState_T& p) {
             typename ParserState_T::Iterator pos = p.GetPos();
             if (
-            T0::template Match(p) 
-            && T1::template Match(p)
-            && T2::template Match(p)
-            && T3::template Match(p)
-            && T4::template Match(p)
-            && T5::template Match(p)
-            && T6::template Match(p)
-            && T7::template Match(p)
-            && T8::template Match(p)
-            && T9::template Match(p)
+            T0:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p) 
+            && T1:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            && T2:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            && T3:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            && T4:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            && T5:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            && T6:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            && T7:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            && T8:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
+            && T9:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)
             )
             {
                 return true;            
@@ -226,7 +226,7 @@ namespace yard
         static bool Match(ParserState_T& p) {
             if (!p.AtEnd())
             {
-                while (Rule_T::template Match(p)) 
+                while (Rule_T:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)) 
                 { }
             }
             return true;
@@ -242,10 +242,10 @@ namespace yard
     {
         template<typename ParserState_T>
         static bool Match(ParserState_T& p) {
-            if (!Rule_T::template Match(p)) {
+            if (!Rule_T:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)) {
                 return false;
             }
-            Star<Rule_T>::template Match(p);
+            Star<Rule_T>:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p);
             return true;
         }
     };
@@ -258,7 +258,7 @@ namespace yard
         template<typename ParserState_T>
         static bool Match(ParserState_T& p) {
             if (!p.AtEnd())
-                Rule_T::template Match(p);
+                Rule_T:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p);
             return true;      
         }
     };
@@ -272,7 +272,7 @@ namespace yard
         {        
             typename ParserState_T::Iterator pos = p.GetPos();
             for (int i=0; i < N; ++i) {
-                if (!Rule_T::template Match(p)) {
+                if (!Rule_T:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)) {
                   p.SetPos(pos);
                   return false;
                 }
@@ -291,7 +291,7 @@ namespace yard
         static bool Match(ParserState_T& p) {
             typename ParserState_T::Iterator pos = p.GetPos();        
             while (true) {
-                if (Rule_T::template Match(p)) {
+                if (Rule_T:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p)) {
                     return true;          
                 }
                 p.GotoNext();
@@ -380,7 +380,7 @@ namespace yard
             int nCurLogMsg = nUniqueLogMsg++;
             printf("#%d : matching parse rule %s\n", nCurLogMsg, typeid(T).name());
             p.template OutputLocation<T>();
-            bool b = T::template Match(p);
+            bool b = T:: OPENDDS_GCC33_TEMPLATE_DEPENDENT Match(p);
             if (b) {
                 printf("#%d : succeeded for rule %s\n", nCurLogMsg, typeid(T).name());
             }

@@ -57,7 +57,9 @@ public:
   bool less(void* lhs_void, void* rhs_void) const {
     Sample* lhs = static_cast<Sample*>(lhs_void);
     Sample* rhs = static_cast<Sample*>(rhs_void);
+#ifndef OPENDDS_GCC33
     using ::operator<; // TAO::String_Manager's operator< is in global NS
+#endif
     return lhs->*mp_ < rhs->*mp_;
   }
 
@@ -66,7 +68,9 @@ public:
     Sample* rhs = static_cast<Sample*>(rhs_void);
     const Field& field_l = lhs->*mp_;
     const Field& field_r = rhs->*mp_;
+#ifndef OPENDDS_GCC33
     using ::operator<; // TAO::String_Manager's operator< is in global NS
+#endif
     return !(field_l < field_r) && !(field_r < field_l);
   }
 

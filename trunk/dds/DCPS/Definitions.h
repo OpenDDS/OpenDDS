@@ -29,6 +29,28 @@
 #define DDS_HAS_WCHAR
 #endif
 
+#if defined __GNUC__ && (__GNUC__ < 3 || (__GNUC__ == 3 && __GNUC_MINOR__ < 4))
+// GCC 3.3.x doesn't have using-declarations and has some strange bugs
+// regarding when the "template" keyword should be used to disambiguate.
+#define OPENDDS_GCC33
+#define OPENDDS_GCC33_TEMPLATE_NON_DEPENDENT template
+#define OPENDDS_GCC33_TEMPLATE_DEPENDENT
+
+namespace TAO {
+  inline bool operator<(const String_Manager& lhs, const String_Manager& rhs) {
+    return ::operator<(lhs, rhs);
+  }
+  inline bool operator<(const WString_Manager& lhs, const WString_Manager& rhs) {
+    return ::operator<(lhs, rhs);
+  }
+}
+
+#else
+#define OPENDDS_GCC33_TEMPLATE_NON_DEPENDENT
+#define OPENDDS_GCC33_TEMPLATE_DEPENDENT template
+
+#endif
+
 namespace OpenDDS {
 namespace DCPS {
 
