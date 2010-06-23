@@ -3,6 +3,7 @@
 
 #include "FilterStructTypeSupportImpl.h"
 
+#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/FilterExpressionGrammar.h"
 #include "dds/DCPS/yard/yard_parser.hpp"
 #include "dds/DCPS/FilterEvaluator.h"
@@ -74,7 +75,7 @@ namespace yard_test {
   {
     const char* out = in + std::strlen(in);
     yard::SimpleTextParser parser(in, out);
-    const bool pass = parser.Parse<yard::Seq<Rule_T, yard::EndOfInput> >();
+    const bool pass = parser. OPENDDS_GCC33_TEMPLATE_NON_DEPENDENT Parse<yard::Seq<Rule_T, yard::EndOfInput> >();
     std::printf("%s test for rule %s, on input %s\n",
       pass ? "passed" : "FAILED", typeid(Rule_T).name(), in);
     if (pass && callback) callback(parser);

@@ -62,8 +62,10 @@ bool keys_generator::gen_struct(UTL_ScopedName* name,
     "  bool operator()(const " << cxx << "& v1, const " << cxx
     << "& v2) const\n"
     "  {\n"
+    "#ifndef OPENDDS_GCC33\n"
     "    using ::operator<; // TAO::String_Manager's operator< is "
-    "in global NS\n";
+    "in global NS\n"
+    "#endif\n";
 
   if (empty) {
     be_global->header_ <<
