@@ -78,6 +78,35 @@ private:
   MemberPtr mp_;
 };
 
+#ifdef OPENDDS_GCC33
+
+template <class Sample, class Char_T>
+class FieldComparator<Sample, TAO::String_Manager_T<Char_T> >
+  : public ComparatorBase {
+public:
+  typedef TAO::String_Manager_T<Char_T> Sample::* MemberPtr;
+  FieldComparator(MemberPtr mp, ComparatorBase::Ptr next)
+  : ComparatorBase(next)
+  , mp_(mp) {}
+
+  bool less(void* lhs_void, void* rhs_void) const {
+    Sample* lhs = static_cast<Sample*>(lhs_void);
+    Sample* rhs = static_cast<Sample*>(rhs_void);
+    return ACE_OS::strcmp((lhs->*mp_).in(), (rhs->*mp_).in()) < 0;
+  }
+
+  bool equal(void* lhs_void, void* rhs_void) const {
+    Sample* lhs = static_cast<Sample*>(lhs_void);
+    Sample* rhs = static_cast<Sample*>(rhs_void);
+    return ACE_OS::strcmp((lhs->*mp_).in(), (rhs->*mp_).in()) == 0;
+  }
+
+private:
+  MemberPtr mp_;
+};
+
+#endif // OPENDDS_GCC33
+
 template <class Sample, class Field>
 ComparatorBase::Ptr make_field_cmp(Field Sample::* mp,
                                    ComparatorBase::Ptr next)

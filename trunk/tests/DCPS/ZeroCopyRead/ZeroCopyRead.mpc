@@ -4,8 +4,4 @@ project: dcpsexe_with_tcp {
   TypeSupport_Files {
     Simple.idl
   }
-  Source_Files {
-    *.cpp
-    SimpleTypeSupportImpl.cpp
-  }
 }

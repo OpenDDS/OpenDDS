@@ -11,12 +11,12 @@
 #define GROUPRAKEDATA_H
 
 #include /**/ "ace/pre.h"
+#include "dcps_export.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dcps_export.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "RakeData.h"

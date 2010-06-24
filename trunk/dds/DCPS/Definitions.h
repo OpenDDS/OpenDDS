@@ -35,20 +35,9 @@
 #define OPENDDS_GCC33
 #define OPENDDS_GCC33_TEMPLATE_NON_DEPENDENT template
 #define OPENDDS_GCC33_TEMPLATE_DEPENDENT
-
-namespace TAO {
-  inline bool operator<(const String_Manager& lhs, const String_Manager& rhs) {
-    return ::operator<(lhs, rhs);
-  }
-  inline bool operator<(const WString_Manager& lhs, const WString_Manager& rhs) {
-    return ::operator<(lhs, rhs);
-  }
-}
-
 #else
 #define OPENDDS_GCC33_TEMPLATE_NON_DEPENDENT
 #define OPENDDS_GCC33_TEMPLATE_DEPENDENT template
-
 #endif
 
 namespace OpenDDS {
