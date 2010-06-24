@@ -146,8 +146,12 @@ SubscriberListenerImpl::verify (const Messenger::Message& msg, const ::DDS::Samp
 
   static DDS::Time_t last_timestamp = { 0, 0 };
 
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator<(si.source_timestamp, last_timestamp))
+#else
   using OpenDDS::DCPS::operator<;
   if (si.source_timestamp < last_timestamp)
+#endif
   {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("%N:%l SubscriberListenerImpl::verify()")

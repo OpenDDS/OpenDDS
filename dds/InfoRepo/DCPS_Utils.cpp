@@ -8,8 +8,9 @@
  */
 
 #include "DcpsInfo_pch.h"
-#include /**/ "DCPS_Utils.h"
+#include "DCPS_Utils.h"
 #include "dds/DCPS/Qos_Helper.h"
+#include "dds/DCPS/Definitions.h"
 
 #include "ace/ACE.h"  /* For ACE::wild_match() */
 #include "ace/OS_NS_string.h"
