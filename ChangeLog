@@ -1,15 +1,23 @@
+Fri Jun 25 20:47:38 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/Ownership/subscriber.cpp:
+        
+          Moved result verify after Service_Participant shutdown.
+          This would fix pure function called error on linux due
+          to earlier result verify which failed sometimes.
+
 Fri Jun 25 18:36:19 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * bin/dcps_tests.lst:
 
           Marked the Ownership update_strength test only run
           when built in topic is enabled.
-          
+
         * dds/DCPS/OwnershipManager.cpp:
 
           Fixed a memory corruption due to a possibility to
           erase vector end.
-          
+
 Thu Jun 24 21:21:57 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/GroupRakeData.h:
