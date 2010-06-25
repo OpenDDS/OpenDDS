@@ -112,18 +112,13 @@ OwnershipManager::unregister_reader (const char* type_name,
   }
   
   ReaderVec::iterator end = instance->readers_.end();
-  ReaderVec::iterator found = end;
   
-    for (ReaderVec::iterator it(instance->readers_.begin());
-       it != end; ++it) {
-       if (*it == reader) {
-        found = it;
-        break;
-       }
-  }
-
-  if (found != end) {
-    instance->readers_.erase (found);
+  for (ReaderVec::iterator it(instance->readers_.begin());
+      it != end; ++it) {
+    if (*it == reader) {
+      instance->readers_.erase (it);
+      break;
+    }
   }
 
   if (instance->readers_.empty ()) {
@@ -271,7 +266,10 @@ OwnershipManager::remove_candidate (OwnershipWriterInfos& infos,const Publicatio
         break;
       }
     }
-    infos.candidates_.erase (found_candidate);
+    
+    if (found_candidate != the_end) {
+      infos.candidates_.erase (found_candidate);
+    }
   }
 }
 
