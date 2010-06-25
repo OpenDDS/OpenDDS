@@ -1,3 +1,10 @@
+Fri Jun 25 20:12:37 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/codegen/model/Exceptions.h:
+
+          Added some more exception types to be thrown by the generated
+          code.
+
 Fri Jun 25 19:30:37 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/codegen:
