@@ -121,7 +121,7 @@ OpenDDS::Model::Delegate::createPublication(
   ///      writer Qos, which is NOT what we want.
 
   // Maybe something like:
-  //   this->modelData_.loadeWriterQos( writerQos);
+  //   this->modelData_.loadWriterQos( writerQos);
 
   writer = publisher->create_datawriter(
         topic,
@@ -152,7 +152,7 @@ OpenDDS::Model::Delegate::createSubscription(
   ///      reader Qos, which is NOT what we want.
 
   // Maybe something like:
-  //   this->modelData_.loadeReaderQos( readerQos);
+  //   this->modelData_.loadReaderQos( readerQos);
 
   reader = subscriber->create_datareader(
         topic,
