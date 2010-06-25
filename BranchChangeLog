@@ -1,3 +1,24 @@
+Fri Jun 25 22:07:19 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/codegen/model/Delegate.cpp:
+
+          Corrected some spelling errors in comments.
+
+        * tools/modeling/docs/design_notes/codegen.html:
+
+          Design notes about the code generator.
+
+        * tools/modeling/docs/design_notes/plugins.html:
+
+          Moved the previous notes index.html file to this name to allow
+          for separate documents about the different areas.  This keeps
+          individual files to a manageable size and avoid access
+          conflicts during development.
+
+        * tools/modeling/docs/design_notes/index.html:
+
+          Removed this file.
+
 Fri Jun 25 20:12:37 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/codegen/model/Exceptions.h:
