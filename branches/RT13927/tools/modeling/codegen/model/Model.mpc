@@ -1,0 +1,15 @@
+project(*Lib): dcps {
+  sharedname = OpenDDS_Model
+  dynamicflags = OPENDDS_MODEL_BUILD_DLL
+  libout = $(DDS_ROOT)/lib
+  includes += $(DDS_ROOT)/tools/modeling/codegen
+
+  Source_Files {
+    Delegate.cpp
+  }
+
+  Template_Files {
+    Service_T.cpp
+  }
+}
+
