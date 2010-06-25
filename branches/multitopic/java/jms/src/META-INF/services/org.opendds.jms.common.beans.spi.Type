@@ -1,0 +1,13 @@
+#
+# $Id$
+#
+
+org.opendds.jms.common.beans.spi.BooleanType
+org.opendds.jms.common.beans.spi.ByteType
+org.opendds.jms.common.beans.spi.CharacterType
+org.opendds.jms.common.beans.spi.DoubleType
+org.opendds.jms.common.beans.spi.FloatType
+org.opendds.jms.common.beans.spi.IntegerType
+org.opendds.jms.common.beans.spi.LongType
+org.opendds.jms.common.beans.spi.StringType
+org.opendds.jms.common.beans.spi.ThreadSynchStrategyType

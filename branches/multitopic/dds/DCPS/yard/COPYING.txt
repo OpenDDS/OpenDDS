@@ -1,0 +1,23 @@
+YARD is all original work.  While it may rely on standard libraries, YARD does
+not include code from other sources.  We have chosen to release our work as
+public domain code.  This means that YARD has been released outside the
+copyright system.  Feel free to use the code in any way you wish.
+
+However, especially in an academic setting, plagiarism has very little to do
+with copyright.  In an academic paper, or in any situation where you are
+expected to give credit to other people's work, you will need to cite YARD as
+a source.  The author is Christopher Diggins, and the appropriate date is
+December 2004 -- the release date for Yard 1.0 (depending on your citation
+format, you may also need to state which date you accessed the files).
+
+While we welcome bug reports and feature requests, we can't make any promises
+regarding whether YARD will do what you want, or whether we will make any
+changes you ask for.  You are free to hire your own expert for that.
+
+If you choose to distribute YARD commercially, you'll probably want to read up
+on the laws covering warranties in your state, especially the implied
+warranties of fitness for a particular use or merchantability.
+
+
+Max Lybbert
+2006

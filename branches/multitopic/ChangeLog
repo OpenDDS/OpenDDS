@@ -1,0 +1,261 @@
+Fri Jun 25 18:36:19 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Marked the Ownership update_strength test only run
+          when built in topic is enabled.
+          
+        * dds/DCPS/OwnershipManager.cpp:
+
+          Fixed a memory corruption due to a possibility to
+          erase vector end.
+          
+Thu Jun 24 21:21:57 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/GroupRakeData.h:
+
+          Fixed a GCC warning by making sure ACE pre-processor macros are
+          defined before use.
+
+        * dds/DCPS/Comparator_T.h:
+        * dds/DCPS/Definitions.h:
+        * dds/InfoRepo/DCPS_Utils.cpp
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/GroupPresentation/SubscriberListener.cpp:
+        * tests/DCPS/Presentation/main.cpp:
+        * tests/DCPS/UnitTests/LivelinessCompatibility.cpp:
+
+          More GCC 3.3.x work-arounds.
+
+        * dds/idl/be_produce.cpp:
+
+          Use main_filename() instead of filename() since some pre-processors
+          use a temporary filename (SunCC).
+
+        * examples/DCPS/Messenger_IOGR_Imr/Messenger_IOGR_Imr.mpc:
+
+          Make sure we get rules.dds.GNU included in the makefile.
+
+        * tests/DCPS/ViewState/ViewState.mpc:
+        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+
+          Simplified mpc files: no need to list a "Source_Files" section.
+
+Wed Jun 23 21:44:45 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Comparator_T.h:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/yard/yard_base_grammar.hpp:
+        * dds/DCPS/yard/yard_text_grammar.hpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+        * dds/idl/keys_generator.cpp:
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+
+          Work-arounds for bugs in GCC 3.3.x.  See comment in Definitions.h.
+
+Wed Jun 23 18:18:52 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
+          Added 2 seconds delay before writing samples for test with udp
+          transport as the udp does not do fully association establishment
+          between pub and sub.
+
+Wed Jun 23 18:12:37 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
+Wed Jun 23 13:59:14 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/GroupPresentation/Writer.cpp:
+
+          Continued the fix from yesterday, need to cast ACE_thread_t back to
+          CORBA::Long for use in IDL struct.
+
+Tue Jun 22 20:34:11 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/README:
+
+          Updated documentation.
+
+        * java/build_scripts/JavaTypeSupportImpl.pm:
+
+          Removed this file.  ts_generator.cpp now does this with -Wb,java.
+
+Tue Jun 22 19:05:34 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/ts_generator.cpp:
+
+          Fixed a typo in the name of a JNI function for the Java bindings.
+
+Tue Jun 22 16:39:35 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+
+          Make sure all code-generation happens in the *_idl project to avoid
+          the publisher and subscriber projects colliding in parallel builds.
+
+Tue Jun 22 16:13:59 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/opendds_idl.mpc:
+
+          In the verbatim(gnuace), add the "all" target as a prerequisite of
+          "idl_stubs" so that if the user runs "make idl_stubs", opendds_idl
+          will be built first.
+
+Tue Jun 22 15:13:00 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Messenger/pub_multicast.ini:
+        * tests/DCPS/Messenger/sub_multicast.ini:
+
+          Setting the multicast group id explicilty to avoid network
+          switch problem for cicada2.
+
+Tue Jun 22 14:41:11 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+
+          Fixing problem where info repo is terminated prior to
+          Subscriber unregistering.
+
+Tue Jun 22 14:29:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/CoherentChangeControl.cpp:
+
+          Added newline at the end of the file to avoid a GCC warning and for
+          general consistency.
+
+        * dds/idl/be_global.cpp:
+
+          WCHAR compatibility.
+
+        * dds/idl/opendds_idl.mpc:
+
+          Use the same logic from tao_idl.mpc to set a preprocessor macro that
+          tells opendds_idl which preprocessor to use at runtime.
+
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+        * tests/DCPS/FilterExpression/FilterExpressionTest.mpc:
+        * tests/DCPS/FilterExpression/FilterStruct.idl:
+
+          Added an IDL file so this test doesn't depend on the struct for one
+          of the Built-in Topics, which are not always available.
+
+        * tests/DCPS/GroupPresentation/SubscriberListener.h:
+        * tests/DCPS/GroupPresentation/SubscriberListener.cpp:
+
+          Use ACE_THROW_SPEC() so that throw() clauses disappear on platforms
+          that don't use them (certian compilers and newer versions of ACE+TAO)
+
+        * tests/DCPS/GroupPresentation/Writer.cpp:
+
+          Use ACE_thread_t as the platform-independent return type of
+          ACE_OS::thr_self().
+
+        * tests/DCPS/Ownership/Ownership.mpc:
+
+          Link multicast and udp libs for static builds.
+
+Mon Jun 21 20:11:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Fixed some GCC warnings.
+
+Mon Jun 21 19:45:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/WaitForAck/WaitForAck.mpc:
+
+          Corrected dependencies (after += ...)
+
+Mon Jun 21 17:47:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged the branch "sbir_n08_116", which includes changes for spec
+          compliance.  See docs/history/ChangeLog-sbir_n08_116 for details.
+          Major features added are:
+
+          - Content-Subscription Profile: implemented ContentFilteredTopic and
+            the remaining functionality for QueryCondition
+          - QoS: OWNERSHIP; PRESENTATION (access_scope = GROUP)
+
+          The Content-Subscription Profile implementation required a change to
+          OpenDDS's strategy for code-generation.  OpenDDS-specific code has
+          been moved out of tao_idl's back-end library (enabled with -Gdcps)
+          and into a code generator here in the OpenDDS repository, called
+          opendds_idl (in dds/idl).  Existing applications that use MPC should
+          only need to change one of the arguments which may appear in
+          dcps_ts_flags: '--export=' has become '-Wb,export_macro='.
+          Also, note that for footprint-sensitive applications, the content-
+          subscription profile can be disabled at compile-time by setting the
+          MPC feature content_subscription=0.
+
+Fri Jun 18 22:42:30 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/PriorityKey.h:
+        * dds/DCPS/transport/framework/PriorityKey.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Supported same transport pub-sub associations (see RT13902).
+          - Added is_loopback and is_active flag to Datalink to help identify
+            the active(pub) end or passive(sub) end.
+          - For SimpleTCP, the links to same remote are seperated for active
+            and passive side.
+          - UDP was not changed as it's already seperated with the active
+            and passive links.
+          - Multicast transport creates two links (one link is for pubs and
+            one is for subs) instead of single link per transport. As before,
+            each link could have multiple sessions.
+
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.cpp:
+
+          Accommodated for function prototype changes.
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
+          Turned on message logging for verify.
+
+        * tests/DCPS/SharedTransport/run_test.pl:
+
+          Added TestFramework lib to libpath.
+
+        * bin/dcps_tests.lst:
+
+          Added SharedTransport tests.
+
+Fri Jun 18 20:21:29 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * README:
+
+          Updated for next release (2.2).
+
+        * ChangeLog:
+        * docs/history/ChangeLog-2.1.3:
+
+          Moved ChangeLog entries from version 2.1.3 to their own file.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
