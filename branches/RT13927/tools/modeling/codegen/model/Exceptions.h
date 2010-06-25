@@ -59,6 +59,18 @@ class OpenDDS_Model_Export BadAttachException : public virtual Exception {
   public: virtual const char* what() const throw() { return "BadAttach"; }
 };
 
+class OpenDDS_Model_Export BadRegisterException : public virtual Exception {
+  public: virtual const char* what() const throw() { return "BadRegister"; }
+};
+
+class OpenDDS_Model_Export BadCastException : public virtual Exception {
+  public: virtual const char* what() const throw() { return "BadCast"; }
+};
+
+class OpenDDS_Model_Export OutOfBoundsException : public virtual Exception {
+  public: virtual const char* what() const throw() { return "OutOfBounds"; }
+};
+
 } } // End of namespace OpenDDS::Model
 
 #include /**/ "ace/post.h"
