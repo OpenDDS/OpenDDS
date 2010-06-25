@@ -1,0 +1,27 @@
+Fri Jun 25 20:02:08 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * BranchChangeLog:
+
+          Creating a ChangeLog for this branch (this file).
+
+        * dds/DCPS/FilterExpressionGrammar.h:
+        * dds/DCPS/TopicExpressionGrammar.h:
+
+          Implemented TopicExpression parsing (for MultiTopic), includes some
+          refactoring of FilterExpression parsing in order to re-use common
+          grammar rules.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/TopicExpression:
+        * tests/DCPS/TopicExpression/TopicExpression.cpp:
+        * tests/DCPS/TopicExpression/TopicExpressionTest.mpc:
+        * tests/DCPS/TopicExpression/run_test.pl:
+
+          New test for parsing TopicExpressions
+
+# vim: filetype=changelog
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
