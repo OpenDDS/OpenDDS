@@ -1,3 +1,17 @@
+Fri Jun 25 19:30:37 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/codegen:
+        * tools/modeling/codegen/model:
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/Exceptions.h:
+        * tools/modeling/codegen/model/Model.mpc:
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+        * tools/modeling/codegen/model/model_export.h:
+
+          Initial capture of modeling support library.
+
 Wed Jun 23 18:12:57 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         [3392] 2010-06-23 18:14:45 harrisb
