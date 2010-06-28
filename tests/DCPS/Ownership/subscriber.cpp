@@ -221,12 +221,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     } while (matches1.current_count > 0 && matches2.current_count > 0);
 
 
-    if (listener_svt1->verify_result () == false || listener_svt2->verify_result () == false) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: failed to verify message!\n")), -1);
-    }
-
     ws1->detach_condition(condition1);
     ws2->detach_condition(condition2);
 
@@ -236,6 +230,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     TheTransportFactory->release();
     TheServiceParticipant->shutdown();
+    
+    if (listener_svt1->verify_result () == false || listener_svt2->verify_result () == false) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l main()")
+                          ACE_TEXT(" ERROR: failed to verify message!\n")), -1);
+    }
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");

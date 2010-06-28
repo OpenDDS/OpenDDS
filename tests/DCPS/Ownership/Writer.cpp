@@ -20,7 +20,7 @@
 const int num_instances_per_writer = 1;
 const int num_messages = 10;
 extern int reset_ownership_strength;
-extern int delay;
+extern int dds_delay;
 extern int reset_delay;
 
 Writer::Writer(DDS::DataWriter_ptr writer, const char* ownership_dw_id)
@@ -146,12 +146,12 @@ Writer::svc()
       }
 
       if (i == num_messages/2 && reset_delay != 0) {
-        //std::cout << ownership_dw_id << ": reset delay from " << delay << " to " 
+        //std::cout << ownership_dw_id << ": reset delay from " << dds_delay << " to " 
         //          << reset_delay << std::endl;
         ACE_OS::sleep (reset_delay);
       }
-      else if (delay > 0) {
-        ACE_OS::sleep (delay);
+      else if (dds_delay > 0) {
+        ACE_OS::sleep (dds_delay);
       }
     }
  
