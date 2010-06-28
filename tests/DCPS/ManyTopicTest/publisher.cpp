@@ -16,9 +16,9 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "tests/DCPS/MultiTopicTypes/Foo1DefTypeSupportImpl.h"
-#include "tests/DCPS/MultiTopicTypes/Foo2DefTypeSupportImpl.h"
-#include "tests/DCPS/MultiTopicTypes/Foo3DefTypeSupportImpl.h"
+#include "tests/DCPS/ManyTopicTypes/Foo1DefTypeSupportImpl.h"
+#include "tests/DCPS/ManyTopicTypes/Foo2DefTypeSupportImpl.h"
+#include "tests/DCPS/ManyTopicTypes/Foo3DefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "ace/Arg_Shifter.h"

@@ -39,10 +39,11 @@ namespace TopicExpressionGrammar {
     Seq<LPAREN, ST<TopicName>, NaturalJoin, JoinItem, RPAREN> > {};
   struct Selection : Seq<ST<TopicName>, Opt<Seq<NaturalJoin, JoinItem> > > {};
 
-  struct SubjectFieldSpec : Seq<ST<FieldName>,
-    Opt<Or<Seq<AS, ST<FieldName> >, Seq<NotAt<FROM>, ST<FieldName> > > > > {};
+  struct FieldAlias : Or<Seq<AS, ST<FieldName> >,
+    Seq<NotAt<FROM>, ST<FieldName> > > {};
+  struct SubjectFieldSpec : Seq<ST<FieldName>, Opt<FieldAlias> > {};
   struct Aggregation : Or<Tok<Char<'*'> >,
-    DelimitedList<Tok<SubjectFieldSpec>, Tok<Char<','> > > > {};
+    DelimitedList<ST<SubjectFieldSpec>, Tok<Char<','> > > > {};
 
   struct SelectFrom : Seq<SELECT, Aggregation, FROM, Selection> {};
   struct WhereClause : Seq<WHERE, Store<FilterExpressionGrammar::Cond> > {};

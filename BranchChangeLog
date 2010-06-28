@@ -1,3 +1,38 @@
+Mon Jun 28 21:59:00 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/MultiTopicImpl.h:
+        * dds/DCPS/MultiTopicImpl.cpp:
+
+          Began implemented spec-defined methods for MultiTopic.
+
+        * dds/DCPS/TopicExpressionGrammar.h:
+
+          Enhanced the grammar to get a useful AST out of it.
+
+        * tests/DCPS/TopicExpression/TopicExpression.cpp:
+
+          Added some new test cases.
+
+        * tests/DCPS/ManyTopicTest:
+        * tests/DCPS/ManyTopicTest/DataReaderListener1.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener2.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener3.cpp:
+        * tests/DCPS/ManyTopicTest/ManyTopicTest.mpc:
+        * tests/DCPS/ManyTopicTest/Writer.cpp:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+        * tests/DCPS/ManyTopicTypes:
+        * tests/DCPS/ManyTopicTypes/ManyTopicTypes.mpc:
+
+          Renamed these tests from "MultiTopic*" since they do not in fact
+          test MultiTopics.
+
+        * tests/DCPS/MultiTopicTest:
+        * tests/DCPS/MultiTopicTypes:
+
+          Removed these files.  They have been renamed.
+
 Fri Jun 25 20:02:08 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * BranchChangeLog:

@@ -1,9 +1,9 @@
-project(MultiTopicTestPublisher): dcpsexe {
+project(ManyTopicTestPublisher): dcpsexe {
   exename   = publisher
-  libpaths += ../MultiTopicTypes
+  libpaths += ../ManyTopicTypes
   libpaths += ../common
-  libs     +=  common MultiTopicTypes
-  after    += common MultiTopicTypes
+  libs     +=  common ManyTopicTypes
+  after    += common ManyTopicTypes
 
   Header_Files {
     common.h
@@ -16,12 +16,12 @@ project(MultiTopicTestPublisher): dcpsexe {
 }
 
 
-project(MultiTopicTestSubscriber): dcpsexe {
+project(ManyTopicTestSubscriber): dcpsexe {
   exename   = subscriber
-  libpaths += ../MultiTopicTypes
+  libpaths += ../ManyTopicTypes
   libpaths += ../common
-  libs     +=  common MultiTopicTypes
-  after    += common MultiTopicTypes
+  libs     +=  common ManyTopicTypes
+  after    += common ManyTopicTypes
 
   Header_Files {
     common.h
