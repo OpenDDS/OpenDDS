@@ -180,6 +180,9 @@ BE_GlobalData::spawn_options()
 void
 BE_GlobalData::parse_args(long& i, char** av)
 {
+  static const char WB_EXPORT_MACRO[] = "--export=";
+  static const size_t SZ_WB_EXPORT_MACRO = sizeof(WB_EXPORT_MACRO) - 1;
+
   switch (av[i][1]) {
   case 'o':
     idl_global->append_idl_flag(av[i + 1]);
@@ -201,6 +204,11 @@ BE_GlobalData::parse_args(long& i, char** av)
         ACE_TEXT(" option\n"), av[i]));
       idl_global->set_compile_flags(idl_global->compile_flags()
                                     | IDL_CF_ONLY_USAGE);
+    }
+    break;
+  case '-':
+    if (0 == ACE_OS::strncasecmp(av[i], WB_EXPORT_MACRO, SZ_WB_EXPORT_MACRO)) {
+      this->export_macro(av[i] + SZ_WB_EXPORT_MACRO);
     }
     break;
   default:
