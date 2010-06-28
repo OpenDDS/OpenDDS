@@ -1,3 +1,10 @@
+Mon Jun 28 15:53:43 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/be_global.cpp:
+
+          Added argument parsing for --export=Foo (backwards-compatibility with
+          dcps_ts.pl).
+
 Mon Jun 28 15:08:30 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Ownership/Writer.cpp:
