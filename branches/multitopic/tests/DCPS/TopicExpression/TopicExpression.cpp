@@ -84,8 +84,10 @@ bool testParsing() {
   ok &= parserTest<TopicExpressionGrammar::SelectFrom>(selfromtests);
 
   const char* topictests[] = {"SELECT * FROM t WHERE a < 100;",
-    "SELECT a FROM b;", "SELECT c FROM d", "SELECT * FROM e NATURAL JOIN f;",
-    "SELECT * FROM g INNER NATURAL JOIN h WHERE z = 3"};
+    "SELECT a FROM b;", "SELECT c x FROM d", "SELECT * FROM e NATURAL JOIN f;",
+    "SELECT y h, w AS i FROM g INNER NATURAL JOIN h WHERE z = 3",
+    "SELECT flight_name, x, y, z AS height FROM Location NATURAL JOIN "
+    "FlightPlan WHERE height < 1000 AND x<23"}; // from spec (fixed)
   ok &= parserTest<TopicExpressionGrammar::TopicCompleteInput>(topictests);
 
   return ok;
