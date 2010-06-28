@@ -1,7 +1,19 @@
+Mon Jun 28 15:08:30 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Ownership/Writer.cpp:
+        * tests/DCPS/Ownership/publisher.cpp:
+
+          Renamed global variable "delay" to avoid conflict with QNX system
+          headers.
+
+        * tests/DCPS/UnitTests/LivelinessCompatibility.cpp:
+
+          Need another #include for inline=0 GCC 3.3.x compatibility.
+
 Fri Jun 25 20:47:38 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Ownership/subscriber.cpp:
-        
+
           Moved result verify after Service_Participant shutdown.
           This would fix pure function called error on linux due
           to earlier result verify which failed sometimes.

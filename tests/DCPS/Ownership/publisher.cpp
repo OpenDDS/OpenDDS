@@ -27,7 +27,7 @@
 
 ::DDS::Duration_t deadline = {::DDS::DURATION_INFINITE_SEC, 0};
 ::DDS::Duration_t liveliness = {::DDS::DURATION_INFINITE_SEC, 0};
-int delay = 1;
+int dds_delay = 1;
 int reset_delay = 0;
 int ownership_strength = 0;
 int reset_ownership_strength = -1;
@@ -58,7 +58,7 @@ parse_args(int argc, ACE_TCHAR *argv[])
       deadline.sec = ACE_OS::atoi (get_opts.opt_arg());
       break;
     case 'y':
-      delay = ACE_OS::atoi (get_opts.opt_arg());
+      dds_delay = ACE_OS::atoi (get_opts.opt_arg());
       break;    
     case 'l':
       liveliness.sec = ACE_OS::atoi (get_opts.opt_arg());
