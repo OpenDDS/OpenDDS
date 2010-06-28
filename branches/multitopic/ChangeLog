@@ -1,15 +1,48 @@
+Mon Jun 28 16:07:20 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Serializer_wstring/Serializer_wstring.mpc:
+
+          Added an "after" to allow correct operation with parallel builds.
+
+Mon Jun 28 15:53:43 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/be_global.cpp:
+
+          Added argument parsing for --export=Foo (backwards-compatibility with
+          dcps_ts.pl).
+
+Mon Jun 28 15:08:30 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Ownership/Writer.cpp:
+        * tests/DCPS/Ownership/publisher.cpp:
+
+          Renamed global variable "delay" to avoid conflict with QNX system
+          headers.
+
+        * tests/DCPS/UnitTests/LivelinessCompatibility.cpp:
+
+          Need another #include for inline=0 GCC 3.3.x compatibility.
+
+Fri Jun 25 20:47:38 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/Ownership/subscriber.cpp:
+
+          Moved result verify after Service_Participant shutdown.
+          This would fix pure function called error on linux due
+          to earlier result verify which failed sometimes.
+
 Fri Jun 25 18:36:19 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * bin/dcps_tests.lst:
 
           Marked the Ownership update_strength test only run
           when built in topic is enabled.
-          
+
         * dds/DCPS/OwnershipManager.cpp:
 
           Fixed a memory corruption due to a possibility to
           erase vector end.
-          
+
 Thu Jun 24 21:21:57 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/GroupRakeData.h:
