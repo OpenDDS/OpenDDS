@@ -1,3 +1,9 @@
+Mon Jun 28 16:07:20 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Serializer_wstring/Serializer_wstring.mpc:
+
+          Added an "after" to allow correct operation with parallel builds.
+
 Mon Jun 28 15:53:43 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/be_global.cpp:
