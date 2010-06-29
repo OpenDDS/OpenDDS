@@ -4,7 +4,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:gmfgen="http://www.eclipse.org/gmf/2009/GenModel" packageNamePrefix="org.opendds.modeling.model.opendds.diagram.policylibrary"
     modelID="OpenDDS PolicyLibrary"
-    diagramFileExtension="opendds_diagram"
+    diagramFileExtension="opendds_diagram_policylibrary"
     copyrightText="(c) Copyright Object Computing, Incorporated.  2005,2010.  All rights reserved.">
   <diagram
       visualID="1000"
