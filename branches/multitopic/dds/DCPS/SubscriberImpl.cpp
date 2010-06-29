@@ -25,6 +25,7 @@
 #include "AssociationData.h"
 #include "Transient_Kludge.h"
 #include "ContentFilteredTopicImpl.h"
+#include "MultiTopicImpl.h"
 #include "GroupRakeData.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
@@ -143,12 +144,14 @@ ACE_THROW_SPEC((CORBA::SystemException))
   TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic_desc);
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  // only used for ContentFilteredTopic and MultiTopic
   ContentFilteredTopicImpl* cft = 0;
+  MultiTopicImpl* mt = 0;
   if (!topic_servant) {
     cft = dynamic_cast<ContentFilteredTopicImpl*>(a_topic_desc);
     if (cft) {
       topic_servant = dynamic_cast<TopicImpl*>(cft->get_related_topic());
+    } else {
+      mt = dynamic_cast<MultiTopicImpl*>(a_topic_desc);
     }
   }
 #endif
@@ -157,6 +160,17 @@ ACE_THROW_SPEC((CORBA::SystemException))
     this->get_default_datareader_qos(dr_qos);
 
   } else if (qos == DATAREADER_QOS_USE_TOPIC_QOS) {
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    if (mt) {
+      if (DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("SubscriberImpl::create_opendds_datareader, ")
+          ACE_TEXT("DATAREADER_QOS_USE_TOPIC_QOS can not be used ")
+          ACE_TEXT("to create a MultiTopic DataReader.\n")));
+      }
+      return DDS::DataReader::_nil();
+    }
+#endif
     DDS::TopicQos topic_qos;
     topic_servant->get_qos(topic_qos);
 
@@ -185,8 +199,14 @@ ACE_THROW_SPEC((CORBA::SystemException))
     return DDS::DataReader::_nil();
   }
 
-  OpenDDS::DCPS::TypeSupport_ptr typesupport =
-    topic_servant->get_type_support();
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  if (mt) {
+    return create_multitopic_datareader(mt, dr_qos, ext_qos, a_listener, mask);
+  }
+#endif
+
+  OpenDDS::DCPS::TypeSupport_ptr typesupport
+    = topic_servant->get_type_support();
 
   if (0 == typesupport) {
     CORBA::String_var name = a_topic_desc->get_name();
@@ -197,6 +217,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
                name.in()));
     return DDS::DataReader::_nil();
   }
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif
 
   DDS::DataReader_var dr_obj = typesupport->create_datareader();
 
@@ -255,6 +278,26 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // done in enable_reader
   return DDS::DataReader::_duplicate(dr_obj.in());
 }
+
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+DDS::DataReader_ptr
+SubscriberImpl::create_multitopic_datareader(MultiTopicImpl* multitopic,
+  const DDS::DataReaderQos& qos, const DataReaderQosExt& ext_qos,
+  DDS::DataReaderListener_ptr a_listener, DDS::StatusMask mask)
+{
+  const std::vector<std::string>& selection = multitopic->get_selection();
+  for (size_t i = 0; i < selection.size(); ++i) {
+    const DDS::Duration_t no_wait = {};
+    DDS::Topic_var t = participant_->find_topic(selection[i].c_str(), no_wait);
+    if (!t.in()) {
+      throw std::runtime_error("Topic: " + selection[i] + " not found.");
+    }
+  }
+
+  return 0;
+}
+#endif
 
 DDS::ReturnCode_t
 SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)

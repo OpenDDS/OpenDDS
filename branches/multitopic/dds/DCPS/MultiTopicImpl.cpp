@@ -13,6 +13,9 @@
 #include "MultiTopicImpl.h"
 #include "Registered_Data_Types.h"
 #include "DomainParticipantImpl.h"
+#include "TopicExpressionGrammar.h"
+#include "FilterEvaluator.h"
+#include "AstNodeWrapper.h"
 
 #include <stdexcept>
 
@@ -41,7 +44,33 @@ MultiTopicImpl::MultiTopicImpl(const char* name,
       participant)
   , subscription_expression_(subscription_expression)
   , expression_parameters_(expression_parameters)
-{}
+  , filter_eval_(NULL)
+{
+  const char* out = subscription_expression
+    + std::strlen(subscription_expression);
+  yard::SimpleTextParser parser(subscription_expression, out);
+  if (!parser.Parse<TopicExpressionGrammar::TopicCompleteInput>()) {
+    reportErrors(parser, subscription_expression);
+  }
+
+  for (AstNode* iter = parser.GetAstRoot()->GetFirstChild(); iter;
+      iter = iter->GetSibling()) {
+    if (iter->TypeMatches<TopicExpressionGrammar::SubjectFieldSpec>()) {
+      AstNode* fieldName = iter->GetFirstChild();
+      aggregation_.push_back(make_pair(toString(fieldName),
+        toString(fieldName->GetSibling())));
+    } else if (iter->TypeMatches<TopicExpressionGrammar::TopicName>()) {
+      selection_.push_back(toString(iter));
+    } else {
+      filter_eval_ = new FilterEvaluator(iter);
+    }
+  }
+}
+
+MultiTopicImpl::~MultiTopicImpl()
+{
+  delete filter_eval_;
+}
 
 char* MultiTopicImpl::get_subscription_expression()
 ACE_THROW_SPEC((CORBA::SystemException))

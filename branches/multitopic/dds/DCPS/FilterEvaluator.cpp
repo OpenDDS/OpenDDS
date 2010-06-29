@@ -13,8 +13,7 @@
 
 #include "FilterEvaluator.h"
 #include "FilterExpressionGrammar.h"
-
-#include "yard/yard_parser.hpp"
+#include "AstNodeWrapper.h"
 
 #include <ace/ACE.h>
 
@@ -25,44 +24,17 @@
 
 using namespace OpenDDS::DCPS::FilterExpressionGrammar;
 
-namespace {
-  std::string toString(yard::TreeBuildingParser<char>::Node* iter)
-  {
-    return std::string(iter->GetFirstToken(), iter->GetLastToken());
-  }
-}
-
 namespace OpenDDS {
 namespace DCPS {
 
-typedef yard::TreeBuildingParser<char>::Node AstNode;
-
-/// keeps the details of yard out of the FilterEvaluator header file
-struct FilterEvaluator::AstNodeWrapper {
-  AstNodeWrapper(AstNode* ptr)
-    : ptr_(ptr) {}
-  operator AstNode*() const { return ptr_; }
-  AstNode* operator->() const { return ptr_; }
-  AstNode* ptr_;
-};
-
 FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
-  : filter_(filter), filter_root_(0)
+  : filter_root_(0)
 {
   const char* out = filter + std::strlen(filter);
   yard::SimpleTextParser parser(filter, out);
   if (!(allowOrderBy ? parser.Parse<QueryCompleteInput>()
       : parser.Parse<FilterCompleteInput>())) {
-    AstNode* prev = 0;
-    for (AstNode* iter = parser.GetAstRoot()->GetFirstChild(); iter;
-        iter = iter->GetSibling()) {
-      prev = iter;
-    }
-    ptrdiff_t pos = prev ? prev->GetLastToken() - parser.Begin() : 0;
-    std::ostringstream oss;
-    oss << pos;
-    throw std::runtime_error("Invalid expression [" + filter_
-      + "] at character " + oss.str());
+    reportErrors(parser, filter);
   }
 
   bool found_order_by = false;
@@ -76,6 +48,11 @@ FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
       filter_root_ = walkAst(iter, filter_root_);
     }
   }
+}
+
+FilterEvaluator::FilterEvaluator(const AstNodeWrapper& yardNode)
+  : filter_root_(walkAst(yardNode, NULL))
+{
 }
 
 class FilterEvaluator::EvalNode {

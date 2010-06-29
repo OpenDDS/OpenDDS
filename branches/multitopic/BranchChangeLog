@@ -1,3 +1,27 @@
+Tue Jun 29 22:24:52 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/AstNodeWrapper.h:
+        * dds/DCPS/ContentFilteredTopicImpl.h:
+        * dds/DCPS/ContentFilteredTopicImpl.cpp:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/MultiTopicImpl.h:
+        * dds/DCPS/MultiTopicImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Re-factored some common code from the FilterEvaluator to be reused
+          in MultiTopic (WHERE clause).  Continued implementing MultiTopic.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.idl:
+        * tests/DCPS/MultiTopic/MultiTopicTest.mpc:
+        * tests/DCPS/MultiTopic/dcps.ini:
+        * tests/DCPS/MultiTopic/run_test.pl:
+
+          New test for MultiTopic -- it doesn't do anything yet.
+
 Tue Jun 29 14:50:41 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/MultiTopicImpl.cpp:
