@@ -14,6 +14,8 @@
 #include "Registered_Data_Types.h"
 #include "DomainParticipantImpl.h"
 
+#include <stdexcept>
+
 namespace OpenDDS {
 namespace DCPS {
 
