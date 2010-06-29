@@ -19,6 +19,10 @@ class OpenDDS_Model_Export Exception : public virtual std::exception {
   public: virtual const char* what() const throw() { return "OpenDDS::Model::Exception"; }
 };
 
+class OpenDDS_Model_Export NoServiceException : public virtual Exception {
+  public: virtual const char* what() const throw() { return "NoService"; }
+};
+
 class OpenDDS_Model_Export NoParticipantException : public virtual Exception {
   public: virtual const char* what() const throw() { return "NoParticipant"; }
 };

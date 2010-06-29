@@ -9,9 +9,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "model_export.h" // FROM GENERATOR CONFIGURATION SPEC
-
-#include "dds/DdsDcpsInfrastructureC.h" // For QoS Policy types.
+#include "model_export.h"
+#include "CopyQos.h"
 
 namespace DDS {
   class DomainParticipant;
@@ -29,8 +28,12 @@ namespace OpenDDS { namespace DCPS {
 
 namespace OpenDDS { namespace Model {
 
+  class CopyQos;
+
   class OpenDDS_Model_Export Delegate {
     public:
+      Delegate();
+
       void init( int argc, char** argv);
 
       void
@@ -71,6 +74,7 @@ namespace OpenDDS { namespace Model {
 
       void
       createPublication(
+        unsigned int       which,
         DDS::DataWriter*&  writer,
         DDS::Publisher*    publisher,
         DDS::Topic*        topic,
@@ -80,6 +84,7 @@ namespace OpenDDS { namespace Model {
 
       void
       createSubscription(
+        unsigned int       which,
         DDS::DataReader*&  reader,
         DDS::Subscriber*   subscriber,
         DDS::Topic*        topic,
@@ -94,6 +99,11 @@ namespace OpenDDS { namespace Model {
         const char*                            kind,
         OpenDDS::DCPS::TransportConfiguration* config
       );
+
+      CopyQos*& service();
+
+    private:
+      CopyQos* service_;
   };
 
 } } // End of namespace OpenDDS::Model

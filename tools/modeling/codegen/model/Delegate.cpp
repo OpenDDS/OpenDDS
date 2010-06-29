@@ -10,10 +10,21 @@
 
 #include "dds/DCPS/Service_Participant.h"
 
+OpenDDS::Model::Delegate::Delegate()
+ : service_( 0)
+{
+}
+
 void
 OpenDDS::Model::Delegate::init( int argc, char** argv)
 {
   TheParticipantFactoryWithArgs( argc, argv);
+}
+
+OpenDDS::Model::CopyQos*&
+OpenDDS::Model::Delegate::service()
+{
+  return this->service_;
 }
 
 void
@@ -105,6 +116,7 @@ OpenDDS::Model::Delegate::createSubscriber(
 
 void
 OpenDDS::Model::Delegate::createPublication(
+  unsigned int       which,
   DDS::DataWriter*&  writer,
   DDS::Publisher*    publisher,
   DDS::Topic*        topic,
@@ -112,16 +124,15 @@ OpenDDS::Model::Delegate::createPublication(
   DDS::StatusMask    mask
 )
 {
-  // DDS::TopicQos topicQos = TheServiceParticipant->initial_TopicQos();
-  // topic->get_qos( topicQos);
-  // publisher->get_default_datawriter_qos( writerQos);
-  // publisher->copy_from_topic_qos( writerQos, topicQos);
+  if( !this->service_) {
+    throw NoServiceException();
+  }
 
-  /// N.B. The copy_from_topic_qos() will overwrite any settings from the
-  ///      writer Qos, which is NOT what we want.
-
-  // Maybe something like:
-  //   this->modelData_.loadWriterQos( writerQos);
+  DDS::TopicQos topicQos = TheServiceParticipant->initial_TopicQos();
+  topic->get_qos( topicQos);
+  publisher->get_default_datawriter_qos( writerQos);
+  publisher->copy_from_topic_qos( writerQos, topicQos);
+  this->service_->copyPublicationQos( which, writerQos);
 
   writer = publisher->create_datawriter(
         topic,
@@ -136,6 +147,7 @@ OpenDDS::Model::Delegate::createPublication(
 
 void
 OpenDDS::Model::Delegate::createSubscription(
+  unsigned int       which,
   DDS::DataReader*&  reader,
   DDS::Subscriber*   subscriber,
   DDS::Topic*        topic,
@@ -143,16 +155,15 @@ OpenDDS::Model::Delegate::createSubscription(
   DDS::StatusMask    mask
 )
 {
-  // DDS::TopicQos topicQos = TheServiceParticipant->initial_TopicQos();
-  // topic->get_qos( topicQos);
-  // subscriber->get_default_datareader_qos( readerQos);
-  // subscriber->copy_from_topic_qos( readerQos, topicQos);
+  if( !this->service_) {
+    throw NoServiceException();
+  }
 
-  /// N.B. The copy_from_topic_qos() will overwrite any settings from the
-  ///      reader Qos, which is NOT what we want.
-
-  // Maybe something like:
-  //   this->modelData_.loadReaderQos( readerQos);
+  DDS::TopicQos topicQos = TheServiceParticipant->initial_TopicQos();
+  topic->get_qos( topicQos);
+  subscriber->get_default_datareader_qos( readerQos);
+  subscriber->copy_from_topic_qos( readerQos, topicQos);
+  this->service_->copySubscriptionQos( which, readerQos);
 
   reader = subscriber->create_datareader(
         topic,

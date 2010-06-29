@@ -1,3 +1,28 @@
+Tue Jun 29 19:26:20 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/codegen/model/CopyQos.h:
+
+          Abstract interface to allow dependency free callbacks for model
+          data.
+
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+
+          Store a callback and use it to overwrite reader and writer Qos
+          once we have the Default+Topic values.
+
+        * tools/modeling/codegen/model/Exceptions.h:
+
+          Add a NoService exception for when the callback is not there.
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Implement the callback interface and pass it to the delegate
+          on construction.  Delegate the Qos copy calls of the interface
+          to the actual model data after translating the raw integer to
+          the Enumeration value and range checking it.
+
 Tue Jun 29 13:25:55 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfgen:

@@ -5,6 +5,8 @@ template< typename ModelName>
 inline
 OpenDDS::Model::Service< ModelName>::Service()
 {
+  this->delegate_.service() = this;
+
   for( int index = 0; index < OpenDDS::Model::modelname::Elements::Participants::LAST_INDEX; ++index) {
     this->participants_[ index] = 0;
   }
@@ -245,6 +247,7 @@ OpenDDS::Model::Service< ModelName>::createPublication( typename DataWriters::Va
   }
 
   this->delegate_.createPublication(
+    writer,
     this->writers_[ writer],
     this->publishers_[ publisher],
     this->topics_[ participant][ topic],
@@ -270,6 +273,7 @@ OpenDDS::Model::Service< ModelName>::createSubscription( typename DataReaders::V
   }
 
   this->delegate_.createSubscription(
+    reader,
     this->readers_[ reader],
     this->subscribers_[ subscriber],
     this->topics_[ participant][ topic],
@@ -289,5 +293,35 @@ OpenDDS::Model::Service< ModelName>::createTransport( typename Transports::Value
     this->modelData_.transportKind( transport),
     this->modelData_.transportConfig( transport)
   );
+}
+
+template< typename ModelName>
+inline
+void
+OpenDDS::Model::Service< ModelName>::copyPublicationQos(
+  unsigned int        which,
+  DDS::DataWriterQos& writerQos
+)
+{
+  typename DataWriters::Values writer = static_cast< typename DataWriters::Values>( which);
+  if( writer < 0 || writer >= DataWriters::LAST_INDEX) {
+    throw OutOfBoundsException();
+  }
+  this->modelData_.copyPublicationQos( writer, writerQos);
+}
+
+template< typename ModelName>
+inline
+void
+OpenDDS::Model::Service< ModelName>::copySubscriptionQos(
+  unsigned int        which,
+  DDS::DataReaderQos& readerQos
+)
+{
+  typename DataReaders::Values reader = static_cast< typename DataReaders::Values>( which);
+  if( reader < 0 || reader >= DataReaders::LAST_INDEX) {
+    throw OutOfBoundsException();
+  }
+  this->modelData_.copySubscriptionQos( reader, readerQos);
 }
 
