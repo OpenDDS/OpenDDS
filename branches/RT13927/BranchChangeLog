@@ -1,3 +1,11 @@
+Tue Jun 29 13:25:55 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfgen:
+
+        Made file extension for diagram different than that for the main
+        diagram. Although it has no runtime effect, it avoids a warning
+        about two diagrams sharing the same extension.
+
 Fri Jun 25 22:07:19 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/codegen/model/Delegate.cpp:
