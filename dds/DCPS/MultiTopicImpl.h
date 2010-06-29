@@ -13,7 +13,10 @@
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 #include "dds/DCPS/TopicDescriptionImpl.h"
+
 #include <string>
+#include <vector>
+#include <utility>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -21,6 +24,8 @@
 
 namespace OpenDDS {
 namespace DCPS {
+
+class FilterEvaluator;
 
 class OpenDDS_Dcps_Export MultiTopicImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::MultiTopic>
@@ -31,7 +36,7 @@ public:
     const DDS::StringSeq& expression_parameters,
     DomainParticipantImpl* participant);
 
-  virtual ~MultiTopicImpl() {}
+  virtual ~MultiTopicImpl();
 
   char* get_subscription_expression()
     ACE_THROW_SPEC((CORBA::SystemException));
@@ -42,9 +47,16 @@ public:
   DDS::ReturnCode_t set_expression_parameters(const DDS::StringSeq& parameters)
     ACE_THROW_SPEC((CORBA::SystemException));
 
+  const std::vector<std::string>& get_selection() const {return selection_;}
+
 private:
   std::string subscription_expression_;
   DDS::StringSeq expression_parameters_;
+  FilterEvaluator* filter_eval_;
+
+  typedef std::pair<std::string, std::string> SubjectFieldSpec;
+  std::vector<SubjectFieldSpec> aggregation_;
+  std::vector<std::string> selection_;
 
   ///concurrent access to expression_parameters_
   mutable ACE_Recursive_Thread_Mutex lock_;

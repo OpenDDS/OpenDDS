@@ -1,0 +1,10 @@
+
+// example from the DCPS Specification, Annex A, Section 3
+
+#pragma DCPS_DATA_TYPE "Resulting"
+struct Resulting {
+  string flight_name;
+  long x;
+  long y;
+  long height;
+};

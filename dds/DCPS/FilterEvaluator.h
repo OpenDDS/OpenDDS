@@ -28,7 +28,12 @@ const MetaStruct& getMetaStruct();
 
 class OpenDDS_Dcps_Export FilterEvaluator {
 public:
+
+  struct AstNodeWrapper;
+
   FilterEvaluator(const char* filter, bool allowOrderBy);
+
+  explicit FilterEvaluator(const AstNodeWrapper& yardNode);
 
   ~FilterEvaluator();
 
@@ -43,24 +48,17 @@ public:
                   getMetaStruct<T>(), params);
   }
 
-  const char* getFilterString() const
-  {
-    return filter_.c_str();
-  }
-
   class EvalNode;
 
 private:
   FilterEvaluator(const FilterEvaluator&);
   FilterEvaluator& operator=(const FilterEvaluator&);
 
-  struct AstNodeWrapper;
   EvalNode* walkAst(const AstNodeWrapper& node, EvalNode* prev);
 
   bool eval_i(const void* sample, const MetaStruct& meta,
               const DDS::StringSeq& params) const;
 
-  std::string filter_;
   EvalNode* filter_root_;
   std::vector<std::string> order_bys_;
 };

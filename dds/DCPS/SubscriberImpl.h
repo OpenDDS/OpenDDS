@@ -37,6 +37,9 @@ class DomainParticipantImpl;
 //class DataReaderImpl;
 class Monitor;
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+class MultiTopicImpl;
+#endif
 
 // Keep track of all the DataReaders attached to this
 // Subscriber
@@ -217,6 +220,13 @@ public:
                                 Coherent_State& group_state);
 
 private:
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  DDS::DataReader_ptr create_multitopic_datareader(MultiTopicImpl* multitopic,
+    const DDS::DataReaderQos& qos, const DataReaderQosExt& ext_qos,
+    DDS::DataReaderListener_ptr a_listener, DDS::StatusMask mask);
+#endif
+
   DDS::InstanceHandle_t        handle_;
 
   DDS::SubscriberQos           qos_;
