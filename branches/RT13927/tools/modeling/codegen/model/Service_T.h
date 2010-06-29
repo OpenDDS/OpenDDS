@@ -10,12 +10,13 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "Delegate.h"
+#include "CopyQos.h"
 #include "dds/DdsDcpsC.h"
 
 namespace OpenDDS { namespace Model {
 
   template< typename ModelName>
-  class Service {
+  class Service : public CopyQos {
     public:
       typedef typename ModelName::Data         Data;
       typedef typename ModelName::Participants Participants;
@@ -70,6 +71,17 @@ namespace OpenDDS { namespace Model {
       void createTransport(
              typename Transports::Values transport
            );
+      ///}
+
+      ///( @name Delegate Callbacks
+      virtual void copyPublicationQos(
+                     unsigned int        which,
+                     DDS::DataWriterQos& writerQos
+                   );
+      virtual void copySubscriptionQos(
+                     unsigned int        which,
+                     DDS::DataReaderQos& readerQos
+                   );
       ///}
 
       Data     modelData_;
