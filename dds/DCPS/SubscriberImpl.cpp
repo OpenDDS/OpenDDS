@@ -36,6 +36,8 @@
 #include "ace/Auto_Ptr.h"
 #include "ace/Vector_T.h"
 
+#include <stdexcept>
+
 namespace OpenDDS {
 namespace DCPS {
 

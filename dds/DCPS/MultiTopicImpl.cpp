@@ -18,6 +18,7 @@
 #include "AstNodeWrapper.h"
 
 #include <stdexcept>
+#include <cstring>
 
 namespace OpenDDS {
 namespace DCPS {
