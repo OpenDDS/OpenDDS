@@ -13,6 +13,7 @@
 
 #include "yard/yard_parser.hpp"
 #include <sstream>
+#include <stdexcept>
 
 namespace OpenDDS {
 namespace DCPS {
