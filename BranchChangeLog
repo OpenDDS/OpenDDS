@@ -1,3 +1,11 @@
+Wed Jun 30 20:18:30 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+          For DataLibrary, set containment of TopicFields to true
+          (composition) so TopicFields can have an owning parent.
+
 Wed Jun 30 15:41:01 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfgen:
