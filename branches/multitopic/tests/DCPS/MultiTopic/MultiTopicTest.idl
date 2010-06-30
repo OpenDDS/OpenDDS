@@ -1,5 +1,17 @@
+// example from the DCPS Specification v1.2, Annex A, Section 3
 
-// example from the DCPS Specification, Annex A, Section 3
+#pragma DCPS_DATA_TYPE "Point3D"
+struct Point3D {
+  long x;
+  long y;
+  long z;
+};
+
+#pragma DCPS_DATA_TYPE "PlanInfo"
+struct PlanInfo {
+  string flight_name;
+  string tailno;
+};
 
 #pragma DCPS_DATA_TYPE "Resulting"
 struct Resulting {
