@@ -1,3 +1,19 @@
+Wed Jun 30 21:58:49 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Basic cleanup; error messages.
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+
+          Fixed a memory leak of the type name string.
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.idl:
+
+          Continued developing the simple functional test for MultiTopic.
+
 Wed Jun 30 15:21:26 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/AstNodeWrapper.h:

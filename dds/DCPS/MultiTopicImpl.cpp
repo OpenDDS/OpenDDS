@@ -30,7 +30,7 @@ namespace {
     TypeSupport_ptr p = Registered_Data_Types->lookup(participant, type_name);
     if (!p) {
       throw std::runtime_error(std::string("Data type: ") + type_name +
-        "is not registered.");
+        " is not registered.");
     }
     return p;
   }

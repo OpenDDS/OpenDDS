@@ -207,8 +207,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
   }
 #endif
 
-  OpenDDS::DCPS::TypeSupport_ptr typesupport
-    = topic_servant->get_type_support();
+  OpenDDS::DCPS::TypeSupport_ptr typesupport =
+    topic_servant->get_type_support();
 
   if (0 == typesupport) {
     CORBA::String_var name = a_topic_desc->get_name();
@@ -219,9 +219,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
                name.in()));
     return DDS::DataReader::_nil();
   }
-
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-#endif
 
   DDS::DataReader_var dr_obj = typesupport->create_datareader();
 

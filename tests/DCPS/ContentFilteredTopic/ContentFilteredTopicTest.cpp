@@ -39,7 +39,8 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   const MessageTypeSupport_var& ts, const Publisher_var& pub,
   const Subscriber_var& sub)
 {
-  Topic_var topic = dp->create_topic("MyTopic", ts->get_type_name(),
+  CORBA::String_var type_name = ts->get_type_name();
+  Topic_var topic = dp->create_topic("MyTopic", type_name,
                                      TOPIC_QOS_DEFAULT, 0,
                                      DEFAULT_STATUS_MASK);
 
