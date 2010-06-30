@@ -71,6 +71,26 @@
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
+      <labels
+          visualID="5023"
+          editPartClassName="LifespanQosPolicyStereoEditPart"
+          itemSemanticEditPolicyClassName="LifespanQosPolicyStereoItemSemanticEditPolicy"
+          notationViewFactoryClassName="LifespanQosPolicyNameViewFactory"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«lifespanQosPolicy»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
     </topLevelNodes>
     <topLevelNodes
         visualID="2002"
@@ -116,6 +136,25 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5024"
+          editPartClassName="OsQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="OsQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«osQosPolicy»">
           <metaFeatures
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
@@ -169,6 +208,25 @@
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
+      <labels
+          visualID="5025"
+          editPartClassName="GdQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="GdQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«gdQosPolicy»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
     </topLevelNodes>
     <topLevelNodes
         visualID="2004"
@@ -214,6 +272,25 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5026"
+          editPartClassName="RlQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="RlQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«rlQosPolicy»">
           <metaFeatures
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
@@ -267,6 +344,25 @@
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
+      <labels
+          visualID="5027"
+          editPartClassName="ReliabilityQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="ReliabilityQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«reliabilityQosPolicy»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
     </topLevelNodes>
     <topLevelNodes
         visualID="2006"
@@ -312,6 +408,25 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5028"
+          editPartClassName="PresentationQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="PresentationQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«presentationQosPolicy»">
           <metaFeatures
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
@@ -365,6 +480,25 @@
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
+      <labels
+          visualID="5029"
+          editPartClassName="EfQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="EfQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«efQosPolicy»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
     </topLevelNodes>
     <topLevelNodes
         visualID="2008"
@@ -410,6 +544,25 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5030"
+          editPartClassName="TdQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="TdQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«tdQosPolicy»">
           <metaFeatures
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
@@ -463,6 +616,25 @@
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
+      <labels
+          visualID="5031"
+          editPartClassName="WdlQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="WdlQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«wdlQosPolicy»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
     </topLevelNodes>
     <topLevelNodes
         visualID="2010"
@@ -508,6 +680,25 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5032"
+          editPartClassName="DestinationOrderQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="DestinationOrderQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«destinationOrderQosPolicy»">
           <metaFeatures
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
@@ -561,6 +752,25 @@
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
+      <labels
+          visualID="5033"
+          editPartClassName="OwnershipQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="OwnershipQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«ownershipQosPolicy»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
     </topLevelNodes>
     <topLevelNodes
         visualID="2012"
@@ -606,6 +816,25 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5034"
+          editPartClassName="UdQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="UdQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«udQosPolicy»">
           <metaFeatures
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
@@ -659,6 +888,25 @@
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
+      <labels
+          visualID="5035"
+          editPartClassName="LbQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="LbQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«lbQosPolicy»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
     </topLevelNodes>
     <topLevelNodes
         visualID="2014"
@@ -704,6 +952,25 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5036"
+          editPartClassName="DurabilityQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="DurabilityQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«durabilityQosPolicy»">
           <metaFeatures
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
@@ -757,6 +1024,25 @@
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
+      <labels
+          visualID="5037"
+          editPartClassName="TbfQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="TbfQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«tbfQosPolicy»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
     </topLevelNodes>
     <topLevelNodes
         visualID="2016"
@@ -802,6 +1088,25 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5038"
+          editPartClassName="RdlQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="RdlQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«rdlQosPolicy»">
           <metaFeatures
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
@@ -855,6 +1160,25 @@
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
+      <labels
+          visualID="5039"
+          editPartClassName="LivelinessQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="LivelinessQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«livelinessQosPolicy»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
     </topLevelNodes>
     <topLevelNodes
         visualID="2018"
@@ -900,6 +1224,25 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5040"
+          editPartClassName="PartitionQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="PartitionQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«partitionQosPolicy»">
           <metaFeatures
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
@@ -953,6 +1296,25 @@
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
+      <labels
+          visualID="5041"
+          editPartClassName="TpQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="TpQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«tpQosPolicy»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
     </topLevelNodes>
     <topLevelNodes
         visualID="2020"
@@ -998,6 +1360,25 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5042"
+          editPartClassName="HistoryQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="HistoryQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«historyQosPolicy»">
           <metaFeatures
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
@@ -1051,6 +1432,25 @@
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
+      <labels
+          visualID="5043"
+          editPartClassName="DeadlineQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="DeadlineQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«deadlineQosPolicy»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
     </topLevelNodes>
     <topLevelNodes
         visualID="2022"
@@ -1100,45 +1500,119 @@
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
+      <labels
+          visualID="5044"
+          editPartClassName="DsQosPolicyName2EditPart"
+          itemSemanticEditPolicyClassName="DsQosPolicyName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureClassFigure_StereoLabel"
+            figureQualifiedClassName="org.eclipse.uml2.diagram.common.draw2d.StereotypeLabel2"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«dsQosPolicy»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
     </topLevelNodes>
     <palette>
       <groups
           title="opendds">
         <entries
             xsi:type="gmfgen:ToolEntry"
+            title="DeadlineQosPolicy"
+            description="Create new DeadlineQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.20"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="DestinationOrderQosPolicy"
+            description="Create new DestinationOrderQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.9"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="DsQosPolicy"
+            description="Create new DsQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.21"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="DurabilityQosPolicy"
+            description="Create new DurabilityQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.13"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="EfQosPolicy"
+            description="Create new EfQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.6"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="GdQosPolicy"
+            description="Create new GdQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.2"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
             title="HistoryQosPolicy"
             description="Create new HistoryQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.0"/>
+            genNodes="//@diagram/@topLevelNodes.19"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="LbQosPolicy"
+            description="Create new LbQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.12"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="LifespanQosPolicy"
             description="Create new LifespanQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.0"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="LivelinessQosPolicy"
+            description="Create new LivelinessQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.16"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="OsQosPolicy"
+            description="Create new OsQosPolicy"
             genNodes="//@diagram/@topLevelNodes.1"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="OwnershipQosPolicy"
             description="Create new OwnershipQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.2"/>
+            genNodes="//@diagram/@topLevelNodes.10"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
-            title="OsQosPolicy"
-            description="Create new OsQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.3"/>
+            title="PartitionQosPolicy"
+            description="Create new PartitionQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.17"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
-            title="WdlQosPolicy"
-            description="Create new WdlQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.4"/>
+            title="PresentationQosPolicy"
+            description="Create new PresentationQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.5"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="RdlQosPolicy"
             description="Create new RdlQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.5"/>
+            genNodes="//@diagram/@topLevelNodes.15"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
-            title="UdQosPolicy"
-            description="Create new UdQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.6"/>
+            title="ReliabilityQosPolicy"
+            description="Create new ReliabilityQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.4"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="RlQosPolicy"
+            description="Create new RlQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.3"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="TbfQosPolicy"
+            description="Create new TbfQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.14"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="TdQosPolicy"
@@ -1146,74 +1620,19 @@
             genNodes="//@diagram/@topLevelNodes.7"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
-            title="LbQosPolicy"
-            description="Create new LbQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.8"/>
-        <entries
-            xsi:type="gmfgen:ToolEntry"
-            title="TbfQosPolicy"
-            description="Create new TbfQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.9"/>
-        <entries
-            xsi:type="gmfgen:ToolEntry"
-            title="GdQosPolicy"
-            description="Create new GdQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.10"/>
-        <entries
-            xsi:type="gmfgen:ToolEntry"
             title="TpQosPolicy"
             description="Create new TpQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.11"/>
-        <entries
-            xsi:type="gmfgen:ToolEntry"
-            title="EfQosPolicy"
-            description="Create new EfQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.12"/>
-        <entries
-            xsi:type="gmfgen:ToolEntry"
-            title="DeadlineQosPolicy"
-            description="Create new DeadlineQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.13"/>
-        <entries
-            xsi:type="gmfgen:ToolEntry"
-            title="RlQosPolicy"
-            description="Create new RlQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.14"/>
-        <entries
-            xsi:type="gmfgen:ToolEntry"
-            title="PresentationQosPolicy"
-            description="Create new PresentationQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.15"/>
-        <entries
-            xsi:type="gmfgen:ToolEntry"
-            title="PartitionQosPolicy"
-            description="Create new PartitionQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.16"/>
-        <entries
-            xsi:type="gmfgen:ToolEntry"
-            title="ReliabilityQosPolicy"
-            description="Create new ReliabilityQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.17"/>
-        <entries
-            xsi:type="gmfgen:ToolEntry"
-            title="DsQosPolicy"
-            description="Create new DsQosPolicy"
             genNodes="//@diagram/@topLevelNodes.18"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
-            title="LivelinessQosPolicy"
-            description="Create new LivelinessQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.19"/>
+            title="UdQosPolicy"
+            description="Create new UdQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.11"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
-            title="DurabilityQosPolicy"
-            description="Create new DurabilityQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.20"/>
-        <entries
-            xsi:type="gmfgen:ToolEntry"
-            title="DestinationOrderQosPolicy"
-            description="Create new DestinationOrderQosPolicy"
-            genNodes="//@diagram/@topLevelNodes.21"/>
+            title="WdlQosPolicy"
+            description="Create new WdlQosPolicy"
+            genNodes="//@diagram/@topLevelNodes.8"/>
       </groups>
     </palette>
     <preferencePages
@@ -1245,8 +1664,9 @@
   <plugin
       iD="org.opendds.modeling.diagram.policylibrary"
       name="OpenDDS PolicyLibrary Plugin">
-    <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
     <requiredPlugins>org.opendds.modeling.uml2tools.mirrored</requiredPlugins>
+    <requiredPlugins>org.eclipse.uml2.diagram.common</requiredPlugins>
+    <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
   </plugin>
   <editor/>
   <navigator>
@@ -1345,7 +1765,7 @@
       extensibleViaService="true">
     <implementations
         xsi:type="gmfgen:PredefinedParser"
-        uses="//@diagram/@topLevelNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.1/@labels.0/@modelFacet //@diagram/@topLevelNodes.2/@labels.0/@modelFacet //@diagram/@topLevelNodes.3/@labels.0/@modelFacet //@diagram/@topLevelNodes.4/@labels.0/@modelFacet //@diagram/@topLevelNodes.5/@labels.0/@modelFacet //@diagram/@topLevelNodes.6/@labels.0/@modelFacet //@diagram/@topLevelNodes.7/@labels.0/@modelFacet //@diagram/@topLevelNodes.8/@labels.0/@modelFacet //@diagram/@topLevelNodes.9/@labels.0/@modelFacet //@diagram/@topLevelNodes.10/@labels.0/@modelFacet //@diagram/@topLevelNodes.11/@labels.0/@modelFacet //@diagram/@topLevelNodes.12/@labels.0/@modelFacet //@diagram/@topLevelNodes.13/@labels.0/@modelFacet //@diagram/@topLevelNodes.14/@labels.0/@modelFacet //@diagram/@topLevelNodes.15/@labels.0/@modelFacet //@diagram/@topLevelNodes.16/@labels.0/@modelFacet //@diagram/@topLevelNodes.17/@labels.0/@modelFacet //@diagram/@topLevelNodes.18/@labels.0/@modelFacet //@diagram/@topLevelNodes.19/@labels.0/@modelFacet //@diagram/@topLevelNodes.20/@labels.0/@modelFacet //@diagram/@topLevelNodes.21/@labels.0/@modelFacet"/>
+        uses="//@diagram/@topLevelNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.0/@labels.1/@modelFacet //@diagram/@topLevelNodes.1/@labels.0/@modelFacet //@diagram/@topLevelNodes.1/@labels.1/@modelFacet //@diagram/@topLevelNodes.2/@labels.0/@modelFacet //@diagram/@topLevelNodes.2/@labels.1/@modelFacet //@diagram/@topLevelNodes.3/@labels.0/@modelFacet //@diagram/@topLevelNodes.3/@labels.1/@modelFacet //@diagram/@topLevelNodes.4/@labels.0/@modelFacet //@diagram/@topLevelNodes.4/@labels.1/@modelFacet //@diagram/@topLevelNodes.5/@labels.0/@modelFacet //@diagram/@topLevelNodes.5/@labels.1/@modelFacet //@diagram/@topLevelNodes.6/@labels.0/@modelFacet //@diagram/@topLevelNodes.6/@labels.1/@modelFacet //@diagram/@topLevelNodes.7/@labels.0/@modelFacet //@diagram/@topLevelNodes.7/@labels.1/@modelFacet //@diagram/@topLevelNodes.8/@labels.0/@modelFacet //@diagram/@topLevelNodes.8/@labels.1/@modelFacet //@diagram/@topLevelNodes.9/@labels.0/@modelFacet //@diagram/@topLevelNodes.9/@labels.1/@modelFacet //@diagram/@topLevelNodes.10/@labels.0/@modelFacet //@diagram/@topLevelNodes.10/@labels.1/@modelFacet //@diagram/@topLevelNodes.11/@labels.0/@modelFacet //@diagram/@topLevelNodes.11/@labels.1/@modelFacet //@diagram/@topLevelNodes.12/@labels.0/@modelFacet //@diagram/@topLevelNodes.12/@labels.1/@modelFacet //@diagram/@topLevelNodes.13/@labels.0/@modelFacet //@diagram/@topLevelNodes.13/@labels.1/@modelFacet //@diagram/@topLevelNodes.14/@labels.0/@modelFacet //@diagram/@topLevelNodes.14/@labels.1/@modelFacet //@diagram/@topLevelNodes.15/@labels.0/@modelFacet //@diagram/@topLevelNodes.15/@labels.1/@modelFacet //@diagram/@topLevelNodes.16/@labels.0/@modelFacet //@diagram/@topLevelNodes.16/@labels.1/@modelFacet //@diagram/@topLevelNodes.17/@labels.0/@modelFacet //@diagram/@topLevelNodes.17/@labels.1/@modelFacet //@diagram/@topLevelNodes.18/@labels.0/@modelFacet //@diagram/@topLevelNodes.18/@labels.1/@modelFacet //@diagram/@topLevelNodes.19/@labels.0/@modelFacet //@diagram/@topLevelNodes.19/@labels.1/@modelFacet //@diagram/@topLevelNodes.20/@labels.0/@modelFacet //@diagram/@topLevelNodes.20/@labels.1/@modelFacet //@diagram/@topLevelNodes.21/@labels.0/@modelFacet //@diagram/@topLevelNodes.21/@labels.1/@modelFacet"/>
   </labelParsers>
   <contextMenus
       context="//@diagram">

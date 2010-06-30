@@ -17,9 +17,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«lifespanQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.0"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.8"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -37,9 +46,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«osQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.1"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.10"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -57,9 +75,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«gdQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.2"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.5"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -77,9 +104,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«rlQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.3"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.16"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -97,9 +133,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«reliabilityQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.4"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.15"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -117,9 +162,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«presentationQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.5"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.13"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -137,9 +191,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«efQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.6"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.4"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -157,9 +220,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«tdQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.7"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.18"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -177,9 +249,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«wdlQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.8"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.21"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -197,9 +278,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«destinationOrderQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.9"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.1"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -217,9 +307,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«ownershipQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.10"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.11"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -237,9 +336,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«udQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.11"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.20"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -257,9 +365,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«lbQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.12"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.7"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -277,9 +394,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«durabilityQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.13"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.3"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -297,9 +423,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«tbfQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.14"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.17"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -317,9 +452,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«rdlQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.15"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.14"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -337,9 +481,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«livelinessQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.16"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.9"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -357,9 +510,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«partitionQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.17"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.12"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -377,9 +539,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«tpQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.18"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.19"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -397,9 +568,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«historyQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.19"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.6"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -417,9 +597,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«deadlineQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.20"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.0"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
@@ -437,9 +626,18 @@
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«dsQosPolicy»">
+        <diagramLabel
+            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_stereo"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.21"/>
+          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.2"/>
       <diagramNode
           href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
     </ownedChild>
