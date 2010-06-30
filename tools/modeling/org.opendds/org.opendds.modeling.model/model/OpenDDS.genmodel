@@ -74,7 +74,7 @@
     </genClasses>
     <genClasses ecoreClass="OpenDDS.ecore#//DataLibrary">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//DataLibrary/name"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataLibrary/dataTypes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataLibrary/dataTypes"/>
     </genClasses>
   </genPackages>
   <genPackages prefix="Core" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
