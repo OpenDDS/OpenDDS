@@ -79,6 +79,6 @@
   <eClassifiers xsi:type="ecore:EClass" name="DataLibrary">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="dataTypes" upperBound="-1"
-        eType="ecore:EClass Types.ecore#//TopicField"/>
+        eType="ecore:EClass Types.ecore#//TopicField" containment="true"/>
   </eClassifiers>
 </ecore:EPackage>
