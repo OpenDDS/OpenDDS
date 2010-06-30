@@ -1,3 +1,19 @@
+Wed Jun 30 15:41:01 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmftool:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.trace:
+        * tools/modeling/testdata:
+        * tools/modeling/testdata/PolicyLibrary:
+        * tools/modeling/testdata/PolicyLibrary/DefaultPolicyLibraryTest.opendds:
+        * tools/modeling/testdata/PolicyLibrary/DefaultPolicyLibraryTest.opendds_diagram:
+        * tools/modeling/testdata/PolicyLibrary/NonDefaultPolicyLibraryTest.opendds:
+        * tools/modeling/testdata/PolicyLibrary/NonDefaultPolicyLibraryTest.opendds_diagram:
+
+          Ordered Policy Library palette alphabetically. Added stereotypes to class figures
+          for QoS policy classes. Added policy library test data to use for regression testing.
+
 Tue Jun 29 19:26:20 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/codegen/model/CopyQos.h:
