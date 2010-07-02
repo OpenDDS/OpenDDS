@@ -123,7 +123,8 @@ private:
   virtual void init_typed(DataReaderEx* dr) = 0;
   virtual const MetaStruct& getResultingMeta() = 0;
 
-  class Listener : public virtual LocalObject<DDS::DataReaderListener> {
+  class Listener
+    : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
   public:
     explicit Listener(MultiTopicDataReaderBase* outer)
       : outer_(outer)

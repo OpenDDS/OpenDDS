@@ -15,6 +15,8 @@
 #include "DomainParticipantImpl.h"
 #include "TypeSupportImpl.h"
 
+#include <stdexcept>
+
 namespace OpenDDS {
 namespace DCPS {
 

@@ -13,6 +13,7 @@
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 #include "dds/DCPS/TopicDescriptionImpl.h"
+#include "dds/DCPS/FilterEvaluator.h"
 
 #include <string>
 #include <vector>
@@ -24,8 +25,6 @@
 
 namespace OpenDDS {
 namespace DCPS {
-
-class FilterEvaluator;
 
 class OpenDDS_Dcps_Export MultiTopicImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::MultiTopic>
