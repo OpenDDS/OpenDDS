@@ -112,6 +112,7 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
 
   static const char* h_includes[] = {
     "dds/DCPS/DataWriterImpl.h", "dds/DCPS/DataReaderImpl.h",
+    "dds/DCPS/TypeSupportImpl.h",
     "dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h",
     "dds/DCPS/DataBlockLockPool.h", "dds/DCPS/SubscriptionInstance.h"
   };
@@ -125,7 +126,8 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
     "dds/DCPS/ReceivedDataElementList.h", "dds/DCPS/RakeResults_T.h",
     "dds/DCPS/transport/framework/TransportInterface.h",
     "dds/DCPS/BuiltInTopicUtils.h", "dds/DCPS/Util.h",
-    "dds/DCPS/ContentFilteredTopicImpl.h", "dds/DCPS/RakeData.h"
+    "dds/DCPS/ContentFilteredTopicImpl.h", "dds/DCPS/RakeData.h",
+    "dds/DCPS/MultiTopicDataReader_T.h"
   };
   add_includes(cpp_includes, BE_GlobalData::STREAM_CPP);
 

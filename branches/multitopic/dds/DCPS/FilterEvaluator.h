@@ -110,6 +110,7 @@ public:
   virtual Value getValue(const void* stru, const char* fieldSpec) const = 0;
   virtual ComparatorBase::Ptr create_qc_comparator(const char* fieldSpec,
     ComparatorBase::Ptr next) const = 0;
+  virtual const char** getFieldNames() const = 0;
 };
 
 /// Each user-defined struct type will have an instantiation of this template

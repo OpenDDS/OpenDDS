@@ -47,14 +47,38 @@ public:
   DDS::ReturnCode_t set_expression_parameters(const DDS::StringSeq& parameters)
     ACE_THROW_SPEC((CORBA::SystemException));
 
-  const std::vector<std::string>& get_selection() const {return selection_;}
+  struct SubjectFieldSpec {
+    std::string incoming_name_;
+    std::string resulting_name_; //if empty string, same as incoming_name_
+
+    SubjectFieldSpec(const std::string& inc, const std::string& res)
+      : incoming_name_(inc), resulting_name_(res)
+    {}
+  };
+
+  const std::vector<SubjectFieldSpec>& get_aggregation() const
+  {
+    return aggregation_;
+  }
+
+  const std::vector<std::string>& get_selection() const
+  {
+    return selection_;
+  }
+
+  template<typename Sample>
+  bool filter(const Sample& s) const
+  {
+    if (!filter_eval_) return true;
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
+    return filter_eval_->eval(s, expression_parameters_);
+  }
 
 private:
   std::string subscription_expression_;
   DDS::StringSeq expression_parameters_;
   FilterEvaluator* filter_eval_;
 
-  typedef std::pair<std::string, std::string> SubjectFieldSpec;
   std::vector<SubjectFieldSpec> aggregation_;
   std::vector<std::string> selection_;
 

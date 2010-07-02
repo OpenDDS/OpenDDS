@@ -275,8 +275,8 @@ public:
    */
   void cleanup();
 
-  virtual void init(
-    TopicImpl*                    a_topic,
+  void init(
+    TopicDescriptionImpl* a_topic_desc,
     const DDS::DataReaderQos &  qos,
     const DataReaderQosExt &      ext_qos,
     DDS::DataReaderListener_ptr a_listener,

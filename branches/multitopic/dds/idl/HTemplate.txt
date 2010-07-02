@@ -6,6 +6,7 @@
  */
 class <%EXPORT%> <%TYPE%>TypeSupportImpl
   : public virtual OpenDDS::DCPS::LocalObject<<%TYPE%>TypeSupport>
+  , public virtual OpenDDS::DCPS::TypeSupportImpl
 {
 public:
 
@@ -27,6 +28,14 @@ public:
 
   virtual ::DDS::DataReader_ptr create_datareader ()
     ACE_THROW_SPEC ((CORBA::SystemException));
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  virtual ::DDS::DataReader_ptr create_multitopic_datareader()
+    ACE_THROW_SPEC ((CORBA::SystemException));
+
+  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
+#endif
+
 
 private:
   CORBA::String_var type_name_;
