@@ -58,7 +58,7 @@ MultiTopicImpl::MultiTopicImpl(const char* name,
       iter = iter->GetSibling()) {
     if (iter->TypeMatches<TopicExpressionGrammar::SubjectFieldSpec>()) {
       AstNode* fieldName = iter->GetFirstChild();
-      aggregation_.push_back(make_pair(toString(fieldName),
+      aggregation_.push_back(SubjectFieldSpec(toString(fieldName),
         toString(fieldName->GetSibling())));
     } else if (iter->TypeMatches<TopicExpressionGrammar::TopicName>()) {
       selection_.push_back(toString(iter));

@@ -144,6 +144,11 @@ namespace {
       }
     }
   };
+
+  void print_field_name(AST_Field* field)
+  {
+    be_global->impl_ << '"' << field->local_name()->get_string() << '"' << ", ";
+  }
 }
 
 bool metaclass_generator::gen_struct(UTL_ScopedName* name,
@@ -187,6 +192,14 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
   std::for_each(fields.begin(), fields.end(), gen_field_createQC(clazz));
   be_global->impl_ <<
     exception <<
+    "  }\n\n"
+    "  const char** getFieldNames() const\n"
+    "  {\n"
+    "    static const char* names[] = {";
+  std::for_each(fields.begin(), fields.end(), print_field_name);
+  be_global->impl_ <<
+    "0};\n"
+    "    return names;\n"
     "  }\n"
     "};\n\n"
     "template<>\n"

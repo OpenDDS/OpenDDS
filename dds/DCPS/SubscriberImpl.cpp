@@ -27,6 +27,7 @@
 #include "ContentFilteredTopicImpl.h"
 #include "MultiTopicImpl.h"
 #include "GroupRakeData.h"
+#include "MultiTopicDataReaderBase.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/DataLinkSet.h"
@@ -203,7 +204,30 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   if (mt) {
-    return create_multitopic_datareader(mt, dr_qos, ext_qos, a_listener, mask);
+    try {
+      DDS::DataReader_var dr =
+        mt->get_type_support()->create_multitopic_datareader();
+      MultiTopicDataReaderBase* mtdr =
+        dynamic_cast<MultiTopicDataReaderBase*>(dr.in());
+      mtdr->init(dr_qos, ext_qos, a_listener, mask, this, mt);
+      if (enabled_.value() && qos_.entity_factory.autoenable_created_entities) {
+        if (dr->enable() != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) ERROR: ")
+                     ACE_TEXT("SubscriberImpl::create_datareader, ")
+                     ACE_TEXT("enable of MultiTopicDataReader failed.\n")));
+          return DDS::DataReader::_nil();
+        }
+      }
+      return dr._retn();
+    } catch (const std::exception& e) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("SubscriberImpl::create_datareader, ")
+                   ACE_TEXT("creation of MultiTopicDataReader failed: %C.\n"),
+                   e.what()));
+    }
+    return DDS::DataReader::_nil();
   }
 #endif
 
@@ -277,26 +301,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // done in enable_reader
   return DDS::DataReader::_duplicate(dr_obj.in());
 }
-
-
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-DDS::DataReader_ptr
-SubscriberImpl::create_multitopic_datareader(MultiTopicImpl* multitopic,
-  const DDS::DataReaderQos& qos, const DataReaderQosExt& ext_qos,
-  DDS::DataReaderListener_ptr a_listener, DDS::StatusMask mask)
-{
-  const std::vector<std::string>& selection = multitopic->get_selection();
-  for (size_t i = 0; i < selection.size(); ++i) {
-    const DDS::Duration_t no_wait = {};
-    DDS::Topic_var t = participant_->find_topic(selection[i].c_str(), no_wait);
-    if (!t.in()) {
-      throw std::runtime_error("Topic: " + selection[i] + " not found.");
-    }
-  }
-
-  return 0;
-}
-#endif
 
 DDS::ReturnCode_t
 SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
