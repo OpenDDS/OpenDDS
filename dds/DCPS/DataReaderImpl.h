@@ -53,6 +53,7 @@ class SubscriberImpl;
 class DomainParticipantImpl;
 class SubscriptionInstance;
 class TopicImpl;
+class TopicDescriptionImpl;
 class RequestedDeadlineWatchdog;
 class Monitor;
 class DataReaderImpl;

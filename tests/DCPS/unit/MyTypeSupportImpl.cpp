@@ -10,6 +10,8 @@
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
 
+#include <stdexcept>
+
 // Implementation skeleton constructor
 MyTypeSupportImpl::MyTypeSupportImpl (void)
   {
@@ -81,3 +83,18 @@ MyTypeSupportImpl::get_type_name (
   }
 
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+::DDS::DataReader_ptr
+MyTypeSupportImpl::create_multitopic_datareader()
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  return NULL;
+}
+
+const OpenDDS::DCPS::MetaStruct&
+MyTypeSupportImpl::getMetaStructForType()
+{
+  throw std::runtime_error("unimplemented");
+}
+
+#endif

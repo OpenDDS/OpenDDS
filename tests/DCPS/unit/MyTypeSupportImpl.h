@@ -66,6 +66,13 @@ public:
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  virtual ::DDS::DataReader_ptr create_multitopic_datareader()
+    ACE_THROW_SPEC ((CORBA::SystemException));
+
+  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
+#endif
 };
 
 class MyDataReaderImpl :  public virtual OpenDDS::DCPS::DataReaderImpl
