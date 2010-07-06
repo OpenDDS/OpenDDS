@@ -137,7 +137,7 @@ Writer::svc()
         if (reset_ownership_strength != -1 && old != reset_ownership_strength) {
           qos.ownership_strength.value = reset_ownership_strength;
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)%s : reset ownership strength from %d to %d\n"), 
-            ownership_dw_id_, old, reset_ownership_strength));
+            ownership_dw_id_.c_str(), old, reset_ownership_strength));
           error = this->writer_->set_qos (qos);
           if (error != ::DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR,
@@ -153,7 +153,7 @@ Writer::svc()
 
       if (i == num_messages/2 && reset_delay != 0) {
         ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)%s : reset delay from %d to %d\n"), 
-          ownership_dw_id_, dds_delay, reset_delay));
+          ownership_dw_id_.c_str(), dds_delay, reset_delay));
         ACE_OS::sleep (reset_delay);
       }
       else if (dds_delay > 0) {
