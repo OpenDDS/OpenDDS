@@ -60,7 +60,7 @@ unlink <*.log>;
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                   "-ORBDebugLevel 10 -ORBVerboseLogging 1 -DCPSDebugLevel $debuglevel -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior ");
 
-$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts -DCPSDebugLevel $debuglevel -ORBVerboseLogging 1 -ORBLogFile sub.log $sub_deadline $sub_liveliness -t $testcase");
+$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts -ORBVerboseLogging 1 -ORBLogFile sub.log $sub_deadline $sub_liveliness -t $testcase");
 
 $Publisher1 = PerlDDS::create_process ("publisher", " $pub_opts -s 10 -i datawriter1 $pub1_reset_strength $pub1_deadline $pub1_liveliness -ORBLogFile pub1.log");
 $Publisher2 = PerlDDS::create_process ("publisher", " $pub_opts -s 12 -i datawriter2 $pub2_deadline $pub2_liveliness -ORBLogFile pub2.log");
@@ -80,6 +80,9 @@ $Publisher1->Spawn ();
 print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn ();
 
+if ($testcase == 0) {
+  sleep (3);
+}
 
 print $Publisher2->CommandLine() . "\n";
 $Publisher2->Spawn ();

@@ -24,6 +24,8 @@ extern int testcase;
 DataReaderListenerImpl::DataReaderListenerImpl(const char* reader_id)
   : num_reads_(0), reader_id_ (reader_id), verify_result_ (true)
 {
+  this->current_strength_[0] = 0;
+  this->current_strength_[1] = 0;
 }
 
 DataReaderListenerImpl::~DataReaderListenerImpl()
@@ -53,8 +55,15 @@ throw(CORBA::SystemException)
 
     if (status == DDS::RETCODE_OK) {
       if (si.valid_data) {
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t)%X %s->%s subject_id: %d ")
+          ACE_TEXT("count: %d strength: %d\n"),
+          this, message.from.in(), this->reader_id_, message.subject_id, 
+          message.count, message.strength)); 
         std::cout << message.from.in() << "->" << this->reader_id_ 
-        << " count: " << message.count << std::endl;
+        << " subject_id: " << message.subject_id  
+        << " count: " << message.count 
+        << " strength: " << message.strength 
+        << std::endl;
         bool result = verify (message);
         this->verify_result_ = result ? this->verify_result_ : false;
         
@@ -86,10 +95,12 @@ throw(CORBA::SystemException)
 
 void DataReaderListenerImpl::on_requested_deadline_missed(
   DDS::DataReader_ptr,
-  const DDS::RequestedDeadlineMissedStatus &)
+  const DDS::RequestedDeadlineMissedStatus & status)
 throw(CORBA::SystemException)
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_requested_deadline_missed()\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)%X: on_requested_deadline_missed(): ")
+          ACE_TEXT(" handle %d total_count_change %d \n"),
+          this, status.last_instance_handle, status.total_count_change));
 }
 
 void DataReaderListenerImpl::on_requested_incompatible_qos(
@@ -102,10 +113,13 @@ throw(CORBA::SystemException)
 
 void DataReaderListenerImpl::on_liveliness_changed(
   DDS::DataReader_ptr,
-  const DDS::LivelinessChangedStatus &)
+  const DDS::LivelinessChangedStatus & status)
 throw(CORBA::SystemException)
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_liveliness_changed()\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)%X: on_liveliness_changed(): ")
+          ACE_TEXT(" handle %d alive_count_change %d not_alive_count_change %d \n"),
+          this, status.last_publication_handle, status.alive_count_change, 
+          status.alive_count_change));
 }
 
 void DataReaderListenerImpl::on_subscription_matched(
@@ -135,27 +149,35 @@ throw(CORBA::SystemException)
 bool
 DataReaderListenerImpl::verify (const Messenger::Message& msg)
 {
+  if (msg.subject_id != msg.count % 2)
+    return false;
+
   switch (testcase) {
   case strength:
   {
-    if (msg.count >= 1) {
-      return ACE_OS::strcmp (msg.from.in(), "datawriter2") == 0;
+    // strength should be not be less then before  
+    if (msg.strength < this->current_strength_[msg.subject_id]) {
+      return false;
     } 
+    // record the strength of writer that sample is from.
+    this->current_strength_[msg.subject_id] = msg.strength;
   }
   break;
   case liveliness_change:
   case miss_deadline:
   {
-    if (msg.count >= 7) {
-      return ACE_OS::strcmp (msg.from.in(), "datawriter2") == 0;
-    } 
+    // record the strength of writer that sample is from.
+    this->current_strength_[msg.subject_id] = msg.strength;
   }
   break;
   case update_strength:
   {
-    if (msg.count >= 7 && ACE_OS::strcmp (msg.from.in(), "datawriter1")) {
+    // strength should be not be less then before  
+    if (msg.strength < this->current_strength_[msg.subject_id]) {
       return false;
-    }
+    } 
+    // record the strength of writer that sample is from.
+    this->current_strength_[msg.subject_id] = msg.strength;
   }
   break;
   default:
@@ -164,4 +186,43 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
   }
   
   return true;
+}
+
+
+bool 
+DataReaderListenerImpl::verify_result ()  
+{
+  switch (testcase) {
+  case strength:
+  {
+    this->verify_result_ 
+      = this->verify_result_ 
+        && this->current_strength_[0] == this->current_strength_[1]
+        && this->current_strength_[0] == 12;
+  }
+  break;
+  case liveliness_change:
+  case miss_deadline:
+  {
+    // The liveliness is changed for both writers in the middle of sending
+    // total messages but finally, the higher strength writer takes ownership.
+    this->verify_result_ 
+      = this->verify_result_ 
+        && this->current_strength_[0] == this->current_strength_[1]
+        && this->current_strength_[0] == 12;
+  }
+  break;
+  case update_strength:
+  {
+    this->verify_result_ 
+      = this->verify_result_ 
+        && this->current_strength_[0] == this->current_strength_[1]
+        && this->current_strength_[0] == 15;
+  }
+  break;
+  default:
+  ACE_OS::exit(1);
+  break;
+  }
+  return this->verify_result_;
 }

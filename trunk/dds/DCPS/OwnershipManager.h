@@ -160,14 +160,18 @@ public:
 
 private:
 
-  bool remove_writer (OwnershipWriterInfos& infos,
+  bool remove_writer (const ::DDS::InstanceHandle_t& instance_handle,
+                      OwnershipWriterInfos& infos,
                       const PublicationId& pub_id);
                       
-  void remove_owner (OwnershipWriterInfos& infos, bool sort);
+  void remove_owner (const ::DDS::InstanceHandle_t& instance_handle,
+                     OwnershipWriterInfos& infos, 
+                     bool sort);
   
   void remove_candidate (OwnershipWriterInfos& infos,const PublicationId& pub_id);
 
-  void broadcast_new_owner (OwnershipWriterInfos& infos, 
+  void broadcast_new_owner (const ::DDS::InstanceHandle_t& instance_handle,
+                            OwnershipWriterInfos& infos, 
                             const PublicationId& owner);
   
   ACE_Thread_Mutex instance_lock_;
