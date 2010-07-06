@@ -1,28 +1,34 @@
+Tue Jul  6 14:43:41 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/FooTest3_0.mpc:
+
+          Added an "after" for correct behavior in parallel builds.
+
 Tue Jul  6 07:25:37 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
-        
-          Added a map to WriterInfo to keep track whether ownership needed 
-          be evaluated for each instance. Previously, it used single flag 
+
+          Added a map to WriterInfo to keep track whether ownership needed
+          be evaluated for each instance. Previously, it used single flag
           for all instances sent by the writer. This is the bug that cause
-          only samples belong the first instance were received when higher 
+          only samples belong the first instance were received when higher
           strength writer took ownership and published multiple instances.
-          
+
         * dds/DCPS/DomainParticipantImpl.cpp:
-        
+
           Fixed a deadlock issue that caused by reverse locking between
           DomainParticipantImpl subscribers_protector_ and ReceiveListenerSet
-          lock_. This happened when one thread deleting subscriber from  
-          delete_contained_entities() while the reactor thread delievered 
+          lock_. This happened when one thread deleting subscriber from
+          delete_contained_entities() while the reactor thread delievered
           builtin topic data sample and called BitPubListenerImpl to update
           ownership strength.
-          
+
         * dds/DCPS/OwnershipManager.h:
         * dds/DCPS/OwnershipManager.cpp:
 
           Passed instance handle to some methods to help debugging.
-          
+
         * tests/DCPS/Ownership/DataReaderListener.h:
         * tests/DCPS/Ownership/DataReaderListener.cpp:
         * tests/DCPS/Ownership/Messenger.idl:
@@ -31,7 +37,7 @@ Tue Jul  6 07:25:37 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
           Made publisher to publish multiple instances to verify the bug
           fix.
-          
+
 Tue Jun 29 21:39:39 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * java/FAQ:
