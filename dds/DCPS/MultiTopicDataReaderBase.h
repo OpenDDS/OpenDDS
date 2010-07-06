@@ -31,6 +31,8 @@ public:
     DDS::DataReaderListener_ptr a_listener, DDS::StatusMask mask,
     SubscriberImpl* parent, MultiTopicImpl* multitopic);
 
+  void data_available(DDS::DataReader_ptr reader);
+
   DDS::InstanceHandle_t get_instance_handle()
     ACE_THROW_SPEC((CORBA::SystemException));
 
@@ -167,7 +169,7 @@ private:
 
   // key: topicName of incoming datareader
   typedef MultiTopicImpl::SubjectFieldSpec SubjectFieldSpec;
-  std::multimap<std::string, SubjectFieldSpec> incoming_field_map_;
+  std::multimap<std::string, SubjectFieldSpec> field_map_;
 };
 
 }

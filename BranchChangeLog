@@ -1,3 +1,16 @@
+Tue Jul  6 21:42:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+
+          Started implementing on_data_available() for the incoming
+          datareaders.
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.idl:
+
+          Changed the test's idl structs to better reflect a real use case.
+
 Tue Jul  6 15:16:05 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
@@ -109,7 +122,7 @@ Mon Jun 28 21:59:00 UTC 2010  Adam Mitz  <mitza@ociweb.com>
         * dds/DCPS/MultiTopicImpl.h:
         * dds/DCPS/MultiTopicImpl.cpp:
 
-          Began implemented spec-defined methods for MultiTopic.
+          Began implementing spec-defined methods for MultiTopic.
 
         * dds/DCPS/TopicExpressionGrammar.h:
 

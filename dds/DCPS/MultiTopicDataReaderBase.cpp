@@ -44,7 +44,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
 
   const std::vector<std::string>& selection = multitopic->get_selection();
   for (size_t i = 0; i < selection.size(); ++i) {
-    const DDS::Duration_t no_wait = {};
+    const DDS::Duration_t no_wait = {0, 0};
     DDS::Topic_var t = participant->find_topic(selection[i].c_str(), no_wait);
     if (!t.in()) {
       throw std::runtime_error("Topic: " + selection[i] + " not found.");
@@ -76,7 +76,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
           //TODO: warning
         }
       } else {
-        incoming_field_map_.insert(make_pair(iter->second,
+        field_map_.insert(make_pair(iter->second,
           SubjectFieldSpec(*names, "")));
       }
     }
@@ -89,9 +89,24 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
           //TODO: error
         }
       } else {
-        incoming_field_map_.insert(make_pair(iter->second, aggregation[i]));
+        field_map_.insert(make_pair(iter->second, aggregation[i]));
       }
     }
+  }
+}
+
+void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
+{
+  DDS::TopicDescription_var td = reader->get_topicdescription();
+  CORBA::String_var topic = td->get_name();
+
+  //TODO: temporary
+  ACE_DEBUG((LM_DEBUG, "Multitopic incoming data available: %C\n", topic.in()));
+
+  typedef std::multimap<std::string, SubjectFieldSpec>::iterator iter_t;
+  for (std::pair<iter_t, iter_t> iters = field_map_.equal_range(topic.in());
+       iters.first != iters.second; ++iters.first) {
+    const SubjectFieldSpec& sfs = iters.second->second;
   }
 }
 
@@ -123,6 +138,14 @@ void MultiTopicDataReaderBase::Listener::on_data_available(
   DDS::DataReader_ptr reader)
   ACE_THROW_SPEC((CORBA::SystemException))
 {
+  try {
+    outer_->data_available(reader);
+  } catch (std::exception& e) {
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_ERROR, "(%P|%t) MultiTopicDataReaderBase::Listener::"
+                 "on_data_available(): %C", e.what()));
+    }
+  }
 }
 
 void MultiTopicDataReaderBase::Listener::on_subscription_matched(

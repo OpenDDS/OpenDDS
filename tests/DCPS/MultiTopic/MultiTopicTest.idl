@@ -1,7 +1,8 @@
 // example from the DCPS Specification v1.2, Annex A, Section 3
 
-#pragma DCPS_DATA_TYPE "Point3D"
-struct Point3D {
+#pragma DCPS_DATA_TYPE "LocationInfo"
+struct LocationInfo {
+  string flight_name;
   long x;
   long y;
   long z;

@@ -30,10 +30,10 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
 {
   // Writer-side setup
 
-  Point3DTypeSupport_var ts_p3d = new Point3DTypeSupportImpl;
-  ts_p3d->register_type(dp, "");
-  CORBA::String_var type_name_p3d = ts_p3d->get_type_name();
-  Topic_var location = dp->create_topic("Location", type_name_p3d,
+  LocationInfoTypeSupport_var ts_loc = new LocationInfoTypeSupportImpl;
+  ts_loc->register_type(dp, "");
+  CORBA::String_var type_name_loc = ts_loc->get_type_name();
+  Topic_var location = dp->create_topic("Location", type_name_loc,
     TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
   DataWriter_var dw_loc = pub->create_datawriter(location,
     DATAWRITER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
@@ -60,9 +60,13 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
 
   StatusCondition_var dw_sc = dw_loc->get_statuscondition();
   waitForMatch(dw_sc);
-  Point3DDataWriter_var p3ddw = Point3DDataWriter::_narrow(dw_loc);
-  Point3D sample = {1, 2, 3};
-  ReturnCode_t ret = p3ddw->write(sample, HANDLE_NIL);
+  LocationInfoDataWriter_var locdw = LocationInfoDataWriter::_narrow(dw_loc);
+  LocationInfo sample;
+  sample.flight_name = "Flight 100";
+  sample.x = 1;
+  sample.y = 2;
+  sample.z = 3;
+  ReturnCode_t ret = locdw->write(sample, HANDLE_NIL);
   if (ret != RETCODE_OK) return false;
 
   // Write samples (FlightPlan)
@@ -75,6 +79,18 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
   sample2.tailno = "N12345";
   ret = pidw->write(sample2, HANDLE_NIL);
   if (ret != RETCODE_OK) return false;
+
+  // Reader-side wait for data
+
+  WaitSet_var ws = new WaitSet;
+  ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
+    ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  ws->attach_condition(rc);
+  Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
+  ConditionSeq active;
+  ws->wait(active, infinite);
+  ws->detach_condition(rc);
+  dr->delete_readcondition(rc);
 
   return true;
 }
