@@ -1,3 +1,14 @@
+Tue Jul  6 15:16:05 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+
+          Added fwd decl for TopicDescriptionImpl.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+
+          Added new methods to hand-written TypeSupportImpl.
+
 Fri Jul  2 21:53:08 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/MultiTopicDataReaderBase.h:
