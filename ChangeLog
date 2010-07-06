@@ -1,3 +1,10 @@
+Tue Jul  6 18:20:11 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/Ownership/Writer.cpp:
+
+          Fixed crash on linux due to ACE_CString passed as string format 
+          logging parameter.
+
 Tue Jul  6 14:43:41 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/FooTest3_0/FooTest3_0.mpc:
