@@ -745,8 +745,17 @@ Files used: ~MainDiagram.gmfgen, ~PolicyLibrary.gmfgen
 # Verify that the sub-diagram opens up allowing to to add elements to the package.
 </pre>
 </div>
-<div title="GMF Models" modifier="Byron" created="201006211456" modified="201006231215" tags="publish" changecount="5">
+<div title="GMF Issues" modifier="Byron" created="201007061429" tags="issues publish" changecount="1">
+<pre>! Diagram refresh problem
+
+On Ubuntu 9.10, running eclipse 3.5.1 on top of GTK 2.10.0, there is a refresh problem for GMF based diagrams. When a diagram is opened, and either another editor tab is activated or another application is placed on top of the diagram, then after making the diagram visible again some of the diagram elements are partially or completely invisible. The only way to confidently make all the diagram elements visible again is to zoom and unzoom the diagram.
+
+The symptoms of this problem seem similar to [[Eclipse bug 164623|https://bugs.eclipse.org/bugs/show_bug.cgi?id=164623]]. This bug was closed as it was determined to be a problem related to GTK usage and not specific to GMF. An attempt was made to get around this by disabled anti-aliasing as discussed in the bugzilla contents but the problem persisted.
+</pre>
+</div>
+<div title="GMF Models" modifier="Byron" created="201006211456" modified="201007061433" tags="publish" changecount="7">
 <pre>[[GMF Details]] contains instructions not available elsewhere to reproduce the steps needed to for model diagram support.
+[[GMF Issues]] contains known issues with the SDK's usage of GMF.
 [[GMF TODO]] contains skipped tasks related to GMF that still need to be done.</pre>
 </div>
 <div title="GMF TODO" modifier="Byron" created="201006211445" modified="201006231215" tags="publish todo" changecount="4">
