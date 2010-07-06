@@ -142,7 +142,7 @@ OwnershipManager::remove_writer (const PublicationId& pub_id)
   InstanceOwnershipWriterInfos::iterator const the_end = instance_ownership_infos_.end ();
   for (InstanceOwnershipWriterInfos::iterator iter = instance_ownership_infos_.begin ();
         iter != the_end; ++ iter) {
-    this->remove_writer (iter->second, pub_id);
+    this->remove_writer (iter->first, iter->second, pub_id);
   }
 }
 
@@ -202,18 +202,19 @@ OwnershipManager::remove_writer (
   InstanceOwnershipWriterInfos::iterator the_iter 
     = instance_ownership_infos_.find (instance_handle);
   if (the_iter != the_end) {
-    return this->remove_writer (the_iter->second, pub_id);
+    return this->remove_writer (instance_handle, the_iter->second, pub_id);
   }
   
   return false;
 }
 
 bool
-OwnershipManager::remove_writer (OwnershipWriterInfos& infos,
-                                      const PublicationId& pub_id)
+OwnershipManager::remove_writer (const ::DDS::InstanceHandle_t& instance_handle,
+                                 OwnershipWriterInfos& infos,
+                                 const PublicationId& pub_id)
 { 
   if (infos.owner_.pub_id_ == pub_id) {
-    this->remove_owner (infos, false);
+    this->remove_owner (instance_handle, infos, false);
     return true;
   }
   else {
@@ -226,7 +227,9 @@ OwnershipManager::remove_writer (OwnershipWriterInfos& infos,
 
 
 void
-OwnershipManager::remove_owner (OwnershipWriterInfos& infos, bool sort)
+OwnershipManager::remove_owner (const ::DDS::InstanceHandle_t& instance_handle,
+                                OwnershipWriterInfos& infos, 
+                                bool sort)
 {
   //change owner
   PublicationId new_owner(GUID_UNKNOWN);
@@ -245,7 +248,7 @@ OwnershipManager::remove_owner (OwnershipWriterInfos& infos, bool sort)
     new_owner = infos.owner_.pub_id_;
   }
 
-  this->broadcast_new_owner (infos, new_owner);
+  this->broadcast_new_owner (instance_handle, infos, new_owner);
 }
 
 
@@ -298,7 +301,7 @@ OwnershipManager::select_owner (const ::DDS::InstanceHandle_t& instance_handle,
     // No owner at some point.
     if (infos.owner_.pub_id_ == GUID_UNKNOWN) { 
       infos.owner_ = WriterInfo(pub_id,ownership_strength);
-      this->broadcast_new_owner (infos, pub_id);
+      this->broadcast_new_owner (instance_handle, infos, pub_id);
 
       return true;
     }
@@ -310,14 +313,14 @@ OwnershipManager::select_owner (const ::DDS::InstanceHandle_t& instance_handle,
       }
       else { //update strength and reevaluate owner which broadcast new owner.
         infos.candidates_.push_back (WriterInfo(pub_id,ownership_strength));
-        this->remove_owner (infos, true);        
+        this->remove_owner (instance_handle, infos, true);        
         return infos.owner_.pub_id_ == pub_id;
       }
     } // not current owner, but has larger strength so use it as owner
     else if (ownership_strength > infos.owner_.ownership_strength_) {
       infos.candidates_.push_back (infos.owner_);
       infos.candidates_.push_back (WriterInfo(pub_id,ownership_strength));
-      this->remove_owner (infos, true);   
+      this->remove_owner (instance_handle, infos, true);   
       ACE_ASSERT (infos.owner_.pub_id_ == pub_id 
                   && infos.owner_.ownership_strength_ == ownership_strength);
       return infos.owner_.pub_id_ == pub_id;
@@ -361,7 +364,7 @@ OwnershipManager::select_owner (const ::DDS::InstanceHandle_t& instance_handle,
       infos.instance_states_.push_back (instance_state);
       instance_state->registered(true);
     }
-    this->broadcast_new_owner (infos, infos.owner_.pub_id_);
+    this->broadcast_new_owner (instance_handle, infos, infos.owner_.pub_id_);
     return true;
   }
   
@@ -370,8 +373,9 @@ OwnershipManager::select_owner (const ::DDS::InstanceHandle_t& instance_handle,
 
 
 void
-OwnershipManager::broadcast_new_owner (OwnershipWriterInfos& infos,
-                                            const PublicationId& owner)
+OwnershipManager::broadcast_new_owner ( const ::DDS::InstanceHandle_t& instance_handle,
+                                        OwnershipWriterInfos& infos,
+                                        const PublicationId& owner)
 {
   if (DCPS_debug_level >= 1) {
     // This may not be an error since it could happen that the sample
@@ -380,9 +384,9 @@ OwnershipManager::broadcast_new_owner (OwnershipWriterInfos& infos,
     RepoIdConverter writer_converter(owner);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) OwnershipManager::broadcast_new_owner: ")
-      ACE_TEXT("owner writer %C, strength %d num of candidates %d\n"),
-      std::string(writer_converter).c_str(),
-      infos.owner_.ownership_strength_, infos.candidates_.size()));
+      ACE_TEXT("owner writer %C, instance handle %d strength %d num of candidates %d\n"),
+      std::string(writer_converter).c_str(), 
+      instance_handle, infos.owner_.ownership_strength_, infos.candidates_.size()));
   }
   
   InstanceStateVec::iterator const the_end = infos.instance_states_.end();
@@ -404,7 +408,7 @@ OwnershipManager::remove_owner (const ::DDS::InstanceHandle_t& instance_handle)
   InstanceOwnershipWriterInfos::iterator iter 
     = instance_ownership_infos_.find (instance_handle);
     
-  this->remove_owner (iter->second, false);
+  this->remove_owner (instance_handle, iter->second, false);
 }
 
 
