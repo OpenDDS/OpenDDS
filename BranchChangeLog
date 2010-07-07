@@ -1,3 +1,11 @@
+Wed Jul  7 13:57:03 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/images/Topics.png:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/Topics.ecore_diagram:
+
+          Updated diagram to account for missing generalization
+          relationships.
+
 Tue Jul  6 14:36:29 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/plugins.html:
