@@ -15,6 +15,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
+#include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
 
 #include "ace/High_Res_Timer.h"
 
@@ -283,16 +284,32 @@ Publication::enable(
     } else if( this->verbose_) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
-        ACE_TEXT("created transport with index %d.\n"),
-        this->name_.c_str(),
-        this->profile_->transport
+        ACE_TEXT("created transport.\n"),
+        this->name_.c_str()
       ));
     }
-  } else if( this->verbose_) {
+  }
+  if( this->verbose_) {
+    OpenDDS::DCPS::MulticastConfiguration* mcconfig
+      = dynamic_cast<OpenDDS::DCPS::MulticastConfiguration*>(
+          transport->config()
+        );
+    bool isMcast    = false;
+    bool isReliable = false;
+    if( mcconfig != 0) {
+      isMcast = true;
+      isReliable = mcconfig->reliable_;
+    }
+
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publication::enable() - publication %C: ")
-      ACE_TEXT("obtained transport with index %d.\n"),
+      ACE_TEXT("%C %C transport with index %d.\n"),
       this->name_.c_str(),
+      (!isMcast? "obtained":
+                 (isReliable? "obtained reliable":
+                              "obtained best effort"
+      )),
+      transport->get_factory_id().c_str(),
       this->profile_->transport
     ));
   }

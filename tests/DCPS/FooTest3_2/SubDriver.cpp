@@ -289,6 +289,14 @@ SubDriver::run()
   // connection during the shutdown period.
   ACE_OS::sleep (5);
 
+  OpenDDS::DCPS::WriterIdSeq writers;
+  writers.length(num_publications);
+  for (size_t i = 0; i < num_publications; ++i) {
+    writers[i] = ids[i];
+  }
+
+  this->subscriber_.remove_associations(num_publications, writers.get_buffer(), this->sub_id_);
+
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
   TheServiceParticipant->shutdown();

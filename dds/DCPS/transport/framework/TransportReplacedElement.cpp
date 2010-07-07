@@ -48,3 +48,11 @@ OpenDDS::DCPS::TransportReplacedElement::msg() const
   DBG_ENTRY_LVL("TransportReplacedElement","msg",6);
   return this->msg_;
 }
+
+ACE_INLINE
+bool 
+OpenDDS::DCPS::TransportReplacedElement::owned_by_transport ()
+{
+  return true;
+}
+

@@ -15,7 +15,6 @@ my @decorators;
 
 if ($^O eq 'MSWin32') {
   $nm = 'dumpbin /exports';
-  $pattern = ' _(Java_\\S+)@\\d+';
   @decorators = (['', '.dll'], ['', 'd.dll'], ['lib', '.dll']);
 } else {
   $nm = 'nm -g -P';
@@ -36,6 +35,14 @@ while (!-r $lib && $idx < scalar @decorators) {
 }
 
 die "Can't find $lib_orig\n" unless -r $lib;
+
+if ($^O eq 'MSWin32') {
+  my $headers = `dumpbin /headers $lib`;
+  (my $machine) = ($headers =~ /machine \((\w+)\)/);
+  my $prefix = ($machine eq 'x64' ? '' : '_');
+  my $suffix = ($machine eq 'x64' ? ' = @ILT\\+\\d+' : '@\\d+');
+  $pattern = " $prefix(Java_\\S+)$suffix";
+}
 
 my %exports;
 open TEMP, "$nm $lib |" or die "Can't spawn $nm\n";

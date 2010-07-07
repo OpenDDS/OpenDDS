@@ -54,10 +54,12 @@ public:
   /// by transport when the transport send strategy is in a MODE_TERMINATED.
   /// The dropped_by_transport flag false indicates the dropping is initiated
   /// by the remove_sample and data_dropped() is a result of remove_sample().
-  void data_dropped(bool dropped_by_transport = false);
+  /// The return value indicates if this element is released.
+  bool data_dropped(bool dropped_by_transport = false);
 
   /// Invoked when the sample has been sent by a DataLink.
-  void data_delivered();
+  /// The return value indicates if this element is released.
+  bool data_delivered();
 
   /// Does the sample require an exclusive transport packet?
   virtual bool requires_exclusive_packet() const;
@@ -75,6 +77,15 @@ public:
   bool released() const;
   void released(bool flag);
 
+  /// Clone method with provided message block allocator and data block
+  /// allocators.
+  static ACE_Message_Block* clone(const ACE_Message_Block* msg,
+                                  MessageBlockAllocator* mb_allocator,
+                                  DataBlockAllocator* db_allocator);
+  
+  /// Is the sample created by the transport?
+  virtual bool owned_by_transport () = 0;
+  
 protected:
 
   /// Ctor.  The initial_count is the number of DataLinks to which
@@ -92,7 +103,7 @@ protected:
 private:
 
   /// Common logic for data_dropped() and data_delivered().
-  void decision_made(bool dropped_by_transport);
+  bool decision_made(bool dropped_by_transport);
 
   /// Thread lock type
   typedef ACE_SYNCH_MUTEX LockType;

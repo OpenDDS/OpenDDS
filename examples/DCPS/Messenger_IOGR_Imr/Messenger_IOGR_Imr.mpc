@@ -9,7 +9,7 @@ project(DDS*idl): dcps {
   custom_only = 1
 }
 
-project(DDS*Aggregator) : portableserver, orbsvcsexe, iormanip, ftorb {
+project(DDS*Aggregator) : portableserver, orbsvcsexe, iormanip, ftorb, dds_macros {
   exename = Aggregator
   requires += tao_orbsvcs
 

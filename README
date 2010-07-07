@@ -14,7 +14,7 @@ team at Object Computing, Incorporated (http://www.ociweb.com) in
 St. Louis and Phoenix.  It is released under the same generous license
 terms as ACE, TAO and MPC.  See the LICENSE file for details.
 
-This directory structure contains OpenDDS 2.1.2.
+This directory structure contains OpenDDS 2.2.
 
 
 ======================================================================
@@ -81,9 +81,9 @@ OpenDDS requires TAO for both IDL compilation as well as interaction
 with the DCPSInfoRepo.  At a minimum, you must be at one of the following
 versions (or later) in order to properly compile OpenDDS:
 
-*** TAO 1.5a patch 19
-*** TAO 1.6a patch 6
-*** TAO 1.7.7 (DOC Group)
+*** TAO 1.5a patch 20
+*** TAO 1.6a patch 7
+*** TAO 1.7.9 (DOC Group)
 
 Note that the 1.xa releases are from OCI and can be obtained from
 http://www.theaceorb.com/.  The DOC Group releases can be obtained from
@@ -123,6 +123,7 @@ Linux family:
 Windows family:
 ** Windows XP
 ** Windows Server 2003
+** Windows 7 (64-bit)
 ** Windows Mobile 6 (ARM)
 
 Others:
@@ -143,12 +144,12 @@ This release of OpenDDS has been tested using the following compilers:
 ** Microsoft Visual C++ 9 with SP1 (Visual Studio 2008)
 ** gcc 3.3.2
 ** gcc 3.4.4 (Red Hat 3.4.4-2)
-** 4.0.1 (Apple Inc. build 5465)
+** gcc 4.0.1 (Apple Inc. build 5465)
 ** gcc 4.1.1
 ** gcc 4.1.1 (Red Hat 4.1.1-30) (Red Hat 4.1.1-52)
 ** gcc 4.1.2 (Red Hat 4.1.2-14)
-** gcc 4.3.2
 ** gcc 4.3.2 (Ubuntu 4.3.2-1ubuntu11)
+** gcc 4.5.0
 ** QNX gcc 3.3.5
 ** Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
 ** Sun C++ 5.9 SunOS_i386 Patch 124864-07 2008/08/22

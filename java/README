@@ -11,7 +11,7 @@ encountered while developing with the Java bindings.
 ======================================================================
 * See also
 
-  - OpenDDS website <http://opendds.org>
+  - OpenDDS website <http://www.opendds.org>
   - OpenDDS Developer's Guide
       <http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf>
   - OMG DDS Portal <http://portals.omg.org/dds>
@@ -43,7 +43,7 @@ library (.jar or just a "classes" directory) that together contain all of the
 generated code.  See the next section ("Step-by-step instructions...") for
 details.
 
-Below is "the gory details," a description of the generated files and which
+Below are "the gory details," a description of the generated files and which
 tools generate them.  In this example, Foo.idl contains a single struct "Bar"
 contained in module "Baz" (IDL modules are similar to C++ namespaces and Java
 packages).  To the right of each file name is the name of the tool that
@@ -51,14 +51,14 @@ generates it, followed by some notes on its purpose.
 
 Foo.idl                       - hand-written description of the DDS sample type
 - Foo{C,S}.{h,inl,cpp}        - tao_idl: C++ representation of the IDL
-- FooTypeSupport.idl          - dcps_ts.pl: DDS type-specific interfaces
+- FooTypeSupport.idl          - opendds_idl: DDS-specific code
   - FooTypeSupport{C,S}.{h,inl,cpp}  - tao_idl
   - Baz/BarSeq{Helper,Holder}.java   - idl2jni
   - Baz/BarData{Reader,Writer}*.java - idl2jni
   - Baz/BarTypeSupport*.java  - idl2jni (except TypeSupportImpl, see below)
   - FooTypeSupportJC.{h,cpp}  - idl2jni: JNI native method implementations
-- FooTypeSupportImpl.{h,cpp}  - dcps_ts.pl: DDS type-specific C++ impl.
-- Baz/BarTypeSupportImpl.java - dcps_ts.pl: DDS type-specific Java impl.
+- FooTypeSupportImpl.{h,cpp}  - opendds_idl: DDS-specific code
+- Baz/BarTypeSupportImpl.java - opendds_idl: DDS-specific code
 - Baz/Bar*.java               - idl2jni: Java representation of IDL struct
 - FooJC.{h,cpp}               - idl2jni: JNI native method implementations
 
@@ -97,7 +97,7 @@ defined.
 
      idlflags      += -Wb,stub_export_include=Foo_Export.h \
                       -Wb,stub_export_macro=Foo_Export
-     dcps_ts_flags += --export=Foo_Export
+     dcps_ts_flags += -Wb,export_macro=Foo_Export
      idl2jniflags  += -Wb,stub_export_include=Foo_Export.h \
                       -Wb,stub_export_macro=Foo_Export
      dynamicflags  += FOO_BUILD_DLL
@@ -157,6 +157,7 @@ defined.
 * Directory structure
 
 java                 - this directory
+java/ant             - Ant scripts for use with JMS (see java/jms)
 java/build_scripts   - Perl support scripts that invoke the JDK tools
 java/dds             - the core OpenDDS Java API layer
 java/docs            - generated Javadocs go here by default
@@ -164,5 +165,6 @@ java/idl2jni         - Idl2Jni is a code-generation tool for IDL interfaces
 java/idl2jni/codegen - the code generator itself
 java/idl2jni/runtime - C++ and Java runtime libraries to support generated code
 java/idl2jni/tests   - tests of idl2jni
+java/jms             - an OpenDDS-based implementation of Java Message Service
 java/tao             - Java bindings for a few TAO types that OpenDDS uses
 java/tests           - test Java applications

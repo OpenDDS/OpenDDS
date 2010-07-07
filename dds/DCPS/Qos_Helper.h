@@ -21,7 +21,7 @@
 #if defined(__ACE_INLINE__)
 # define EXTERN_OR_INLINE_HELPER_METHOD ACE_INLINE
 #else
-# define EXTERN_OR_INLINE_HELPER_METHOD extern
+# define EXTERN_OR_INLINE_HELPER_METHOD
 #endif
 
 namespace OpenDDS {
@@ -267,9 +267,6 @@ public:
                          const DDS::DomainParticipantFactoryQos& qos2);
 };
 
-} // namespace DCPS
-} // namespace OpenDDS
-
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator== (const DDS::Duration_t& t1,
                  const DDS::Duration_t& t2);
@@ -433,6 +430,10 @@ bool operator == (const DDS::SubscriberQos& qos1,
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 bool operator == (const DDS::DomainParticipantFactoryQos& qos1,
                   const DDS::DomainParticipantFactoryQos& qos2);
+
+} // namespace DCPS
+} // namespace OpenDDS
+
 
 #if defined(__ACE_INLINE__)
 #include "Qos_Helper.inl"

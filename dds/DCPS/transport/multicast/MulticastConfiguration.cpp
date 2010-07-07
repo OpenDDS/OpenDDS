@@ -32,6 +32,8 @@ const size_t DEFAULT_NAK_DEPTH(32);
 const long DEFAULT_NAK_INTERVAL(500);
 const long DEFAULT_NAK_TIMEOUT(30000);
 
+const char DEFAULT_TTL(1);
+
 } // namespace
 
 namespace OpenDDS {
@@ -43,7 +45,14 @@ MulticastConfiguration::MulticastConfiguration()
     port_offset_(DEFAULT_PORT_OFFSET),
     reliable_(DEFAULT_RELIABLE),
     syn_backoff_(DEFAULT_SYN_BACKOFF),
-    nak_depth_(DEFAULT_NAK_DEPTH)
+    nak_depth_(DEFAULT_NAK_DEPTH),
+    ttl_(DEFAULT_TTL),
+#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+    rcv_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+#else
+    // Use system default values.
+    rcv_buffer_size_(0) 
+#endif
 {
   default_group_address(this->group_address_, DEFAULT_MULTICAST_ID);
 
@@ -113,7 +122,13 @@ MulticastConfiguration::load(const TransportIdType& id,
   GET_CONFIG_TIME_VALUE(config, transport_key, ACE_TEXT("nak_timeout"),
                         this->nak_timeout_)
 
-  return 0;
+  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("ttl"),
+                   this->ttl_, char)
+
+  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("rcv_buffer_size"),
+                   this->rcv_buffer_size_, size_t)
+  
+   return 0;
 }
 
 void

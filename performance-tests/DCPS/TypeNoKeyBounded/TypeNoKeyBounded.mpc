@@ -4,7 +4,7 @@ project(DCPS_Perf*) : dcps {
   dynamicflags   = PTTYPELIB_BUILD_DLL
   pch_header     =
   pch_source     =
-  dcps_ts_flags += --export=PTTypeLib_Export
+  dcps_ts_flags += -Wb,export_macro=PTTypeLib_Export
 // --module=Mine
 
   TypeSupport_Files {

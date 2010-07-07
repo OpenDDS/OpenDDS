@@ -38,25 +38,27 @@ OpenDDS::DCPS::TransportQueueElement::operator==(
 }
 
 ACE_INLINE
-void
+bool
 OpenDDS::DCPS::TransportQueueElement::data_dropped(bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("TransportQueueElement","data_dropped",6);
   this->dropped_ = true;
-  this->decision_made(dropped_by_transport);
+  return this->decision_made(dropped_by_transport);
 }
 
 ACE_INLINE
-void
+bool
 OpenDDS::DCPS::TransportQueueElement::data_delivered()
 {
   DBG_ENTRY_LVL("TransportQueueElement","data_delivered",6);
-  bool dropped = false;
-  this->decision_made(dropped);
+  // Decision made depend on dropped_ flag. If any link drops
+  // the sample even other links deliver successfully, the
+  // data dropped by transport will called back to writer.
+  return this->decision_made(this->dropped_);
 }
 
 ACE_INLINE
-void
+bool
 OpenDDS::DCPS::TransportQueueElement::decision_made(bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("TransportQueueElement","decision_made",6);
@@ -73,9 +75,13 @@ OpenDDS::DCPS::TransportQueueElement::decision_made(bool dropped_by_transport)
 
     // The queue elements are released to its cached allocator
     // in release_element() call.
+    // It's not necessary to set the released_ flag to true
+    // as this element will be released anyway and not be 
+    // accessible. Note it can not be set after release_element 
+    // call.
+    // this->released_ = true;
     this->release_element(dropped_by_transport);
-    this->released_ = true;
-    return;
+    return true;
   }
 
   // ciju: The sub_loan_count_ has been observed to drop below zero.
@@ -84,7 +90,7 @@ OpenDDS::DCPS::TransportQueueElement::decision_made(bool dropped_by_transport)
   // count for now. Ideally we would like to prevent the count from
   // falling below 0 and opening up this assert.
   // assert (new_count > 0);
-  return;
+  return false;
 }
 
 ACE_INLINE

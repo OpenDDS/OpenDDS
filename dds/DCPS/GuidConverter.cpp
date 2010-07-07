@@ -15,6 +15,7 @@
 #include "ace/ACE.h"
 
 #include "GuidConverter.h"
+#include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -108,19 +109,20 @@ GuidConverter::operator std::wstring() const
 }
 #endif
 
-} // namespace DCPS
-} // namespace OpenDDS
-
 std::ostream&
-operator<<(std::ostream& os, const OpenDDS::DCPS::GuidConverter& rhs)
+operator<<(std::ostream& os, const GuidConverter& rhs)
 {
   return os << std::string(rhs);
 }
 
 #ifdef DDS_HAS_WCHAR
 std::wostream&
-operator<<(std::wostream& os, const OpenDDS::DCPS::GuidConverter& rhs)
+operator<<(std::wostream& os, const GuidConverter& rhs)
 {
   return os << std::wstring(rhs);
 }
 #endif
+
+} // namespace DCPS
+} // namespace OpenDDS
+

@@ -35,7 +35,8 @@ UdpTransport::find_or_create_datalink(
 {
   ACE_INET_Addr remote_address(
     connection_info_i(remote_association->remote_data_));
-  PriorityKey key(priority, remote_address);
+  bool is_loopback = remote_address == this->config_i_->local_address_;    
+  PriorityKey key(priority, remote_address, is_loopback, active);
 
   if (active) {
     UdpDataLinkMap::iterator it(this->client_links_.find(key));

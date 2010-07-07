@@ -23,7 +23,10 @@
 OpenDDS::DCPS::SimpleTcpDataLink::SimpleTcpDataLink(
   const ACE_INET_Addr& remote_address,
   OpenDDS::DCPS::SimpleTcpTransport*  transport_impl,
-  CORBA::Long priority) : DataLink(transport_impl, priority),
+  CORBA::Long priority,
+  bool        is_loopback,
+  bool        is_active) 
+  : DataLink(transport_impl, priority, is_loopback, is_active),
     remote_address_(remote_address),
     graceful_disconnect_sent_(false),
     release_is_pending_ (false)
@@ -264,6 +267,9 @@ OpenDDS::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message()
 
   ACE_NEW(send_element, TransportControlElement(message));
 
+  // give the message block ownership to TransportControlElement
+  message->release ();
+ 
   // I don't want to rebuild a connection in order to send
   // a graceful disconnect message.
   this->send_i(send_element, false);
@@ -324,6 +330,9 @@ OpenDDS::DCPS::SimpleTcpDataLink::fully_associated()
   TransportControlElement* send_element = 0;
 
   ACE_NEW(send_element, TransportControlElement(message));
+
+  // give the message block ownership to TransportControlElement
+  message->release ();
 
   this->send_i(send_element);
 }

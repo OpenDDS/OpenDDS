@@ -1,7 +1,7 @@
 // -*- MPC -*-
 // $Id$
 
-project: taolib, portableserver, dcps_ts_defaults, built_in_topic_support, dds_suppress_any_support, taoidldefaults, coverage_optional {
+project: taolib, portableserver, dcps_ts_defaults, dcps_optional_features, dds_suppress_any_support, taoidldefaults, coverage_optional, dds_macros {
   // override the taolib default library output directory
   libout      = $(DDS_ROOT)/lib
   libs        += OpenDDS_Dcps
@@ -9,12 +9,5 @@ project: taolib, portableserver, dcps_ts_defaults, built_in_topic_support, dds_s
   libpaths    += $(DDS_ROOT)/lib
 
   includes    += $(DDS_ROOT)
-  idlflags    += -Gdcps -I$(DDS_ROOT)
-
-  // DDS is not compatible with an exceptions=0 build
-  requires    += exceptions
-
-  verbatim(gnuace, extension, 1) {
-    include $(DDS_ROOT)/rules.dds.GNU
-  }
+  idlflags    += -I$(DDS_ROOT)
 }

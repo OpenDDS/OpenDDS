@@ -9,7 +9,7 @@ project: dcps_java {
 
     after           += InfoRepoLib Federator DCPSInfoRepoServ
 
-    dcps_ts_flags   += --export=opendds_jms_native_Export
+    dcps_ts_flags   += -Wb,export_macro=opendds_jms_native_Export
 
     idlflags        += -Wb,stub_export_include=opendds_jms_native_Export.h \
                        -Wb,stub_export_macro=opendds_jms_native_Export

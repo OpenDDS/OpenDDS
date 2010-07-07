@@ -2,11 +2,18 @@
 // $Id$
 
 project {
+
+  after += opendds_idl
+
   Define_Custom(TypeSupport) {
     automatic_in          = 0
     automatic_out         = 1
-    command               = perl $(DDS_ROOT)/bin/dcps_ts.pl
-    dependent             = $(DDS_ROOT)/bin/dcps_ts.pl $(DDS_ROOT)/bin/DCPS/CPPTemplate.pm $(DDS_ROOT)/bin/DCPS/HTemplate.pm $(DDS_ROOT)/bin/DCPS/IDLTemplate.pm
+    output_follows_input  = 0
+    libpath               = $(ACE_ROOT)/lib
+    command   = $(DDS_ROOT)/bin/opendds_idl
+    dependent = $(DDS_ROOT)/bin/opendds_idl \
+      $(DDS_ROOT)/dds/idl/CPPTemplate.txt \
+      $(DDS_ROOT)/dds/idl/HTemplate.txt $(DDS_ROOT)/dds/idl/IDLTemplate.txt
     keyword dcps_ts_flags = commandflags
     inputext              = .idl
     source_outputext      = TypeSupportImpl.cpp
@@ -16,5 +23,4 @@ project {
 //    generic_outputext     = TypeSupport.idl
   }
 
-  dcps_ts_flags += $(OPENDDS_DCPS_TS_FLAGS)
 }

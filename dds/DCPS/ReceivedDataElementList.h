@@ -15,7 +15,12 @@
 
 #include "dcps_export.h"
 #include "Definitions.h"
+#include "GuidUtils.h"
+#include "DataSampleHeader.h"
+#include "Qos_Helper.h"
+
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "ace/OS.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -28,19 +33,27 @@ class InstanceState;
 
 class OpenDDS_Dcps_Export ReceivedDataElement {
 public:
-  ReceivedDataElement(PublicationId pub, void *received_data)
-    : pub_(pub),
+  ReceivedDataElement(const DataSampleHeader& header, void *received_data)
+    : pub_(header.publication_id_),
       registered_data_(received_data),
       sample_state_(DDS::NOT_READ_SAMPLE_STATE),
-      coherent_change_(false),
+      coherent_change_(header.coherent_change_),
+      group_coherent_(header.group_coherent_),
+      publisher_id_ (header.publisher_id_),
       disposed_generation_count_(0),
       no_writers_generation_count_(0),
       zero_copy_cnt_(0),
-      sequence_(0),
+      sequence_(header.sequence_),
       previous_data_sample_(0),
       next_data_sample_(0),
       ref_count_(1)
-  {}
+  {
+  
+    this->destination_timestamp_ = time_value_to_time(ACE_OS::gettimeofday());
+
+    this->source_timestamp_.sec = header.source_timestamp_sec_;
+    this->source_timestamp_.nanosec = header.source_timestamp_nanosec_;
+  }
 
   long dec_ref() {
     return --this->ref_count_;
@@ -71,6 +84,12 @@ public:
 
   /// Sample belongs to an active coherent change set
   bool coherent_change_;
+  
+  /// Sample belongs to a group coherent changes.
+  bool group_coherent_;
+  
+  /// Publisher id represent group identifier.
+  RepoId publisher_id_;
 
   /// The data sample's instance's disposed_generation_count_
   /// at the time the sample was received

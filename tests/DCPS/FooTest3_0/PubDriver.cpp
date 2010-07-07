@@ -999,7 +999,7 @@ PubDriver::allocator_test ()
 
     TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
-    if (_tao_is_bounded_size (foo1))
+    if (gen_is_bounded_size (foo1))
     {
       TEST_CHECK (foo_datawriter_servant_->data_allocator() != 0);
       TEST_CHECK (foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == 0);
@@ -1022,7 +1022,7 @@ PubDriver::allocator_test ()
 
     TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
-    if (_tao_is_bounded_size (foo1))
+    if (gen_is_bounded_size (foo1))
     {
       TEST_CHECK (foo_datawriter_servant_->data_allocator() != 0);
       TEST_CHECK (foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == i);

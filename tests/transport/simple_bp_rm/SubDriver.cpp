@@ -247,6 +247,12 @@ SubDriver::run()
   ACE_DEBUG((LM_DEBUG,
              "(%P|%t) Received %d of %d messages.\n", amount, this->num_msgs_));
 
+  OpenDDS::DCPS::WriterIdSeq writers;
+  writers.length(1);
+  writers[0] = this->pub_id_;
+
+  this->subscriber_.remove_associations(1, writers.get_buffer(), this->sub_id_);
+
   // Tear-down the entire Transport Framework.
   TheTransportFactory->release();
   TheServiceParticipant->shutdown();

@@ -26,7 +26,9 @@ public:
 
   SimpleTcpDataLink(const ACE_INET_Addr& remote_address,
                     SimpleTcpTransport*  transport_impl,
-                    CORBA::Long          priority = 0);
+                    CORBA::Long          priority,
+                    bool                 is_loopback,
+                    bool                 is_active);
   virtual ~SimpleTcpDataLink();
 
   /// Accessor for the remote address.

@@ -20,6 +20,7 @@
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
 #include "EntryExit.h"
 #include "tao/ORB_Core.h"
@@ -35,13 +36,18 @@
 #endif /* __ACE_INLINE__ */
 
 /// Only called by our TransportImpl object.
-OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl, CORBA::Long priority)
+OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl, 
+                                  CORBA::Long priority, 
+                                  bool is_loopback, 
+                                  bool is_active)
   : stopped_(false),
     thr_per_con_send_task_(0),
     transport_priority_(priority),
     send_control_allocator_(0),
     mb_allocator_(0),
-    db_allocator_(0)
+    db_allocator_(0),
+    is_loopback_(is_loopback),
+    is_active_(is_active)
 {
   DBG_ENTRY_LVL("DataLink","DataLink",6);
 
@@ -666,7 +672,7 @@ void
 OpenDDS::DCPS::DataLink::ack_received(ReceivedDataSample& sample)
 {
   RepoId publication = GUID_UNKNOWN;
-  TAO::DCPS::Serializer serializer(
+  Serializer serializer(
     sample.sample_,
     sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
   serializer >> publication;
@@ -679,10 +685,21 @@ OpenDDS::DCPS::DataLink::ack_received(ReceivedDataSample& sample)
 
     if (where == this->send_listeners_.end()) {
       RepoIdConverter converter(publication);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) DataLink::ack_received: ")
-                 ACE_TEXT("listener for publication %C not found.\n"),
-                 std::string(converter).c_str()));
+
+      // Ack could be for a different publisher.
+      if (this->pub_map_.find(publication) == 0) {
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR((LM_WARNING,
+                     ACE_TEXT("(%P|%t) DataLink::ack_received: ")
+                     ACE_TEXT("publication %C not found.\n"),
+                     std::string(converter).c_str()));
+        }
+      } else {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) DataLink::ack_received: ")
+                   ACE_TEXT("listener for publication %C not found.\n"),
+                   std::string(converter).c_str()));
+      }
       return;
     }
 
@@ -711,8 +728,15 @@ OpenDDS::DCPS::DataLink::release_remote_subscriber
        ++itr) {
     if (publisher_id == itr->first) {
       // Remove the publisher_id => subscriber_id association.
-      if (this->pub_map_.release_subscriber(publisher_id,
-                                            subscriber_id) == 1) {
+      int ret = 0;
+      {
+        GuardType guard(this->pub_map_lock_);
+
+        ret = this->pub_map_.release_subscriber(publisher_id,
+                                                subscriber_id);
+      }
+      
+      if ( ret == 1) {
         // This means that this release() operation has caused the
         // publisher_id to no longer be associated with *any* subscribers.
         released_publishers.insert_link(publisher_id,this);

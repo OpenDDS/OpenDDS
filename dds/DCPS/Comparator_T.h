@@ -16,8 +16,6 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-
 #include "ace/OS_NS_string.h"
 
 #include "RcHandle_T.h"
@@ -59,6 +57,9 @@ public:
   bool less(void* lhs_void, void* rhs_void) const {
     Sample* lhs = static_cast<Sample*>(lhs_void);
     Sample* rhs = static_cast<Sample*>(rhs_void);
+#ifndef OPENDDS_GCC33
+    using ::operator<; // TAO::String_Manager's operator< is in global NS
+#endif
     return lhs->*mp_ < rhs->*mp_;
   }
 
@@ -67,12 +68,44 @@ public:
     Sample* rhs = static_cast<Sample*>(rhs_void);
     const Field& field_l = lhs->*mp_;
     const Field& field_r = rhs->*mp_;
+#ifndef OPENDDS_GCC33
+    using ::operator<; // TAO::String_Manager's operator< is in global NS
+#endif
     return !(field_l < field_r) && !(field_r < field_l);
   }
 
 private:
   MemberPtr mp_;
 };
+
+#ifdef OPENDDS_GCC33
+
+template <class Sample, class Char_T>
+class FieldComparator<Sample, TAO::String_Manager_T<Char_T> >
+  : public ComparatorBase {
+public:
+  typedef TAO::String_Manager_T<Char_T> Sample::* MemberPtr;
+  FieldComparator(MemberPtr mp, ComparatorBase::Ptr next)
+  : ComparatorBase(next)
+  , mp_(mp) {}
+
+  bool less(void* lhs_void, void* rhs_void) const {
+    Sample* lhs = static_cast<Sample*>(lhs_void);
+    Sample* rhs = static_cast<Sample*>(rhs_void);
+    return ACE_OS::strcmp((lhs->*mp_).in(), (rhs->*mp_).in()) < 0;
+  }
+
+  bool equal(void* lhs_void, void* rhs_void) const {
+    Sample* lhs = static_cast<Sample*>(lhs_void);
+    Sample* rhs = static_cast<Sample*>(rhs_void);
+    return ACE_OS::strcmp((lhs->*mp_).in(), (rhs->*mp_).in()) == 0;
+  }
+
+private:
+  MemberPtr mp_;
+};
+
+#endif // OPENDDS_GCC33
 
 template <class Sample, class Field>
 ComparatorBase::Ptr make_field_cmp(Field Sample::* mp,
@@ -126,7 +159,5 @@ ComparatorBase::Ptr make_struct_cmp(Field Sample::* mp,
 
 } // namespace DCPS
 } // namespace OpenDDS
-
-#endif /* OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */
 
 #endif

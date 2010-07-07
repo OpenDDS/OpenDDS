@@ -29,6 +29,9 @@ project(*InfoRepoLib): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_utils 
   Resource_Files {
     InfoRepoLib.rc
   }
+
+  TypeSupport_Files {
+  }
 }
 
 
@@ -57,6 +60,9 @@ project(*DCPSInfoRepoServ): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_u
   Resource_Files {
     DCPSInfoRepoServ.rc
   }
+
+  TypeSupport_Files {
+  }
 }
 
 
@@ -70,7 +76,7 @@ project(*Federator): dcps, dcps_tcp, iortable {
   
   idlflags    += -Wb,export_macro=OpenDDS_Federator_Export -Wb,export_include=federator_export.h -Wb,pch_include=DcpsInfo_pch.h
   dynamicflags = OPENDDS_FEDERATOR_BUILD_DLL
-  dcps_ts_flags += --export=OpenDDS_Federator_Export --pch DcpsInfo_pch.h
+  dcps_ts_flags += -Wb,export_macro=OpenDDS_Federator_Export -Wb,pch_include=DcpsInfo_pch.h
 
   pch_header   =
   pch_source   =
@@ -138,5 +144,8 @@ project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils 
   }
 
   Resource_Files {
+  }
+
+  TypeSupport_Files {
   }
 }

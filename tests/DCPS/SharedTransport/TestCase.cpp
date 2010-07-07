@@ -19,10 +19,12 @@
 
 #include "TestCase.h"
 
+
 namespace {
 
 OpenDDS::DCPS::TransportIdType local_transport_id(1);
 ACE_TString local_transport_type(ACE_TEXT("SimpleTcp"));
+const int num_messages = 100;
 
 void
 parse_args(int& argc, ACE_TCHAR** argv)
@@ -63,15 +65,21 @@ TestCase::init_transport(OpenDDS::DCPS::TransportIdType& transport_id,
   return DDS::RETCODE_OK;
 }
 
+
 int
 TestCase::test()
 {
   wait_for_subscribers(); // wait for association
 
-  // Write test data to exercise the data paths:
-  for (int i = 0; i < 100; ++i) {
-    TestMessage message = { i, "Testing!" };
+  // As there are no fully assoication establishment between pub and sub for UDP
+  // transport, a delay is required for the test to receive all messages.
+  if (local_transport_type == ACE_TEXT("udp")) { 
+    ACE_OS::sleep (2);
+  }
 
+  // Write test data to exercise the data paths:
+  for (int i = 0; i < num_messages; ++i) {
+    TestMessage message = { i, "Testing!" };
     if (this->writer_i_->write(message, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: test() -")
@@ -85,7 +93,43 @@ TestCase::test()
   // publishers attached to the same TransportImpl. There is nothing
   // which needs to be verified other than the association is formed
   // without crashing the DCPS subsystem.
+#if 1
+  for (int i = 0; i < num_messages; ++i) {
+    TestMessage message;
+    DDS::SampleInfo si;
 
+    DDS::ReturnCode_t status = this->reader_i_->take_next_sample(message, si) ;
+
+    if (status == DDS::RETCODE_OK) {
+      std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
+      std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
+
+      if (si.valid_data) {
+        std::cout << "Message: key    = " << message.key << std::endl
+                  << "         message = " << message.message.in()   << std::endl;
+      } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
+        return -1;
+
+      } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
+        return -1;
+
+      } else {
+        ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("%N:%l: take_next_sample()")
+                    ACE_TEXT(" ERROR: unknown instance state: %d\n"),
+                    si.instance_state), -1);
+      }
+
+    } else {
+      ACE_ERROR_RETURN((LM_ERROR,
+                  ACE_TEXT("%N:%l: take_next_sample()")
+                  ACE_TEXT(" ERROR: unexpected status: %d\n"),
+                  status), -1);
+    }
+  }
+ #endif 
   return 0;
 }
 

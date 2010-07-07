@@ -41,6 +41,7 @@ project(DDS*Subscriber) : dcpsexe_with_tcp {
 project(DDS*Monitor) : dcpsexe_with_tcp {
   exename   = monitor
   requires += built_in_topics
+  after  += DDS*idl
 
   Source_Files {
     monitor.cpp

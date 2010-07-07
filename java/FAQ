@@ -43,7 +43,7 @@ in the $DDS_ROOT directory and the FAQ at <http://www.opendds.org/faq.html>.
   - How do I detect errors from the OpenDDS middleware?
 
     DDS (as defined by the spec) does not throw exceptions.  There are some
-    cases where OpenDDS will throw exceptions, mostfly for unrecoverable
+    cases where OpenDDS will throw exceptions, mostly for unrecoverable
     conditions.  See the IDL for the DDS API to determine if an error code is
     returned from the API call.  In some cases an object reference is returned
     instead of an error code.  The application must check if this is a nil
@@ -84,8 +84,8 @@ in the $DDS_ROOT directory and the FAQ at <http://www.opendds.org/faq.html>.
     either the "out" or "inout" parameter passing modes requires the caller to
     make use of the associated Holder class for those parameters.  For the
     "inout" mode, the data held by the Holder must be valid before calling the
-    method.  For either mode, the caller must always the Holder's "value" field
-    to access the data after the call.
+    method.  For either mode, the caller must always use the Holder's "value"
+    field to access the data after the call.
     For more information about IDL and the IDL-to-Java mapping, see the
     references at the top of the $DDS_ROOT/java/README file and the book
     "Pure CORBA" by Fintan Bolton (Sams Publishing, 2002).

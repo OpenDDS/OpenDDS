@@ -29,6 +29,17 @@
 #define DDS_HAS_WCHAR
 #endif
 
+#if defined __GNUC__ && (__GNUC__ < 3 || (__GNUC__ == 3 && __GNUC_MINOR__ < 4))
+// GCC 3.3.x doesn't have using-declarations and has some strange bugs
+// regarding when the "template" keyword should be used to disambiguate.
+#define OPENDDS_GCC33
+#define OPENDDS_GCC33_TEMPLATE_NON_DEPENDENT template
+#define OPENDDS_GCC33_TEMPLATE_DEPENDENT
+#else
+#define OPENDDS_GCC33_TEMPLATE_NON_DEPENDENT
+#define OPENDDS_GCC33_TEMPLATE_DEPENDENT template
+#endif
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -40,7 +51,7 @@ typedef RepoId PublicationId;
 struct OpenDDS_Dcps_Export SequenceNumber {
   /// Construct with a value, default to negative starting point.
   SequenceNumber(int value = SHRT_MIN) {
-    if (value > SHRT_MAX) this->value_ = ACE_INT16(value % SHRT_MAX);
+    if (value > SHRT_MAX) this->value_ = ACE_INT16(value % (SHRT_MAX + 1));
     else                  this->value_ = ACE_INT16(value);
   }
 
@@ -79,10 +90,10 @@ struct OpenDDS_Dcps_Export SequenceNumber {
   ///      shortest distance is from 2 to MAX/2.
   bool operator<(const SequenceNumber& rvalue) const {
     ACE_INT16 distance = rvalue.value_ - value_;
-    return (distance == 0)? false:                    // Equal is not less than.
-           (value_ < 0)? (value_ < rvalue.value_):    // Stem of lollipop.
-           (distance <  0)? (SHRT_MAX/2 < -distance): // Closest distance dominates.
-           (distance < (SHRT_MAX/2));
+    return (distance == 0)? false:                // Equal is not less than.
+       (value_ < 0 || rvalue.value_ < 0) ? (value_ < rvalue.value_): // Stem of lollipop.
+       (distance <  0)? (SHRT_MAX/2 < -distance): // Closest distance dominates.
+       (distance < (SHRT_MAX/2));
   }
 
   /// Derive a full suite of logical operations.
@@ -119,6 +130,9 @@ typedef Cached_Allocator_With_Overflow<ACE_Message_Block, ACE_Thread_Mutex>
 MessageBlockAllocator;
 typedef Cached_Allocator_With_Overflow<ACE_Data_Block, ACE_Thread_Mutex>
 DataBlockAllocator;
+struct DataSampleHeader;
+typedef Cached_Allocator_With_Overflow<DataSampleHeader, ACE_Null_Mutex>
+DataSampleHeaderAllocator;
 
 #define DUP true
 #define NO_DUP false

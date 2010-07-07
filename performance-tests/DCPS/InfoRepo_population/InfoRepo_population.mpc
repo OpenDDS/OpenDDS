@@ -1,9 +1,9 @@
-project(*idl) : taoidldefaults {
-  idlflags += -I../Sync
+project(*idl) : taoidldefaults, dcps_ts_defaults {
+  idlflags += -I../Sync -I$(DDS_ROOT)
   after    += Sync_Idl
 
-  IDL_Files {
-    SyncExt.idl
+  TypeSupport_Files {
+    Messenger.idl
   }
 
   custom_only = 1

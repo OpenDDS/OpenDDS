@@ -333,6 +333,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_OS::sleep(2);
       }
 
+      if (! listener_servant->verify_result ()) {
+        ACE_ERROR_RETURN ((LM_ERROR,
+                          ACE_TEXT(" %P|%t ERROR: verify result failed.\n")),
+                          1);
+      }
+      
       //The collocated test for multicast needs more time than udp to
       //wait for receiving all end messages.
       ACE_OS::sleep(10);
@@ -342,6 +348,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       TheTransportFactory->release();
       TheServiceParticipant->shutdown ();
+      
 
     }
   catch (const CORBA::Exception& ex)

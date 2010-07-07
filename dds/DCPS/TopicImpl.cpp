@@ -177,5 +177,11 @@ ACE_THROW_SPEC((CORBA::SystemException))
   return this->participant_->get_handle(this->id_);
 }
 
+const char* 
+TopicImpl::type_name () 
+{
+  return this->type_name_.c_str ();
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
