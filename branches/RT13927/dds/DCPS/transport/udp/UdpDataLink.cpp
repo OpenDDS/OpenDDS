@@ -22,7 +22,9 @@ namespace DCPS {
 UdpDataLink::UdpDataLink(UdpTransport* transport,
                          bool active)
   : DataLink(transport,
-             0), // priority
+             0, // priority
+             false, // is_loopback,
+             active),// is_active
     active_(active),
     config_(0),
     reactor_task_(0)
@@ -33,7 +35,8 @@ bool
 UdpDataLink::open(const ACE_INET_Addr& remote_address)
 {
   this->remote_address_ = remote_address;
-
+  this->is_loopback_ = this->remote_address_ == this->config_->local_address_;
+  
   ACE_INET_Addr local_address;
   if (!this->active_) {
     local_address = this->config_->local_address_;

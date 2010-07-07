@@ -66,6 +66,12 @@ OpenDDS::DCPS::TransportReceiveStrategy::check_header(const TransportHeader& /*h
   return true;
 }
 
+bool
+OpenDDS::DCPS::TransportReceiveStrategy::check_header(const DataSampleHeader& /*header*/)
+{
+  return true;
+}
+
 /// Note that this is just an initial implementation.  We may take
 /// some shortcuts (we will) that will need to be dealt with later once
 /// a more robust implementation can be put in place.
@@ -284,21 +290,10 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
                                                 vec_index,
                                                 remote_address);
 
-  VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   "
-            "recvv() return %d - we call this the bytes_remaining.\n",
-            bytes_remaining), 5);
-
-  if (bytes_remaining == 0 && this->gracefully_disconnected_) {
-    VDBG_LVL((LM_ERROR,
-              ACE_TEXT("(%P|%t) Peer has gracefully disconnected.\n"))
-             ,1);
-    return -1;
-
-  } else if ((bytes_remaining == 0 && !this->gracefully_disconnected_)
-             || bytes_remaining < 0) {
-    VDBG_LVL((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unrecoverable problem ")
+  if (bytes_remaining < 0) {
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Problem ")
               ACE_TEXT("with data link detected: %p.\n"),
-              ACE_TEXT("receive_bytes")), 1);
+              ACE_TEXT("receive_bytes")));
 
     // The relink() will handle the connection to the ReconnectTask to do
     // the reconnect so this reactor thread will not be block.
@@ -307,6 +302,32 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
     // Close connection anyway.
     return -1;
     // Returning -1 takes the handle out of the reactor read mask.
+  }
+
+  VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   "
+            "recvv() return %d - we call this the bytes_remaining.\n",
+            bytes_remaining), 5);
+
+  if (bytes_remaining == 0) {
+    if (this->gracefully_disconnected_) {
+      VDBG_LVL((LM_ERROR,
+                ACE_TEXT("(%P|%t) Peer has gracefully disconnected.\n"))
+               ,1);
+      return -1;
+
+    } else {
+      VDBG_LVL((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unrecoverable problem ")
+                ACE_TEXT("with data link detected: %p.\n"),
+                ACE_TEXT("receive_bytes")), 1);
+
+      // The relink() will handle the connection to the ReconnectTask to do
+      // the reconnect so this reactor thread will not be block.
+      this->relink();
+
+      // Close connection anyway.
+      return -1;
+      // Returning -1 takes the handle out of the reactor read mask.
+    }
   }
 
   VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   "
@@ -497,45 +518,9 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
     // Ignore bad PDUs by skipping over them.  We do this out here
     // in case we did not skip over the entire bad PDU last time.
     //
-    if(!this->good_pdu_) {
-      //
-      // Adjust the message block chain pointers to account for the
-      // skipped data.
-      //
-      for (size_t index = this->buffer_index_ ;
-           this->pdu_remaining_ > 0 ;
-           index = this->successor_index(index)) {
-        size_t amount =
-          ace_min<size_t>(this->pdu_remaining_, this->receive_buffers_[ index]->space());
-
-        this->receive_buffers_[ index]->rd_ptr(amount) ;
-        this->pdu_remaining_ -= amount ;
-
-        if (this->pdu_remaining_ > 0 && this->successor_index(index) == this->buffer_index_) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: ")
-                            ACE_TEXT("TransportReceiveStrategy::handle_input()")
-                            ACE_TEXT(" - Unrecoverably corrupted ")
-                            ACE_TEXT("receive buffer management detected: ")
-                            ACE_TEXT("read more bytes than available.\n")),
-                           -1) ;
-        }
-      }
-
-      //
-      // Adjust the buffer chain in case we crossed into the next
-      // buffer after skipping the PDU.
-      //
-      size_t initial = this->buffer_index_ ;
-
-      while (this->receive_buffers_[ this->buffer_index_]->length() == 0) {
-        this->buffer_index_ = this->successor_index(this->buffer_index_) ;
-
-        if (initial == this->buffer_index_) {
-          // No more data to process, our work here is done.
-          return 0;
-        }
-      }
+    {
+      int rtn_code = skip_bad_pdus();
+      if (rtn_code <= 0) return rtn_code;
     }
 
     //
@@ -620,7 +605,8 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
           //
           // Check the DataSampleHeader.
           //
-          /// TODO
+
+          this->good_pdu_ = check_header(receive_sample_.header_);
 
           //
           // Set the amount to parse into the message buffer.  We
@@ -651,9 +637,12 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
           VDBG((LM_DEBUG,"(%P|%t) DBG:   "
                 "Amount of transport packet remaining: %d.\n",
                 this->pdu_remaining_));
+
+          int rtn_code = skip_bad_pdus();
+          if (rtn_code <= 0) return rtn_code;
         }
       }
-
+     
       VDBG((LM_DEBUG,"(%P|%t) DBG:   "
             "Adjust the buffer chain in case we crossed into the next "
             "buffer after the last read(s).\n"));
@@ -850,4 +839,51 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
   //   pick up from where we left off correctly.
   //
   return 0 ;
+}
+
+int 
+OpenDDS::DCPS::TransportReceiveStrategy::skip_bad_pdus()
+{
+  if (this->good_pdu_) return 1;
+  
+  //
+  // Adjust the message block chain pointers to account for the
+  // skipped data.
+  //
+  for (size_t index = this->buffer_index_ ;
+       this->pdu_remaining_ > 0 ;
+       index = this->successor_index(index)) {
+    size_t amount =
+      ace_min<size_t>(this->pdu_remaining_, this->receive_buffers_[ index]->length());
+
+    this->receive_buffers_[ index]->rd_ptr(amount) ;
+    this->pdu_remaining_ -= amount ;
+
+    if (this->pdu_remaining_ > 0 && this->successor_index(index) == this->buffer_index_) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("TransportReceiveStrategy::handle_input()")
+                        ACE_TEXT(" - Unrecoverably corrupted ")
+                        ACE_TEXT("receive buffer management detected: ")
+                        ACE_TEXT("read more bytes than available.\n")),
+                       -1) ;
+    }
+  }
+
+  //
+  // Adjust the buffer chain in case we crossed into the next
+  // buffer after skipping the PDU.
+  //
+  size_t initial = this->buffer_index_ ;
+
+  while (this->receive_buffers_[ this->buffer_index_]->length() == 0) {
+    this->buffer_index_ = this->successor_index(this->buffer_index_) ;
+
+    if (initial == this->buffer_index_) {
+      // No more data to process, our work here is done.
+      return 0;
+    }
+  }
+
+  return 1;
 }

@@ -45,7 +45,13 @@ MulticastReceiveStrategy::receive_bytes(iovec iov[],
 bool
 MulticastReceiveStrategy::check_header(const TransportHeader& header)
 {
-  return this->link_->header_received(header);
+  return this->link_->check_header(header);
+}
+
+bool
+MulticastReceiveStrategy::check_header(const DataSampleHeader& header)
+{
+  return this->link_->check_header(header);
 }
 
 void

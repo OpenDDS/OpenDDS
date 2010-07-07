@@ -28,7 +28,9 @@ public:
   TransportRetainedElement(
     const ACE_Message_Block*           message,
     const RepoId&                      pubId,
-    TransportRetainedElementAllocator* allocator = 0
+    TransportRetainedElementAllocator* allocator = 0,
+    MessageBlockAllocator*             mb_allocator_ = 0,
+    DataBlockAllocator*                db_allocator_ = 0
   );
 
   /// Copy constructor.
@@ -40,6 +42,8 @@ public:
 
   virtual RepoId publication_id() const;
   virtual const ACE_Message_Block* msg() const;
+  virtual bool owned_by_transport ();
+
 protected:
   virtual void release_element(bool dropped_by_transport);
 
@@ -54,6 +58,10 @@ private:
 
   /// Reference to TransportRetainedElement allocator.
   TransportRetainedElementAllocator* allocator_;
+  /// Cached allocator for DataSampleHeader message block
+  MessageBlockAllocator*             mb_allocator_;
+  /// Cached allocator for DataSampleHeader data block
+  DataBlockAllocator*                db_allocator_;
 };
 
 } // namespace DCPS

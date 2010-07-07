@@ -1,16 +1,22 @@
 // This .mpb represents the parts of the DdsDcps project that depend on whether
 // or not the built_in_topics feature is enabled (which it is by default).
 
-feature (built_in_topics): dcps_ts_defaults, taoidldefaults, dds_suppress_any_support {
-  dcps_ts_flags += --export OpenDDS_Dcps_Export --pch DCPS/DdsDcps_pch.h
-
+feature (built_in_topics): dcps_ts_defaults, taoidldefaults {
+  dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h
   TypeSupport_Files {
     DdsDcpsInfrastructure.idl
   }
 
   idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
-
   IDL_Files {
     DdsDcpsInfrastructureTypeSupport.idl
+  }
+}
+
+feature (!built_in_topics): dcps_ts_defaults {
+  dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -DDDS_HAS_MINIMUM_BIT
+  TypeSupport_Files {
+    dcps_ts_flags += -SI
+    DdsDcpsInfrastructure.idl
   }
 }

@@ -8,8 +8,9 @@
  */
 
 #include "DcpsInfo_pch.h"
-#include /**/ "DCPS_Utils.h"
+#include "DCPS_Utils.h"
 #include "dds/DCPS/Qos_Helper.h"
+#include "dds/DCPS/Definitions.h"
 
 #include "ace/ACE.h"  /* For ACE::wild_match() */
 #include "ace/OS_NS_string.h"
@@ -251,9 +252,17 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
   // invalid if offered kind is less than requested kind OR
   //         if offered liveliness duration greater than requested
   //         liveliness duration
+#ifdef OPENDDS_GCC33
+  if (writerQos->liveliness.kind < readerQos->liveliness.kind
+      || OpenDDS::DCPS::operator>(writerQos->liveliness.lease_duration,
+      readerQos->liveliness.lease_duration)) {
+#else
+  using OpenDDS::DCPS::operator>;
   if (writerQos->liveliness.kind < readerQos->liveliness.kind
       || writerQos->liveliness.lease_duration
       > readerQos->liveliness.lease_duration) {
+#endif
+
     compatible = false;
 
     increment_incompatibility_count(writerStatus,
@@ -265,7 +274,13 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
   // Check the DEADLINE_QOS_POLICY_ID
   //   Offered deadline must be less than or equal to the requested
   //   deadline.
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator>(writerQos->deadline.period,
+                               readerQos->deadline.period)) {
+#else
   if (writerQos->deadline.period > readerQos->deadline.period) {
+#endif
+
     compatible = false;
 
     increment_incompatibility_count(writerStatus,
@@ -276,7 +291,14 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
 
   // Check the LATENCY_BUDGET
   //   The reader's duration must be greater than or equal to the writer's
+#ifdef OPENDDS_GCC33
+  if (OpenDDS::DCPS::operator<(readerQos->latency_budget.duration,
+                               writerQos->latency_budget.duration)) {
+#else
+  using OpenDDS::DCPS::operator<;
   if (readerQos->latency_budget.duration < writerQos->latency_budget.duration) {
+#endif
+
     compatible = false;
 
     increment_incompatibility_count(writerStatus,
@@ -285,9 +307,74 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
                                     DDS::LATENCYBUDGET_QOS_POLICY_ID);
   }
 
+  // The value of the OWNERSHIP kind offered must exactly match the one 
+  // requested or else they are considered incompatible.
+  if (writerQos->ownership.kind != readerQos->ownership.kind) {
+    compatible = false;
+
+    increment_incompatibility_count(writerStatus,
+                                    DDS::OWNERSHIP_QOS_POLICY_ID);
+    increment_incompatibility_count(readerStatus,
+                                    DDS::OWNERSHIP_QOS_POLICY_ID);
+  }
+  
   return compatible;
 }
 
+#ifdef OPENDDS_GCC33
+bool should_check_compatibility_upon_change(const DDS::DataReaderQos & qos1,
+                                            const DDS::DataReaderQos & qos2)
+{
+  return !(
+           OpenDDS::DCPS::operator==(qos1.deadline, qos2.deadline) &&
+           OpenDDS::DCPS::operator==(qos1.latency_budget, qos2.latency_budget));
+}
+
+bool should_check_compatibility_upon_change(const DDS::DataWriterQos & qos1,
+                                            const DDS::DataWriterQos & qos2)
+{
+  return !(
+           OpenDDS::DCPS::operator==(qos1.deadline, qos2.deadline) &&
+           OpenDDS::DCPS::operator==(qos1.latency_budget, qos2.latency_budget));
+}
+
+bool should_check_compatibility_upon_change(const DDS::TopicQos & qos1,
+                                            const DDS::TopicQos & qos2)
+{
+  return !OpenDDS::DCPS::operator==(qos1.deadline, qos2.deadline);
+}
+
+bool should_check_association_upon_change(const DDS::DataReaderQos & qos1,
+                                          const DDS::DataReaderQos & qos2)
+{
+  return !(
+           OpenDDS::DCPS::operator==(qos1.deadline, qos2.deadline) &&
+           OpenDDS::DCPS::operator==(qos1.latency_budget, qos2.latency_budget));
+}
+
+bool should_check_association_upon_change(const DDS::DataWriterQos & qos1,
+                                          const DDS::DataWriterQos & qos2)
+{
+  return !(
+           OpenDDS::DCPS::operator==(qos1.deadline, qos2.deadline) &&
+           OpenDDS::DCPS::operator==(qos1.latency_budget, qos2.latency_budget));
+}
+
+bool should_check_association_upon_change(const DDS::SubscriberQos & qos1,
+                                          const DDS::SubscriberQos & qos2)
+{
+  return !OpenDDS::DCPS::operator==(qos1.partition, qos2.partition);
+}
+
+bool should_check_association_upon_change(const DDS::PublisherQos & qos1,
+                                          const DDS::PublisherQos & qos2)
+{
+  return !OpenDDS::DCPS::operator==(qos1.partition, qos2.partition);
+}
+
+#else // !OPENDDS_GCC33
+
+using OpenDDS::DCPS::operator==;
 bool should_check_compatibility_upon_change(const DDS::DataReaderQos & qos1,
                                             const DDS::DataReaderQos & qos2)
 {
@@ -304,28 +391,10 @@ bool should_check_compatibility_upon_change(const DDS::DataWriterQos & qos1,
            (qos1.latency_budget == qos2.latency_budget));
 }
 
-bool should_check_compatibility_upon_change(const DDS::SubscriberQos & /*qos1*/,
-                                            const DDS::SubscriberQos & /*qos2*/)
-{
-  return false;
-}
-
-bool should_check_compatibility_upon_change(const DDS::PublisherQos & /*qos1*/,
-                                            const DDS::PublisherQos & /*qos2*/)
-{
-  return false;
-}
-
 bool should_check_compatibility_upon_change(const DDS::TopicQos & qos1,
                                             const DDS::TopicQos & qos2)
 {
   return !(qos1.deadline == qos2.deadline);
-}
-
-bool should_check_compatibility_upon_change(const DDS::DomainParticipantQos & /*qos1*/,
-                                            const DDS::DomainParticipantQos & /*qos2*/)
-{
-  return false;
 }
 
 bool should_check_association_upon_change(const DDS::DataReaderQos & qos1,
@@ -354,6 +423,26 @@ bool should_check_association_upon_change(const DDS::PublisherQos & qos1,
                                           const DDS::PublisherQos & qos2)
 {
   return !(qos1.partition == qos2.partition);
+}
+
+#endif // OPENDDS_GCC33
+
+bool should_check_compatibility_upon_change(const DDS::SubscriberQos & /*qos1*/,
+                                            const DDS::SubscriberQos & /*qos2*/)
+{
+  return false;
+}
+
+bool should_check_compatibility_upon_change(const DDS::PublisherQos & /*qos1*/,
+                                            const DDS::PublisherQos & /*qos2*/)
+{
+  return false;
+}
+
+bool should_check_compatibility_upon_change(const DDS::DomainParticipantQos & /*qos1*/,
+                                            const DDS::DomainParticipantQos & /*qos2*/)
+{
+  return false;
 }
 
 bool should_check_association_upon_change(const DDS::TopicQos & /*qos1*/,

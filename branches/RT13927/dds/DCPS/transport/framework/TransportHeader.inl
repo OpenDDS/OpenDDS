@@ -97,7 +97,7 @@ OpenDDS::DCPS::TransportHeader::init(ACE_Message_Block* buffer)
 {
   DBG_ENTRY_LVL("TransportHeader","init",6);
 
-  TAO::DCPS::Serializer reader(buffer);
+  Serializer reader(buffer);
 
   reader.read_octet_array(this->protocol_, sizeof(this->protocol_));
 

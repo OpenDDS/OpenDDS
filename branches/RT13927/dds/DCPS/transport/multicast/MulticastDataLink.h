@@ -43,7 +43,9 @@ class OpenDDS_Multicast_Export MulticastDataLink
 public:
   MulticastDataLink(MulticastTransport* transport,
                     MulticastSessionFactory* session_factory,
-                    MulticastPeer local_peer);
+                    MulticastPeer local_peer,
+                    bool is_loopback,
+                    bool is_active);
   virtual ~MulticastDataLink();
 
   MulticastTransport* transport();
@@ -74,9 +76,12 @@ public:
 
   bool acked(MulticastPeer remote_peer);
 
-  bool header_received(const TransportHeader& header);
+  bool check_header(const TransportHeader& header);
+  bool check_header(const DataSampleHeader& header);
   void sample_received(ReceivedDataSample& sample);
 
+  void set_check_fully_association ();
+  
 private:
   MulticastTransport* transport_;
 
@@ -101,6 +106,8 @@ private:
   MulticastSessionMap sessions_;
 
   virtual void stop_i();
+  
+  bool check_fully_association_;
 };
 
 } // namespace DCPS

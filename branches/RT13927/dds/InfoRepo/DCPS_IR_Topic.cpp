@@ -290,7 +290,12 @@ bool DCPS_IR_Topic::set_topic_qos(const DDS::TopicQos& qos)
   // TopicQos changes since only datareader and datawriter QoS
   // are evaludated during normal associations establishment.
 
+#ifdef OPENDDS_GCC33
+  bool pub_to_rd_wr = !OpenDDS::DCPS::operator==(qos.topic_data, qos_.topic_data);
+#else
+  using OpenDDS::DCPS::operator==;
   bool pub_to_rd_wr = !(qos.topic_data == qos_.topic_data);
+#endif
 
   qos_ = qos;
   domain_->publish_topic_bit(this);

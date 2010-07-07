@@ -25,6 +25,8 @@
 
 namespace Monitor {
 
+using OpenDDS::DCPS::GUID_tKeyLessThan;
+
 /**
  * @class MonitorDataStorage
  *

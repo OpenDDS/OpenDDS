@@ -52,9 +52,12 @@ mkdir -p $PKG/bin/PerlDDS
 mkdir -p $PKG/bin/PerlACE
 
 # Perl modules
-cp $DDS_ROOT/bin/PerlDDS/Run_Test.pm        $PKG/bin/PerlDDS/
-cp $DDS_ROOT/bin/PerlDDS/ProcessFactory.pm  $PKG/bin/PerlDDS/
-cp $DDS_ROOT/bin/PerlDDS/Process.pm         $PKG/bin/PerlDDS/
+cp $DDS_ROOT/bin/PerlDDS/Run_Test.pm          $PKG/bin/PerlDDS/
+
+cp $DDS_ROOT/bin/PerlDDS/ProcessFactory.pm    $PKG/bin/PerlDDS/
+cp $DDS_ROOT/bin/PerlDDS/Process.pm           $PKG/bin/PerlDDS/
+cp $DDS_ROOT/bin/PerlDDS/Cross_Sync.pm        $PKG/bin/PerlDDS/
+cp $DDS_ROOT/bin/PerlDDS/Cross_Sync_Common.pm $PKG/bin/PerlDDS/
 
 cp $ACE_ROOT/bin/PerlACE/ConfigList.pm      $PKG/bin/PerlACE/
 cp $ACE_ROOT/bin/PerlACE/Process_Unix.pm    $PKG/bin/PerlACE/
@@ -95,4 +98,10 @@ cp $DDS_ROOT/performance-tests/Bench/tests/latency/*.ini $PKG/tests/latency
 cp $DDS_ROOT/performance-tests/Bench/tests/scaling/*.ini $PKG/tests/scaling
 cp $DDS_ROOT/performance-tests/Bench/tests/spray/*.ini $PKG/tests/spray
 cp $DDS_ROOT/performance-tests/Bench/tests/thru/*.ini $PKG/tests/thru
+
+# test running scripts
+cp $DDS_ROOT/performance-tests/Bench/tests/latency/run_test.pl $PKG/tests/latency
+cp $DDS_ROOT/performance-tests/Bench/tests/latency/test_list.txt $PKG/tests/latency
+cp $DDS_ROOT/performance-tests/Bench/tests/thru/run_test.pl $PKG/tests/thru
+cp $DDS_ROOT/performance-tests/Bench/tests/thru/test_list.txt $PKG/tests/thru
 

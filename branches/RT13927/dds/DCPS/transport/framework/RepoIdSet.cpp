@@ -9,6 +9,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "RepoIdSet.h"
+#include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
 #if !defined (__ACE_INLINE__)
 #include "RepoIdSet.inl"
@@ -20,7 +21,7 @@ OpenDDS::DCPS::RepoIdSet::~RepoIdSet()
 }
 
 void
-OpenDDS::DCPS::RepoIdSet::serialize(TAO::DCPS::Serializer & serializer)
+OpenDDS::DCPS::RepoIdSet::serialize(OpenDDS::DCPS::Serializer & serializer)
 {
   DBG_ENTRY_LVL("RepoIdSet","serialize",6);
   CORBA::ULong sz = this->size();

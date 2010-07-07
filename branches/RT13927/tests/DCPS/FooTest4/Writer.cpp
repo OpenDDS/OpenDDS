@@ -84,7 +84,7 @@ Writer::start ()
 
       sample.sample_ =  new ACE_Message_Block(sizeof(foo)) ;
 
-      ::TAO::DCPS::Serializer ser(sample.sample_) ;
+      ::OpenDDS::DCPS::Serializer ser(sample.sample_) ;
       ser << foo ;
 
       dr_servant->data_received(sample) ;

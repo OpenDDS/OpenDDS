@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_REQUESTED_DEADLINE_WATCHDOG_H
-#define OPENDDS_REQUESTED_DEADLINE_WATCHDOG_H
+#ifndef OPENDDS_OFFERED_DEADLINE_WATCHDOG_H
+#define OPENDDS_OFFERED_DEADLINE_WATCHDOG_H
 
 #include "dds/DdsDcpsPublicationC.h"
 
@@ -99,4 +99,4 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif  /* OPENDDS_REQUESTED_DEADLINE_WATCHDOG_H */
+#endif  /* OPENDDS_OFFERED_DEADLINE_WATCHDOG_H */

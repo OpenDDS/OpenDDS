@@ -19,3 +19,10 @@ OpenDDS::DCPS::TransportSendElement::TransportSendElement(int initial_count,
 {
   DBG_ENTRY_LVL("TransportSendElement","TransportSendElement",6);
 }
+
+ACE_INLINE
+bool 
+OpenDDS::DCPS::TransportSendElement::owned_by_transport ()
+{
+  return false;
+}

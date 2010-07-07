@@ -15,8 +15,11 @@
 # include "Serializer.inl"
 #endif /* !__ACE_INLINE__ */
 
+namespace OpenDDS {
+namespace DCPS {
+
 // Default constructor
-TAO::DCPS::Serializer::Serializer(
+Serializer::Serializer(
   ACE_Message_Block* chain,
   bool               swap_bytes)
   : start_(chain)
@@ -27,12 +30,12 @@ TAO::DCPS::Serializer::Serializer(
 }
 
 // Default destructor
-TAO::DCPS::Serializer::~Serializer()
+Serializer::~Serializer()
 {
 }
 
 void
-TAO::DCPS::Serializer::smemcpy(char* to, const char* from, size_t n)
+Serializer::smemcpy(char* to, const char* from, size_t n)
 {
   // Unroll the loop...
   switch (n) {
@@ -79,7 +82,7 @@ TAO::DCPS::Serializer::smemcpy(char* to, const char* from, size_t n)
 }
 
 void
-TAO::DCPS::Serializer::swapcpy(char* to, const char* from, size_t n)
+Serializer::swapcpy(char* to, const char* from, size_t n)
 {
   // Unroll the loop...
   switch (n) {                           // 2   4   8   16
@@ -123,7 +126,7 @@ TAO::DCPS::Serializer::swapcpy(char* to, const char* from, size_t n)
 }
 
 void
-TAO::DCPS::Serializer::read_string(ACE_CDR::Char*& dest)
+Serializer::read_string(ACE_CDR::Char*& dest)
 {
   //
   // Ensure no bad values leave the routine.
@@ -180,7 +183,7 @@ TAO::DCPS::Serializer::read_string(ACE_CDR::Char*& dest)
 }
 
 void
-TAO::DCPS::Serializer::read_string(ACE_CDR::WChar*& dest)
+Serializer::read_string(ACE_CDR::WChar*& dest)
 {
   //
   // Ensure no bad values leave the routine.
@@ -235,3 +238,6 @@ TAO::DCPS::Serializer::read_string(ACE_CDR::WChar*& dest)
   //
   this->good_bit_ = (dest != 0);
 }
+
+} // namespace DCPS
+} // namespace OpenDDS

@@ -532,7 +532,7 @@ Error: #f88
 <div title="DCPSInfoRepo" modifier="MikeMartinez" created="201003011936" changecount="1">
 <pre>This is the executable that manages metadata for OpenDDS.  This is where associations are made between publications and subscriptions.  Builtin Topics are distributed from here.  One process of this type is required for operaion of OpenDDS.  It implements CORBA interfaces that allow the individual DDS Participants to register for discovery and update internal state as necessary.</pre>
 </div>
-<div title="Data Reduction" modifier="MikeMartinez" created="201003082209" modified="201003192144" tags="publish" changecount="31">
+<div title="Data Reduction" modifier="MikeMartinez" created="201003082209" modified="201004231451" tags="publish" changecount="33">
 <pre>Test execution will result in data being generated and stored.  This data can then be post processed to reduce it to understandable summaries as well as to visualize the results.  OpenDDS-Bench produces output to the console while operating and will create latency data files if directed to do so as part of the test configuration.
 
 {{chunk{
@@ -543,16 +543,16 @@ Latency tests will rely on the data stored to the [[test output files|LatencyDat
 Scripts are available to convert the data into plottable format.  These include the following:
 
 {{indent{
-;[[$BENCH_ROOT/bin/reduce.pl|ReduceManPage]]
+;[[$BENCH_ROOT/bin/reduce-latency-data.pl|ReduceLatencyManPage]]
 :This script will convert individual latency test output files into a format suitable for use by GNUPlot for [[visualization|Data Visualization]].
 }}}
 
 {{indent{
-;[[$BENCH_ROOT/bin/extract.pl|ExtractManPage]]
+;[[$BENCH_ROOT/bin/extract-latency.pl|ExtractLatencyManPage]]
 :This script will extract the data from the previously converted plot data and create a summary table for plotting overall trend data.
 }}}
 
-In addition to these scripts, a helper script to show how the other scripts can be used to reduce the data produced by the pre-defined [[existing tests|Existing Tests]] is available at //$~BENCH_ROOT/tools/convert-all//.  The commands in there assume a directory structure in which the tests were executed and in which the analysis will be performed.  You will need to tailor a set of commands similar to these to your test environment in order to effectively use the data reduction scripts.
+In addition to these scripts, a helper script to show how the other scripts can be used to reduce the data produced by the pre-defined [[existing tests|Existing Tests]] is available at //$~BENCH_ROOT/tools/convert-latency//.  The commands in there assume a directory structure in which the tests were executed and in which the analysis will be performed.  You will need to tailor a set of commands similar to these to your test environment in order to effectively use the data reduction scripts.
 
 The directory structure assumed for this analysis is the following, relative to a working directory acting as the root directory for the data reduction.
 {{centeredTable{
@@ -563,20 +563,20 @@ The directory structure assumed for this analysis is the following, relative to 
 }}}
 
 The data reduction steps peformed include the following:
-#Convert the raw data files into plottable files:
+1) Convert the raw data files into plottable files:
 {{indent{
-{{{ reduce.pl &lt;testdir&gt;/tcp/latency-&lt;size&gt;.data &gt; data/tcp-&lt;size&gt;.gpd }}}
-{{{ reduce.pl &lt;testdir&gt;/udp/latency-&lt;size&gt;.data &gt; data/udp-&lt;size&gt;.gpd }}}
-{{{ reduce.pl &lt;testdir&gt;/mbe/latency-&lt;size&gt;.data &gt; data/mbe-&lt;size&gt;.gpd }}}
-{{{ reduce.pl &lt;testdir&gt;/mrel/latency-&lt;size&gt;.data &gt; data/mrel-&lt;size&gt;.gpd }}}
+{{{ reduce-latency-data.pl &lt;testdir&gt;/tcp/latency-&lt;size&gt;.data &gt; data/latency-tcp-&lt;size&gt;.gpd }}}
+{{{ reduce-latency-data.pl &lt;testdir&gt;/udp/latency-&lt;size&gt;.data &gt; data/latency-udp-&lt;size&gt;.gpd }}}
+{{{ reduce-latency-data.pl &lt;testdir&gt;/mbe/latency-&lt;size&gt;.data &gt; data/latency-mbe-&lt;size&gt;.gpd }}}
+{{{ reduce-latency-data.pl &lt;testdir&gt;/mrel/latency-&lt;size&gt;.data &gt; data/latency-mrel-&lt;size&gt;.gpd }}}
 }}}
-#Extract summary data from the plottable data files:
+2) Extract summary data from the plottable data files:
 {{indent{
-{{{ extract.pl data/*.gpd &gt; data/latency.csv }}}
+{{{ extract-latency.pl data/latency-*.gpd &gt; data/latency.csv }}}
 }}}
-#Generate GNUPlot suitable label strings for charts:
+3) Generate GNUPlot suitable label strings for charts:
 {{indent{
-{{{ genstats.pl data/latency.csv }}}
+{{{ gen-latency-stats.pl data/latency.csv }}}
 }}}
 }}}
 
@@ -589,14 +589,14 @@ Throughput test analysis will rely on the number of samples received at the test
 }}}
 </pre>
 </div>
-<div title="Data Visualization" modifier="MikeMartinez" created="201003082219" modified="201003191855" tags="publish" changecount="2">
+<div title="Data Visualization" modifier="TrevorFields" created="201003082219" modified="201004231821" tags="publish" changecount="4">
 <pre>!!NOTE: This is a documentation placeholder and needs to be expanded.
 There are several scripts to assist in visualizing the reduced test data.  These include:
 ;//[[$BENCH_ROOT/bin/mktable.pl|MktableManPage]]//
-:script to crate a table of results.  This currently creates only a TiddlyWiki format table.
+:script to create a table of results.  This currently creates only a TiddlyWiki format table.
 ;//[[$BENCH_ROOT/bin/expandColors.pl|ExpandcolorsManPage]]//
 :script to replace color table lookups from TiddlyWiki in the data table from //mktable.pl// with actual color references.
-;//[[$BENCH_ROOT/bin/genstats.pl|GenstatsManPage]]//
+;//[[$BENCH_ROOT/bin/gen-latency-stats.pl|GenstatsManPage]]//
 :script to create file with GNUPlot label string definitions containing summary statistics information to be added as labels to histogram charts.
 ;//$~BENCH_ROOT/bin/lj-plots.gp//
 :GNUPlot script to create Latency and Jitter timeline charts and histograms in a quad-plot format.
@@ -604,14 +604,20 @@ There are several scripts to assist in visualizing the reduced test data.  These
 :GNUPlot script to create a plot of jitter summary data for all tests.
 ;//$~BENCH_ROOT/bin/plot-transports.gp//
 :GNUPlot script to create a plot of summary latency data for all tests.
-;//$~BENCH_ROOT/tools/plot-all.gp//
-:notional GNUPlot script to create plots for all gathered data.
+;//$~BENCH_ROOT/bin/plot-throughput-testformats.gp//
+:GNUPlot script to create a plot of summary throughput data organized by test type.
+;//$~BENCH_ROOT/bin/plot-throughput-transports.gp//
+:GNUPlot script to create a plot of summary  throughput data organized by transport type.
+;//$~BENCH_ROOT/tools/plot-latency.gp//
+:notional GNUPlot script to create plots for gathered latency data.
+;//$~BENCH_ROOT/tools/plot-throughput.gp//
+:notional GNUPlot script to create plots for gathered throughput data.
 </pre>
 </div>
 <div title="DefaultTiddlers" modifier="MikeMartinez" created="201002181950" modified="201002182002" changecount="2">
 <pre>[[OpenDDS-Bench]]</pre>
 </div>
-<div title="Existing Tests" modifier="MikeMartinez" created="201003031715" tags="publish" changecount="1">
+<div title="Existing Tests" modifier="MikeMartinez" created="201003031715" modified="201003221816" tags="publish" changecount="3">
 <pre>There are existing test configurations for common test scenarios provided with the framework.  These are:
 ;[[latency|Latency Tests]]
 :measures latency from publication to reception of each sample
@@ -619,12 +625,71 @@ There are several scripts to assist in visualizing the reduced test data.  These
 :measures the maximum bandwidth that can be utilized by OpenDDS
 ;[[scaling|Scaling Tests]]
 :measures the incremental performance as hosts are added to a distribution
-</pre>
+
+In addition to the test specification files, the transport specification files may need to be updated for your test environment.  Today, only the //$~BENCH_ROOT/etc/transport-udp.ini// file will need to be udpated.  Replace the &lt;%HOSTNAME%&gt; placeholders with IP addresses or resolvable hostnames in your environment.
+
+Included in the test specification directories is a file &quot;//test-commands.txt//&quot; which contains a set of bash script commands that can be used to execute the full set of tests in a Linux environment.  These can be used as an example and tailored to your specific test environment.  Beyond translating to the native shell type, the IP addresses used should be changed to those that are valid in your environment.</pre>
 </div>
-<div title="ExtractManPage" modifier="MikeMartinez" created="201003191853" tags="publish" changecount="1">
+<div title="ExpandcolorsManPage" modifier="MikeMartinez" created="201004272157" changecount="1">
 <pre>&lt;html&gt;
 &lt;head&gt;
-&lt;title&gt;extract.pl - extract summary statistics from plot datafiles.&lt;/title&gt;
+&lt;title&gt;expandColors.pl - Convert the TiddlyWiki ColorPalette slices to actual CSS colors&lt;/title&gt;
+&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
+&lt;/head&gt;
+
+&lt;body style=&quot;background-color: white&quot;&gt;
+
+
+&lt;!-- INDEX BEGIN --&gt;
+&lt;div name=&quot;index&quot;&gt;
+&lt;p&gt;&lt;a name=&quot;__index__&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+
+	&lt;li&gt;&lt;a href=&quot;#name&quot;&gt;NAME&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr name=&quot;index&quot; /&gt;
+&lt;/div&gt;
+&lt;!-- INDEX END --&gt;
+
+&lt;p&gt;
+&lt;/p&gt;
+&lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;expandColors.pl - Convert the TiddlyWiki ColorPalette slices to actual CSS colors&lt;/p&gt;
+&lt;p&gt;$Id$&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  expandColors.pl &amp;lt;stylesheet&amp;gt;&lt;/pre&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This script will replace the TiddlyWiki ColorPalette slice specifications
+in the CSS stylesheet(s).  The map is currently staticly defined in this
+script and needs to be synchronized manually with the TiddlyWiki
+ColorPalette.&lt;/p&gt;
+&lt;p&gt;Processing is performed in place.  That is, the input file is written
+back with the updated information.  The original file is saved with an
+appended '.bak' extension.&lt;/p&gt;
+&lt;p&gt;This script is intended to be run on the publish/style.css file created
+when publishing a TiddlyWiki file as a series of static HTML documents.
+The export plugin does not do this conversion for us.&lt;/p&gt;
+
+&lt;/body&gt;
+
+&lt;/html&gt;</pre>
+</div>
+<div title="ExtractLatencyManPage" modifier="TrevorFields" created="201003191853" modified="201004232244" tags="publish" changecount="3">
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;extract-latency.pl - extract summary statistics from plot datafiles.&lt;/title&gt;
 &lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
 &lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
 &lt;/head&gt;
@@ -651,14 +716,13 @@ There are several scripts to assist in visualizing the reduced test data.  These
 &lt;p&gt;
 &lt;/p&gt;
 &lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;extract.pl - extract summary statistics from plot datafiles.&lt;/p&gt;
-&lt;p&gt;$Id$&lt;/p&gt;
+&lt;p&gt;extract-latency.pl - extract summary statistics from plot datafiles.&lt;/p&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
 &lt;pre&gt;
-  extract.pl &amp;lt;infile&amp;gt; ...&lt;/pre&gt;
+  extract-latency.pl &amp;lt;infile&amp;gt; ...&lt;/pre&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
@@ -672,7 +736,7 @@ script and gathered from all input files.&lt;/p&gt;
 &lt;p&gt;This input file name is expected to be in a format that includes '-'
 separated fields and a fixed extension of &amp;quot;.gpd&amp;quot;.&lt;/p&gt;
 &lt;pre&gt;
-  &amp;lt;transport&amp;gt;-&amp;lt;size&amp;gt;.gpd&lt;/pre&gt;
+  latency-&amp;lt;transport&amp;gt;-&amp;lt;size&amp;gt;.gpd&lt;/pre&gt;
 &lt;p&gt;The &amp;lt;transport&amp;gt; and &amp;lt;size&amp;gt; fields are used to populate two columns in the
 output data.&lt;/p&gt;
 &lt;p&gt;This output consists of a single CSV file with a single record (line)
@@ -694,29 +758,24 @@ generated from each input file.  The output files include:&lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1&gt;&lt;a name=&quot;example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/h1&gt;
 &lt;pre&gt;
-  extract.pl data/*.gpd &amp;gt; data/latency.csv&lt;/pre&gt;
+  extract-latency.pl data/*.gpd &amp;gt; data/latency.csv&lt;/pre&gt;
 
 &lt;/body&gt;
 
 &lt;/html&gt;
 </pre>
 </div>
-<div title="FAQ" modifier="MikeMartinez" created="201003022001" tags="publish faq" changecount="1">
-<pre>#[[What kind of document is this?|FAQ1]]
-</pre>
-</div>
-<div title="FAQ1" modifier="MikeMartinez" created="201003022001" modified="201003082219" tags="publish faq" changecount="2">
-<pre>&quot;What kind of document is this?&quot;
-
-This is a TiddlyWiki document.</pre>
+<div title="FAQ" modifier="MikeMartinez" created="201003022001" modified="201004231456" tags="publish faq" changecount="4">
+<pre>#''What kind of document is this?''&lt;br&gt;{{indent{This is a TiddlyWiki document.}}}
+#''What is the latency data output file format?''&lt;br&gt;{{indent{The output files generated when gathering latency data is: [[latency file format|LatencyDataFileFormat]].}}}</pre>
 </div>
 <div title="GNUPlot" modifier="MikeMartinez" created="201003082221" modified="201003082223" changecount="4">
 <pre>GNUPlot is a data visualization tool available as from [[gnuplot.info|http://gnuplot.info/]]</pre>
 </div>
-<div title="GenstatsManPage" modifier="MikeMartinez" created="201003191859" tags="publish" changecount="1">
+<div title="GenstatsManPage" modifier="TrevorFields" created="201003191859" modified="201004231825" tags="publish" changecount="2">
 <pre>&lt;html&gt;
 &lt;head&gt;
-&lt;title&gt;genstats.pl - create GNUPlot statistical summary data string variables&lt;/title&gt;
+&lt;title&gt;gen-latency-stats.pl - create GNUPlot statistical summary data string variables&lt;/title&gt;
 &lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
 &lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
 &lt;/head&gt;
@@ -743,14 +802,14 @@ This is a TiddlyWiki document.</pre>
 &lt;p&gt;
 &lt;/p&gt;
 &lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;genstats.pl - create GNUPlot statistical summary data string variables&lt;/p&gt;
+&lt;p&gt;gen-latency-stats.pl - create GNUPlot statistical summary data string variables&lt;/p&gt;
 &lt;p&gt;$Id$&lt;/p&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
 &lt;pre&gt;
-  genstats.pl &amp;lt;infile&amp;gt;&lt;/pre&gt;
+  gen-latency-stats.pl &amp;lt;infile&amp;gt;&lt;/pre&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
@@ -760,7 +819,7 @@ creates an output file for each record of the input.  Each output file is
 placed in the same directory that the input file was located in.  The
 output file names are constructed using fields from the input record as:&lt;/p&gt;
 &lt;pre&gt;
-  &amp;lt;transport&amp;gt;-&amp;lt;size&amp;gt;.stats&lt;/pre&gt;
+  latency-&amp;lt;transport&amp;gt;-&amp;lt;size&amp;gt;.stats&lt;/pre&gt;
 &lt;p&gt;The input file is expected to be in the format produced by the extract.pl
 data reduction script.  Each record (line) of the input file contains the
 following fields:&lt;/p&gt;
@@ -787,15 +846,19 @@ to place on some plots.  The variables are:&lt;/p&gt;
 data values for the output file (transport/size) in a newline separated
 single string suitable for use as a label within GNUPlot.&lt;/p&gt;
 &lt;p&gt;
+
 &lt;/p&gt;
 &lt;hr /&gt;
+
 &lt;h1&gt;&lt;a name=&quot;example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/h1&gt;
 &lt;pre&gt;
-  genstats.pl data/latency.csv&lt;/pre&gt;
+
+  gen-latency-stats.pl data/latency.csv&lt;/pre&gt;
 
 &lt;/body&gt;
 
 &lt;/html&gt;
+
 </pre>
 </div>
 <div title="GettingStarted" modifier="MikeMartinez" created="201002011551" modified="201002011553" changecount="3">
@@ -812,10 +875,13 @@ If you wish to publish the contents of this document as static HTML web pages, t
 * [[StyleSheet]]: modify the reference to the logo file in the //.publishLogo// class to be in a correct relative directory path
 * use the ''publish'' selection on the right sidebar to publish all tiddlers with the ''publish'' tag to individual HTML files.  They will all be located in the //./publish// directory</pre>
 </div>
-<div title="Installation" modifier="MikeMartinez" created="201003022306" modified="201003031651" tags="publish" changecount="24">
-<pre>Once the OpenDDS core is built, the OpenDDS-Bench software can be built and installed.  This software is located relative to the OpenDDS root directory and is part of the OpenDDS download.  For purposes of this documentation, we assume that you have set the ~BENCH_ROOT environment variable to a value of //$~DDS_ROOT/performance-tests/Bench//.
+<div title="Installation" modifier="TrevorFields" created="201003022306" modified="201004232327" tags="publish" changecount="27">
+<pre>Once the OpenDDS core is built, the OpenDDS-Bench software can be built and installed.  This software is located relative to the OpenDDS root directory and is part of the OpenDDS download.  For purposes of this documentation, we assume that you have set the ~BENCH_ROOT environment variable to a value of //$~DDS_ROOT/performance-tests/Bench//.  In a bash shell this can be done as:
+&lt;&lt;&lt;
+ shell&gt; export ~BENCH_ROOT=$~DDS_ROOT/performance-tests/Bench
+&lt;&lt;&lt;
 
-There is one additional executable that needs to be built as part of the framework.  This is the {{{testprocess}}} command.  Makefiles and solution files are provided as part of the OpenDDS download, so this can be built the same way as the core OpenDDS code.  Using gcc on Linux this could be done simply as:
+There is one additional executable that needs to be built as part of the framework.  This is the {{{testprocess}}} command.  Makefiles and solution files are provided as part of the OpenDDS download, so this can be built the same way as the core OpenDDS code.  Using the GNU toolchain on Linux this could be done simply as:
 &lt;&lt;&lt;
  shell&gt; make -C $~BENCH_ROOT
 &lt;&lt;&lt;
@@ -882,6 +948,7 @@ In addition to the software, there are configuration files that are available fo
 |*.ini |$~BENCH_ROOT/tests/scenarios |Preconfigured scenario tests.  These are old and should be considered deprecated. |
 |~|$~BENCH_ROOT/tests/latency |Preconfigured latency tests.|
 |~|$~BENCH_ROOT/tests/scaling |Preconfigured scaling tests.|
+|~|$~BENCH_ROOT/tests/thru |Preconfigured throughput tests.|
 |~|$~BENCH_ROOT/tests/spray |Preconfigured multicast multipoint tests.|
 }}}
 
@@ -889,7 +956,7 @@ As an aid to packaging these files into a distributable form, the //$~BENCH_ROOT
 
 The script makes copies and links in a named (default //pkg//) target directory that can then be tar'ed or zip'ed into a distributable file.  The {{{run_test}}} test management script will configure the environment of processes that it starts to find libraries and commands in the subdirectories created by this script, making use of the distribution straightforward.</pre>
 </div>
-<div title="Latency Tests" modifier="MikeMartinez" created="201003042136" modified="201003082130" tags="publish" changecount="10">
+<div title="Latency Tests" modifier="MikeMartinez" created="201003042136" modified="201003311508" tags="publish" changecount="19">
 <pre>The OpenDDS-Bench framework includes configuration files for latency testing.  These files are located in the //$~BENCH_ROOT/tests/latency// sub-directory.  The latency testing covers several different conditions.  The configuration for these tests are illustrated in the following diagram.
 [img[Latency Test|images/latencytest.jpg]]
 The message size is varied for each test execution run and latency data for the full loopback path gathered and analyzed.  Latency data is measured by extracting a timestamp at the time of the write() call and inserting that into the data sample.  Once the sample has been received at the terminus of the path, another timestamp will be extracted and the difference logged as the latency.  Since the clocks on different hosts tend to drift at different rates, it is best to have both the write() and read() calls executed on the same host so the latency measurements are made using the same system clock.  This is ensured for these tests by placing the publication and subscription in the same process.  Typically the two processes of this test will be executed on different hosts to include network effects in the measurements.  While executing them on the same host will exclude network effects from the results, it is possible to encounter processor effects depending on the capacity of the host on which the test is executing.
@@ -908,9 +975,26 @@ There is a separate configuration file supplied for each message size test to be
 | 8000|p1-8000.ini |
 | 16000|p1-16000.ini |
 | 32000|p1-32000.ini |
+}}}
+{{itemBlock{
+Commands that can be used to structure the test execution for these tests is included in the file //$~BENCH_ROOT/tests/latency/test-commands.txt//.  This file contains a set of commands for each test configuration described above.  They can be used to structure tests for your specific environment.  Executing tests in a Linux environment can be done as follows:
+!Start the repostory
+&lt;&lt;&lt;
+repohost&gt; $~BENCH_ROOT/bin/run_test -S -h iiop:&quot;&quot;&quot;//&quot;&quot;&quot;&lt;repohost&gt;:2809
+&lt;&lt;&lt;
+!Start the forwarding (loopback) process
+&lt;&lt;&lt;
+host2&gt; cd &lt;testdir&gt;
+host2&gt; $~BENCH_ROOT/bin/run_test -P -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/latency/p2.ini
+&lt;&lt;&lt;
+!Start the originating and receiving process
+&lt;&lt;&lt;
+host1&gt; cd &lt;testdir&gt;
+host1&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/latency/p1-&lt;size&gt;.ini
+&lt;&lt;&lt;
 }}}</pre>
 </div>
-<div title="LatencyDataFileFormat" modifier="MikeMartinez" created="201003191950" modified="201003192026" tags="publish" changecount="8">
+<div title="LatencyDataFileFormat" modifier="MikeMartinez" created="201003191950" modified="201003221736" tags="publish" changecount="9">
 <pre>Latency data files include last hop and full path information in both summary and detailed forms.  in the output files specified as part of the test configuration for a subscription, the summary data appears first, followed by the detailed data.  The summary data is shown organized by last hop then full path, and within each category the information is broken down and summarized by publication that wrote the data.
 
 Latency data is produced by collecting a timestamp at the originating point and sending it along with the sample to be compared with a timestamp collected at the terminating point.  Since the actual collection of timestamps can affect the operation of the test, only timestamps that are required are generated.  This typically means that a test timestamp will be generated and collected only at the path origination and termination.  This is where the full-path latency data is gathered.
@@ -1168,7 +1252,7 @@ This user guide is written assuming a minimum environment setup which includes e
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
-<div title="Participant Specifications" modifier="MikeMartinez" created="201003032054" modified="201003032301" tags="publish" changecount="6">
+<div title="Participant Specifications" modifier="MikeMartinez" created="201003032054" modified="201003311552" tags="publish" changecount="7">
 <pre>!Definable Parameters
 {{centeredTable{
 | ''Participant Section Keys'' |c
@@ -1182,14 +1266,14 @@ This user guide is written assuming a minimum environment setup which includes e
 !Test Execution Parameters
 [participant] specifications only have {{{DomainId}}} as a test execution parameter.  This determines the DDS Domain in which the participant resides.
 !Example
-An example participant section like the following would result in a DDS ~DomainParticipant with a name of //player1// being created in the process with default ~QoS parameter values and a Domain Id value of 2112.
+An example participant section like the following would result in a DDS ~DomainParticipant with a name of //player// being created in the process with default ~QoS parameter values and a Domain Id value of 2112.
 {{{
 [participant/player]
 DomainId = 2112
 }}}
 </pre>
 </div>
-<div title="Publication Specifications" modifier="MikeMartinez" created="201003032056" modified="201003032218" tags="publish" changecount="9">
+<div title="Publication Specifications" modifier="MikeMartinez" created="201003032056" modified="201003311608" tags="publish" changecount="12">
 <pre>The OpenDDS-Bench framework specifies publications, which consist of individual DDS Publisher and ~DataWriter Entities.  The combination of these Entities make up a complete publication.  A consequence of this is that any single DDS Publisher will contain only a single DDS ~DataWriter.  This should not affect any test results or capabilities.
 
 !Definable Parameters
@@ -1254,7 +1338,7 @@ The test execution parameters allow specification of several aspects of the publ
 ;how the publication starts
 :the publication will not start writing until it is associated with the number of subscriptions specified by the {{{Associations}}} parameter.  After the associations have been matched, if the {{{StartAfterDelay}}} parameter has been specified and is greater than zero, the publication will wait that many seconds before starting to write data.
 ;how the publication terminates
-:if the {{{WaitForAcks}}} parameter is specified and non-zero, the ~DataWriter::wait_for_acknowledgments() API method is called as the publication is terminating to wait until delivery of all data has been acknowledged.
+:if the {{{AckDelay}}} parameter is specified and non-zero, the ~DataWriter::wait_for_acknowledgments() API method is called as the publication is terminating to wait until delivery of all data has been acknowledged.
 ;the transport used
 :this is specified as an index into the transport definitions.  The definitions are in the OpenDDS service configuration file read at startup.
 ;the data published
@@ -1275,7 +1359,7 @@ If the {{{MessageSizeType}}}, or {{{InstanceType}}} have a value of ''UNIFORM'',
 !!Exponential Distribution
 If the {{{MessageRateType}}} has a value of ''POISSON'', the the {{{MessageRate}}} parameter is used as the //lamba// parameter for an exponential probability distribution to determine the interval between writing samples.  This interval will result in a Poisson arrival time distribution of the samples as they are published.
 !!Gaussian Distribution
-If the {{{MessageSizeType}}}, or {{{InstanceType}}} have a value of ''GAUSSIAN'', then the corresponding *Mean and *Deviation parameters define a Gaussian probability distribution from which the actual value for each sample will be obtained as each sample is written.  The *Min and *Max parameters are used as the lower and upper bound for the value and values from the probability distribution that are outside this range are replaced with the nearest extreme value.
+If the {{{MessageSizeType}}}, or {{{InstanceType}}} have a value of ''GAUSSIAN'', then the corresponding *//Mean// and *//Deviation// parameters define a Gaussian probability distribution from which the actual value for each sample will be obtained as each sample is written.  The *//Min// and *//Max// parameters are used as the lower and upper bound for the value and values from the probability distribution that are outside this range are replaced with the nearest extreme value.
 }}}
 !Example
 As an example a publication section like the following would result in a publication that started sending after associating with a single subscription, and sent 1,000 byte samples at 1,000 samples per second during the test.
@@ -1548,17 +1632,26 @@ String.prototype.filenameEncode = function()
 &lt;hr&gt;%4, %5&amp;nbsp;(created %6)
 &lt;/div&gt;</pre>
 </div>
-<div title="Quick Start" modifier="MikeMartinez" created="201003022013" modified="201003051541" tags="publish" changecount="24">
-<pre>The steps to run a test using this framework are described below.  The description is based on a Linux platform using the gcc toolchain.  If you are using a different platform or tools the instructions will need to be modified to suit your environment.
+<div title="Quick Start" modifier="TrevorFields" created="201003022013" modified="201004232344" tags="publish" changecount="29">
+<pre>The steps to run a test using this framework are described below.
+The description is based on a Linux platform using the GNU toolchain.  If you are using a different platform or tools the instructions will need to be modified to suit your environment.
 {{itemBlock{
 !Obtain and build ~OpenDDS and the ~OpenDDS-Bench software.
 Find the OpenDDS software build and install instructions at [[opendds.org|http://www.opendds.org/]].  Each host which will be participating in a test will need to have the software available.  For homogeneous hosts that can execute software built on the same kind of host the installation steps below show a way to distribute the software.  Each host type will need to have the software built for it.  For example if both Linux and Windows machines will be participating in the testing then a build for each host type will need to be performed and installed on hosts of that type.
 
 Once OpenDDS and the libraries it depends on have been built, the OpenDDS-Bench software needs to be built.  Do this by:
 &lt;&lt;&lt;
- shell&gt; cd $~BENCH_ROOT
+ shell&gt; cd $~DDS_ROOT/performance-tests/Bench
  shell&gt; mwc.pl -type gnuace
  shell&gt; make
+&lt;&lt;&lt;
+}}}
+{{itemBlock{
+!Locate the ~OpenDDS-Bench performance testing framework software.
+
+Do this by:
+&lt;&lt;&lt;
+shell&gt; export ~BENCH_ROOT=$~DDS_ROOT/performance-tests/Bench
 &lt;&lt;&lt;
 }}}
 {{itemBlock{
@@ -1583,7 +1676,7 @@ Once the tarfile has been distributed unpack it and save the base directory of t
 Once the test software is available on each host participating in the test, the test can be executed.  A separate directory for each host is recommended to avoid inadvertently colliding output.
 The [[repository|DCPSInfoRepo]] needs to be started on one host prior to starting any {{{testprocess}}} executables.  The ''&lt;host&gt;'' and ''&lt;port&gt;'' are where the repository will listen for CORBA connection requests from the participating processes.
 &lt;&lt;&lt;
- shell&gt; $BASEDIR/bin/run_test -S -h iiop:&quot;&quot;&quot;//&quot;&quot;&quot;&lt;host&gt;:&lt;port&gt;
+ shell&gt; $BASEDIR/bin/run_test -S -h &lt;host&gt;:&lt;port&gt;
 &lt;&lt;&lt;
 The following steps need to be performed on each host for each test.  The ''&lt;host&gt;'' and ''&lt;port&gt;'' should refer to the location where the repository is listening and should be reachable from the current host.  The ''&lt;transportconfig&gt;'' file specifies the transport configuration information, and the ''&lt;testconfig&gt;'' file contains the [[test specification|Test Specification]] information.
 &lt;&lt;&lt;
@@ -1594,10 +1687,10 @@ The following steps need to be performed on each host for each test.  The ''&lt;
 Note that it is important to start the tests within 60 seconds of each other.  This is due to the script timeout value, which is set to 60 seconds after the specified duration.  The test execution does not start until the entire test is connected, so if any host is not started within the 60 seconds interval processes that were started first will time out before the test is complete.
 }}}</pre>
 </div>
-<div title="ReduceManPage" modifier="MikeMartinez" created="201003191851" tags="publish" changecount="1">
+<div title="ReduceLatencyManPage" modifier="TrevorFields" created="201003191851" modified="201004232243" tags="publish" changecount="4">
 <pre>&lt;html&gt;
 &lt;head&gt;
-&lt;title&gt;reduce.pl - reduce test results into plottable data&lt;/title&gt;
+&lt;title&gt;reduce-latency-data.pl - reduce test results into plottable data&lt;/title&gt;
 &lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
 &lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
 &lt;/head&gt;
@@ -1624,14 +1717,13 @@ Note that it is important to start the tests within 60 seconds of each other.  T
 &lt;p&gt;
 &lt;/p&gt;
 &lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;reduce.pl - reduce test results into plottable data&lt;/p&gt;
-&lt;p&gt;$Id$&lt;/p&gt;
+&lt;p&gt;reduce-latency-data.pl - reduce test results into plottable data&lt;/p&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
 &lt;pre&gt;
-  reduce.pl &amp;lt;infile&amp;gt;&lt;/pre&gt;
+  reduce-latency-data.pl &amp;lt;infile&amp;gt;&lt;/pre&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
@@ -1716,14 +1808,14 @@ message size of the test data.&lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1&gt;&lt;a name=&quot;example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/h1&gt;
 &lt;pre&gt;
-  reduce.pl tcp/run/latency-1000.data &amp;gt; data/tcp-1000.gpd&lt;/pre&gt;
+  reduce-latency-data.pl tcp/run/latency-1000.data &amp;gt; data/latency-tcp-1000.gpd&lt;/pre&gt;
 
 &lt;/body&gt;
 
 &lt;/html&gt;
 </pre>
 </div>
-<div title="RunTestManPage" modifier="MikeMartinez" created="201002251721" modified="201003031700" changecount="4">
+<div title="RunTestManPage" modifier="MikeMartinez" created="201002251721" modified="201004272251" tags="publish" changecount="10">
 <pre>&lt;html&gt;
 &lt;head&gt;
 &lt;title&gt;run_test - Execute test processes for distributed testing&lt;/title&gt;
@@ -1761,52 +1853,6 @@ message size of the test data.&lt;/p&gt;
 &lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
 &lt;pre&gt;
  run_test [options]&lt;/pre&gt;
-&lt;p&gt;Options:&lt;/p&gt;
-&lt;pre&gt;
-  -? | --help            brief help message&lt;/pre&gt;
-&lt;pre&gt;
-  --man                  full documentation&lt;/pre&gt;
-&lt;pre&gt;
-  -x | --noaction        do not execute any processing&lt;/pre&gt;
-&lt;pre&gt;
-  -v | --verbose         be chatty while executing&lt;/pre&gt;
-&lt;pre&gt;
-  -V NUMBER | --ORBVerboseLogging=NUMBER
-                         set the corresponding ORB option&lt;/pre&gt;
-&lt;pre&gt;
-  -d NUMBER | --debug=NUMBER
-                         set the DCPS debugging level&lt;/pre&gt;
-&lt;pre&gt;
-  -T NUMBER | --tdebug=NUMBER
-                         set the DCPSTransportDebug debugging level&lt;/pre&gt;
-&lt;pre&gt;
-  -R NUMBER | --rdebug=NUMBER
-                         set the DCPS debugging level for the repository&lt;/pre&gt;
-&lt;pre&gt;
-  -f FILE | --dfile=FILE set the filename for debug output&lt;/pre&gt;
-&lt;pre&gt;
-  -C TYPES | --collect=TYPES
-                         collect process and system statistics during test&lt;/pre&gt;
-&lt;pre&gt;
-  -h FQDN | --repohost FQDN
-                         fully qualified domain name (and port) for
-                         connecting to repository&lt;/pre&gt;
-&lt;pre&gt;
-  -i FILE | --inifile FILE
-                         file for configuring the OpenDDS service&lt;/pre&gt;
-&lt;pre&gt;
-  -s FILELIST | --scenario FILELIST
-                         list of files defining the test scenario(s) to execute&lt;/pre&gt;
-&lt;pre&gt;
-  -r FILE | --rawdatafile FILE
-                         file to write collected data to at end of test&lt;/pre&gt;
-&lt;pre&gt;
-  -t NUMBER | --duration=NUMBER
-                         limit the duration of test execution&lt;/pre&gt;
-&lt;pre&gt;
-  -S | --startrepo       start a repository&lt;/pre&gt;
-&lt;pre&gt;
-  -P | --starttest       start a testprocess&lt;/pre&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
@@ -1898,32 +1944,75 @@ the ORBLogFile specification being omitted from the process command line.&lt;/p&
 &lt;dd&gt;
 &lt;p&gt;Starts statistics collection for the specified TYPES.  TYPES may contain
 one or more of the values: &lt;a href=&quot;#n&quot;&gt;&lt;code&gt;n&lt;/code&gt;&lt;/a&gt;, &lt;a href=&quot;#s&quot;&gt;&lt;code&gt;s&lt;/code&gt;&lt;/a&gt;, and &lt;a href=&quot;#p&quot;&gt;&lt;code&gt;p&lt;/code&gt;&lt;/a&gt;, or the collective
-specification &lt;code&gt;all&lt;/code&gt;.&lt;/p&gt;
+specification &lt;a href=&quot;#all&quot;&gt;&lt;code&gt;all&lt;/code&gt;&lt;/a&gt;.
+The output for any given statistic is placed in a file named as specified
+by the &lt;strong&gt;-O FORMAT&lt;/strong&gt; command line option.  The default is to a file with a
+basename of the TYPE and a decorator of &lt;code&gt;-&amp;lt;pid&amp;gt;.log&lt;/code&gt;.&lt;/p&gt;
 &lt;dl&gt;
 &lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;n&quot; class=&quot;item&quot;&gt;&lt;strong&gt;n&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
 &lt;dd&gt;
 &lt;p&gt;Causes network statistics to be gathered.  A &lt;code&gt;netstat -ntpc&lt;/code&gt; command is
-started for each test process and the output filtered by its process Id.
-The output is stored to a file named &lt;em&gt;network-{pid}.log&lt;/em&gt;.&lt;/p&gt;
+started for each test process and the output filtered by its process Id.&lt;/p&gt;
 &lt;/dd&gt;
 &lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;s&quot; class=&quot;item&quot;&gt;&lt;strong&gt;s&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
 &lt;dd&gt;
 &lt;p&gt;Causes system statistics to be gathered.  A single &lt;code&gt;vmstat 1&lt;/code&gt; command is
-started and the output stored in a file named &lt;em&gt;system-{pid}.log&lt;/em&gt;, where
-the pid value is for the test script.&lt;/p&gt;
+started.  If the PID value is specified as part of the statistic
+filename, the PID value for the test script process is used.&lt;/p&gt;
 &lt;/dd&gt;
 &lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;p&quot; class=&quot;item&quot;&gt;&lt;strong&gt;p&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
 &lt;dd&gt;
 &lt;p&gt;Causes process statistics to be gathered.  A &lt;code&gt;top -bd 1 -p {pid}&lt;/code&gt;
 command is started for each test process and the output filtered by its
-process Id.  The output is stored to a file named &lt;em&gt;process-{pid}.log&lt;/em&gt;.&lt;/p&gt;
+process Id.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;all&quot; class=&quot;item&quot;&gt;&lt;strong&gt;all&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Causes all statistics described above to be gathered.  This is a synonym
+for &lt;em&gt;nsp&lt;/em&gt;&lt;/p&gt;
 &lt;/dd&gt;
 &lt;/dl&gt;
 &lt;p&gt;The default is unspecified.  This results in no statistics being
 collected.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;o_format_outputdecorator_format&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-O FORMAT&lt;/strong&gt; | &lt;strong&gt;--outputdecorator=FORMAT&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Establishes the format of the statistics gathering output file names.
+The format is specified as a string with simple substitution performed to
+replace some characters with other information.  This is a simple
+substitution and no escapes are allowed.&lt;/p&gt;
+&lt;p&gt;Statistics output filenames are formed starting with the type of
+statistic being gathered concatenated with the decorater defined here,
+expanded with the formatting information at the time of execution.  The
+types of statistics currently include &lt;code&gt;system&lt;/code&gt;, &lt;code&gt;process&lt;/code&gt;, and
+&lt;code&gt;network&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The characters replaced in the format specification are:&lt;/p&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;p&quot; class=&quot;item&quot;&gt;&lt;strong&gt;P&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;replaced with the process PID for being monitored.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;t&quot; class=&quot;item&quot;&gt;&lt;strong&gt;T&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;replaced with a timestamp that includes a 4 digit year, 2 digit month, 2
+digit day of month, 2 digit hour, 2 digit minute, and 2 digit second.
+The timestamp is taken near the time the statistics collection is started.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;h&quot; class=&quot;item&quot;&gt;&lt;strong&gt;H&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;replaced by the hostname of the machine executing the script.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;The default is &amp;quot;-P.log&amp;quot; which results in output files with names similar
+to &lt;code&gt;system-5436.log&lt;/code&gt;.&lt;/p&gt;
 &lt;/dd&gt;
 &lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;h_fqdn_repohost_fqdn&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-h FQDN&lt;/strong&gt; | &lt;strong&gt;--repohost=FQDN&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
@@ -2014,7 +2103,7 @@ connections to the test process.&lt;/p&gt;
 two using the scenario1.ini specification file and one using the other.ini
 specification file.  The test would be scheduled to last for 2 minutes.&lt;/p&gt;
 &lt;/dd&gt;
-&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;bin_run_test_vd10t4vcall_s_test_ini_h_machine_domain_com_2112&quot; class=&quot;item&quot;&gt;&lt;strong&gt;bin/run_test -vd10T4VCall -s test.ini -h machine.domain.com:2112&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;bin_run_test_vd10t4vcall_o_h_t_p_log_s_test_ini_h_machine_domain_com_2112&quot; class=&quot;item&quot;&gt;&lt;strong&gt;bin/run_test -vd10T4VCall -O-H-T-P.log -s test.ini -h machine.domain.com:2112&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
 &lt;dd&gt;
 &lt;p&gt;starts a test process using the &lt;code&gt;test.ini&lt;/code&gt; specification file and
@@ -2022,15 +2111,19 @@ expecting to connect to the repository at &lt;code&gt;machine.domain.com:2112&lt
 will run with &lt;code&gt;DCPSDebugLevel&lt;/code&gt; of 10, &lt;code&gt;DCPSTransportDebugLevel&lt;/code&gt; of 4,
 &lt;code&gt;ORBVerboseLogging&lt;/code&gt; enabled and both the script and test process will
 execute in verbose mode.  The log output will be directed to the standard
-output.  All statistics - system, network, and process - will be gathered.&lt;/p&gt;
+output.&lt;/p&gt;
+&lt;p&gt;All statistics - system, network, and process - will be gathered.
+Statistics will be placed in files named using the statistic type, the
+hostname, a timestamp, and the PID of the monitored process.  These
+filenames will appear as: &lt;code&gt;system-&amp;lt;host&amp;gt;-&amp;lt;time&amp;gt;-&amp;lt;pid&amp;gt;.log&lt;/code&gt;,
+&lt;code&gt;process-&amp;lt;host&amp;gt;-&amp;lt;time&amp;gt;-&amp;lt;pid&amp;gt;.log&lt;/code&gt;, and
+&lt;code&gt;network-&amp;lt;host&amp;gt;-&amp;lt;time&amp;gt;-&amp;lt;pid&amp;gt;.log&lt;/code&gt;.&lt;/p&gt;
 &lt;/dd&gt;
 &lt;/dl&gt;
 
 &lt;/body&gt;
 
-
-&lt;/html&gt;
-</pre>
+&lt;/html&gt;</pre>
 </div>
 <div title="SideBarOptions" modifier="MikeMartinez" created="200911302023" modified="201002011534" changecount="2">
 <pre>&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;doPublish&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;options »&quot; &quot;Change TiddlyWiki advanced options&quot;&gt;&gt;</pre>
@@ -2267,7 +2360,7 @@ h2,h3 {border-bottom:1px solid [[ColorPalette::TertiaryLight]];}
 #backstageCloak {background:[[ColorPalette::Foreground]]; opacity:0.6; filter:'alpha(opacity=60)';}
 /*}}}*/</pre>
 </div>
-<div title="Subscription Specifications" modifier="MikeMartinez" created="201003032230" modified="201003032323" tags="publish" changecount="7">
+<div title="Subscription Specifications" modifier="BrianJohnson" created="201003032230" modified="201004221443" tags="publish" changecount="13">
 <pre>!Definable Parameters
 {{centeredTable{
 | ''Subscription Section Keys'' |c
@@ -2305,16 +2398,15 @@ h2,h3 {border-bottom:1px solid [[ColorPalette::TertiaryLight]];}
 }}}
 !Test Execution Parameters
 The test execution parameters allow specification of the transport used for by the subscription and the data collection during the test.
-
-The transport is specified as an index into the transport definitions.
-
+;{{{TransportIndex}}}
+:this is specified as an index into the transport definitions.  The definitions are in the OpenDDS service configuration file read at startup.
 Data collection is specified as a combination of where to store the results, how much data to store, and if not all which data to store.  The data collected during test operation consists of per hop latency data along with path latency data.  Summary statistics for all observed data are reported at the end of the test.  The internal collection buffers are flushed to the filesystem after the test completes as well.  This avoids writes to disk affecting the performance being measured.  Data collection specification consists of:
 ;{{{DataCollectionFile}}}
 :if specified, this is the output file where data will be stored at the end of the test.  It will contain summary data at the top and (per sample) detailed data after that.  If not specified, no detailed data collection will occur.
 ;{{{DataCollectionBound}}}
 :this specifies the number of samples to retain data for if the {{{DataCollectionRetention}}} parameter has a value other than {{{ALL}}}.  This parameter is not needed if the {{{DataCollectionFile}}} parameter is not specified or if the {{{DataCollectionRetention}}} parameter has the value {{{ALL}}}.
 ;{{{DataCollectionRetention}}}
-:this specifies what data is to be retained during the test.  Data is collected for each sample.  To reduce the impact of storing this data on the performance being measured, the data is stored in RAM until the end of the test when it is written to the output file.  This parameter specifies what data should be stored.  If this has a value of {{{ALL}}} then all of the data will be stored in RAM.  Otherwise a fixed size buffer of size {{{DataCollectionBound}}} is created before the test starts and data stored there.  If this parameter has a value of {{{OLDEST}}} the buffer is not written once it fills up.  If the value is {{{NEWEST}}} then the buffer is treated as a ring buffer and the last {{{DataCollectionBound}}} samples will always be present.  Samples will be overwritten oldest sample first.
+:this specifies what data is to be retained during the test.  Data is collected for each sample.  To reduce the impact of storing this data on the performance being measured, the data is stored in RAM until the end of the test when it is written to the output file.  This parameter specifies what data should be stored.  If this has a value of {{{ALL}}} then all of the data will be stored in RAM.  Otherwise a fixed size buffer of size {{{DataCollectionBound}}} is created before the test starts and data stored there.  If this parameter has a value of {{{OLDEST}}} the buffer is not written to once it fills up.  If the value is {{{NEWEST}}} then the buffer is treated as a ring buffer and the last {{{DataCollectionBound}}} samples will always be present.  Samples will be overwritten oldest sample first.
 !Example
 An example subscription section like the following would result in a subscription with the name //result// that receives //status// topic data on partition //link2// and stores the most recent 5,000 samples of information and writes them to the file //latency.data// at the end of the test.
 {{{
@@ -2400,7 +2492,7 @@ The specific Entity specifications that are supported include:
 #[[Subscription|Subscription Specifications]]
 </pre>
 </div>
-<div title="Throughput Tests" modifier="MikeMartinez" created="201003081923" modified="201003082200" tags="publish" changecount="15">
+<div title="Throughput Tests" modifier="MikeMartinez" created="201003081923" modified="201003311533" tags="publish" changecount="19">
 <pre>The OpenDDS-Bench framework includes configuration files for throughput testing.  These files are located in the //$~BENCH_ROOT/tests/thru// sub-directory.  The throughput testing covers several different conditions.  These include a bidirectional test, topologically equivalent to the [[latency tests|Latency Tests]], publication bound tests, and subscription bound tests.  Publication bound testing publishes test data from one publication to two distinct subscriptions.  When these processes are on three separate hosts, the publication processing will dominate and likely be the limiting factor in throughput.  Subscription bound testing publishes test data from two separate publications to a single subscription.  When these processes are on three separate hosts, the subscription processing will dominate and likely be the limiting factor in throughput.  If the test environment does not have adequate network bandwidth, then this will dominate either or both of these tests and the CPU usage observed during the tests will give an indication of what margins are available in the test setup.  The configuration for these tests are illustrated in the following diagrams.
 [img[Bidirectional Test|images/bidirtest.jpg]]
 [img[Publication Bound Test|images/pubboundtest.jpg]]
@@ -2468,6 +2560,62 @@ There is a separate configuration file supplied for each test condition to be ex
 | 23| 1,500| 10,000|  240|pub-1sub-be-160.ini&lt;br&gt;pub-1sub-rel-160.ini |
 | 24| 2,000| 10,000|  320|pub-1sub-be-240s.ini&lt;br&gt;pub-1sub-rel-240s.ini |
 | 25| 2,500| 10,000|  400|pub-1sub-be-320s.ini&lt;br&gt;pub-1sub-rel-320s.ini |
+}}}
+{{itemBlock{
+Commands that can be used to structure the test execution for these tests is included in the file //$~BENCH_ROOT/tests/thru/test-commands.txt//.  This file contains a set of commands for each test configuration described above.  They can be used to structure tests for your specific environment.
+!Executing bidirectional tests in a Linux environment can be done as follows:
+*Start the repostory
+&lt;&lt;&lt;
+repohost&gt; $~BENCH_ROOT/bin/run_test -S -h iiop:&quot;&quot;&quot;//&quot;&quot;&quot;&lt;repohost&gt;:2809
+&lt;&lt;&lt;
+*Start the forwarding (loopback) process
+&lt;&lt;&lt;
+host2&gt; cd &lt;testdir&gt;
+host2&gt; $~BENCH_ROOT/bin/run_test -P -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/bidir-remote-&lt;rel&gt;.ini
+&lt;&lt;&lt;
+*Start the originating and receiving process
+&lt;&lt;&lt;
+host1&gt; cd &lt;testdir&gt;
+host1&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/bidir-1sub-&lt;rel&gt;-&lt;rate&gt;.ini
+&lt;&lt;&lt;
+!Executing publication bound tests in a Linux environment can be done as follows:
+*Start the repostory
+&lt;&lt;&lt;
+repohost&gt; $~BENCH_ROOT/bin/run_test -S -h iiop:&quot;&quot;&quot;//&quot;&quot;&quot;&lt;repohost&gt;:2809
+&lt;&lt;&lt;
+*Start the receiving processes
+&lt;&lt;&lt;
+host2&gt; cd &lt;testdir&gt;
+host2&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/sub-&lt;rel&gt;.ini
+&lt;&lt;&lt;
+&lt;&lt;&lt;
+host3&gt; cd &lt;testdir&gt;
+host3&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/sub-&lt;rel&gt;.ini
+&lt;&lt;&lt;
+*Start the publishing process
+&lt;&lt;&lt;
+host1&gt; cd &lt;testdir&gt;
+host1&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/pub-2sub-&lt;rel&gt;-&lt;rate&gt;.ini
+&lt;&lt;&lt;
+!Executing subscription bound tests in a Linux environment can be done as follows:
+*Start the repostory
+&lt;&lt;&lt;
+repohost&gt; $~BENCH_ROOT/bin/run_test -S -h iiop:&quot;&quot;&quot;//&quot;&quot;&quot;&lt;repohost&gt;:2809
+&lt;&lt;&lt;
+*Start the publishing processes
+&lt;&lt;&lt;
+host1&gt; cd &lt;testdir&gt;
+host1&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/pub-1sub-&lt;rel&gt;-&lt;rate&gt;.ini
+&lt;&lt;&lt;
+&lt;&lt;&lt;
+host2&gt; cd &lt;testdir&gt;
+host2&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/pub-1sub-&lt;rel&gt;-&lt;rate&gt;.ini
+&lt;&lt;&lt;
+*Start the receiving process
+&lt;&lt;&lt;
+host3&gt; cd &lt;testdir&gt;
+host3&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/sub-&lt;rel&gt;.ini
+&lt;&lt;&lt;
 }}}</pre>
 </div>
 <div title="TiddlyWiki" modifier="MikeMartinez" created="201003022002" modified="201003082219" changecount="2">
@@ -2475,7 +2623,7 @@ There is a separate configuration file supplied for each test condition to be ex
 
 You can find out more at the [[TiddlyWiki home|http://www.tiddlywiki.com/]].</pre>
 </div>
-<div title="Topic Specifications" modifier="MikeMartinez" created="201003032055" modified="201003032223" tags="publish" changecount="3">
+<div title="Topic Specifications" modifier="MikeMartinez" created="201003032055" modified="201003311551" tags="publish" changecount="4">
 <pre>!Definable Parameters
 {{centeredTable{
 | ''Topic Section Keys'' |c
@@ -2503,17 +2651,17 @@ You can find out more at the [[TiddlyWiki home|http://www.tiddlywiki.com/]].</pr
 |~ResourceMaxSamplesPerInstance |&lt;number&gt; |&amp;nbsp; |
 |~TransportPriority |&lt;number&gt; |&amp;nbsp; |
 |~LifespanDuration |&lt;number&gt; |&amp;nbsp; |
-|~OwnershipKind |&lt;string&gt; |Enumeration value of {{{SHARED}}}, {{{EXCLUSIVE}}} |
+|~OwnershipKind |&lt;string&gt; |Enumeration value of {{{SHARED}}} or {{{EXCLUSIVE}}} |
 |&gt;|&gt;| &quot;&quot;&quot;---&quot;&quot;&quot; Test Execution Parameters &quot;&quot;&quot;---&quot;&quot;&quot; |
 |Participant |&lt;string&gt; |Must reference by name the identifier of a [participant] subsection within the file. |
 }}}
 !Test Execution Parameters
 [topic] sections are only linked to the containing DDS Participant.  There are no other test execution effects for a topic, other than the Quality of Service policy settings.
 !Example
-An example topic section like the following would result in a DDS Topic with a name of //status// being created in the process with reliability enabled and contained within the //player1// participant.
+An example topic section like the following would result in a DDS Topic with a name of //status// being created in the process with reliability enabled and contained within the //player// participant.
 {{{
 [topic/status]
-Participant = player1
+Participant = player
 ReliabilityKind = RELIABLE
 }}}
 </pre>

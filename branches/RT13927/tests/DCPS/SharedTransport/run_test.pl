@@ -11,6 +11,7 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 
 PerlDDS::add_lib_path('../FooType');
+PerlDDS::add_lib_path('../TestFramework');
 
 $opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf svc.conf";

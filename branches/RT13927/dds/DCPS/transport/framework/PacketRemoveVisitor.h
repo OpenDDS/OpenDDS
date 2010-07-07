@@ -27,7 +27,9 @@ public:
   PacketRemoveVisitor(TransportQueueElement& sample,
                       ACE_Message_Block*&          unsent_head_block,
                       ACE_Message_Block*           header_block,
-                      TransportReplacedElementAllocator& allocator);
+                      TransportReplacedElementAllocator& allocator,
+                      MessageBlockAllocator& mb_allocator,
+                      DataBlockAllocator& db_allocator);
 
   virtual ~PacketRemoveVisitor();
 
@@ -67,6 +69,10 @@ private:
 
   /// Cached allocator for TransportReplaceElement.
   TransportReplacedElementAllocator& replaced_element_allocator_;
+  /// Cached allocator for DataSampleHeader message block
+  MessageBlockAllocator& replaced_element_mb_allocator_;
+  /// Cached allocator for DataSampleHeader data block
+  DataBlockAllocator& replaced_element_db_allocator_;
 };
 
 } // namespace DCPS

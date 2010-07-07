@@ -1,182 +1,344 @@
-Tue Mar 23 19:32:21 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+Tue Jul  6 18:20:11 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
-        * OpenDDS version 2.1.2 released.
+        * tests/DCPS/Ownership/Writer.cpp:
 
-Tue Mar 23 15:57:27 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+          Fixed crash on linux due to ACE_CString passed as string format 
+          logging parameter.
 
-        * NEWS:
+Tue Jul  6 14:43:41 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
-          Updated documentation for next release.
+        * tests/DCPS/FooTest3_0/FooTest3_0.mpc:
 
-Tue Mar 23 15:45:06 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+          Added an "after" for correct behavior in parallel builds.
 
-        * NEWS:
-        * README:
+Tue Jul  6 07:25:37 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
-          Updated documentation for next release.
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
 
-Mon Mar 22 21:54:24 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+          Added a map to WriterInfo to keep track whether ownership needed
+          be evaluated for each instance. Previously, it used single flag
+          for all instances sent by the writer. This is the bug that cause
+          only samples belong the first instance were received when higher
+          strength writer took ownership and published multiple instances.
 
-        * NEWS:
+        * dds/DCPS/DomainParticipantImpl.cpp:
 
-          Added changes for next release.
+          Fixed a deadlock issue that caused by reverse locking between
+          DomainParticipantImpl subscribers_protector_ and ReceiveListenerSet
+          lock_. This happened when one thread deleting subscriber from
+          delete_contained_entities() while the reactor thread delievered
+          builtin topic data sample and called BitPubListenerImpl to update
+          ownership strength.
 
-Mon Mar 22 19:53:59 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+        * dds/DCPS/OwnershipManager.h:
+        * dds/DCPS/OwnershipManager.cpp:
 
-        * dds/DCPS/DataWriterImpl.h:
-        * dds/DCPS/DataWriterImpl.cpp:
-        * dds/DCPS/transport/framework/DataLink.h:
-        * dds/DCPS/transport/framework/DataLink.inl:
-        * dds/DCPS/transport/framework/DataLinkSet.h:
-        * dds/DCPS/transport/framework/DataLinkSet.inl:
-        * dds/DCPS/transport/framework/TransportInterface.h:
-        * dds/DCPS/transport/framework/TransportInterface.inl:
-        * dds/DCPS/transport/framework/TransportSendStrategy.h:
-        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+          Passed instance handle to some methods to help debugging.
 
-          Renamed remove_all_control_msgs() to remove_all_msgs() as the function
-          was changed to removes all messages sent by a datawriter.
+        * tests/DCPS/Ownership/DataReaderListener.h:
+        * tests/DCPS/Ownership/DataReaderListener.cpp:
+        * tests/DCPS/Ownership/Messenger.idl:
+        * tests/DCPS/Ownership/Writer.cpp:
+        * tests/DCPS/Ownership/run_test.pl:
 
-        * dds/DCPS/WriteDataContainer.cpp:
+          Made publisher to publish multiple instances to verify the bug
+          fix.
 
-          Removed remove_sample call on samples in sending_data or released_data
-          lists as it's redundant with remove_all_msgs().
+Tue Jun 29 21:39:39 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
-Fri Mar 19 22:25:14 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+        * java/FAQ:
 
-        * performance-tests/Bench/bin/expandColors.pl:
-        * performance-tests/Bench/bin/extract.pl:
-        * performance-tests/Bench/bin/genstats.pl:
-        * performance-tests/Bench/bin/mktable.pl:
-        * performance-tests/Bench/bin/reduce.pl:
-        * performance-tests/Bench/bin/run_test:
-        * performance-tests/Bench/doc/userguide.html:
-        * performance-tests/Bench/tests/thru/test-commands.txt:
+          Fixed a few typos.
 
-          Updating documentation in scripts and user guide.
+Mon Jun 28 16:07:20 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
-Fri Mar 19 21:23:54 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+        * tests/DCPS/Serializer_wstring/Serializer_wstring.mpc:
 
-        * dds/DCPS/WriteDataContainer.cpp:
+          Added an "after" to allow correct operation with parallel builds.
 
-          - Added lock in data_dropped as it could be called by the
-            the transport thread that does not hold the lock before
-            calling it. Otherwise, it may cause SEGV when write()
-            thraad request transport removing a sample while sample
-            is released due to tranport delayed notification.
-          - Added code to remove released_data_ samples in
-            unregister_all().
+Mon Jun 28 15:53:43 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
+        * dds/idl/be_global.cpp:
+
+          Added argument parsing for --export=Foo (backwards-compatibility with
+          dcps_ts.pl).
+
+Mon Jun 28 15:08:30 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Ownership/Writer.cpp:
+        * tests/DCPS/Ownership/publisher.cpp:
+
+          Renamed global variable "delay" to avoid conflict with QNX system
+          headers.
+
+        * tests/DCPS/UnitTests/LivelinessCompatibility.cpp:
+
+          Need another #include for inline=0 GCC 3.3.x compatibility.
+
+Fri Jun 25 20:47:38 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/Ownership/subscriber.cpp:
+
+          Moved result verify after Service_Participant shutdown.
+          This would fix pure function called error on linux due
+          to earlier result verify which failed sometimes.
+
+Fri Jun 25 18:36:19 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Marked the Ownership update_strength test only run
+          when built in topic is enabled.
+
+        * dds/DCPS/OwnershipManager.cpp:
+
+          Fixed a memory corruption due to a possibility to
+          erase vector end.
+
+Thu Jun 24 21:21:57 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/GroupRakeData.h:
+
+          Fixed a GCC warning by making sure ACE pre-processor macros are
+          defined before use.
+
+        * dds/DCPS/Comparator_T.h:
+        * dds/DCPS/Definitions.h:
+        * dds/InfoRepo/DCPS_Utils.cpp
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/GroupPresentation/SubscriberListener.cpp:
+        * tests/DCPS/Presentation/main.cpp:
+        * tests/DCPS/UnitTests/LivelinessCompatibility.cpp:
+
+          More GCC 3.3.x work-arounds.
+
+        * dds/idl/be_produce.cpp:
+
+          Use main_filename() instead of filename() since some pre-processors
+          use a temporary filename (SunCC).
+
+        * examples/DCPS/Messenger_IOGR_Imr/Messenger_IOGR_Imr.mpc:
+
+          Make sure we get rules.dds.GNU included in the makefile.
+
+        * tests/DCPS/ViewState/ViewState.mpc:
+        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+
+          Simplified mpc files: no need to list a "Source_Files" section.
+
+Wed Jun 23 21:44:45 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Comparator_T.h:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/yard/yard_base_grammar.hpp:
+        * dds/DCPS/yard/yard_text_grammar.hpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+        * dds/idl/keys_generator.cpp:
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+
+          Work-arounds for bugs in GCC 3.3.x.  See comment in Definitions.h.
+
+Wed Jun 23 18:18:52 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
+          Added 2 seconds delay before writing samples for test with udp
+          transport as the udp does not do fully association establishment
+          between pub and sub.
+
+Wed Jun 23 18:12:37 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
+Wed Jun 23 13:59:14 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/GroupPresentation/Writer.cpp:
+
+          Continued the fix from yesterday, need to cast ACE_thread_t back to
+          CORBA::Long for use in IDL struct.
+
+Tue Jun 22 20:34:11 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/README:
+
+          Updated documentation.
+
+        * java/build_scripts/JavaTypeSupportImpl.pm:
+
+          Removed this file.  ts_generator.cpp now does this with -Wb,java.
+
+Tue Jun 22 19:05:34 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/ts_generator.cpp:
+
+          Fixed a typo in the name of a JNI function for the Java bindings.
+
+Tue Jun 22 16:39:35 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+
+          Make sure all code-generation happens in the *_idl project to avoid
+          the publisher and subscriber projects colliding in parallel builds.
+
+Tue Jun 22 16:13:59 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/opendds_idl.mpc:
+
+          In the verbatim(gnuace), add the "all" target as a prerequisite of
+          "idl_stubs" so that if the user runs "make idl_stubs", opendds_idl
+          will be built first.
+
+Tue Jun 22 15:13:00 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Messenger/pub_multicast.ini:
+        * tests/DCPS/Messenger/sub_multicast.ini:
+
+          Setting the multicast group id explicilty to avoid network
+          switch problem for cicada2.
+
+Tue Jun 22 14:41:11 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+
+          Fixing problem where info repo is terminated prior to
+          Subscriber unregistering.
+
+Tue Jun 22 14:29:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/CoherentChangeControl.cpp:
+
+          Added newline at the end of the file to avoid a GCC warning and for
+          general consistency.
+
+        * dds/idl/be_global.cpp:
+
+          WCHAR compatibility.
+
+        * dds/idl/opendds_idl.mpc:
+
+          Use the same logic from tao_idl.mpc to set a preprocessor macro that
+          tells opendds_idl which preprocessor to use at runtime.
+
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+        * tests/DCPS/FilterExpression/FilterExpressionTest.mpc:
+        * tests/DCPS/FilterExpression/FilterStruct.idl:
+
+          Added an IDL file so this test doesn't depend on the struct for one
+          of the Built-in Topics, which are not always available.
+
+        * tests/DCPS/GroupPresentation/SubscriberListener.h:
+        * tests/DCPS/GroupPresentation/SubscriberListener.cpp:
+
+          Use ACE_THROW_SPEC() so that throw() clauses disappear on platforms
+          that don't use them (certian compilers and newer versions of ACE+TAO)
+
+        * tests/DCPS/GroupPresentation/Writer.cpp:
+
+          Use ACE_thread_t as the platform-independent return type of
+          ACE_OS::thr_self().
+
+        * tests/DCPS/Ownership/Ownership.mpc:
+
+          Link multicast and udp libs for static builds.
+
+Mon Jun 21 20:11:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Fixed some GCC warnings.
+
+Mon Jun 21 19:45:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/WaitForAck/WaitForAck.mpc:
+
+          Corrected dependencies (after += ...)
+
+Mon Jun 21 17:47:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged the branch "sbir_n08_116", which includes changes for spec
+          compliance.  See docs/history/ChangeLog-sbir_n08_116 for details.
+          Major features added are:
+
+          - Content-Subscription Profile: implemented ContentFilteredTopic and
+            the remaining functionality for QueryCondition
+          - QoS: OWNERSHIP; PRESENTATION (access_scope = GROUP)
+
+          The Content-Subscription Profile implementation required a change to
+          OpenDDS's strategy for code-generation.  OpenDDS-specific code has
+          been moved out of tao_idl's back-end library (enabled with -Gdcps)
+          and into a code generator here in the OpenDDS repository, called
+          opendds_idl (in dds/idl).  Existing applications that use MPC should
+          only need to change one of the arguments which may appear in
+          dcps_ts_flags: '--export=' has become '-Wb,export_macro='.
+          Also, note that for footprint-sensitive applications, the content-
+          subscription profile can be disabled at compile-time by setting the
+          MPC feature content_subscription=0.
+
+Fri Jun 18 22:42:30 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/AssociationData.h:
         * dds/DCPS/transport/framework/DataLink.h:
         * dds/DCPS/transport/framework/DataLink.inl:
         * dds/DCPS/transport/framework/DataLink.cpp:
-        * dds/DCPS/transport/framework/DataLinkSet.inl:
-        * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
-        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
-        * dds/DCPS/transport/framework/QueueRemoveVisitor.h:
-        * dds/DCPS/transport/framework/QueueRemoveVisitor.inl:
-        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
-        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
-        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
-        * dds/DCPS/transport/framework/TransportQueueElement.h:
-        * dds/DCPS/transport/framework/TransportQueueElement.inl:
-        * dds/DCPS/transport/framework/TransportSendElement.h:
-        * dds/DCPS/transport/framework/TransportSendElement.cpp:
-        * dds/DCPS/transport/framework/TransportSendStrategy.h:
-        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
-        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
-
-          - Fixed an issue that DataWriter request transport to remove
-            a sample while the sample is released by transport.
-            This could happen when there are more number of datalinks
-            upon sample removing than sending. A datalink is requested
-            to remove sample is not requested for sending. The sample
-            may already be released while the link uses the sample to
-            find in it's storage.
-
-            Wrappered sample to remove with TransportSendElement so the
-            DataWriter data_dropped() will be called only when sample is
-            removed from all links it originally sent to.
-            The TransportSendElement instance also carry the information
-            if a data_dropped is called to DataWriter, if it does, then
-            stop using the sample to remove from the rest links because
-            the sample may already be released.
-
-          - Added/update methods to accommodate the changes above.
-          - Added transport_shutdown to TransportSendStrategy to avoid
-            delayed notification upon transport release as the transport
-            release is normally called after DataWriter is destroyed.
-
-        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
-
-          Added receive_strategy_ nil value check in handle_close()
-          to avoid crash if receive_strategy_ is wiped before
-          handle_close() called.
-
-Tue Mar 16 21:01:14 UTC 2010  Steven Stallion  <stallions@ociweb.com>
-
+        * dds/DCPS/transport/framework/PriorityKey.h:
+        * dds/DCPS/transport/framework/PriorityKey.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
         * dds/DCPS/transport/multicast/ReliableSession.h:
         * dds/DCPS/transport/multicast/ReliableSession.cpp:
-
-          Fixed deadlock caused by shared mutex between starting and
-          acknowledgement critical sections.
-
-Tue Mar 16 14:18:51 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
-
-        * performance-tests/Bench/tests/latency/p1-16000.ini:
-
-          Update to use new datamodel.  Thanks to Don Busch for finding
-          this.
-
-Thu Mar 11 23:54:38 UTC 2010  Yan Dai  <dai_y@ociweb.com>
-
-        * dds/DCPS/WriteDataContainer.cpp:
-
-          Fixed a bug in obtain_buffer() when max_blocking_time is 0 or very small
-          period. The condition makes the write() not wait for old sample releasing.
-          In this case, the TIMEOUT error code should be returned.
-
-        * dds/DCPS/DataWriterImpl.cpp:
-
-          Turned off the error logging as obtain_buffer() returns TIMEOUT error code.
-
-        * tests/DCPS/FooTest5/InstanceDataMap.cpp:
-        * tests/DCPS/FooTest5/Writer.cpp:
-        * tests/DCPS/FooTest5/run_test.pl:
-
-          - Adjusted result verify.
-          - Log timeout error return from write() only if DCPS_debug_level > 0.
-
-Wed Mar 10 16:25:55 UTC 2010  Steven Stallion  <stallions@ociweb.com>
-
-        * dds/DCPS/transport/framework/ThreadSynchStrategy.h:
-        * dds/DCPS/transport/framework/ThreadSynchStrategy_rch.h:
-        * dds/DCPS/transport/framework/TransportConfiguration.h:
-        * dds/DCPS/transport/framework/TransportConfiguration.inl:
-        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
-
-          Added support for optionally specifying a ThreadSynchStrategy
-          implementation at construction-time (submitted by Don Busch).
-
-        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
-        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
-
-          Updated UDP-based transports to use a NullSynchStrategy by
-          default; this prevents spurious threads from being spawned
-          for each created DataLink (submitted by Don Busch).
-
-        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
         * dds/DCPS/transport/udp/UdpTransport.cpp:
 
-          Updated support for endpoint addressing; DataLinks are created
-          per unique endpoint rather than RepoId (submitted by Don Busch).
+          Supported same transport pub-sub associations (see RT13902).
+          - Added is_loopback and is_active flag to Datalink to help identify
+            the active(pub) end or passive(sub) end.
+          - For SimpleTCP, the links to same remote are seperated for active
+            and passive side.
+          - UDP was not changed as it's already seperated with the active
+            and passive links.
+          - Multicast transport creates two links (one link is for pubs and
+            one is for subs) instead of single link per transport. As before,
+            each link could have multiple sessions.
 
-Tue Mar  9 19:08:05 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.cpp:
+
+          Accommodated for function prototype changes.
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
+          Turned on message logging for verify.
+
+        * tests/DCPS/SharedTransport/run_test.pl:
+
+          Added TestFramework lib to libpath.
+
+        * bin/dcps_tests.lst:
+
+          Added SharedTransport tests.
+
+Fri Jun 18 20:21:29 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:
         * README:
 
-          Updated documentation for next release.
+          Updated for next release (2.2).
+
+        * ChangeLog:
+        * docs/history/ChangeLog-2.1.3:
+
+          Moved ChangeLog entries from version 2.1.3 to their own file.
 
 Local Variables:
 mode: change-log

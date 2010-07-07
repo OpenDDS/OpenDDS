@@ -373,7 +373,12 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
         DDS::Time_t last_timestamp = { 0, 0 };
         for (CORBA::ULong i = 0; i < info.length(); ++i)
         {
+#ifdef OPENDDS_GCC33
+          if (OpenDDS::DCPS::operator<(info[i].source_timestamp, last_timestamp))
+#else
+          using OpenDDS::DCPS::operator<;
           if (info[i].source_timestamp < last_timestamp)
+#endif
           {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("%N:%l main()")

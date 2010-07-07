@@ -26,7 +26,9 @@ class OpenDDS_Dcps_Export TransportReplacedElement : public TransportQueueElemen
 public:
 
   TransportReplacedElement(TransportQueueElement* orig_elem,
-                           TransportReplacedElementAllocator* allocator = 0);
+                           TransportReplacedElementAllocator* allocator = 0,
+                           MessageBlockAllocator* mb_allocator = 0,
+                           DataBlockAllocator* db_allocator = 0);
   virtual ~TransportReplacedElement();
 
   /// Accessor for the publisher id.
@@ -34,6 +36,7 @@ public:
 
   /// Accessor for the ACE_Message_Block
   virtual const ACE_Message_Block* msg() const;
+  virtual bool owned_by_transport ();
 
 protected:
 
@@ -43,7 +46,11 @@ private:
 
   /// Reference to TransportReplacedElement allocator.
   TransportReplacedElementAllocator* allocator_;
-
+  /// Cached allocator for DataSampleHeader message block
+  MessageBlockAllocator* mb_allocator_;
+  /// Cached allocator for DataSampleHeader data block
+  DataBlockAllocator* db_allocator_;
+                           
   /// The publication_id() from the original TransportQueueElement
   RepoId publisher_id_;
 

@@ -158,7 +158,7 @@ void postprocess(const char *fn, ostringstream &content,
     out << "/* -*- C++ -*- */\n";
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
     string taoheader = to_tao(fn);
-    out << "#include \"" << taoheader << "\"\n";
+    out << "#include \"" << be_global->tao_inc_pre_ << taoheader << "\"\n";
 
   } else if (which == BE_GlobalData::STUB_CPP ||
              which == BE_GlobalData::SKEL_CPP) {

@@ -25,7 +25,8 @@ public:
 
   virtual bool acked();
 
-  virtual bool header_received(const TransportHeader& header);
+  virtual bool check_header(const TransportHeader& header);
+  virtual bool check_header(const DataSampleHeader& header);
 
   virtual void control_received(char submessage_id,
                                 ACE_Message_Block* control);

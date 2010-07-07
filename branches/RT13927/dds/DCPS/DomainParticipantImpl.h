@@ -12,14 +12,17 @@
 
 #include "EntityImpl.h"
 #include "Definitions.h"
-#include "InstanceHandle.h"
 #include "TopicImpl.h"
+#include "InstanceHandle.h"
+#include "OwnershipManager.h"
+#include "RepoIdGenerator.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsDomainExtS.h"
 #include "dds/DdsDcpsInfoC.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "dds/DdsDcpsInfrastructureTypeSupportC.h"
@@ -92,6 +95,9 @@ public:
   };
 
   typedef std::map<std::string, RefCounted_Topic> TopicMap;
+
+  typedef std::map<std::string, DDS::TopicDescription_var> TopicDescriptionMap;
+
   typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> HandleMap;
 
   ///Constructor
@@ -321,6 +327,17 @@ public:
   */
   void get_topic_ids(TopicIdVec& topics);
 
+  /** Accessor for ownership manager.
+  */
+  OwnershipManager* ownership_manager ();
+  
+  /** 
+  * Called upon receiving new BIT publication data to
+  * update the ownership strength of a publication.
+  */
+  void update_ownership_strength (const PublicationId& pub_id,
+                                  const CORBA::Long& ownership_strength);
+
 private:
 
   /** The implementation of create_topic.
@@ -384,6 +401,10 @@ private:
   SubscriberSet  subscribers_;
   /// Collection of topics.
   TopicMap       topics_;
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  /// Collection of TopicDescriptions which are not also Topics
+  TopicDescriptionMap topic_descrs_;
+#endif
   /// Collection of handles.
   HandleMap      handles_;
   /// Collection of ignored participants.
@@ -432,6 +453,11 @@ private:
   DDS::SubscriptionBuiltinTopicDataDataReader_var bit_sub_dr_;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
   Monitor* monitor_;
+  
+  OwnershipManager owner_man_;
+  
+  /// Publisher ID generator. 
+  RepoIdGenerator  pub_id_generator_;
 };
 
 } // namespace DCPS

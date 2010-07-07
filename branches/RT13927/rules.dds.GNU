@@ -35,6 +35,7 @@ endif
 # This is needed for features used in requires/avoids statements in .mpc files
 built_in_topics ?= 1
 tao_orbsvcs ?= 1
+content_subscription ?= 1
 
 # Turn on symbol versioning. The scheme that we follow is to allow
 # applications dependent on libraries, with same version numbers (major,
@@ -66,5 +67,13 @@ ifeq ($(versioned_so),1)
     SONAME = $(SHLIB).$(DDS_MAJOR_VERSION).$(DDS_MINOR_VERSION).$(DDS_MICRO_VERSION)
   endif # SONAME
 endif # versioned_so
+
+-include $(DDS_ROOT)/user_macros.GNU
+
+# user_macros.GNU may not exist, but GNU make will try to "make" it using the
+# overly general rule for creating symlinks in rules.local.GNU.  To prevent
+# this, create a more specific rule for user_macros.GNU that does nothing.
+.DEFAULT_GOAL := all
+$(DDS_ROOT)/user_macros.GNU: ;
 
 endif # rules_dds_gnu_included

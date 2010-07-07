@@ -98,14 +98,15 @@ private:
   OnFull onFull_;
 };
 
-} // namespace DCPS
-} // namespace OpenDDS
-
 /// Insert collected data onto an ostream.
 template<typename DatumType>
 std::ostream& operator<<(
   std::ostream& str,
-  const OpenDDS::DCPS::DataCollector<DatumType>& value);
+  const DataCollector<DatumType>& value);
+
+} // namespace DCPS
+} // namespace OpenDDS
+
 
 #if defined (__ACE_INLINE__)
 #include "DataCollector_T.inl"

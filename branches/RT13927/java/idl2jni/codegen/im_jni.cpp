@@ -66,6 +66,7 @@ string idl_mapping_jni::taoType(AST_Type *decl)
   case AST_Decl::NT_enum:
     return scoped(decl->name());
   case AST_Decl::NT_interface:
+  case AST_Decl::NT_interface_fwd:
     return scoped(decl->name()) + "_var";
   default:
     ;
@@ -92,6 +93,7 @@ string idl_mapping_jni::taoParam(AST_Type *decl, AST_Argument::Direction dir,
 
   switch (effectiveType) {
   case AST_Decl::NT_interface:
+  case AST_Decl::NT_interface_fwd:
 
     if (dir == AST_Argument::dir_OUT) {
       addRef = false;
@@ -277,6 +279,7 @@ string idl_mapping_jni::jvmSignature(AST_Type *decl)
   case AST_Decl::NT_struct:
   case AST_Decl::NT_union:
   case AST_Decl::NT_interface:
+  case AST_Decl::NT_interface_fwd:
     return "L" + scoped_helper(decl->name(), "/") + ";";
   case AST_Decl::NT_typedef: {
     AST_Typedef *td = AST_Typedef::narrow_from_decl(decl);
@@ -411,7 +414,8 @@ bool isObjref(AST_Type *t)
     t = td->primitive_base_type();
   }
 
-  return t->node_type() == AST_Decl::NT_interface;
+  return t->node_type() == AST_Decl::NT_interface
+    || t->node_type() == AST_Decl::NT_interface_fwd;
 }
 
 bool isSSU(AST_Type *t)  //sequence, struct, union
@@ -588,7 +592,8 @@ bool idl_mapping_jni::gen_typedef(UTL_ScopedName *name, AST_Type *base,
   return gen_jarray_copies(name, jvmSignature(element), jniFnName(element),
                            type(element), type(base), taoType(element),
                            sequence, length,
-                           element->node_type() == AST_Decl::NT_interface);
+                           element->node_type() == AST_Decl::NT_interface ||
+                           element->node_type() == AST_Decl::NT_interface_fwd);
 }
 
 bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,

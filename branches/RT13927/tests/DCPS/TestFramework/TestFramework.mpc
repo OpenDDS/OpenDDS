@@ -5,7 +5,7 @@
 project: dcps {
   sharedname     = TestFramework
 
-  dcps_ts_flags += --export=TestFramework_Export
+  dcps_ts_flags += -Wb,export_macro=TestFramework_Export
 
   idlflags      += -Wb,stub_export_include=TestFramework_Export.h \
                    -Wb,stub_export_macro=TestFramework_Export
