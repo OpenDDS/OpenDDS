@@ -28,8 +28,6 @@ namespace OpenDDS { namespace DCPS {
 
 namespace OpenDDS { namespace Model {
 
-  class CopyQos;
-
   class OpenDDS_Model_Export Delegate {
     public:
       Delegate();

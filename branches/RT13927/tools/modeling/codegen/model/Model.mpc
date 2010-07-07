@@ -6,6 +6,7 @@ project(*Lib): dcps {
 
   Source_Files {
     Delegate.cpp
+    Utilities.cpp
   }
 
   Template_Files {

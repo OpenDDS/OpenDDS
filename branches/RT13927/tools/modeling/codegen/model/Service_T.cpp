@@ -7,39 +7,39 @@ OpenDDS::Model::Service< ModelName>::Service()
 {
   this->delegate_.service() = this;
 
-  for( int index = 0; index < OpenDDS::Model::modelname::Elements::Participants::LAST_INDEX; ++index) {
+  for( int index = 0; index < ModelName::Elements::Participants::LAST_INDEX; ++index) {
     this->participants_[ index] = 0;
   }
 
-  for( int outter = 0; outter < OpenDDS::Model::modelname::Elements::Participants::LAST_INDEX; ++outter) {
-    for( int inner = 0; inner < OpenDDS::Model::modelname::Elements::Types::LAST_INDEX; ++inner) {
+  for( int outter = 0; outter < ModelName::Elements::Participants::LAST_INDEX; ++outter) {
+    for( int inner = 0; inner < ModelName::Elements::Types::LAST_INDEX; ++inner) {
       this->types_[ outter][ inner] = false;
     }
   }
 
-  for( int outter = 0; outter < OpenDDS::Model::modelname::Elements::Participants::LAST_INDEX; ++outter) {
-    for( int inner = 0; inner < OpenDDS::Model::modelname::Elements::Topics::LAST_INDEX; ++inner) {
+  for( int outter = 0; outter < ModelName::Elements::Participants::LAST_INDEX; ++outter) {
+    for( int inner = 0; inner < ModelName::Elements::Topics::LAST_INDEX; ++inner) {
       this->topics_[ outter][ inner] = 0;
     }
   }
 
-  for( int index = 0; index < OpenDDS::Model::modelname::Elements::Publishers::LAST_INDEX; ++index) {
+  for( int index = 0; index < ModelName::Elements::Publishers::LAST_INDEX; ++index) {
     this->publishers_[ index] = 0;
   }
 
-  for( int index = 0; index < OpenDDS::Model::modelname::Elements::Subscribers::LAST_INDEX; ++index) {
+  for( int index = 0; index < ModelName::Elements::Subscribers::LAST_INDEX; ++index) {
     this->subscribers_[ index] = 0;
   }
 
-  for( int index = 0; index < OpenDDS::Model::modelname::Elements::DataWriters::LAST_INDEX; ++index) {
+  for( int index = 0; index < ModelName::Elements::DataWriters::LAST_INDEX; ++index) {
     this->writers_[ index] = 0;
   }
 
-  for( int index = 0; index < OpenDDS::Model::modelname::Elements::DataReaders::LAST_INDEX; ++index) {
+  for( int index = 0; index < ModelName::Elements::DataReaders::LAST_INDEX; ++index) {
     this->readers_[ index] = 0;
   }
 
-  for( int index = 0; index < OpenDDS::Model::modelname::Elements::Transports::LAST_INDEX; ++index) {
+  for( int index = 0; index < ModelName::Elements::Transports::LAST_INDEX; ++index) {
     this->transports_[ index] = 0;
   }
 }
