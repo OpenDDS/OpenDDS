@@ -18,12 +18,6 @@ Wed Jul  7 19:21:08 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
           Added utility for loading an OctetSeq with an ASCII string.
 
-Wed Jul  7 19:19:45 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
-
-        * tools/modeling/codegen/model/Delegate.h:
-        * tools/modeling/codegen/model/Model.mpc:
-        * tools/modeling/codegen/model/Service_T.cpp:
-
 Wed Jul  7 19:08:31 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * Merged from trunk revisions 3161:3430
