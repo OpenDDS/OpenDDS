@@ -1,3 +1,41 @@
+Thu Jul  8 18:30:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+
+          Added and implemented a fini() method.
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Implemented the fini() method.  Includes delegation.
+
+        * tools/modeling/codegen/model/Model.mpc:
+
+          Added new null listener implementations to library.
+
+        * tools/modeling/codegen/model/NullListener.h:
+        * tools/modeling/codegen/model/NullListener.cpp:
+        * tools/modeling/codegen/model/NullParticipantListener.h:
+        * tools/modeling/codegen/model/NullParticipantListener.cpp:
+        * tools/modeling/codegen/model/NullPublisherListener.h:
+        * tools/modeling/codegen/model/NullPublisherListener.cpp:
+        * tools/modeling/codegen/model/NullReaderListener.h:
+        * tools/modeling/codegen/model/NullReaderListener.cpp:
+        * tools/modeling/codegen/model/NullSubscriberListener.h:
+        * tools/modeling/codegen/model/NullSubscriberListener.cpp:
+        * tools/modeling/codegen/model/NullTopicListener.h:
+        * tools/modeling/codegen/model/NullTopicListener.cpp:
+        * tools/modeling/codegen/model/NullWriterListener.h:
+        * tools/modeling/codegen/model/NullWriterListener.cpp:
+
+          Providing null listener implementations.  These will do nothing
+          for debug levels less than 5 and indicate what methods are
+          called for level 5 and over.  These provide an implementation
+          for all listener methods, so application code needs to
+          implement only those methods in use if it inherits from these
+          classes.
+
 Wed Jul  7 19:21:08 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/codegen/model/Delegate.h:
