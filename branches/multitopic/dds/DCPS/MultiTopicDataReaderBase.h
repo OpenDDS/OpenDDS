@@ -124,6 +124,8 @@ public:
 private:
   virtual void init_typed(DataReaderEx* dr) = 0;
   virtual const MetaStruct& getResultingMeta() = 0;
+  virtual void incoming_sample(void* sample, const DDS::SampleInfo& info,
+                               const char* topic, const MetaStruct& meta) = 0;
 
   class Listener
     : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
@@ -167,6 +169,7 @@ private:
   DataReaderEx_var resulting_reader_;
   std::vector<DDS::DataReader_var> incoming_readers_;
 
+protected:
   // key: topicName of incoming datareader
   typedef MultiTopicImpl::SubjectFieldSpec SubjectFieldSpec;
   std::multimap<std::string, SubjectFieldSpec> field_map_;

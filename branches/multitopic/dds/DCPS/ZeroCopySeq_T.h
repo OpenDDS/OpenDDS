@@ -35,7 +35,7 @@ namespace DCPS {
 
 /**
 * Provides [] operators returning sample references
-*     but it is is implemented as
+*     but it is implemented as
 *     an "array" of pointers to the samples so they can be
 *     "loaned" to the application code.
 *

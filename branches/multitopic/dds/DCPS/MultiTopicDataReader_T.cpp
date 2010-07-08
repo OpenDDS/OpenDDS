@@ -31,6 +31,24 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::getResultingMeta()
 }
 
 template<typename Sample, typename TypedDataReader>
+void
+MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
+  const DDS::SampleInfo& info, const char* topic, const MetaStruct& meta)
+{
+  Sample resulting;
+  typedef std::multimap<std::string, SubjectFieldSpec>::iterator iter_t;
+  typedef std::pair<iter_t, iter_t> iterpair_t;
+  for (iterpair_t iters = field_map_.equal_range(topic);
+       iters.first != iters.second; ++iters.first) {
+    const SubjectFieldSpec& sfs = iters.second->second;
+    const std::string& resulting_name = sfs.resulting_name_.empty()
+      ? sfs.incoming_name_ : sfs.resulting_name_;
+    getResultingMeta().assign(&resulting, resulting_name.c_str(),
+                              sample, sfs.incoming_name_.c_str(), meta);
+  }
+}
+
+template<typename Sample, typename TypedDataReader>
 DDS::ReturnCode_t
 MultiTopicDataReader_T<Sample, TypedDataReader>::read(SampleSeq& received_data,
   DDS::SampleInfoSeq& info_seq, CORBA::Long max_samples,

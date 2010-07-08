@@ -349,6 +349,11 @@ public:
                                 DDS::InstanceStateMask instance_states,
                                 const OpenDDS::DCPS::FilterEvaluator& evaluator,
                                 const DDS::StringSeq& params);
+
+  DDS::ReturnCode_t read_generic(
+    OpenDDS::DCPS::DataReaderImpl::GenericBundle& gen,
+    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+    DDS::InstanceStateMask instance_states);
 #endif
 
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,

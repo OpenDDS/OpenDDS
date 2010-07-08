@@ -103,6 +103,11 @@ public:
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample&,
                                OpenDDS::DCPS::SubscriptionInstance*&) {}
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  virtual DDS::ReturnCode_t read_generic(
+    OpenDDS::DCPS::DataReaderImpl::GenericBundle&, DDS::SampleStateMask,
+    DDS::ViewStateMask, DDS::InstanceStateMask);
+#endif
 };
 
 class MyDataWriterImpl :  public virtual OpenDDS::DCPS::DataWriterImpl
