@@ -21,6 +21,13 @@ OpenDDS::Model::Delegate::init( int argc, char** argv)
   TheParticipantFactoryWithArgs( argc, argv);
 }
 
+void
+OpenDDS::Model::Delegate::fini()
+{
+  TheTransportFactory->release();
+  TheServiceParticipant->shutdown();
+}
+
 OpenDDS::Model::CopyQos*&
 OpenDDS::Model::Delegate::service()
 {

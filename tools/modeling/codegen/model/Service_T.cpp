@@ -64,6 +64,13 @@ inline
 void
 OpenDDS::Model::Service< ModelName>::fini()
 {
+  for( int index = 0; index < Participants::LAST_INDEX; ++index) {
+    if( this->participants_[ index]) {
+      this->participants_[ index]->delete_contained_entities();
+      TheParticipantFactory->delete_participant( this->participants_[ index]);
+    }
+  }
+  this->delegate_.fini();
 }
 
 template< typename ModelName>

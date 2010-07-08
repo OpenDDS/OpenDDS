@@ -12,6 +12,7 @@
 #include "Delegate.h"
 #include "CopyQos.h"
 #include "dds/DdsDcpsC.h"
+#include "dds/DCPS/Service_Participant.h"
 
 namespace OpenDDS { namespace Model {
 

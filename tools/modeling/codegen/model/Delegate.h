@@ -33,6 +33,7 @@ namespace OpenDDS { namespace Model {
       Delegate();
 
       void init( int argc, char** argv);
+      void fini();
 
       void
       createParticipant(
