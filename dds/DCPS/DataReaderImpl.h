@@ -512,6 +512,18 @@ public:
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   void enable_filtering(ContentFilteredTopicImpl* cft);
+
+  typedef std::vector<void*> GenericSeq;
+
+  struct GenericBundle {
+    GenericSeq samples_;
+    DDS::SampleInfoSeq info_;
+    //TODO: ~GenericBundle();
+  };
+
+  virtual DDS::ReturnCode_t read_generic(GenericBundle& gen,
+    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+    DDS::InstanceStateMask instance_states) = 0;
 #endif
 
   void begin_access();

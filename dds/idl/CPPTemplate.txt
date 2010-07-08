@@ -1587,6 +1587,20 @@ bool
 
   return false;
 }
+
+DDS::ReturnCode_t
+<%TYPE%>DataReaderImpl::read_generic(
+  OpenDDS::DCPS::DataReaderImpl::GenericBundle& gen,
+   DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+   DDS::InstanceStateMask instance_states)
+{
+  <%SCOPED%>Seq data;
+  DDS::ReturnCode_t rc = read_i(data, gen.info_, 0/*max*/, sample_states,
+    view_states, instance_states, NULL);
+//copy
+  return rc;
+}
+
 #endif
 
 void

@@ -57,7 +57,8 @@ namespace {
     CL_SCALAR = 1,
     CL_STRUCTURE = 2,
     CL_STRING = 4,
-    CL_ENUM = 8
+    CL_ENUM = 8,
+    CL_WIDE = 16
   };
 
   Classification classify(AST_Type* type)
@@ -74,8 +75,9 @@ namespace {
       }
     }
     case AST_Decl::NT_string:
-    case AST_Decl::NT_wstring:
       return static_cast<Classification>(CL_SCALAR | CL_STRING);
+    case AST_Decl::NT_wstring:
+      return static_cast<Classification>(CL_SCALAR | CL_STRING | CL_WIDE);
     case AST_Decl::NT_struct:
       return CL_STRUCTURE;
     case AST_Decl::NT_enum:
@@ -149,6 +151,31 @@ namespace {
   {
     be_global->impl_ << '"' << field->local_name()->get_string() << '"' << ", ";
   }
+
+  void get_raw_field(AST_Field* field)
+  {
+    const char* fieldName = field->local_name()->get_string();
+    be_global->impl_ <<
+      "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
+      "      return &static_cast<const T*>(stru)->" << fieldName << ";\n"
+      "    }\n";
+  }
+
+  void assign_field(AST_Field* field)
+  {
+    Classification cls = classify(field->field_type());
+    if (!cls) return; // skip CL_UNKNOWN types
+    const char* fieldName = field->local_name()->get_string();
+    const std::string fieldType = (cls & CL_STRING) ?
+      ((cls & CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager")
+      : scoped(field->field_type()->name());
+    be_global->impl_ <<
+      "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
+      "      static_cast<T*>(lhs)->" << fieldName <<
+      " = *static_cast<const " << fieldType <<
+      "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n"
+      "    }\n";
+  }
 }
 
 bool metaclass_generator::gen_struct(UTL_ScopedName* name,
@@ -169,6 +196,7 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
   be_global->impl_ <<
     "template<>\n"
     "struct MetaStructImpl<" << clazz << "> : MetaStruct {\n"
+    "  typedef " << clazz << " T;\n"
     "  Value getValue(const void* stru, const char* field) const\n"
     "  {\n"
     "    const " << clazz << "& typed = *static_cast<const " << clazz
@@ -200,6 +228,24 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
   be_global->impl_ <<
     "0};\n"
     "    return names;\n"
+    "  }\n"
+    "  const void* getRawField(const void* stru, const char* field) const\n"
+    "  {\n";
+  std::for_each(fields.begin(), fields.end(), get_raw_field);
+  be_global->impl_ <<
+    exception <<
+    "  }\n"
+    "  void assign(void* lhs, const char* field, const void* rhs,\n"
+    "    const char* rhsFieldSpec, const MetaStruct& rhsMeta) const\n"
+    "  {\n"
+    "    ACE_UNUSED_ARG(lhs);\n"
+    "    ACE_UNUSED_ARG(field);\n"
+    "    ACE_UNUSED_ARG(rhs);\n"
+    "    ACE_UNUSED_ARG(rhsFieldSpec);\n"
+    "    ACE_UNUSED_ARG(rhsMeta);\n";
+  std::for_each(fields.begin(), fields.end(), assign_field);
+  be_global->impl_ <<
+    exception <<
     "  }\n"
     "};\n\n"
     "template<>\n"

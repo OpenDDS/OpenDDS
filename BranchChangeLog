@@ -1,3 +1,31 @@
+Wed Jul  7 22:08:49 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.h:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          Continued with handling incoming samples in the MultiTopic reader.
+          This is all still a work in progress.
+
+        * dds/DCPS/ZeroCopySeq_T.h:
+
+          Typo fix in comment.
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/metaclass_generator.cpp:
+
+          Added new functions to "reflectively" assign field data from
+          one struct to another.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+
+          Added new DataReaderImpl virtual method.
+
 Tue Jul  6 21:42:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/MultiTopicDataReaderBase.h:

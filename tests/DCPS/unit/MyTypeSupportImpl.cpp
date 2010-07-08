@@ -97,4 +97,10 @@ MyTypeSupportImpl::getMetaStructForType()
   throw std::runtime_error("unimplemented");
 }
 
+DDS::ReturnCode_t MyDataReaderImpl::read_generic(
+  OpenDDS::DCPS::DataReaderImpl::GenericBundle&, DDS::SampleStateMask,
+  DDS::ViewStateMask, DDS::InstanceStateMask)
+{
+  return DDS::RETCODE_UNSUPPORTED;
+}
 #endif

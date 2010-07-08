@@ -98,15 +98,24 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
 void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
 {
   DDS::TopicDescription_var td = reader->get_topicdescription();
+  TopicDescriptionImpl* tdi = dynamic_cast<TopicDescriptionImpl*>(td.in());
+  TypeSupportImpl* ts = dynamic_cast<TypeSupportImpl*>(tdi->get_type_support());
+  const MetaStruct& meta = ts->getMetaStructForType();
   CORBA::String_var topic = td->get_name();
+  DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(reader);
 
   //TODO: temporary
   ACE_DEBUG((LM_DEBUG, "Multitopic incoming data available: %C\n", topic.in()));
+  DataReaderImpl::GenericBundle gen;
+  DDS::ReturnCode_t rc = dri->read_generic(gen, DDS::NOT_READ_SAMPLE_STATE,
+    DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
 
-  typedef std::multimap<std::string, SubjectFieldSpec>::iterator iter_t;
-  for (std::pair<iter_t, iter_t> iters = field_map_.equal_range(topic.in());
-       iters.first != iters.second; ++iters.first) {
-    const SubjectFieldSpec& sfs = iters.second->second;
+  if (rc == DDS::RETCODE_NO_DATA) return;
+
+  for (size_t i = 0; i < gen.samples_.size(); ++i) {
+    if (gen.info_[i].valid_data) {
+      incoming_sample(gen.samples_[i], gen.info_[i], topic, meta);
+    }
   }
 }
 

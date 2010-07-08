@@ -30,6 +30,8 @@ public:
 
   void init_typed(DataReaderEx* dr);
   const MetaStruct& getResultingMeta();
+  void incoming_sample(void* sample, const DDS::SampleInfo& info,
+                       const char* topic, const MetaStruct& meta);
 
   DDS::ReturnCode_t read(SampleSeq& received_data, DDS::SampleInfoSeq& info_seq,
     CORBA::Long max_samples, DDS::SampleStateMask sample_states,
