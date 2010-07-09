@@ -54,13 +54,19 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
     if (!incoming.in()) {
       //TODO: error
     }
-    incoming_readers_.push_back(incoming);
+    incoming_readers_[selection[i]] = incoming;
     TopicDescriptionImpl* tdi = dynamic_cast<TopicDescriptionImpl*>(t.in());
     TypeSupportImpl* ts =
       dynamic_cast<TypeSupportImpl*>(tdi->get_type_support());
     const MetaStruct& meta = ts->getMetaStructForType();
     for (const char** names = meta.getFieldNames(); *names; ++names) {
-      fieldToTopic[*names] = selection[i];
+      if (fieldToTopic.count(*names)) { // already seen this field name
+        std::set<std::string>& topics = join_keys_[*names];
+        topics.insert(fieldToTopic[*names]);
+        topics.insert(selection[i]);
+      } else {
+        fieldToTopic[*names] = selection[i];
+      }
     }
   }
 
@@ -95,27 +101,44 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   }
 }
 
-void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
+std::string MultiTopicDataReaderBase::topicNameFor(DDS::DataReader_ptr reader)
+{
+  DDS::TopicDescription_var td = reader->get_topicdescription();
+  CORBA::String_var topic = td->get_name();
+  return topic;
+}
+
+const MetaStruct&
+MultiTopicDataReaderBase::metaStructFor(DDS::DataReader_ptr reader)
 {
   DDS::TopicDescription_var td = reader->get_topicdescription();
   TopicDescriptionImpl* tdi = dynamic_cast<TopicDescriptionImpl*>(td.in());
   TypeSupportImpl* ts = dynamic_cast<TypeSupportImpl*>(tdi->get_type_support());
-  const MetaStruct& meta = ts->getMetaStructForType();
-  CORBA::String_var topic = td->get_name();
-  DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(reader);
+  return ts->getMetaStructForType();
+}
 
-  //TODO: temporary
-  ACE_DEBUG((LM_DEBUG, "Multitopic incoming data available: %C\n", topic.in()));
+void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
+{
+  DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(reader);
   DataReaderImpl::GenericBundle gen;
   DDS::ReturnCode_t rc = dri->read_generic(gen, DDS::NOT_READ_SAMPLE_STATE,
     DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  if (rc != DDS::RETCODE_NO_DATA && rc != DDS::RETCODE_OK) {
+    //TODO: error
+  }
 
-  if (rc == DDS::RETCODE_NO_DATA) return;
+  std::string topic = topicNameFor(reader);
+  const MetaStruct& meta = metaStructFor(reader);
+
+  //TODO: temporary logging
+  ACE_DEBUG((LM_DEBUG, "Multitopic incoming data available: %C\n",
+    topic.c_str()));
 
   for (size_t i = 0; i < gen.samples_.size(); ++i) {
     if (gen.info_[i].valid_data) {
-      incoming_sample(gen.samples_[i], gen.info_[i], topic, meta);
+      incoming_sample(gen.samples_[i], gen.info_[i], topic.c_str(), meta);
     }
+    //TODO: else { process not-alive instance states }
   }
 }
 

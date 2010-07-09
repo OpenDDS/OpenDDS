@@ -206,6 +206,7 @@ public:
   typedef std::map<<%SCOPED%>, DDS::InstanceHandle_t,
       OpenDDSGenerated::<%TYPE%>_KeyLessThan> InstanceMap;
   typedef ::OpenDDS::DCPS::Cached_Allocator_With_Overflow<<%SCOPED%>, ACE_Null_Mutex>  DataAllocator;
+  typedef <%TYPE%>DataReader Interface;
 
   //Constructor
   <%TYPE%>DataReaderImpl (void);
@@ -354,6 +355,15 @@ public:
     OpenDDS::DCPS::DataReaderImpl::GenericBundle& gen,
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states);
+
+  DDS::InstanceHandle_t lookup_instance_generic(const void* data);
+
+  DDS::ReturnCode_t read_instance_generic(void*& data,
+    DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
+    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+    DDS::InstanceStateMask instance_states);
+
+  void store_synthetic_data(const <%SCOPED%>& sample);
 #endif
 
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,

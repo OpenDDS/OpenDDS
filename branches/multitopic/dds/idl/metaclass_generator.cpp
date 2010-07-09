@@ -174,6 +174,7 @@ namespace {
       "      static_cast<T*>(lhs)->" << fieldName <<
       " = *static_cast<const " << fieldType <<
       "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n"
+      "      return;\n"
       "    }\n";
   }
 }
@@ -197,6 +198,8 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
     "template<>\n"
     "struct MetaStructImpl<" << clazz << "> : MetaStruct {\n"
     "  typedef " << clazz << " T;\n"
+    "  void* allocate() const { return new T; }\n"
+    "  void deallocate(void* stru) const { delete static_cast<T*>(stru); }\n"
     "  Value getValue(const void* stru, const char* field) const\n"
     "  {\n"
     "    const " << clazz << "& typed = *static_cast<const " << clazz

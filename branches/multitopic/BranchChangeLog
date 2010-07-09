@@ -1,3 +1,34 @@
+Fri Jul  9 17:54:01 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.h:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          Continued implementing MultiTopic.  The simplest case of JOINing
+          data from different topics is now working.
+
+        * dds/DCPS/OwnershipManager.h:
+
+          Removed comment that was copied from a different class.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Added lookup_instance_generic() and read_instance_generic().
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/idl/metaclass_generator.cpp:
+
+          Added allocate()/deallocate() to the MetaStruct for "reflective"
+          creation of new data-sample structs.
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.idl:
+
+          Added DCPS_DATA_KEYs to match the JOIN keys.  Enhanced test.
+
 Wed Jul  7 22:08:49 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:

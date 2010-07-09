@@ -1,21 +1,26 @@
 // example from the DCPS Specification v1.2, Annex A, Section 3
 
 #pragma DCPS_DATA_TYPE "LocationInfo"
+#pragma DCPS_DATA_KEY "LocationInfo flight_id"
 struct LocationInfo {
-  string flight_name;
+  unsigned long flight_id;
   long x;
   long y;
   long z;
 };
 
 #pragma DCPS_DATA_TYPE "PlanInfo"
+#pragma DCPS_DATA_KEY "PlanInfo flight_id"
 struct PlanInfo {
+  unsigned long flight_id;
   string flight_name;
   string tailno;
 };
 
 #pragma DCPS_DATA_TYPE "Resulting"
+#pragma DCPS_DATA_KEY "Resulting flight_id"
 struct Resulting {
+  unsigned long flight_id;
   string flight_name;
   long x;
   long y;
