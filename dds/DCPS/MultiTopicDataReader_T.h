@@ -23,7 +23,7 @@ namespace DCPS {
 
 template<typename Sample, typename TypedDataReader>
 class MultiTopicDataReader_T
-  : public virtual LocalObject<TypedDataReader>
+  : public virtual LocalObject<typename TypedDataReader::Interface>
   , public virtual MultiTopicDataReaderBase {
 public:
   typedef TAO::DCPS::ZeroCopyDataSeq<Sample> SampleSeq;
@@ -107,7 +107,10 @@ public:
     ACE_THROW_SPEC((CORBA::SystemException));
 
 private:
-  typename TypedDataReader::_var_type typed_reader_;
+  void assign_fields(void* incoming, Sample& resulting, const char* topic,
+    const MetaStruct& meta);
+
+  typename TypedDataReader::Interface::_var_type typed_reader_;
 };
 
 

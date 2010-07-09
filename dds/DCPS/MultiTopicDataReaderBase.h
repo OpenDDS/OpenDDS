@@ -167,12 +167,22 @@ private:
 
   DDS::DataReaderListener_var listener_;
   DataReaderEx_var resulting_reader_;
-  std::vector<DDS::DataReader_var> incoming_readers_;
 
 protected:
+
+  std::string topicNameFor(DDS::DataReader_ptr dr);
+  const MetaStruct& metaStructFor(DDS::DataReader_ptr dr);
+
+  // key: topicName for this reader
+  std::map<std::string, DDS::DataReader_var> incoming_readers_;
+
   // key: topicName of incoming datareader
   typedef MultiTopicImpl::SubjectFieldSpec SubjectFieldSpec;
   std::multimap<std::string, SubjectFieldSpec> field_map_;
+
+  // key: name of field that's a key for the 'join'
+  // mapped: set of topicNames that have this key in common
+  std::map<std::string, std::set<std::string> > join_keys_;
 };
 
 }

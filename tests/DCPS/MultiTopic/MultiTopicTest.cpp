@@ -61,12 +61,12 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
   StatusCondition_var dw_sc = dw_loc->get_statuscondition();
   waitForMatch(dw_sc);
   LocationInfoDataWriter_var locdw = LocationInfoDataWriter::_narrow(dw_loc);
-  LocationInfo sample;
-  sample.flight_name = "Flight 100";
-  sample.x = 1;
-  sample.y = 2;
-  sample.z = 3;
+  LocationInfo sample = {100, 23, 2, 3}; // filtered out (x < 23)
   ReturnCode_t ret = locdw->write(sample, HANDLE_NIL);
+  LocationInfo sample2 = {100, 1, 2, 3000}; // filtered out (height < 1000)
+  ret = locdw->write(sample2, HANDLE_NIL);
+  LocationInfo sample3 = {100, 1, 2, 3};
+  ret = locdw->write(sample3, HANDLE_NIL);
   if (ret != RETCODE_OK) return false;
 
   // Write samples (FlightPlan)
@@ -74,13 +74,14 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
   StatusCondition_var dw2_sc = dw_fp->get_statuscondition();
   waitForMatch(dw2_sc);
   PlanInfoDataWriter_var pidw = PlanInfoDataWriter::_narrow(dw_fp);
-  PlanInfo sample2;
-  sample2.flight_name = "Flight 100";
-  sample2.tailno = "N12345";
-  ret = pidw->write(sample2, HANDLE_NIL);
+  PlanInfo sample4;
+  sample4.flight_id = 100;
+  sample4.flight_name = "Flight 100";
+  sample4.tailno = "N12345";
+  ret = pidw->write(sample4, HANDLE_NIL);
   if (ret != RETCODE_OK) return false;
 
-  // Reader-side wait for data
+  // Read resulting samples
 
   WaitSet_var ws = new WaitSet;
   ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
@@ -88,10 +89,26 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
   ws->attach_condition(rc);
   Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
   ConditionSeq active;
-  ws->wait(active, infinite);
+  ret = ws->wait(active, infinite);
+  if (ret != RETCODE_OK) return false;
   ws->detach_condition(rc);
+  ResultingDataReader_var res_dr = ResultingDataReader::_narrow(dr);
+  ResultingSeq data;
+  SampleInfoSeq info;
+  ret = res_dr->take_w_condition(data, info, DDS::LENGTH_UNLIMITED, rc);
+  if (ret != RETCODE_OK) return false;
+  if (data.length() > 1 || !info[0].valid_data) return false;
+  std::cout << "Received: " << data[0].flight_id << " \""
+    << data[0].flight_name << "\" " << data[0].x << " " << data[0].y << " "
+    << data[0].height << std::endl;
+  if (data[0].flight_id != sample4.flight_id ||
+    strcmp(data[0].flight_name, sample4.flight_name) || data[0].x != sample3.x
+    || data[0].y != sample3.y || data[0].height != sample3.z) return false;
+  data.length(0);
+  info.length(0);
+  ret = res_dr->read_w_condition(data, info, DDS::LENGTH_UNLIMITED, rc);
   dr->delete_readcondition(rc);
-
+  if (ret != RETCODE_NO_DATA) return false;  
   return true;
 }
 

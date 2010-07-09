@@ -518,12 +518,19 @@ public:
   struct GenericBundle {
     GenericSeq samples_;
     DDS::SampleInfoSeq info_;
-    //TODO: ~GenericBundle();
   };
 
   virtual DDS::ReturnCode_t read_generic(GenericBundle& gen,
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states) = 0;
+
+  virtual DDS::InstanceHandle_t lookup_instance_generic(const void* data) = 0;
+
+  virtual DDS::ReturnCode_t read_instance_generic(void*& data,
+    DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
+    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+    DDS::InstanceStateMask instance_states) = 0;
+
 #endif
 
   void begin_access();
@@ -592,6 +599,9 @@ protected:
   bool filter_instance(SubscriptionInstance* instance, 
                        const PublicationId& pubid);
 
+  /// Data has arrived into the cache, unblock waiting ReadConditions
+  void notify_read_conditions();
+
   ReceivedDataAllocator        *rd_allocator_;
   DDS::DataReaderQos           qos_;
 
@@ -630,9 +640,6 @@ private:
     const RepoId& publication,
     ACE_INT16 sequence,
     DDS::Time_t when);
-
-  /// Data has arrived into the cache, unblock waiting ReadConditions
-  void notify_read_conditions();
 
   void notify_subscription_lost(const DDS::InstanceHandleSeq& handles);
 

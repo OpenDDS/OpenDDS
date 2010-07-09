@@ -116,6 +116,8 @@ public:
     const MetaStruct& rhsMeta) const = 0;
   virtual const void* getRawField(const void* stru,
     const char* fieldSpec) const = 0;
+  virtual void* allocate() const = 0;
+  virtual void deallocate(void* stru) const = 0;
 };
 
 /// Each user-defined struct type will have an instantiation of this template

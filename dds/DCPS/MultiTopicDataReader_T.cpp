@@ -20,7 +20,7 @@ template<typename Sample, typename TypedDataReader>
 void
 MultiTopicDataReader_T<Sample, TypedDataReader>::init_typed(DataReaderEx* dr)
 {
-  typed_reader_ = TypedDataReader::_narrow(dr);
+  typed_reader_ = TypedDataReader::Interface::_narrow(dr);
 }
 
 template<typename Sample, typename TypedDataReader>
@@ -32,19 +32,70 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::getResultingMeta()
 
 template<typename Sample, typename TypedDataReader>
 void
+MultiTopicDataReader_T<Sample, TypedDataReader>::assign_fields(void* incoming,
+  Sample& resulting, const char* topic, const MetaStruct& meta)
+{
+  using namespace std;
+  typedef multimap<string, SubjectFieldSpec>::iterator iter_t;
+  typedef pair<iter_t, iter_t> iterpair_t;
+  for (iterpair_t iters = field_map_.equal_range(topic);
+      iters.first != iters.second; ++iters.first) {
+    const SubjectFieldSpec& sfs = iters.first->second;
+    const string& resulting_name = sfs.resulting_name_.empty()
+      ? sfs.incoming_name_ : sfs.resulting_name_;
+    getResultingMeta().assign(&resulting, resulting_name.c_str(),
+      incoming, sfs.incoming_name_.c_str(), meta);
+  }
+}
+
+template<typename Sample, typename TypedDataReader>
+void
 MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
   const DDS::SampleInfo& info, const char* topic, const MetaStruct& meta)
 {
+  using namespace std;
+  using namespace DDS;
   Sample resulting;
-  typedef std::multimap<std::string, SubjectFieldSpec>::iterator iter_t;
-  typedef std::pair<iter_t, iter_t> iterpair_t;
-  for (iterpair_t iters = field_map_.equal_range(topic);
-       iters.first != iters.second; ++iters.first) {
-    const SubjectFieldSpec& sfs = iters.second->second;
-    const std::string& resulting_name = sfs.resulting_name_.empty()
-      ? sfs.incoming_name_ : sfs.resulting_name_;
-    getResultingMeta().assign(&resulting, resulting_name.c_str(),
-                              sample, sfs.incoming_name_.c_str(), meta);
+  assign_fields(sample, resulting, topic, meta);
+  TypedDataReader* tdr = dynamic_cast<TypedDataReader*>(typed_reader_.in());
+
+  //TODO: process the "joins" to complete the fields of <resulting>
+  //currently the simple case of joining two topics on one key is handled
+  //but all of the other cases still need to be written
+  typedef map<string, set<string> >::iterator iter2_t;
+  for (iter2_t iter = join_keys_.begin(); iter != join_keys_.end(); ++iter) {
+    const string& key = iter->first;
+    const set<string>& topics = iter->second;
+    if (topics.count(topic)) {
+      getResultingMeta().assign(&resulting, key.c_str(), sample,
+        key.c_str(), meta);
+      for (set<string>::const_iterator i = topics.begin();
+          i != topics.end(); ++i) {
+        if (*i != topic) {
+          DataReader_var other_dr = incoming_readers_[*i];
+          const MetaStruct& other_meta = metaStructFor(other_dr);
+          void* other_key_data = other_meta.allocate();
+          other_meta.assign(other_key_data, key.c_str(),
+            sample, key.c_str(), meta);
+          DataReaderImpl* other_dri =
+            dynamic_cast<DataReaderImpl*>(other_dr.in());
+          InstanceHandle_t ih =
+            other_dri->lookup_instance_generic(other_key_data);
+          other_meta.deallocate(other_key_data);
+          if (ih != DDS::HANDLE_NIL) {
+            void* other_data;
+            SampleInfo info;
+            other_dri->read_instance_generic(other_data, info, ih,
+              READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+            assign_fields(other_data, resulting, i->c_str(), other_meta);
+            other_meta.deallocate(other_data);
+            tdr->store_synthetic_data(resulting);
+          }
+        }
+      }
+    } else {
+      //TODO: handle case where key is not in this topic
+    }
   }
 }
 
