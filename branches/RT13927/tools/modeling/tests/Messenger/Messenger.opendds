@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+
+<generator:model name='Messenger'
+                 xmlns:opendds='http://www.opendds.com/modeling/schemas/OpenDDS/1.0'
+                 xmlns:generator='http://www.opendds.com/modeling/schemas/Generator/1.0'>
+
+<!--
+<opendds:application name="publisher"/>
+<opendds:application name="subscriber"/>
+  -->
+
+<opendds:domainParticipant name="part1"
+                           domain="42"
+                           mask="DEFAULT_STATUS_MASK">
+  <opendds:publisher name="pub"
+                     transport="transport1"
+                     mask="DEFAULT_STATUS_MASK">
+    <opendds:dataWriter name="writer"
+                        topic="Movie Discussion List"
+                        mask="DEFAULT_STATUS_MASK">
+    </opendds:dataWriter>
+  </opendds:publisher>
+</opendds:domainParticipant>
+
+<opendds:domainParticipant name="part2"
+                           domain="42"
+                           mask="DEFAULT_STATUS_MASK">
+  <opendds:subscriber name="sub"
+                      transport="transport2"
+                      mask="DEFAULT_STATUS_MASK">
+    <opendds:dataReader name="reader"
+                        topic="Movie Discussion List"
+                        mask="DEFAULT_STATUS_MASK">
+    </opendds:dataReader>
+  </opendds:subscriber>
+</opendds:domainParticipant>
+
+<opendds:topic name="Movie Discussion List"
+               mask="DEFAULT_STATUS_MASK">
+  <opendds:datatype name="Message"/>
+</opendds:topic>
+
+<opendds:typeLibrary>
+  <opendds:type name="Message" type="opendds:idlStruct">
+    <opendds:member name="from"         type="opendds:String"/>
+    <opendds:member name="subject"    type="opendds:String"/>
+    <opendds:member name="subject_id"     type="opendds:Long"/>
+    <opendds:member name="text" type="opendds:String"/>
+    <opendds:member name="count"        type="opendds:Long"/>
+    <opendds:key member="subject_id"/>
+  </opendds:type>
+</opendds:typeLibrary>
+
+<opendds:transportLibrary>
+  <opendds:transport name="transport1" key="1">
+    <opendds:commonConfig>
+      <opendds:transport_type           value="SimpleTcp"/>
+    </opendds:commonConfig>
+  </opendds:transport>
+  <opendds:transport name="transport2" key="2">
+    <opendds:commonConfig>
+      <opendds:transport_type           value="SimpleTcp"/>
+    </opendds:commonConfig>
+  </opendds:transport>
+</opendds:transportLibrary>
+
+</generator:model>
+

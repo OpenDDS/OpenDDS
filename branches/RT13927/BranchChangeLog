@@ -1,3 +1,19 @@
+Fri Jul  9 02:28:40 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * MPC/config/dds_model.mpb:
+
+          Base project to generate source files from XML using the
+          'xsltproc' translation tool.
+
+        * tools/modeling/codegen/xsl:
+
+          Initial candidate XSL translation stylesheets.
+
+        * tools/modeling/tests/Messenger:
+
+          Initial Messenger example clone using middleware defined using
+          model XML and application code.
+
 Thu Jul  8 18:30:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/codegen/model/Delegate.h:
