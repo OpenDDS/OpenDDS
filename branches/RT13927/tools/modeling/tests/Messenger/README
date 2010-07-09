@@ -14,6 +14,12 @@ The following files are part of this example:
   tcp.conf          - Service configuration directives to load the TCP
                       transport.
 
+NOTE: The run_test.pl and tcp.conf files are simply copies of the
+      original DevGuideExamples/DCPS/Messenger example files.  The test
+      application code in publisher.cpp and subscriber.cpp is largely
+      copied directly from the original files as well, with
+      simplifications to use the generated middleware model.
+
 ----------------------------------------
 Quick Start:
 
@@ -23,21 +29,17 @@ Quick Start:
 
 2) Generate the model source files:
 
-  shell> make xsl=1
+  shell> make
 
-3) Generate the model library build files:
+3) Regenerate the build files (to include the generated model project):
 
-  shell> (cd src; mwc.pl -type gnuace)
+  shell> mwc.pl -type gnuace
 
-4) Build the model library:
-
-  shell> make -C src
-
-5) Build the applications:
+4) Build the model library and applications:
 
   shell> make
 
-6) Execute the example:
+5) Execute the example:
 
   shell> ./run_test.pl
 
@@ -45,7 +47,5 @@ Quick Start:
 Clean up:
 
   shell> make realclean
-  shell> rm -f GNU*
-  shell> rm -f .depend*
-  shell> rm -f *.log
+  shell> rm -f GNU* .depend* *.log
 

@@ -1,3 +1,28 @@
+Fri Jul  9 16:00:13 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * MPC/config/dds_model.mpb:
+        * MPC/config/dds_xsl.mpb:
+
+          Factored out model settings to a new base project.
+          Moved XSL base project to dds_xsl, simplified some.  Moved
+          post_clean directory removal to the model base project.  Moved
+          generated file sources to 'model' subdirectory from 'src'
+          subdir.
+
+        * tools/modeling/codegen/xsl/mpc.xsl:
+
+          Made library installation directory ../ to coincide with the
+          Messenger example for generated code.  Removed the '_lib'
+          decorator from the generated MPC project name.
+
+        * tools/modeling/tests/Messenger/README:
+        * tools/modeling/tests/Messenger/example.mpc:
+        * tools/modeling/tests/Messenger/publisher.cpp:
+        * tools/modeling/tests/Messenger/run_test.pl:
+        * tools/modeling/tests/Messenger/subscriber.cpp:
+
+          Updated with new MPC and XSL changes.
+
 Fri Jul  9 02:28:40 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * MPC/config/dds_model.mpb:

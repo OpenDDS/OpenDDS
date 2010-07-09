@@ -26,8 +26,8 @@
 <xsl:template match="/">
   <xsl:text>project(</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>_lib): dcps {
-  libout = .
+  <xsl:text>): dcps {
+  libout = ..
   sharedname = </xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text>
@@ -71,7 +71,7 @@ project(</xsl:text>
   includes += $(DDS_ROOT)/../sdk/tools/modeling/codegen
   after += </xsl:text>
     <xsl:value-of select="$modelname"/>
-    <xsl:text>_lib
+    <xsl:text>
   libs  += </xsl:text>
     <xsl:value-of select="$modelname"/>
     <xsl:text> OpenDDS_Model
