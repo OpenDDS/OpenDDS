@@ -316,33 +316,34 @@ OwnershipManager::select_owner (const ::DDS::InstanceHandle_t& instance_handle,
         this->remove_owner (instance_handle, infos, true);        
         return infos.owner_.pub_id_ == pub_id;
       }
-    } // not current owner, but has larger strength so use it as owner
-    else if (ownership_strength > infos.owner_.ownership_strength_) {
-      infos.candidates_.push_back (infos.owner_);
-      infos.candidates_.push_back (WriterInfo(pub_id,ownership_strength));
-      this->remove_owner (instance_handle, infos, true);   
-      ACE_ASSERT (infos.owner_.pub_id_ == pub_id 
-                  && infos.owner_.ownership_strength_ == ownership_strength);
-      return infos.owner_.pub_id_ == pub_id;
-    }
-    else { // not current owner, but has smaller strength so is a candidate.
+    } 
+    else { // not current owner, reevaluate the owner
+      bool replace_owner = false;
+      // Add current owner to candidate list for owner reevaluation
+      // if provided pub has strength greater than currrent owner.
+      if (ownership_strength > infos.owner_.ownership_strength_) {
+        infos.candidates_.push_back (infos.owner_);
+        replace_owner = true;
+      }
+
       bool found = false;
-      // check if it already existed in candicate list.If not, 
-      // add it to the candidate list and sort the list.
+      bool sort = true;
+
+      // check if it already existed in candicate list. If not, 
+      // add it to the candidate list, otherwise update strength
+      // if strength was changed.
       WriterInfos::iterator const the_end = infos.candidates_.end(); 
 
       for (WriterInfos::iterator iter = infos.candidates_.begin(); 
         iter != the_end; ++iter) {
-        if (ownership_strength > iter->ownership_strength_) {
-          // not found as list is ordered descending by the strength.
-          break;
-        }
-        
+
         if (iter->pub_id_ == pub_id) { 
           if (iter->ownership_strength_ != ownership_strength) {
             iter->ownership_strength_ = ownership_strength;
           }
-          
+          else {
+            sort = false;
+          }
           found = true;
           break;
         }
@@ -350,7 +351,17 @@ OwnershipManager::select_owner (const ::DDS::InstanceHandle_t& instance_handle,
         
       if (!found) {
         infos.candidates_.push_back (WriterInfo(pub_id,ownership_strength)); 
+      }
+      
+      if (sort) {
         std::sort (infos.candidates_.begin(), infos.candidates_.end(), ::Util::DescendingOwnershipStrengthSort);
+      }
+      
+      if (replace_owner) {
+        // Owner was already moved to candidate list and the list was sorted
+        // already so pick owner from sorted list and replace current 
+        // owner.
+        this->remove_owner (instance_handle, infos, false);
       }
       
       return false;
