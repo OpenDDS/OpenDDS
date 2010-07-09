@@ -1,0 +1,77 @@
+// -*- MPC -*-
+// $Id$
+
+project {
+
+  requires += xsl
+
+  // Compile .opendds files to .idl, .h, .cpp, and .mpc files.
+  // Output files will be generated into a "src" subdirectory of the
+  // project directory, which will be removed during a "clean".
+
+  // Convert *.opendds XML files to IDL files.
+  Define_Custom(opendds2idl) {
+    automatic            = 1
+    inputext             = .opendds
+    command              = xsltproc $(DDS_ROOT)/tools/modeling/codegen/xsl/idl.xsl
+    output_option        = <%gt%>
+    generic_outputext    = .idl
+    generic_pre_dirname  = src/
+    keyword xslidlflags  = commandflags
+  }
+
+  // Convert *.opendds XML files to *_export.h files.
+  // @TODO This needs to be fixed - the command appears to always put
+  //       the input file on the command line, but with the script, we
+  //       really only need the basename - without extension - for the
+  //       command argument.  Currently we just null the command with
+  //       echo and form the command we need as a 'postcommand'.
+  Define_Custom(opendds2export) {
+    automatic             = 1
+    inputext              = .opendds
+    command               = echo
+    postcommand           = generate_export_file.pl <%input_noext%> <%gt%> <%output%>
+    generic_pre_extension = _export
+    generic_outputext     = .h
+    generic_pre_dirname   = src/
+    keyword xslexpflags   = commandflags
+  }
+
+  // Convert *.opendds XML files to C++ header files.
+  Define_Custom(opendds2h) {
+    automatic            = 1
+    inputext             = .opendds
+    command              = xsltproc $(DDS_ROOT)/tools/modeling/codegen/xsl/h.xsl
+    output_option        = <%gt%>
+    generic_outputext    = .h
+    generic_pre_dirname  = src/
+    keyword xslhflags    = commandflags
+  }
+
+  // Convert *.opendds XML files to C++ implementation files.
+  Define_Custom(opendds2cpp) {
+    automatic            = 1
+    inputext             = .opendds
+    command              = xsltproc $(DDS_ROOT)/tools/modeling/codegen/xsl/cpp.xsl
+    output_option        = <%gt%>
+    generic_outputext    = .cpp
+    generic_pre_dirname  = src/
+    keyword xslcppflags  = commandflags
+  }
+
+  // Convert *.opendds XML files to MPC files.
+  Define_Custom(opendds2mpc) {
+    automatic            = 1
+    inputext             = .opendds
+    command              = xsltproc $(DDS_ROOT)/tools/modeling/codegen/xsl/mpc.xsl
+    output_option        = <%gt%>
+    generic_outputext    = .mpc
+    generic_pre_dirname  = src/
+    keyword xslmpcflags  = commandflags
+  }
+
+  // Make the directory but ensure there are no error messages displayed and
+  // a "0" is returned on all platforms.
+  prebuild  += <%mkdir%> src 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+  postclean += <%rmdir%> src
+}
