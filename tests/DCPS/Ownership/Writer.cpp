@@ -136,6 +136,10 @@ Writer::svc()
         CORBA::Long old = qos.ownership_strength.value;
         if (reset_ownership_strength != -1 && old != reset_ownership_strength) {
           qos.ownership_strength.value = reset_ownership_strength;
+          // Add a delay so the builtin topic data update arrives after samples
+          // with previous strength is received by datareader. This helps simplify
+          // result verification on subscriber side.
+          ACE_OS::sleep (1);
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)%s : reset ownership strength from %d to %d\n"), 
             ownership_dw_id_.c_str(), old, reset_ownership_strength));
           error = this->writer_->set_qos (qos);

@@ -1,8 +1,24 @@
+Fri Jul  9 20:14:17 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/OwnershipManager.cpp:
+
+          Fixed a bug that adds same writer to ownership candidate
+          list multiple times when its strength is changed to be greater
+          than current owner. This was observed from subscriber log in
+          ownership update_strength test.
+          
+        * tests/DCPS/Ownership/Writer.cpp:
+          
+          Add one second delay before reset the writer strength to be higher,
+          so the builtin topic data update arrives only after samples with  
+          previous strength on subscriber side. This helps simplify result 
+          verification on subscriber side.  
+                  
 Tue Jul  6 18:20:11 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Ownership/Writer.cpp:
 
-          Fixed crash on linux due to ACE_CString passed as string format 
+          Fixed crash on linux due to ACE_CString passed as string format
           logging parameter.
 
 Tue Jul  6 14:43:41 UTC 2010  Adam Mitz  <mitza@ociweb.com>
@@ -16,7 +32,7 @@ Tue Jul  6 07:25:37 UTC 2010  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
 
-          Added a map to WriterInfo to keep track whether ownership needed
+          Added a map to WriterInfo to keep track whether ownership need
           be evaluated for each instance. Previously, it used single flag
           for all instances sent by the writer. This is the bug that cause
           only samples belong the first instance were received when higher
