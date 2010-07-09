@@ -1,3 +1,20 @@
+Fri Jul  9 18:03:44 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/tests/Messenger/Messenger.mpc:
+        * tools/modeling/tests/Messenger/MessengerModel.opendds:
+        * tools/modeling/tests/Messenger/README:
+        * tools/modeling/tests/Messenger/publisher.cpp:
+        * tools/modeling/tests/Messenger/subscriber.cpp:
+
+          Migrated the model to MessengerModel to be explicit about which
+          messenger example this is.  Changed the MPC project names as
+          well to avoid conflicts with the original Messenger example.
+
+        * tools/modeling/tests/Messenger/Messenger.opendds:
+        * tools/modeling/tests/Messenger/example.mpc:
+
+          Removed these files.
+
 Fri Jul  9 16:00:13 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * MPC/config/dds_model.mpb:

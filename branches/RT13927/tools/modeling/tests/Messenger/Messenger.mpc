@@ -1,0 +1,23 @@
+project(*model) : dds_xsl {
+}
+
+project(*xmlPublisher) : dcpsexe, dds_model {
+  exename   = publisher
+  after    += *model MessengerModel
+  libs     += MessengerModel
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(*xmlSubscriber) : dcpsexe, dds_model {
+  exename   = subscriber
+  after    += *model MessengerModel
+  libs     += MessengerModel
+
+  Source_Files {
+    subscriber.cpp
+  }
+}
+
