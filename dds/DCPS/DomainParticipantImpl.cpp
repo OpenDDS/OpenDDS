@@ -2253,12 +2253,18 @@ void
 DomainParticipantImpl::update_ownership_strength (const PublicationId& pub_id,
                                                   const CORBA::Long& ownership_strength)
 {
+  if (this->get_deleted ())
+    return;
+    
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             tao_mon,
             this->subscribers_protector_);
-
-  for (SubscriberSet::iterator it(subscribers_.begin());
-      it != subscribers_.end(); ++it) {
+ 
+  if (this->get_deleted ())
+    return;
+            
+  for (SubscriberSet::iterator it(this->subscribers_.begin());
+      it != this->subscribers_.end(); ++it) {
     it->svt_->update_ownership_strength(pub_id, ownership_strength);
   }
 }

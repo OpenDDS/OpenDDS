@@ -25,7 +25,7 @@ project(*Publisher): dcpsexe_with_tcp {
 
 project(*Subscriber): dcpsexe_with_tcp {
   exename = FooTest3_subscriber
-  after       += DcpsFooType3
+  after       += DcpsFooType4 *Publisher
   libs     += DcpsFooType3
   libpaths +=  ../FooType3
 
