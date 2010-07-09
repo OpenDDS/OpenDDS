@@ -11,8 +11,6 @@ use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 
-PerlDDS::add_lib_path('src');
-
 $status = 0;
 $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 

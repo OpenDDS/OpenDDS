@@ -1,25 +1,20 @@
-project(*model) : dds_model {
-  custom_only = 1
+project(*model) : dds_xsl {
 }
 
-project(*publisher) : dcpsexe {
+project(*publisher) : dcpsexe, dds_model {
   exename   = publisher
-  includes += $(DDS_ROOT)/../sdk/tools/modeling/codegen
-  libpaths += src
-  after    += example_model
-  libs     += OpenDDS_Model Messenger
+  after    += *model Messenger
+  libs     += Messenger
 
   Source_Files {
     publisher.cpp
   }
 }
 
-project(*subscriber) : dcpsexe {
+project(*subscriber) : dcpsexe, dds_model {
   exename   = subscriber
-  includes += $(DDS_ROOT)/../sdk/tools/modeling/codegen
-  libpaths += src
-  after    += example_model
-  libs     += OpenDDS_Model Messenger
+  after    += *model Messenger
+  libs     += Messenger
 
   Source_Files {
     subscriber.cpp
