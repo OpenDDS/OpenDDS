@@ -6,13 +6,13 @@ demonstrates the creation and execution of an OpenDDS application using
 model defined middleware and application code.
 
 The following files are part of this example:
-  example.mpc       - MPC file to create the build files for the example.
-  Messenger.opendds - XML file with the middleware model definition.
-  publisher.cpp     - Publisher application code.
-  subscriber.cpp    - Subscriber application code.
-  run_test.pl       - Perl script to execute the example.
-  tcp.conf          - Service configuration directives to load the TCP
-                      transport.
+  example.mpc            - MPC file to create the build files for the example.
+  MessengerModel.opendds - XML file with the middleware model definition.
+  publisher.cpp          - Publisher application code.
+  subscriber.cpp         - Subscriber application code.
+  run_test.pl            - Perl script to execute the example.
+  tcp.conf               - Service configuration directives to load the TCP
+                           transport.
 
 NOTE: The run_test.pl and tcp.conf files are simply copies of the
       original DevGuideExamples/DCPS/Messenger example files.  The test
@@ -22,6 +22,11 @@ NOTE: The run_test.pl and tcp.conf files are simply copies of the
 
 ----------------------------------------
 Quick Start:
+  shell> mwc.pl -type gnuace && make && mwc.pl -type gnuace && make && ./run_test.pl
+  shell> make realclean && rm -f GNU* .depend* *.log
+
+----------------------------------------
+Build and Test:
 
 1) Generate the build files:
 
