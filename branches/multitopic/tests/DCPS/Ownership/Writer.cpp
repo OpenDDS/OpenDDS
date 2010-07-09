@@ -22,6 +22,7 @@ const int num_messages = 10;
 extern int reset_ownership_strength;
 extern int dds_delay;
 extern int reset_delay;
+extern int ownership_strength;
 
 Writer::Writer(DDS::DataWriter_ptr writer, const char* ownership_dw_id)
   : writer_(DDS::DataWriter::_duplicate(writer)),
@@ -98,16 +99,18 @@ Writer::svc()
     }
 
     Messenger::Message message;
-    message.subject_id = 99;
 
     DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-    message.from       = ownership_dw_id_.c_str();
+    message.from       = CORBA::string_dup(ownership_dw_id_.c_str());
     message.subject    = CORBA::string_dup("Review");
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
-    message.count      = 0;
+    message.count      = 1;
+    message.strength   = ownership_strength;
 
     for (int i = 0; i < num_messages; i++) {
+      message.subject_id = message.count % 2;  // 0 or 1
+      
       DDS::ReturnCode_t error = message_dw->write(message, handle);
 
       if (error != DDS::RETCODE_OK) {
@@ -133,21 +136,24 @@ Writer::svc()
         CORBA::Long old = qos.ownership_strength.value;
         if (reset_ownership_strength != -1 && old != reset_ownership_strength) {
           qos.ownership_strength.value = reset_ownership_strength;
-          std::cout << ownership_dw_id_ << ": reset ownership strength from " 
-                    << old << " to " << reset_ownership_strength << std::endl;
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)%s : reset ownership strength from %d to %d\n"), 
+            ownership_dw_id_.c_str(), old, reset_ownership_strength));
           error = this->writer_->set_qos (qos);
           if (error != ::DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: set_qos returned %d!\n"), error));
-          }  
+          } 
+          else {
+            message.strength   =  reset_ownership_strength;
+          }
         }
         
       }
 
       if (i == num_messages/2 && reset_delay != 0) {
-        //std::cout << ownership_dw_id << ": reset delay from " << dds_delay << " to " 
-        //          << reset_delay << std::endl;
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)%s : reset delay from %d to %d\n"), 
+          ownership_dw_id_.c_str(), dds_delay, reset_delay));
         ACE_OS::sleep (reset_delay);
       }
       else if (dds_delay > 0) {

@@ -73,9 +73,7 @@ public:
     return num_reads_;
   }
 
-  bool verify_result () const {
-    return verify_result_;
-  }
+  bool verify_result ();
   
 private:
 
@@ -87,6 +85,7 @@ private:
   
   bool  verify_result_;
   
+  long current_strength_[2]; 
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

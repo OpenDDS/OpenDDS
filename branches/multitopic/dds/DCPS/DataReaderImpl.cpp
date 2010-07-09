@@ -308,7 +308,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
       for (CORBA::ULong i = 0; i < wr_len; i++) {
         PublicationId writer_id = writers[i].writerId;
         infos[i] = new WriterInfo(this, writer_id, writers[i].writerQos);
-        this->writers_.insert(
+        std::pair<WriterMapType::iterator, bool> bpair = this->writers_.insert(
           // This insertion is idempotent.
           WriterMapType::value_type(
             writer_id,
@@ -324,8 +324,27 @@ ACE_THROW_SPEC((CORBA::SystemException))
           RepoIdConverter converter(writer_id);
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) DataReaderImpl::add_associations: "
-                     "inserted writer %C.\n",
-                     std::string(converter).c_str()));
+                     "inserted writer %C.return %d \n",
+                     std::string(converter).c_str(), bpair.second));
+        
+          WriterMapType::iterator iter = writers_.find(writer_id);
+          WriterInfo* writer = 0;
+          if (iter != writers_.end()) {
+          if (DCPS_debug_level > 4) {
+            // This may not be an error since it could happen that the sample
+            // is delivered to the datareader after the write is dis-associated
+            // with this datareader.
+            RepoIdConverter reader_converter(subscription_id_);
+            RepoIdConverter writer_converter(writer_id);
+            ACE_DEBUG((LM_DEBUG,
+                      ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
+                      ACE_TEXT("reader %C is associated with writer %C.\n"),
+                      std::string(reader_converter).c_str(),
+                      std::string(writer_converter).c_str()));
+          }
+          }
+
+
         }
       }
     }
@@ -1887,8 +1906,7 @@ OpenDDS::DCPS::WriterInfo::WriterInfo()
     state_(NOT_SET),
     reader_(0),
     writer_id_(GUID_UNKNOWN),
-    handle_(DDS::HANDLE_NIL),
-    owner_evaluated_(false)
+    handle_(DDS::HANDLE_NIL)
 {
   this->reset_coherent_info();
 }
@@ -1901,8 +1919,7 @@ OpenDDS::DCPS::WriterInfo::WriterInfo(OpenDDS::DCPS::DataReaderImpl* reader,
     state_(NOT_SET),
     reader_(reader),
     writer_id_(writer_id),
-    writer_qos_(writer_qos),
-    owner_evaluated_ (false)
+    writer_qos_(writer_qos)
 {
   this->reset_coherent_info();
 
@@ -1915,6 +1932,30 @@ OpenDDS::DCPS::WriterInfo::WriterInfo(OpenDDS::DCPS::DataReaderImpl* reader,
                std::string(writer_converter).c_str(),
                std::string(reader_converter).c_str()));
   }
+}
+
+void
+OpenDDS::DCPS::WriterInfo::clear_owner_evaluated ()
+{
+  this->owner_evaluated_.clear ();
+}
+
+void
+OpenDDS::DCPS::WriterInfo::set_owner_evaluated (SubscriptionInstance* instance, bool flag)
+{
+  this->owner_evaluated_ [instance] = flag;
+}
+
+bool 
+OpenDDS::DCPS::WriterInfo::is_owner_evaluated (SubscriptionInstance* instance)
+{
+  OwnerEvaluateFlag::iterator iter = owner_evaluated_.find (instance);
+  if (iter == owner_evaluated_.end ()) {
+    this->owner_evaluated_.insert (OwnerEvaluateFlag::value_type (instance, false));
+    return false;
+  }
+  else
+    return iter->second;
 }
 
 ACE_Time_Value
@@ -2148,7 +2189,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
 
   if (this->is_exclusive_ownership_) {
     this->owner_manager_->remove_writer (info.writer_id_);
-    info.owner_evaluated_ = false;
+    info.clear_owner_evaluated ();
   }
   
   bool liveliness_changed = false;
@@ -2265,7 +2306,7 @@ DataReaderImpl::writer_became_dead(WriterInfo & info,
 
   if (this->is_exclusive_ownership_) {
     this->owner_manager_->remove_writer (info.writer_id_); 
-    info.owner_evaluated_ = false;   
+    info.clear_owner_evaluated ();   
   }
   
   // caller should already have the samples_lock_ !!!
@@ -2745,16 +2786,18 @@ DataReaderImpl::filter_instance(SubscriptionInstance* instance,
       return true;
     }
     
+ 
     // Evaulate the owner of the instance if not selected and filter
     // current message if it's not from owner writer.
     if ( instance->instance_state_.get_owner () == GUID_UNKNOWN 
-      || ! iter->second->owner_evaluated_) {
+      || ! iter->second->is_owner_evaluated (instance)) {
       bool is_owner = this->owner_manager_->select_owner (
                         instance->instance_handle_, 
                         iter->second->writer_id_, 
                         iter->second->writer_qos_.ownership_strength.value,
                         &instance->instance_state_);
-      iter->second->owner_evaluated_ = true;
+      iter->second->set_owner_evaluated (instance, true);
+
       if (! is_owner) {
         return true;
       }
@@ -2943,7 +2986,7 @@ DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
               iter->second->writer_qos_.ownership_strength, ownership_strength));
             }
             iter->second->writer_qos_.ownership_strength.value = ownership_strength;
-            iter->second->owner_evaluated_ = false;
+            iter->second->clear_owner_evaluated ();
           }
         break;
       }       

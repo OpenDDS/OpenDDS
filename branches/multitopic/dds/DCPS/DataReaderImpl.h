@@ -122,6 +122,10 @@ public:
   void reset_coherent_info ();
   void set_group_info (const CoherentChangeControl& info);
 
+  void clear_owner_evaluated ();
+  void set_owner_evaluated (SubscriptionInstance* instance, bool flag);
+  bool is_owner_evaluated (SubscriptionInstance* instance);
+
 private:
                                              
   /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
@@ -154,7 +158,8 @@ private:
   ACE_Atomic_Op<ACE_Thread_Mutex, ACE_UINT32> coherent_samples_;
 
   /// Is this writer evaluated for owner ?
-  bool owner_evaluated_;
+  typedef std::map <SubscriptionInstance*, bool> OwnerEvaluateFlag;
+  OwnerEvaluateFlag owner_evaluated_;
   
   /// Data to support GROUP access scope.
   bool group_coherent_;
