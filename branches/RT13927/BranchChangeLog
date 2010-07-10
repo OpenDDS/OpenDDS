@@ -1,3 +1,10 @@
+Sat Jul 10 15:00:59 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/DataLibrary:
+        * tools/modeling/testdata/DataLibrary/DataLibraryTest.opendds:
+
+          Added test data for DataLibrary model.
+
 Sat Jul 10 14:57:24 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.model/model/Types.ecore:
