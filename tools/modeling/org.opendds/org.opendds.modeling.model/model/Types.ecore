@@ -53,7 +53,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="labels" upperBound="-1"
         eType="#//Sequence" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="FloatingPoint" eSuperTypes="#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="FloatingPoint" abstract="true" eSuperTypes="#//Simple"/>
   <eClassifiers xsi:type="ecore:EClass" name="Double" eSuperTypes="#//FloatingPoint"/>
   <eClassifiers xsi:type="ecore:EClass" name="Float" eSuperTypes="#//FloatingPoint"/>
   <eClassifiers xsi:type="ecore:EClass" name="Int" abstract="true" eSuperTypes="#//Simple"/>
