@@ -1,3 +1,9 @@
+Sat Jul 10 14:57:24 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/Types.ecore:
+
+          Changed Key's member reference to have containment of false.
+
 Sat Jul 10 11:57:40 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/images/Types.png:

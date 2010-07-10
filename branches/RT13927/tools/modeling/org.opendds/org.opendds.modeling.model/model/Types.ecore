@@ -69,6 +69,6 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Key">
     <eStructuralFeatures xsi:type="ecore:EReference" name="member" lowerBound="1"
-        eType="#//KeyField" containment="true"/>
+        eType="#//KeyField"/>
   </eClassifiers>
 </ecore:EPackage>
