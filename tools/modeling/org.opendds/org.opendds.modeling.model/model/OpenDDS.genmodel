@@ -215,6 +215,9 @@
     <genClasses ecoreClass="Types.ecore#//Typedef">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Typedef/type"/>
     </genClasses>
+    <genClasses ecoreClass="Types.ecore#//TypedefRef">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//TypedefRef/reference"/>
+    </genClasses>
     <genClasses ecoreClass="Types.ecore#//Sequence">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Sequence/subtype"/>
     </genClasses>

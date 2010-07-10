@@ -1,3 +1,18 @@
+Sat Jul 10 17:04:42 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/Types.ecore:
+
+          Introduced TypedefRef class to allow a typedef defined outside
+          a TopicStruct to be as a type within the TopicStruct (and
+          similarly for Sequence an Array).
+
+        * tools/modeling/testdata/DataLibrary/DataLibraryTest.opendds:
+
+          Updated how the typedef inside the TopicStruct was set up by
+          using a TypedefRef.
+
 Sat Jul 10 15:00:59 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/testdata/DataLibrary:
