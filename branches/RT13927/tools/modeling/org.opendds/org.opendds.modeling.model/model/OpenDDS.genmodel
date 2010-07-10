@@ -231,7 +231,10 @@
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Union/cases"/>
     </genClasses>
     <genClasses ecoreClass="Types.ecore#//TopicStruct">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//TopicStruct/members"/>
+      <genFeatures property="None" notify="false" children="true" createChild="true"
+          ecoreFeature="ecore:EReference Types.ecore#//TopicStruct/members"/>
+      <genFeatures property="None" notify="false" children="true" createChild="true"
+          ecoreFeature="ecore:EReference Types.ecore#//TopicStruct/keys"/>
     </genClasses>
     <genClasses ecoreClass="Types.ecore#//Boolean"/>
     <genClasses ecoreClass="Types.ecore#//Char"/>
@@ -253,6 +256,10 @@
     <genClasses ecoreClass="Types.ecore#//ULong"/>
     <genClasses ecoreClass="Types.ecore#//ULongLong"/>
     <genClasses ecoreClass="Types.ecore#//Octet"/>
+    <genClasses image="false" ecoreClass="Types.ecore#//KeyField"/>
+    <genClasses ecoreClass="Types.ecore#//Key">
+      <genFeatures notify="false" createChild="false" propertyCategory="" ecoreFeature="ecore:EReference Types.ecore#//Key/member"/>
+    </genClasses>
   </genPackages>
   <genPackages prefix="DCPS" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
       generateExampleClass="false" generateModelWizard="false" ecorePackage="DCPS.ecore#/">

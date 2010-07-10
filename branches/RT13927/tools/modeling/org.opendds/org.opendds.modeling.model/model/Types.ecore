@@ -3,8 +3,8 @@
     xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="types"
     nsURI="http://www.opendds.org/modeling/schemas/Types/1.0" nsPrefix="types">
-  <eClassifiers xsi:type="ecore:EClass" name="TopicField" eSuperTypes="Core.ecore#//Entity"/>
-  <eClassifiers xsi:type="ecore:EClass" name="Simple" abstract="true" eSuperTypes="#//TopicField"/>
+  <eClassifiers xsi:type="ecore:EClass" name="TopicField" abstract="true" eSuperTypes="Core.ecore#//Entity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Simple" abstract="true" eSuperTypes="#//TopicField #//KeyField"/>
   <eClassifiers xsi:type="ecore:EClass" name="Collection" abstract="true" eSuperTypes="#//TopicField">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="length" lowerBound="1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"/>
@@ -22,7 +22,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="subtype" lowerBound="1"
         eType="#//TopicField"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="String" eSuperTypes="#//Collection"/>
+  <eClassifiers xsi:type="ecore:EClass" name="String" eSuperTypes="#//Collection #//KeyField"/>
   <eClassifiers xsi:type="ecore:EClass" name="Case">
     <eStructuralFeatures xsi:type="ecore:EReference" name="labels" lowerBound="1"
         eType="#//Sequence" containment="true"/>
@@ -38,6 +38,8 @@
   <eClassifiers xsi:type="ecore:EClass" name="TopicStruct" eSuperTypes="#//ConstructedTopicType">
     <eStructuralFeatures xsi:type="ecore:EReference" name="members" lowerBound="1"
         upperBound="-1" eType="#//TopicField" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="keys" upperBound="-1" eType="#//Key"
+        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Boolean" eSuperTypes="#//Simple"/>
   <eClassifiers xsi:type="ecore:EClass" name="Char" eSuperTypes="#//Simple"/>
@@ -60,4 +62,13 @@
   <eClassifiers xsi:type="ecore:EClass" name="ULong" eSuperTypes="#//UnsignedInt"/>
   <eClassifiers xsi:type="ecore:EClass" name="ULongLong" eSuperTypes="#//UnsignedInt"/>
   <eClassifiers xsi:type="ecore:EClass" name="Octet" eSuperTypes="#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="KeyField" abstract="true">
+    <eAnnotations source="GenModel">
+      <details key="documentation" value="A base class for any topic field that can be a Key in a TopicStruct. This is an extension to UML Profile for Data Distribution Specification (ptc/2008-07-02)."/>
+    </eAnnotations>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Key">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="member" lowerBound="1"
+        eType="#//KeyField" containment="true"/>
+  </eClassifiers>
 </ecore:EPackage>
