@@ -14,6 +14,12 @@
   <eClassifiers xsi:type="ecore:EClass" name="Typedef" eSuperTypes="#//TopicField">
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" lowerBound="1" eType="#//TopicField"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TypedefRef" eSuperTypes="#//TopicField">
+    <eAnnotations source="GenModel">
+      <details key="documentation" value="This is an extension to the ptc/2008-07-02 DDS Profile to allow a typedef defined outside of a TopicStruct, Sequence, or Array topic field to be used as the type within the field."/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reference" eType="#//Typedef"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Sequence" eSuperTypes="#//Collection">
     <eStructuralFeatures xsi:type="ecore:EReference" name="subtype" lowerBound="1"
         eType="#//TopicField"/>
