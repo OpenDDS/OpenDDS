@@ -1,3 +1,11 @@
+Sat Jul 10 17:28:22 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/Core.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/Types.ecore:
+
+          Made non-instantiatable classes abstract.
+
 Sat Jul 10 17:04:42 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.model.edit/plugin.properties:
