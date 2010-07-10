@@ -1,3 +1,15 @@
+Sat Jul 10 11:57:40 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/images/Types.png:
+        * tools/modeling/org.opendds/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/Types.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/Types.ecore_diagram:
+
+          Added support for Keys to TopicStruct and made
+          non-instantiatable classes abstract.
+
 Fri Jul  9 18:03:44 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/tests/Messenger/Messenger.mpc:
