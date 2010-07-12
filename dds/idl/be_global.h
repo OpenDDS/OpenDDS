@@ -56,18 +56,6 @@ public:
   void parse_args(long& i, char** av);
   // Parse args that affect the backend.
 
-  void prep_be_arg(char* s);
-  // Special BE arg call factored out of DRV_args.
-
-  void arg_post_proc();
-  // Checks made after parsing args.
-
-  void usage() const;
-  // Display usage of BE-specific options.
-
-  AST_Generator* generator_init();
-  // Create an AST node generator.
-
   void open_streams(const char* filename);
 
   std::ostringstream header_, impl_, idl_;

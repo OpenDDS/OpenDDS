@@ -1,3 +1,18 @@
+Mon Jul 12 08:44:58 UTC 2010  Jeff Parsons <j.parsons@vanderbilt.edu>
+
+        * dds/idl/be_util.cpp:
+        * dds/idl/be_util.h:
+
+          New files, containing a utility
+          class with static methods.
+
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_global.h:
+
+          Moved methods not related to 
+          global data storage to new
+          utility class.
+
 Fri Jul  9 20:14:17 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/OwnershipManager.cpp:
