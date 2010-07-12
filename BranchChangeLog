@@ -1,3 +1,12 @@
+Mon Jul 12 16:40:26 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+          Set Generate Schema property to false as this is deprecated and
+          the preferred way is to select Export Model... from the
+          Generator pull-down menu as this generates a higher quality
+          schema.
+
 Mon Jul 12 15:17:42 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
