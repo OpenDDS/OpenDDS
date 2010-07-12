@@ -536,6 +536,8 @@ public:
   void reset_coherent_info (const PublicationId& writer_id, 
                             const RepoId& publisher_id);
 
+  // Called upon subscriber qos change to update the local cache.
+  void set_subscriber_qos(const DDS::SubscriberQos & qos);
 
 protected:
 
@@ -610,11 +612,11 @@ protected:
   
   /// Is accessing to Group coherent changes ? 
   bool coherent_;
-  /// Is Group ordered qos ?
-  bool group_coherent_ordered_;
+
   /// Ordered group samples.
   GroupRakeData group_coherent_ordered_data_;
-
+  
+  DDS::SubscriberQos subqos_;
 
 private:
   /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.

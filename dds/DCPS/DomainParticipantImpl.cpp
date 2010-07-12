@@ -2180,11 +2180,13 @@ DomainParticipantImpl::ownership_manager ()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
-  DDS::DataReaderListener_var listener = this->bit_pub_dr_->get_listener ();
-  if (CORBA::is_nil (listener.in())) {
-    DDS::DataReaderListener_var bit_pub_listener(new BitPubListenerImpl(this));
-    this->bit_pub_dr_->set_listener (bit_pub_listener.in (), ::DDS::DATA_AVAILABLE_STATUS);
-  } 
+  if (! CORBA::is_nil (this->bit_pub_dr_.in())) {
+    DDS::DataReaderListener_var listener = this->bit_pub_dr_->get_listener ();
+    if (CORBA::is_nil (listener.in())) {
+      DDS::DataReaderListener_var bit_pub_listener(new BitPubListenerImpl(this));
+      this->bit_pub_dr_->set_listener (bit_pub_listener.in (), ::DDS::DATA_AVAILABLE_STATUS);
+    } 
+  }
    
 #endif 
   return &this->owner_man_;
