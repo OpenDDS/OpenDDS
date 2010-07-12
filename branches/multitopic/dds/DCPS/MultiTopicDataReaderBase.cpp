@@ -105,7 +105,7 @@ std::string MultiTopicDataReaderBase::topicNameFor(DDS::DataReader_ptr reader)
 {
   DDS::TopicDescription_var td = reader->get_topicdescription();
   CORBA::String_var topic = td->get_name();
-  return topic;
+  return topic.in();
 }
 
 const MetaStruct&

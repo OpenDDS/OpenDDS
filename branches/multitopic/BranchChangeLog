@@ -1,3 +1,11 @@
+Mon Jul 12 16:56:37 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+
+          Fixed some compilation errors from the latest multitopic work.
+
 Fri Jul  9 18:12:09 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r3408 through r3438.
