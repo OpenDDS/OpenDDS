@@ -56,6 +56,24 @@ public:
   void parse_args(long& i, char** av);
   // Parse args that affect the backend.
 
+
+#if ACE_MAJOR_VERSION < 6 && ACE_MINOR_VERSION < 8
+
+  void prep_be_arg(char* s);
+  // Special BE arg call factored out of DRV_args.
+
+  void arg_post_proc();
+  // Checks made after parsing args.
+
+  void usage() const;
+  // Display usage of BE-specific options.
+
+  AST_Generator* generator_init();
+  // Create an AST node generator.
+
+#endif
+
+
   void open_streams(const char* filename);
 
   std::ostringstream header_, impl_, idl_;

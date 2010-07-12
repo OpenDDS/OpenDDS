@@ -8,6 +8,7 @@
  */
 
 #include "be_global.h"
+#include "be_util.h"
 #include "ast_generator.h"
 #include "global_extern.h"
 #include "idl_defines.h"
@@ -218,6 +219,35 @@ BE_GlobalData::parse_args(long& i, char** av)
                                   | IDL_CF_ONLY_USAGE);
   }
 }
+
+
+#if ACE_MAJOR_VERSION < 6 && ACE_MINOR_VERSION < 8
+
+void
+BE_GlobalData::prep_be_arg(char* arg)
+{
+  be_util::prep_be_arg(arg);
+}
+
+// Does nothing in this backend.
+void
+BE_GlobalData::arg_post_proc()
+{
+}
+
+void
+BE_GlobalData::usage() const
+{
+  be_util::usage();
+}
+
+AST_Generator* 
+BE_GlobalData::generator_init()
+{
+  return be_util::generator_init();
+}
+
+#endif
 
 bool
 BE_GlobalData::writeFile(const char* fileName, const string& content)
