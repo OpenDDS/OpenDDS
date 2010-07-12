@@ -103,4 +103,16 @@ DDS::ReturnCode_t MyDataReaderImpl::read_generic(
 {
   return DDS::RETCODE_UNSUPPORTED;
 }
+
+DDS::InstanceHandle_t MyDataReaderImpl::lookup_instance_generic(const void*)
+{
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t MyDataReaderImpl::read_instance_generic(void*&,
+  DDS::SampleInfo&, DDS::InstanceHandle_t, DDS::SampleStateMask,
+  DDS::ViewStateMask, DDS::InstanceStateMask)
+{
+  return DDS::RETCODE_UNSUPPORTED;
+}
 #endif

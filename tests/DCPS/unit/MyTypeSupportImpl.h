@@ -107,6 +107,13 @@ public:
   virtual DDS::ReturnCode_t read_generic(
     OpenDDS::DCPS::DataReaderImpl::GenericBundle&, DDS::SampleStateMask,
     DDS::ViewStateMask, DDS::InstanceStateMask);
+
+  virtual DDS::InstanceHandle_t lookup_instance_generic(const void* data);
+
+  virtual DDS::ReturnCode_t read_instance_generic(void*& data,
+    DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
+    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+    DDS::InstanceStateMask instance_states);
 #endif
 };
 
