@@ -50,9 +50,9 @@ typedef RepoId PublicationId;
 /// This helps distinguish new and old sequence numbers. (?)
 struct OpenDDS_Dcps_Export SequenceNumber {
   /// Construct with a value, default to negative starting point.
-  SequenceNumber(int value = SHRT_MIN) {
-    if (value > SHRT_MAX) this->value_ = ACE_INT16(value % (SHRT_MAX + 1));
-    else                  this->value_ = ACE_INT16(value);
+  SequenceNumber(int value = MIN_VALUE) {
+    if (value > MAX_VALUE) this->value_ = ACE_INT16(value % (MAX_VALUE+1));
+    else                   this->value_ = ACE_INT16(value);
   }
 
   // N.B: Default copy constructor is sufficient.
@@ -89,11 +89,12 @@ struct OpenDDS_Dcps_Export SequenceNumber {
   ///      MAX-2 to 2.  But that 2 is less than MAX/2 since the
   ///      shortest distance is from 2 to MAX/2.
   bool operator<(const SequenceNumber& rvalue) const {
-    ACE_INT16 distance = rvalue.value_ - value_;
+    // double the distance and SHRT_MAX/2, to avoid rounding error 
+    const ACE_INT32 distance = (rvalue.value_ - value_)*2;
     return (distance == 0)? false:                // Equal is not less than.
        (value_ < 0 || rvalue.value_ < 0) ? (value_ < rvalue.value_): // Stem of lollipop.
-       (distance <  0)? (SHRT_MAX/2 < -distance): // Closest distance dominates.
-       (distance < (SHRT_MAX/2));
+       (distance <  0)? (MAX_VALUE+1 < -distance): // Closest distance dominates.
+       (distance < MAX_VALUE+1);
   }
 
   /// Derive a full suite of logical operations.
@@ -114,13 +115,15 @@ struct OpenDDS_Dcps_Export SequenceNumber {
            && (*this != rvalue);
   }
 
-  ACE_INT16 value_ ;
+  static const ACE_INT16 MAX_VALUE = SHRT_MAX - 1;
+  static const ACE_INT16 MIN_VALUE = SHRT_MIN;
+  ACE_INT16 value_;
 
   /// Increment operation itself.
   void increment() {
     /// Lolipop sequencing (never wrap to negative).
-    if (this->value_ == 0x7fff) this->value_ = 0x0 ;
-    else                        this->value_++ ;
+    if (this->value_ == MAX_VALUE) this->value_ = 0x0;
+    else                           ++this->value_;
   }
 };
 
