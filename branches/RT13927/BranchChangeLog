@@ -1,3 +1,9 @@
+Mon Jul 12 21:02:29 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/codegen/xsl/idl.xsl:
+
+          Added support for Array and Union types.
+
 Mon Jul 12 16:43:32 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/plugins.html:

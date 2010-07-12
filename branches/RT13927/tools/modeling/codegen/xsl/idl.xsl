@@ -8,8 +8,6 @@
     **
     ** Generate IDL code.
     **
-    ** @TODO Determine how unions are to be specified and represented.
-    **
     -->
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
