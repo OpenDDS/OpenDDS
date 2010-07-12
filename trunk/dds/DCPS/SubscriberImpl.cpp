@@ -475,13 +475,15 @@ ACE_THROW_SPEC((CORBA::SystemException))
                    this->si_lock_,
                    DDS::RETCODE_ERROR);
  
+  // If access_scope is GROUP and ordered_access is true then return readers as
+  // list which may contain same readers multiple times. Otherwise return readers 
+  // as set.
   if (this->qos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS) {
     if (this->access_depth_ == 0) {
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
     
-    if (this->qos_.presentation.coherent_access 
-        && this->qos_.presentation.ordered_access) {
+    if (this->qos_.presentation.ordered_access) {
 
       GroupRakeData data;
       for (DataReaderSet::const_iterator pos = datareader_set_.begin() ;
@@ -569,6 +571,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
         for (DataReaderMap::const_iterator iter = datareader_map_.begin() ;
              iter != endIter ; ++iter) {
           DataReaderImpl* reader = iter->second->local_reader_impl_;
+          reader->set_subscriber_qos (qos);
           DDS::DataReaderQos qos;
           reader->get_qos(qos);
           RepoId id = reader->get_subscription_id();

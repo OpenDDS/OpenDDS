@@ -75,7 +75,10 @@ public:
   
 private:
 
-  void verify (const Messenger::Message& msg, const ::DDS::SampleInfo& si);
+  void verify (const Messenger::Message& msg, 
+               const ::DDS::SampleInfo& si,
+               const DDS::SubscriberQos& qos,
+               const bool reset_last_timestamp);
 
   DDS::Subscriber_var subscriber_;
   bool  verify_result_;
