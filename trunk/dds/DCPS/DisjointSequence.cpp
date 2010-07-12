@@ -39,6 +39,7 @@ DisjointSequence::reset(SequenceNumber value)
 void
 DisjointSequence::shift(SequenceNumber value)
 {
+  validate(SequenceRange(value, value));
   value = SequenceNumber(value - 1);  // non-inclusive
 
   if (seen(value)) return; // nothing to shift
@@ -59,6 +60,7 @@ DisjointSequence::shift(SequenceNumber value)
 bool
 DisjointSequence::update(SequenceNumber value)
 {
+  validate(SequenceRange(value, value));
   if (seen(value)) return false;  // nothing to update
 
   std::pair<SequenceSet::iterator, bool> pair = this->sequences_.insert(value);
@@ -72,6 +74,7 @@ DisjointSequence::update(SequenceNumber value)
 bool
 DisjointSequence::update(const SequenceRange& range)
 {
+  validate(range);
   if (seen(range.second)) return false; // nothing to update
 
   bool updated(false);
@@ -100,6 +103,41 @@ DisjointSequence::normalize()
     this->sequences_.erase(first);
     first = second;
   }
+}
+
+DisjointSequence::range_iterator&
+DisjointSequence::range_iterator::operator++()
+{
+  if (this->pos_ != this->end_) {
+    SequenceSet::iterator prev(this->pos_++);
+
+    if (this->pos_ != this->end_) {
+      const SequenceNumber rangeLow(prev->value_ + 1);
+      this->value_ = SequenceRange(rangeLow,
+                                   previous_sequence_number(this->pos_->value_, rangeLow));
+      if (this->value_.first > this->value_.second) {
+        operator++();
+      }
+    }
+
+  }
+  return *this;
+}
+
+SequenceNumber
+DisjointSequence::previous_sequence_number(const SequenceNumber value, SequenceNumber in_reference_to) {
+  // if all of the identifiable sequence is positive, then we do not know
+  return SequenceNumber(((value.value_ != 0) || (in_reference_to.value_ < 0)) ?
+    SequenceNumber(value.value_ - 1) : SequenceNumber::MAX_VALUE);
+}
+
+void
+DisjointSequence::validate(const SequenceRange& range) const {
+  if (range.first > range.second)
+    throw std::exception("SequenceNumber range invalid, range must be assending.");
+  if ((range.second < low()) && (range.first > high()))
+    throw std::exception("SequenceNumber range not valid with respect"
+      " to existing DisjointSequence SequenceNumbers.");
 }
 
 } // namespace DCPS

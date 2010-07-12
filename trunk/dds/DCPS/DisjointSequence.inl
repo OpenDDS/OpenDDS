@@ -26,23 +26,6 @@ DisjointSequence::range_iterator::range_iterator(SequenceSet::iterator begin,
   ++*this;
 }
 
-ACE_INLINE DisjointSequence::range_iterator&
-DisjointSequence::range_iterator::operator++()
-{
-  if (this->pos_ != this->end_) {
-    SequenceSet::iterator prev(this->pos_++);
-
-    if (this->pos_ != this->end_) {
-      this->value_ = SequenceRange(SequenceNumber(prev->value_ + 1),
-                                   SequenceNumber(this->pos_->value_ - 1));
-      if (this->value_.first > this->value_.second) {
-        operator++();
-      }
-    }
-  }
-  return *this;
-}
-
 ACE_INLINE DisjointSequence::range_iterator
 DisjointSequence::range_iterator::operator++(int)
 {

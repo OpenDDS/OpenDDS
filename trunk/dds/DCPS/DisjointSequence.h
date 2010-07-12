@@ -74,6 +74,8 @@ private:
   SequenceSet sequences_;
 
   void normalize();
+  void validate(const SequenceRange& range) const;
+  static SequenceNumber previous_sequence_number(SequenceNumber value, SequenceNumber in_reference_to);
 };
 
 
