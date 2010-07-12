@@ -8,7 +8,6 @@
     **
     ** Generate IDL code.
     **
-    ** @TODO Determine how arrays are to be handled.
     ** @TODO Determine how unions are to be specified and represented.
     **
     -->
@@ -28,6 +27,7 @@
 <xsl:variable name="enum"     select="//opendds:type[ @type = 'opendds:idlEnum']"/>
 <xsl:variable name="union"    select="//opendds:type[ @type = 'opendds:idlUnion']"/>
 <xsl:variable name="struct"   select="//opendds:type[ @type = 'opendds:idlStruct']"/>
+<xsl:variable name="array"    select="//opendds:type[ @type = 'opendds:idlArray']"/>
 <xsl:variable name="sequence" select="//opendds:type[ @type = 'opendds:idlSequence']"/>
 <xsl:variable name="typedef"  select="//opendds:type[ @type = 'opendds:idlTypedef']"/>
 
@@ -69,6 +69,11 @@ module </xsl:text>
   <!-- Generate IDL for typedefs. -->
   <xsl:value-of select="$newline"/>
   <xsl:apply-templates select="$typedef">
+    <xsl:sort select="@name"/>
+  </xsl:apply-templates>
+
+  <!-- Generate IDL for arrays. -->
+  <xsl:apply-templates select="$array">
     <xsl:sort select="@name"/>
   </xsl:apply-templates>
 
@@ -137,9 +142,24 @@ module </xsl:text>
   <xsl:value-of select="$newline"/>
 </xsl:template>
 
+<!-- Process each array definition. -->
+<xsl:template match="opendds:type[ @type = 'opendds:idlArray']">
+  <!-- 'typedef (member/@type) (member/@name)[ (member/@size)];\n' -->
+  <xsl:text>  typedef </xsl:text>
+  <xsl:call-template name="typespec">
+    <xsl:with-param name="spectype" select="opendds:member/@type"/>
+  </xsl:call-template>
+  <xsl:text> </xsl:text>
+  <xsl:value-of select="opendds:member/@name"/>
+  <xsl:text>[ </xsl:text>
+  <xsl:value-of select="opendds:member/@size"/>
+  <xsl:text>];</xsl:text>
+  <xsl:value-of select="$newline"/>
+</xsl:template>
+
 <!-- Process each sequence definition. -->
 <xsl:template match="opendds:type[ @type = 'opendds:idlSequence']">
-  <!-- 'typedef sequence<(target/@type)> (@name);\n' -->
+  <!-- 'typedef sequence<(member/@type)> (@member/name);\n' -->
   <xsl:text>  typedef sequence&lt;</xsl:text>
   <xsl:call-template name="typespec">
     <xsl:with-param name="spectype" select="opendds:member/@type"/>
@@ -152,8 +172,32 @@ module </xsl:text>
 
 <!-- Process each union definition. -->
 <xsl:template match="opendds:type[ @type = 'opendds:idlUnion']" mode="define">
+  <xsl:value-of select="$newline"/>
+  <xsl:text>  union </xsl:text>
+  <xsl:value-of select="@name"/>
+  <xsl:text>  switch (</xsl:text>
+  <xsl:call-template name="typespec">
+    <xsl:with-param name="spectype" select="@switch"/>
+  </xsl:call-template>
+  <xsl:text>)  {</xsl:text>
+  <xsl:value-of select="$newline"/>
 
-  <!-- @TODO this needs to be implemented - similar to structure. -->
+  <xsl:apply-templates select="./opendds:case"/>
+
+  <xsl:if test="./opendds:default">
+    <xsl:text>    default: </xsl:text>
+    <xsl:call-template name="typespec">
+      <xsl:with-param name="spectype" select="./opendds:default/@type"/>
+    </xsl:call-template>
+    <xsl:text> </xsl:text>
+    <xsl:value-of select="./opendds:default/@name"/>
+    <xsl:text>;</xsl:text>
+    <xsl:value-of select="$newline"/>
+  </xsl:if>
+
+  <xsl:text>  };</xsl:text>
+  <xsl:value-of select="$newline"/>
+
 
 </xsl:template>
 
@@ -184,6 +228,26 @@ module </xsl:text>
   <xsl:text>  };</xsl:text>
   <xsl:value-of select="$newline"/>
 
+</xsl:template>
+
+<!-- Process union cases. -->
+<xsl:template match="opendds:case">
+  <!-- Build the output string for the type specification. -->
+  <xsl:variable name="typespec">
+    <xsl:call-template name="typespec">
+      <xsl:with-param name="spectype" select="@type"/>
+    </xsl:call-template>
+  </xsl:variable>
+
+  <!-- '  (@type) (@name);\n' -->
+  <xsl:text>    case </xsl:text>
+  <xsl:value-of select="@label"/>
+  <xsl:text>: </xsl:text>
+  <xsl:value-of select="$typespec"/>
+  <xsl:text> </xsl:text>
+  <xsl:value-of select="@name"/>
+  <xsl:text>;</xsl:text>
+  <xsl:value-of select="$newline"/>
 </xsl:template>
 
 <!-- Process structure members. -->
@@ -252,6 +316,7 @@ module </xsl:text>
       <xsl:choose>
         <!-- Typedef and Sequence types use the translated (defined) type name. -->
         <xsl:when test="$type[@name=$spectype]/@type = 'opendds:idlTypedef'
+                     or $type[@name=$spectype]/@type = 'opendds:idlArray'
                      or $type[@name=$spectype]/@type = 'opendds:idlSequence'">
           <xsl:value-of select="$type[@name=$spectype]/opendds:member/@name"/>
         </xsl:when>
