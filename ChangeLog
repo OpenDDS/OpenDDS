@@ -1,3 +1,10 @@
+Mon Jul 12 15:20:10 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/be_global.h:
+        * dds/idl/be_global.cpp:
+
+          Restored compatibility with TAO 1.5a and 1.6a after Jeff's change.
+
 Mon Jul 12 08:44:58 UTC 2010  Jeff Parsons <j.parsons@vanderbilt.edu>
 
         * dds/idl/be_util.cpp:
@@ -9,7 +16,7 @@ Mon Jul 12 08:44:58 UTC 2010  Jeff Parsons <j.parsons@vanderbilt.edu>
         * dds/idl/be_global.cpp:
         * dds/idl/be_global.h:
 
-          Moved methods not related to 
+          Moved methods not related to
           global data storage to new
           utility class.
 
@@ -21,14 +28,14 @@ Fri Jul  9 20:14:17 UTC 2010  Yan Dai  <dai_y@ociweb.com>
           list multiple times when its strength is changed to be greater
           than current owner. This was observed from subscriber log in
           ownership update_strength test.
-          
+
         * tests/DCPS/Ownership/Writer.cpp:
-          
+
           Add one second delay before reset the writer strength to be higher,
-          so the builtin topic data update arrives only after samples with  
-          previous strength on subscriber side. This helps simplify result 
-          verification on subscriber side.  
-                  
+          so the builtin topic data update arrives only after samples with
+          previous strength on subscriber side. This helps simplify result
+          verification on subscriber side.
+
 Tue Jul  6 18:20:11 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Ownership/Writer.cpp:
