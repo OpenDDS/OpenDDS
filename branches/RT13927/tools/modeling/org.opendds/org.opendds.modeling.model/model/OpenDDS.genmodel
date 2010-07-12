@@ -3,19 +3,17 @@
     xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
     xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/org.opendds.modeling.model/src"
     modelPluginID="org.opendds.modeling.model" modelName="OpenDDS" generateSchema="true"
-    featureMapWrapperInterface="" featureMapWrapperInternalInterface="" featureMapWrapperClass=""
-    booleanFlagsField="" importerID="org.eclipse.emf.importer.ecore" complianceLevel="6.0"
-    copyrightFields="false" providerRootExtendsClass="">
+    importerID="org.eclipse.emf.importer.ecore" complianceLevel="6.0" copyrightFields="false">
   <foreignModel>OpenDDS.ecore</foreignModel>
   <genPackages prefix="OpenDDS" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
-      contentTypeIdentifier="" ecorePackage="OpenDDS.ecore#/">
+      ecorePackage="OpenDDS.ecore#/">
     <genClasses image="false" ecoreClass="OpenDDS.ecore#//ddsSpecification"/>
     <genClasses image="false" ecoreClass="OpenDDS.ecore#//ddsProperty"/>
     <genClasses ecoreClass="OpenDDS.ecore#//qosProperty"/>
     <genClasses image="false" ecoreClass="OpenDDS.ecore#//qosPolicy"/>
     <genClasses ecoreClass="OpenDDS.ecore#//topic"/>
     <genClasses ecoreClass="OpenDDS.ecore#//topicStruct"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//topicField"/>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//topicField"/>
     <genClasses ecoreClass="OpenDDS.ecore#//domainParticipant"/>
     <genClasses ecoreClass="OpenDDS.ecore#//publisher"/>
     <genClasses ecoreClass="OpenDDS.ecore#//subscriber"/>
@@ -79,7 +77,7 @@
   </genPackages>
   <genPackages prefix="Core" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
       generateExampleClass="false" generateModelWizard="false" ecorePackage="Core.ecore#/">
-    <genClasses ecoreClass="Core.ecore#//Entity">
+    <genClasses image="false" ecoreClass="Core.ecore#//Entity">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Core.ecore#//Entity/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Core.ecore#//Entity/ownedEntity"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Core.ecore#//Entity/property"/>
@@ -204,9 +202,9 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Topics.ecore#//MultiTopic/subscription_expression"/>
     </genClasses>
   </genPackages>
-  <genPackages prefix="Types" basePackage="org.opendds.modeling.model" generateExampleClass="false"
-      generateModelWizard="false" ecorePackage="Types.ecore#/">
-    <genClasses ecoreClass="Types.ecore#//TopicField"/>
+  <genPackages prefix="Types" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
+      generateExampleClass="false" generateModelWizard="false" ecorePackage="Types.ecore#/">
+    <genClasses image="false" ecoreClass="Types.ecore#//TopicField"/>
     <genClasses image="false" ecoreClass="Types.ecore#//Simple"/>
     <genClasses image="false" ecoreClass="Types.ecore#//Collection">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Collection/length"/>
@@ -234,17 +232,15 @@
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Union/cases"/>
     </genClasses>
     <genClasses ecoreClass="Types.ecore#//TopicStruct">
-      <genFeatures property="None" notify="false" children="true" createChild="true"
-          ecoreFeature="ecore:EReference Types.ecore#//TopicStruct/members"/>
-      <genFeatures property="None" notify="false" children="true" createChild="true"
-          ecoreFeature="ecore:EReference Types.ecore#//TopicStruct/keys"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//TopicStruct/members"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//TopicStruct/keys"/>
     </genClasses>
     <genClasses ecoreClass="Types.ecore#//Boolean"/>
     <genClasses ecoreClass="Types.ecore#//Char"/>
     <genClasses ecoreClass="Types.ecore#//Enum">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Enum/labels"/>
     </genClasses>
-    <genClasses ecoreClass="Types.ecore#//FloatingPoint"/>
+    <genClasses image="false" ecoreClass="Types.ecore#//FloatingPoint"/>
     <genClasses ecoreClass="Types.ecore#//Double"/>
     <genClasses ecoreClass="Types.ecore#//Float"/>
     <genClasses image="false" ecoreClass="Types.ecore#//Int"/>
@@ -261,7 +257,7 @@
     <genClasses ecoreClass="Types.ecore#//Octet"/>
     <genClasses image="false" ecoreClass="Types.ecore#//KeyField"/>
     <genClasses ecoreClass="Types.ecore#//Key">
-      <genFeatures notify="false" createChild="false" propertyCategory="" ecoreFeature="ecore:EReference Types.ecore#//Key/member"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Key/member"/>
     </genClasses>
   </genPackages>
   <genPackages prefix="DCPS" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
@@ -308,8 +304,8 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataWriter/reader_data_lifecycle"/>
     </genClasses>
   </genPackages>
-  <genPackages prefix="Application" basePackage="org.opendds.modeling.model" generateExampleClass="false"
-      generateModelWizard="false" ecorePackage="Application.ecore#/">
+  <genPackages prefix="Application" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
+      generateExampleClass="false" generateModelWizard="false" ecorePackage="Application.ecore#/">
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="Application.ecore#//LanguageType">
       <genEnumLiterals ecoreEnumLiteral="Application.ecore#//LanguageType/CXX"/>
     </genEnums>
@@ -333,8 +329,8 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Application.ecore#//ApplicationTarget/component_type"/>
     </genClasses>
   </genPackages>
-  <genPackages prefix="Enumerations" basePackage="org.opendds.modeling.model" generateExampleClass="false"
-      generateModelWizard="false" ecorePackage="Enumerations.ecore#/">
+  <genPackages prefix="Enumerations" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
+      generateExampleClass="false" generateModelWizard="false" ecorePackage="Enumerations.ecore#/">
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="Enumerations.ecore#//ReliabilityQosPolicyKind">
       <genEnumLiterals ecoreEnumLiteral="Enumerations.ecore#//ReliabilityQosPolicyKind/BEST_EFFORT"/>
       <genEnumLiterals ecoreEnumLiteral="Enumerations.ecore#//ReliabilityQosPolicyKind/RELIABLE"/>
