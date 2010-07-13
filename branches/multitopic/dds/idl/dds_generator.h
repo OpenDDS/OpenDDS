@@ -157,5 +157,84 @@ inline std::string scoped(UTL_ScopedName* sn)
   return dds_generator::scoped_helper(sn, "::");
 }
 
+namespace AstTypeClassification {
+  inline void unTypeDef(AST_Type*& element)
+  {
+    if (element->node_type() == AST_Decl::NT_typedef) {
+      AST_Typedef* td = AST_Typedef::narrow_from_decl(element);
+      element = td->primitive_base_type();
+    }
+  }
+
+  typedef size_t Classification;
+  const Classification CL_UNKNOWN = 0, CL_SCALAR = 1, CL_PRIMITIVE = 2,
+    CL_STRUCTURE = 4, CL_STRING = 8, CL_ENUM = 16, CL_UNION = 32, CL_ARRAY = 64,
+    CL_SEQUENCE = 128, CL_WIDE = 256, CL_BOUNDED = 512, CL_INTERFACE = 1024;
+
+  inline Classification classify(AST_Type* type)
+  {
+    unTypeDef(type);
+    switch (type->node_type()) {
+    case AST_Decl::NT_pre_defined: {
+      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+      return (p->pt() == AST_PredefinedType::PT_any
+        || p->pt() == AST_PredefinedType::PT_object)
+        ? CL_UNKNOWN : (CL_SCALAR | CL_PRIMITIVE);
+    }
+    case AST_Decl::NT_array:
+      return CL_ARRAY;
+    case AST_Decl::NT_union:
+      return CL_UNION;
+    case AST_Decl::NT_string:
+    case AST_Decl::NT_wstring:
+      return CL_SCALAR | CL_STRING |
+        ((AST_String::narrow_from_decl(type)->max_size()->ev()->u.ulval == 0)
+        ? 0 : CL_BOUNDED) |
+        ((type->node_type() == AST_Decl::NT_wstring) ? CL_WIDE : 0);
+    case AST_Decl::NT_sequence:
+      return CL_SEQUENCE |
+        ((AST_Sequence::narrow_from_decl(type)->unbounded()) ? 0 : CL_BOUNDED);
+    case AST_Decl::NT_struct:
+      return CL_STRUCTURE;
+    case AST_Decl::NT_enum:
+      return CL_SCALAR | CL_ENUM;
+    case AST_Decl::NT_interface:
+      return CL_INTERFACE;
+    default:
+      return CL_UNKNOWN;
+    }
+  }
+}
+
+struct NestedForLoops {
+  NestedForLoops(const char* type, const char* prefix, AST_Array* arr,
+                 std::string& indent)
+    : n_(arr->n_dims()), indent_(indent)
+  {
+    std::ostringstream index_oss;
+    for (size_t i = 0; i < n_; ++i) {
+      be_global->impl_ <<
+        indent << "for (" << type << ' ' << prefix << i << " = 0; " <<
+        prefix << i << " < " << arr->dims()[i]->ev()->u.ulval << "; ++" <<
+        prefix << i << ") {\n";
+      indent += "  ";
+      index_oss << "[i" << i << "]";
+    }
+    index_ = index_oss.str();
+  }
+
+  ~NestedForLoops()
+  {
+    for (size_t i = 0; i < n_; ++i) {
+      indent_.resize(indent_.size() - 2);
+      be_global->impl_ << indent_ << "}\n";
+    }
+  }
+
+  size_t n_;
+  std::string& indent_;
+  std::string index_;
+};
+
 
 #endif
