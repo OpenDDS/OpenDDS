@@ -12,6 +12,7 @@
 #include "DisjointSequence.h"
 
 #include "ace/Log_Msg.h"
+#include <stdexcept>
 
 #ifndef __ACE_INLINE__
 # include "DisjointSequence.inl"
@@ -128,15 +129,15 @@ SequenceNumber
 DisjointSequence::previous_sequence_number(const SequenceNumber value, SequenceNumber in_reference_to) {
   // if all of the identifiable sequence is positive, then we do not know
   return SequenceNumber(((value.value_ != 0) || (in_reference_to.value_ < 0)) ?
-    SequenceNumber(value.value_ - 1) : SequenceNumber::MAX_VALUE);
+    SequenceNumber(value.value_ - 1) : SequenceNumber(SequenceNumber::MAX_VALUE));
 }
 
 void
 DisjointSequence::validate(const SequenceRange& range) const {
   if (range.first > range.second)
-    throw std::exception("SequenceNumber range invalid, range must be assending.");
+    throw std::runtime_error("SequenceNumber range invalid, range must be assending.");
   if ((range.second < low()) && (range.first > high()))
-    throw std::exception("SequenceNumber range not valid with respect"
+    throw std::runtime_error("SequenceNumber range not valid with respect"
       " to existing DisjointSequence SequenceNumbers.");
 }
 
