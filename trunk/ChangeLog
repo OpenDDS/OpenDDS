@@ -1,10 +1,16 @@
+Tue Jul 13 14:25:56 UTC 2010  Brian Johnson  <johnson_b@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.cpp:
+        
+          Fix for broken nightly build.
+
 Mon Jul 12 20:54:17 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/Definitions.h:
 
           Change operator< to double the distance and compare this with
           the range of valid positive values so that < would never be ambiguious,
-          since the distance will always be even and range is odd.  Error was 
+          since the distance will always be even and range is odd.  Error was
           exposed by UnitTests/SequenceNumber.cpp lines 38 and 42.
 
         * dds/DCPS/DisjointSequence.h:
@@ -12,7 +18,7 @@ Mon Jul 12 20:54:17 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
         * dds/DCPS/DisjointSequence.cpp:
 
           Added private function to determine what the previous sequence
-          number should be.  Error was exposed by 
+          number should be.  Error was exposed by
           UnitTest/DisjointSequence.cpp lines 213-223.
 
         * tests/DCPS/UnitTests/DisjointSequence.cpp:
@@ -21,7 +27,7 @@ Mon Jul 12 20:54:17 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/UnitTests/SequenceNumber.cpp:
         * tests/DCPS/UnitTests/UnitTests.mpc:
-        
+
           Added SequenceNumber tests.
 
 Mon Jul 12 20:03:15 UTC 2010  Yan Dai  <dai_y@ociweb.com>
