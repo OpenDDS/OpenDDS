@@ -1,3 +1,28 @@
+Tue Jul 13 19:42:19 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+
+          Minor change: bail out early if DDS::RETCODE_NO_DATA.
+
+        * dds/idl/dds_generator.h:
+        * dds/idl/marshal_generator.cpp:
+
+          Moved common code to dds_generator.h.
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Re-used code from dds_generator.h.
+          Added support for MetaStruct::assign() of nested structs, unions,
+          sequences, and arrays.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/MetaStruct/MetaStructTest.idl:
+        * tests/DCPS/MetaStruct/MetaStructTest.cpp:
+        * tests/DCPS/MetaStruct/MetaStructTest.mpc:
+        * tests/DCPS/MetaStruct/run_test.pl:
+
+          New test for MetaStruct::assign() of complex IDL types.
+
 Mon Jul 12 16:56:37 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/MultiTopicDataReaderBase.cpp:

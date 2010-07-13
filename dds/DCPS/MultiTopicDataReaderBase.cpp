@@ -123,7 +123,9 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
   DataReaderImpl::GenericBundle gen;
   DDS::ReturnCode_t rc = dri->read_generic(gen, DDS::NOT_READ_SAMPLE_STATE,
     DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
-  if (rc != DDS::RETCODE_NO_DATA && rc != DDS::RETCODE_OK) {
+  if (rc == DDS::RETCODE_NO_DATA) {
+    return;
+  } else if (rc != DDS::RETCODE_OK) {
     //TODO: error
   }
 
