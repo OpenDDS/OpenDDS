@@ -1858,7 +1858,8 @@ void
 
     instance_ptr->rcvd_strategy_->add(ptr);
 
-    if (instance_ptr->rcvd_samples_.size_ > get_depth())
+    if (! is_dispose_msg  && ! is_unregister_msg
+        && instance_ptr->rcvd_samples_.size_ > get_depth())
     {
       OpenDDS::DCPS::ReceivedDataElement* head_ptr =
         instance_ptr->rcvd_samples_.head_;

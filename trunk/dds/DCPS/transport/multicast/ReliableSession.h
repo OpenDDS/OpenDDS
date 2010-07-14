@@ -109,7 +109,7 @@ private:
 
   DisjointSequence nak_sequence_;
 
-  typedef std::multimap<ACE_Time_Value, SequenceNumber> NakRequestMap;
+  typedef std::map<ACE_Time_Value, SequenceNumber> NakRequestMap;
   NakRequestMap nak_requests_;
 
   typedef std::set<SequenceRange> NakPeerSet;

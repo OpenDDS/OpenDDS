@@ -3158,12 +3158,14 @@ DataReaderImpl::coherent_changes_completed (DataReaderImpl* reader)
 
 void DataReaderImpl::begin_access()
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
   this->coherent_ = true;
 }
 
 
 void DataReaderImpl::end_access()
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
   this->coherent_ = false;
   this->group_coherent_ordered_data_.reset();
   this->post_read_or_take();

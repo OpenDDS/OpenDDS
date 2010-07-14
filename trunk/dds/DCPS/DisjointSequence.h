@@ -70,6 +70,8 @@ public:
 
   operator SequenceNumber() const;
 
+  void dump();
+
 private:
   SequenceSet sequences_;
 
