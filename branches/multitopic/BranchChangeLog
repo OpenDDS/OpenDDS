@@ -1,3 +1,18 @@
+Wed Jul 14 20:31:40 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          updated comment to describe current functionality
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Fixed a bug in the arrays-of-arrays case.
+
+        * tests/DCPS/MetaStruct/MetaStructTest.cpp:
+        * tests/DCPS/MetaStruct/MetaStructTest.idl:
+
+          Added a test for arrays-of-arrays.
+
 Wed Jul 14 17:42:29 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/MultiTopicDataReader_T.cpp:

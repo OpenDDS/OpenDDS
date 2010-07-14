@@ -60,7 +60,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
   TypedDataReader* tdr = dynamic_cast<TypedDataReader*>(typed_reader_.in());
 
   //TODO: process the "joins" to complete the fields of <resulting>
-  //currently the simple case of joining two topics on one key is handled
+  //currently the simple case of joining two topics on >= 1 key is handled
   //but all of the other cases still need to be written
 
   map<string, vector<string> > keys; // other-topic-name => keys

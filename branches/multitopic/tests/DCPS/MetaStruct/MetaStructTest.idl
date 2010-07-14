@@ -4,6 +4,7 @@ struct A {
 };
 
 typedef short ShortArray[3];
+typedef ShortArray ArrayOfShortArray[4];
 typedef sequence<A> StructSeq;
 enum MyEnum {b, d, as, sa, ss, other1, other2};
 
@@ -25,6 +26,7 @@ default: float u_f;
 struct Source {
   A rhs_a;
   ShortArray rhs_sa;
+  ArrayOfShortArray rhs_asa;
   StructSeq rhs_ss;
   MyEnum rhs_e;
   MyUnion rhs_u;
@@ -33,6 +35,7 @@ struct Source {
 struct Target {
   A lhs_a;
   ShortArray lhs_sa;
+  ArrayOfShortArray lhs_asa;
   StructSeq lhs_ss;
   MyEnum lhs_e;
   MyUnion lhs_u;
