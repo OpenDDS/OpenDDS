@@ -148,10 +148,11 @@ namespace {
           "      " << fieldType << "_forany rhsForany(const_cast<" <<
           fieldType << "_slice*>(*rhsArr));\n"
           "      ACE_Message_Block mb(gen_find_size(rhsForany));\n"
-          "      Serializer ser(&mb);\n"
-          "      ser << rhsForany;\n"
+          "      Serializer ser_out(&mb);\n"
+          "      ser_out << rhsForany;\n"
           "      " << fieldType << "_forany lhsForany(*lhsArr);\n"
-          "      ser >> lhsForany;\n";
+          "      Serializer ser_in(&mb);\n"
+          "      ser_in >> lhsForany;\n";
       } else {
         std::string indent = "      ";
         NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
