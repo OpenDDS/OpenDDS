@@ -1,3 +1,16 @@
+Wed Jul 14 16:03:35 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Fixed MetaStruct::assign() for arrays-of-arrays.
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.idl:
+
+          Extended the test to use two fields as DCPS_DATA_KEYs and
+          MultiTopic join keys.  This will make the test fail until
+          the implementation of MultiTopic is enhanced to cover this case.
+
 Tue Jul 13 19:42:19 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/MultiTopicDataReaderBase.cpp:
