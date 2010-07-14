@@ -51,7 +51,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::assign_fields(void* incoming,
 template<typename Sample, typename TypedDataReader>
 void
 MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
-  const DDS::SampleInfo& info, const char* topic, const MetaStruct& meta)
+  const DDS::SampleInfo& /*info*/, const char* topic, const MetaStruct& meta)
 {
   using namespace std;
   using namespace DDS;
@@ -62,39 +62,58 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
   //TODO: process the "joins" to complete the fields of <resulting>
   //currently the simple case of joining two topics on one key is handled
   //but all of the other cases still need to be written
+
+  map<string, vector<string> > keys; // other-topic-name => keys
+
   typedef map<string, set<string> >::iterator iter2_t;
   for (iter2_t iter = join_keys_.begin(); iter != join_keys_.end(); ++iter) {
     const string& key = iter->first;
     const set<string>& topics = iter->second;
     if (topics.count(topic)) {
+      
       getResultingMeta().assign(&resulting, key.c_str(), sample,
         key.c_str(), meta);
+
+
       for (set<string>::const_iterator i = topics.begin();
           i != topics.end(); ++i) {
         if (*i != topic) {
-          DataReader_var other_dr = incoming_readers_[*i];
-          const MetaStruct& other_meta = metaStructFor(other_dr);
-          void* other_key_data = other_meta.allocate();
-          other_meta.assign(other_key_data, key.c_str(),
-            sample, key.c_str(), meta);
-          DataReaderImpl* other_dri =
-            dynamic_cast<DataReaderImpl*>(other_dr.in());
-          InstanceHandle_t ih =
-            other_dri->lookup_instance_generic(other_key_data);
-          other_meta.deallocate(other_key_data);
-          if (ih != DDS::HANDLE_NIL) {
-            void* other_data;
-            SampleInfo info;
-            other_dri->read_instance_generic(other_data, info, ih,
-              READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
-            assign_fields(other_data, resulting, i->c_str(), other_meta);
-            other_meta.deallocate(other_data);
-            tdr->store_synthetic_data(resulting);
-          }
+          keys[*i].push_back(key);
         }
       }
-    } else {
-      //TODO: handle case where key is not in this topic
+    }
+  }
+
+  if (keys.size() == 0) {
+    tdr->store_synthetic_data(resulting);
+    return;
+  }
+
+  typedef map<string, vector<string> >::iterator msvsi_t;
+  for (msvsi_t it = keys.begin(); it != keys.end(); ++it) {
+    const string& other_topic = it->first;
+    const vector<string>& other_keys = it->second;
+    DataReader_var other_dr = incoming_readers_[other_topic];
+    const MetaStruct& other_meta = metaStructFor(other_dr);
+    void* other_key_data = other_meta.allocate();
+
+    for (vector<string>::const_iterator it2 = other_keys.begin();
+         it2 != other_keys.end(); ++it2) {
+      other_meta.assign(other_key_data, it2->c_str(),
+                        sample, it2->c_str(), meta);
+    }
+
+    DataReaderImpl* other_dri = dynamic_cast<DataReaderImpl*>(other_dr.in());
+    InstanceHandle_t ih = other_dri->lookup_instance_generic(other_key_data);
+    other_meta.deallocate(other_key_data);
+    if (ih != DDS::HANDLE_NIL) {
+      void* other_data;
+      SampleInfo info;
+      other_dri->read_instance_generic(other_data, info, ih, READ_SAMPLE_STATE,
+                                       ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+      assign_fields(other_data, resulting, other_topic.c_str(), other_meta);
+      other_meta.deallocate(other_data);
+      tdr->store_synthetic_data(resulting);
     }
   }
 }
