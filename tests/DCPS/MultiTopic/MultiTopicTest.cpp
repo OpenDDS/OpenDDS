@@ -25,8 +25,7 @@ void waitForMatch(const StatusCondition_var& sc)
 }
 
 bool run_multitopic_test(const DomainParticipant_var& dp,
-  const ResultingTypeSupport_var& ts, const Publisher_var& pub,
-  const Subscriber_var& sub)
+  const Publisher_var& pub, const Subscriber_var& sub)
 {
   // Writer-side setup
 
@@ -48,7 +47,9 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
 
   // Reader-side setup
 
-  CORBA::String_var type_name = ts->get_type_name();
+  ResultingTypeSupport_var ts_res = new ResultingTypeSupportImpl;
+  ts_res->register_type(dp, "");
+  CORBA::String_var type_name = ts_res->get_type_name();
   MultiTopic_var mt = dp->create_multitopic("MyMultiTopic", type_name,
     "SELECT flight_name, x, y, z AS height FROM Location NATURAL JOIN "
     "FlightPlan WHERE height < 1000 AND x<23", StringSeq());
@@ -61,11 +62,11 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
   StatusCondition_var dw_sc = dw_loc->get_statuscondition();
   waitForMatch(dw_sc);
   LocationInfoDataWriter_var locdw = LocationInfoDataWriter::_narrow(dw_loc);
-  LocationInfo sample = {100, 23, 2, 3}; // filtered out (x < 23)
+  LocationInfo sample = {100, 99, 23, 2, 3}; // filtered out (x < 23)
   ReturnCode_t ret = locdw->write(sample, HANDLE_NIL);
-  LocationInfo sample2 = {100, 1, 2, 3000}; // filtered out (height < 1000)
+  LocationInfo sample2 = {100, 99, 1, 2, 3000}; // filtered out (height < 1000)
   ret = locdw->write(sample2, HANDLE_NIL);
-  LocationInfo sample3 = {100, 1, 2, 3};
+  LocationInfo sample3 = {100, 99, 1, 2, 3};
   ret = locdw->write(sample3, HANDLE_NIL);
   if (ret != RETCODE_OK) return false;
 
@@ -75,8 +76,9 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
   waitForMatch(dw2_sc);
   PlanInfoDataWriter_var pidw = PlanInfoDataWriter::_narrow(dw_fp);
   PlanInfo sample4;
-  sample4.flight_id = 100;
-  sample4.flight_name = "Flight 100";
+  sample4.flight_id1 = 100;
+  sample4.flight_id2 = 99;
+  sample4.flight_name = "Flight 100-99";
   sample4.tailno = "N12345";
   ret = pidw->write(sample4, HANDLE_NIL);
   if (ret != RETCODE_OK) return false;
@@ -98,12 +100,13 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
   ret = res_dr->take_w_condition(data, info, DDS::LENGTH_UNLIMITED, rc);
   if (ret != RETCODE_OK) return false;
   if (data.length() > 1 || !info[0].valid_data) return false;
-  std::cout << "Received: " << data[0].flight_id << " \""
-    << data[0].flight_name << "\" " << data[0].x << " " << data[0].y << " "
-    << data[0].height << std::endl;
-  if (data[0].flight_id != sample4.flight_id ||
-    strcmp(data[0].flight_name, sample4.flight_name) || data[0].x != sample3.x
-    || data[0].y != sample3.y || data[0].height != sample3.z) return false;
+  std::cout << "Received: " << data[0].flight_id1 << '-' <<
+    data[0].flight_id2 << " \"" << data[0].flight_name << "\" " << data[0].x <<
+    " " << data[0].y << " " << data[0].height << std::endl;
+  if (data[0].flight_id1 != sample4.flight_id1 || data[0].flight_id2 !=
+    sample4.flight_id2 || strcmp(data[0].flight_name, sample4.flight_name) ||
+    data[0].x != sample3.x || data[0].y != sample3.y ||
+    data[0].height != sample3.z) return false;
   data.length(0);
   info.length(0);
   ret = res_dr->read_w_condition(data, info, DDS::LENGTH_UNLIMITED, rc);
@@ -118,8 +121,6 @@ int run_test(int argc, ACE_TCHAR *argv[])
   DomainParticipant_var dp =
     dpf->create_participant(23, PARTICIPANT_QOS_DEFAULT, 0,
                             DEFAULT_STATUS_MASK);
-  ResultingTypeSupport_var ts = new ResultingTypeSupportImpl;
-  ts->register_type(dp, "");
 
   Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
                                            DEFAULT_STATUS_MASK);
@@ -135,7 +136,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
   SubscriberImpl* sub_impl = dynamic_cast<SubscriberImpl*>(sub.in());
   sub_impl->attach_transport(sub_tport.in());
 
-  bool passed = run_multitopic_test(dp, ts, pub, sub);
+  bool passed = run_multitopic_test(dp, pub, sub);
 
   dp->delete_contained_entities();
   dpf->delete_participant(dp);

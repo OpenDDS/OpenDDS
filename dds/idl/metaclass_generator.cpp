@@ -139,7 +139,20 @@ namespace {
         fieldName << ";\n"
         "      const " << fieldType << "* rhsArr = static_cast<const " <<
         fieldType << "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n";
-      {
+      AST_Type* elem = arr->base_type();
+      AST_Type* elemUnTD = elem;
+      unTypeDef(elemUnTD);
+      if (classify(elemUnTD) & CL_ARRAY) {
+        // array-of-array case, fall back on the Serializer
+        be_global->impl_ <<
+          "      " << fieldType << "_forany rhsForany(const_cast<" <<
+          fieldType << "_slice*>(*rhsArr));\n"
+          "      ACE_Message_Block mb(gen_find_size(rhsForany));\n"
+          "      Serializer ser(&mb);\n"
+          "      ser << rhsForany;\n"
+          "      " << fieldType << "_forany lhsForany(*lhsArr);\n"
+          "      ser >> lhsForany;\n";
+      } else {
         std::string indent = "      ";
         NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
         be_global->impl_ <<
