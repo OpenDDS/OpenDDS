@@ -479,7 +479,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // list which may contain same readers multiple times. Otherwise return readers 
   // as set.
   if (this->qos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS) {
-    if (this->access_depth_ == 0) {
+    if (this->access_depth_ == 0 && this->qos_.presentation.coherent_access) {
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
     

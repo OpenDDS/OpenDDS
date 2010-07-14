@@ -54,8 +54,8 @@ DisjointSequence::shift(SequenceNumber value)
 
   // Shift low-water mark to inserted value:
   this->sequences_.erase(first, last);
-
-  normalize();
+  
+  normalize ();
 }
 
 bool
@@ -106,6 +106,7 @@ DisjointSequence::normalize()
   }
 }
 
+
 DisjointSequence::range_iterator&
 DisjointSequence::range_iterator::operator++()
 {
@@ -141,5 +142,14 @@ DisjointSequence::validate(const SequenceRange& range) const {
       " to existing DisjointSequence SequenceNumbers.");
 }
 
+void
+DisjointSequence::dump()
+{
+  SequenceSet::iterator iter(this->sequences_.begin());
+  while (iter != this->sequences_.end()) {
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DisjointSequence::dump(%X) %d\n", this, iter->value_));
+    ++ iter;
+  }
+}
 } // namespace DCPS
 } // namespace OpenDDS
