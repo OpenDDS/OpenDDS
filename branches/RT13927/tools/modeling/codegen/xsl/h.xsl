@@ -8,8 +8,6 @@
     **
     ** Generate C++ header code.
     **
-    ** @TODO Fix duplicate data type issue.
-    **
     -->
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
@@ -85,12 +83,19 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
         public: enum Values {
 </xsl:text>
   <!-- '          (//type/@name),\n' -->
-  <xsl:for-each select="$topic/opendds:datatype">
-    <xsl:sort select="@name"/>
-    <xsl:value-of select="'          '"/>
-    <xsl:value-of select="@name"/>
-    <xsl:text>,</xsl:text>
-    <xsl:value-of select="$newline"/>
+  <xsl:variable name="defined-types" select="$topic/opendds:datatype"/>
+  <xsl:for-each select="$defined-types">
+    <!-- Don't sort this without sorting the prior list as well. -->
+
+    <!-- Only generate type code once for each type. -->
+    <xsl:variable name="curpos" select="position()"/>
+    <xsl:variable name="priors" select="$defined-types[ position() &lt; $curpos]"/>
+    <xsl:if test="count( $priors[@name = current()/@name]) = 0">
+      <xsl:value-of select="'          '"/>
+      <xsl:value-of select="@name"/>
+      <xsl:text>,</xsl:text>
+      <xsl:value-of select="$newline"/>
+    </xsl:if>
   </xsl:for-each>
   <xsl:text>          LAST_INDEX
         };
