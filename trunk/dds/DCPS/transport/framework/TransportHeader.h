@@ -64,7 +64,7 @@ struct OpenDDS_Dcps_Export TransportHeader {
   /// The sequence number of the packet identified by this header; this
   /// value is guaranteed to be a monotonically increasing number per
   /// transport instance.
-  ACE_INT16 sequence_;
+  SequenceNumber::Value sequence_;
 
   /// A transport-specific identification number which uniquely
   /// identifies the source of the packet.

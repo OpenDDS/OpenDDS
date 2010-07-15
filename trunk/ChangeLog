@@ -1,3 +1,49 @@
+Wed Jul 14 20:56:38 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Changed to use ACE_INT32.  Made SequenceNumber a class
+          and provided accessors to value_.  Also made a typedef
+          for ACE_INT32 to use when a SequenceNumber value is not
+          being stored in a SequenceNumber.
+
+        * dds/DCPS/transport/multicast/MulticastTypes.h:
+
+          Removed redundant type.
+          
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/SubscriptionInstance.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * tests/DCPS/FooTest4/Writer.cpp:
+
+          Changed to use SequenceNumber::Value and getValue().
+
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Changed to pass SequenceNumber instead of internal
+          value.  And changed to use SequenceNumber::Value 
+          and getValue().
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Int16 to Int32 changes and removed unused depth function.
+          
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+        * tests/DCPS/UnitTests/SequenceNumber.cpp:
+        
+          Int16 to Int32 changes and removal of functions.
+
 Wed Jul 14 18:21:35 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/DisjointSequence.h:
@@ -9,8 +55,8 @@ Wed Jul 14 18:21:35 UTC 2010  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
 
           Added nak_delay_intervals configuration parameter to define the
-          number of intervals between naks after the initial nak.  This 
-          makes the initial nak sent right away and resend after delayed 
+          number of intervals between naks after the initial nak.  This
+          makes the initial nak sent right away and resend after delayed
           intervals. This could reduce naks.
 
           Added nak_max configuration parameter to limit the maximum number
@@ -47,7 +93,7 @@ Wed Jul 14 18:21:35 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 Tue Jul 13 14:25:56 UTC 2010  Brian Johnson  <johnson_b@ociweb.com>
 
         * dds/DCPS/DisjointSequence.cpp:
-        
+
           Fix for broken nightly build.
 
 Mon Jul 12 20:54:17 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>

@@ -41,7 +41,7 @@ void
 DisjointSequence::shift(SequenceNumber value)
 {
   validate(SequenceRange(value, value));
-  value = SequenceNumber(value - 1);  // non-inclusive
+  value = previous_sequence_number(value, low());  // non-inclusive
 
   if (seen(value)) return; // nothing to shift
 
@@ -114,9 +114,9 @@ DisjointSequence::range_iterator::operator++()
     SequenceSet::iterator prev(this->pos_++);
 
     if (this->pos_ != this->end_) {
-      const SequenceNumber rangeLow(prev->value_ + 1);
+      const SequenceNumber rangeLow(prev->getValue() + 1);
       this->value_ = SequenceRange(rangeLow,
-                                   previous_sequence_number(this->pos_->value_, rangeLow));
+                                   previous_sequence_number(this->pos_->getValue(), rangeLow));
       if (this->value_.first > this->value_.second) {
         operator++();
       }
@@ -129,8 +129,8 @@ DisjointSequence::range_iterator::operator++()
 SequenceNumber
 DisjointSequence::previous_sequence_number(const SequenceNumber value, SequenceNumber in_reference_to) {
   // if all of the identifiable sequence is positive, then we do not know
-  return SequenceNumber(((value.value_ != 0) || (in_reference_to.value_ < 0)) ?
-    SequenceNumber(value.value_ - 1) : SequenceNumber(SequenceNumber::MAX_VALUE));
+  return SequenceNumber(((value.getValue() != 0) || (in_reference_to.getValue() < 0)) ?
+    SequenceNumber(value.getValue() - 1) : SequenceNumber(SequenceNumber::MAX_VALUE));
 }
 
 void
@@ -147,7 +147,7 @@ DisjointSequence::dump()
 {
   SequenceSet::iterator iter(this->sequences_.begin());
   while (iter != this->sequences_.end()) {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DisjointSequence::dump(%X) %d\n", this, iter->value_));
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DisjointSequence::dump(%X) %d\n", this, iter->getValue()));
     ++ iter;
   }
 }

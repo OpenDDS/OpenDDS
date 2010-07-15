@@ -28,7 +28,7 @@ ACE_CDR::Boolean
 operator<< (Serializer& serializer, CoherentChangeControl& value)
 {  
   serializer << value.coherent_samples_.num_samples_ ;
-  serializer << value.coherent_samples_.last_sample_.value_;
+  serializer << value.coherent_samples_.last_sample_.getValue();
   serializer << ACE_OutputCDR::from_boolean (value.group_coherent_);
   
   if (value.group_coherent_) {
@@ -40,7 +40,7 @@ operator<< (Serializer& serializer, CoherentChangeControl& value)
          it = value.group_coherent_samples_.begin (); it != itEnd; ++it) {
         serializer << it->first;
         serializer << it->second.num_samples_;
-        serializer << it->second.last_sample_.value_;
+        serializer << it->second.last_sample_.getValue();
     }
   }
   
@@ -53,7 +53,11 @@ operator>> (Serializer& serializer, CoherentChangeControl& value)
   serializer >> value.coherent_samples_.num_samples_;
   if (serializer.good_bit() != true) return false;
   
-  serializer >> value.coherent_samples_.last_sample_.value_;
+  SequenceNumber::Value seqNum;
+  serializer >> seqNum;
+  value.coherent_samples_.last_sample_.setValue(seqNum);
+  if (value.coherent_samples_.last_sample_.getValue() != seqNum)
+    throw std::exception("CoherentChangeControl::operator>> received sequence number is invalid.");
   if (serializer.good_bit() != true) return false;
   
   serializer >> ACE_InputCDR::to_boolean(value.group_coherent_);
@@ -96,7 +100,7 @@ extern OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& str, const CoherentChangeControl& value)
 {
   str << "num_samples: " << std::dec << value.coherent_samples_.num_samples_ << ", " 
-      << "last_sample: " << value.coherent_samples_.last_sample_.value_ << ", "; 
+      << "last_sample: " << value.coherent_samples_.last_sample_.getValue() << ", "; 
   if (value.group_coherent_) {
     RepoIdConverter converter(value.publisher_id_);
     str << "publisher: " << std::dec << std::string(converter).c_str() << ", ";
@@ -108,7 +112,7 @@ std::ostream& operator<<(std::ostream& str, const CoherentChangeControl& value)
       RepoIdConverter converter(it->first);
       str << "writer: " << std::string(converter).c_str() << ", " 
           << "num_samples: " << it->second.num_samples_ << ", " 
-          << "last_sample: " << it->second.last_sample_.value_  << std::endl;
+          << "last_sample: " << it->second.last_sample_.getValue()  << std::endl;
     }
   }
   return str;

@@ -104,7 +104,7 @@ public:
   ACE_Atomic_Op<ACE_Thread_Mutex, long> zero_copy_cnt_;
 
   /// The data sample's sequence number
-  ACE_INT16 sequence_ ;
+  SequenceNumber::Value sequence_ ;
 
   /// the previous data sample in the ReceivedDataElementList
   ReceivedDataElement *previous_data_sample_ ;

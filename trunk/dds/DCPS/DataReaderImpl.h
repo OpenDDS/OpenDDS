@@ -622,7 +622,7 @@ private:
   /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
   bool send_sample_ack(
     const RepoId& publication,
-    ACE_INT16 sequence,
+    SequenceNumber::Value sequence,
     DDS::Time_t when);
 
   /// Data has arrived into the cache, unblock waiting ReadConditions
