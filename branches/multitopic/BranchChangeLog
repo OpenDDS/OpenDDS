@@ -1,3 +1,13 @@
+Thu Jul 15 19:10:42 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+
+          Fixed typo which caused the wrong overload to be called.
+
+        * dds/DCPS/TypeSupportImpl.h:
+
+          Added the Export macro which GCC 4 needed to make the vtable visible.
+
 Thu Jul 15 17:26:24 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r3439 through r3466.
