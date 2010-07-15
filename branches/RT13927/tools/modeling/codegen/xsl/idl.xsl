@@ -42,62 +42,106 @@
 <xsl:template match="/">
 
   <xsl:text>
+// Some header information should be generated here.
 module </xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text> {
 </xsl:text>
 
-  <!-- Generate IDL for enumerations. -->
-  <xsl:apply-templates select="$enum">
+  <!-- Generate IDL for forward declarations. -->
+  <xsl:apply-templates select="$type" mode="declare">
     <xsl:sort select="@name"/>
   </xsl:apply-templates>
-
-  <!-- Generate IDL to forward declare unions. -->
   <xsl:value-of select="$newline"/>
-  <xsl:apply-templates select="$union" mode="declare">
-    <xsl:sort select="@name"/>
-  </xsl:apply-templates>
 
-  <!-- Generate IDL to forward declare structures. -->
-  <xsl:value-of select="$newline"/>
-  <xsl:apply-templates select="$struct" mode="declare">
-    <xsl:sort select="@name"/>
-  </xsl:apply-templates>
+  <!-- Non-terminal user defined types are those that are used within other user types. -->
+  <xsl:variable name="non-terminals" select="$type[@name  = $type/*/@type]"/>
 
-  <!-- Generate IDL for typedefs. -->
-  <xsl:value-of select="$newline"/>
-  <xsl:apply-templates select="$typedef">
-    <xsl:sort select="@name"/>
-  </xsl:apply-templates>
+  <!-- Terminal user defined types are all user defined types minus the non-terminals. -->
+  <xsl:variable name="terminals" select="$type[count(. | $non-terminals) != count($non-terminals)]"/>
 
-  <!-- Generate IDL for arrays. -->
-  <xsl:apply-templates select="$array">
-    <xsl:sort select="@name"/>
-  </xsl:apply-templates>
-
-  <!-- Generate IDL for sequences. -->
-  <xsl:apply-templates select="$sequence">
-    <xsl:sort select="@name"/>
-  </xsl:apply-templates>
-
-  <!-- Generate IDL for unions. -->
-  <xsl:apply-templates select="$union" mode="define">
-    <xsl:sort select="@name"/>
-  </xsl:apply-templates>
-
-  <!-- Generate IDL for structures. -->
-  <xsl:apply-templates select="$struct" mode="define">
-    <xsl:sort select="@name"/>
-  </xsl:apply-templates>
+  <!-- Process all types with no dependencies on them. -->
+  <xsl:call-template name="generate-idl">
+    <xsl:with-param name="nodes" select="$terminals"/>
+  </xsl:call-template>
 
   <xsl:text>
+
 };
 
 </xsl:text>
 </xsl:template>
 <!-- End of main processing template. -->
 
-<!-- Process each enumeration definition. -->
+<!-- Depth first traversal of type nodes processing predecessors first. -->
+<xsl:template name="generate-idl">
+  <xsl:param name="nodes"/>     <!-- <opendds:type> element nodes -->
+  <xsl:param name="excluded"/>  <!-- Space separated string of types already processed. -->
+
+  <!--
+    ** We can't just apply-templates here as we need to keep track of what
+    ** we have already output.
+    -->
+  <xsl:for-each select="$nodes">
+    <!-- Collect the previously output types for exclusion.  -->
+    <xsl:variable name="curpos" select="position()"/>
+    <xsl:variable name="priors" select="$nodes[position() &lt; $curpos]"/>
+    <xsl:variable name="exclude-list">
+      <xsl:for-each select="$priors">
+        <xsl:call-template name="get-dependencies"/>
+      </xsl:for-each>
+      <xsl:text> </xsl:text>
+      <xsl:value-of select="$excluded"/>
+    </xsl:variable>
+
+    <!-- Process new predecessor types. -->
+    <xsl:variable name="direct-predecessors" select="$type[@name = current()/*/@type]"/>
+    <xsl:call-template name="generate-idl">
+      <xsl:with-param name="nodes"
+           select="$direct-predecessors[not(contains($exclude-list,concat(' ',@name,' ')))]"/>
+      <xsl:with-param name="excluded" select="$exclude-list"/>
+    </xsl:call-template>
+
+    <!--
+      ** Actually generate the IDL for this node after its predecessors
+      ** have been processed.
+      -->
+    <xsl:apply-templates select="."/>
+  </xsl:for-each>
+</xsl:template>
+
+<!-- Depth first search for type names of predecessors. -->
+<xsl:template name="get-dependencies">
+  <xsl:param name="successors" select=".."/>
+
+  <xsl:variable name="direct-predecessors" select="$type[@name = current()/*/@type]"/>
+
+  <xsl:for-each select="$direct-predecessors[count(. | $successors) != count($successors)]">
+    <xsl:call-template name="get-dependencies">
+      <xsl:with-param name="successors" select=". | $successors"/>
+    </xsl:call-template>
+  </xsl:for-each>
+  <xsl:text> </xsl:text>
+  <xsl:value-of select="@name"/>
+</xsl:template>
+
+<!-- Forward declare union definitions. -->
+<xsl:template match="opendds:type[ @type = 'opendds:idlUnion']" mode="declare">
+  <xsl:text>  union </xsl:text>
+  <xsl:value-of select="@name"/>
+  <xsl:text>;</xsl:text>
+  <xsl:value-of select="$newline"/>
+</xsl:template>
+
+<!-- Forward declare data structure definitions. -->
+<xsl:template match="opendds:type[ @type = 'opendds:idlStruct']" mode="declare">
+  <xsl:text>  struct </xsl:text>
+  <xsl:value-of select="@name"/>
+  <xsl:text>;</xsl:text>
+  <xsl:value-of select="$newline"/>
+</xsl:template>
+
+<!-- Process enumeration definitions. -->
 <xsl:template match="opendds:type[ @type = 'opendds:idlEnum']">
   <xsl:value-of select="$newline"/>
   <xsl:text>  enum </xsl:text>
@@ -111,23 +155,7 @@ module </xsl:text>
   <xsl:value-of select="$newline"/>
 </xsl:template>
 
-<!-- Forward declare each union definition. -->
-<xsl:template match="opendds:type[ @type = 'opendds:idlUnion']" mode="declare">
-  <xsl:text>  union </xsl:text>
-  <xsl:value-of select="@name"/>
-  <xsl:text>;</xsl:text>
-  <xsl:value-of select="$newline"/>
-</xsl:template>
-
-<!-- Forward declare each data structure definition. -->
-<xsl:template match="opendds:type[ @type = 'opendds:idlStruct']" mode="declare">
-  <xsl:text>  struct </xsl:text>
-  <xsl:value-of select="@name"/>
-  <xsl:text>;</xsl:text>
-  <xsl:value-of select="$newline"/>
-</xsl:template>
-
-<!-- Process each typedef definition. -->
+<!-- Process typedef definitions. -->
 <xsl:template match="opendds:type[ @type = 'opendds:idlTypedef']">
   <!-- 'typedef (target/@type) (@name);\n' -->
   <xsl:text>  typedef </xsl:text>
@@ -140,7 +168,7 @@ module </xsl:text>
   <xsl:value-of select="$newline"/>
 </xsl:template>
 
-<!-- Process each array definition. -->
+<!-- Process array definitions. -->
 <xsl:template match="opendds:type[ @type = 'opendds:idlArray']">
   <!-- 'typedef (member/@type) (member/@name)[ (member/@size)];\n' -->
   <xsl:text>  typedef </xsl:text>
@@ -155,7 +183,7 @@ module </xsl:text>
   <xsl:value-of select="$newline"/>
 </xsl:template>
 
-<!-- Process each sequence definition. -->
+<!-- Process sequence definitions. -->
 <xsl:template match="opendds:type[ @type = 'opendds:idlSequence']">
   <!-- 'typedef sequence<(member/@type)> (@member/name);\n' -->
   <xsl:text>  typedef sequence&lt;</xsl:text>
@@ -168,8 +196,8 @@ module </xsl:text>
   <xsl:value-of select="$newline"/>
 </xsl:template>
 
-<!-- Process each union definition. -->
-<xsl:template match="opendds:type[ @type = 'opendds:idlUnion']" mode="define">
+<!-- Process union definitions. -->
+<xsl:template match="opendds:type[ @type = 'opendds:idlUnion']">
   <xsl:value-of select="$newline"/>
   <xsl:text>  union </xsl:text>
   <xsl:value-of select="@name"/>
@@ -199,8 +227,8 @@ module </xsl:text>
 
 </xsl:template>
 
-<!-- Process each data structure definition. -->
-<xsl:template match="opendds:type[ @type = 'opendds:idlStruct']" mode="define">
+<!-- Process data structure definitions. -->
+<xsl:template match="opendds:type[ @type = 'opendds:idlStruct']">
   <!-- '#pragma DCPS_DATA_TYPE "(modelname)::(type/@name)"\n' -->
   <xsl:value-of select="$newline"/>
   <xsl:text>#pragma DCPS_DATA_TYPE "</xsl:text>
@@ -228,7 +256,7 @@ module </xsl:text>
 
 </xsl:template>
 
-<!-- Process union cases. -->
+<!-- Process individual union cases. -->
 <xsl:template match="opendds:case">
   <!-- Build the output string for the type specification. -->
   <xsl:variable name="typespec">
@@ -248,7 +276,7 @@ module </xsl:text>
   <xsl:value-of select="$newline"/>
 </xsl:template>
 
-<!-- Process structure members. -->
+<!-- Process individual structure members. -->
 <xsl:template match="opendds:member" mode="struct">
   <!-- Build the output string for the type specification. -->
   <xsl:variable name="typespec">
