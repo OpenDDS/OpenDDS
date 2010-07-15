@@ -1,8 +1,230 @@
+Thu Jul 15 15:22:10 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        
+          Removing paranoid checks.
+
+Thu Jul 15 12:33:55 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Fixed nightly build compile errors.
+
+        * dds/DCPS/Definitions.h:
+
+          Fixed nightly build warning. LONG_MAX and LONG_MIN
+          are actually the unsigned long max and min for
+          linux.
+
+Wed Jul 14 20:56:38 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Changed to use ACE_INT32.  Made SequenceNumber a class
+          and provided accessors to value_.  Also made a typedef
+          for ACE_INT32 to use when a SequenceNumber value is not
+          being stored in a SequenceNumber.
+
+        * dds/DCPS/transport/multicast/MulticastTypes.h:
+
+          Removed redundant type.
+
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/SubscriptionInstance.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * tests/DCPS/FooTest4/Writer.cpp:
+
+          Changed to use SequenceNumber::Value and getValue().
+
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Changed to pass SequenceNumber instead of internal
+          value.  And changed to use SequenceNumber::Value
+          and getValue().
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Int16 to Int32 changes and removed unused depth function.
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+        * tests/DCPS/UnitTests/SequenceNumber.cpp:
+
+          Int16 to Int32 changes and removal of functions.
+
+Wed Jul 14 18:21:35 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Added a dump() method to help debugging.
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+
+          Added nak_delay_intervals configuration parameter to define the
+          number of intervals between naks after the initial nak.  This
+          makes the initial nak sent right away and resend after delayed
+          intervals. This could reduce naks.
+
+          Added nak_max configuration parameter to limit the maximum number
+          of times a missing sample will be nak'ed for.  Set this parameter
+          so the nak will be not be sent repeatedly for the unrecoverable
+          packets.
+
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+
+          Changed NakRequestMap from multimap to map as the key is
+          always unique.
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Changed expire_naks() to remove looping through nak requests,
+          to shift the sequence baseline instead of resetting it, and
+          to make time out message clearer.
+
+          Changed send_naks() to use new configuration parameters
+          nak_delay_intervals and nak_max.  Missing samples will now be
+          nak'ed for on the first nak_interval and then after every
+          nak_delay_intervals until the missing sample has been nak'ed
+          for nak_max times or the nak_timeout has expired.
+
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+
+          Added new configurations.
+
+        * dds/idl/CPPTemplate.txt:
+
+          Excluded disposal and unregister messages from check for
+          max samples as this was causing these messages to be lost.
+
+Tue Jul 13 14:25:56 UTC 2010  Brian Johnson  <johnson_b@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Fix for broken nightly build.
+
+Mon Jul 12 20:54:17 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Change operator< to double the distance and compare this with
+          the range of valid positive values so that < would never be ambiguious,
+          since the distance will always be even and range is odd.  Error was
+          exposed by UnitTests/SequenceNumber.cpp lines 38 and 42.
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Added private function to determine what the previous sequence
+          number should be.  Error was exposed by
+          UnitTest/DisjointSequence.cpp lines 213-223.
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Added tests to expose errors in DisjointSequence logic.
+
+        * tests/DCPS/UnitTests/SequenceNumber.cpp:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          Added SequenceNumber tests.
+
+Mon Jul 12 20:03:15 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          Corrected the behave when subscriber has INSTANCE or TOPIC
+          presentation qos and publisher has GROUP presentation qos.
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Added check for nil bit_pub_dr_ in ownership_manager().
+          This prevents crash when builtin topic is turned off in a non
+          minimum bit build.
+
+        * tests/DCPS/GroupPresentation/DataReaderListener.cpp:
+        * tests/DCPS/GroupPresentation/SubscriberListener.h:
+        * tests/DCPS/GroupPresentation/SubscriberListener.cpp:
+        * tests/DCPS/GroupPresentation/run_test.pl:
+        * tests/DCPS/GroupPresentation/subscriber.cpp:
+
+          Added subscriber TOPIC and INSTANCE test cases.
+
+        * bin/dcps_tests.lst:
+
+          Added GroupPresentation new test cases.
+
+Mon Jul 12 16:21:33 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/codegen/be_global.h:
+        * java/idl2jni/codegen/be_global.cpp:
+        * java/idl2jni/codegen/be_util.h:
+        * java/idl2jni/codegen/be_util.cpp:
+
+          The same change is needed for idl2jni to work with the
+          latest DOC group tao_idl and remain compatible with 1.5a and 1.6a.
+
+Mon Jul 12 15:20:10 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/be_global.h:
+        * dds/idl/be_global.cpp:
+
+          Restored compatibility with TAO 1.5a and 1.6a after Jeff's change.
+
+Mon Jul 12 08:44:58 UTC 2010  Jeff Parsons <j.parsons@vanderbilt.edu>
+
+        * dds/idl/be_util.cpp:
+        * dds/idl/be_util.h:
+
+          New files, containing a utility
+          class with static methods.
+
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_global.h:
+
+          Moved methods not related to
+          global data storage to new
+          utility class.
+
+Fri Jul  9 20:14:17 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/OwnershipManager.cpp:
+
+          Fixed a bug that adds same writer to ownership candidate
+          list multiple times when its strength is changed to be greater
+          than current owner. This was observed from subscriber log in
+          ownership update_strength test.
+
+        * tests/DCPS/Ownership/Writer.cpp:
+
+          Add one second delay before reset the writer strength to be higher,
+          so the builtin topic data update arrives only after samples with
+          previous strength on subscriber side. This helps simplify result
+          verification on subscriber side.
+
 Tue Jul  6 18:20:11 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Ownership/Writer.cpp:
 
-          Fixed crash on linux due to ACE_CString passed as string format 
+          Fixed crash on linux due to ACE_CString passed as string format
           logging parameter.
 
 Tue Jul  6 14:43:41 UTC 2010  Adam Mitz  <mitza@ociweb.com>
@@ -16,7 +238,7 @@ Tue Jul  6 07:25:37 UTC 2010  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
 
-          Added a map to WriterInfo to keep track whether ownership needed
+          Added a map to WriterInfo to keep track whether ownership need
           be evaluated for each instance. Previously, it used single flag
           for all instances sent by the writer. This is the bug that cause
           only samples belong the first instance were received when higher

@@ -54,7 +54,6 @@ public:
   SequenceNumber low() const;
   SequenceNumber high() const;
 
-  size_t depth() const;
   bool disjoint() const;
 
   bool seen(SequenceNumber value) const;
@@ -70,10 +69,14 @@ public:
 
   operator SequenceNumber() const;
 
+  void dump();
+
 private:
   SequenceSet sequences_;
 
   void normalize();
+  void validate(const SequenceRange& range) const;
+  static SequenceNumber previous_sequence_number(SequenceNumber value, SequenceNumber in_reference_to);
 };
 
 

@@ -37,6 +37,7 @@
 #include "ace/Auto_Ptr.h"
 
 #include <sstream>
+#include <stdexcept>
 
 #if !defined (__ACE_INLINE__)
 # include "DataReaderImpl.inl"
@@ -54,7 +55,7 @@ DataReaderImpl::DataReaderImpl()
     is_exclusive_ownership_ (false),
     owner_manager_ (0),
     coherent_(false),
-    group_coherent_ordered_(false),
+    subqos_ (TheServiceParticipant->initial_SubscriberQos()),
     topic_desc_(0),
     listener_mask_(DEFAULT_STATUS_MASK),
     fast_listener_(0),
@@ -221,16 +222,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
   dr_local_objref_    = DDS::DataReader::_duplicate(dr_objref);
   dr_remote_objref_   =
     OpenDDS::DCPS::DataReaderRemote::_duplicate(dr_remote_objref);
-  
-  DDS::SubscriberQos subqos;
-  
-  if (this->subscriber_servant_->get_qos(subqos) == ::DDS::RETCODE_OK) {
-    this->group_coherent_ordered_ = 
-      subqos.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS
-      && subqos.presentation.coherent_access 
-      && subqos.presentation.ordered_access;
-  }
-  else {
+    
+  if (this->subscriber_servant_->get_qos(this->subqos_) != ::DDS::RETCODE_OK) {
     ACE_DEBUG((LM_WARNING,
                 ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::init() - ")
                 ACE_TEXT("failed to get SubscriberQos\n")));
@@ -328,7 +321,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
                      std::string(converter).c_str(), bpair.second));
         
           WriterMapType::iterator iter = writers_.find(writer_id);
-          WriterInfo* writer = 0;
           if (iter != writers_.end()) {
           if (DCPS_debug_level > 4) {
             // This may not be an error since it could happen that the sample
@@ -375,7 +367,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
             DDS::Time_t timenow = time_value_to_time(now);
             bool result = this->send_sample_ack(
                             writers[ index].writerId,
-                            sequence.value_,
+                            sequence.getValue(),
                             timenow);
 
             if (result) {
@@ -1371,12 +1363,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   case REQUEST_ACK: {
     this->writer_activity(sample.header_);
 
-    SequenceNumber ack;
     DDS::Duration_t delay;
     Serializer serializer(
       sample.sample_,
       sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
-    serializer >> ack.value_;
+    SequenceNumber::Value seqNum;
+    serializer >> seqNum;
+    SequenceNumber ack(seqNum);
     serializer >> delay;
 
     if (DCPS_debug_level > 9) {
@@ -1386,7 +1379,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
                  ACE_TEXT("publication %C received REQUEST_ACK for sequence 0x%x ")
                  ACE_TEXT("valid for the next %d seconds.\n"),
                  std::string(debugConverter).c_str(),
-                 ACE_UINT16(ack.value_),
+                 ack.getValue(),
                  delay.sec));
     }
 
@@ -1406,7 +1399,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           DDS::Time_t timenow = time_value_to_time(now);
           bool result = this->send_sample_ack(
                           sample.header_.publication_id_,
-                          ack.value_,
+                          ack.getValue(),
                           timenow);
 
           if (result) {
@@ -1551,7 +1544,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 bool
 DataReaderImpl::send_sample_ack(
   const RepoId& publication,
-  ACE_INT16 sequence,
+  SequenceNumber::Value sequence,
   DDS::Time_t when)
 {
   size_t dataSize = sizeof(sequence);
@@ -1595,7 +1588,7 @@ DataReaderImpl::send_sample_ack(
                ACE_TEXT("%C sending SAMPLE_ACK message with sequence 0x%x ")
                ACE_TEXT("to publication %C.\n"),
                std::string(subscriptionBuffer).c_str(),
-               ACE_UINT16(sequence),
+               sequence,
                std::string(publicationBuffer).c_str()));
   }
 
@@ -2088,7 +2081,7 @@ OpenDDS::DCPS::WriterInfo::coherent_change_received ()
 {
   if (this->writer_coherent_samples_.num_samples_ == 0)
     return NOT_COMPLETED_YET;
-    
+  
   if (! this->coherent_sample_sequence_.disjoint() 
       && (this->coherent_sample_sequence_.high() 
           == this->writer_coherent_samples_.last_sample_))
@@ -2996,6 +2989,13 @@ DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
 
 bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer) 
 {
+  if (this->subqos_.presentation.access_scope == ::DDS::INSTANCE_PRESENTATION_QOS
+   || ! this->subqos_.presentation.coherent_access) {
+    this->accept_coherent (writer->writer_id_, writer->publisher_id_);
+    this->coherent_changes_completed (this);
+    return true;
+  }
+  
   // verify current coherent changes from single writer
   Coherent_State state = writer->coherent_change_received();
   if (writer->group_coherent_) { // GROUP coherent
@@ -3165,12 +3165,14 @@ DataReaderImpl::coherent_changes_completed (DataReaderImpl* reader)
 
 void DataReaderImpl::begin_access()
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
   this->coherent_ = true;
 }
 
 
 void DataReaderImpl::end_access()
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
   this->coherent_ = false;
   this->group_coherent_ordered_data_.reset();
   this->post_read_or_take();
@@ -3201,6 +3203,13 @@ void DataReaderImpl::get_ordered_data (GroupRakeData& data,
   }
 }
 
+
+void
+DataReaderImpl::set_subscriber_qos(
+  const DDS::SubscriberQos & qos)
+{
+  this->subqos_ = qos;
+}
 
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE

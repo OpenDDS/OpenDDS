@@ -34,6 +34,7 @@
 #include "ace/Auto_Ptr.h"
 
 #include <sstream>
+#include <stdexcept>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -791,7 +792,7 @@ DataWriterImpl::create_ack_token(DDS::Duration_t max_wait) const
 DDS::ReturnCode_t
 DataWriterImpl::send_ack_requests(const DataWriterImpl::AckToken& token)
 {
-  size_t dataSize = sizeof(token.sequence_.value_); // Assume no padding.
+  size_t dataSize = sizeof(token.sequence_.getValue()); // Assume no padding.
   dataSize += gen_find_size(token.max_wait_);
 
   ACE_Message_Block* data;
@@ -803,7 +804,7 @@ DataWriterImpl::send_ack_requests(const DataWriterImpl::AckToken& token)
   Serializer serializer(
     data,
     this->get_publisher_servant()->swap_bytes());
-  serializer << token.sequence_.value_;
+  serializer << token.sequence_.getValue();
   serializer << token.max_wait_;
 
   if (DCPS_debug_level > 0) {
@@ -813,7 +814,7 @@ DataWriterImpl::send_ack_requests(const DataWriterImpl::AckToken& token)
                ACE_TEXT("%C sending REQUEST_ACK message for sequence 0x%x ")
                ACE_TEXT("to %d subscriptions.\n"),
                std::string(converter).c_str(),
-               ACE_UINT16(token.sequence_.value_),
+               token.sequence_.getValue(),
                this->readers_.size()));
   }
 
@@ -881,7 +882,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
                    ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments() - ")
                    ACE_TEXT("%C unblocking for sequence 0x%x.\n"),
                    std::string(converter).c_str(),
-                   ACE_UINT16(token.sequence_.value_)));
+                   token.sequence_.getValue()));
       }
 
       return DDS::RETCODE_OK;
@@ -895,7 +896,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
              ACE_TEXT("%C timed out waiting for sequence 0x%x to be acknowledged ")
              ACE_TEXT("from %d subscriptions.\n"),
              std::string(converter).c_str(),
-             ACE_UINT16(token.sequence_.value_),
+             token.sequence_.getValue(),
              this->readers_.size()));
   return DDS::RETCODE_TIMEOUT;
 }
@@ -1668,7 +1669,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
       == ::DDS::GROUP_PRESENTATION_QOS;
   header_data.message_length_ = data->total_length();
   ++this->sequence_number_;
-  header_data.sequence_ = this->sequence_number_.value_;
+  header_data.sequence_ = this->sequence_number_.getValue();
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
 
@@ -1738,12 +1739,13 @@ DataWriterImpl::deliver_ack(
   const DataSampleHeader& header,
   DataSample*             data)
 {
-  SequenceNumber ack;
+  SequenceNumber::Value seqNum;
 
   Serializer serializer(
     data,
     header.byte_order_ != TAO_ENCAP_BYTE_ORDER);
-  serializer >> ack.value_;
+  serializer >> seqNum;
+  SequenceNumber ack(seqNum);
 
   if (DCPS_debug_level > 0) {
     RepoIdConverter debugConverter(this->publication_id_);
@@ -1753,7 +1755,7 @@ DataWriterImpl::deliver_ack(
                ACE_TEXT("publication %C received update for ")
                ACE_TEXT("sample %x from subscription %C.\n"),
                std::string(debugConverter).c_str(),
-               ACE_UINT16(ack.value_),
+               ack.getValue(),
                std::string(debugConverter2).c_str()));
   }
 
