@@ -50,6 +50,14 @@ nak_depth=32
 # The default value is: 500.
 nak_interval=500
 
+# The number of interval's between nak's (after initial nak).
+# The default value is: 4.
+nak_delay_intervals=4
+
+# The maximum number of a missing sample will be nak'ed.
+# The default value is: 3.
+nak_max=3
+
 # The maximum number of milliseconds to wait before giving up
 # on a repair response (reliable only).
 # The default value is: 30000 (30 seconds).

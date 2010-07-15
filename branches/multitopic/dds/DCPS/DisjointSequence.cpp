@@ -12,6 +12,7 @@
 #include "DisjointSequence.h"
 
 #include "ace/Log_Msg.h"
+#include <stdexcept>
 
 #ifndef __ACE_INLINE__
 # include "DisjointSequence.inl"
@@ -39,7 +40,8 @@ DisjointSequence::reset(SequenceNumber value)
 void
 DisjointSequence::shift(SequenceNumber value)
 {
-  value = SequenceNumber(value - 1);  // non-inclusive
+  validate(SequenceRange(value, value));
+  value = previous_sequence_number(value, low());  // non-inclusive
 
   if (seen(value)) return; // nothing to shift
 
@@ -52,13 +54,14 @@ DisjointSequence::shift(SequenceNumber value)
 
   // Shift low-water mark to inserted value:
   this->sequences_.erase(first, last);
-
-  normalize();
+  
+  normalize ();
 }
 
 bool
 DisjointSequence::update(SequenceNumber value)
 {
+  validate(SequenceRange(value, value));
   if (seen(value)) return false;  // nothing to update
 
   std::pair<SequenceSet::iterator, bool> pair = this->sequences_.insert(value);
@@ -72,6 +75,7 @@ DisjointSequence::update(SequenceNumber value)
 bool
 DisjointSequence::update(const SequenceRange& range)
 {
+  validate(range);
   if (seen(range.second)) return false; // nothing to update
 
   bool updated(false);
@@ -102,5 +106,50 @@ DisjointSequence::normalize()
   }
 }
 
+
+DisjointSequence::range_iterator&
+DisjointSequence::range_iterator::operator++()
+{
+  if (this->pos_ != this->end_) {
+    SequenceSet::iterator prev(this->pos_++);
+
+    if (this->pos_ != this->end_) {
+      const SequenceNumber rangeLow(prev->getValue() + 1);
+      this->value_ = SequenceRange(rangeLow,
+                                   previous_sequence_number(this->pos_->getValue(), rangeLow));
+      if (this->value_.first > this->value_.second) {
+        operator++();
+      }
+    }
+
+  }
+  return *this;
+}
+
+SequenceNumber
+DisjointSequence::previous_sequence_number(const SequenceNumber value, SequenceNumber in_reference_to) {
+  // if all of the identifiable sequence is positive, then we do not know
+  return SequenceNumber(((value.getValue() != 0) || (in_reference_to.getValue() < 0)) ?
+    SequenceNumber(value.getValue() - 1) : SequenceNumber(SequenceNumber::MAX_VALUE));
+}
+
+void
+DisjointSequence::validate(const SequenceRange& range) const {
+  if (range.first > range.second)
+    throw std::runtime_error("SequenceNumber range invalid, range must be assending.");
+  if ((range.second < low()) && (range.first > high()))
+    throw std::runtime_error("SequenceNumber range not valid with respect"
+      " to existing DisjointSequence SequenceNumbers.");
+}
+
+void
+DisjointSequence::dump()
+{
+  SequenceSet::iterator iter(this->sequences_.begin());
+  while (iter != this->sequences_.end()) {
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DisjointSequence::dump(%X) %d\n", this, iter->getValue()));
+    ++ iter;
+  }
+}
 } // namespace DCPS
 } // namespace OpenDDS

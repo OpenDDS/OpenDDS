@@ -1,3 +1,7 @@
+Thu Jul 15 17:26:24 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r3439 through r3466.
+
 Wed Jul 14 20:31:40 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/MultiTopicDataReader_T.cpp:

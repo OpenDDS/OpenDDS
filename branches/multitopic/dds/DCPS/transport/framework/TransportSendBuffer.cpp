@@ -122,7 +122,7 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) TransportSendBuffer::insert() - ")
         ACE_TEXT("aging off PDU: 0x%x as buffer(0x%x,0x%x)\n"),
-        static_cast<const ACE_INT16>(it->first),
+        it->first.getValue(),
         it->second.first, it->second.second
       ));
     }
@@ -157,7 +157,7 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) TransportSendBuffer::insert() - ")
       ACE_TEXT("saved PDU: 0x%x as buffer(0x%x,0x%x)\n"),
-      static_cast<const ACE_INT16>(sequence),
+      sequence.getValue(),
       buffer.first, buffer.second
     ));
   }
@@ -181,7 +181,7 @@ TransportSendBuffer::resend(const SequenceRange& range)
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) TransportSendBuffer::resend() - ")
                    ACE_TEXT("resending PDU: 0x%x, (0x%x,0x%x)\n"),
-                   static_cast<const ACE_INT16>(sequence),
+                   sequence.getValue(),
                    it->second.first,
                    it->second.second));
       }

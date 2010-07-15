@@ -97,7 +97,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// The sequence number is obtained from the Publisher
   /// associated with the DataWriter based on the PRESENTATION
   /// requirement for the sequence value (access_scope == GROUP).
-  ACE_INT16   sequence_;
+  SequenceNumber::Value sequence_;
 
   /// The SOURCE_TIMESTAMP field is generated from the DataWriter
   /// or supplied by the application at the time of the write.
