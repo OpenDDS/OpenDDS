@@ -1365,8 +1365,6 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     SequenceNumber::Value seqNum;
     serializer >> seqNum;
     SequenceNumber ack(seqNum);
-    if (ack.getValue() != seqNum)
-      throw std::runtime_error("DataReaderImpl::data_received REQUEST_ACK received sequence number is invalid.");
     serializer >> delay;
 
     if (DCPS_debug_level > 9) {

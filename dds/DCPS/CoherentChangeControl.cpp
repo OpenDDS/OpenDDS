@@ -58,8 +58,6 @@ operator>> (Serializer& serializer, CoherentChangeControl& value)
   SequenceNumber::Value seqNum;
   serializer >> seqNum;
   value.coherent_samples_.last_sample_.setValue(seqNum);
-  if (value.coherent_samples_.last_sample_.getValue() != seqNum)
-    throw std::runtime_error("CoherentChangeControl::operator>> received sequence number is invalid.");
   if (serializer.good_bit() != true) return false;
   
   serializer >> ACE_InputCDR::to_boolean(value.group_coherent_);
