@@ -365,7 +365,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
             DDS::Time_t timenow = time_value_to_time(now);
             bool result = this->send_sample_ack(
                             writers[ index].writerId,
-                            sequence.value_,
+                            sequence.getValue(),
                             timenow);
 
             if (result) {
@@ -1357,12 +1357,15 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   case REQUEST_ACK: {
     this->writer_activity(sample.header_);
 
-    SequenceNumber ack;
     DDS::Duration_t delay;
     Serializer serializer(
       sample.sample_,
       sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
-    serializer >> ack.value_;
+    SequenceNumber::Value seqNum;
+    serializer >> seqNum;
+    SequenceNumber ack(seqNum);
+    if (ack.getValue() != seqNum)
+      throw std::exception("DataReaderImpl::data_received REQUEST_ACK received sequence number is invalid.");
     serializer >> delay;
 
     if (DCPS_debug_level > 9) {
@@ -1372,7 +1375,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
                  ACE_TEXT("publication %C received REQUEST_ACK for sequence 0x%x ")
                  ACE_TEXT("valid for the next %d seconds.\n"),
                  std::string(debugConverter).c_str(),
-                 ACE_UINT16(ack.value_),
+                 ack.getValue(),
                  delay.sec));
     }
 
@@ -1392,7 +1395,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           DDS::Time_t timenow = time_value_to_time(now);
           bool result = this->send_sample_ack(
                           sample.header_.publication_id_,
-                          ack.value_,
+                          ack.getValue(),
                           timenow);
 
           if (result) {
@@ -1537,7 +1540,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 bool
 DataReaderImpl::send_sample_ack(
   const RepoId& publication,
-  ACE_INT16 sequence,
+  SequenceNumber::Value sequence,
   DDS::Time_t when)
 {
   size_t dataSize = sizeof(sequence);
@@ -1581,7 +1584,7 @@ DataReaderImpl::send_sample_ack(
                ACE_TEXT("%C sending SAMPLE_ACK message with sequence 0x%x ")
                ACE_TEXT("to publication %C.\n"),
                std::string(subscriptionBuffer).c_str(),
-               ACE_UINT16(sequence),
+               sequence,
                std::string(publicationBuffer).c_str()));
   }
 

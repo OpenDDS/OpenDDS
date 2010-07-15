@@ -84,7 +84,7 @@ public:
   void send_naks (DisjointSequence& missing);
 
   void nakack_received(ACE_Message_Block* control);
-  void send_nakack(MulticastSequence low);
+  void send_nakack(SequenceNumber low);
 
   virtual bool start(bool active);
   virtual void stop();

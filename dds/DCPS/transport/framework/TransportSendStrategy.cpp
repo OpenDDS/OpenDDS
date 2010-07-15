@@ -1644,7 +1644,7 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_header()
   DBG_ENTRY_LVL("TransportSendStrategy","prepare_header",6);
 
   // Increment header sequence for packet:
-  this->header_.sequence_ = ++this->header_sequence_;
+  this->header_.sequence_ = (++this->header_sequence_).getValue();
 
   // Allow the specific implementation the opportunity to set
   // values in the packet header.

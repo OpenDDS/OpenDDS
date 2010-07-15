@@ -73,15 +73,6 @@ DisjointSequence::high() const
   return *(this->sequences_.rbegin());
 }
 
-ACE_INLINE size_t
-DisjointSequence::depth() const
-{
-  ACE_UINT16 u_low(low());
-  ACE_UINT16 u_high(high());
-
-  return std::max(u_low, u_high) - std::min(u_low, u_high);
-}
-
 ACE_INLINE bool
 DisjointSequence::disjoint() const
 {

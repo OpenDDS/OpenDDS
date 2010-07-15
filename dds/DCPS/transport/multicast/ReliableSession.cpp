@@ -320,7 +320,7 @@ ReliableSession::expire_naks()
                 ACE_TEXT("(%P|%t) WARNING: ")
                 ACE_TEXT("ReliableSession::expire_naks: ")
                 ACE_TEXT("timed out waiting on remote peer %d to send missing samples: %d - %d!\n"),
-                this->remote_peer_, this->nak_sequence_.low ().value_, lastSeq.value_));
+                this->remote_peer_, this->nak_sequence_.low ().getValue(), lastSeq.getValue()));
     this->nak_sequence_.shift(lastSeq);
   }
       
@@ -431,7 +431,7 @@ ReliableSession::send_naks()
       if (DCPS_debug_level > 0) {
         ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)ReliableSession::send_naks local %d ")
           ACE_TEXT ("remote %d ignore missing %d - %d \n"), 
-          this->link_->local_peer(), this->remote_peer_, low.value_, high.value_));
+          this->link_->local_peer(), this->remote_peer_, low.getValue(), high.getValue()));
       }
       
       // Make contiguous between ignored sequences.
@@ -475,10 +475,10 @@ ReliableSession::nak_received(ACE_Message_Block* control)
   std::vector<SequenceRange> ranges;
 
   for (CORBA::ULong i = 0; i < size; ++i) {
-    MulticastSequence low;
+    SequenceNumber::Value low;
     serializer >> low;
 
-    MulticastSequence high;
+    SequenceNumber::Value high;
     serializer >> high;
 
     ranges.push_back (SequenceRange (low, high));
@@ -510,7 +510,7 @@ ReliableSession::nak_received(ACE_Message_Block* control)
       ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)ReliableSession::nak_received")
                             ACE_TEXT (" %d <- %d %d - %d resend result %d\n"),
                             this->link_->local_peer(), this->remote_peer_, 
-                            ranges[i].first.value_, ranges[i].second.value_, ret));  
+                            ranges[i].first.getValue(), ranges[i].second.getValue(), ret));  
     }
   }
 }
@@ -543,13 +543,13 @@ ReliableSession::send_naks (DisjointSequence& missing)
   serializer << this->remote_peer_;
   serializer << size;
   for (CORBA::ULong i = 0; i < size; ++i) {
-    serializer << ranges[i]->first;
-    serializer << ranges[i]->second;
+    serializer << ranges[i]->first.getValue();
+    serializer << ranges[i]->second.getValue();
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)ReliableSession::send_naks")
                             ACE_TEXT (" %d -> %d %d - %d \n"), 
                             this->link_->local_peer(), remote_peer_,
-                            ranges[i]->first.value_, ranges[i]->second.value_));
+                            ranges[i]->first.getValue(), ranges[i]->second.getValue()));
     }
   }
   // Send control sample to remote peer:
@@ -571,7 +571,7 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
   Serializer serializer(
     control, header.swap_bytes());
 
-  MulticastSequence low;
+  SequenceNumber::Value low;
   serializer >> low;
 
   // MULTICAST_NAKACK control samples indicate data which cannot be
@@ -584,16 +584,16 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
                 ACE_TEXT("ReliableSession::nakack_received %d <- %d %d - %d ")
                 ACE_TEXT("not repaired.\n"),
                 this->link_->local_peer(), this->remote_peer_, 
-                this->nak_sequence_.low().value_, low));
+                this->nak_sequence_.low().getValue(), low));
     }
     this->nak_sequence_.shift(low);
   }
 }
 
 void
-ReliableSession::send_nakack(MulticastSequence low)
+ReliableSession::send_nakack(SequenceNumber low)
 {
-  size_t len = sizeof(low);
+  size_t len = sizeof(low.getValue());
 
   ACE_Message_Block* data;
   ACE_NEW(data, ACE_Message_Block(len));
@@ -601,7 +601,7 @@ ReliableSession::send_nakack(MulticastSequence low)
   Serializer serializer(
     data, this->link_->transport()->swap_bytes());
 
-  serializer << low;
+  serializer << low.getValue();
 
   // Broadcast control sample to all peers:
   send_control(MULTICAST_NAKACK, data);

@@ -16,8 +16,8 @@
 using namespace OpenDDS::DCPS;
 
 namespace {
-  const ACE_INT16 POSITIVE_RANGE = ACE_INT16_MAX;
-  const ACE_INT16 MAX_POSITIVE = ACE_INT16_MAX-1;
+  const SequenceNumber::Value POSITIVE_RANGE = ACE_INT32_MAX;
+  const SequenceNumber::Value MAX_POSITIVE = ACE_INT32_MAX-1;
 }
 
 int
@@ -25,7 +25,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 {
   // Construction (default)
   {
-    TEST_CHECK(SequenceNumber(ACE_INT16_MIN) == SequenceNumber());
+    TEST_CHECK(SequenceNumber(ACE_INT32_MIN) == SequenceNumber());
 
     DisjointSequence sequence;
 
@@ -35,9 +35,6 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     // ASSERT low and high water marks are the same:
     TEST_CHECK(sequence.low() == sequence.high());
-
-    // ASSERT depth is 0:
-    TEST_CHECK(sequence.depth() == 0);
 
     // ASSERT sequence is not disjointed:
     TEST_CHECK(!sequence.disjoint());
@@ -53,9 +50,6 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     // ASSERT low and high water marks are the same:
     TEST_CHECK(sequence.low() == sequence.high());
-
-    // ASSERT depth is 0:
-    TEST_CHECK(sequence.depth() == 0);
 
     // ASSERT sequence is not disjointed:
     TEST_CHECK(!sequence.disjoint());
@@ -76,9 +70,6 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     // ASSERT low and high water marks are the same:
     TEST_CHECK(sequence.low() == sequence.high());
 
-    // ASSERT depth is 0:
-    TEST_CHECK(sequence.depth() == 0);
-
     // ASSERT sequence is not disjointed:
     TEST_CHECK(!sequence.disjoint());
   }
@@ -93,8 +84,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     sequence.update(sequence.low() + 1);
 
     TEST_CHECK(sequence.low() == SequenceNumber(1));
+    TEST_CHECK(sequence.low() == sequence.high());
     TEST_CHECK(!sequence.disjoint());
-    TEST_CHECK(sequence.depth() == 0);
 
     // ASSERT update of value > low + 1 creates discontiguity:
     sequence = DisjointSequence(0);
@@ -103,7 +94,6 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(sequence.low() == SequenceNumber(0));
     TEST_CHECK(sequence.high() == SequenceNumber(5));
     TEST_CHECK(sequence.disjoint());
-    TEST_CHECK(sequence.depth() == 5);
 
     // ASSERT update of low + 1 updates the low water mark
     //        and normalizes new contiguities:
@@ -116,14 +106,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(sequence.low() == SequenceNumber(0));
     TEST_CHECK(sequence.high() == SequenceNumber(5));
     TEST_CHECK(sequence.disjoint());
-    TEST_CHECK(sequence.depth() == 5);
 
     sequence.update(1);
 
     TEST_CHECK(sequence.low() == SequenceNumber(5));
     TEST_CHECK(sequence.high() == SequenceNumber(5));
     TEST_CHECK(!sequence.disjoint());
-    TEST_CHECK(sequence.depth() == 0);
 
     // ASSERT update of low + 1 updates the low water mark
     //        and preserves existing discontiguities:
@@ -135,14 +123,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(sequence.low() == SequenceNumber(0));
     TEST_CHECK(sequence.high() == SequenceNumber(5));
     TEST_CHECK(sequence.disjoint());
-    TEST_CHECK(sequence.depth() == 5);
   
     sequence.update(1);
 
     TEST_CHECK(sequence.low() == SequenceNumber(2));
     TEST_CHECK(sequence.high() == SequenceNumber(5));
     TEST_CHECK(sequence.disjoint());
-    TEST_CHECK(sequence.depth() == 3);
 
     // ASSERT update of range from low +1 updates the 
     //        low water mark and preserves existing 
@@ -155,14 +141,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(sequence.low() == SequenceNumber(0));
     TEST_CHECK(sequence.high() == SequenceNumber(6));
     TEST_CHECK(sequence.disjoint());
-    TEST_CHECK(sequence.depth() == 6);
   
     sequence.update(SequenceRange(1, 2));
 
     TEST_CHECK(sequence.low() == SequenceNumber(3));
     TEST_CHECK(sequence.high() == SequenceNumber(6));
     TEST_CHECK(sequence.disjoint());
-    TEST_CHECK(sequence.depth() == 3);
   }
 
   // invalid set of SequenceNumbers
@@ -253,7 +237,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     // ASSERT multiple contiguities return  multiple ranges
     //        of values with a difference of one:
-    sequence = DisjointSequence(ACE_INT16_MIN);
+    sequence = DisjointSequence(ACE_INT32_MIN);
     sequence.update(0);  // discontiguity
     sequence.update(5);  // discontiguity
     sequence.update(7);  // discontiguity
@@ -262,7 +246,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     it = sequence.range_begin();
 
     range = *it;
-    TEST_CHECK(range.first == SequenceNumber(ACE_INT16_MIN + 1));
+    TEST_CHECK(range.first == SequenceNumber(ACE_INT32_MIN + 1));
     TEST_CHECK(range.second == SequenceNumber(-1));
     TEST_CHECK(++it != sequence.range_end());
 

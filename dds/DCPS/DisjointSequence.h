@@ -54,7 +54,6 @@ public:
   SequenceNumber low() const;
   SequenceNumber high() const;
 
-  size_t depth() const;
   bool disjoint() const;
 
   bool seen(SequenceNumber value) const;

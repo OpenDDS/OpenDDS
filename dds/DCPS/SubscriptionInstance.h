@@ -77,7 +77,7 @@ public:
   InstanceState instance_state_ ;
 
   /// sequence number of the move recect data sample received
-  ACE_INT16 last_sequence_ ;
+  SequenceNumber::Value last_sequence_ ;
 
   /// Data sample(s) in this instance
   ReceivedDataElementList rcvd_samples_ ;

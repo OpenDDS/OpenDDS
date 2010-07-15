@@ -260,8 +260,8 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     if (value.historic_sample_ == 1) str << "Historic, ";
     if (value.lifespan_duration_ == 1) str << "Lifespan, ";
 
-    str << "Sequence: 0x" << std::hex << std::setw(2) << std::setfill('0')
-        << ACE_UINT16(value.sequence_) << ", ";
+    str << "Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
+        << value.sequence_ << ", ";
 
     str << "Timestamp: " << std::dec << value.source_timestamp_sec_ << "."
         << std::dec << value.source_timestamp_nanosec_ << ", ";
