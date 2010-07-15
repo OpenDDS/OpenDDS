@@ -1,3 +1,17 @@
+Thu Jul 15 12:33:55 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        
+          Fixed nightly build compile errors.
+        
+        * dds/DCPS/Definitions.h:
+        
+          Fixed nightly build warning. LONG_MAX and LONG_MIN
+          are actually the unsigned long max and min for 
+          linux.
+
 Wed Jul 14 20:56:38 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/Definitions.h:
@@ -10,7 +24,7 @@ Wed Jul 14 20:56:38 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
         * dds/DCPS/transport/multicast/MulticastTypes.h:
 
           Removed redundant type.
-          
+
         * dds/DCPS/ReceivedDataElementList.h:
         * dds/DCPS/SubscriptionInstance.h:
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
@@ -30,7 +44,7 @@ Wed Jul 14 20:56:38 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
         * dds/DCPS/transport/multicast/ReliableSession.cpp:
 
           Changed to pass SequenceNumber instead of internal
-          value.  And changed to use SequenceNumber::Value 
+          value.  And changed to use SequenceNumber::Value
           and getValue().
 
         * dds/DCPS/DisjointSequence.h:
@@ -38,10 +52,10 @@ Wed Jul 14 20:56:38 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
         * dds/DCPS/DisjointSequence.cpp:
 
           Int16 to Int32 changes and removed unused depth function.
-          
+
         * tests/DCPS/UnitTests/DisjointSequence.cpp:
         * tests/DCPS/UnitTests/SequenceNumber.cpp:
-        
+
           Int16 to Int32 changes and removal of functions.
 
 Wed Jul 14 18:21:35 UTC 2010  Yan Dai  <dai_y@ociweb.com>

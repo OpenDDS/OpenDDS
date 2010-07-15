@@ -37,6 +37,7 @@
 #include "ace/Auto_Ptr.h"
 
 #include <sstream>
+#include <stdexcept>
 
 #if !defined (__ACE_INLINE__)
 # include "DataReaderImpl.inl"
@@ -1365,7 +1366,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     serializer >> seqNum;
     SequenceNumber ack(seqNum);
     if (ack.getValue() != seqNum)
-      throw std::exception("DataReaderImpl::data_received REQUEST_ACK received sequence number is invalid.");
+      throw std::runtime_error("DataReaderImpl::data_received REQUEST_ACK received sequence number is invalid.");
     serializer >> delay;
 
     if (DCPS_debug_level > 9) {
