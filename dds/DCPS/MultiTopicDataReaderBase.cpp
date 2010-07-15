@@ -363,7 +363,7 @@ void MultiTopicDataReaderBase::statistics_enabled(
   CORBA::Boolean statistics_enabled)
   ACE_THROW_SPEC((CORBA::SystemException))
 {
-  resulting_reader_->statistics_enabled();
+  resulting_reader_->statistics_enabled(statistics_enabled);
 }
 
 }

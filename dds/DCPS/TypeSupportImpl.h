@@ -21,7 +21,7 @@ namespace DCPS {
 
 class MetaStruct;
 
-class TypeSupportImpl {
+class OpenDDS_Dcps_Export TypeSupportImpl {
 public:
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
