@@ -34,6 +34,7 @@
 #include "ace/Auto_Ptr.h"
 
 #include <sstream>
+#include <stdexcept>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -1746,7 +1747,7 @@ DataWriterImpl::deliver_ack(
   serializer >> seqNum;
   SequenceNumber ack(seqNum);
   if (ack.getValue() != seqNum)
-    throw std::exception("DataWriterImpl::deliver_ack received sequence number is invalid.");
+    throw std::runtime_error("DataWriterImpl::deliver_ack received sequence number is invalid.");
 
   if (DCPS_debug_level > 0) {
     RepoIdConverter debugConverter(this->publication_id_);

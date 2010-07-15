@@ -15,6 +15,8 @@
 
 #include <iomanip>
 #include <iostream>
+#include <stdexcept>
+
 
 #if !defined (__ACE_INLINE__)
 #include "CoherentChangeControl.inl"
@@ -57,7 +59,7 @@ operator>> (Serializer& serializer, CoherentChangeControl& value)
   serializer >> seqNum;
   value.coherent_samples_.last_sample_.setValue(seqNum);
   if (value.coherent_samples_.last_sample_.getValue() != seqNum)
-    throw std::exception("CoherentChangeControl::operator>> received sequence number is invalid.");
+    throw std::runtime_error("CoherentChangeControl::operator>> received sequence number is invalid.");
   if (serializer.good_bit() != true) return false;
   
   serializer >> ACE_InputCDR::to_boolean(value.group_coherent_);

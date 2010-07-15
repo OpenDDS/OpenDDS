@@ -122,8 +122,8 @@ public:
            && (*this != rvalue);
   }
 
-  static const Value MAX_VALUE = LONG_MAX - 1;
-  static const Value MIN_VALUE = LONG_MIN;
+  static const Value MAX_VALUE = ACE_INT32_MAX - 1;
+  static const Value MIN_VALUE = ACE_INT32_MIN;
 
 private:
   Value value_;
