@@ -1746,8 +1746,6 @@ DataWriterImpl::deliver_ack(
     header.byte_order_ != TAO_ENCAP_BYTE_ORDER);
   serializer >> seqNum;
   SequenceNumber ack(seqNum);
-  if (ack.getValue() != seqNum)
-    throw std::runtime_error("DataWriterImpl::deliver_ack received sequence number is invalid.");
 
   if (DCPS_debug_level > 0) {
     RepoIdConverter debugConverter(this->publication_id_);

@@ -1,15 +1,23 @@
-Thu Jul 15 12:33:55 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+Thu Jul 15 15:22:10 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/CoherentChangeControl.cpp:
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DataWriterImpl.cpp:
         
+          Removing paranoid checks.
+
+Thu Jul 15 12:33:55 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
           Fixed nightly build compile errors.
-        
+
         * dds/DCPS/Definitions.h:
-        
+
           Fixed nightly build warning. LONG_MAX and LONG_MIN
-          are actually the unsigned long max and min for 
+          are actually the unsigned long max and min for
           linux.
 
 Wed Jul 14 20:56:38 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
