@@ -1,3 +1,13 @@
+Thu Jul 15 22:42:34 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/codegen/xsl/idl.xsl:
+
+          Implemented dependency ordered IDL generation.
+
+        * tools/modeling/docs/user_guide/index.html:
+
+          Minor documentation updates.
+
 Mon Jul 12 21:02:29 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/codegen/xsl/idl.xsl:
