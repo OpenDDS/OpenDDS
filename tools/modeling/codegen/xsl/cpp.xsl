@@ -8,7 +8,6 @@
     **
     ** Generate C++ implementation code.
     **
-    ** @TODO - fix problem with duplicate type registration.
     ** @TODO - check string management.
     ** @TODO - determine how to set the transport addresses.
     **
@@ -143,17 +142,23 @@ OpenDDS::Model::</xsl:text>
   switch( type) {
 </xsl:text>
   <!-- '  case Types::(type/@name):\n ... \n  break;\n' -->
-  <xsl:for-each select="$topic/opendds:datatype">
-    <xsl:sort select="@name"/>
-    <xsl:text>    case Types::</xsl:text>
-    <xsl:value-of select="@name"/>
-    <xsl:text>:
+  <xsl:variable name="defined-types" select="$topic/opendds:datatype"/>
+  <xsl:for-each select="$defined-types">
+    <!-- Don't sort this without sorting the prior list as well. -->
+
+    <!-- Only generate type code once for each type. -->
+    <xsl:variable name="curpos" select="position()"/>
+    <xsl:variable name="priors" select="$defined-types[ position() &lt; $curpos]"/>
+    <xsl:if test="count( $priors[@name = current()/@name]) = 0">
+      <xsl:text>    case Types::</xsl:text>
+      <xsl:value-of select="@name"/>
+      <xsl:text>:
       {
         typedef ::</xsl:text>
-    <xsl:value-of select="$modelname"/>
-    <xsl:text>::</xsl:text>
-    <xsl:value-of select="@name"/>
-    <xsl:text>TypeSupportImpl TypeSupport;
+      <xsl:value-of select="$modelname"/>
+      <xsl:text>::</xsl:text>
+      <xsl:value-of select="@name"/>
+      <xsl:text>TypeSupportImpl TypeSupport;
 
         TypeSupport* typeSupport = new TypeSupport();
         if( RETCODE_OK != typeSupport->register_type( participant, 0)) {
@@ -168,6 +173,7 @@ OpenDDS::Model::</xsl:text>
       break;
 
 </xsl:text>
+    </xsl:if>
   </xsl:for-each>
   <xsl:text>    default:
       throw NoTypeException();
