@@ -641,6 +641,12 @@ Details for settings that are different from default EMF settings can be found i
 Issues related to usage can be found in [[EMF Issues]].
 </pre>
 </div>
+<div title="EMF TODO" modifier="Byron" created="201007161342" tags="publish todo" changecount="1">
+<pre>! Check that the Ecore class diagrams are up to date
+
+There are class diagrams (.ecore_diagram) that are visual representations of the .ecore files. Make sure these diagrams reflect the latest version of the .ecore files.
+</pre>
+</div>
 <div title="EnumerationsPackage" modifier="MikeMartinez" created="201006152309" tags="publish" changecount="1">
 <pre>Section 7.1.8 of the specification defines the ''Enumerations'' package of the metamodel.  The ecore model for this includes definitions for enumerations used as field of ~QoS policies.  Inexplicably, this also includes a structure definition for the //Period// classifier which is not an enumeration but a compound type used as a field type for various policies.  This model has the following properties:
 * package: org.opendds.modeling.model
@@ -651,8 +657,34 @@ Issues related to usage can be found in [[EMF Issues]].
 {{imgcenter{[img[images/Enumerations.png]]}}}
 </pre>
 </div>
-<div title="GMF Details" modifier="Byron" created="201006231304" modified="201007161234" tags="publish details" changecount="36">
-<pre>!Sub-diagrams
+<div title="GMF Details" modifier="Byron" created="201006231304" modified="201007161410" tags="publish details" changecount="39">
+<pre>!Making sure Java has enough ~PermGen memory
+
+It was found running SDK diagram code under Ubuntu 9.10 running eclipse 3.5.1 that the Java ~PermGen memory hit the maximum ~PermGen memory allowed causing the diagram code to crash. The ~PermGen memory is used to hold meta data about user classes.
+
+This condition is seen the Error log as
+
+{{{
+!MESSAGE Error occurred during status handling
+!STACK 0
+java.lang.OutOfMemoryError: PermGen space
+}}}
+
+In the case that this was seen the ~PermGen maximum size was about 88MB.
+
+The maximum size can be set using the -XX:~MaxPermSize argument. For example, to set the maximum ~PermGen size to 128MB, pass
+
+{{{
+-XX:MaxPermSize=128m
+}}}
+
+to the Java VM.
+
+Note the //~PermSize// term is used for for referring to //~PermGen// space.
+
+Also note that any such setting made in eclipse.ini does not apply to launching an eclipse application from within eclipse (Run As -&gt; Eclipse Application). Instead it is necessary to add the ~MaxPermSize argument to the VM arguments in the Run Configuration setting.
+
+!Sub-diagrams
 GMF supports the capability to double-click on a diagram node and have it open up another diagram. GMF calls this //diagram partitioning//. Unfortunately, GMF 2.2.2 does not directly support diagram partitioning through it's views and wizards when the diagram node's domain element is not the same as the canvas mapping's domain element in the sub-diagram, which is how the SDK uses sub-diagrams. The steps given here were used to produce the sub-diagram capability of the SDK.
 
 The starting point for these steps are the [[Diagram Partitioning wiki page|http://wiki.eclipse.org/Diagram_Partitioning]] that was extract from a [[GMF newsgroup post|http://dev.eclipse.org/newslists/news.eclipse.modeling.gmf/msg06184.html]], and the discussion in section 4.5.6  of the eclipse Modeling Project book.
