@@ -1,3 +1,10 @@
+Fri Jul 16 12:37:09 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/plugins.html:
+
+          Updated the GMF Sub-diagram details based on following the
+          the steps for the Data Library.
+
 Fri Jul 16 03:26:47 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/codegen/xsl/cpp.xsl:
