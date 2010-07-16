@@ -1,3 +1,28 @@
+Fri Jul 16 13:20:08 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/plugins.html:
+
+          Added discussion in GMF Issues about why Data Library elements from OpenDDS.ecore
+          were moved to Types.ecore.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/DataLibrary.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/DataLibrary.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/DataLibrary.gmftool:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/DataLibrary.trace:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.trace:
+
+          Added start of Data Library diagram.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/Types.ecore:
+
+          Moved DataLibrary class and stereotypes derived from TopicField to Types package.
+
 Fri Jul 16 12:37:09 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/plugins.html:

@@ -95,6 +95,7 @@
       </viewmap>
       <behaviour
           xsi:type="gmfgen:OpenDiagramBehaviour"
+          editPolicyClassName="OpenDiagramEditPolicyPolicyLibrary"
           diagramKind="OpenDDS PolicyLibrary"
           editorID="org.opendds.modeling.model.opendds.diagram.policylibrary.part.OpenDDSPolicyLibraryDiagramEditorID"/>
       <modelFacet>
@@ -126,7 +127,7 @@
       </labels>
     </topLevelNodes>
     <topLevelNodes
-        visualID="2003"
+        visualID="2004"
         editPartClassName="DataLibraryEditPart"
         itemSemanticEditPolicyClassName="DataLibraryItemSemanticEditPolicy"
         notationViewFactoryClassName="DataLibraryViewFactory"
@@ -146,16 +147,21 @@
             width="100"
             height="80"/>
       </viewmap>
+      <behaviour
+          xsi:type="gmfgen:OpenDiagramBehaviour"
+          editPolicyClassName="OpenDiagramEditPolicyDataLibrary"
+          diagramKind="OpenDDS DataLibrary"
+          editorID="org.opendds.modeling.model.opendds.diagram.datalibrary.part.OpenDDSDataLibraryDiagramEditorID"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/DataLibrary"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLibrary"/>
         <containmentMetaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/dataLibrary"/>
         <childMetaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/dataLibrary"/>
       </modelFacet>
       <labels
-          visualID="5003"
+          visualID="5004"
           editPartClassName="DataLibraryNameEditPart"
           itemSemanticEditPolicyClassName="DataLibraryNameItemSemanticEditPolicy"
           notationViewFactoryClassName="DataLibraryNameViewFactory"
@@ -170,7 +176,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/DataLibrary/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLibrary/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>

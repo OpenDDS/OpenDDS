@@ -51,14 +51,16 @@
         href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/dataLibrary"/>
     <ownedChild>
       <domainMetaElement
-          href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLibrary"/>
+          href="../../org.opendds.modeling.model/model/Types.ecore#//DataLibrary"/>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
             href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_packages.mirrored.gmfgraph#PackageNode_name"/>
         <features
-            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLibrary/name"/>
+            href="../../org.opendds.modeling.model/model/Types.ecore#//DataLibrary/name"/>
       </labelMappings>
+      <relatedDiagrams
+          href="DataLibrary.gmfmap#//@diagram"/>
       <tool
           xsi:type="gmftool:CreationTool"
           href="MainDiagram.gmftool#//@palette/@tools.0/@tools.2"/>
