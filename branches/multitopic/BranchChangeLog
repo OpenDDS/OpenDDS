@@ -1,3 +1,19 @@
+Fri Jul 16 22:33:25 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.h:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+        * dds/DCPS/MultiTopicImpl.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/metaclass_generator.cpp:
+
+          Continued implementing more joins for MultiTopic.
+          Not every case is handled yet.
+
 Thu Jul 15 19:10:42 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/MultiTopicDataReaderBase.cpp:

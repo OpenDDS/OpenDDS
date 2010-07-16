@@ -173,16 +173,17 @@ protected:
   std::string topicNameFor(DDS::DataReader_ptr dr);
   const MetaStruct& metaStructFor(DDS::DataReader_ptr dr);
 
-  // key: topicName for this reader
-  std::map<std::string, DDS::DataReader_var> incoming_readers_;
-
-  // key: topicName of incoming datareader
   typedef MultiTopicImpl::SubjectFieldSpec SubjectFieldSpec;
-  std::multimap<std::string, SubjectFieldSpec> field_map_;
 
-  // key: name of field that's a key for the 'join'
-  // mapped: set of topicNames that have this key in common
-  std::map<std::string, std::set<std::string> > join_keys_;
+  struct QueryPlan {
+    DDS::DataReader_var data_reader_;
+    std::vector<SubjectFieldSpec> projection_;
+    std::vector<std::string> keys_projected_out_;
+    std::multimap<std::string, std::string> adjacent_joins_; // topic -> key
+  };
+
+  // key: topicName for this reader
+  std::map<std::string, QueryPlan> query_plans_;
 };
 
 }

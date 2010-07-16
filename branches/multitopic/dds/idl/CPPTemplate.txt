@@ -1589,6 +1589,24 @@ DDS::ReturnCode_t
   return rc;
 }
 
+DDS::ReturnCode_t
+<%TYPE%>DataReaderImpl::read_next_instance_generic(void*& data,
+  DDS::SampleInfo& info, DDS::InstanceHandle_t previous_instance,
+  DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+  DDS::InstanceStateMask instance_states)
+{
+  <%SCOPED%>Seq dataseq;
+  DDS::SampleInfoSeq infoseq;
+  DDS::ReturnCode_t rc = read_next_instance_i(dataseq, infoseq,
+    DDS::LENGTH_UNLIMITED, previous_instance, sample_states, view_states,
+    instance_states, NULL);
+  if (rc == DDS::RETCODE_NO_DATA) return rc;
+  const CORBA::ULong last = dataseq.length() - 1;
+  data = new <%SCOPED%>(dataseq[last]);
+  info = infoseq[last];
+  return rc;
+}
+
 void
 <%TYPE%>DataReaderImpl::store_synthetic_data(const <%SCOPED%>& sample)
 {

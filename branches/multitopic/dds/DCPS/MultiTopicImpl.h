@@ -48,10 +48,12 @@ public:
 
   struct SubjectFieldSpec {
     std::string incoming_name_;
-    std::string resulting_name_; //if empty string, same as incoming_name_
+    std::string resulting_name_;
 
-    SubjectFieldSpec(const std::string& inc, const std::string& res)
-      : incoming_name_(inc), resulting_name_(res)
+    explicit SubjectFieldSpec(const std::string& inc,
+                              const std::string& res = "")
+      : incoming_name_(inc)
+      , resulting_name_(res == "" ? inc : res)
     {}
   };
 

@@ -107,8 +107,22 @@ public:
     ACE_THROW_SPEC((CORBA::SystemException));
 
 private:
-  void assign_fields(void* incoming, Sample& resulting, const char* topic,
-    const MetaStruct& meta);
+  typedef std::vector<Sample> SampleVec;
+
+  void assign_fields(void* incoming, Sample& resulting, const QueryPlan& qp,
+                     const MetaStruct& meta);
+
+  void join(SampleVec& resulting, const Sample& prototype,
+            const std::vector<std::string>& key_names, const void* key_data,
+            DDS::DataReader_ptr other_dr, const MetaStruct& other_meta);
+
+  struct GenericData {
+    explicit GenericData(const MetaStruct& meta, bool doAlloc = true)
+      : meta_(meta), ptr_(doAlloc ? meta.allocate() : NULL) {}
+    ~GenericData() { meta_.deallocate(ptr_); }
+    const MetaStruct& meta_;
+    void* ptr_;
+  };
 
   typename TypedDataReader::Interface::_var_type typed_reader_;
 };
