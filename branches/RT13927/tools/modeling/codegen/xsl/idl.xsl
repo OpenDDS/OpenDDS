@@ -22,12 +22,6 @@
 
 <!-- Node sets -->
 <xsl:variable name="type"     select="//opendds:type"/>
-<xsl:variable name="enum"     select="//opendds:type[ @type = 'opendds:idlEnum']"/>
-<xsl:variable name="union"    select="//opendds:type[ @type = 'opendds:idlUnion']"/>
-<xsl:variable name="struct"   select="//opendds:type[ @type = 'opendds:idlStruct']"/>
-<xsl:variable name="array"    select="//opendds:type[ @type = 'opendds:idlArray']"/>
-<xsl:variable name="sequence" select="//opendds:type[ @type = 'opendds:idlSequence']"/>
-<xsl:variable name="typedef"  select="//opendds:type[ @type = 'opendds:idlTypedef']"/>
 
 <!-- Index (lookup table is at the bottom of this document) -->
 <xsl:key
@@ -403,7 +397,6 @@ module </xsl:text>
 </xsl:template>
 
 <!-- Lookup Table Magic. -->
-<xsl:variable name="lookupTables" select="document('')/*//lut:types"/>
 <lut:tables>
   <type type="Boolean"   cpptype="bool"               corbatype="boolean"/>
   <type type="Char"      cpptype="char"               corbatype="char"/>

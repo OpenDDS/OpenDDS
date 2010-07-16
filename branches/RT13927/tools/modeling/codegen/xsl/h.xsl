@@ -21,8 +21,8 @@
 <xsl:variable name="lowercase" select="'abcdefghijklmnopqrstuvwxyz'"/>
 <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
 
+<!-- Node sets -->
 <xsl:variable name="participant" select="//opendds:domainParticipant"/>
-<!-- <xsl:variable name="type"        select="//opendds:type"/> -->
 <xsl:variable name="topic"       select="//opendds:topic"/>
 <xsl:variable name="publisher"   select="//opendds:publisher"/>
 <xsl:variable name="subscriber"  select="//opendds:subscriber"/>

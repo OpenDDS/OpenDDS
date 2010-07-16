@@ -32,7 +32,6 @@
 <xsl:variable name="subscriber"  select="//opendds:subscriber"/>
 <xsl:variable name="topic"       select="//opendds:topic"/>
 <xsl:variable name="transport"   select="//opendds:transport"/>
-<xsl:variable name="type"        select="//opendds:type"/>
 
 <!-- Indices (lookup tables are at the bottom of this document) -->
 <xsl:key
