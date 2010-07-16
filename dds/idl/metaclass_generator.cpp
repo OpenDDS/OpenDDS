@@ -165,6 +165,25 @@ namespace {
         "    }\n";
     }
   }
+
+  void compare_field(AST_Field* field)
+  {
+    Classification cls = classify(field->field_type());
+    if (!(cls & CL_SCALAR)) return;
+    const char* fieldName = field->local_name()->get_string();
+    be_global->impl_ <<
+      "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n";
+    if (cls & CL_STRING) {
+      be_global->impl_ << // ACE_OS::strcmp has overloads for narrow & wide
+        "      " << "return 0 == ACE_OS::strcmp(static_cast<const T*>(lhs)->" <<
+        fieldName << ", static_cast<const T*>(rhs)->" << fieldName << ");\n";
+    } else {
+      be_global->impl_ <<
+        "      return static_cast<const T*>(lhs)->" << fieldName <<
+        " == static_cast<const T*>(rhs)->" << fieldName << ";\n";
+    }
+    be_global->impl_ << "    }\n";
+  }
 }
 
 bool metaclass_generator::gen_struct(UTL_ScopedName* name,
@@ -181,6 +200,13 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
       "const MetaStruct& getMetaStruct();\n\n";
     first_struct_ = false;
   }
+
+  size_t nKeys = 0;
+  IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
+  if (info) {
+    nKeys = info->key_list_.size();
+  }
+
   std::string clazz = scoped(name);
   std::string decl = "const MetaStruct& getMetaStruct<" + clazz + ">()",
     exp = be_global->export_macro().c_str();
@@ -193,6 +219,7 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
     "  typedef " << clazz << " T;\n\n"
     "  void* allocate() const { return new T; }\n\n"
     "  void deallocate(void* stru) const { delete static_cast<T*>(stru); }\n\n"
+    "  size_t numDcpsKeys() const { return " << nKeys << "; }\n\n"
     "  Value getValue(const void* stru, const char* field) const\n"
     "  {\n"
     "    const " << clazz << "& typed = *static_cast<const " << clazz
@@ -236,6 +263,16 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
     "    ACE_UNUSED_ARG(rhsFieldSpec);\n"
     "    ACE_UNUSED_ARG(rhsMeta);\n";
   std::for_each(fields.begin(), fields.end(), assign_field);
+  be_global->impl_ <<
+    exception <<
+    "  }\n\n"
+    "  bool compare(const void* lhs, const void* rhs, const char* field) "
+    "const\n"
+    "  {\n"
+    "    ACE_UNUSED_ARG(lhs);\n"
+    "    ACE_UNUSED_ARG(field);\n"
+    "    ACE_UNUSED_ARG(rhs);\n";
+  std::for_each(fields.begin(), fields.end(), compare_field);
   be_global->impl_ <<
     exception <<
     "  }\n"

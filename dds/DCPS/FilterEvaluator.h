@@ -107,15 +107,26 @@ struct OpenDDS_Dcps_Export Value {
 class OpenDDS_Dcps_Export MetaStruct {
 public:
   virtual ~MetaStruct();
+
   virtual Value getValue(const void* stru, const char* fieldSpec) const = 0;
+
   virtual ComparatorBase::Ptr create_qc_comparator(const char* fieldSpec,
     ComparatorBase::Ptr next) const = 0;
+
   virtual const char** getFieldNames() const = 0;
+
+  virtual size_t numDcpsKeys() const = 0;
+
+  virtual bool compare(const void* lhs, const void* rhs,
+                       const char* fieldSpec) const = 0;
+
   virtual void assign(void* lhs, const char* lhsFieldSpec,
-    const void* rhs, const char* rhsFieldSpec,
-    const MetaStruct& rhsMeta) const = 0;
+                      const void* rhs, const char* rhsFieldSpec,
+                      const MetaStruct& rhsMeta) const = 0;
+
   virtual const void* getRawField(const void* stru,
-    const char* fieldSpec) const = 0;
+                                  const char* fieldSpec) const = 0;
+
   virtual void* allocate() const = 0;
   virtual void deallocate(void* stru) const = 0;
 };

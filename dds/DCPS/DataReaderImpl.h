@@ -536,6 +536,11 @@ public:
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states) = 0;
 
+  virtual DDS::ReturnCode_t read_next_instance_generic(void*& data,
+    DDS::SampleInfo& info, DDS::InstanceHandle_t previous_instance,
+    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+    DDS::InstanceStateMask instance_states) = 0;
+
 #endif
 
   void begin_access();

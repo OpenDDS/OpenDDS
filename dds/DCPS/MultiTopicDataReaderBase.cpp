@@ -17,6 +17,18 @@
 
 #include <stdexcept>
 
+namespace {
+  struct MatchesIncomingName { // predicate for std::find_if
+    const std::string& look_for_;
+    explicit MatchesIncomingName(const std::string& s) : look_for_(s) {}
+    bool operator()(const OpenDDS::DCPS::MultiTopicImpl::SubjectFieldSpec& sfs)
+      const {
+      return sfs.incoming_name_ == look_for_;
+    }
+  };
+}
+
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -24,6 +36,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   const DataReaderQosExt& ext_qos, DDS::DataReaderListener_ptr a_listener,
   DDS::StatusMask mask, SubscriberImpl* parent, MultiTopicImpl* multitopic)
 {
+  using namespace std;
   DDS::DataReader_var dr = multitopic->get_type_support()->create_datareader();
   resulting_reader_ = DataReaderEx::_narrow(dr);
   DataReaderImpl* resulting_impl =
@@ -40,28 +53,34 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   init_typed(resulting_reader_);
   listener_ = new Listener(this);
 
-  std::map<std::string, std::string> fieldToTopic;
+  map<string, string> fieldToTopic;
 
-  const std::vector<std::string>& selection = multitopic->get_selection();
+  // key: name of field that's a key for the 'join'
+  // mapped: set of topicNames that have this key in common
+  map<string, set<string> > joinKeys;
+
+  const vector<string>& selection = multitopic->get_selection();
   for (size_t i = 0; i < selection.size(); ++i) {
+
     const DDS::Duration_t no_wait = {0, 0};
     DDS::Topic_var t = participant->find_topic(selection[i].c_str(), no_wait);
     if (!t.in()) {
-      throw std::runtime_error("Topic: " + selection[i] + " not found.");
+      throw runtime_error("Topic: " + selection[i] + " not found.");
     }
+
     DDS::DataReader_var incoming = parent->create_opendds_datareader(t, dr_qos,
       ext_qos, listener_, ALL_STATUS_MASK);
     if (!incoming.in()) {
       //TODO: error
     }
-    incoming_readers_[selection[i]] = incoming;
-    TopicDescriptionImpl* tdi = dynamic_cast<TopicDescriptionImpl*>(t.in());
-    TypeSupportImpl* ts =
-      dynamic_cast<TypeSupportImpl*>(tdi->get_type_support());
-    const MetaStruct& meta = ts->getMetaStructForType();
+
+    QueryPlan& qp = query_plans_[selection[i]];
+    qp.data_reader_ = incoming;
+    const MetaStruct& meta = metaStructFor(incoming);
+
     for (const char** names = meta.getFieldNames(); *names; ++names) {
       if (fieldToTopic.count(*names)) { // already seen this field name
-        std::set<std::string>& topics = join_keys_[*names];
+        set<string>& topics = joinKeys[*names];
         topics.insert(fieldToTopic[*names]);
         topics.insert(selection[i]);
       } else {
@@ -70,32 +89,51 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
     }
   }
 
-  const std::vector<MultiTopicImpl::SubjectFieldSpec>& aggregation =
-    multitopic->get_aggregation();
+  const vector<SubjectFieldSpec>& aggregation = multitopic->get_aggregation();
   if (aggregation.size() == 0) { // "SELECT * FROM ..."
     const MetaStruct& meta = getResultingMeta();
     for (const char** names = meta.getFieldNames(); *names; ++names) {
-      std::map<std::string, std::string>::const_iterator iter =
-        fieldToTopic.find(*names);
-      if (iter == fieldToTopic.end()) {
+      map<string, string>::const_iterator found = fieldToTopic.find(*names);
+      if (found == fieldToTopic.end()) {
         if (DCPS_debug_level > 1) {
           //TODO: warning
         }
       } else {
-        field_map_.insert(make_pair(iter->second,
-          SubjectFieldSpec(*names, "")));
+        query_plans_[found->second].projection_.push_back(
+          SubjectFieldSpec(*names));
       }
     }
   } else { // "SELECT A, B FROM ..."
     for (size_t i = 0; i < aggregation.size(); ++i) {
-      std::map<std::string, std::string>::const_iterator iter =
+      map<string, string>::const_iterator found =
         fieldToTopic.find(aggregation[i].incoming_name_);
-      if (iter == fieldToTopic.end()) {
+      if (found == fieldToTopic.end()) {
         if (DCPS_debug_level > 1) {
           //TODO: error
         }
       } else {
-        field_map_.insert(make_pair(iter->second, aggregation[i]));
+        query_plans_[found->second].projection_.push_back(aggregation[i]);
+      }
+    }
+  }
+
+  typedef map<string, set<string> >::const_iterator iter_t;
+  for (iter_t iter = joinKeys.begin(); iter != joinKeys.end(); ++iter) {
+    const string& field = iter->first;
+    const set<string>& topics = iter->second;
+    for (set<string>::const_iterator iter2 = topics.begin();
+         iter2 != topics.end(); ++iter2) {
+      const string& topic = *iter2;
+      QueryPlan& qp = query_plans_[topic];
+      if (find_if(qp.projection_.begin(), qp.projection_.end(),
+                  MatchesIncomingName(field)) == qp.projection_.end()) {
+        qp.keys_projected_out_.push_back(field);
+      }
+      for (set<string>::const_iterator iter3 = topics.begin();
+           iter3 != topics.end(); ++iter3) {
+        if (topic != *iter3) { // other topics
+          qp.adjacent_joins_.insert(make_pair(*iter3, field));
+        }
       }
     }
   }

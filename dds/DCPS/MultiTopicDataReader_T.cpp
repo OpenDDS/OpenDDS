@@ -33,18 +33,83 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::getResultingMeta()
 template<typename Sample, typename TypedDataReader>
 void
 MultiTopicDataReader_T<Sample, TypedDataReader>::assign_fields(void* incoming,
-  Sample& resulting, const char* topic, const MetaStruct& meta)
+  Sample& resulting, const MultiTopicDataReaderBase::QueryPlan& qp,
+  const MetaStruct& meta)
 {
   using namespace std;
-  typedef multimap<string, SubjectFieldSpec>::iterator iter_t;
-  typedef pair<iter_t, iter_t> iterpair_t;
-  for (iterpair_t iters = field_map_.equal_range(topic);
-      iters.first != iters.second; ++iters.first) {
-    const SubjectFieldSpec& sfs = iters.first->second;
-    const string& resulting_name = sfs.resulting_name_.empty()
-      ? sfs.incoming_name_ : sfs.resulting_name_;
-    getResultingMeta().assign(&resulting, resulting_name.c_str(),
-      incoming, sfs.incoming_name_.c_str(), meta);
+  const vector<SubjectFieldSpec>& proj = qp.projection_;
+  typedef vector<SubjectFieldSpec>::const_iterator iter_t;
+  for (iter_t iter = proj.begin(); iter != proj.end(); ++iter) {
+    const SubjectFieldSpec& sfs = *iter;
+    getResultingMeta().assign(&resulting, sfs.resulting_name_.c_str(),
+                              incoming, sfs.incoming_name_.c_str(), meta);
+  }
+
+  const vector<string>& proj_out = qp.keys_projected_out_;
+  for (vector<string>::const_iterator iter = proj_out.begin();
+       iter != proj_out.end(); ++iter) {
+    getResultingMeta().assign(&resulting, iter->c_str(),
+                              incoming, iter->c_str(), meta);
+  }
+}
+
+template<typename Sample, typename TypedDataReader>
+void
+MultiTopicDataReader_T<Sample, TypedDataReader>::join(
+  std::vector<Sample>& resulting, const Sample& prototype,
+  const std::vector<std::string>& key_names, const void* key_data,
+  DDS::DataReader_ptr other_dr, const MetaStruct& other_meta)
+{
+  using namespace DDS;
+  DataReaderImpl* other_dri = dynamic_cast<DataReaderImpl*>(other_dr);
+  TopicDescription_var other_td = other_dri->get_topicdescription();
+  CORBA::String_var other_topic = other_td->get_name();
+  const QueryPlan& other_qp = query_plans_[other_topic.in()];
+
+  if (other_meta.numDcpsKeys() == key_names.size()) { // complete key
+    InstanceHandle_t ih = other_dri->lookup_instance_generic(key_data);
+    if (ih == HANDLE_NIL) {
+      // no match for join, no results
+      resulting.clear();
+    } else {
+      GenericData other_data(other_meta, false);
+      SampleInfo info;
+      ReturnCode_t ret = other_dri->read_instance_generic(other_data.ptr_,
+        info, ih, READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+      if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
+        //TODO: log & throw
+      }
+      resulting.push_back(Sample(prototype));
+      assign_fields(other_data.ptr_, resulting.back(), other_qp, other_meta);
+    }
+  } else { // incomplete key
+    SampleVec new_resulting;
+    ReturnCode_t ret = RETCODE_OK;
+    for (InstanceHandle_t ih = HANDLE_NIL; ret != RETCODE_NO_DATA;) {
+      GenericData other_data(other_meta, false);
+      SampleInfo info;
+      ret = other_dri->read_next_instance_generic(other_data.ptr_, info, ih,
+        READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+      if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
+        //TODO: log & throw
+      } else if (ret == RETCODE_NO_DATA) {
+        break;
+      }
+      ih = info.instance_handle;
+
+      bool match = true;
+      for (size_t i = 0; match && i < key_names.size(); ++i) {
+        if (!other_meta.compare(key_data, other_data.ptr_,
+                                key_names[i].c_str())) {
+          match = false;
+        }
+      }
+
+      if (match) {
+        resulting.push_back(Sample(prototype));
+        assign_fields(other_data.ptr_, resulting.back(), other_qp, other_meta);
+      }
+    }
   }
 }
 
@@ -55,66 +120,42 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
 {
   using namespace std;
   using namespace DDS;
-  Sample resulting;
-  assign_fields(sample, resulting, topic, meta);
-  TypedDataReader* tdr = dynamic_cast<TypedDataReader*>(typed_reader_.in());
 
-  //TODO: process the "joins" to complete the fields of <resulting>
-  //currently the simple case of joining two topics on >= 1 key is handled
-  //but all of the other cases still need to be written
+  const QueryPlan& qp = query_plans_[topic];
+  SampleVec resulting;
+  resulting.push_back(Sample());
+  assign_fields(sample, resulting[0], qp, meta);
 
-  map<string, vector<string> > keys; // other-topic-name => keys
-
-  typedef map<string, set<string> >::iterator iter2_t;
-  for (iter2_t iter = join_keys_.begin(); iter != join_keys_.end(); ++iter) {
-    const string& key = iter->first;
-    const set<string>& topics = iter->second;
-    if (topics.count(topic)) {
-      
-      getResultingMeta().assign(&resulting, key.c_str(), sample,
-        key.c_str(), meta);
-
-
-      for (set<string>::const_iterator i = topics.begin();
-          i != topics.end(); ++i) {
-        if (*i != topic) {
-          keys[*i].push_back(key);
-        }
-      }
-    }
-  }
-
-  if (keys.size() == 0) {
-    tdr->store_synthetic_data(resulting);
-    return;
-  }
-
-  typedef map<string, vector<string> >::iterator msvsi_t;
-  for (msvsi_t it = keys.begin(); it != keys.end(); ++it) {
-    const string& other_topic = it->first;
-    const vector<string>& other_keys = it->second;
-    DataReader_var other_dr = incoming_readers_[other_topic];
+  typedef multimap<string, string>::const_iterator iter_t;
+  for (iter_t iter = qp.adjacent_joins_.begin();
+       iter != qp.adjacent_joins_.end();) { // for each topic we're joining
+    const string& other_topic = iter->first;
+    iter_t range_end = qp.adjacent_joins_.upper_bound(other_topic);
+    DataReader_ptr other_dr = query_plans_[other_topic].data_reader_;
     const MetaStruct& other_meta = metaStructFor(other_dr);
-    void* other_key_data = other_meta.allocate();
 
-    for (vector<string>::const_iterator it2 = other_keys.begin();
-         it2 != other_keys.end(); ++it2) {
-      other_meta.assign(other_key_data, it2->c_str(),
-                        sample, it2->c_str(), meta);
+    vector<string> keys;
+    for (; iter != range_end; ++iter) { // for each key in common w/ this topic
+      keys.push_back(iter->second);
     }
 
-    DataReaderImpl* other_dri = dynamic_cast<DataReaderImpl*>(other_dr.in());
-    InstanceHandle_t ih = other_dri->lookup_instance_generic(other_key_data);
-    other_meta.deallocate(other_key_data);
-    if (ih != DDS::HANDLE_NIL) {
-      void* other_data;
-      SampleInfo info;
-      other_dri->read_instance_generic(other_data, info, ih, READ_SAMPLE_STATE,
-                                       ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
-      assign_fields(other_data, resulting, other_topic.c_str(), other_meta);
-      other_meta.deallocate(other_data);
-      tdr->store_synthetic_data(resulting);
+    SampleVec join_result;
+    for (size_t i = 0; i < resulting.size(); ++i) {
+      GenericData other_key(other_meta);
+      for (size_t j = 0; j < keys.size(); ++j) {
+        other_meta.assign(other_key.ptr_, keys[j].c_str(),
+                          sample, keys[j].c_str(), meta); 
+      }
+      join(join_result, resulting[i], keys,
+           other_key.ptr_, other_dr, other_meta);
     }
+    resulting.swap(join_result);
+  }
+
+  TypedDataReader* tdr = dynamic_cast<TypedDataReader*>(typed_reader_.in());
+  for (typename SampleVec::iterator i = resulting.begin();
+       i != resulting.end(); ++i) {
+    tdr->store_synthetic_data(*i);
   }
 }
 
