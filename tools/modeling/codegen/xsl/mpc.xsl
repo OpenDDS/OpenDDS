@@ -31,7 +31,7 @@
   sharedname = </xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text>
-  includes += $(DDS_ROOT)/../sdk/tools/modeling/codegen
+  includes += $(DDS_ROOT)/tools/modeling/codegen
 
   idlflags      += -Wb,export_macro=</xsl:text>
   <xsl:value-of select="$modelname"/>
@@ -68,7 +68,7 @@ project(</xsl:text>
   exename = </xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>
-  includes += $(DDS_ROOT)/../sdk/tools/modeling/codegen
+  includes += $(DDS_ROOT)/tools/modeling/codegen
   after += </xsl:text>
     <xsl:value-of select="$modelname"/>
     <xsl:text>

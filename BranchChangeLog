@@ -1,3 +1,15 @@
+Fri Jul 16 03:26:47 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/codegen/xsl/cpp.xsl:
+        * tools/modeling/codegen/xsl/h.xsl:
+        * tools/modeling/codegen/xsl/idl.xsl:
+
+          Removed unused node-set definitions.
+
+        * tools/modeling/codegen/xsl/mpc.xsl:
+
+          Removed path specific to development environment.
+
 Thu Jul 15 23:27:31 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/codegen/xsl/cpp.xsl:
