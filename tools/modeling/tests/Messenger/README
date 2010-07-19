@@ -6,7 +6,7 @@ demonstrates the creation and execution of an OpenDDS application using
 model defined middleware and application code.
 
 The following files are part of this example:
-  example.mpc            - MPC file to create the build files for the example.
+  Messenger.mpc          - MPC file to create the build files for the example.
   MessengerModel.opendds - XML file with the middleware model definition.
   publisher.cpp          - Publisher application code.
   subscriber.cpp         - Subscriber application code.

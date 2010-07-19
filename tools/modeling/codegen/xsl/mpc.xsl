@@ -64,8 +64,8 @@ project(</xsl:text>
     <xsl:value-of select="$modelname"/>
     <xsl:text>_</xsl:text>
     <xsl:value-of select="@name"/>
-    <xsl:text>) : dcpsexe {
-  exename = </xsl:text>
+    <xsl:text>) : dcpsexe, dds_model {
+  exename = ../</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>
   includes += $(DDS_ROOT)/tools/modeling/codegen
@@ -77,7 +77,7 @@ project(</xsl:text>
     <xsl:text> OpenDDS_Model
 
   Source_Files {
-    </xsl:text>
+    ../</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>.cpp
   }
