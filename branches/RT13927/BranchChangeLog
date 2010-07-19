@@ -1,3 +1,17 @@
+Mon Jul 19 17:45:29 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/codegen/xsl/mpc.xsl:
+
+          Updated to build the unit test applications from a subdirectory.
+
+        * tools/modeling/tests/Codegen:
+
+          Created a simple unit test for the code generation.
+
+        * tools/modeling/tests/Messenger/README:
+
+          Corrected some documentation.
+
 Mon Jul 19 12:16:00 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.model.edit/plugin.properties:
