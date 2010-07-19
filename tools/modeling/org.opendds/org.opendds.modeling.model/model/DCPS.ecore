@@ -7,10 +7,10 @@
   <eClassifiers xsi:type="ecore:EClass" name="DomainParticipant" eSuperTypes="Domain.ecore#//DomainEntity">
     <eStructuralFeatures xsi:type="ecore:EReference" name="domain" lowerBound="1"
         eType="#//Domain"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="publisher" eType="#//Publisher"
-        containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="subscriber" eType="#//Subscriber"
-        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="publishers" upperBound="-1"
+        eType="#//Publisher" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subscribers" upperBound="-1"
+        eType="#//Subscriber" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="entity_factory" eType="ecore:EClass QoS.ecore#//EntityFactoryQosPolicy"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="user_data" eType="ecore:EClass QoS.ecore#//UserDataQosPolicy"
