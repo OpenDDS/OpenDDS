@@ -115,4 +115,12 @@ DDS::ReturnCode_t MyDataReaderImpl::read_instance_generic(void*&,
 {
   return DDS::RETCODE_UNSUPPORTED;
 }
+
+DDS::ReturnCode_t MyDataReaderImpl::read_next_instance_generic(void*&,
+  DDS::SampleInfo&, DDS::InstanceHandle_t, DDS::SampleStateMask,
+  DDS::ViewStateMask, DDS::InstanceStateMask)
+{
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
 #endif

@@ -1,3 +1,10 @@
+Mon Jul 19 14:57:16 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+
+          Updated unit test for more recent change to DataReaderImpl.
+
 Fri Jul 16 22:33:25 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
