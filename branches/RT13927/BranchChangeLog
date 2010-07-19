@@ -1,3 +1,10 @@
+Mon Jul 19 17:53:30 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/Middleware:
+        * tools/modeling/testdata/Middleware/MiddlewareTest.opendds:
+
+          Added test data for Middleware package.
+
 Mon Jul 19 17:45:29 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/codegen/xsl/mpc.xsl:
