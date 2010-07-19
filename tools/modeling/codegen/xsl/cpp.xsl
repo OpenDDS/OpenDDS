@@ -57,7 +57,7 @@
   <xsl:text>
 #include "</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>.h"
+  <xsl:text>_T.h"
 
 #include "</xsl:text>
   <xsl:value-of select="$modelname"/>
@@ -83,12 +83,13 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "model/Utilities.h"
 
-using namespace OpenDDS::DCPS;
-using namespace DDS;
-
-OpenDDS::Model::</xsl:text>
+namespace OpenDDS { namespace Model { namespace </xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::Data()
+  <xsl:text> {
+
+template&lt; class InstanceTraits&gt;
+inline
+Elements::Data&lt;InstanceTraits&gt;::Data()
 {
   for( int index = 0;
        index &lt; OpenDDS::Model::</xsl:text>
@@ -113,9 +114,9 @@ OpenDDS::Model::</xsl:text>
   this->buildSubscriptionsQos();
 }
 
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-    <xsl:text>::Elements::Data::~Data()
+template&lt; class InstanceTraits&gt;
+inline
+Elements::Data&lt;InstanceTraits&gt;::~Data()
 {
   for( int index = 0;
        index &lt; OpenDDS::Model::</xsl:text>
@@ -130,10 +131,10 @@ OpenDDS::Model::</xsl:text>
   }
 }
 
+template&lt; class InstanceTraits&gt;
+inline
 void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::registerType(
+Elements::Data&lt;InstanceTraits&gt;::registerType(
   Types::Values      type,
   DomainParticipant* participant
 )
@@ -180,10 +181,10 @@ OpenDDS::Model::</xsl:text>
   }
 }
 
+template&lt; class InstanceTraits&gt;
+inline
 void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::loadMasks()
+Elements::Data&lt;InstanceTraits&gt;::loadMasks()
 {
 </xsl:text>
   <!-- '  this->participantMasks_[ Participants::(domainParticipant/@name)] = (domainParticipant/@mask);\n' -->
@@ -252,10 +253,10 @@ OpenDDS::Model::</xsl:text>
   </xsl:for-each>
   <xsl:text>}
 
+template&lt; class InstanceTraits&gt;
+inline
 void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::loadDomains()
+Elements::Data&lt;InstanceTraits&gt;::loadDomains()
 {
 </xsl:text>
   <!-- '  this->domains_[ Participants::(domainParticipant/@name)] = (domainParticipant/@domain);\n' -->
@@ -269,10 +270,10 @@ OpenDDS::Model::</xsl:text>
   </xsl:for-each>
   <xsl:text>}
 
+template&lt; class InstanceTraits&gt;
+inline
 void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::loadTopics()
+Elements::Data&lt;InstanceTraits&gt;::loadTopics()
 {
   /// @TODO verify how we manage the model strings.
 </xsl:text>
@@ -287,10 +288,10 @@ OpenDDS::Model::</xsl:text>
   </xsl:for-each>
   <xsl:text>}
 
+template&lt; class InstanceTraits&gt;
+inline
 void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::loadTransports()
+Elements::Data&lt;InstanceTraits&gt;::loadTransports()
 {
   /// @TODO verify how we manage the model strings.
 </xsl:text>
@@ -309,17 +310,17 @@ OpenDDS::Model::</xsl:text>
   <xsl:for-each select="$transport/@key">
     <xsl:text>  this->transportKeys_[ Transports::</xsl:text>
     <xsl:value-of select="../@name"/>
-    <xsl:text>] = </xsl:text>
+    <xsl:text>] = InstanceTraits::transport_key_base + </xsl:text>
     <xsl:value-of select="."/>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
   <xsl:text>}
 
+template&lt; class InstanceTraits&gt;
+inline
 void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::loadMaps()
+Elements::Data&lt;InstanceTraits&gt;::loadMaps()
 {
 </xsl:text>
   <!-- '  this->publisherParticipants_[ Publishers::(publisher/@name)] = Participants::(publisher/../@name);\n' -->
@@ -421,10 +422,10 @@ OpenDDS::Model::</xsl:text>
   </xsl:for-each>
   <xsl:text>}
 
+template&lt; class InstanceTraits&gt;
+inline
 void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::buildParticipantsQos()
+Elements::Data&lt;InstanceTraits&gt;::buildParticipantsQos()
 {
   DomainParticipantQos participantQos;
   Participants::Values participant;
@@ -447,10 +448,10 @@ OpenDDS::Model::</xsl:text>
   </xsl:for-each>
   <xsl:text>}
 
+template&lt; class InstanceTraits&gt;
+inline
 void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::buildTopicsQos()
+Elements::Data&lt;InstanceTraits&gt;::buildTopicsQos()
 {
   TopicQos       topicQos;
   Topics::Values topic;
@@ -474,10 +475,10 @@ OpenDDS::Model::</xsl:text>
   </xsl:for-each>
   <xsl:text>}
 
+template&lt; class InstanceTraits&gt;
+inline
 void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::buildPublishersQos()
+Elements::Data&lt;InstanceTraits&gt;::buildPublishersQos()
 {
   PublisherQos       publisherQos;
   Publishers::Values publisher;
@@ -500,10 +501,10 @@ OpenDDS::Model::</xsl:text>
   </xsl:for-each>
   <xsl:text>}
 
+template&lt; class InstanceTraits&gt;
+inline
 void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::buildSubscribersQos()
+Elements::Data&lt;InstanceTraits&gt;::buildSubscribersQos()
 {
   SubscriberQos       subscriberQos;
   Subscribers::Values subscriber;
@@ -526,10 +527,10 @@ OpenDDS::Model::</xsl:text>
   </xsl:for-each>
   <xsl:text>}
 
+template&lt; class InstanceTraits&gt;
+inline
 void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::buildPublicationsQos()
+Elements::Data&lt;InstanceTraits&gt;::buildPublicationsQos()
 {
   DataWriters::Values  writer;
   DataWriterQos        writerQos;
@@ -552,10 +553,10 @@ OpenDDS::Model::</xsl:text>
   </xsl:for-each>
   <xsl:text>}
 
+template&lt; class InstanceTraits&gt;
+inline
 void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::buildSubscriptionsQos()
+Elements::Data&lt;InstanceTraits&gt;::buildSubscriptionsQos()
 {
   DataReaders::Values  reader;
   DataReaderQos        readerQos;
@@ -578,10 +579,10 @@ OpenDDS::Model::</xsl:text>
   </xsl:for-each>
   <xsl:text>}
 
+template&lt; class InstanceTraits&gt;
+inline
 void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::buildTransportsConfig()
+Elements::Data&lt;InstanceTraits&gt;::buildTransportsConfig()
 {
   Transports::Values transport;
   unsigned long      key;
@@ -635,14 +636,16 @@ OpenDDS::Model::</xsl:text>
   </xsl:for-each>
   <xsl:text>}
 
+template&lt; class InstanceTraits&gt;
+inline
 void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::copyPublicationQos(
+Elements::Data&lt;InstanceTraits&gt;::copyPublicationQos(
   DataWriters::Values which,
   DataWriterQos&amp;  writerQos
 )
 {
+  do{}while(&amp;writerQos==0); // In case we define no properties.
+
   switch( which) {
 </xsl:text>
   <xsl:for-each select="$writer">
@@ -666,14 +669,16 @@ OpenDDS::Model::</xsl:text>
   }
 }
 
+template&lt; class InstanceTraits&gt;
+inline
 void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data::copySubscriptionQos(
+Elements::Data&lt;InstanceTraits&gt;::copySubscriptionQos(
   DataReaders::Values which,
   DataReaderQos&amp;  readerQos
 )
 {
+  do{}while(&amp;readerQos==0); // In case we define no properties.
+
   switch( which) {
 </xsl:text>
   <xsl:for-each select="$reader">
@@ -696,6 +701,10 @@ OpenDDS::Model::</xsl:text>
       throw NoReaderException();
   }
 }
+
+} } } // End of namespace OpenDDS::Model::</xsl:text>
+  <xsl:value-of select="$modelname"/>
+  <xsl:text>
 
 </xsl:text>
 </xsl:template>

@@ -25,7 +25,7 @@ project {
     inputext             = .opendds
     command              = xsltproc $(DDS_ROOT)/tools/modeling/codegen/xsl/h.xsl
     output_option        = <%gt%>
-    generic_outputext    = .h
+    generic_outputext    = _T.h
     generic_pre_dirname  = model/
     postcommand          = generate_export_file.pl <%input_noext%> <%gt%> model/<%input_noext%>_export.h
     keyword xslhflags    = commandflags
@@ -37,7 +37,7 @@ project {
     inputext             = .opendds
     command              = xsltproc $(DDS_ROOT)/tools/modeling/codegen/xsl/cpp.xsl
     output_option        = <%gt%>
-    generic_outputext    = .cpp
+    generic_outputext    = _T.cpp
     generic_pre_dirname  = model/
     keyword xslcppflags  = commandflags
   }

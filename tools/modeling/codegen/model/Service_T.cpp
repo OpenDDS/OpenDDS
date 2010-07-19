@@ -1,9 +1,9 @@
 
 #include "Service_T.h"
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
-OpenDDS::Model::Service< ModelName>::Service()
+OpenDDS::Model::Service< ModelName, InstanceTraits>::Service()
 {
   this->delegate_.service() = this;
 
@@ -44,25 +44,25 @@ OpenDDS::Model::Service< ModelName>::Service()
   }
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
-OpenDDS::Model::Service< ModelName>::~Service()
+OpenDDS::Model::Service< ModelName, InstanceTraits>::~Service()
 {
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 void
-OpenDDS::Model::Service< ModelName>::init( int argc, char** argv)
+OpenDDS::Model::Service< ModelName, InstanceTraits>::init( int argc, char** argv)
 {
   this->delegate_.init( argc, argv);
   this->modelData_.init();
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 void
-OpenDDS::Model::Service< ModelName>::fini()
+OpenDDS::Model::Service< ModelName, InstanceTraits>::fini()
 {
   for( int index = 0; index < Participants::LAST_INDEX; ++index) {
     if( this->participants_[ index]) {
@@ -73,10 +73,10 @@ OpenDDS::Model::Service< ModelName>::fini()
   this->delegate_.fini();
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 DDS::DomainParticipant_var
-OpenDDS::Model::Service< ModelName>::participant( typename Participants::Values participant)
+OpenDDS::Model::Service< ModelName, InstanceTraits>::participant( typename Participants::Values participant)
 {
   if( !this->participants_[ participant]) {
     this->createParticipant( participant);
@@ -84,10 +84,10 @@ OpenDDS::Model::Service< ModelName>::participant( typename Participants::Values 
   return DDS::DomainParticipant::_duplicate(this->participants_[ participant]);
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 DDS::Topic_var
-OpenDDS::Model::Service< ModelName>::topic(
+OpenDDS::Model::Service< ModelName, InstanceTraits>::topic(
   typename Participants::Values participant,
   typename Topics::Values       topic
 )
@@ -98,10 +98,10 @@ OpenDDS::Model::Service< ModelName>::topic(
   return DDS::Topic::_duplicate(this->topics_[ participant][ topic]);
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 DDS::Publisher_var
-OpenDDS::Model::Service< ModelName>::publisher( typename Publishers::Values publisher)
+OpenDDS::Model::Service< ModelName, InstanceTraits>::publisher( typename Publishers::Values publisher)
 {
   if( !this->publishers_[ publisher]) {
     this->createPublisher( publisher);
@@ -109,10 +109,10 @@ OpenDDS::Model::Service< ModelName>::publisher( typename Publishers::Values publ
   return DDS::Publisher::_duplicate(this->publishers_[ publisher]);
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 DDS::Subscriber_var
-OpenDDS::Model::Service< ModelName>::subscriber( typename Subscribers::Values subscriber)
+OpenDDS::Model::Service< ModelName, InstanceTraits>::subscriber( typename Subscribers::Values subscriber)
 {
   if( !this->subscribers_[ subscriber]) {
     this->createSubscriber( subscriber);
@@ -120,10 +120,10 @@ OpenDDS::Model::Service< ModelName>::subscriber( typename Subscribers::Values su
   return DDS::Subscriber::_duplicate(this->subscribers_[ subscriber]);
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 DDS::DataWriter_var
-OpenDDS::Model::Service< ModelName>::writer( typename DataWriters::Values writer)
+OpenDDS::Model::Service< ModelName, InstanceTraits>::writer( typename DataWriters::Values writer)
 {
   if( !this->writers_[ writer]) {
     this->createPublication( writer);
@@ -131,10 +131,10 @@ OpenDDS::Model::Service< ModelName>::writer( typename DataWriters::Values writer
   return DDS::DataWriter::_duplicate(this->writers_[ writer]);
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 DDS::DataReader_var
-OpenDDS::Model::Service< ModelName>::reader( typename DataReaders::Values reader)
+OpenDDS::Model::Service< ModelName, InstanceTraits>::reader( typename DataReaders::Values reader)
 {
   if( !this->readers_[ reader]) {
     this->createSubscription( reader);
@@ -142,10 +142,10 @@ OpenDDS::Model::Service< ModelName>::reader( typename DataReaders::Values reader
   return DDS::DataReader::_duplicate(this->readers_[ reader]);
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 void
-OpenDDS::Model::Service< ModelName>::createParticipant(
+OpenDDS::Model::Service< ModelName, InstanceTraits>::createParticipant(
   typename Participants::Values participant
 )
 {
@@ -157,10 +157,10 @@ OpenDDS::Model::Service< ModelName>::createParticipant(
   );
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 void
-OpenDDS::Model::Service< ModelName>::createTopic(
+OpenDDS::Model::Service< ModelName, InstanceTraits>::createTopic(
   typename Participants::Values participant,
   typename Topics::Values       topic
 )
@@ -185,10 +185,10 @@ OpenDDS::Model::Service< ModelName>::createTopic(
   );
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 void
-OpenDDS::Model::Service< ModelName>::createPublisher(
+OpenDDS::Model::Service< ModelName, InstanceTraits>::createPublisher(
   typename Publishers::Values publisher
 )
 {
@@ -211,10 +211,10 @@ OpenDDS::Model::Service< ModelName>::createPublisher(
   );
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 void
-OpenDDS::Model::Service< ModelName>::createSubscriber(
+OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscriber(
   typename Subscribers::Values subscriber
 )
 {
@@ -237,10 +237,10 @@ OpenDDS::Model::Service< ModelName>::createSubscriber(
   );
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 void
-OpenDDS::Model::Service< ModelName>::createPublication( typename DataWriters::Values writer)
+OpenDDS::Model::Service< ModelName, InstanceTraits>::createPublication( typename DataWriters::Values writer)
 {
   typename Publishers::Values   publisher   = this->modelData_.publisher( writer);
   typename Participants::Values participant = this->modelData_.participant( publisher);
@@ -263,10 +263,10 @@ OpenDDS::Model::Service< ModelName>::createPublication( typename DataWriters::Va
   );
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 void
-OpenDDS::Model::Service< ModelName>::createSubscription( typename DataReaders::Values reader)
+OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscription( typename DataReaders::Values reader)
 {
   typename Subscribers::Values  subscriber  = this->modelData_.subscriber( reader);
   typename Participants::Values participant = this->modelData_.participant( subscriber);
@@ -289,10 +289,10 @@ OpenDDS::Model::Service< ModelName>::createSubscription( typename DataReaders::V
   );
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 void
-OpenDDS::Model::Service< ModelName>::createTransport( typename Transports::Values transport)
+OpenDDS::Model::Service< ModelName, InstanceTraits>::createTransport( typename Transports::Values transport)
 {
   this->delegate_.createTransport(
     this->transports_[ transport],
@@ -302,10 +302,10 @@ OpenDDS::Model::Service< ModelName>::createTransport( typename Transports::Value
   );
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 void
-OpenDDS::Model::Service< ModelName>::copyPublicationQos(
+OpenDDS::Model::Service< ModelName, InstanceTraits>::copyPublicationQos(
   unsigned int        which,
   DDS::DataWriterQos& writerQos
 )
@@ -317,10 +317,10 @@ OpenDDS::Model::Service< ModelName>::copyPublicationQos(
   this->modelData_.copyPublicationQos( writer, writerQos);
 }
 
-template< typename ModelName>
+template< typename ModelName, class InstanceTraits>
 inline
 void
-OpenDDS::Model::Service< ModelName>::copySubscriptionQos(
+OpenDDS::Model::Service< ModelName, InstanceTraits>::copySubscriptionQos(
   unsigned int        which,
   DDS::DataReaderQos& readerQos
 )

@@ -16,10 +16,13 @@
 
 namespace OpenDDS { namespace Model {
 
-  template< typename ModelName>
+  class DefaultInstanceTraits;
+
+  template< typename ModelName, class InstanceTraits = DefaultInstanceTraits>
   class Service : public CopyQos {
     public:
-      typedef typename ModelName::Data         Data;
+      typedef typename ModelName::template Data< InstanceTraits> Data;
+
       typedef typename ModelName::Participants Participants;
       typedef typename ModelName::Types        Types;
       typedef typename ModelName::Topics       Topics;

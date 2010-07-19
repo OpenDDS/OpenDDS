@@ -1,3 +1,42 @@
+Mon Jul 19 22:22:42 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * MPC/config/dds_xsl.mpb:
+
+          Added template decorator to generated C++ files to reflect
+          the model data class new status as a template.
+
+        * tools/modeling/codegen/model/DefaultInstanceTraits.h:
+
+          Provide a base traits struct for default model instances and to
+          be used to simplify creating user traits.
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Added traits as a template parameter and instantiated the model
+          data with the traits.
+
+        * tools/modeling/codegen/xsl/cpp.xsl:
+        * tools/modeling/codegen/xsl/h.xsl:
+        * tools/modeling/codegen/xsl/mpc.xsl:
+
+          Migrated the model data to a template class with a traits
+          parameter.  Implement the initial trait as a base key index for
+          transports to allow multiple model instances in the same
+          application process.
+
+        * tools/modeling/tests/Codegen/aPublisher.cpp:
+        * tools/modeling/tests/Codegen/aSubscriber.cpp:
+
+          Migrated to using the new traits based model types.  Added a
+          simple trait definition and instantiation example in the
+          publisher.
+
+        * tools/modeling/tests/Messenger/publisher.cpp:
+        * tools/modeling/tests/Messenger/subscriber.cpp:
+
+          Migrated to using the new traits based model types.
+
 Mon Jul 19 19:00:47 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.model/model/DCPS.ecore:

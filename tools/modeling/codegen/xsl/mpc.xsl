@@ -52,9 +52,6 @@
   }
 
   Source_Files {
-    </xsl:text>
-    <xsl:value-of select="$modelname"/>
-    <xsl:text>.cpp
   }
 }
 </xsl:text>
