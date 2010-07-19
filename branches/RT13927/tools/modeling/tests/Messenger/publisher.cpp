@@ -7,7 +7,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerModel.h"
+#include "model/MessengerModel_T.h"
 
 int
 main( int argc, char** argv, char**)
