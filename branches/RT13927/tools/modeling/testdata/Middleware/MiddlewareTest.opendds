@@ -3,20 +3,33 @@
   <domains name="1"/>
   <domains name="2"/>
   <participants name="part1" domain="//@domains.0">
-    <publisher xsi:type="opendds:publisher" name="pub1">
+    <qosPolicy xsi:type="opendds:qosProperty" name="part1QosProperty">
+      <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#//@policyLibrary.0/@policies.21"/>
+    </qosPolicy>
+    <publishers xsi:type="opendds:publisher" name="pub1">
       <qosPolicy xsi:type="opendds:qosProperty" name="policyFromLibrary">
         <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#//@policyLibrary.0/@policies.8"/>
       </qosPolicy>
       <presentation xsi:type="opendds:presentationQosPolicy" name="pub1presentation" coherent_access="true" ordered_access="true"/>
       <partition xsi:type="opendds:partitionQosPolicy" name="pub1partition"/>
       <writer xsi:type="opendds:dataWriter" name="writer1" topic="//@topics.0">
-        <resource_limits xsi:type="opendds:rlQosPolicy" name="wrtier1limits"/>
+        <qosPolicy xsi:type="opendds:qosProperty" name="write1QosProperty">
+          <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#//@policyLibrary.0/@policies.9"/>
+        </qosPolicy>
+        <resource_limits xsi:type="opendds:rlQosPolicy" name="writer1limits"/>
         <durability_service xsi:type="opendds:dsQosPolicy" name="write1DsQosPolicy" max_instances="3" max_samples="4" max_samples_per_instance="2"/>
       </writer>
-    </publisher>
-    <subscriber xsi:type="opendds:subscriber" name="sub1">
-      <reader xsi:type="opendds:dataReader" name="reader1" topic="//@topics.0"/>
-    </subscriber>
+    </publishers>
+    <subscribers xsi:type="opendds:subscriber" name="sub1">
+      <qosPolicy xsi:type="opendds:qosProperty" name="sub1QosProperty">
+        <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#//@policyLibrary.0/@policies.3"/>
+      </qosPolicy>
+      <reader xsi:type="opendds:dataReader" name="reader1" topic="//@topics.0">
+        <qosPolicy xsi:type="opendds:qosProperty" name="reader1QosProperty">
+          <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#//@policyLibrary.0/@policies.19"/>
+        </qosPolicy>
+      </reader>
+    </subscribers>
     <entity_factory xsi:type="opendds:efQosPolicy" name="part1entityfactory"/>
     <user_data name="part1userdata" value="42"/>
   </participants>

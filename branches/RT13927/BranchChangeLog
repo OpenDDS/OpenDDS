@@ -1,3 +1,19 @@
+Mon Jul 19 19:00:47 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/DCPS.ecore:
+
+          Changed cardinality of DomainParticipant's publisher and subscribers from 0..1
+          (as given in the profile specification) to 0..* (as given in the DDS specification).
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model.edit/plugin.properties:
+
+          Updated due to changes in DCPS.ecore
+
+        * tools/modeling/testdata/Middleware/MiddlewareTest.opendds:
+
+          Updated due to changes in DCPS.ecore. Also, removed validation failures by adding a
+          QosProperty where needed.
+
 Mon Jul 19 17:53:30 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/testdata/Middleware:
