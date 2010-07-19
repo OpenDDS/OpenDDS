@@ -1,9 +1,16 @@
+Mon Jul 19 14:20:37 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/TreeNode.h:
+
+          Changed QList<>::removeOne() to QList<>::removeAll() to allow
+          use with earlier Qt 4.3 version.
+
 Thu Jul 15 15:22:10 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/CoherentChangeControl.cpp:
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DataWriterImpl.cpp:
-        
+
           Removing paranoid checks.
 
 Thu Jul 15 12:33:55 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
