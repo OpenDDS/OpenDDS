@@ -114,6 +114,10 @@ public:
     DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states);
+
+  virtual DDS::ReturnCode_t read_next_instance_generic(void*&,
+    DDS::SampleInfo&, DDS::InstanceHandle_t, DDS::SampleStateMask,
+    DDS::ViewStateMask, DDS::InstanceStateMask);
 #endif
 };
 
