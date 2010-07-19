@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<opendds:DataLibrary xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0">
+<types:DataLibrary xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0">
   <dataTypes xsi:type="types:Short"/>
   <dataTypes xsi:type="types:Sequence" name="ShortSequence" subtype="//@dataTypes.0"/>
-  <dataTypes xsi:type="opendds:idlTypedef" name="shortseqtypedef" type="//@dataTypes.1"/>
-  <dataTypes xsi:type="opendds:idlStruct" name="type1">
+  <dataTypes xsi:type="types:idlTypedef" name="shortseqtypedef" type="//@dataTypes.1"/>
+  <dataTypes xsi:type="types:idlStruct" name="type1">
     <members xsi:type="types:String" name="name"/>
     <members xsi:type="types:ULong" name="value"/>
     <members xsi:type="types:Short" name="key"/>
     <members xsi:type="types:TypedefRef" name="bseq" reference="//@dataTypes.2"/>
     <keys member="//@dataTypes.3/@members.2"/>
   </dataTypes>
-</opendds:DataLibrary>
+</types:DataLibrary>
