@@ -18,7 +18,7 @@
 #include <stdexcept>
 
 namespace {
-  struct MatchesIncomingName { // predicate for std::find_if
+  struct MatchesIncomingName { // predicate for std::find_if()
     const std::string& look_for_;
     explicit MatchesIncomingName(const std::string& s) : look_for_(s) {}
     bool operator()(const OpenDDS::DCPS::MultiTopicImpl::SubjectFieldSpec& sfs)
@@ -169,12 +169,7 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
 
   std::string topic = topicNameFor(reader);
   const MetaStruct& meta = metaStructFor(reader);
-
-  //TODO: temporary logging
-  ACE_DEBUG((LM_DEBUG, "Multitopic incoming data available: %C\n",
-    topic.c_str()));
-
-  for (size_t i = 0; i < gen.samples_.size(); ++i) {
+  for (CORBA::ULong i = 0; i < gen.samples_.size(); ++i) {
     if (gen.info_[i].valid_data) {
       incoming_sample(gen.samples_[i], gen.info_[i], topic.c_str(), meta);
     }
@@ -183,25 +178,25 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
 }
 
 void MultiTopicDataReaderBase::Listener::on_requested_deadline_missed(
-  DDS::DataReader_ptr reader, const DDS::RequestedDeadlineMissedStatus& status)
+  DDS::DataReader_ptr reader, const DDS::RequestedDeadlineMissedStatus&)
   ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void MultiTopicDataReaderBase::Listener::on_requested_incompatible_qos(
-  DDS::DataReader_ptr reader, const DDS::RequestedIncompatibleQosStatus& status)
+  DDS::DataReader_ptr reader, const DDS::RequestedIncompatibleQosStatus&)
   ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void MultiTopicDataReaderBase::Listener::on_sample_rejected(
-  DDS::DataReader_ptr reader, const DDS::SampleRejectedStatus& status)
+  DDS::DataReader_ptr reader, const DDS::SampleRejectedStatus&)
   ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void MultiTopicDataReaderBase::Listener::on_liveliness_changed(
-  DDS::DataReader_ptr reader, const DDS::LivelinessChangedStatus& status)
+  DDS::DataReader_ptr reader, const DDS::LivelinessChangedStatus&)
   ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
@@ -221,13 +216,13 @@ void MultiTopicDataReaderBase::Listener::on_data_available(
 }
 
 void MultiTopicDataReaderBase::Listener::on_subscription_matched(
-  DDS::DataReader_ptr reader, const DDS::SubscriptionMatchedStatus& status)
+  DDS::DataReader_ptr, const DDS::SubscriptionMatchedStatus&)
   ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
-void MultiTopicDataReaderBase::Listener::on_sample_lost(
-  DDS::DataReader_ptr reader, const DDS::SampleLostStatus& status)
+void MultiTopicDataReaderBase::Listener::on_sample_lost(DDS::DataReader_ptr,
+  const DDS::SampleLostStatus&)
   ACE_THROW_SPEC((CORBA::SystemException))
 {
 }

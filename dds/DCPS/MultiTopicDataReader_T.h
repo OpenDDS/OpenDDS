@@ -108,13 +108,41 @@ public:
 
 private:
   typedef std::vector<Sample> SampleVec;
+  typedef std::set<std::string> TopicSet;
 
+  // Given a QueryPlan that describes how to treat 'incoming' data from a
+  // certain topic (with MetaStruct 'meta'), assign its relevant fields to
+  // the corresponding fields of 'resulting'.
   void assign_fields(void* incoming, Sample& resulting, const QueryPlan& qp,
                      const MetaStruct& meta);
 
+  // Process all joins (recursively) in the QueryPlan 'qp'.
+  void process_joins(std::map<TopicSet, SampleVec>& partialResults,
+                     SampleVec starting, const TopicSet& seen,
+                     const QueryPlan& qp);
+
+  // Starting with a 'prototype' sample, fill a 'resulting' vector with all
+  // data from 'other_dr' (with MetaStruct 'other_meta') such that all key
+  // fields named in 'key_names' match the values in 'key_data'.  The struct
+  // pointed-to by 'key_data' is of the type used by the 'other_dr'.
   void join(SampleVec& resulting, const Sample& prototype,
             const std::vector<std::string>& key_names, const void* key_data,
             DDS::DataReader_ptr other_dr, const MetaStruct& other_meta);
+
+  // Combine two vectors of data, 'resulting' and 'other', with the results of
+  // the combination going into 'resulting'.  Use the keys in 'key_names' to
+  // determine which elements to combine, and the topic names in 'other_topics'
+  // to determine which fields from 'other' should be assigned to 'resulting'.
+  void combine(SampleVec& resulting, const SampleVec& other,
+               const std::vector<std::string>& key_names,
+               const TopicSet& other_topics);
+
+  // Helper for combine(), similar to assign_fields but instead of coming from
+  // a differently-typed struct in a void*, the data comes from an existing
+  // Sample, 'source'.  Each field projeted from any of the topics in
+  // 'other_topics' is copied from 'source' to 'target'.
+  void assign_resulting_fields(Sample& target, const Sample& source,
+                               const TopicSet& other_topics);
 
   struct GenericData {
     explicit GenericData(const MetaStruct& meta, bool doAlloc = true)
@@ -122,6 +150,15 @@ private:
     ~GenericData() { meta_.deallocate(ptr_); }
     const MetaStruct& meta_;
     void* ptr_;
+  };
+
+  struct Contains { // predicate for std::find_if()
+    const std::string& look_for_;
+    explicit Contains(const std::string& s) : look_for_(s) {}
+    bool operator()(const std::pair<const std::set<std::string>, SampleVec>& e)
+      const {
+      return e.first.count(look_for_);
+    }
   };
 
   typename TypedDataReader::Interface::_var_type typed_reader_;

@@ -24,26 +24,32 @@ void waitForMatch(const StatusCondition_var& sc)
   ws->detach_condition(sc);
 }
 
+template <typename TSImpl>
+struct Writer {
+  Writer(const DomainParticipant_var& dp, const Publisher_var& pub,
+    const char* topic_name)
+    : ts_(new TSImpl)
+  {
+    ts_->register_type(dp, "");
+    CORBA::String_var type_name = ts_->get_type_name();
+    Topic_var topic = dp->create_topic(topic_name, type_name,
+      TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+    dw_ = pub->create_datawriter(topic,
+      DATAWRITER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+  }
+
+  typename TSImpl::_var_type ts_;
+  DataWriter_var dw_;
+};
+
 bool run_multitopic_test(const DomainParticipant_var& dp,
   const Publisher_var& pub, const Subscriber_var& sub)
 {
   // Writer-side setup
 
-  LocationInfoTypeSupport_var ts_loc = new LocationInfoTypeSupportImpl;
-  ts_loc->register_type(dp, "");
-  CORBA::String_var type_name_loc = ts_loc->get_type_name();
-  Topic_var location = dp->create_topic("Location", type_name_loc,
-    TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
-  DataWriter_var dw_loc = pub->create_datawriter(location,
-    DATAWRITER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
-
-  PlanInfoTypeSupport_var ts_pi = new PlanInfoTypeSupportImpl;
-  ts_pi->register_type(dp, "");
-  CORBA::String_var type_name_pi = ts_pi->get_type_name();
-  Topic_var flightplan = dp->create_topic("FlightPlan", type_name_pi,
-    TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
-  DataWriter_var dw_fp = pub->create_datawriter(flightplan,
-    DATAWRITER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+  Writer<LocationInfoTypeSupportImpl> location(dp, pub, "Location");
+  Writer<PlanInfoTypeSupportImpl> flightplan(dp, pub, "FlightPlan");
+  Writer<MoreInfoTypeSupportImpl> more(dp, pub, "More");
 
   // Reader-side setup
 
@@ -51,36 +57,67 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
   ts_res->register_type(dp, "");
   CORBA::String_var type_name = ts_res->get_type_name();
   MultiTopic_var mt = dp->create_multitopic("MyMultiTopic", type_name,
-    "SELECT flight_name, x, y, z AS height FROM Location NATURAL JOIN "
-    "FlightPlan WHERE height < 1000 AND x<23", StringSeq());
+    "SELECT flight_name, x, y, z AS height, more FROM Location NATURAL JOIN "
+    "FlightPlan NATURAL JOIN More WHERE height < 1000 AND x<23", StringSeq());
   if (!mt) return false;
   DataReader_var dr = sub->create_datareader(mt, DATAREADER_QOS_DEFAULT,
     0, DEFAULT_STATUS_MASK);
 
   // Write samples (Location)
 
-  StatusCondition_var dw_sc = dw_loc->get_statuscondition();
+  StatusCondition_var dw_sc = location.dw_->get_statuscondition();
   waitForMatch(dw_sc);
-  LocationInfoDataWriter_var locdw = LocationInfoDataWriter::_narrow(dw_loc);
-  LocationInfo sample = {100, 99, 23, 2, 3}; // filtered out (x < 23)
+  LocationInfoDataWriter_var locdw =
+    LocationInfoDataWriter::_narrow(location.dw_);
+  LocationInfo sample = {100, 97, 23, 2, 3}; // filtered out (x < 23)
   ReturnCode_t ret = locdw->write(sample, HANDLE_NIL);
-  LocationInfo sample2 = {100, 99, 1, 2, 3000}; // filtered out (height < 1000)
+  if (ret != RETCODE_OK) return false;
+  LocationInfo sample2 = {100, 96, 1, 2, 3000}; // filtered out (height < 1000)
   ret = locdw->write(sample2, HANDLE_NIL);
+  if (ret != RETCODE_OK) return false;
   LocationInfo sample3 = {100, 99, 1, 2, 3};
   ret = locdw->write(sample3, HANDLE_NIL);
+  if (ret != RETCODE_OK) return false;
+  LocationInfo sample3_5 = {100, 98, 4, 5, 6};
+  ret = locdw->write(sample3_5, HANDLE_NIL);
   if (ret != RETCODE_OK) return false;
 
   // Write samples (FlightPlan)
 
-  StatusCondition_var dw2_sc = dw_fp->get_statuscondition();
+  StatusCondition_var dw2_sc = flightplan.dw_->get_statuscondition();
   waitForMatch(dw2_sc);
-  PlanInfoDataWriter_var pidw = PlanInfoDataWriter::_narrow(dw_fp);
+  PlanInfoDataWriter_var pidw = PlanInfoDataWriter::_narrow(flightplan.dw_);
   PlanInfo sample4;
   sample4.flight_id1 = 100;
   sample4.flight_id2 = 99;
   sample4.flight_name = "Flight 100-99";
   sample4.tailno = "N12345";
   ret = pidw->write(sample4, HANDLE_NIL);
+  if (ret != RETCODE_OK) return false;
+  PlanInfo sample4_1(sample4);
+  sample4_1.flight_id2 = 97;
+  sample4_1.flight_name = "Flight 100-97";
+  ret = pidw->write(sample4_1, HANDLE_NIL);
+  if (ret != RETCODE_OK) return false;
+  PlanInfo sample4_2(sample4);
+  sample4_2.flight_id2 = 96;
+  sample4_2.flight_name = "Flight 100-96";
+  ret = pidw->write(sample4_2, HANDLE_NIL);
+  if (ret != RETCODE_OK) return false;
+
+  // Write samples (More)
+
+  StatusCondition_var dw3_sc = more.dw_->get_statuscondition();
+  waitForMatch(dw3_sc);
+  MoreInfoDataWriter_var midw = MoreInfoDataWriter::_narrow(more.dw_);
+  MoreInfo mi;
+  mi.flight_id1 = 12345;
+  mi.more = "Shouldn't see this";
+  ret = midw->write(mi, HANDLE_NIL);
+  if (ret != RETCODE_OK) return false;
+  mi.flight_id1 = 100;
+  mi.more = "Extra info for all flights with id1 == 100";
+  ret = midw->write(mi, HANDLE_NIL);
   if (ret != RETCODE_OK) return false;
 
   // Read resulting samples
@@ -102,11 +139,14 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
   if (data.length() > 1 || !info[0].valid_data) return false;
   std::cout << "Received: " << data[0].flight_id1 << '-' <<
     data[0].flight_id2 << " \"" << data[0].flight_name << "\" " << data[0].x <<
-    " " << data[0].y << " " << data[0].height << std::endl;
+    " " << data[0].y << " " << data[0].height << " \"" << data[0].more <<
+    "\"" << std::endl;
   if (data[0].flight_id1 != sample4.flight_id1 || data[0].flight_id2 !=
-    sample4.flight_id2 || strcmp(data[0].flight_name, sample4.flight_name) ||
-    data[0].x != sample3.x || data[0].y != sample3.y ||
-    data[0].height != sample3.z) return false;
+      sample4.flight_id2 || strcmp(data[0].flight_name, sample4.flight_name) ||
+      data[0].x != sample3.x || data[0].y != sample3.y ||
+      data[0].height != sample3.z || strcmp(data[0].more, mi.more)) {
+    return false;
+  }
   data.length(0);
   info.length(0);
   ret = res_dr->read_w_condition(data, info, DDS::LENGTH_UNLIMITED, rc);

@@ -21,6 +21,13 @@ struct PlanInfo {
   string tailno;
 };
 
+#pragma DCPS_DATA_TYPE "MoreInfo"
+#pragma DCPS_DATA_KEY "MoreInfo flight_id1"
+struct MoreInfo {
+  unsigned long flight_id1;
+  string more;
+};
+
 #pragma DCPS_DATA_TYPE "Resulting"
 #pragma DCPS_DATA_KEY "Resulting flight_id1"
 #pragma DCPS_DATA_KEY "Resulting flight_id2"
@@ -31,4 +38,5 @@ struct Resulting {
   long x;
   long y;
   long height;
+  string more;
 };
