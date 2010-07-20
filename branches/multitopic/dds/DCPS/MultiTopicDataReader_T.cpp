@@ -140,10 +140,10 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::combine(
 {
   const MetaStruct& meta = getResultingMeta();
   SampleVec newData;
-  for (SampleVec::iterator iterRes = resulting.begin();
+  for (typename SampleVec::iterator iterRes = resulting.begin();
        iterRes != resulting.end(); /*incremented in loop*/) {
     bool foundOneMatch = false;
-    for (SampleVec::const_iterator iterOther = other.begin();
+    for (typename SampleVec::const_iterator iterOther = other.begin();
          iterOther != other.end(); ++iterOther) {
       bool match = true;
       for (size_t i = 0; match && i < key_names.size(); ++i) {
@@ -195,7 +195,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
       keys.push_back(iter->second);
     }
 
-    map<TopicSet, SampleVec>::iterator found =
+    typename map<TopicSet, SampleVec>::iterator found =
       find_if(partialResults.begin(), partialResults.end(),
         Contains(other_topic));
 
@@ -259,8 +259,8 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
   process_joins(partialResults, starting, seen, qp);
 
   TypedDataReader* tdr = dynamic_cast<TypedDataReader*>(typed_reader_.in());
-  for (map<TopicSet, SampleVec>::iterator iterPR = partialResults.begin();
-       iterPR != partialResults.end(); ++iterPR) {
+  for (typename map<TopicSet, SampleVec>::iterator iterPR =
+       partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
     for (typename SampleVec::iterator i = iterPR->second.begin();
          i != iterPR->second.end(); ++i) {
       tdr->store_synthetic_data(*i);

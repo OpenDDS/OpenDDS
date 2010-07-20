@@ -1,3 +1,9 @@
+Tue Jul 20 22:56:24 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          GCC requires a few more "typename"s than VC++.
+
 Tue Jul 20 22:38:47 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/LocalObject.h:
