@@ -1,3 +1,25 @@
+Tue Jul 20 22:38:47 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/LocalObject.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.h:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          Continued implementing MultiTopic, specifically the ability to have
+          arbitrarily complex joins with different keys.  Not all of that is
+          test yet, and cross-joins are not yet implemented.
+
+        * dds/idl/CPPTemplate.txt:
+
+          Corrected filtering (WHERE clause) for MultiTopic.
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.idl:
+
+          Added a 3rd incoming topic to the test, provides coverage for the
+          case where one of the topics has a subset of the keys of the
+          resulting topic.
+
 Mon Jul 19 14:57:16 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/unit/MyTypeSupportImpl.h:

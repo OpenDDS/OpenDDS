@@ -1612,6 +1612,14 @@ void
 {
   using namespace OpenDDS::DCPS;
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+
+  DDS::TopicDescription_var descr = get_topicdescription();
+  if (MultiTopicImpl* mt = dynamic_cast<MultiTopicImpl*>(descr.in())) {
+    if (!mt->filter(sample)) {
+      return;
+    }
+  }
+
   get_subscriber_servant()->data_received(this);
 
   DDS::InstanceHandle_t inst = lookup_instance(sample);
@@ -1662,7 +1670,6 @@ void
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   using OpenDDS::DCPS::ContentFilteredTopicImpl;
-  using OpenDDS::DCPS::MultiTopicImpl;
   if (ContentFilteredTopicImpl* cft =
       dynamic_cast<ContentFilteredTopicImpl*>(content_filtered_topic_.in())) {
     if (sample.header_.message_id_ == OpenDDS::DCPS::SAMPLE_DATA
@@ -1670,18 +1677,7 @@ void
       filtered = true;
       return;
     }
-  } else {
-    DDS::TopicDescription_var descr = get_topicdescription();
-    if (MultiTopicImpl* mt =
-        dynamic_cast<MultiTopicImpl*>(descr.in())) {
-      if (sample.header_.message_id_ == OpenDDS::DCPS::SAMPLE_DATA
-          && !mt->filter(*data)) {
-        filtered = true;
-        return;
-      }
-    }
   }
-
 #endif
 
   store_instance_data(data, sample.header_, instance, just_registered, filtered);

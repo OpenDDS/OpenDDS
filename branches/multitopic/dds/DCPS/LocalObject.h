@@ -29,6 +29,7 @@ class LocalObject
   , public virtual TAO_Local_RefCounted_Object {
 public:
   typedef typename Stub::_ptr_type _ptr_type;
+  typedef typename Stub::_var_type _var_type;
   static _ptr_type _narrow(CORBA::Object_ptr obj) {
     return Stub::_narrow(obj);
   }
