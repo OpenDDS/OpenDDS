@@ -1,3 +1,12 @@
+Wed Jul 21 03:49:25 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3487] 2010-07-21 03:44  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.feature/feature.xml,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/META-INF/MANIFEST.MF:
+
+          Updated with a new version qualifier to build for the candidate
+          update site.
+
 Wed Jul 21 00:10:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/tests/Codegen/aPublisher.cpp:
@@ -5,42 +14,42 @@ Wed Jul 21 00:10:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
           Removed second instance fini() call to avoid a problem with
           transport shutdown not being idempotent.
 
-	* [r3485] 2010-07-21 00:05  martinezm
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/.classpath,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/.project,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/.settings,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/.settings/org.eclipse.jdt.core.prefs,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/META-INF/MANIFEST.MF,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/build.properties,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/images/codegen-16x16.gif,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/images/codegen-32x32.gif,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/plugin.xml,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenEditor.java,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenEditorContributor.java,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/ColorManager.java,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/IXMLColorConstants.java,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/NonRuleBasedDamagerRepairer.java,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/TagRule.java,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLConfiguration.java,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLDocumentProvider.java,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLDoubleClickStrategy.java,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLPartitionScanner.java,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLScanner.java,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLTagScanner.java,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLWhitespaceDetector.java,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/wizards,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/wizards/CodeGenNewWizard.java,
-	  tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/wizards/CodeGenNewWizardPage.java:
+        * [r3485] 2010-07-21 00:05  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/.classpath,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/.project,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/.settings,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/.settings/org.eclipse.jdt.core.prefs,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/build.properties,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/images/codegen-16x16.gif,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/images/codegen-32x32.gif,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/plugin.xml,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenEditor.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenEditorContributor.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/ColorManager.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/IXMLColorConstants.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/NonRuleBasedDamagerRepairer.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/TagRule.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLConfiguration.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLDocumentProvider.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLDoubleClickStrategy.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLPartitionScanner.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLScanner.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLTagScanner.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLWhitespaceDetector.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/wizards,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/wizards/CodeGenNewWizard.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/wizards/CodeGenNewWizardPage.java:
 
-	  Created code generation editor infrastructure. This includes a code
-	  generation file creation wizard and the multi-page editor framework
-	  itself. Currently the default example editor is included.
+          Created code generation editor infrastructure. This includes a code
+          generation file creation wizard and the multi-page editor framework
+          itself. Currently the default example editor is included.
 
 Mon Jul 19 22:22:42 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
