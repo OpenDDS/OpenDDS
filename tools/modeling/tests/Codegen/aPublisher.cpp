@@ -53,7 +53,7 @@ main( int argc, char** argv, char**)
     writer3->get_qos( writerQos);
 
     modelinstance1.fini();
-    modelinstance2.fini();
+    // modelinstance2.fini();
 
   } catch( const std::exception& ex) {
     std::cerr << "test: caught exception in main() - " << ex.what() << std::endl;
