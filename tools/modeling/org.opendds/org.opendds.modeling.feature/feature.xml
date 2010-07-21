@@ -2,7 +2,7 @@
 <feature
       id="org.opendds.modeling.feature"
       label="OpenDDS Modeling SDK"
-      version="1.0.0.dev20100615"
+      version="1.0.0.dev20100720"
       provider-name="Object Computing, Inc."
       plugin="org.opendds.modeling.sdk">
 
@@ -69,6 +69,7 @@ development model.
          id="org.opendds.modeling.sdk"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>
