@@ -129,7 +129,7 @@ public class CodeGenNewWizard extends Wizard implements INewWizard {
 
 	private InputStream openContentStream() {
 		String contents =
-			"This is the initial file contents for *.codegen file that should be word-sorted in the Preview page of the multi-page editor";
+			"This is the initial content";
 		return new ByteArrayInputStream(contents.getBytes());
 	}
 

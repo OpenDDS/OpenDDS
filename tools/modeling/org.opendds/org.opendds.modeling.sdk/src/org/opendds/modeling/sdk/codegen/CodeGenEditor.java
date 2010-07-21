@@ -33,95 +33,111 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.ide.IDE;
 
 /**
- * An example showing how to create a multi-page editor.
- * This example has 3 pages:
+ * The code generation specification editor.
+ * 
+ * This editor has 4 pages:
  * <ul>
- * <li>page 0 contains a nested text editor.
- * <li>page 1 allows you to change the font used in page 2
- * <li>page 2 shows the words in page 0 in sorted order
+ * <li>page 0 specifies the model input files
+ * <li>page 1 specifies the model target output directory or project
+ * <li>page 2 defines and customizes any instances of the model
+ * <li>page 3 is the raw XML format for the specification file
  * </ul>
  */
 public class CodeGenEditor extends MultiPageEditorPart implements IResourceChangeListener{
+	
+	/** Editor for model source specification. */
+	private InputsForm inputsForm;
+	
+	/** Editor for model target output specification. */
+ 	private OutputsForm outputsForm;
+	
+	/** Editor for defining and customizing instance specifications. */
+ 	private InstanceForm instanceForm;
 
-	/** The text editor used in page 0. */
-	private TextEditor editor;
-
-	/** The font chosen in page 1. */
-	private Font font;
-
-	/** The text widget used in page 2. */
-	private StyledText text;
+	/** The XML text editor for the resource. */
+	private TextEditor xmlEditor;
+	
 	/**
-	 * Creates a multi-page editor example.
+	 * Creates a code generation specification editor.
 	 */
 	public CodeGenEditor() {
 		super();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 	}
 	/**
-	 * Creates page 0 of the multi-page editor,
-	 * which contains a text editor.
+	 * Create the input specification page.
 	 */
-	void createPage0() {
+	void createInputsForm() {
+		inputsForm = new InputsForm(getContainer());
+		int index = addPage(inputsForm);
+		setPageText(index, "Model Input");
+	}
+	/**
+	 * Create the target output specification page.
+	 */
+	void createOutputsForm() {
+		outputsForm = new OutputsForm(getContainer());
+		int index = addPage(outputsForm);
+		setPageText(index, "Code Output");
+	}
+	/**
+	 * Create the instance definition and customization page.
+	 */
+	void createInstanceForm() {
+		instanceForm = new InstanceForm(getContainer());
+		int index = addPage(instanceForm);
+		setPageText(index, "Instance Customization");
+	}
+	/**
+	 * Creates the page with the XML text editor showing the contents of the resource.
+	 */
+	void createXmlEditor() {
 		try {
-			editor = new TextEditor();
-			int index = addPage(editor, getEditorInput());
-			setPageText(index, editor.getTitle());
+			xmlEditor = new TextEditor();
+			int index = addPage(xmlEditor, getEditorInput());
+			setPageText(index, xmlEditor.getTitle());
 		} catch (PartInitException e) {
 			ErrorDialog.openError(
 				getSite().getShell(),
-				"Error creating nested text editor",
+				"Error creating nested XML text editor",
 				null,
 				e.getStatus());
 		}
 	}
 	/**
-	 * Creates page 1 of the multi-page editor,
-	 * which allows you to change the font used in page 2.
+	 * Updates the title by the resource name.
 	 */
-	void createPage1() {
-
-		Composite composite = new Composite(getContainer(), SWT.NONE);
-		GridLayout layout = new GridLayout();
-		composite.setLayout(layout);
-		layout.numColumns = 2;
-
-		Button fontButton = new Button(composite, SWT.NONE);
-		GridData gd = new GridData(GridData.BEGINNING);
-		gd.horizontalSpan = 2;
-		fontButton.setLayoutData(gd);
-		fontButton.setText("Change Font...");
-		
-		fontButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent event) {
-				setFont();
-			}
-		});
-
-		int index = addPage(composite);
-		setPageText(index, "Properties");
-	}
-	/**
-	 * Creates page 2 of the multi-page editor,
-	 * which shows the sorted text.
-	 */
-	void createPage2() {
-		Composite composite = new Composite(getContainer(), SWT.NONE);
-		FillLayout layout = new FillLayout();
-		composite.setLayout(layout);
-		text = new StyledText(composite, SWT.H_SCROLL | SWT.V_SCROLL);
-		text.setEditable(false);
-
-		int index = addPage(composite);
-		setPageText(index, "Preview");
+	void updateTitle() {
+		IEditorInput input = getEditorInput();
+		setPartName( input.getName());
+		setTitleToolTip(input.getToolTipText());
 	}
 	/**
 	 * Creates the pages of the multi-page editor.
 	 */
 	protected void createPages() {
-		createPage0();
-		createPage1();
-		createPage2();
+		createInputsForm();
+		createOutputsForm();
+		createInstanceForm();
+		createXmlEditor();
+		updateTitle();
+	}
+	public void setFocus() {
+		int index = getActivePage();
+		switch(index) {
+		case 0:
+			inputsForm.setFocus();
+			break;
+		case 1:
+			outputsForm.setFocus();
+			break;
+		case 2:
+			instanceForm.setFocus();
+			break;
+		case 3:
+			xmlEditor.setFocus();
+			break;
+		}
 	}
 	/**
 	 * The <code>MultiPageEditorPart</code> implementation of this 
@@ -136,25 +152,25 @@ public class CodeGenEditor extends MultiPageEditorPart implements IResourceChang
 	 * Saves the multi-page editor's document.
 	 */
 	public void doSave(IProgressMonitor monitor) {
-		getEditor(0).doSave(monitor);
+		getEditor(3).doSave(monitor);
 	}
 	/**
 	 * Saves the multi-page editor's document as another file.
-	 * Also updates the text for page 0's tab, and updates this multi-page editor's input
+	 * Also updates the text for page 3's tab, and updates this multi-page editor's input
 	 * to correspond to the nested editor's.
 	 */
 	public void doSaveAs() {
-		IEditorPart editor = getEditor(0);
+		IEditorPart editor = getEditor(3);
 		editor.doSaveAs();
-		setPageText(0, editor.getTitle());
+		setPageText(3, editor.getTitle());
 		setInput(editor.getEditorInput());
 	}
 	/* (non-Javadoc)
 	 * Method declared on IEditorPart
 	 */
 	public void gotoMarker(IMarker marker) {
-		setActivePage(0);
-		IDE.gotoMarker(getEditor(0), marker);
+		setActivePage(3);
+		IDE.gotoMarker(getEditor(3), marker);
 	}
 	/**
 	 * The <code>MultiPageEditorExample</code> implementation of this method
@@ -173,15 +189,6 @@ public class CodeGenEditor extends MultiPageEditorPart implements IResourceChang
 		return true;
 	}
 	/**
-	 * Calculates the contents of page 2 when the it is activated.
-	 */
-	protected void pageChange(int newPageIndex) {
-		super.pageChange(newPageIndex);
-		if (newPageIndex == 2) {
-			sortWords();
-		}
-	}
-	/**
 	 * Closes all project files on project close.
 	 */
 	public void resourceChanged(final IResourceChangeEvent event){
@@ -190,50 +197,13 @@ public class CodeGenEditor extends MultiPageEditorPart implements IResourceChang
 				public void run(){
 					IWorkbenchPage[] pages = getSite().getWorkbenchWindow().getPages();
 					for (int i = 0; i<pages.length; i++){
-						if(((FileEditorInput)editor.getEditorInput()).getFile().getProject().equals(event.getResource())){
-							IEditorPart editorPart = pages[i].findEditor(editor.getEditorInput());
+						if(((FileEditorInput)xmlEditor.getEditorInput()).getFile().getProject().equals(event.getResource())){
+							IEditorPart editorPart = pages[i].findEditor(xmlEditor.getEditorInput());
 							pages[i].closeEditor(editorPart,true);
 						}
 					}
 				}            
 			});
 		}
-	}
-	/**
-	 * Sets the font related data to be applied to the text in page 2.
-	 */
-	void setFont() {
-		FontDialog fontDialog = new FontDialog(getSite().getShell());
-		fontDialog.setFontList(text.getFont().getFontData());
-		FontData fontData = fontDialog.open();
-		if (fontData != null) {
-			if (font != null)
-				font.dispose();
-			font = new Font(text.getDisplay(), fontData);
-			text.setFont(font);
-		}
-	}
-	/**
-	 * Sorts the words in page 0, and shows them in page 2.
-	 */
-	void sortWords() {
-
-		String editorText =
-			editor.getDocumentProvider().getDocument(editor.getEditorInput()).get();
-
-		StringTokenizer tokenizer =
-			new StringTokenizer(editorText, " \t\n\r\f!@#\u0024%^&*()-_=+`~[]{};:'\",.<>/?|\\");
-		ArrayList editorWords = new ArrayList();
-		while (tokenizer.hasMoreTokens()) {
-			editorWords.add(tokenizer.nextToken());
-		}
-
-		Collections.sort(editorWords, Collator.getInstance());
-		StringWriter displayText = new StringWriter();
-		for (int i = 0; i < editorWords.size(); i++) {
-			displayText.write(((String) editorWords.get(i)));
-			displayText.write(System.getProperty("line.separator"));
-		}
-		text.setText(displayText.toString());
 	}
 }
