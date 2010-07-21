@@ -1,3 +1,20 @@
+Wed Jul 21 23:29:20 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3489] 2010-07-21 23:24  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.feature/feature.xml:
+
+          Added the diagram editors and UML2 gallery plug-ins to the feature.
+
+        * [r3490] 2010-07-21 23:24  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenEditor.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/InputsForm.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/InstanceForm.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/OutputsForm.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/wizards/CodeGenNewWizard.java:
+
+          Starting to implement the actual code generation editor and replace
+          the example editor.
+
 Wed Jul 21 03:49:25 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3487] 2010-07-21 03:44  martinezm
