@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.opendds.modeling.sdk.codegen.CodeGenEditor"
+            contributorClass="org.opendds.modeling.sdk.codegen.CodeGenEditorContributor"
+            extensions="codegen"
+            icon="images/codegen-16x16.gif"
+            id="org.opendds.modeling.sdk.codegen.CodeGenEditor"
+            name="OpenDDS Code Generator">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <wizard
+            category="org.opendds.modeling.Wizard.category.ID"
+            class="org.opendds.modeling.sdk.wizards.CodeGenNewWizard"
+            icon="images/codegen-16x16.gif"
+            id="org.opendds.modeling.sdk.wizards.CodeGenNewWizard"
+            name="OpenDDS Code Generator Specification">
+      </wizard>
+   </extension>
+
+</plugin>
