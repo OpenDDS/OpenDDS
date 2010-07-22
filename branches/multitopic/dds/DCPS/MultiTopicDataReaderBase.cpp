@@ -201,25 +201,25 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
 }
 
 void MultiTopicDataReaderBase::Listener::on_requested_deadline_missed(
-  DDS::DataReader_ptr reader, const DDS::RequestedDeadlineMissedStatus&)
+  DDS::DataReader_ptr, const DDS::RequestedDeadlineMissedStatus&)
   ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void MultiTopicDataReaderBase::Listener::on_requested_incompatible_qos(
-  DDS::DataReader_ptr reader, const DDS::RequestedIncompatibleQosStatus&)
+  DDS::DataReader_ptr, const DDS::RequestedIncompatibleQosStatus&)
   ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void MultiTopicDataReaderBase::Listener::on_sample_rejected(
-  DDS::DataReader_ptr reader, const DDS::SampleRejectedStatus&)
+  DDS::DataReader_ptr, const DDS::SampleRejectedStatus&)
   ACE_THROW_SPEC((CORBA::SystemException))
 {
 }
 
 void MultiTopicDataReaderBase::Listener::on_liveliness_changed(
-  DDS::DataReader_ptr reader, const DDS::LivelinessChangedStatus&)
+  DDS::DataReader_ptr, const DDS::LivelinessChangedStatus&)
   ACE_THROW_SPEC((CORBA::SystemException))
 {
 }

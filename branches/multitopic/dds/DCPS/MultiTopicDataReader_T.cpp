@@ -12,6 +12,7 @@
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
+#include <stdexcept>
 
 namespace OpenDDS {
 namespace DCPS {

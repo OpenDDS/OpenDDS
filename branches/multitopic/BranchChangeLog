@@ -1,3 +1,12 @@
+Thu Jul 22 22:01:55 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          Fixed GCC error and warnings.  Corrected refcount management on the
+          "resulting" data reader for the multitopic.
+
 Thu Jul 22 21:24:00 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
