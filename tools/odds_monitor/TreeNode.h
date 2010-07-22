@@ -282,7 +282,7 @@ bool
 Monitor::TreeNode::removeValueRef( TreeNode* ref)
 {
   ref->staleValueRef();
-  return this->valueRefs_.removeOne( ref);
+  return this->valueRefs_.removeAll( ref);
 }
 
 inline
