@@ -28,6 +28,12 @@ struct MoreInfo {
   string more;
 };
 
+#pragma DCPS_DATA_TYPE "UnrelatedInfo"
+// testing cross-joins, this has no keys
+struct UnrelatedInfo {
+  string misc;
+};
+
 #pragma DCPS_DATA_TYPE "Resulting"
 #pragma DCPS_DATA_KEY "Resulting flight_id1"
 #pragma DCPS_DATA_KEY "Resulting flight_id2"
@@ -39,4 +45,5 @@ struct Resulting {
   long y;
   long height;
   string more;
+  string misc;
 };

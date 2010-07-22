@@ -50,6 +50,7 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
   Writer<LocationInfoTypeSupportImpl> location(dp, pub, "Location");
   Writer<PlanInfoTypeSupportImpl> flightplan(dp, pub, "FlightPlan");
   Writer<MoreInfoTypeSupportImpl> more(dp, pub, "More");
+  Writer<UnrelatedInfoTypeSupportImpl> unrelated(dp, pub, "Unrelated");
 
   // Reader-side setup
 
@@ -57,8 +58,9 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
   ts_res->register_type(dp, "");
   CORBA::String_var type_name = ts_res->get_type_name();
   MultiTopic_var mt = dp->create_multitopic("MyMultiTopic", type_name,
-    "SELECT flight_name, x, y, z AS height, more FROM Location NATURAL JOIN "
-    "FlightPlan NATURAL JOIN More WHERE height < 1000 AND x<23", StringSeq());
+    "SELECT flight_name, x, y, z AS height, more, misc "
+    "FROM Location NATURAL JOIN FlightPlan NATURAL JOIN More NATURAL JOIN "
+    "Unrelated WHERE height < 1000 AND x<23", StringSeq());
   if (!mt) return false;
   DataReader_var dr = sub->create_datareader(mt, DATAREADER_QOS_DEFAULT,
     0, DEFAULT_STATUS_MASK);
@@ -120,6 +122,17 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
   ret = midw->write(mi, HANDLE_NIL);
   if (ret != RETCODE_OK) return false;
 
+  // Write samples (Unrelated)
+
+  StatusCondition_var dw4_sc = unrelated.dw_->get_statuscondition();
+  waitForMatch(dw4_sc);
+  UnrelatedInfoDataWriter_var uidw =
+    UnrelatedInfoDataWriter::_narrow(unrelated.dw_);
+  UnrelatedInfo ui;
+  ui.misc = "Misc";
+  ret = uidw->write(ui, HANDLE_NIL);
+  if (ret != RETCODE_OK) return false;
+
   // Read resulting samples
 
   WaitSet_var ws = new WaitSet;
@@ -134,28 +147,46 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
   ResultingDataReader_var res_dr = ResultingDataReader::_narrow(dr);
   ResultingSeq data;
   SampleInfoSeq info;
-  ret = res_dr->take_w_condition(data, info, DDS::LENGTH_UNLIMITED, rc);
+  ret = res_dr->take_w_condition(data, info, LENGTH_UNLIMITED, rc);
   if (ret != RETCODE_OK) return false;
   if (data.length() > 1 || !info[0].valid_data) return false;
   std::cout << "Received: " << data[0].flight_id1 << '-' <<
     data[0].flight_id2 << " \"" << data[0].flight_name << "\" " << data[0].x <<
     " " << data[0].y << " " << data[0].height << " \"" << data[0].more <<
-    "\"" << std::endl;
+    "\" \"" << data[0].misc << "\"" << std::endl;
   if (data[0].flight_id1 != sample4.flight_id1 || data[0].flight_id2 !=
       sample4.flight_id2 || strcmp(data[0].flight_name, sample4.flight_name) ||
       data[0].x != sample3.x || data[0].y != sample3.y ||
-      data[0].height != sample3.z || strcmp(data[0].more, mi.more)) {
+      data[0].height != sample3.z || strcmp(data[0].more, mi.more) ||
+      strcmp(data[0].misc, ui.misc)) {
     return false;
   }
   data.length(0);
   info.length(0);
-  ret = res_dr->read_w_condition(data, info, DDS::LENGTH_UNLIMITED, rc);
+  ret = res_dr->read_w_condition(data, info, LENGTH_UNLIMITED, rc);
   dr->delete_readcondition(rc);
   if (ret != RETCODE_NO_DATA) return false;  
+
+  // Dispose
+
+  ret = midw->dispose(mi, HANDLE_NIL);
+  if (ret != RETCODE_OK) return false;
+  rc = dr->create_readcondition(ANY_SAMPLE_STATE, ANY_VIEW_STATE,
+                                NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  ws->attach_condition(rc);
+  active.length(0);
+  ret = ws->wait(active, infinite);
+  if (ret != RETCODE_OK) return false;
+  ws->detach_condition(rc);
+  ret = res_dr->read_w_condition(data, info, LENGTH_UNLIMITED, rc);
+  dr->delete_readcondition(rc);
+  if (ret != RETCODE_OK) return false;
+  if (info[0].valid_data ||
+      info[0].instance_state != NOT_ALIVE_DISPOSED_INSTANCE_STATE) return false;
   return true;
 }
 
-int run_test(int argc, ACE_TCHAR *argv[])
+int run_test(int argc, ACE_TCHAR* argv[])
 {
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
   DomainParticipant_var dp =

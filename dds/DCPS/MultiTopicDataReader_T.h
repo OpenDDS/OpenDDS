@@ -107,7 +107,22 @@ public:
     ACE_THROW_SPEC((CORBA::SystemException));
 
 private:
-  typedef std::vector<Sample> SampleVec;
+
+  struct SampleWithInfo {
+    SampleWithInfo(const std::string& topic, const DDS::SampleInfo& sampinfo)
+      : view_(sampinfo.view_state) {
+      info_[topic] = sampinfo.instance_handle;
+    }
+    void combine(const SampleWithInfo& other) {
+      info_.insert(other.info_.begin(), other.info_.end());
+      if (other.view_ == DDS::NEW_VIEW_STATE) view_ = DDS::NEW_VIEW_STATE;
+    }
+    Sample sample_;
+    DDS::ViewStateKind view_;
+    std::map<std::string/*topicName*/, DDS::InstanceHandle_t> info_;
+  };
+
+  typedef std::vector<SampleWithInfo> SampleVec;
   typedef std::set<std::string> TopicSet;
 
   // Given a QueryPlan that describes how to treat 'incoming' data from a
@@ -125,9 +140,15 @@ private:
   // data from 'other_dr' (with MetaStruct 'other_meta') such that all key
   // fields named in 'key_names' match the values in 'key_data'.  The struct
   // pointed-to by 'key_data' is of the type used by the 'other_dr'.
-  void join(SampleVec& resulting, const Sample& prototype,
+  void join(SampleVec& resulting, const SampleWithInfo& prototype,
             const std::vector<std::string>& key_names, const void* key_data,
             DDS::DataReader_ptr other_dr, const MetaStruct& other_meta);
+
+  // When no common keys are found, natural join devolves to a cross-join where
+  // each instance in the joined-to-topic (qp) is combined with the results so
+  // far (partialResults).
+  void cross_join(std::map<TopicSet, SampleVec>& partialResults,
+                  const TopicSet& seen, const QueryPlan& qp);
 
   // Combine two vectors of data, 'resulting' and 'other', with the results of
   // the combination going into 'resulting'.  Use the keys in 'key_names' to

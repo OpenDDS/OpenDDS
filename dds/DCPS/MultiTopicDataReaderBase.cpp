@@ -16,6 +16,7 @@
 #include "TypeSupportImpl.h"
 
 #include <stdexcept>
+#include <sstream>
 
 namespace {
   struct MatchesIncomingName { // predicate for std::find_if()
@@ -71,7 +72,8 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
     DDS::DataReader_var incoming = parent->create_opendds_datareader(t, dr_qos,
       ext_qos, listener_, ALL_STATUS_MASK);
     if (!incoming.in()) {
-      //TODO: error
+      throw runtime_error("Could not create incoming DataReader "
+        + selection[i]);
     }
 
     QueryPlan& qp = query_plans_[selection[i]];
@@ -96,7 +98,11 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
       map<string, string>::const_iterator found = fieldToTopic.find(*names);
       if (found == fieldToTopic.end()) {
         if (DCPS_debug_level > 1) {
-          //TODO: warning
+          ACE_DEBUG((LM_WARNING,
+                     ACE_TEXT("(%P|%t) WARNING: ")
+                     ACE_TEXT("MultiTopicDataReaderBase::init(), in SELECT * ")
+                     ACE_TEXT("resulting field %C has no corresponding ")
+                     ACE_TEXT("incoming field.\n"), *names));
         }
       } else {
         query_plans_[found->second].projection_.push_back(
@@ -108,9 +114,8 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
       map<string, string>::const_iterator found =
         fieldToTopic.find(aggregation[i].incoming_name_);
       if (found == fieldToTopic.end()) {
-        if (DCPS_debug_level > 1) {
-          //TODO: error
-        }
+        throw std::runtime_error("Projected field " +
+          aggregation[i].incoming_name_ + " has no incoming field.");
       } else {
         query_plans_[found->second].projection_.push_back(aggregation[i]);
       }
@@ -157,23 +162,41 @@ MultiTopicDataReaderBase::metaStructFor(DDS::DataReader_ptr reader)
 
 void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
 {
+  using namespace std;
+  using namespace DDS;
+
+  const string topic = topicNameFor(reader);
   DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(reader);
   DataReaderImpl::GenericBundle gen;
-  DDS::ReturnCode_t rc = dri->read_generic(gen, DDS::NOT_READ_SAMPLE_STATE,
-    DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
-  if (rc == DDS::RETCODE_NO_DATA) {
+  ReturnCode_t rc = dri->read_generic(gen, NOT_READ_SAMPLE_STATE,
+                                      ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  if (rc == RETCODE_NO_DATA) {
     return;
-  } else if (rc != DDS::RETCODE_OK) {
-    //TODO: error
+  } else if (rc != RETCODE_OK) {
+    ostringstream rc_ss;
+    rc_ss << rc;
+    throw runtime_error("Incoming DataReader for " + topic +
+      " could not be read, error #" + rc_ss.str());
   }
 
-  std::string topic = topicNameFor(reader);
   const MetaStruct& meta = metaStructFor(reader);
+  const QueryPlan& qp = query_plans_[topic];
   for (CORBA::ULong i = 0; i < gen.samples_.size(); ++i) {
     if (gen.info_[i].valid_data) {
       incoming_sample(gen.samples_[i], gen.info_[i], topic.c_str(), meta);
+    } else if (gen.info_[i].instance_state != ALIVE_INSTANCE_STATE) {
+      DataReaderImpl* resulting_impl =
+        dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
+      set<pair<InstanceHandle_t, InstanceHandle_t> >::const_iterator
+        iter = qp.instances_.begin();
+      while (iter != qp.instances_.end() &&
+             iter->first != gen.info_[i].instance_handle) ++iter;
+      for (; iter != qp.instances_.end() &&
+           iter->first == gen.info_[i].instance_handle; ++iter) {
+        resulting_impl->set_instance_state(iter->second,
+                                           gen.info_[i].instance_state);
+      }
     }
-    //TODO: else { process not-alive instance states }
   }
 }
 
@@ -227,6 +250,29 @@ void MultiTopicDataReaderBase::Listener::on_sample_lost(DDS::DataReader_ptr,
 {
 }
 
+void MultiTopicDataReaderBase::set_status_changed_flag(DDS::StatusKind status,
+  bool flag)
+{
+  dynamic_cast<DataReaderImpl*>(resulting_reader_.in())
+    ->set_status_changed_flag(status, flag);
+}
+
+bool MultiTopicDataReaderBase::have_sample_states(
+  DDS::SampleStateMask sample_states) const
+{
+  return dynamic_cast<DataReaderImpl*>(resulting_reader_.in())
+    ->have_sample_states(sample_states);
+}
+
+void MultiTopicDataReaderBase::cleanup()
+{
+  for (std::map<std::string, QueryPlan>::iterator it = query_plans_.begin();
+       it != query_plans_.end(); ++it) {
+    it->second.data_reader_->set_listener(0, ALL_STATUS_MASK);
+  }
+  dynamic_cast<DataReaderImpl*>(resulting_reader_.in())->cleanup();
+}
+
 DDS::InstanceHandle_t MultiTopicDataReaderBase::get_instance_handle()
   ACE_THROW_SPEC((CORBA::SystemException))
 {
@@ -237,6 +283,18 @@ DDS::ReturnCode_t MultiTopicDataReaderBase::enable()
   ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->enable();
+}
+
+DDS::StatusCondition_ptr MultiTopicDataReaderBase::get_statuscondition()   
+  ACE_THROW_SPEC((CORBA::SystemException))
+{
+  return resulting_reader_->get_statuscondition();
+}
+
+DDS::StatusMask MultiTopicDataReaderBase::get_status_changes()
+  ACE_THROW_SPEC((CORBA::SystemException))
+{
+  return resulting_reader_->get_status_changes();
 }
 
 DDS::ReadCondition_ptr MultiTopicDataReaderBase::create_readcondition(

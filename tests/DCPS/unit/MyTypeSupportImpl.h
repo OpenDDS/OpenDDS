@@ -104,20 +104,23 @@ public:
                                OpenDDS::DCPS::SubscriptionInstance*&) {}
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  virtual DDS::ReturnCode_t read_generic(
+  DDS::ReturnCode_t read_generic(
     OpenDDS::DCPS::DataReaderImpl::GenericBundle&, DDS::SampleStateMask,
     DDS::ViewStateMask, DDS::InstanceStateMask);
 
-  virtual DDS::InstanceHandle_t lookup_instance_generic(const void* data);
+  DDS::InstanceHandle_t lookup_instance_generic(const void* data);
 
-  virtual DDS::ReturnCode_t read_instance_generic(void*& data,
+  DDS::ReturnCode_t read_instance_generic(void*& data,
     DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states);
 
-  virtual DDS::ReturnCode_t read_next_instance_generic(void*&,
+  DDS::ReturnCode_t read_next_instance_generic(void*&,
     DDS::SampleInfo&, DDS::InstanceHandle_t, DDS::SampleStateMask,
     DDS::ViewStateMask, DDS::InstanceStateMask);
+
+  void set_instance_state(DDS::InstanceHandle_t, DDS::InstanceStateKind)
+  {}
 #endif
 };
 

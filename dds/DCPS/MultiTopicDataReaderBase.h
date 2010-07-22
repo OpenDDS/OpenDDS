@@ -24,20 +24,36 @@ namespace OpenDDS {
 namespace DCPS {
 
 class OpenDDS_Dcps_Export MultiTopicDataReaderBase
-  : public virtual LocalObject<DataReaderEx>
-  , public virtual EntityImpl {
+  : public virtual LocalObject<DataReaderEx> {
 public:
+
   void init(const DDS::DataReaderQos& dr_qos, const DataReaderQosExt& ext_qos,
     DDS::DataReaderListener_ptr a_listener, DDS::StatusMask mask,
     SubscriberImpl* parent, MultiTopicImpl* multitopic);
 
   void data_available(DDS::DataReader_ptr reader);
 
+  // used by the SubscriberImpl
+
+  void set_status_changed_flag(DDS::StatusKind status, bool flag);
+  bool have_sample_states(DDS::SampleStateMask sample_states) const;
+  void cleanup();
+
+  // DDS::Entity interface
+
   DDS::InstanceHandle_t get_instance_handle()
     ACE_THROW_SPEC((CORBA::SystemException));
 
   DDS::ReturnCode_t enable()
     ACE_THROW_SPEC((CORBA::SystemException));
+
+  DDS::StatusCondition_ptr get_statuscondition()   
+    ACE_THROW_SPEC((CORBA::SystemException));
+
+  DDS::StatusMask get_status_changes()
+    ACE_THROW_SPEC((CORBA::SystemException));
+
+  // DDS::DataReader interface
 
   DDS::ReadCondition_ptr create_readcondition(DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states)
@@ -108,6 +124,8 @@ public:
     DDS::PublicationBuiltinTopicData& publication_data,
     DDS::InstanceHandle_t publication_handle)
     ACE_THROW_SPEC((CORBA::SystemException));
+
+  // OpenDDS::DCPS::DataReaderEx interface
 
   void get_latency_stats(LatencyStatisticsSeq& stats)
     ACE_THROW_SPEC((CORBA::SystemException));
@@ -180,6 +198,8 @@ protected:
     std::vector<SubjectFieldSpec> projection_;
     std::vector<std::string> keys_projected_out_;
     std::multimap<std::string, std::string> adjacent_joins_; // topic -> key
+    std::set<std::pair<DDS::InstanceHandle_t /*of this data_reader_*/,
+      DDS::InstanceHandle_t /*of the resulting DR*/> > instances_;
   };
 
   // key: topicName for this reader

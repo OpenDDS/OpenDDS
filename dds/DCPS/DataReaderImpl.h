@@ -541,6 +541,8 @@ public:
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states) = 0;
 
+  virtual void set_instance_state(DDS::InstanceHandle_t instance,
+                                  DDS::InstanceStateKind state) = 0;
 #endif
 
   void begin_access();

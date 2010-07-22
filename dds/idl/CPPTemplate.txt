@@ -1607,16 +1607,18 @@ DDS::ReturnCode_t
   return rc;
 }
 
-void
-<%TYPE%>DataReaderImpl::store_synthetic_data(const <%SCOPED%>& sample)
+DDS::InstanceHandle_t
+<%TYPE%>DataReaderImpl::store_synthetic_data(const <%SCOPED%>& sample,
+  DDS::ViewStateKind view)
 {
   using namespace OpenDDS::DCPS;
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_,
+                   DDS::HANDLE_NIL);
 
   DDS::TopicDescription_var descr = get_topicdescription();
   if (MultiTopicImpl* mt = dynamic_cast<MultiTopicImpl*>(descr.in())) {
     if (!mt->filter(sample)) {
-      return;
+      return DDS::HANDLE_NIL;
     }
   }
 
@@ -1624,6 +1626,7 @@ void
 
   DDS::InstanceHandle_t inst = lookup_instance(sample);
   bool filtered;
+  SubscriptionInstance* instance = 0;
 
   // Call store_instance_data() once or twice, depending on if we need to
   // process the INSTANCE_REGISTRATION.  In either case, store_instance_data()
@@ -1633,16 +1636,45 @@ void
 
     DataSampleHeader header;
     header.message_id_ = i ? SAMPLE_DATA : INSTANCE_REGISTRATION;
-    SubscriptionInstance* instance;
     bool just_registered;
     <%SCOPED%>* data;
     ACE_NEW_MALLOC_NORETURN(data,
       static_cast< <%SCOPED%>*>(data_allocator_->malloc(sizeof(<%SCOPED%>))),
       <%SCOPED%>(sample));
     store_instance_data(data, header, instance, just_registered, filtered);
+    inst = instance->instance_handle_;
   }
 
-  if (!filtered) notify_read_conditions();
+  if (!filtered) {
+    if (view == DDS::NOT_NEW_VIEW_STATE) {
+      instance->instance_state_.accessed();
+    }
+    notify_read_conditions();
+  }
+  return inst;
+}
+
+void
+<%TYPE%>DataReaderImpl::set_instance_state(DDS::InstanceHandle_t instance,
+  DDS::InstanceStateKind state)
+{
+  using namespace OpenDDS::DCPS;
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+
+  SubscriptionInstance* si = get_handle_instance(instance);
+  if (si && state != DDS::ALIVE_INSTANCE_STATE) {
+    DataSampleHeader header;
+    header.message_id_ = (state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
+      ? DISPOSE_INSTANCE : UNREGISTER_INSTANCE;
+    bool just_registered, filtered;
+    <%SCOPED%>* data;
+    ACE_NEW_MALLOC_NORETURN(data,
+      static_cast< <%SCOPED%>*>(data_allocator_->malloc(sizeof(<%SCOPED%>))),
+      <%SCOPED%>);
+    get_key_value(*data, instance);
+    store_instance_data(data, header, si, just_registered, filtered);
+    notify_read_conditions();
+  }
 }
 
 #endif
