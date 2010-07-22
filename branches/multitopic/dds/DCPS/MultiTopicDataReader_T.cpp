@@ -77,7 +77,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::assign_resulting_fields(
 template<typename Sample, typename TypedDataReader>
 void
 MultiTopicDataReader_T<Sample, TypedDataReader>::join(
-  std::vector<Sample>& resulting, const Sample& prototype,
+  SampleVec& resulting, const SampleWithInfo& prototype,
   const std::vector<std::string>& key_names, const void* key_data,
   DDS::DataReader_ptr other_dr, const MetaStruct& other_meta)
 {
@@ -96,10 +96,16 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
       ReturnCode_t ret = other_dri->read_instance_generic(other_data.ptr_,
         info, ih, READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
       if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
-        //TODO: log & throw
+        std::ostringstream rc_ss;
+        rc_ss << ret;
+        throw std::runtime_error("In join(), incoming DataReader for " +
+          std::string(other_topic) + " read_instance_generic, error #" +
+          rc_ss.str());
       }
-      resulting.push_back(Sample(prototype));
-      assign_fields(other_data.ptr_, resulting.back(), other_qp, other_meta);
+      resulting.push_back(prototype);
+      resulting.back().combine(SampleWithInfo(other_topic.in(), info));
+      assign_fields(other_data.ptr_, resulting.back().sample_,
+                    other_qp, other_meta);
     }
   } else { // incomplete key or cross-join (0 key fields)
     SampleVec new_resulting;
@@ -110,7 +116,11 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
       ret = other_dri->read_next_instance_generic(other_data.ptr_, info, ih,
         READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
       if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
-        //TODO: log & throw
+        std::ostringstream rc_ss;
+        rc_ss << ret;
+        throw std::runtime_error("In join(), incoming DataReader for " +
+          std::string(other_topic) + " read_next_instance_generic, error #" +
+          rc_ss.str());
       } else if (ret == RETCODE_NO_DATA) {
         break;
       }
@@ -125,8 +135,10 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
       }
 
       if (match) {
-        resulting.push_back(Sample(prototype));
-        assign_fields(other_data.ptr_, resulting.back(), other_qp, other_meta);
+        resulting.push_back(prototype);
+        resulting.back().combine(SampleWithInfo(other_topic.in(), info));
+        assign_fields(other_data.ptr_, resulting.back().sample_,
+                      other_qp, other_meta);
       }
     }
   }
@@ -135,7 +147,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
 template<typename Sample, typename TypedDataReader>
 void
 MultiTopicDataReader_T<Sample, TypedDataReader>::combine(
-  std::vector<Sample>& resulting, const std::vector<Sample>& other,
+  SampleVec& resulting, const SampleVec& other,
   const std::vector<std::string>& key_names, const TopicSet& other_topics)
 {
   const MetaStruct& meta = getResultingMeta();
@@ -156,10 +168,14 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::combine(
       }
       if (foundOneMatch) {
         newData.push_back(*iterRes);
-        assign_resulting_fields(newData.back(), *iterOther, other_topics);
+        newData.back().combine(*iterOther);
+        assign_resulting_fields(newData.back().sample_,
+                                iterOther->sample_, other_topics);
       } else {
         foundOneMatch = true;
-        assign_resulting_fields(*iterRes, *iterOther, other_topics);
+        iterRes->combine(*iterOther);
+        assign_resulting_fields(iterRes->sample_,
+                                iterOther->sample_, other_topics);
       }
     }
     if (foundOneMatch) {
@@ -238,32 +254,72 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
 
 template<typename Sample, typename TypedDataReader>
 void
-MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
-  const DDS::SampleInfo& /*info*/, const char* topic, const MetaStruct& meta)
+MultiTopicDataReader_T<Sample, TypedDataReader>::cross_join(
+  std::map<TopicSet, SampleVec>& partialResults, const TopicSet& seen,
+  const QueryPlan& qp)
 {
   using namespace std;
-  const QueryPlan& qp = query_plans_[topic];
+  const MetaStruct& other_meta = metaStructFor(qp.data_reader_);
+  vector<string> no_keys;
+  for (typename map<TopicSet, SampleVec>::iterator iterPR =
+       partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
+    SampleVec resulting;
+    for (typename SampleVec::iterator i = iterPR->second.begin();
+         i != iterPR->second.end(); ++i) {
+      join(resulting, *i, no_keys, NULL, qp.data_reader_, other_meta);
+    }
+    resulting.swap(iterPR->second);
+  }
+  TopicSet withJoin(seen);
+  withJoin.insert(topicNameFor(qp.data_reader_));
+  partialResults[withJoin].swap(partialResults[seen]);
+  partialResults.erase(seen);
+  process_joins(partialResults, partialResults[withJoin], withJoin, qp);
+}
 
-  // The prototypical sample has all of the locally-known (not joined) fields
-  // filled in.  As joins are processed, this sample is copied as the starting
-  // point for each resulting sample.
-  SampleVec starting;
-  starting.push_back(Sample());
-  assign_fields(sample, starting.back(), qp, meta);
+template<typename Sample, typename TypedDataReader>
+void
+MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
+  const DDS::SampleInfo& info, const char* topic, const MetaStruct& meta)
+{
+  using namespace std;
+  using namespace DDS;
+  const QueryPlan& qp = query_plans_[topic];
 
   // Track results of joins along multiple paths through the MultiTopic keys.
   map<TopicSet, SampleVec> partialResults;
-
   TopicSet seen;
   seen.insert(topic);
-  process_joins(partialResults, starting, seen, qp);
+  partialResults[seen].push_back(SampleWithInfo(topic, info));
+  assign_fields(sample, partialResults[seen].back().sample_, qp, meta);
+
+  process_joins(partialResults, partialResults[seen], seen, qp);
+
+  // Any topic we haven't seen needs to be cross-joined
+  for (map<string, QueryPlan>::iterator iter = query_plans_.begin();
+       iter != query_plans_.end(); ++iter) {
+    typename map<TopicSet, SampleVec>::iterator found =
+      find_if(partialResults.begin(), partialResults.end(),
+              Contains(iter->first));
+    if (found == partialResults.end()) {
+      cross_join(partialResults, seen, iter->second);
+    }
+  }
 
   TypedDataReader* tdr = dynamic_cast<TypedDataReader*>(typed_reader_.in());
   for (typename map<TopicSet, SampleVec>::iterator iterPR =
        partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
     for (typename SampleVec::iterator i = iterPR->second.begin();
          i != iterPR->second.end(); ++i) {
-      tdr->store_synthetic_data(*i);
+      InstanceHandle_t ih = tdr->store_synthetic_data(i->sample_, i->view_);
+      if (ih != HANDLE_NIL) {
+        typedef map<string, InstanceHandle_t>::iterator mapiter_t;
+        for (mapiter_t iterMap = i->info_.begin(); iterMap != i->info_.end();
+             ++iterMap) {
+          query_plans_[iterMap->first].instances_.insert(
+            make_pair(iterMap->second, ih));
+        }
+      }
     }
   }
 }

@@ -218,6 +218,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
                      ACE_TEXT("enable of MultiTopicDataReader failed.\n")));
           return DDS::DataReader::_nil();
         }
+        multitopic_reader_enabled(dr);
       }
       return dr._retn();
     } catch (const std::exception& e) {
@@ -311,7 +312,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   DataReaderImpl* dr_servant
   = dynamic_cast<DataReaderImpl*>(a_datareader);
 
-  {
+  if (dr_servant) { // for MultiTopic this will be false
     DDS::Subscriber_var dr_subscriber(dr_servant->get_subscriber());
 
     if (dr_subscriber.in() != this) {
@@ -323,12 +324,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
                  std::string(converter).c_str()));
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
-  }
 
-  int loans = dr_servant->num_zero_copies();
+    int loans = dr_servant->num_zero_copies();
 
-  if (0 != loans) {
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
+    if (0 != loans) {
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
   }
 
   SubscriberDataReaderInfo* dr_info = 0;
@@ -350,7 +351,18 @@ ACE_THROW_SPEC((CORBA::SystemException))
     }
 
     if (it == datareader_map_.end()) {
-      CORBA::String_var topic_name = dr_servant->get_topic_name();
+      DDS::TopicDescription_var td = a_datareader->get_topicdescription();
+      CORBA::String_var topic_name = td->get_name();
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+      std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
+        multitopic_reader_map_.find(topic_name.in());
+      if (mt_iter != multitopic_reader_map_.end()) {
+        DDS::DataReader_ptr ptr = mt_iter->second;
+        dynamic_cast<MultiTopicDataReaderBase*>(ptr)->cleanup();
+        multitopic_reader_map_.erase(mt_iter);
+        return DDS::RETCODE_OK;
+      }
+#endif
       RepoId id = dr_servant->get_subscription_id();
       RepoIdConverter converter(id);
       ACE_ERROR_RETURN((LM_ERROR,
@@ -450,6 +462,14 @@ ACE_THROW_SPEC((CORBA::SystemException))
                      this->si_lock_,
                      DDS::RETCODE_ERROR);
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    for (std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
+           multitopic_reader_map_.begin();
+         mt_iter != multitopic_reader_map_.end(); ++mt_iter) {
+      drs.push_back(mt_iter->second);
+    }
+#endif
+
     DataReaderMap::iterator it;
     DataReaderMap::iterator itEnd = datareader_map_.end();
 
@@ -493,6 +513,14 @@ ACE_THROW_SPEC((CORBA::SystemException))
   DataReaderMap::iterator it = datareader_map_.find(topic_name);
 
   if (it == datareader_map_.end()) {
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
+      multitopic_reader_map_.find(topic_name);
+    if (mt_iter != multitopic_reader_map_.end()) {
+      return DDS::DataReader::_duplicate(mt_iter->second);
+    }
+#endif
+
     if (DCPS_debug_level >= 2) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) ")
@@ -586,6 +614,22 @@ ACE_THROW_SPEC((CORBA::SystemException))
         DDS::DATA_AVAILABLE_STATUS, false);
     }
   }
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  for (std::map<std::string, DDS::DataReader_var>::iterator it =
+         multitopic_reader_map_.begin(); it != multitopic_reader_map_.end();
+       ++it) {
+    MultiTopicDataReaderBase* dri =
+      dynamic_cast<MultiTopicDataReaderBase*>(it->second.in());
+    if (dri->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
+      DDS::DataReaderListener_var listener = dri->get_listener();
+      if (!CORBA::is_nil(listener)) {
+        listener->on_data_available(dri);
+      }
+      dri->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
+    }
+  }
+#endif
 
   return DDS::RETCODE_OK ;
 }
@@ -1067,6 +1111,17 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   return DDS::RETCODE_OK;
 }
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+DDS::ReturnCode_t
+SubscriberImpl::multitopic_reader_enabled(DDS::DataReader_ptr reader)
+{
+  DDS::TopicDescription_var td = reader->get_topicdescription();
+  CORBA::String_var topic = td->get_name();
+  multitopic_reader_map_[topic.in()] = DDS::DataReader::_duplicate(reader);
+  return DDS::RETCODE_OK;
+}
+#endif
 
 DDS::SubscriberListener*
 SubscriberImpl::listener_for(::DDS::StatusKind kind)

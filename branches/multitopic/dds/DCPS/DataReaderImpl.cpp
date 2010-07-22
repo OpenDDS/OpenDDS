@@ -158,11 +158,13 @@ DataReaderImpl::cleanup()
     }
   }
 
-  topic_servant_->remove_entity_ref();
-  topic_servant_->_remove_ref();
-  dr_local_objref_ = DDS::DataReader::_nil();
-  deactivate_remote_object(dr_remote_objref_.in());
-  dr_remote_objref_ = DataReaderRemote::_nil();
+  if (topic_servant_) {
+    topic_servant_->remove_entity_ref();
+    topic_servant_->_remove_ref();
+    dr_local_objref_ = DDS::DataReader::_nil();
+    deactivate_remote_object(dr_remote_objref_.in());
+    dr_remote_objref_ = DataReaderRemote::_nil();
+  }
 }
 
 void DataReaderImpl::init(

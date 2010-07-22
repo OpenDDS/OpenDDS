@@ -192,6 +192,10 @@ public:
     RepoId topic_id)
   ACE_THROW_SPEC((CORBA::SystemException));
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  DDS::ReturnCode_t multitopic_reader_enabled(DDS::DataReader_ptr reader);
+#endif
+
   //void cleanup();
 
   DDS::SubscriberListener* listener_for(DDS::StatusKind kind);
@@ -232,6 +236,10 @@ private:
 
   DataReaderMap                datareader_map_ ;
   DataReaderSet                datareader_set_ ;
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  std::map<std::string, DDS::DataReader_var> multitopic_reader_map_;
+#endif
 
   DomainParticipantImpl*       participant_;
   DDS::DomainParticipant_var   participant_objref_;

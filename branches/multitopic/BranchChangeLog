@@ -1,3 +1,33 @@
+Thu Jul 22 21:24:00 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.h:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          This completes the MultiTopic implementation:
+          - added error handling
+          - implemented cross-joins
+          - now tracking instance_state and view_state
+          - the Subscriber is now aware of the MultiTopic DataReader so
+            that the normal lookup, delete, etc. operations work and the
+            MultiTopic DataReader can de-register its listener during cleanup
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.idl:
+
+          Added testing cross-join and instance state management.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Adapted to DataReaderImpl.h modification.
+
 Tue Jul 20 22:56:24 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/MultiTopicDataReader_T.cpp:
