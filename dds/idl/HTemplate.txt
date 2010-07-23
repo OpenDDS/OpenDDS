@@ -6,6 +6,7 @@
  */
 class <%EXPORT%> <%TYPE%>TypeSupportImpl
   : public virtual OpenDDS::DCPS::LocalObject<<%TYPE%>TypeSupport>
+  , public virtual OpenDDS::DCPS::TypeSupportImpl
 {
 public:
 
@@ -27,6 +28,14 @@ public:
 
   virtual ::DDS::DataReader_ptr create_datareader ()
     ACE_THROW_SPEC ((CORBA::SystemException));
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  virtual ::DDS::DataReader_ptr create_multitopic_datareader()
+    ACE_THROW_SPEC ((CORBA::SystemException));
+
+  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
+#endif
+
 
 private:
   CORBA::String_var type_name_;
@@ -197,6 +206,7 @@ public:
   typedef std::map<<%SCOPED%>, DDS::InstanceHandle_t,
       OpenDDSGenerated::<%TYPE%>_KeyLessThan> InstanceMap;
   typedef ::OpenDDS::DCPS::Cached_Allocator_With_Overflow<<%SCOPED%>, ACE_Null_Mutex>  DataAllocator;
+  typedef <%TYPE%>DataReader Interface;
 
   //Constructor
   <%TYPE%>DataReaderImpl (void);
@@ -340,6 +350,29 @@ public:
                                 DDS::InstanceStateMask instance_states,
                                 const OpenDDS::DCPS::FilterEvaluator& evaluator,
                                 const DDS::StringSeq& params);
+
+  DDS::ReturnCode_t read_generic(
+    OpenDDS::DCPS::DataReaderImpl::GenericBundle& gen,
+    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+    DDS::InstanceStateMask instance_states);
+
+  DDS::InstanceHandle_t lookup_instance_generic(const void* data);
+
+  DDS::ReturnCode_t read_instance_generic(void*& data,
+    DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
+    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+    DDS::InstanceStateMask instance_states);
+
+  DDS::ReturnCode_t read_next_instance_generic(void*& data,
+    DDS::SampleInfo& info, DDS::InstanceHandle_t previous_instance,
+    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+    DDS::InstanceStateMask instance_states);
+
+  DDS::InstanceHandle_t store_synthetic_data(const <%SCOPED%>& sample,
+                                             DDS::ViewStateKind view);
+
+  void set_instance_state(DDS::InstanceHandle_t instance,
+                          DDS::InstanceStateKind state);
 #endif
 
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,

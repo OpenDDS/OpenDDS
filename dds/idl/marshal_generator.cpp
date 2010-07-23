@@ -17,6 +17,8 @@
 #include <cctype>
 using std::string;
 
+using namespace AstTypeClassification;
+
 bool marshal_generator::gen_enum(UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>&, const char*)
 {
@@ -48,51 +50,6 @@ bool marshal_generator::gen_enum(UTL_ScopedName* name,
 }
 
 namespace {
-  void unTypeDef(AST_Type*& element)
-  {
-    if (element->node_type() == AST_Decl::NT_typedef) {
-      AST_Typedef* td = AST_Typedef::narrow_from_decl(element);
-      element = td->primitive_base_type();
-    }
-  }
-
-  const size_t CL_UNKNOWN = 0, CL_SCALAR = 1, CL_PRIMITIVE = 2,
-    CL_STRUCTURE = 4, CL_STRING = 8, CL_ENUM = 16, CL_UNION = 32, CL_ARRAY = 64,
-    CL_SEQUENCE = 128, CL_WIDE = 256, CL_BOUNDED = 512, CL_INTERFACE = 1024;
-
-  size_t classify(AST_Type*& type)
-  {
-    unTypeDef(type);
-    switch (type->node_type()) {
-    case AST_Decl::NT_pre_defined: {
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
-      return (p->pt() == AST_PredefinedType::PT_any
-        || p->pt() == AST_PredefinedType::PT_object)
-        ? CL_UNKNOWN : (CL_SCALAR | CL_PRIMITIVE);
-    }
-    case AST_Decl::NT_array:
-      return CL_ARRAY;
-    case AST_Decl::NT_union:
-      return CL_UNION;
-    case AST_Decl::NT_string:
-    case AST_Decl::NT_wstring:
-      return CL_SCALAR | CL_STRING |
-        ((AST_String::narrow_from_decl(type)->max_size()->ev()->u.ulval == 0)
-        ? 0 : CL_BOUNDED) |
-        ((type->node_type() == AST_Decl::NT_wstring) ? CL_WIDE : 0);
-    case AST_Decl::NT_sequence:
-      return CL_SEQUENCE |
-        ((AST_Sequence::narrow_from_decl(type)->unbounded()) ? 0 : CL_BOUNDED);
-    case AST_Decl::NT_struct:
-      return CL_STRUCTURE;
-    case AST_Decl::NT_enum:
-      return CL_SCALAR | CL_ENUM;
-    case AST_Decl::NT_interface:
-      return CL_INTERFACE;
-    default:
-      return CL_UNKNOWN;
-    }
-  }
 
   enum WrapDirection {WD_OUTPUT, WD_INPUT};
 
@@ -221,7 +178,8 @@ namespace {
     NamespaceGuard ng;
     string cxx = scoped(tdname);
     AST_Type* elem = seq->base_type();
-    size_t elem_cls = classify(elem);
+    unTypeDef(elem);
+    Classification elem_cls = classify(elem);
     if (!elem->in_main_file()) {
       if (elem->node_type() == AST_Decl::NT_pre_defined) {
         be_global->add_include(("dds/CorbaSeq/" + nameOfSeqHeader(elem)
@@ -414,43 +372,14 @@ namespace {
     }
   }
 
-  struct NestedForLoops {
-    NestedForLoops(const char* type, const char* prefix, AST_Array* arr,
-                   string& indent)
-      : n_(arr->n_dims()), indent_(indent)
-    {
-      std::ostringstream index_oss;
-      for (size_t i = 0; i < n_; ++i) {
-        be_global->impl_ <<
-          indent << "for (" << type << ' ' << prefix << i << " = 0; " << prefix
-          << i << " < " << arr->dims()[i]->ev()->u.ulval << "; ++" << prefix
-          << i << ") {\n";
-        indent += "  ";
-        index_oss << "[i" << i << "]";
-      }
-      index_ = index_oss.str();
-    }
-
-    ~NestedForLoops()
-    {
-      for (size_t i = 0; i < n_; ++i) {
-        indent_.resize(indent_.size() - 2);
-        be_global->impl_ << indent_ << "}\n";
-      }
-    }
-
-    size_t n_;
-    string& indent_;
-    string index_;
-  };
-
   void gen_array(UTL_ScopedName* name, AST_Array* arr)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
     NamespaceGuard ng;
     string cxx = scoped(name);
     AST_Type* elem = arr->base_type();
-    size_t elem_cls = classify(elem);
+    unTypeDef(elem);
+    Classification elem_cls = classify(elem);
     if (!elem->in_main_file()
         && elem->node_type() != AST_Decl::NT_pre_defined) {
       be_global->add_referenced(elem->file_name().c_str());
@@ -650,7 +579,8 @@ namespace {
                         const string& prefix, string& intro)
   {
     AST_Type* typedeff = type;
-    size_t fld_cls = classify(type);
+    unTypeDef(type);
+    Classification fld_cls = classify(type);
     const string qual = prefix + '.' + name;
     if (fld_cls & CL_ENUM) {
       return "max_marshaled_size_ulong()";
@@ -681,7 +611,8 @@ namespace {
                       const string& prefix, string& intro)
   {
     AST_Type* typedeff = type;
-    size_t fld_cls = classify(type);
+    unTypeDef(type);
+    Classification fld_cls = classify(type);
     const string qual = prefix + '.' + name, shift = prefix.substr(0, 2);
     WrapDirection dir = (shift == ">>") ? WD_INPUT : WD_OUTPUT;
     if ((fld_cls & CL_STRING) && (dir == WD_INPUT)) {
@@ -723,7 +654,8 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     string intro, expr = "true";
     for (size_t i = 0; i < fields.size(); ++i) {
       AST_Type* field_type = fields[i]->field_type();
-      size_t fld_cls = classify(field_type);
+      unTypeDef(field_type);
+      Classification fld_cls = classify(field_type);
       if ((fld_cls & CL_STRING) && !(fld_cls & CL_BOUNDED)) {
         expr = "false";
         intro = "";
@@ -752,7 +684,8 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
       if (i) expr << "\n    + ";
       const char* fname = fields[i]->local_name()->get_string();
       AST_Type* field_type = fields[i]->field_type();
-      size_t fld_cls = classify(field_type);
+      unTypeDef(field_type);
+      Classification fld_cls = classify(field_type);
       if (!field_type->in_main_file()
           && field_type->node_type() != AST_Decl::NT_pre_defined) {
         be_global->add_referenced(field_type->file_name().c_str());
@@ -917,7 +850,8 @@ namespace {
       if (namePrefix == string(">> ")) {
         string brType = scoped(branch->field_type()->name()), forany;
         AST_Type* br = branch->field_type();
-        size_t br_cls = classify(br);
+        unTypeDef(br);
+        Classification br_cls = classify(br);
         if (!br->in_main_file()
             && br->node_type() != AST_Decl::NT_pre_defined) {
           be_global->add_referenced(br->file_name().c_str());

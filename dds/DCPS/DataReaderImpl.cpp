@@ -158,15 +158,21 @@ DataReaderImpl::cleanup()
     }
   }
 
-  topic_servant_->remove_entity_ref();
-  topic_servant_->_remove_ref();
+  if (topic_servant_) {
+    topic_servant_->remove_entity_ref();
+    topic_servant_->_remove_ref();
+  }
+
   dr_local_objref_ = DDS::DataReader::_nil();
-  deactivate_remote_object(dr_remote_objref_.in());
-  dr_remote_objref_ = DataReaderRemote::_nil();
+
+  if (dr_remote_objref_) {
+    deactivate_remote_object(dr_remote_objref_.in());
+    dr_remote_objref_ = DataReaderRemote::_nil();
+  }
 }
 
 void DataReaderImpl::init(
-  TopicImpl*         a_topic,
+  TopicDescriptionImpl* a_topic_desc,
   const DDS::DataReaderQos &  qos,
   const DataReaderQosExt &      ext_qos,
   DDS::DataReaderListener_ptr a_listener,
@@ -177,12 +183,15 @@ void DataReaderImpl::init(
   OpenDDS::DCPS::DataReaderRemote_ptr dr_remote_objref)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  topic_servant_ = a_topic;
-  topic_servant_->_add_ref();
+  topic_desc_ = DDS::TopicDescription::_duplicate(a_topic_desc);
+  if (TopicImpl* a_topic = dynamic_cast<TopicImpl*>(a_topic_desc)) {
+    topic_servant_ = a_topic;
+    topic_servant_->_add_ref();
 
-  topic_servant_->add_entity_ref();
+    topic_servant_->add_entity_ref();
+  }
 
-  CORBA::String_var topic_name = topic_servant_->get_name();
+  CORBA::String_var topic_name = a_topic_desc->get_name();
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
   is_bit_ = ACE_OS::strcmp(topic_name.in(), BUILT_IN_PARTICIPANT_TOPIC) == 0
@@ -212,8 +221,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
   }
   
   domain_id_ = participant_servant_->get_domain_id();
-  topic_desc_ =
-    participant_servant_->lookup_topicdescription(topic_name.in());
 
   // Only store the subscriber pointer, since it is our parent, we
   // will exist as long as it does.
@@ -1166,14 +1173,18 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   this->set_enabled();
 
-  CORBA::String_var name = topic_servant_->get_name();
+  if (topic_servant_) {
+    CORBA::String_var name = topic_servant_->get_name();
 
-  return subscriber_servant_->reader_enabled(
-           dr_remote_objref_.in(),
-           dr_local_objref_.in(),
-           this,
-           name.in(),
-           topic_servant_->get_id());
+    return subscriber_servant_->reader_enabled(
+             dr_remote_objref_.in(),
+             dr_local_objref_.in(),
+             this,
+             name.in(),
+             topic_servant_->get_id());
+  } else {
+    return DDS::RETCODE_OK;
+  }
 }
 
 void

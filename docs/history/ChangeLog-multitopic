@@ -1,0 +1,419 @@
+Thu Jul 22 22:20:39 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r3467 through r3494.
+
+Thu Jul 22 22:01:55 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          Fixed GCC error and warnings.  Corrected refcount management on the
+          "resulting" data reader for the multitopic.
+
+Thu Jul 22 21:24:00 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.h:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          This completes the MultiTopic implementation:
+          - added error handling
+          - implemented cross-joins
+          - now tracking instance_state and view_state
+          - the Subscriber is now aware of the MultiTopic DataReader so
+            that the normal lookup, delete, etc. operations work and the
+            MultiTopic DataReader can de-register its listener during cleanup
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.idl:
+
+          Added testing cross-join and instance state management.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Adapted to DataReaderImpl.h modification.
+
+Tue Jul 20 22:56:24 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          GCC requires a few more "typename"s than VC++.
+
+Tue Jul 20 22:38:47 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/LocalObject.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.h:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          Continued implementing MultiTopic, specifically the ability to have
+          arbitrarily complex joins with different keys.  Not all of that is
+          test yet, and cross-joins are not yet implemented.
+
+        * dds/idl/CPPTemplate.txt:
+
+          Corrected filtering (WHERE clause) for MultiTopic.
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.idl:
+
+          Added a 3rd incoming topic to the test, provides coverage for the
+          case where one of the topics has a subset of the keys of the
+          resulting topic.
+
+Mon Jul 19 14:57:16 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+
+          Updated unit test for more recent change to DataReaderImpl.
+
+Fri Jul 16 22:33:25 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.h:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+        * dds/DCPS/MultiTopicImpl.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/metaclass_generator.cpp:
+
+          Continued implementing more joins for MultiTopic.
+          Not every case is handled yet.
+
+Thu Jul 15 19:10:42 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+
+          Fixed typo which caused the wrong overload to be called.
+
+        * dds/DCPS/TypeSupportImpl.h:
+
+          Added the Export macro which GCC 4 needed to make the vtable visible.
+
+Thu Jul 15 17:26:24 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r3439 through r3466.
+
+Wed Jul 14 20:31:40 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          updated comment to describe current functionality
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Fixed a bug in the arrays-of-arrays case.
+
+        * tests/DCPS/MetaStruct/MetaStructTest.cpp:
+        * tests/DCPS/MetaStruct/MetaStructTest.idl:
+
+          Added a test for arrays-of-arrays.
+
+Wed Jul 14 17:42:29 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          Implemented joining on multiple key fields.
+          The MultiTopic test should now pass.
+
+Wed Jul 14 16:03:35 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Fixed MetaStruct::assign() for arrays-of-arrays.
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.idl:
+
+          Extended the test to use two fields as DCPS_DATA_KEYs and
+          MultiTopic join keys.  This will make the test fail until
+          the implementation of MultiTopic is enhanced to cover this case.
+
+Tue Jul 13 19:42:19 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+
+          Minor change: bail out early if DDS::RETCODE_NO_DATA.
+
+        * dds/idl/dds_generator.h:
+        * dds/idl/marshal_generator.cpp:
+
+          Moved common code to dds_generator.h.
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Re-used code from dds_generator.h.
+          Added support for MetaStruct::assign() of nested structs, unions,
+          sequences, and arrays.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/MetaStruct/MetaStructTest.idl:
+        * tests/DCPS/MetaStruct/MetaStructTest.cpp:
+        * tests/DCPS/MetaStruct/MetaStructTest.mpc:
+        * tests/DCPS/MetaStruct/run_test.pl:
+
+          New test for MetaStruct::assign() of complex IDL types.
+
+Mon Jul 12 16:56:37 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+
+          Fixed some compilation errors from the latest multitopic work.
+
+Fri Jul  9 18:12:09 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r3408 through r3438.
+
+Fri Jul  9 17:54:01 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.h:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          Continued implementing MultiTopic.  The simplest case of JOINing
+          data from different topics is now working.
+
+        * dds/DCPS/OwnershipManager.h:
+
+          Removed comment that was copied from a different class.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Added lookup_instance_generic() and read_instance_generic().
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/idl/metaclass_generator.cpp:
+
+          Added allocate()/deallocate() to the MetaStruct for "reflective"
+          creation of new data-sample structs.
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.idl:
+
+          Added DCPS_DATA_KEYs to match the JOIN keys.  Enhanced test.
+
+Wed Jul  7 22:08:49 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.h:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          Continued with handling incoming samples in the MultiTopic reader.
+          This is all still a work in progress.
+
+        * dds/DCPS/ZeroCopySeq_T.h:
+
+          Typo fix in comment.
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/metaclass_generator.cpp:
+
+          Added new functions to "reflectively" assign field data from
+          one struct to another.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+
+          Added new DataReaderImpl virtual method.
+
+Tue Jul  6 21:42:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+
+          Started implementing on_data_available() for the incoming
+          datareaders.
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.idl:
+
+          Changed the test's idl structs to better reflect a real use case.
+
+Tue Jul  6 15:16:05 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+
+          Added fwd decl for TopicDescriptionImpl.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+
+          Added new methods to hand-written TypeSupportImpl.
+
+Fri Jul  2 21:53:08 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicImpl.h:
+
+          GCC compatibility for the previous commit.
+
+Fri Jul  2 20:06:45 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.h:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+        * dds/DCPS/MultiTopicImpl.h:
+        * dds/DCPS/MultiTopicImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/DdsDcpsTypeSupportExt.idl:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/idl/ts_generator.cpp:
+
+          Continued implementing MultiTopic: initialization of the MultiTopic's
+          DataReader and its constituent DataReaders (both incoming readers
+          and the resulting reader).
+
+        * tests/DCPS/TopicExpression/TopicExpressionTest.mpc:
+
+          Set exename to the project name instead of the name of the cpp file.
+
+Wed Jun 30 21:58:49 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Basic cleanup; error messages.
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+
+          Fixed a memory leak of the type name string.
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.idl:
+
+          Continued developing the simple functional test for MultiTopic.
+
+Wed Jun 30 15:21:26 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/AstNodeWrapper.h:
+        * dds/DCPS/MultiTopicImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Added missing #includes.
+
+Tue Jun 29 22:24:52 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/AstNodeWrapper.h:
+        * dds/DCPS/ContentFilteredTopicImpl.h:
+        * dds/DCPS/ContentFilteredTopicImpl.cpp:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/MultiTopicImpl.h:
+        * dds/DCPS/MultiTopicImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Re-factored some common code from the FilterEvaluator to be reused
+          in MultiTopic (WHERE clause).  Continued implementing MultiTopic.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.idl:
+        * tests/DCPS/MultiTopic/MultiTopicTest.mpc:
+        * tests/DCPS/MultiTopic/dcps.ini:
+        * tests/DCPS/MultiTopic/run_test.pl:
+
+          New test for MultiTopic -- it doesn't do anything yet.
+
+Tue Jun 29 14:50:41 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicImpl.cpp:
+
+          Added missing #include for std library header.
+
+Mon Jun 28 22:09:42 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r3399 through r3407.
+
+Mon Jun 28 21:59:00 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/MultiTopicImpl.h:
+        * dds/DCPS/MultiTopicImpl.cpp:
+
+          Began implementing spec-defined methods for MultiTopic.
+
+        * dds/DCPS/TopicExpressionGrammar.h:
+
+          Enhanced the grammar to get a useful AST out of it.
+
+        * tests/DCPS/TopicExpression/TopicExpression.cpp:
+
+          Added some new test cases.
+
+        * tests/DCPS/ManyTopicTest:
+        * tests/DCPS/ManyTopicTest/DataReaderListener1.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener2.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener3.cpp:
+        * tests/DCPS/ManyTopicTest/ManyTopicTest.mpc:
+        * tests/DCPS/ManyTopicTest/Writer.cpp:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+        * tests/DCPS/ManyTopicTypes:
+        * tests/DCPS/ManyTopicTypes/ManyTopicTypes.mpc:
+
+          Renamed these tests from "MultiTopic*" since they do not in fact
+          test MultiTopics.
+
+        * tests/DCPS/MultiTopicTest:
+        * tests/DCPS/MultiTopicTypes:
+
+          Removed these files.  They have been renamed.
+
+Fri Jun 25 20:02:08 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * BranchChangeLog:
+
+          Creating a ChangeLog for this branch (this file).
+
+        * dds/DCPS/FilterExpressionGrammar.h:
+        * dds/DCPS/TopicExpressionGrammar.h:
+
+          Implemented TopicExpression parsing (for MultiTopic), includes some
+          refactoring of FilterExpression parsing in order to re-use common
+          grammar rules.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/TopicExpression:
+        * tests/DCPS/TopicExpression/TopicExpression.cpp:
+        * tests/DCPS/TopicExpression/TopicExpressionTest.mpc:
+        * tests/DCPS/TopicExpression/run_test.pl:
+
+          New test for parsing TopicExpressions
+
+# vim: filetype=changelog
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

@@ -28,18 +28,6 @@ namespace DCPS {
 class InstanceState;
 class DataReaderImpl;
 
-/**
-* @class DomainParticipantImpl
-*
-* @brief Implements the OpenDDS::DCPS::DomainParticipant interfaces.
-*
-* This class acts as an entrypoint of the service and a factory
-* for publisher, subscriber and topic. It also acts as a container
-* for the publisher, subscriber and topic objects.
-*
-* See the DDS specification, OMG formal/04-12-02, for a description of
-* the interface this class is implementing.
-*/
 class OpenDDS_Dcps_Export OwnershipManager {
 public:
   typedef std::vector<DataReaderImpl* > ReaderVec;

@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_CONTENTFILTEREDTOPICIMPL_H
-#define OPENDDS_DCPS_CONTENTFILTEREDTOPICIMPL_H
+#ifndef OPENDDS_DCPS_MULTITOPICIMPL_H
+#define OPENDDS_DCPS_MULTITOPICIMPL_H
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
@@ -16,6 +16,8 @@
 #include "dds/DCPS/FilterEvaluator.h"
 
 #include <string>
+#include <vector>
+#include <utility>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -24,17 +26,18 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export ContentFilteredTopicImpl
-  : public virtual OpenDDS::DCPS::LocalObject<DDS::ContentFilteredTopic>
+class OpenDDS_Dcps_Export MultiTopicImpl
+  : public virtual OpenDDS::DCPS::LocalObject<DDS::MultiTopic>
   , public virtual TopicDescriptionImpl {
 public:
-  ContentFilteredTopicImpl(const char* name, DDS::Topic_ptr related_topic,
-    const char* filter_expression, const DDS::StringSeq& expression_parameters,
+  MultiTopicImpl(const char* name, const char* type_name,
+    const char* subscription_expression,
+    const DDS::StringSeq& expression_parameters,
     DomainParticipantImpl* participant);
 
-  virtual ~ContentFilteredTopicImpl() {}
+  virtual ~MultiTopicImpl();
 
-  char* get_filter_expression()
+  char* get_subscription_expression()
     ACE_THROW_SPEC((CORBA::SystemException));
 
   DDS::ReturnCode_t get_expression_parameters(DDS::StringSeq& parameters)
@@ -43,21 +46,42 @@ public:
   DDS::ReturnCode_t set_expression_parameters(const DDS::StringSeq& parameters)
     ACE_THROW_SPEC((CORBA::SystemException));
 
-  DDS::Topic_ptr get_related_topic()
-    ACE_THROW_SPEC((CORBA::SystemException));
+  struct SubjectFieldSpec {
+    std::string incoming_name_;
+    std::string resulting_name_;
+
+    explicit SubjectFieldSpec(const std::string& inc,
+                              const std::string& res = "")
+      : incoming_name_(inc)
+      , resulting_name_(res == "" ? inc : res)
+    {}
+  };
+
+  const std::vector<SubjectFieldSpec>& get_aggregation() const
+  {
+    return aggregation_;
+  }
+
+  const std::vector<std::string>& get_selection() const
+  {
+    return selection_;
+  }
 
   template<typename Sample>
   bool filter(const Sample& s) const
   {
+    if (!filter_eval_) return true;
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
-    return filter_eval_.eval(s, expression_parameters_);
+    return filter_eval_->eval(s, expression_parameters_);
   }
 
 private:
-  std::string filter_expression_;
-  FilterEvaluator filter_eval_;
+  std::string subscription_expression_;
   DDS::StringSeq expression_parameters_;
-  DDS::Topic_var related_topic_;
+  FilterEvaluator* filter_eval_;
+
+  std::vector<SubjectFieldSpec> aggregation_;
+  std::vector<std::string> selection_;
 
   ///concurrent access to expression_parameters_
   mutable ACE_Recursive_Thread_Mutex lock_;
