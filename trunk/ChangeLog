@@ -1,3 +1,13 @@
+Fri Jul 23 22:19:31 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+
+          Added notes on Content-Subscription and opendds_idl changes.
+
+        * README:
+
+          Updated platform, compiler, and TAO versions.
+
 Fri Jul 23 21:34:37 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * Merged the branch "multitopic", which includes the implementation

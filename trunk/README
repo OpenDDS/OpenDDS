@@ -79,13 +79,13 @@ please see the Support section for contact information.
 
 OpenDDS requires TAO for both IDL compilation as well as interaction
 with the DCPSInfoRepo.  At a minimum, you must be at one of the following
-versions (or later) in order to properly compile OpenDDS:
+versions in order to properly compile OpenDDS:
 
-*** TAO 1.5a patch 20
+*** TAO 1.5a patch 21
 *** TAO 1.6a patch 7
-*** TAO 1.7.9 (DOC Group)
+*** TAO 1.8.1 (DOC Group)
 
-Note that the 1.xa releases are from OCI and can be obtained from
+Note that the 1.5a and 1.6a releases are from OCI and can be obtained from
 http://www.theaceorb.com/.  The DOC Group releases can be obtained from
 http://download.dre.vanderbilt.edu/.
 
@@ -114,10 +114,9 @@ This release of OpenDDS has been tested under the following platforms:
 
 Linux family:
 ** RedHat EL 5, x86_64
-** RedHat 7.2 and EL 4.2, x86
-** Fedora Core 3, x86_64
 ** Fedora Core 6, x86
 ** CentOS 5, x86_64
+** Ubuntu 8.04 LTS, x86_64
 ** Ubuntu 8.10, x86
 
 Windows family:
@@ -143,11 +142,10 @@ This release of OpenDDS has been tested using the following compilers:
 ** Microsoft Visual C++ 8 with SP1 (Visual Studio 2005)
 ** Microsoft Visual C++ 9 with SP1 (Visual Studio 2008)
 ** gcc 3.3.2
-** gcc 3.4.4 (Red Hat 3.4.4-2)
 ** gcc 4.0.1 (Apple Inc. build 5465)
-** gcc 4.1.1
 ** gcc 4.1.1 (Red Hat 4.1.1-30) (Red Hat 4.1.1-52)
 ** gcc 4.1.2 (Red Hat 4.1.2-14)
+** gcc 4.2.4 (Ubuntu 4.2.4-1ubuntu4)
 ** gcc 4.3.2 (Ubuntu 4.3.2-1ubuntu11)
 ** gcc 4.5.0
 ** QNX gcc 3.3.5

@@ -1,5 +1,20 @@
 Version 2.2 of OpenDDS.
 
+- Completed the implementation of the Content-Subscription Profile (which
+  was begun in version 1.3 of OpenDDS).  This includes:
+  - QueryCondition (previously OpenDDS had a partial implementation)
+  - ContentFilteredTopic
+  - MultiTopic
+  The content-subscription profile can be disabled at compile-time in order
+  to reduce footprint: set the MPC feature "content_subscription" to 0.
+
+- The code generation tools for OpenDDS have changed in this release.  The
+  Perl script "dcps_ts.pl" is no longer used and instead the OpenDDS IDL
+  Compiler "opendds_idl" takes its place.  opendds_idl also includes the
+  functionality which used to be in the tao_idl and enabled with -Gdcps.
+  Existing applications that use MPC do not need to make any changes unless
+  they happen to depend on some rarely-used arguments to dcps_ts.pl.  See the
+  OpenDDS Developer's Guide for the list of arguments accepted by opendds_idl.
 
 
 ========================================================================
