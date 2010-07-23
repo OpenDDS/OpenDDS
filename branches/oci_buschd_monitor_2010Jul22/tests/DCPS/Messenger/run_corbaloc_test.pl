@@ -15,20 +15,27 @@ $status = 0;
 
 $svc_conf = '';
 $repo_bit_opt = '';
+$corbaloc_prefix = 'corbaloc:iiop:';
+$corbaloc_suffix = '/DCPSInfoRepo';
 if (!new PerlACE::ConfigList->check_config ('STATIC')) {
   $repo_bit_opt = "-ORBSvcConf tcp.conf";
-  if ($ARGV[0] eq 'udp') {
+  if ($ARGV[0] eq 'udp' || $ARGV[1] eq 'udp') {
     $svc_conf = " -ORBSvcConf udp.conf ";
   }
   else {
     $svc_conf = " -ORBSvcConf tcp.conf";
   }
+
+  if ($ARGV[0] eq 'host_port_only' || $ARGV[1] eq 'host_port_only') {
+    $corbaloc_prefix = '';
+    $corbaloc_suffix = '';
+  }
 }
 
 my($port1) = PerlACE::random_port();
 $dcpsrepo_ior = "repo.ior";
-$common_args = "-DCPSInfoRepo corbaloc:iiop:localhost:$port1/DCPSInfoRepo"
-    . " $svc_conf";
+$common_args = "-DCPSInfoRepo " . "$corbaloc_prefix" . "localhost:$port1"
+    . "$corbaloc_suffix". " $svc_conf";
 
 unlink $dcpsrepo_ior;
 
