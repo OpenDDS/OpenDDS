@@ -47,7 +47,7 @@
      <item>
       <widget class="QLineEdit" name="iorLineEdit">
        <property name="text">
-        <string>corbaloc::iiop:</string>
+        <string>&lt;host&gt;:&lt;port&gt;</string>
        </property>
       </widget>
      </item>

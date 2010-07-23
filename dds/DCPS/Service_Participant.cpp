@@ -10,6 +10,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "debug.h"
 #include "Service_Participant.h"
+#include "InfoRepoUtils.h"
 #include "BuiltInTopicUtils.h"
 #include "DataDurabilityCache.h"
 #include "RepoIdConverter.h"
@@ -730,9 +731,7 @@ Service_Participant::set_repo_ior(const char* ior, const RepoKey key, bool attac
   DCPSInfo_var repo;
 
   try {
-    CORBA::Object_var obj = orb_->string_to_object(ior);
-
-    repo = DCPSInfo::_narrow(obj.in());
+    repo = InfoRepoUtils::get_repo(ior,orb_.in());
 
     if (CORBA::is_nil(repo.in())) {
       ACE_ERROR((LM_ERROR,
