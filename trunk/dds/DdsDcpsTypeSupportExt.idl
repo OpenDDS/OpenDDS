@@ -40,6 +40,9 @@ module OpenDDS {
     */
     ::DDS::DataReader create_datareader();
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    ::DDS::DataReader create_multitopic_datareader();
+#endif
     };
   };
 };

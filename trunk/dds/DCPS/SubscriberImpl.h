@@ -37,6 +37,9 @@ class DomainParticipantImpl;
 //class DataReaderImpl;
 class Monitor;
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+class MultiTopicImpl;
+#endif
 
 // Keep track of all the DataReaders attached to this
 // Subscriber
@@ -189,6 +192,10 @@ public:
     RepoId topic_id)
   ACE_THROW_SPEC((CORBA::SystemException));
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  DDS::ReturnCode_t multitopic_reader_enabled(DDS::DataReader_ptr reader);
+#endif
+
   //void cleanup();
 
   DDS::SubscriberListener* listener_for(DDS::StatusKind kind);
@@ -217,6 +224,7 @@ public:
                                 Coherent_State& group_state);
 
 private:
+
   DDS::InstanceHandle_t        handle_;
 
   DDS::SubscriberQos           qos_;
@@ -228,6 +236,10 @@ private:
 
   DataReaderMap                datareader_map_ ;
   DataReaderSet                datareader_set_ ;
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  std::map<std::string, DDS::DataReader_var> multitopic_reader_map_;
+#endif
 
   DomainParticipantImpl*       participant_;
   DDS::DomainParticipant_var   participant_objref_;

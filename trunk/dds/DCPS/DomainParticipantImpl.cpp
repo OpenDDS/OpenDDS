@@ -24,6 +24,7 @@
 #include "dds/DdsDcpsGuidC.h"
 #include "BitPubListenerImpl.h"
 #include "ContentFilteredTopicImpl.h"
+#include "MultiTopicImpl.h"
 
 #include <sstream>
 
@@ -732,8 +733,19 @@ ACE_THROW_SPEC((CORBA::SystemException))
     return 0;
   }
 
-  DDS::ContentFilteredTopic_var cft = new ContentFilteredTopicImpl(name,
-    related_topic, filter_expression, expression_parameters, this);
+  DDS::ContentFilteredTopic_var cft;
+  try {
+    cft = new ContentFilteredTopicImpl(name,
+      related_topic, filter_expression, expression_parameters, this);
+  } catch (const std::exception& e) {
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::create_contentfilteredtopic, ")
+        ACE_TEXT("can't create a content-filtered topic due to runtime error: ")
+        ACE_TEXT("%C.\n"), e.what()));
+    }
+    return 0;
+  }
   DDS::TopicDescription_var td = DDS::TopicDescription::_duplicate(cft);
   topic_descrs_[name] = td;
   return cft._retn();
@@ -759,20 +771,67 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 DDS::MultiTopic_ptr DomainParticipantImpl::create_multitopic(
-  const char * /*name*/,
-  const char * /*type_name*/, 
-  const char * /*subscription_expression*/,
-  const DDS::StringSeq & /*expression_parameters*/)
+  const char* name, const char* type_name,
+  const char* subscription_expression,
+  const DDS::StringSeq& expression_parameters)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  return 0;
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, topics_protector_, 0);
+
+  if (topics_.count(name)) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::create_multitopic, ")
+        ACE_TEXT("can't create a multi topic due to name \"%C\" ")
+        ACE_TEXT("already in use by a Topic.\n"), name));
+    }
+    return 0;
+  }
+
+  if (topic_descrs_.count(name)) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::create_multitopic, ")
+        ACE_TEXT("can't create a multi topic due to name \"%C\" ")
+        ACE_TEXT("already in use by a TopicDescription.\n"), name));
+    }
+    return 0;
+  }
+
+  DDS::MultiTopic_var mt;
+  try {
+    mt = new MultiTopicImpl(name, type_name, subscription_expression,
+      expression_parameters, this);
+  } catch (const std::exception& e) {
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::create_multitopic, ")
+        ACE_TEXT("can't create a multi topic due to runtime error: ")
+        ACE_TEXT("%C.\n"), e.what()));
+    }
+    return 0;
+  }
+  DDS::TopicDescription_var td = DDS::TopicDescription::_duplicate(mt);
+  topic_descrs_[name] = td;
+  return mt._retn();
 }
 
 DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
-  DDS::MultiTopic_ptr /*a_multitopic*/)
+  DDS::MultiTopic_ptr a_multitopic)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  return DDS::RETCODE_UNSUPPORTED;
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, topics_protector_,
+                   DDS::RETCODE_OUT_OF_RESOURCES);
+  DDS::MultiTopic_var mt = DDS::MultiTopic::_duplicate(a_multitopic);
+  TopicDescriptionMap::iterator iter = topic_descrs_.find(mt->get_name());
+  if (iter == topic_descrs_.end()) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+  if (dynamic_cast<TopicDescriptionImpl*>(iter->second.in())->has_reader()) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+  topic_descrs_.erase(iter);
+  return DDS::RETCODE_OK;
 }
 
 #endif

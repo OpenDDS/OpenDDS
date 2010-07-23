@@ -1,5 +1,5 @@
 project : dcps {
-  after         += MultiTopicTypes
+  after         += ManyTopicTypes
   libout         = .
   idlflags      += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h
   dynamicflags   = FOOLIB_BUILD_DLL

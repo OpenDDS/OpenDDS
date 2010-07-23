@@ -12,6 +12,8 @@
 
 #include "utl_identifier.h"
 
+using namespace AstTypeClassification;
+
 namespace {
   struct ContentSubscriptionGuard {
     ContentSubscriptionGuard()
@@ -44,46 +46,6 @@ bool metaclass_generator::gen_enum(UTL_ScopedName* name,
 }
 
 namespace {
-  void unTypeDef(AST_Type*& element)
-  {
-    if (element->node_type() == AST_Decl::NT_typedef) {
-      AST_Typedef* td = AST_Typedef::narrow_from_decl(element);
-      element = td->primitive_base_type();
-    }
-  }
-
-  enum Classification {
-    CL_UNKNOWN = 0,
-    CL_SCALAR = 1,
-    CL_STRUCTURE = 2,
-    CL_STRING = 4,
-    CL_ENUM = 8
-  };
-
-  Classification classify(AST_Type* type)
-  {
-    unTypeDef(type);
-    switch (type->node_type()) {
-    case AST_Decl::NT_pre_defined: {
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
-      if (p->pt() == AST_PredefinedType::PT_any
-          || p->pt() == AST_PredefinedType::PT_object) {
-        return CL_UNKNOWN;
-      } else {
-        return CL_SCALAR;
-      }
-    }
-    case AST_Decl::NT_string:
-    case AST_Decl::NT_wstring:
-      return static_cast<Classification>(CL_SCALAR | CL_STRING);
-    case AST_Decl::NT_struct:
-      return CL_STRUCTURE;
-    case AST_Decl::NT_enum:
-      return static_cast<Classification>(CL_SCALAR | CL_ENUM);
-    default:
-      return CL_UNKNOWN;
-    }
-  }
 
   void gen_field_getValue(AST_Field* field)
   {
@@ -115,35 +77,113 @@ namespace {
     }
   }
 
-  struct gen_field_createQC {
-    std::string scoped_;
-    gen_field_createQC(const std::string& scoped)
-      : scoped_(scoped)
-    {}
-
-    void operator()(AST_Field* field) const
-    {
-      Classification cls = classify(field->field_type());
-      const std::string fieldName = field->local_name()->get_string();
-      if (cls & CL_SCALAR) {
-        be_global->impl_ <<
-          "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
-          "      return make_field_cmp(&" << scoped_ << "::" << fieldName
-          << ", next);\n"
-          "    }\n";
-      } else if (cls & CL_STRUCTURE) {
-        size_t n = fieldName.size() + 1 /* 1 for the dot */;
-        std::string fieldType = scoped(field->field_type()->name());
-        be_global->impl_ <<
-          "    if (std::strncmp(field, \"" << fieldName << ".\", " << n
-          << ") == 0) {\n"
-          "      return make_struct_cmp(&" << scoped_ << "::" << fieldName
-          << ", getMetaStruct<" << fieldType << ">().create_qc_comparator("
-          "field + " << n << ", 0), next);\n"
-          "    }\n";
-      }
+  void gen_field_createQC(AST_Field* field)
+  {
+    Classification cls = classify(field->field_type());
+    const std::string fieldName = field->local_name()->get_string();
+    if (cls & CL_SCALAR) {
+      be_global->impl_ <<
+        "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
+        "      return make_field_cmp(&T::" << fieldName << ", next);\n"
+        "    }\n";
+    } else if (cls & CL_STRUCTURE) {
+      size_t n = fieldName.size() + 1 /* 1 for the dot */;
+      std::string fieldType = scoped(field->field_type()->name());
+      be_global->impl_ <<
+        "    if (std::strncmp(field, \"" << fieldName << ".\", " << n <<
+        ") == 0) {\n"
+        "      return make_struct_cmp(&T::" << fieldName <<
+        ", getMetaStruct<" << fieldType << ">().create_qc_comparator("
+        "field + " << n << ", 0), next);\n"
+        "    }\n";
     }
-  };
+  }
+
+  void print_field_name(AST_Field* field)
+  {
+    be_global->impl_ << '"' << field->local_name()->get_string() << '"' << ", ";
+  }
+
+  void get_raw_field(AST_Field* field)
+  {
+    const char* fieldName = field->local_name()->get_string();
+    be_global->impl_ <<
+      "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
+      "      return &static_cast<const T*>(stru)->" << fieldName << ";\n"
+      "    }\n";
+  }
+
+  void assign_field(AST_Field* field)
+  {
+    Classification cls = classify(field->field_type());
+    if (!cls) return; // skip CL_UNKNOWN types
+    const char* fieldName = field->local_name()->get_string();
+    const std::string fieldType = (cls & CL_STRING) ?
+      ((cls & CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager")
+      : scoped(field->field_type()->name());
+    if (cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_UNION)) {
+      be_global->impl_ <<
+        "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
+        "      static_cast<T*>(lhs)->" << fieldName <<
+        " = *static_cast<const " << fieldType <<
+        "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n"
+        "      return;\n"
+        "    }\n";
+    } else if (cls & CL_ARRAY) {
+      AST_Type* unTD = field->field_type();
+      unTypeDef(unTD);
+      AST_Array* arr = AST_Array::narrow_from_decl(unTD);
+      be_global->impl_ <<
+        "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
+        "      " << fieldType << "* lhsArr = &static_cast<T*>(lhs)->" <<
+        fieldName << ";\n"
+        "      const " << fieldType << "* rhsArr = static_cast<const " <<
+        fieldType << "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n";
+      AST_Type* elem = arr->base_type();
+      AST_Type* elemUnTD = elem;
+      unTypeDef(elemUnTD);
+      if (classify(elemUnTD) & CL_ARRAY) {
+        // array-of-array case, fall back on the Serializer
+        be_global->impl_ <<
+          "      " << fieldType << "_forany rhsForany(const_cast<" <<
+          fieldType << "_slice*>(*rhsArr));\n"
+          "      ACE_Message_Block mb(gen_find_size(rhsForany));\n"
+          "      Serializer ser_out(&mb);\n"
+          "      ser_out << rhsForany;\n"
+          "      " << fieldType << "_forany lhsForany(*lhsArr);\n"
+          "      Serializer ser_in(&mb);\n"
+          "      ser_in >> lhsForany;\n";
+      } else {
+        std::string indent = "      ";
+        NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
+        be_global->impl_ <<
+          indent << "(*lhsArr)" << nfl.index_ << " = (*rhsArr)" <<
+          nfl.index_ << ";\n";
+      }
+      be_global->impl_ <<
+        "      return;\n"
+        "    }\n";
+    }
+  }
+
+  void compare_field(AST_Field* field)
+  {
+    Classification cls = classify(field->field_type());
+    if (!(cls & CL_SCALAR)) return;
+    const char* fieldName = field->local_name()->get_string();
+    be_global->impl_ <<
+      "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n";
+    if (cls & CL_STRING) {
+      be_global->impl_ << // ACE_OS::strcmp has overloads for narrow & wide
+        "      " << "return 0 == ACE_OS::strcmp(static_cast<const T*>(lhs)->" <<
+        fieldName << ", static_cast<const T*>(rhs)->" << fieldName << ");\n";
+    } else {
+      be_global->impl_ <<
+        "      return static_cast<const T*>(lhs)->" << fieldName <<
+        " == static_cast<const T*>(rhs)->" << fieldName << ";\n";
+    }
+    be_global->impl_ << "    }\n";
+  }
 }
 
 bool metaclass_generator::gen_struct(UTL_ScopedName* name,
@@ -160,19 +200,31 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
       "const MetaStruct& getMetaStruct();\n\n";
     first_struct_ = false;
   }
+
+  size_t nKeys = 0;
+  IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
+  if (info) {
+    nKeys = info->key_list_.size();
+  }
+
   std::string clazz = scoped(name);
+  std::string decl = "const MetaStruct& getMetaStruct<" + clazz + ">()",
+    exp = be_global->export_macro().c_str();
+  be_global->header_ << "template<>\n" << exp << (exp.length() ? "\n" : "")
+    << decl << ";\n";
+
   be_global->impl_ <<
     "template<>\n"
     "struct MetaStructImpl<" << clazz << "> : MetaStruct {\n"
+    "  typedef " << clazz << " T;\n\n"
+    "  void* allocate() const { return new T; }\n\n"
+    "  void deallocate(void* stru) const { delete static_cast<T*>(stru); }\n\n"
+    "  size_t numDcpsKeys() const { return " << nKeys << "; }\n\n"
     "  Value getValue(const void* stru, const char* field) const\n"
     "  {\n"
     "    const " << clazz << "& typed = *static_cast<const " << clazz
     << "*>(stru);\n";
   std::for_each(fields.begin(), fields.end(), gen_field_getValue);
-  std::string decl = "const MetaStruct& getMetaStruct<" + clazz + ">()",
-    exp = be_global->export_macro().c_str();
-  be_global->header_ << "template<>\n" << exp << (exp.length() ? "\n" : "")
-    << decl << ";\n";
   std::string exception =
     "    throw std::runtime_error(\"Field \" + std::string(field) + \" not "
     "found or its type is not supported (in Struct " + clazz + ")\");\n";
@@ -184,7 +236,43 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
     "ComparatorBase::Ptr next) const\n"
     "  {\n"
     "    ACE_UNUSED_ARG(next);\n";
-  std::for_each(fields.begin(), fields.end(), gen_field_createQC(clazz));
+  std::for_each(fields.begin(), fields.end(), gen_field_createQC);
+  be_global->impl_ <<
+    exception <<
+    "  }\n\n"
+    "  const char** getFieldNames() const\n"
+    "  {\n"
+    "    static const char* names[] = {";
+  std::for_each(fields.begin(), fields.end(), print_field_name);
+  be_global->impl_ <<
+    "0};\n"
+    "    return names;\n"
+    "  }\n\n"
+    "  const void* getRawField(const void* stru, const char* field) const\n"
+    "  {\n";
+  std::for_each(fields.begin(), fields.end(), get_raw_field);
+  be_global->impl_ <<
+    exception <<
+    "  }\n\n"
+    "  void assign(void* lhs, const char* field, const void* rhs,\n"
+    "    const char* rhsFieldSpec, const MetaStruct& rhsMeta) const\n"
+    "  {\n"
+    "    ACE_UNUSED_ARG(lhs);\n"
+    "    ACE_UNUSED_ARG(field);\n"
+    "    ACE_UNUSED_ARG(rhs);\n"
+    "    ACE_UNUSED_ARG(rhsFieldSpec);\n"
+    "    ACE_UNUSED_ARG(rhsMeta);\n";
+  std::for_each(fields.begin(), fields.end(), assign_field);
+  be_global->impl_ <<
+    exception <<
+    "  }\n\n"
+    "  bool compare(const void* lhs, const void* rhs, const char* field) "
+    "const\n"
+    "  {\n"
+    "    ACE_UNUSED_ARG(lhs);\n"
+    "    ACE_UNUSED_ARG(field);\n"
+    "    ACE_UNUSED_ARG(rhs);\n";
+  std::for_each(fields.begin(), fields.end(), compare_field);
   be_global->impl_ <<
     exception <<
     "  }\n"

@@ -2,22 +2,22 @@
 //
 // $Id$
 
-#include "DataReaderListener3.h"
+#include "DataReaderListener1.h"
 #include "common.h"
 #include "../common/SampleInfo.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "tests/DCPS/MultiTopicTypes/Foo3DefTypeSupportC.h"
-#include "tests/DCPS/MultiTopicTypes/Foo3DefTypeSupportImpl.h"
+#include "tests/DCPS/ManyTopicTypes/Foo1DefTypeSupportC.h"
+#include "tests/DCPS/ManyTopicTypes/Foo1DefTypeSupportImpl.h"
 
-  void DataReaderListenerImpl3::read(::DDS::DataReader_ptr reader)
+  void DataReaderListenerImpl1::read(::DDS::DataReader_ptr reader)
   {
     ACE_UNUSED_ARG(max_samples_per_instance);
     ACE_UNUSED_ARG(history_depth);
     ACE_UNUSED_ARG(using_udp);
 
-    ::T3::Foo3DataReader_var foo_dr =
-        ::T3::Foo3DataReader::_narrow(reader);
+    ::T1::Foo1DataReader_var foo_dr =
+        ::T1::Foo1DataReader::_narrow(reader);
 
     if (CORBA::is_nil (foo_dr.in ()))
       {
@@ -25,10 +25,10 @@
                ACE_TEXT("(%P|%t) ::Mine::FooDataReader::_narrow failed.\n")));
       }
 
-    ::T3::Foo3DataReaderImpl* dr_servant =
-      dynamic_cast< ::T3::Foo3DataReaderImpl*>(foo_dr.in());
+    ::T1::Foo1DataReaderImpl* dr_servant =
+      dynamic_cast<T1::Foo1DataReaderImpl*> (foo_dr.in ());
 
-    ::T3::Foo3Seq foo(num_ops_per_thread) ;
+    ::T1::Foo1Seq foo(num_ops_per_thread) ;
     ::DDS::SampleInfoSeq si(num_ops_per_thread) ;
 
     DDS::ReturnCode_t status  ;
@@ -44,9 +44,8 @@
         {
           num_samples_++ ;
 
-          ACE_OS::printf (
-              "foo3[%d]: c = %c,  s = %d, l = %d, text = %s, key = %d\n",
-              i, foo[i].c, foo[i].s, foo[i].l, foo[i].text.in(), foo[i].key);
+          ACE_OS::printf ("foo1[%d]: c = %c, x = %f y = %f, key = %d\n",
+                          i, foo[i].c, foo[i].x, foo[i].y, foo[i].key);
           PrintSampleInfo(si[i]) ;
         }
       }

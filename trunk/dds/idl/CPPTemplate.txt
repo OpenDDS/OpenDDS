@@ -60,6 +60,22 @@ char *
   return reader_impl;
 }
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+::DDS::DataReader_ptr
+<%TYPE%>TypeSupportImpl::create_multitopic_datareader()
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  return new OpenDDS::DCPS::MultiTopicDataReader_T<<%TYPE%>,
+    <%TYPE%>DataReaderImpl>;
+}
+
+const OpenDDS::DCPS::MetaStruct&
+<%TYPE%>TypeSupportImpl::getMetaStructForType()
+{
+  return OpenDDS::DCPS::getMetaStruct<<%TYPE%>>();
+}
+
+#endif
 
 <%TYPE%>DataWriterImpl::<%TYPE%>DataWriterImpl ()
   : marshaled_size_ (0)
@@ -1532,6 +1548,135 @@ bool
 
   return false;
 }
+
+DDS::ReturnCode_t
+<%TYPE%>DataReaderImpl::read_generic(
+  OpenDDS::DCPS::DataReaderImpl::GenericBundle& gen,
+  DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+  DDS::InstanceStateMask instance_states)
+{
+  <%SCOPED%>Seq data;
+  DDS::ReturnCode_t rc = read_i(data, gen.info_, DDS::LENGTH_UNLIMITED,
+    sample_states, view_states, instance_states, NULL);
+  gen.samples_.reserve(data.length());
+  for (CORBA::ULong i = 0; i < data.length(); ++i) {
+    gen.samples_.push_back(&data[i]);
+  }
+  return rc;
+}
+
+DDS::InstanceHandle_t
+<%TYPE%>DataReaderImpl::lookup_instance_generic(const void* data)
+{
+  return lookup_instance(*static_cast<const <%SCOPED%>*>(data));
+}
+
+DDS::ReturnCode_t
+<%TYPE%>DataReaderImpl::read_instance_generic(void*& data,
+  DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
+  DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+  DDS::InstanceStateMask instance_states)
+{
+  <%SCOPED%>Seq dataseq;
+  DDS::SampleInfoSeq infoseq;
+  DDS::ReturnCode_t rc = read_instance_i(dataseq, infoseq,
+    DDS::LENGTH_UNLIMITED, instance, sample_states, view_states,
+    instance_states, NULL);
+  if (rc == DDS::RETCODE_NO_DATA) return rc;
+  const CORBA::ULong last = dataseq.length() - 1;
+  data = new <%SCOPED%>(dataseq[last]);
+  info = infoseq[last];
+  return rc;
+}
+
+DDS::ReturnCode_t
+<%TYPE%>DataReaderImpl::read_next_instance_generic(void*& data,
+  DDS::SampleInfo& info, DDS::InstanceHandle_t previous_instance,
+  DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+  DDS::InstanceStateMask instance_states)
+{
+  <%SCOPED%>Seq dataseq;
+  DDS::SampleInfoSeq infoseq;
+  DDS::ReturnCode_t rc = read_next_instance_i(dataseq, infoseq,
+    DDS::LENGTH_UNLIMITED, previous_instance, sample_states, view_states,
+    instance_states, NULL);
+  if (rc == DDS::RETCODE_NO_DATA) return rc;
+  const CORBA::ULong last = dataseq.length() - 1;
+  data = new <%SCOPED%>(dataseq[last]);
+  info = infoseq[last];
+  return rc;
+}
+
+DDS::InstanceHandle_t
+<%TYPE%>DataReaderImpl::store_synthetic_data(const <%SCOPED%>& sample,
+  DDS::ViewStateKind view)
+{
+  using namespace OpenDDS::DCPS;
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_,
+                   DDS::HANDLE_NIL);
+
+  DDS::TopicDescription_var descr = get_topicdescription();
+  if (MultiTopicImpl* mt = dynamic_cast<MultiTopicImpl*>(descr.in())) {
+    if (!mt->filter(sample)) {
+      return DDS::HANDLE_NIL;
+    }
+  }
+
+  get_subscriber_servant()->data_received(this);
+
+  DDS::InstanceHandle_t inst = lookup_instance(sample);
+  bool filtered;
+  SubscriptionInstance* instance = 0;
+
+  // Call store_instance_data() once or twice, depending on if we need to
+  // process the INSTANCE_REGISTRATION.  In either case, store_instance_data()
+  // owns the memory for the sample and it must come from the correct allocator.
+  for (int i = 0; i < 2; ++i) {
+    if (i == 0 && inst != DDS::HANDLE_NIL) continue;
+
+    DataSampleHeader header;
+    header.message_id_ = i ? SAMPLE_DATA : INSTANCE_REGISTRATION;
+    bool just_registered;
+    <%SCOPED%>* data;
+    ACE_NEW_MALLOC_NORETURN(data,
+      static_cast< <%SCOPED%>*>(data_allocator_->malloc(sizeof(<%SCOPED%>))),
+      <%SCOPED%>(sample));
+    store_instance_data(data, header, instance, just_registered, filtered);
+    inst = instance->instance_handle_;
+  }
+
+  if (!filtered) {
+    if (view == DDS::NOT_NEW_VIEW_STATE) {
+      instance->instance_state_.accessed();
+    }
+    notify_read_conditions();
+  }
+  return inst;
+}
+
+void
+<%TYPE%>DataReaderImpl::set_instance_state(DDS::InstanceHandle_t instance,
+  DDS::InstanceStateKind state)
+{
+  using namespace OpenDDS::DCPS;
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+
+  SubscriptionInstance* si = get_handle_instance(instance);
+  if (si && state != DDS::ALIVE_INSTANCE_STATE) {
+    DataSampleHeader header;
+    header.message_id_ = (state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
+      ? DISPOSE_INSTANCE : UNREGISTER_INSTANCE;
+    bool just_registered, filtered;
+    <%SCOPED%>* data;
+    ACE_NEW_MALLOC_NORETURN(data,
+      static_cast< <%SCOPED%>*>(data_allocator_->malloc(sizeof(<%SCOPED%>))),
+      <%SCOPED%>);
+    get_key_value(*data, instance);
+    store_instance_data(data, header, si, just_registered, filtered);
+    notify_read_conditions();
+  }
+}
+
 #endif
 
 void

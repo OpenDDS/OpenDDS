@@ -1,3 +1,10 @@
+Fri Jul 23 21:34:37 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged the branch "multitopic", which includes the implementation
+          of MultiTopic, part of the Content-Subscription Profile.
+          For details see the branch-specific change log at
+          docs/history/ChangeLog-multitopic.
+
 Mon Jul 19 14:20:37 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/odds_monitor/TreeNode.h:
