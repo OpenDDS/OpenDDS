@@ -24,7 +24,7 @@ namespace DCPS {
       CORBA::Object_var o;
       try {
         o = orb->string_to_object(ior);
-      } catch (CORBA::Exception&) {
+      } catch (CORBA::INV_OBJREF&) {
         // host:port format causes an exception; try again
         // with corbaloc format
         std::string second_try("corbaloc:iiop:");

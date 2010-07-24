@@ -1,3 +1,15 @@
+Sat Jul 24 20:45:59 UTC 2010  Don Busch <buschd@ociweb.com>
+
+        * DDS_TAO.mwc:
+
+        * dds/DCPS/InfoRepoUtils.cpp:
+
+        * tests/DCPS/Messenger/run_corbaloc_test.pl:
+
+        Fixed DDS_TAO.mwc to build everything in TAO needed for DDS workspace
+        Catching INV_OBJREF in InfoRepoUtils::get_repo instead of CORBA::Exception
+        Fixed run_corbaloc_test.pl script to work properly for udp
+
 Fri Jul 23 21:42:19 UTC 2010  Don Busch <buschd@ociweb.com>
 
         * bin/dcps_tests.lst:
