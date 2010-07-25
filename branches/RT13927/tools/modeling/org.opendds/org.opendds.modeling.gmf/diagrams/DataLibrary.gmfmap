@@ -13,7 +13,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -21,7 +21,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.17"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -33,7 +33,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -41,7 +41,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.25"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -53,7 +53,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -61,7 +61,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.8"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -73,7 +73,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -81,7 +81,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.11"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -93,7 +93,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -101,7 +101,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.15"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -113,7 +113,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -121,7 +121,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.6"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -133,7 +133,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -141,7 +141,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.14"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -153,7 +153,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -161,7 +161,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.13"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -173,7 +173,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -181,7 +181,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.23"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -193,7 +193,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -201,7 +201,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.1"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -213,7 +213,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -221,7 +221,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.21"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -233,7 +233,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -241,7 +241,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.5"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -253,7 +253,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -261,7 +261,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.24"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -273,7 +273,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -281,7 +281,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.2"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -293,7 +293,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -301,7 +301,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.18"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -313,7 +313,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -321,7 +321,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.7"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -333,7 +333,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -341,7 +341,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.10"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -353,7 +353,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -361,7 +361,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.12"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -373,7 +373,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -381,7 +381,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.22"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -393,7 +393,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -401,7 +401,7 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.3"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -413,7 +413,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode_name"/>
+            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
         <features
@@ -423,12 +423,12 @@
           xsi:type="gmftool:CreationTool"
           href="DataLibrary.gmftool#//@palette/@tools.0/@tools.0"/>
       <diagramNode
-          href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
     </ownedChild>
   </nodes>
   <diagram>
     <diagramCanvas
-        href="../../org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph#"/>
+        href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#metamodel"/>
     <domainModel
         href="../../org.opendds.modeling.model/model/Types.ecore#/"/>
     <domainMetaElement
