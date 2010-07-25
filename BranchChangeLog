@@ -1,3 +1,76 @@
+Sun Jul 25 18:52:00 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/DataLibrary.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/DataLibrary.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.trace:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfmap:
+
+          Updated to use custom graphics in org.opendds.modeling.graphics instead of UML2Tools
+          graphics.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/.classpath:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/.project:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/META-INF:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/META-INF/MANIFEST.MF:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/build.properties:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/diagrams:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/diagrams/class.gmfgraph:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/diagrams/packageDiagram.gmfgraph:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/model:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/model/metamodel.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/model/metamodel.ecore_diagram:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/model/metamodel.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/plugin.properties:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/plugin.xml:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/text:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/text/description.txt:
+
+          Added custom graphic definition models to use in place of UML2Tools GDMs because of
+          various issues encountered using trying to use UML2Tools GDMS.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel:
+
+          OpenDDS.genmodel was not properly updated after a recent change to DCPS.ecore.
+
+        * tools/modeling/testdata/PolicyLibrary/DefaultPolicyLibraryTest.opendds_diagram_policylibrary:
+        * tools/modeling/testdata/PolicyLibrary/NonDefaultPolicyLibraryTest.opendds_diagram_policylibrary:
+
+          Updated to account for use of custom graphics from org.opendds.modeling.graphics.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/.classpath:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/.project:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/META-INF:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/META-INF/MANIFEST.MF:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/build.properties:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/models:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/models/classDiagram_classifiers.mirrored.gmfgraph:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/models/classDiagram_packages.mirrored.gmfgraph:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/plugin.properties:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools/mirrored:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools/mirrored/AssociationClassRhomb.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools/mirrored/ClassFigure.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools/mirrored/PackageFigure.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools/mirrored/SecondaryPackageFigure.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools/mirrored/activator:
+        * tools/modeling/org.opendds/org.opendds.modeling.uml2tools.mirrored/src/org/opendds/modeling/uml2tools/mirrored/activator/PluginActivator.java:
+        * tools/modeling/testdata/PolicyLibrary/DefaultPolicyLibraryTest.opendds_diagram:
+        * tools/modeling/testdata/PolicyLibrary/NonDefaultPolicyLibraryTest.opendds_diagram:
+
+          Removed these files.
+
 Wed Jul 21 23:29:20 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3489] 2010-07-21 23:24  martinezm
