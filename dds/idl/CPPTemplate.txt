@@ -646,6 +646,11 @@ DDS::ReturnCode_t
                     guard,
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
+                    
+  if (this->subqos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS
+    && ! this->coherent_) {
+    return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
 
   bool group_coherent_ordered
     = this->subqos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS
@@ -743,6 +748,11 @@ DDS::ReturnCode_t
                     guard,
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
+
+  if (this->subqos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS
+    && ! this->coherent_) {
+    return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
 
   bool group_coherent_ordered
     = this->subqos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS
