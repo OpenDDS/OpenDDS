@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 import java.io.*;
 import org.eclipse.ui.*;
 import org.eclipse.ui.ide.IDE;
+import org.opendds.modeling.sdk.codegen.GeneratorManager;
 
 /**
  * This is a sample new wizard. Its role is to create a new file 
@@ -124,13 +125,23 @@ public class CodeGenNewWizard extends Wizard implements INewWizard {
 	}
 	
 	/**
-	 * We will initialize file contents with a sample text.
+	 * Initialize file contents.
 	 */
-
 	private InputStream openContentStream() {
-		String contents =
-			"This is the initial content";
-		return new ByteArrayInputStream(contents.getBytes());
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		GeneratorManager manager = new GeneratorManager();
+		
+		// STUB - replace this with information from wizard - most likely via arguments.
+		manager.addModelFile("sometypesfilename.opendds", "datalibrary");
+		manager.addModelFile("someqosfilename.opendds", "qoslibrary");
+		manager.addModelFile("somemodelfilename.opendds", "components");
+		manager.addTargetDir("somedirectory");
+		manager.addControl(true, true, true, true);
+		// END STUB
+
+		manager.marshal(out);
+
+		return new ByteArrayInputStream(out.toByteArray());
 	}
 
 	private void throwCoreException(String message) throws CoreException {

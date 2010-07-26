@@ -1,11 +1,9 @@
 package org.opendds.modeling.sdk.codegen;
 
 
-import java.io.StringWriter;
-import java.text.Collator;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.StringTokenizer;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import javax.xml.bind.JAXBException;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -13,23 +11,14 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FontDialog;
 import org.eclipse.ui.*;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.eclipse.ui.texteditor.DocumentProviderRegistry;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.ide.IDE;
 
 /**
@@ -44,6 +33,10 @@ import org.eclipse.ui.ide.IDE;
  * </ul>
  */
 public class CodeGenEditor extends MultiPageEditorPart implements IResourceChangeListener{
+//	private static final int INPUTFORM_INDEX = 0;
+//	private static final int OUTPUTFORM_INDEX = 1;
+//	private static final int INSTANCEFORM_INDEX = 2;
+	private static final int XMLEDITOR_INDEX = 3;
 	
 	/** Editor for model source specification. */
 	private InputsForm inputsForm;
@@ -57,36 +50,43 @@ public class CodeGenEditor extends MultiPageEditorPart implements IResourceChang
 	/** The XML text editor for the resource. */
 	private TextEditor xmlEditor;
 	
+	/** Manage the specification contents while editing. */
+	private GeneratorManager manager;
+
+	/** The editor's explicit document provider. */
+//	private IDocumentProvider provider;
+
 	/**
 	 * Creates a code generation specification editor.
 	 */
 	public CodeGenEditor() {
 		super();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
+		manager = new GeneratorManager();
 	}
 	/**
 	 * Create the input specification page.
 	 */
 	void createInputsForm() {
-		inputsForm = new InputsForm(getContainer());
-		int index = addPage(inputsForm);
-		setPageText(index, "Model Input");
+//		inputsForm = new InputsForm(getContainer());
+//		addPage(INPUTFORM_INDEX,inputsForm);
+//		setPageText(INPUTFORM_INDEX,"Model Input");
 	}
 	/**
 	 * Create the target output specification page.
 	 */
 	void createOutputsForm() {
-		outputsForm = new OutputsForm(getContainer());
-		int index = addPage(outputsForm);
-		setPageText(index, "Code Output");
+//		outputsForm = new OutputsForm(getContainer());
+//		addPage(OUTPUTFORM_INDEX,outputsForm);
+//		setPageText(OUTPUTFORM_INDEX,"Code Output");
 	}
 	/**
 	 * Create the instance definition and customization page.
 	 */
 	void createInstanceForm() {
-		instanceForm = new InstanceForm(getContainer());
-		int index = addPage(instanceForm);
-		setPageText(index, "Instance Customization");
+//		instanceForm = new InstanceForm(getContainer());
+//		addPage(INSTANCEFORM_INDEX,instanceForm);
+//		setPageText(INSTANCEFORM_INDEX,"Instance Customization");
 	}
 	/**
 	 * Creates the page with the XML text editor showing the contents of the resource.
@@ -94,8 +94,8 @@ public class CodeGenEditor extends MultiPageEditorPart implements IResourceChang
 	void createXmlEditor() {
 		try {
 			xmlEditor = new TextEditor();
-			int index = addPage(xmlEditor, getEditorInput());
-			setPageText(index, xmlEditor.getTitle());
+			addPage(XMLEDITOR_INDEX, xmlEditor, getEditorInput());
+			setPageText(XMLEDITOR_INDEX, xmlEditor.getTitle());
 		} catch (PartInitException e) {
 			ErrorDialog.openError(
 				getSite().getShell(),
@@ -121,6 +121,35 @@ public class CodeGenEditor extends MultiPageEditorPart implements IResourceChang
 		createInstanceForm();
 		createXmlEditor();
 		updateTitle();
+		loadManager( getEditorInput());
+	}
+	protected void loadManager( IEditorInput input) {
+		try {
+			IDocumentProvider provider = DocumentProviderRegistry.getDefault().
+			                                                      getDocumentProvider(getEditorInput());
+			if( provider == null) {
+				System.out.println("Failed to get a provider");
+				return;
+			}
+			IDocument document= provider.getDocument(getEditorInput());
+			if( document == null) {
+				System.out.println("Failed to get the document");
+				return;
+			}
+			InputStream in = new ByteArrayInputStream( document.get().getBytes());
+			if( in == null) {
+				System.out.println("Failed to get a stream");
+				return;
+			}
+			manager.unmarshal(in);
+//			manager.marshal(System.out);
+		} catch (JAXBException e) {
+			ErrorDialog.openError(
+					getSite().getShell(),
+					"Error parsing XML specification",
+					e.getMessage(),
+					null);
+		}
 	}
 	public void setFocus() {
 		int index = getActivePage();

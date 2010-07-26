@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.opendds.modeling.sdk.codegen.CodeGenEditor"
+            class="org.opendds.modeling.sdk.codegen.CodeGenForm"
             contributorClass="org.opendds.modeling.sdk.codegen.CodeGenEditorContributor"
             extensions="codegen"
             icon="images/codegen-16x16.gif"
