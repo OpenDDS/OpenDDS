@@ -1,3 +1,46 @@
+Mon Jul 26 21:04:44 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3510] 2010-07-26 20:59  martinezm
+        * tools/modeling/org.opendds/org.opendds.modeling.sdk/.classpath,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/.project,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/plugin.xml,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/Generator.xsd,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenEditor.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenForm.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/Gencontrol.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/GeneratorManager.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/Genspec.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/InputsForm.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/InstanceForm.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/Instancespec.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/Modelfile.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/ObjectFactory.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/OutputsForm.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/Targetdir.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/package-info.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/wizards/CodeGenNewWizard.java:
+
+          Migrating the code generation editor to use the eclipse UI Forms so
+          that it will have the look and feel of the standard plug-in editors.
+          This includes defining the code generation specification data as a
+          schema and generating JAXB bindings from it.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/ColorManager.java[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/IXMLColorConstants.java[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/NonRuleBasedDamagerRepairer.java[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/TagRule.java[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLConfiguration.java[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLDocumentProvider.java[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLDoubleClickStrategy.java[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLPartitionScanner.java[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLScanner.java[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLTagScanner.java[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/XMLWhitespaceDetector.java[DEL]:
+
+          Removed these stale example files that were generated at
+          project creation.
+
 Mon Jul 26 12:57:41 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/images/DCPS.png:
