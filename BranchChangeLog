@@ -1,3 +1,11 @@
+Mon Jul 26 12:57:41 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/images/DCPS.png:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/DCPS.ecore_diagram:
+
+          Update to account for fix in cardinality between DomainParticipant and
+          Publisher/Subscriber made in commit "Mon Jul 19 19:00:47 UTC 2010".
+
 Mon Jul 26 12:11:16 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/plugins.html:
