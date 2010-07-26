@@ -1,3 +1,10 @@
+Mon Jul 26 12:11:16 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/plugins.html:
+
+          Added discussion in the GMF Issues section about why UML2Tools graphics was
+          abandoned.
+
 Sun Jul 25 18:52:00 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/DataLibrary.gmfgen:
