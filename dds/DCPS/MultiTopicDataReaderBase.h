@@ -55,8 +55,9 @@ public:
 
   // DDS::DataReader interface
 
-  DDS::ReadCondition_ptr create_readcondition(DDS::SampleStateMask sample_states,
-    DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states)
+  DDS::ReadCondition_ptr create_readcondition(
+    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+    DDS::InstanceStateMask instance_states)
     ACE_THROW_SPEC((CORBA::SystemException));
 
   DDS::QueryCondition_ptr create_querycondition(
@@ -120,10 +121,12 @@ public:
     DDS::InstanceHandleSeq& publication_handles)
     ACE_THROW_SPEC((CORBA::SystemException));
 
+#ifndef DDS_HAS_MINIMUM_BIT
   DDS::ReturnCode_t get_matched_publication_data(
     DDS::PublicationBuiltinTopicData& publication_data,
     DDS::InstanceHandle_t publication_handle)
     ACE_THROW_SPEC((CORBA::SystemException));
+#endif
 
   // OpenDDS::DCPS::DataReaderEx interface
 

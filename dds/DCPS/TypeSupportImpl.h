@@ -25,6 +25,7 @@ class OpenDDS_Dcps_Export TypeSupportImpl {
 public:
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  virtual ~TypeSupportImpl() {}
   virtual const MetaStruct& getMetaStructForType() = 0;
 #endif
 
