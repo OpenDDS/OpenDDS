@@ -137,7 +137,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
       for (set<string>::const_iterator iter3 = topics.begin();
            iter3 != topics.end(); ++iter3) {
         if (topic != *iter3) { // other topics
-          qp.adjacent_joins_.insert(make_pair(*iter3, field));
+          qp.adjacent_joins_.insert(pair<const string, string>(*iter3, field));
         }
       }
     }
@@ -423,6 +423,7 @@ DDS::ReturnCode_t MultiTopicDataReaderBase::get_matched_publications(
   return resulting_reader_->get_matched_publications(publication_handles);
 }
 
+#ifndef DDS_HAS_MINIMUM_BIT
 DDS::ReturnCode_t MultiTopicDataReaderBase::get_matched_publication_data(
   DDS::PublicationBuiltinTopicData& publication_data,
   DDS::InstanceHandle_t publication_handle)
@@ -431,6 +432,7 @@ DDS::ReturnCode_t MultiTopicDataReaderBase::get_matched_publication_data(
   return resulting_reader_->get_matched_publication_data(publication_data,
     publication_handle);
 }
+#endif
 
 void MultiTopicDataReaderBase::get_latency_stats(LatencyStatisticsSeq& stats)
   ACE_THROW_SPEC((CORBA::SystemException))

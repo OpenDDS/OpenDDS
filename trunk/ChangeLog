@@ -1,3 +1,21 @@
+Mon Jul 26 16:20:28 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+
+          typo fix
+
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/TypeSupportImpl.h:
+
+          Work-around for SunCC bug; support for built_in_topics=0;
+          avoid GCC warning for virtual destructor of TypeSupportImpl.
+
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.mpc:
+
+          Link with the SimpleTCP library for static builds.
+
 Sun Jul 25 22:57:17 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportHeader.h:
@@ -5,9 +23,9 @@ Sun Jul 25 22:57:17 UTC 2010  Yan Dai  <dai_y@ociweb.com>
           Changed back the length data type to be ACE_UINT32
           instead of ACE_UINT16. The bug caused transport on
           sending side input an incorrect length in TransportHeader
-          and receiving side uses the incorrect length to parse 
+          and receiving side uses the incorrect length to parse
           data.
-          
+
 Fri Jul 23 22:19:31 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:
