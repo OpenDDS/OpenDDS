@@ -1,3 +1,42 @@
+Tue Jul 27 19:49:57 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/.classpath:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/build.properties:
+
+          Modified since files not essential for SDK distribution have been moved.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph:
+
+          Added beginning of component diagram graphic definition model.
+
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/.classpath:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/.project:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/META-INF:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/META-INF/MANIFEST.MF:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/README:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/diagrams:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/diagrams/componentDiagram.gmfgen:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/diagrams/componentDiagram.gmfmap:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/diagrams/componentDiagram.gmftool:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/diagrams/componentDiagram.trace:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/model:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/model/metamodel.ecore:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/model/metamodel.ecore_diagram:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/model/metamodel.genmodel:
+
+          EMF and GMF models to aid in the development and testing of SDK graphics moved from
+          org.opendds.modeling.graphics.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/model:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/model/metamodel.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/model/metamodel.ecore_diagram:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/model/metamodel.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/text:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/text/description.txt:
+
+          Removed these files.
+
 Mon Jul 26 21:04:44 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3510] 2010-07-26 20:59  martinezm
