@@ -1,12 +1,20 @@
+Tue Jul 27 14:36:38 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          GCC 3.3 (on Solaris at least) requires qualifying map as std::map
+          even though "using namespace std;" is in scope.
+
 Mon Jul 26 18:41:00 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:
 
-          Added check in read/take/read_w_condition/take_w_condition for 
-          whether begin_access is called if subscriber using GROUP presentation 
-          (see spec 7.1.2.5.2.8 begin_access). If begin_access is not called, 
+          Added check in read/take/read_w_condition/take_w_condition for
+          whether begin_access is called if subscriber using GROUP presentation
+          (see spec 7.1.2.5.2.8 begin_access). If begin_access is not called,
           PRECONDITION_NOT_MET error is returned.
-          
+
         * tests/DCPS/LargeSample/DataReaderListener.h:
         * tests/DCPS/LargeSample/DataReaderListener.cpp:
         * tests/DCPS/LargeSample/LargeSample.mpc:
@@ -28,17 +36,17 @@ Mon Jul 26 18:41:00 UTC 2010  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/LargeSample/udp.conf:
 
           Added a test for sample size > 65KB. This is to confirm the
-          fix from last commit 
+          fix from last commit
           (Sun Jul 25 22:57:17 UTC 2010  Yan Dai  <dai_y@ociweb.com>).
-          The udp and multicast test fail due to UDP restriction on 
-          PDU size to 64K bytes. The udp and multicast test cases can be 
+          The udp and multicast test fail due to UDP restriction on
+          PDU size to 64K bytes. The udp and multicast test cases can be
           used in future if the UDP based fragmentation and reassembly
           is supported.
 
         * bin/dcps_tests.lst:
 
           Added LargeSample SimpleTCP test.
-          
+
 Mon Jul 26 16:20:28 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:

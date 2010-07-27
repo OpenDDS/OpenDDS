@@ -54,11 +54,11 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   init_typed(resulting_reader_);
   listener_ = new Listener(this);
 
-  map<string, string> fieldToTopic;
+  std::map<string, string> fieldToTopic;
 
   // key: name of field that's a key for the 'join'
   // mapped: set of topicNames that have this key in common
-  map<string, set<string> > joinKeys;
+  std::map<string, set<string> > joinKeys;
 
   const vector<string>& selection = multitopic->get_selection();
   for (size_t i = 0; i < selection.size(); ++i) {
@@ -95,7 +95,8 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   if (aggregation.size() == 0) { // "SELECT * FROM ..."
     const MetaStruct& meta = getResultingMeta();
     for (const char** names = meta.getFieldNames(); *names; ++names) {
-      map<string, string>::const_iterator found = fieldToTopic.find(*names);
+      std::map<string, string>::const_iterator found =
+        fieldToTopic.find(*names);
       if (found == fieldToTopic.end()) {
         if (DCPS_debug_level > 1) {
           ACE_DEBUG((LM_WARNING,
@@ -111,7 +112,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
     }
   } else { // "SELECT A, B FROM ..."
     for (size_t i = 0; i < aggregation.size(); ++i) {
-      map<string, string>::const_iterator found =
+      std::map<string, string>::const_iterator found =
         fieldToTopic.find(aggregation[i].incoming_name_);
       if (found == fieldToTopic.end()) {
         throw std::runtime_error("Projected field " +
@@ -122,7 +123,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
     }
   }
 
-  typedef map<string, set<string> >::const_iterator iter_t;
+  typedef std::map<string, set<string> >::const_iterator iter_t;
   for (iter_t iter = joinKeys.begin(); iter != joinKeys.end(); ++iter) {
     const string& field = iter->first;
     const set<string>& topics = iter->second;
