@@ -212,7 +212,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
       keys.push_back(iter->second);
     }
 
-    typename map<TopicSet, SampleVec>::iterator found =
+    typename std::map<TopicSet, SampleVec>::iterator found =
       find_if(partialResults.begin(), partialResults.end(),
         Contains(other_topic));
 
@@ -262,7 +262,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::cross_join(
   using namespace std;
   const MetaStruct& other_meta = metaStructFor(qp.data_reader_);
   vector<string> no_keys;
-  for (typename map<TopicSet, SampleVec>::iterator iterPR =
+  for (typename std::map<TopicSet, SampleVec>::iterator iterPR =
        partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
     SampleVec resulting;
     for (typename SampleVec::iterator i = iterPR->second.begin();
@@ -288,7 +288,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
   const QueryPlan& qp = query_plans_[topic];
 
   // Track results of joins along multiple paths through the MultiTopic keys.
-  map<TopicSet, SampleVec> partialResults;
+  std::map<TopicSet, SampleVec> partialResults;
   TopicSet seen;
   seen.insert(topic);
   partialResults[seen].push_back(SampleWithInfo(topic, info));
@@ -297,9 +297,9 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
   process_joins(partialResults, partialResults[seen], seen, qp);
 
   // Any topic we haven't seen needs to be cross-joined
-  for (map<string, QueryPlan>::iterator iter = query_plans_.begin();
+  for (std::map<string, QueryPlan>::iterator iter = query_plans_.begin();
        iter != query_plans_.end(); ++iter) {
-    typename map<TopicSet, SampleVec>::iterator found =
+    typename std::map<TopicSet, SampleVec>::iterator found =
       find_if(partialResults.begin(), partialResults.end(),
               Contains(iter->first));
     if (found == partialResults.end()) {
@@ -308,13 +308,13 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
   }
 
   TypedDataReader* tdr = dynamic_cast<TypedDataReader*>(typed_reader_.in());
-  for (typename map<TopicSet, SampleVec>::iterator iterPR =
-       partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
+  for (typename std::map<TopicSet, SampleVec>::iterator iterPR =
+		  partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
     for (typename SampleVec::iterator i = iterPR->second.begin();
          i != iterPR->second.end(); ++i) {
       InstanceHandle_t ih = tdr->store_synthetic_data(i->sample_, i->view_);
       if (ih != HANDLE_NIL) {
-        typedef map<string, InstanceHandle_t>::iterator mapiter_t;
+        typedef std::map<string, InstanceHandle_t>::iterator mapiter_t;
         for (mapiter_t iterMap = i->info_.begin(); iterMap != i->info_.end();
              ++iterMap) {
           query_plans_[iterMap->first].instances_.insert(
