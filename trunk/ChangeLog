@@ -1,3 +1,10 @@
+Tue Jul 27 16:58:59 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/MetaStruct/MetaStructTest.cpp:
+
+          Fixes for SunCC (was selecting the wrong overloaded function) and
+          also fixed 64-bit warnings.
+
 Tue Jul 27 14:36:38 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/MultiTopicDataReaderBase.cpp:

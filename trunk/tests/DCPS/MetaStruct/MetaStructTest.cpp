@@ -34,7 +34,7 @@ int check(const float& lhs, const float& rhs, const char* name)
 }
 
 template<size_t N, size_t M>
-int check(const short (&lhs)[N][M], const short (&rhs)[N][M], const char* name)
+int check_array(short (&lhs)[N][M], short (&rhs)[N][M], const char* name)
 {
   for (size_t i = 0; i < N; ++i) {
     for (size_t j = 0; j < M; ++j) {
@@ -62,8 +62,8 @@ int check(const T& lhs, const T& rhs, const char* name)
 template<size_t N, size_t M>
 void fill_2d(short (&arr)[N][M])
 {
-  for (size_t i = 0; i < N; ++i) {
-    for (size_t j = 0; j < M; ++j) {
+  for (short i = 0; i < N; ++i) {
+    for (short j = 0; j < M; ++j) {
       arr[i][j] = j + i * M;
     }
   }
@@ -102,7 +102,7 @@ int run_test(int, ACE_TCHAR*[])
     + check(tgt.lhs_sa[0], src.rhs_sa[0], "lhs_sa[0]")
     + check(tgt.lhs_sa[1], src.rhs_sa[1], "lhs_sa[1]")
     + check(tgt.lhs_sa[2], src.rhs_sa[2], "lhs_sa[2]")
-    + check(tgt.lhs_asa, src.rhs_asa, "lhs_asa")
+    + check_array(tgt.lhs_asa, src.rhs_asa, "lhs_asa")
     + check(tgt.lhs_ss.length(), src.rhs_ss.length(), "lhs_ss.length()")
     + check(tgt.lhs_ss[0].s, src.rhs_ss[0].s, "lhs_ss[0].s")
     + check(tgt.lhs_ss[0].l, src.rhs_ss[0].l, "lhs_ss[0].l")
