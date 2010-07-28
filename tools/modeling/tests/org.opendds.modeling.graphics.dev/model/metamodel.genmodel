@@ -25,7 +25,11 @@
     <genClasses image="false" ecoreClass="metamodel.ecore#//Type"/>
     <genClasses ecoreClass="metamodel.ecore#//Class">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference metamodel.ecore#//Class/children"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference metamodel.ecore#//Class/ports"/>
     </genClasses>
     <genClasses ecoreClass="metamodel.ecore#//Package"/>
+    <genClasses ecoreClass="metamodel.ecore#//Port">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference metamodel.ecore#//Port/uses"/>
+    </genClasses>
   </genPackages>
 </genmodel:GenModel>

@@ -1,3 +1,20 @@
+Wed Jul 28 17:51:12 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/diagrams/ports.gmfgraph:
+
+          Added support for ports so that dataWriter/dataReader can be represented in diagram
+          as a port of publisher/subscriber.
+
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/diagrams/componentDiagram.gmfgen:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/diagrams/componentDiagram.gmfmap:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/diagrams/componentDiagram.gmftool:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/diagrams/componentDiagram.trace:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/model/metamodel.ecore:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/model/metamodel.ecore_diagram:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/model/metamodel.genmodel:
+
+          Updates for development/testing of side-affixed nodes to act as ports.
+
 Tue Jul 27 20:34:19 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.graphics/.classpath:

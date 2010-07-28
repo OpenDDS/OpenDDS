@@ -28,8 +28,26 @@
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
-          title="ClassChildren"
-          description="Create new ClassChildren">
+          title="Port"
+          description="Create new Port">
+        <smallIcon
+            xsi:type="gmftool:DefaultImage"/>
+        <largeIcon
+            xsi:type="gmftool:DefaultImage"/>
+      </tools>
+      <tools
+          xsi:type="gmftool:CreationTool"
+          title="Port Connection"
+          description="Create new Port Connection">
+        <smallIcon
+            xsi:type="gmftool:DefaultImage"/>
+        <largeIcon
+            xsi:type="gmftool:DefaultImage"/>
+      </tools>
+      <tools
+          xsi:type="gmftool:CreationTool"
+          title="Class Children"
+          description="Create new Class Children">
         <smallIcon
             xsi:type="gmftool:DefaultImage"/>
         <largeIcon
