@@ -36,9 +36,9 @@
 #endif /* __ACE_INLINE__ */
 
 /// Only called by our TransportImpl object.
-OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl, 
-                                  CORBA::Long priority, 
-                                  bool is_loopback, 
+OpenDDS::DCPS::DataLink::DataLink(TransportImpl* impl,
+                                  CORBA::Long priority,
+                                  bool is_loopback,
                                   bool is_active)
   : stopped_(false),
     thr_per_con_send_task_(0),
@@ -735,7 +735,7 @@ OpenDDS::DCPS::DataLink::release_remote_subscriber
         ret = this->pub_map_.release_subscriber(publisher_id,
                                                 subscriber_id);
       }
-      
+
       if ( ret == 1) {
         // This means that this release() operation has caused the
         // publisher_id to no longer be associated with *any* subscribers.
@@ -772,13 +772,13 @@ OpenDDS::DCPS::DataLink::release_remote_publisher
 
   if (listener_set->exist(subscriber_id)) {
     // Remove the publisher_id => subscriber_id association.
-  
+
     int result = 0;
-    { 
+    {
       GuardType guard(this->sub_map_lock_);
       result = this->sub_map_.release_publisher(subscriber_id,publisher_id);
     }
-    
+
     if (result == 1) {
       // This means that this release() operation has caused the
       // subscriber_id to no longer be associated with *any* publishers.
@@ -827,11 +827,11 @@ void
 OpenDDS::DCPS::DataLink::transport_shutdown()
 {
   DBG_ENTRY_LVL("DataLink","transport_shutdown",6);
-  
+
   if (! this->send_strategy_.is_nil ()) {
     this->send_strategy_->transport_shutdown ();
   }
-  
+
   if (this->cancel_release()) {
     this->handle_timeout(ACE_OS::gettimeofday(), (const void *)0);
   }

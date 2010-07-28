@@ -405,7 +405,7 @@ protected:
   /// control samples when send_control is called.
   MessageBlockAllocator* mb_allocator_;
   DataBlockAllocator* db_allocator_;
-  
+
   /// Is remote attached to same transport ?
   bool is_loopback_;
   /// Is pub or sub ?

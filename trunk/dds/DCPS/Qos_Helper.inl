@@ -733,7 +733,7 @@ ACE_INLINE
 bool Qos_Helper::valid(const DDS::OwnershipQosPolicy& qos)
 {
   return
-    qos.kind == DDS::SHARED_OWNERSHIP_QOS 
+    qos.kind == DDS::SHARED_OWNERSHIP_QOS
     || qos.kind == DDS::EXCLUSIVE_OWNERSHIP_QOS;
 }
 

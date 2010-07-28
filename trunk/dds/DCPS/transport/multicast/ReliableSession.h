@@ -95,14 +95,14 @@ private:
 
   ACE_SYNCH_MUTEX start_lock_;
   bool started_;
-  
+
   // A session must be for a publisher
   // or subscriber.  Implementation doesn't
   // support being for both.
-  // As to control message, 
+  // As to control message,
   // only subscribers receive syn, send synack, send naks, receive nakack,
   // and publisher only send syn, receive synack,receive naks, send nakack.
-  bool active_; 
+  bool active_;
 
   SynWatchdog syn_watchdog_;
   NakWatchdog nak_watchdog_;

@@ -350,7 +350,7 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
       element,
       (TransportQueueElement*)this->replaced_element_allocator_.malloc(),
       TransportReplacedElement(orig_elem, &this->replaced_element_allocator_,
-                               &this->replaced_element_mb_allocator_, 
+                               &this->replaced_element_mb_allocator_,
                                &this->replaced_element_db_allocator_)
     );
     if( element == 0) {
@@ -461,12 +461,12 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
     // Tell the original element (that we replaced), data_dropped()
     // by transport.
     // This visitor is used in TransportSendStrategy::do_remove_sample
-    // and TransportSendBuffer::retain_all. In formal case, the sample 
-    // is dropped as a result of writer's remove_sample call. In the 
-    // later case, the dropped_by_transport is not used as the sample 
+    // and TransportSendBuffer::retain_all. In formal case, the sample
+    // is dropped as a result of writer's remove_sample call. In the
+    // later case, the dropped_by_transport is not used as the sample
     // is retained sample and no callback is made to writer.
     this->sample_.released (orig_elem->data_dropped());
-    
+
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Return 0 to halt visitation.\n"));
 

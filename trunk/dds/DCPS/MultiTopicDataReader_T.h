@@ -60,7 +60,7 @@ public:
   DDS::ReturnCode_t take_next_sample(Sample& received_data,
     DDS::SampleInfo& sample_info)
     ACE_THROW_SPEC((CORBA::SystemException));
-  
+
   DDS::ReturnCode_t read_instance(SampleSeq& received_data,
     DDS::SampleInfoSeq & info_seq, CORBA::Long max_samples,
     DDS::InstanceHandle_t a_handle, DDS::SampleStateMask sample_states,

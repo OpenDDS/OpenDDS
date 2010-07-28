@@ -141,16 +141,16 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
   TransportSendStrategy::QueueType*& elems = buffer.first;
   ACE_NEW(elems, TransportSendStrategy::QueueType(value.first->size(), 1));
 
-  CopyChainVisitor visitor(*elems, 
-                           &this->retained_allocator_, 
-                           &this->retained_mb_allocator_, 
+  CopyChainVisitor visitor(*elems,
+                           &this->retained_allocator_,
+                           &this->retained_mb_allocator_,
                            &this->retained_db_allocator_);
   value.first->accept_visitor(visitor);
 
   // Copy sample's message/data block descriptors:
   ACE_Message_Block*& data = buffer.second;
-  data = TransportQueueElement::clone(value.second, 
-                                      &this->retained_mb_allocator_, 
+  data = TransportQueueElement::clone(value.second,
+                                      &this->retained_mb_allocator_,
                                       &this->retained_db_allocator_);
 
   if ( OpenDDS::DCPS::Transport_debug_level >= 10) {

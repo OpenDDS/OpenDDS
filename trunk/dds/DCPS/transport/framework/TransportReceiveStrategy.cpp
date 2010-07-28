@@ -642,7 +642,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
           if (rtn_code <= 0) return rtn_code;
         }
       }
-     
+
       VDBG((LM_DEBUG,"(%P|%t) DBG:   "
             "Adjust the buffer chain in case we crossed into the next "
             "buffer after the last read(s).\n"));
@@ -841,11 +841,11 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
   return 0 ;
 }
 
-int 
+int
 OpenDDS::DCPS::TransportReceiveStrategy::skip_bad_pdus()
 {
   if (this->good_pdu_) return 1;
-  
+
   //
   // Adjust the message block chain pointers to account for the
   // skipped data.

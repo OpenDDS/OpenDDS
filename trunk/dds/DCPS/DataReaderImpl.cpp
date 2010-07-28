@@ -50,7 +50,7 @@ DataReaderImpl::DataReaderImpl()
   : rd_allocator_(0),
     qos_(TheServiceParticipant->initial_DataReaderQos()),
     reverse_sample_lock_(sample_lock_),
-    participant_servant_(0),  
+    participant_servant_(0),
     topic_servant_(0),
     is_exclusive_ownership_ (false),
     owner_manager_ (0),
@@ -215,11 +215,11 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // Only store the participant pointer, since it is our "grand"
   // parent, we will exist as long as it does
   participant_servant_ = participant;
-  
+
   if (is_exclusive_ownership_) {
     owner_manager_ = participant_servant_->ownership_manager ();
   }
-  
+
   domain_id_ = participant_servant_->get_domain_id();
 
   // Only store the subscriber pointer, since it is our parent, we
@@ -228,7 +228,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   dr_local_objref_    = DDS::DataReader::_duplicate(dr_objref);
   dr_remote_objref_   =
     OpenDDS::DCPS::DataReaderRemote::_duplicate(dr_remote_objref);
-    
+
   if (this->subscriber_servant_->get_qos(this->subqos_) != ::DDS::RETCODE_OK) {
     ACE_DEBUG((LM_WARNING,
                 ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::init() - ")
@@ -325,7 +325,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
                      "(%P|%t) DataReaderImpl::add_associations: "
                      "inserted writer %C.return %d \n",
                      std::string(converter).c_str(), bpair.second));
-        
+
           WriterMapType::iterator iter = writers_.find(writer_id);
           if (iter != writers_.end()) {
           if (DCPS_debug_level > 4) {
@@ -1225,7 +1225,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
     writer->received_activity(when);
 
     if (header.message_id_ == SAMPLE_DATA) {
-        
+
       if (writer->seen_data_) {
         // Data samples should be acknowledged prior to any
         // reader-side filtering to ensure discontiguities
@@ -1239,7 +1239,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
         writer->seen_data_ = true;
         writer->ack_sequence_.reset(header.sequence_);
       }
-      
+
       if (header.coherent_change_) {
         if (writer->coherent_samples_ == 0) {
           writer->coherent_sample_sequence_.reset(header.sequence_);
@@ -1302,16 +1302,16 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     bool accepted = true;
     bool verify_coherent = false;
     WriterInfo* writer = 0;
-      
+
     {
       ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
       WriterMapType::iterator where
       = this->writers_.find(header.publication_id_);
-      
+
       if (where != this->writers_.end()) {
         if (header.coherent_change_) {
-                  
+
           // Received coherent change
           where->second->group_coherent_ = header.group_coherent_;
           where->second->publisher_id_ = header.publisher_id_;
@@ -1331,7 +1331,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           if (result) {
             where->second->clear_acks(SequenceNumber(header.sequence_));
           }
-        }        
+        }
       } else {
         RepoIdConverter subscriptionBuffer(this->subscription_id_);
         RepoIdConverter publicationBuffer(header.publication_id_);
@@ -1347,7 +1347,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     if (verify_coherent) {
       accepted = this->verify_coherent_changes_completion (writer);
     }
-    
+
     if (this->watchdog_.get()) {
       instance->last_sample_tv_ = instance->cur_sample_tv_;
       instance->cur_sample_tv_ = ACE_OS::gettimeofday();
@@ -1430,13 +1430,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
   case END_COHERENT_CHANGES: {
     CoherentChangeControl control;
-    
+
     this->writer_activity(sample.header_);
 
     Serializer serializer(
       sample.sample_, sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
     serializer >> control;
-    
+
     if (DCPS_debug_level > 0) {
       std::stringstream buffer;
       buffer << control << std::endl;
@@ -1450,10 +1450,10 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     WriterInfo* writer = 0;
     {
       ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
-    
+
       WriterMapType::iterator it =
         this->writers_.find(sample.header_.publication_id_);
-        
+
       if (it == this->writers_.end()) {
         RepoIdConverter sub_id(this->subscription_id_);
         RepoIdConverter pub_id(sample.header_.publication_id_);
@@ -1470,7 +1470,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       }
       it->second->set_group_info (control);
     }
-      
+
     if (this->verify_coherent_changes_completion (writer)) {
       this->notify_read_conditions();
     }
@@ -1495,13 +1495,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   case DISPOSE_INSTANCE: {
     this->writer_activity(sample.header_);
     SubscriptionInstance* instance = 0;
-    
+
     if (this->watchdog_.get()) {
-      // Find the instance first for timer cancellation since 
-      // the instance may be deleted during dispose and can 
+      // Find the instance first for timer cancellation since
+      // the instance may be deleted during dispose and can
       // not be accessed.
       this->lookup_instance (sample, instance);
-      if (! this->is_exclusive_ownership_ 
+      if (! this->is_exclusive_ownership_
          || (this->is_exclusive_ownership_
              && (instance != 0 )
              && (this->owner_manager_->is_owner (instance->instance_handle_,
@@ -1520,19 +1520,19 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     SubscriptionInstance* instance = 0;
 
     if (this->watchdog_.get()) {
-      // Find the instance first for timer cancellation since 
-      // the instance may be deleted during dispose and can 
+      // Find the instance first for timer cancellation since
+      // the instance may be deleted during dispose and can
       // not be accessed.
-      
+
       this->lookup_instance (sample, instance);
-      if (! this->is_exclusive_ownership_ 
-         || (this->is_exclusive_ownership_ 
+      if (! this->is_exclusive_ownership_
+         || (this->is_exclusive_ownership_
              && (instance != 0 )
              && instance->instance_state_.is_last (sample.header_.publication_id_))) {
         this->watchdog_->cancel_timer(instance);
       }
     }
-    instance = 0;    
+    instance = 0;
     this->unregister(sample, instance);
   }
   this->notify_read_conditions();
@@ -1945,7 +1945,7 @@ OpenDDS::DCPS::WriterInfo::set_owner_evaluated (SubscriptionInstance* instance, 
   this->owner_evaluated_ [instance] = flag;
 }
 
-bool 
+bool
 OpenDDS::DCPS::WriterInfo::is_owner_evaluated (SubscriptionInstance* instance)
 {
   OwnerEvaluateFlag::iterator iter = owner_evaluated_.find (instance);
@@ -2087,14 +2087,14 @@ OpenDDS::DCPS::WriterInfo::coherent_change_received ()
 {
   if (this->writer_coherent_samples_.num_samples_ == 0)
     return NOT_COMPLETED_YET;
-  
-  if (! this->coherent_sample_sequence_.disjoint() 
-      && (this->coherent_sample_sequence_.high() 
+
+  if (! this->coherent_sample_sequence_.disjoint()
+      && (this->coherent_sample_sequence_.high()
           == this->writer_coherent_samples_.last_sample_))
   {
     return COMPLETED;
   }
-  else if (this->coherent_sample_sequence_.high() 
+  else if (this->coherent_sample_sequence_.high()
           > this->writer_coherent_samples_.last_sample_) {
     return REJECTED;
   }
@@ -2102,8 +2102,8 @@ OpenDDS::DCPS::WriterInfo::coherent_change_received ()
     return NOT_COMPLETED_YET;
   }
 }
-    
-void 
+
+void
 OpenDDS::DCPS::WriterInfo::reset_coherent_info ()
 {
   this->coherent_samples_ = 0;
@@ -2115,10 +2115,10 @@ OpenDDS::DCPS::WriterInfo::reset_coherent_info ()
 }
 
 
-void 
+void
 OpenDDS::DCPS::WriterInfo::set_group_info (const CoherentChangeControl& info)
 {
-  if (! (this->publisher_id_ == info.publisher_id_) 
+  if (! (this->publisher_id_ == info.publisher_id_)
       || this->group_coherent_ != info.group_coherent_) {
     RepoIdConverter sub_id(this->reader_->subscription_id_);
     RepoIdConverter pub_id(this->writer_id_);
@@ -2128,7 +2128,7 @@ OpenDDS::DCPS::WriterInfo::set_group_info (const CoherentChangeControl& info)
                 std::string(sub_id).c_str(),
                 std::string(pub_id).c_str()));
   }
-                   
+
   this->writer_coherent_samples_ = info.coherent_samples_;
   this->group_coherent_samples_ = info.group_coherent_samples_;
 }
@@ -2190,7 +2190,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
     this->owner_manager_->remove_writer (info.writer_id_);
     info.clear_owner_evaluated ();
   }
-  
+
   bool liveliness_changed = false;
 
   if (info.state_ == WriterInfo::ALIVE) {
@@ -2304,10 +2304,10 @@ DataReaderImpl::writer_became_dead(WriterInfo & info,
   }
 
   if (this->is_exclusive_ownership_) {
-    this->owner_manager_->remove_writer (info.writer_id_); 
-    info.clear_owner_evaluated ();   
+    this->owner_manager_->remove_writer (info.writer_id_);
+    info.clear_owner_evaluated ();
   }
-  
+
   // caller should already have the samples_lock_ !!!
   bool liveliness_changed = false;
 
@@ -2762,13 +2762,13 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
 }
 
 bool
-DataReaderImpl::filter_instance(SubscriptionInstance* instance, 
+DataReaderImpl::filter_instance(SubscriptionInstance* instance,
                                 const PublicationId& pubid)
 {
   if (this->is_exclusive_ownership_) {
 
     WriterMapType::iterator iter = writers_.find(pubid);
-    
+
     if (iter == writers_.end()) {
       if (DCPS_debug_level > 4) {
         // This may not be an error since it could happen that the sample
@@ -2784,15 +2784,15 @@ DataReaderImpl::filter_instance(SubscriptionInstance* instance,
       }
       return true;
     }
-    
- 
+
+
     // Evaulate the owner of the instance if not selected and filter
     // current message if it's not from owner writer.
-    if ( instance->instance_state_.get_owner () == GUID_UNKNOWN 
+    if ( instance->instance_state_.get_owner () == GUID_UNKNOWN
       || ! iter->second->is_owner_evaluated (instance)) {
       bool is_owner = this->owner_manager_->select_owner (
-                        instance->instance_handle_, 
-                        iter->second->writer_id_, 
+                        instance->instance_handle_,
+                        iter->second->writer_id_,
                         iter->second->writer_qos_.ownership_strength.value,
                         &instance->instance_state_);
       iter->second->set_owner_evaluated (instance, true);
@@ -2805,7 +2805,7 @@ DataReaderImpl::filter_instance(SubscriptionInstance* instance,
       return true;
     }
   }
-  
+
   ACE_Time_Value now(ACE_OS::gettimeofday());
 
   // TIME_BASED_FILTER processing; expire data samples
@@ -2962,7 +2962,7 @@ DataReaderImpl::get_writer_states(WriterStatePairVec& writer_states)
   }
 }
 
-void 
+void
 DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength)
 {
@@ -2988,12 +2988,12 @@ DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
             iter->second->clear_owner_evaluated ();
           }
         break;
-      }       
+      }
   }
 }
 
 
-bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer) 
+bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
 {
   if (this->subqos_.presentation.access_scope == ::DDS::INSTANCE_PRESENTATION_QOS
    || ! this->subqos_.presentation.coherent_access) {
@@ -3001,18 +3001,18 @@ bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
     this->coherent_changes_completed (this);
     return true;
   }
-  
+
   // verify current coherent changes from single writer
   Coherent_State state = writer->coherent_change_received();
   if (writer->group_coherent_) { // GROUP coherent
-    if (state != NOT_COMPLETED_YET) { 
+    if (state != NOT_COMPLETED_YET) {
       // verify if all readers received complete coherent changes in a group.
       this->subscriber_servant_->coherent_change_received (
         writer->publisher_id_, this, state);
     }
   }
   else {  // TOPIC coherent
-    if (state == COMPLETED) { 
+    if (state == COMPLETED) {
       this->accept_coherent (writer->writer_id_, writer->publisher_id_);
     }
     else if (state == REJECTED) {
@@ -3025,12 +3025,12 @@ bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
     // decision made: either COMPLETED or REJECTED
     writer->reset_coherent_info ();
   }
-  
-  return state == COMPLETED; 
+
+  return state == COMPLETED;
 }
 
 
-void DataReaderImpl::accept_coherent (PublicationId& writer_id, 
+void DataReaderImpl::accept_coherent (PublicationId& writer_id,
                                       RepoId& publisher_id)
 {
   if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -3044,7 +3044,7 @@ void DataReaderImpl::accept_coherent (PublicationId& writer_id,
       std::string(writer).c_str(),
       std::string(publisher).c_str()));
   }
-      
+
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
   for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
@@ -3055,7 +3055,7 @@ void DataReaderImpl::accept_coherent (PublicationId& writer_id,
 }
 
 
-void DataReaderImpl::reject_coherent (PublicationId& writer_id, 
+void DataReaderImpl::reject_coherent (PublicationId& writer_id,
                                       RepoId& publisher_id)
 {
   if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -3069,9 +3069,9 @@ void DataReaderImpl::reject_coherent (PublicationId& writer_id,
       std::string(writer).c_str(),
       std::string(publisher).c_str()));
   }
-      
+
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-     
+
   for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
       iter != this->instances_.end(); ++iter) {
     iter->second->rcvd_strategy_->reject_coherent(
@@ -3080,8 +3080,8 @@ void DataReaderImpl::reject_coherent (PublicationId& writer_id,
   this->reset_coherent_info (writer_id, publisher_id);
 }
 
-    
-void DataReaderImpl::reset_coherent_info (const PublicationId& writer_id, 
+
+void DataReaderImpl::reset_coherent_info (const PublicationId& writer_id,
                                           const RepoId& publisher_id)
 {
   ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
@@ -3089,7 +3089,7 @@ void DataReaderImpl::reset_coherent_info (const PublicationId& writer_id,
   WriterMapType::iterator itEnd = this->writers_.end();
   for (WriterMapType::iterator it = this->writers_.begin();
     it != itEnd; ++it) {
-      if (it->second->writer_id_ == writer_id 
+      if (it->second->writer_id_ == writer_id
           && it->second->publisher_id_ == publisher_id) {
         it->second->reset_coherent_info();
       }
@@ -3102,7 +3102,7 @@ DataReaderImpl::coherent_change_received (RepoId publisher_id, Coherent_State& r
 {
   ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
-  result = COMPLETED;   
+  result = COMPLETED;
   for (WriterMapType::iterator iter = writers_.begin();
        iter != writers_.end();
        ++iter) {
@@ -3119,9 +3119,9 @@ DataReaderImpl::coherent_change_received (RepoId publisher_id, Coherent_State& r
     }
   }
 }
-  
 
-void  
+
+void
 DataReaderImpl::coherent_changes_completed (DataReaderImpl* reader)
 {
   this->subscriber_servant_->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, true);
@@ -3136,7 +3136,7 @@ DataReaderImpl::coherent_changes_completed (DataReaderImpl* reader)
       ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
       sub_listener->on_data_on_readers(this->subscriber_servant_);
     }
-        
+
     this->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
     this->subscriber_servant_->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
   }
@@ -3156,8 +3156,8 @@ DataReaderImpl::coherent_changes_completed (DataReaderImpl* reader)
       }
       else {
         listener->on_data_available(dr_local_objref_.in ());
-      }    
-        
+      }
+
       set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
       this->subscriber_servant_->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
     }
@@ -3205,7 +3205,7 @@ void DataReaderImpl::get_ordered_data (GroupRakeData& data,
             this->group_coherent_ordered_data_.insert_sample(item, ptr, ++i);
           }
         }
-      } 
+      }
   }
 }
 

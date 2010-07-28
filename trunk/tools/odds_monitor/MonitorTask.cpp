@@ -30,7 +30,7 @@ namespace { // Anonymous namespace for file scope.
     BUILTIN_PUBLICATION_REPORT_TYPE,
     BUILTIN_SUBSCRIPTION_REPORT_TYPE
   };
-  
+
 } // End of anonymous namespace
 
 Monitor::MonitorTask::MonitorTask(
@@ -177,13 +177,13 @@ Monitor::MonitorTask::stopInstrumentation()
   catch (...) {
     throw;
   }
-  
+
   this->participant_ = DDS::DomainParticipant::_nil();
-  
+
   // Extract a transport index for this subscription.
   OpenDDS::DCPS::TransportIdType transportKey
     = static_cast<OpenDDS::DCPS::TransportIdType>( this->activeKey_);
- 
+
   TheTransportFactory->release (transportKey);
 }
 
@@ -205,7 +205,7 @@ Monitor::MonitorTask::setRepoIor( const std::string& ior)
     if( location != this->iorKeyMap_.end()) {
       // We already have this IOR mapped, use the existing key.
       key = location->second;
-      // In case the same repo restart again, need resolve the 
+      // In case the same repo restart again, need resolve the
       // repo object reference again.
       TheServiceParticipant->set_repo_ior( ior.c_str(), key, false);
 
@@ -339,7 +339,7 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
       key
     ));
   }
-  
+
   // Remap all domains pointing to the old repository to the new one.
   // But do not attach the participant to the repository as the repo
   // may not know the monitor domain and monitor also will request
@@ -350,17 +350,17 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
   RepoKey monitorKey = TheServiceParticipant->domain_to_repo(
                         this->options_.domain()
                       );
-                        
+
   if(!activeKeyInited_ || monitorKey != key) {
     if (!activeKeyInited_)
       {
         activeKeyInited_ = true;
       }
-      
+
     // Otherwise map the instrumentation domain onto the new repository.
     TheServiceParticipant->set_repo_domain( this->options_.domain(), key, false);
   }
-  
+
   // Save the newly active repository key.
   this->activeKey_ = key;
 
@@ -545,7 +545,7 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
 
 template< class TypeSupport>
 void
-Monitor::MonitorTask::createSubscription( 
+Monitor::MonitorTask::createSubscription(
   DDS::Subscriber_ptr subscriber,
   const char*         topicName,
   int                 type

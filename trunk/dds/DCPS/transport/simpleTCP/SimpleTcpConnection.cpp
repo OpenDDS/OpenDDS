@@ -275,12 +275,12 @@ OpenDDS::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
     this->send_strategy_->terminate_send();
 
   this->disconnect();
-  
+
   if (!this->receive_strategy_.is_nil() && this->receive_strategy_->gracefully_disconnected())
   {
     this->link_->notify (DataLink::DISCONNECTED);
   }
-    
+
   return 0;
 }
 

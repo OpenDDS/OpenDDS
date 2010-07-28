@@ -81,19 +81,19 @@ MonitorFactoryImpl::create_subscriber_monitor(SubscriberImpl* sub)
   return new SubscriberMonitorImpl(sub, this->sub_writer_);
 }
 
-OpenDDS::DCPS::Monitor* 
+OpenDDS::DCPS::Monitor*
 MonitorFactoryImpl::create_data_writer_monitor(DataWriterImpl* dw)
 {
   return new DWMonitorImpl(dw, this->dw_writer_);
 }
 
-OpenDDS::DCPS::Monitor* 
+OpenDDS::DCPS::Monitor*
 MonitorFactoryImpl::create_data_writer_periodic_monitor(DataWriterImpl* dw)
 {
   return new DWPeriodicMonitorImpl(dw, this->dw_per_writer_);
 }
 
-OpenDDS::DCPS::Monitor* 
+OpenDDS::DCPS::Monitor*
 MonitorFactoryImpl::create_data_reader_monitor(DataReaderImpl* dr)
 {
   return new DRMonitorImpl(dr, this->dr_writer_);
@@ -159,7 +159,7 @@ MonitorFactoryImpl::initialize()
     participant->create_publisher(PUBLISHER_QOS_DEFAULT,
                                   DDS::PublisherListener::_nil(),
                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-                                  
+
   OpenDDS::DCPS::TransportImpl_rch transport_impl =
     TheTransportFactory->obtain (MONITOR_TRANSPORT_ID);
   if (transport_impl.is_nil ())
@@ -169,15 +169,15 @@ MonitorFactoryImpl::initialize()
       ACE_TEXT("SimpleTcp"),
       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
-    OpenDDS::DCPS::TransportConfiguration_rch config 
+    OpenDDS::DCPS::TransportConfiguration_rch config
       = TheTransportFactory->get_or_create_configuration(MONITOR_TRANSPORT_ID, ACE_TEXT("SimpleTcp"));
 
     OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
       = static_cast <SimpleTcpConfiguration*>(config.in());
-  
+
     transport_impl->configure (tcp_config);
   }
-  
+
   transport_impl->attach(publisher.in());
 
   DDS::DataWriter_var writer;
@@ -352,7 +352,7 @@ ACE_STATIC_SVC_DEFINE (MonitorFactoryImpl,
                        ACE_TEXT ("OpenDDS_Monitor"),
                        ACE_SVC_OBJ_T,
                        &ACE_SVC_NAME (MonitorFactoryImpl),
-                       ACE_Service_Type::DELETE_THIS | 
+                       ACE_Service_Type::DELETE_THIS |
                          ACE_Service_Type::DELETE_OBJ,
                        0)
 

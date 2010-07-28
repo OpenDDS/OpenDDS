@@ -49,7 +49,7 @@ MonitorDataStorage::deleteNode( MapType& map, TreeNode* node)
 template< class PolicyType>
 bool
 MonitorDataStorage::manageQosPolicy(
-  TreeNode*         node, 
+  TreeNode*         node,
   const QString&    label,
   const PolicyType& value
 )
@@ -57,7 +57,7 @@ MonitorDataStorage::manageQosPolicy(
   TreeNode* child = 0;
   return this->manageChildValue( node, child, label, QosToQString( value));
 }
- 
+
 template< typename DataType>
 inline
 void

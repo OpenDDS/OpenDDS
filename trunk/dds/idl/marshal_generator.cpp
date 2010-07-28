@@ -206,7 +206,7 @@ namespace {
           be_global->impl_ <<
             "  " << cxx_elem << "_forany element_forany(element);\n";
         }
-        be_global->impl_ << 
+        be_global->impl_ <<
           "  return gen_is_bounded_size(element" << (arr ? "_forany" : "")
           << ");\n";
       } else { // primitive
@@ -395,10 +395,10 @@ namespace {
         be_global->impl_ << "  return "
           << ((elem_cls & CL_BOUNDED) ? "true" : "false") << ";\n";
       } else if (elem_cls & (CL_STRUCTURE | CL_SEQUENCE)) {
-        be_global->impl_ << 
+        be_global->impl_ <<
           "  return gen_is_bounded_size(arr[CORBA::ULong(0)]);\n";
       } else if (elem_cls & CL_ARRAY) {
-        be_global->impl_ << 
+        be_global->impl_ <<
           "  " << cxx_elem << "_var tmp_var = " << cxx_elem << "_dup(arr";
         size_t ndims = AST_Array::narrow_from_decl(elem)->n_dims();
         for (size_t i = 0; i < ndims; ++i) {
@@ -552,7 +552,7 @@ namespace {
     if (local.size() > 2 && local.substr(local.size() - 2, 2) == "()") {
       local.erase(local.size() - 2);
     }
-    return cxx_fld + "_forany " + prefix + '_' + local + "(const_cast<" 
+    return cxx_fld + "_forany " + prefix + '_' + local + "(const_cast<"
       + cxx_fld + "_slice*>(" + prefix + "." + fname + "));";
   }
 }
@@ -878,7 +878,7 @@ namespace {
           "      return false;\n"
           "    }\n";
       } else {
-        string expr = commonFn(name + "()", branch->field_type(), 
+        string expr = commonFn(name + "()", branch->field_type(),
           string(namePrefix) + "uni", intro);
         be_global->impl_ <<
           "    {\n" <<

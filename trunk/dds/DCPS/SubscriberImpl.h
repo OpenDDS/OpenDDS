@@ -218,9 +218,9 @@ public:
 
   void update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength);
-  
-  void coherent_change_received(RepoId& publisher_id, 
-                                DataReaderImpl* reader, 
+
+  void coherent_change_received(RepoId& publisher_id,
+                                DataReaderImpl* reader,
                                 Coherent_State& group_state);
 
 private:
@@ -259,7 +259,7 @@ private:
 
   /// Monitor object for this entity
   Monitor* monitor_;
-  
+
   int access_depth_;
 };
 

@@ -1129,7 +1129,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   else {// ignore same participant again, just return ok.
     return DDS::RETCODE_OK;
   }
-  
+
   try {
     if (DCPS_debug_level >= 4) {
       RepoIdConverter converter(dp_id_);
@@ -1584,11 +1584,11 @@ ACE_THROW_SPEC((CORBA::SystemException))
     if (converter.entityKind() == KIND_TOPIC) {
 
       // skip the ignored topic
-      if (this->ignored_topics_.find(iter->first) 
+      if (this->ignored_topics_.find(iter->first)
           != this->ignored_topics_.end ()) {
         continue;
       }
-      
+
       CORBA::ULong len = topic_handles.length();
       topic_handles.length(len + 1);
       topic_handles[len] = iter->second;
@@ -2235,7 +2235,7 @@ DomainParticipantImpl::get_topic_ids(TopicIdVec& topics)
 }
 
 OwnershipManager*
-DomainParticipantImpl::ownership_manager () 
+DomainParticipantImpl::ownership_manager ()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
@@ -2244,27 +2244,27 @@ DomainParticipantImpl::ownership_manager ()
     if (CORBA::is_nil (listener.in())) {
       DDS::DataReaderListener_var bit_pub_listener(new BitPubListenerImpl(this));
       this->bit_pub_dr_->set_listener (bit_pub_listener.in (), ::DDS::DATA_AVAILABLE_STATUS);
-    } 
+    }
   }
-   
-#endif 
+
+#endif
   return &this->owner_man_;
 }
 
-void 
+void
 DomainParticipantImpl::update_ownership_strength (const PublicationId& pub_id,
                                                   const CORBA::Long& ownership_strength)
 {
   if (this->get_deleted ())
     return;
-    
+
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             tao_mon,
             this->subscribers_protector_);
- 
+
   if (this->get_deleted ())
     return;
-            
+
   for (SubscriberSet::iterator it(this->subscribers_.begin());
       it != this->subscribers_.end(); ++it) {
     it->svt_->update_ownership_strength(pub_id, ownership_strength);

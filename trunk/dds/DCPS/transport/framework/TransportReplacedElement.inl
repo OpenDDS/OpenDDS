@@ -25,8 +25,8 @@ OpenDDS::DCPS::TransportReplacedElement::TransportReplacedElement
 
   // Obtain the publisher id.
   this->publisher_id_ = orig_elem->publication_id();
-  
-  this->msg_ = TransportQueueElement::clone (orig_elem->msg(), 
-                                            this->mb_allocator_, 
+
+  this->msg_ = TransportQueueElement::clone (orig_elem->msg(),
+                                            this->mb_allocator_,
                                             this->db_allocator_);
 }

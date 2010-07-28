@@ -48,7 +48,7 @@ public:
       next_data_sample_(0),
       ref_count_(1)
   {
-  
+
     this->destination_timestamp_ = time_value_to_time(ACE_OS::gettimeofday());
 
     this->source_timestamp_.sec = header.source_timestamp_sec_;
@@ -84,10 +84,10 @@ public:
 
   /// Sample belongs to an active coherent change set
   bool coherent_change_;
-  
+
   /// Sample belongs to a group coherent changes.
   bool group_coherent_;
-  
+
   /// Publisher id represent group identifier.
   RepoId publisher_id_;
 

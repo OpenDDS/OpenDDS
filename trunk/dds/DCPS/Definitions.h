@@ -96,7 +96,7 @@ public:
   ///      MAX-2 to 2.  But that 2 is less than MAX/2 since the
   ///      shortest distance is from 2 to MAX/2.
   bool operator<(const SequenceNumber& rvalue) const {
-    // double the distance and SHRT_MAX/2, to avoid rounding error 
+    // double the distance and SHRT_MAX/2, to avoid rounding error
     const ACE_INT64 distance = (ACE_INT64(rvalue.value_) - value_)*2;
     return (distance == 0)? false:                // Equal is not less than.
        (value_ < 0 || rvalue.value_ < 0) ? (value_ < rvalue.value_): // Stem of lollipop.

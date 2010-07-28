@@ -131,7 +131,7 @@ A number of display filters are supported by the OpenDDS DCPS dissector:
 
    odds.sample.length
      Total length of sample data, not including sample header.
-   
+
    odds.sample.sequence
      Sequence number of transmitted SAMPLE_DATA.
 
@@ -140,7 +140,7 @@ A number of display filters are supported by the OpenDDS DCPS dissector:
 
    odds.sample.lifespan
      Lifespan duration of sample (iff lifespan flag is set).
-   
+
    odds.sample.publication
      Publication ID of transmitting DataWriter.
 
@@ -169,6 +169,6 @@ NOTE: Coloring rules are applied on a first match basis; you may need to
     of the DCPS protocol.  This dissector is effective for the compiled
     protocol version only.
 
-  - Dissection of marshaled sample data is not currently supported. 
+  - Dissection of marshaled sample data is not currently supported.
 
 

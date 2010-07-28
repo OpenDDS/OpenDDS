@@ -58,11 +58,11 @@ MulticastTransport::find_or_create_datalink(
   if (active && ! this->client_link_.is_nil ()) {
     link = this->client_link_;
   }
-  
+
   if (!active && ! this->server_link_.is_nil ()) {
     link = this->server_link_;
   }
-  
+
   if (link.is_nil()) {
     MulticastSessionFactory* session_factory;
     if (this->config_i_->reliable_) {
@@ -72,23 +72,23 @@ MulticastTransport::find_or_create_datalink(
     }
 
     MulticastPeer local_peer = RepoIdConverter(local_id).participantId();
-    MulticastPeer remote_peer 
+    MulticastPeer remote_peer
       = RepoIdConverter(const_cast<AssociationData*> (remote_association)->remote_id_).participantId();
-         
+
     bool is_loopback = local_peer == remote_peer;
-    
+
     VDBG_LVL((LM_DEBUG, "(%P|%t)MulticastTransport::find_or_create_datalink remote addr str "
               "\"%s\" priority %d is_loopback %d active %d\"\n",
               const_cast<AssociationData*> (remote_association)->network_order_address_.addr_.c_str(),
               priority, is_loopback, active),
               2);
-     
-     
+
+
     ACE_NEW_RETURN(link,
-                   MulticastDataLink(this, 
-                                     session_factory, 
-                                     local_peer, 
-                                     is_loopback, 
+                   MulticastDataLink(this,
+                                     session_factory,
+                                     local_peer,
+                                     is_loopback,
                                      active),
                    0);
 
@@ -125,7 +125,7 @@ MulticastTransport::find_or_create_datalink(
   if (!active && this->server_link_.is_nil ()) {
     this->server_link_ = link;
   }
-  
+
   MulticastPeer remote_peer =
     RepoIdConverter(remote_association->remote_id_).participantId();
 
@@ -196,7 +196,7 @@ MulticastTransport::connection_info_i(TransportInterfaceInfo& info) const
   // for DataLink establishment.
   info.transport_id = TRANSPORT_INTERFACE_ID;
 
-  info.data = TransportInterfaceBLOB(ACE_Utils::truncate_cast<CORBA::ULong>(len), 
+  info.data = TransportInterfaceBLOB(ACE_Utils::truncate_cast<CORBA::ULong>(len),
                                      ACE_Utils::truncate_cast<CORBA::ULong>(len),
     reinterpret_cast<CORBA::Octet*>(buffer));
 
@@ -211,18 +211,18 @@ MulticastTransport::acked(RepoId /*local_id*/, RepoId remote_id)
   bool is_client = ! (this->client_link_.is_nil());
   bool is_server = ! (this->server_link_.is_nil());
   bool acked = false;
-  
+
   if (is_client || is_server) {
     MulticastPeer remote_peer =
       RepoIdConverter(remote_id).participantId();
-    
+
      if (is_client) {
        acked = acked || this->client_link_->acked(remote_peer);
      }
      if (is_server) {
        acked = acked || this->server_link_->acked(remote_peer);
      }
-      
+
     return acked;
   }
 

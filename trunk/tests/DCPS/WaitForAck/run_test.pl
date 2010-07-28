@@ -43,7 +43,7 @@ my $priority      = "1";
 #
 GetOptions( "verbose!"            => \$verbose,
             "v"                   => \$verbose,
-	    "publisher|p"	  => \$publisher,
+            "publisher|p"         => \$publisher,
             "ORBVerboseLogging|V" => \$orbVerbose,
             "help|?"              => \$help,
             "man"                 => \$man,

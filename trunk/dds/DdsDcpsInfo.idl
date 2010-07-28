@@ -198,7 +198,7 @@ module OpenDDS {
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Publication);
-      
+
       //=======================================================
       // Update the QoS of an enitity to support Built-in Topics
       // and updating the other side of assocations.

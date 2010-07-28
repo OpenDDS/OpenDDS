@@ -34,12 +34,12 @@ if (!chdir $opt_d) {
     exit $!;
 }
 
-# This seems to only impact ant on Windows, it's confused by -Dfoo=bar when 
+# This seems to only impact ant on Windows, it's confused by -Dfoo=bar when
 # bar also contains an =
 if ($^O eq 'MSWin32') {
     map s/-D([\w.]+)=(\S+)=(\S+)/-D$1=\\"$2=$3\\"/, @ARGV;
 }
- 
+
 my $overall_status = 0;
 
 for my $tgt (@targets) {
@@ -98,7 +98,7 @@ for my $tgt (@targets) {
         close LOG;
     }
     if ($status > 0) {
-        #If we've had a test failure, the scoreboard will pick that up as 
+        #If we've had a test failure, the scoreboard will pick that up as
         #an 'error' line and we don't need an extra one for the ant invocation
         #returning non-zero.
         if ($testfailed == 0) {

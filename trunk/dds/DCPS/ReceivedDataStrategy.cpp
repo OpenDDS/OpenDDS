@@ -18,24 +18,24 @@ namespace {
 
 class CoherentFilter : public OpenDDS::DCPS::ReceivedDataFilter {
 public:
-  CoherentFilter (OpenDDS::DCPS::PublicationId& writer, 
+  CoherentFilter (OpenDDS::DCPS::PublicationId& writer,
                   OpenDDS::DCPS::RepoId& publisher)
   : writer_ (writer),
     publisher_ (publisher),
     group_coherent_ (! (this->publisher_ == ::OpenDDS::DCPS::GUID_UNKNOWN))
   {}
-  
+
   bool operator()(OpenDDS::DCPS::ReceivedDataElement* data_sample) {
     if (this->group_coherent_) {
-      return data_sample->coherent_change_  
+      return data_sample->coherent_change_
              && (this->publisher_ == data_sample->publisher_id_);
     }
     else {
-      return data_sample->coherent_change_ 
+      return data_sample->coherent_change_
              && (this->writer_ == data_sample->pub_);
     }
   }
-  
+
 private:
 
   OpenDDS::DCPS::PublicationId& writer_;
@@ -46,21 +46,21 @@ private:
 
 class AcceptCoherent : public OpenDDS::DCPS::ReceivedDataOperation {
 public:
-  AcceptCoherent (OpenDDS::DCPS::PublicationId& writer, 
+  AcceptCoherent (OpenDDS::DCPS::PublicationId& writer,
                   OpenDDS::DCPS::RepoId& publisher)
   : writer_ (writer),
     publisher_ (publisher),
     group_coherent_ (! (this->publisher_ == ::OpenDDS::DCPS::GUID_UNKNOWN))
   {}
-  
+
   void operator()(OpenDDS::DCPS::ReceivedDataElement* data_sample) {
     // Clear coherent_change_ flag; this makes
     // the data available for read/take operations.
     if (this->group_coherent_) {
-      if (data_sample->coherent_change_  
+      if (data_sample->coherent_change_
           && (this->publisher_ == data_sample->publisher_id_)) {
         data_sample->coherent_change_ = false;
-      }     
+      }
     }
     else {
       if (data_sample->coherent_change_ && (this->writer_ == data_sample->pub_)) {
@@ -68,7 +68,7 @@ public:
       }
     }
   }
-  
+
 private:
 
   OpenDDS::DCPS::PublicationId& writer_;
@@ -96,7 +96,7 @@ ReceivedDataStrategy::add(ReceivedDataElement* data_sample)
 }
 
 void
-ReceivedDataStrategy::accept_coherent(PublicationId& writer, 
+ReceivedDataStrategy::accept_coherent(PublicationId& writer,
                                       RepoId& publisher)
 {
   CoherentFilter    filter = CoherentFilter(writer, publisher);
@@ -105,7 +105,7 @@ ReceivedDataStrategy::accept_coherent(PublicationId& writer,
 }
 
 void
-ReceivedDataStrategy::reject_coherent(PublicationId& writer, 
+ReceivedDataStrategy::reject_coherent(PublicationId& writer,
                                       RepoId& publisher)
 {
   CoherentFilter filter = CoherentFilter(writer, publisher);

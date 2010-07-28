@@ -135,14 +135,14 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
 
   if (reader.good_bit() != true) return ;
   this->marshaled_size_ += gen_find_size(this->publication_id_);
-  
-  
+
+
   if (this->group_coherent_) {
     reader >> this->publisher_id_;
     if (reader.good_bit() != true) return ;
     this->marshaled_size_ += gen_find_size(this->publisher_id_);
   }
- 
+
 }
 
 ACE_CDR::Boolean
@@ -179,7 +179,7 @@ operator<< (ACE_Message_Block*& buffer, DataSampleHeader& value)
   if (value.group_coherent_) {
     writer << value.publisher_id_;
   }
-  
+
   return writer.good_bit() ;
 }
 

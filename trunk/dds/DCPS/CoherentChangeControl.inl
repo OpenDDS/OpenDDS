@@ -14,16 +14,16 @@ ACE_INLINE
 WriterCoherentSample::WriterCoherentSample (
   ACE_UINT32 num_sample,
   SequenceNumber last_sample)
-  : num_samples_ (num_sample), 
+  : num_samples_ (num_sample),
     last_sample_ (last_sample)
   {}
 
 
 ACE_INLINE
-void WriterCoherentSample::reset () 
-{ 
-  num_samples_ = 0; 
-  last_sample_ = SequenceNumber(); 
+void WriterCoherentSample::reset ()
+{
+  num_samples_ = 0;
+  last_sample_ = SequenceNumber();
 }
 
 
@@ -45,11 +45,11 @@ CoherentChangeControl::max_marshaled_size()
   if (this->group_coherent_) {
     sz += sizeof(this->publisher_id_);
     sz += sizeof (ACE_UINT32);
-    sz += this->group_coherent_samples_.size () * 
+    sz += this->group_coherent_samples_.size () *
           (sizeof(PublicationId) + sizeof(this->coherent_samples_));
   }
-  
-  return sz;         
+
+  return sz;
 }
 
 ACE_INLINE

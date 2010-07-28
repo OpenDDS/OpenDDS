@@ -654,7 +654,7 @@ namespace {
 bool
 Value::convert(Value::Type t)
 {
-  std::string asString; 
+  std::string asString;
   if (type_ == VAL_STRING) {
     asString = s_;
   } else {

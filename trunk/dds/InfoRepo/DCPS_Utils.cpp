@@ -307,7 +307,7 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
                                     DDS::LATENCYBUDGET_QOS_POLICY_ID);
   }
 
-  // The value of the OWNERSHIP kind offered must exactly match the one 
+  // The value of the OWNERSHIP kind offered must exactly match the one
   // requested or else they are considered incompatible.
   if (writerQos->ownership.kind != readerQos->ownership.kind) {
     compatible = false;
@@ -317,7 +317,7 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
     increment_incompatibility_count(readerStatus,
                                     DDS::OWNERSHIP_QOS_POLICY_ID);
   }
-  
+
   return compatible;
 }
 

@@ -15,7 +15,7 @@ subscriber.cpp : Reduced code base by using DDS wrapper classes in the
 ExchangeEventDataReaderListenerImpl.[h/cpp] :
 QuoteDataReaderListenerImpl.[h/cpp] :
                 Inherit from DataReader_Listener_Base now to remove
-		necessity to implement empty and unused callback methods.
+                necessity to implement empty and unused callback methods.
 
 For how to run the example, see the following original description.
 

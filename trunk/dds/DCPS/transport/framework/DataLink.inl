@@ -28,7 +28,7 @@ OpenDDS::DCPS::DataLink::transport_priority() const
 
 
 ACE_INLINE
-bool& OpenDDS::DCPS::DataLink::is_loopback() 
+bool& OpenDDS::DCPS::DataLink::is_loopback()
 {
   return this->is_loopback_;
 }

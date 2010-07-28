@@ -494,8 +494,8 @@ Monitor::MonitorDataStorage::getNode(
 
 bool
 Monitor::MonitorDataStorage::manageChildValue(
-  TreeNode*      parent, 
-  TreeNode*&     node, 
+  TreeNode*      parent,
+  TreeNode*&     node,
   const QString& label,
   const QString& value
 )

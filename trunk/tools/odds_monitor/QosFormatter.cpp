@@ -83,7 +83,7 @@ QosToQString<DDS::DestinationOrderQosPolicy>(
 
     case DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS:
       return QString( "SOURCE TIMESTAMP");
-  
+
     default:
       return QString( "<bad value == %1>").arg(value.kind);
   }
@@ -252,7 +252,7 @@ QosToQString<DDS::OwnershipQosPolicy>( const DDS::OwnershipQosPolicy& value)
 
     case DDS::EXCLUSIVE_OWNERSHIP_QOS:
       return QString( "EXCLUSIVE");
-  
+
     default:
       return QString( "<bad value == %1>").arg(value.kind);
   }

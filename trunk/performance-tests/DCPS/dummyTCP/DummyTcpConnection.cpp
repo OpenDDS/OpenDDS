@@ -106,9 +106,9 @@ OpenDDS::DCPS::DummyTcpConnection::open(void* arg)
   // defaults to true and open() is called after the ACE_Aceptor
   // creates this new svc handler.
   if (this->is_connector_ == false)
-  	{
-  	  return -1;
-  	}
+    {
+      return -1;
+    }
 
   // This connection object represents the acceptor side.
   this->is_connector_ = false;

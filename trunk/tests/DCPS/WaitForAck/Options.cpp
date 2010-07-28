@@ -43,7 +43,7 @@ Options::~Options()
 Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
  : valid_(        true),
    verbose_(      false),
-   publisher_(	  false),
+   publisher_(    false),
    domain_(       DEFAULT_TEST_DOMAIN),
    topicName_(    DEFAULT_TEST_TOPICNAME),
    publications_( DEFAULT_PUBLICATIONS),
