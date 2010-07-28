@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_DEFINITION_H
-#define TAO_DDS_DCPS_DEFINITION_H
+#ifndef OPENDDS_DCPS_DEFINITION_H
+#define OPENDDS_DCPS_DEFINITION_H
 
 #include "Cached_Allocator_With_Overflow_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
@@ -199,4 +199,4 @@ operator+(int lhs, const OpenDDS::DCPS::SequenceNumber& rhs)
   return rhs + lhs;
 }
 
-#endif /* TAO_DDS_DCPS_DEFINITION_H */
+#endif /* OPENDDS_DCPS_DEFINITION_H */

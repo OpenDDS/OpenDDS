@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_TRANSPORT_DEBUG_H
-#define TAO_DDS_TRANSPORT_DEBUG_H
+#ifndef OPENDDS_TRANSPORT_DEBUG_H
+#define OPENDDS_TRANSPORT_DEBUG_H
 
 #include "dds/DCPS/dcps_export.h"
 
@@ -48,4 +48,4 @@ extern OpenDDS_Dcps_Export unsigned int Transport_debug_level;
 } // namespace OpenDDS
 } // namespace DCPS
 
-#endif /* TAO_DDS_TRANSPORT_DEBUG_H */
+#endif /* OPENDDS_TRANSPORT_DEBUG_H */

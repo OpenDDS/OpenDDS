@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_RECEIVEDDATAELEMENTLIST_H
-#define TAO_DDS_DCPS_RECEIVEDDATAELEMENTLIST_H
+#ifndef OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H
+#define OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 
 #include "ace/Atomic_Op_T.h"
 #include "ace/Thread_Mutex.h"
@@ -173,4 +173,4 @@ private:
 # include "ReceivedDataElementList.inl"
 #endif  /* __ACE_INLINE__ */
 
-#endif /* TAO_DDS_DCPS_RECEIVEDDATAELEMENTLIST_H  */
+#endif /* OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H  */

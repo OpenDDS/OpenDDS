@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_DATAWRITER_H
-#define TAO_DDS_DCPS_DATAWRITER_H
+#ifndef OPENDDS_DCPS_DATAWRITER_H
+#define OPENDDS_DCPS_DATAWRITER_H
 
 #include "dds/DdsDcpsPublicationS.h"
 #include "dds/DdsDcpsDataWriterRemoteS.h"
@@ -633,4 +633,4 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* DDSDCPSPUBLICATION_DATAWRITER_H_  */
+#endif

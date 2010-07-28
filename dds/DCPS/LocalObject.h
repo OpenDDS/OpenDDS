@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_LOCALOBJECT_H
-#define TAO_DDS_DCPS_LOCALOBJECT_H
+#ifndef OPENDDS_DCPS_LOCALOBJECT_H
+#define OPENDDS_DCPS_LOCALOBJECT_H
 
 #include "tao/LocalObject.h"
 
@@ -56,4 +56,4 @@ public:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* TAO_DDS_DCPS_LOCALOBJECT_H */
+#endif /* OPENDDS_DCPS_LOCALOBJECT_H */

@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_SUBSCRIBER_H
-#define TAO_DDS_DCPS_SUBSCRIBER_H
+#ifndef OPENDDS_DCPS_SUBSCRIBER_H
+#define OPENDDS_DCPS_SUBSCRIBER_H
 
 #include "dds/DdsDcpsSubscriptionExtS.h"
 #include "dds/DdsDcpsDataReaderRemoteC.h"
@@ -266,4 +266,4 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* TAO_DDS_DCPS_SUBSCRIBER_H  */
+#endif /* OPENDDS_DCPS_SUBSCRIBER_H  */
