@@ -16,6 +16,19 @@ Version 2.2 of OpenDDS.
   they happen to depend on some rarely-used arguments to dcps_ts.pl.  See the
   OpenDDS Developer's Guide for the list of arguments accepted by opendds_idl.
 
+- Fixed transport so it now allow associations between datareaders and 
+  datawriters attached to the same transport to work.
+    
+- Fixed a bug that causes samples larger than 64K to not work correctly with
+  the SimpleTCP transport.  
+
+- Added support for Ownership qos.
+
+- Added support for GROUP presentation.
+
+- Added nak_delay_intervals and nak_max configurations for reliable 
+  multicast to help reduce naks.
+
 
 ========================================================================
 

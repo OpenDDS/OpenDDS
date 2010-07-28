@@ -1,3 +1,10 @@
+Wed Jul 28 20:49:46 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * NEWS:
+        
+          Added notes for ownership, group presentation qos and etc.
+          
+          
 Wed Jul 28 20:20:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
