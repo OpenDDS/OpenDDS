@@ -1,3 +1,46 @@
+Wed Jul 28 20:20:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderRemoteImpl.h:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterRemoteImpl.h:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/LocalObject.h:
+        * dds/DCPS/Marked_Default_Qos.h:
+        * dds/DCPS/OwnershipManager.h:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/RcHandle_T.h:
+        * dds/DCPS/RcObject_T.h:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriptionInstance.h:
+        * dds/DCPS/TopicDescriptionImpl.h:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/Transient_Kludge.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/debug.h:
+        * dds/DCPS/transport/framework/TransportDebug.h:
+        * dds/DdsDcps.idl:
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsGuid.idl:
+        * dds/DdsDcpsInfo.idl:
+        * dds/DdsDcpsInfoUtils.idl:
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/DdsDcpsTopic.idl:
+        * dds/idl/be_util.h:
+        * java/idl2jni/codegen/be_util.h:
+        * java/tao/tao_java_export.h:
+
+          Changed preprocessor macros for header multi-include guards from
+          TAO_* to OPENDDS_*.
+
 Wed Jul 28 20:01:02 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * converted tabs to spaces

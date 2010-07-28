@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_RCHANDLE_T_H
-#define TAO_DDS_RCHANDLE_T_H
+#ifndef OPENDDS_RCHANDLE_T_H
+#define OPENDDS_RCHANDLE_T_H
 
 #include <algorithm>
 
@@ -113,4 +113,4 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif  /* TAO_DDS_RCHANDLE_T_H */
+#endif  /* OPENDDS_RCHANDLE_T_H */

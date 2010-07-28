@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_DATAREADER_H
-#define TAO_DDS_DCPS_DATAREADER_H
+#ifndef OPENDDS_DCPS_DATAREADER_H
+#define OPENDDS_DCPS_DATAREADER_H
 
 #include "dcps_export.h"
 #include "EntityImpl.h"
@@ -775,4 +775,4 @@ private:
 // Insertion of WriterState enumeration values;
 ostream& operator<<(ostream& str, OpenDDS::DCPS::WriterInfo::WriterState value);
 
-#endif /* TAO_DDS_DCPS_DATAREADER_H  */
+#endif /* OPENDDS_DCPS_DATAREADER_H  */

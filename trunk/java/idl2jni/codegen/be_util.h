@@ -14,8 +14,8 @@
  */
 //=============================================================================
 
-#ifndef TAO_BE_UTIL_H
-#define TAO_BE_UTIL_H
+#ifndef IDL2JNI_BE_UTIL_H
+#define IDL2JNI_BE_UTIL_H
 
 class TAO_OutStream;
 class be_module;

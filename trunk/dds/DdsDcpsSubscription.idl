@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_SUBSCRIPTION_IDL
-#define TAO_DDS_DCPS_SUBSCRIPTION_IDL
+#ifndef OPENDDS_DCPS_SUBSCRIPTION_IDL
+#define OPENDDS_DCPS_SUBSCRIPTION_IDL
 
 #include "dds/DdsDcpsInfrastructure.idl"
 
@@ -274,4 +274,4 @@ module DDS {
 
 };
 
-#endif /* TAO_DDS_DCPS_SUBSCRIPTION_IDL */
+#endif /* OPENDDS_DCPS_SUBSCRIPTION_IDL */
