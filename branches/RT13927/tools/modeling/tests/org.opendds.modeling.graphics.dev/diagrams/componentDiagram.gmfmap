@@ -60,22 +60,62 @@
         <features
             href="../model/metamodel.ecore#//NamedElement/name"/>
       </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«class»">
+        <diagramLabel
+            href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassStereotype"/>
+        <features
+            href="../model/metamodel.ecore#//NamedElement/name"/>
+      </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="componentDiagram.gmftool#//@palette/@tools.0/@tools.1"/>
       <diagramNode
           href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#Class"/>
+      <children
+          referencedChild="//@nodes.1/@ownedChild/@children.0/@ownedChild">
+        <containmentFeature
+            href="../model/metamodel.ecore#//Class/ports"/>
+        <ownedChild>
+          <domainMetaElement
+              href="../model/metamodel.ecore#//Port"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping">
+            <diagramLabel
+                href="../../org.opendds.modeling.graphics/diagrams/ports.gmfgraph#PortName"/>
+            <features
+                href="../model/metamodel.ecore#//NamedElement/name"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="componentDiagram.gmftool#//@palette/@tools.0/@tools.2"/>
+          <diagramNode
+              href="../../org.opendds.modeling.graphics/diagrams/ports.gmfgraph#Port"/>
+        </ownedChild>
+      </children>
     </ownedChild>
   </nodes>
   <links>
     <tool
         xsi:type="gmftool:CreationTool"
-        href="componentDiagram.gmftool#//@palette/@tools.0/@tools.2"/>
+        href="componentDiagram.gmftool#//@palette/@tools.0/@tools.4"/>
     <diagramLink
         href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassChildren"/>
     <linkMetaFeature
         xsi:type="ecore:EReference"
         href="../model/metamodel.ecore#//Class/children"/>
+  </links>
+  <links>
+    <tool
+        xsi:type="gmftool:CreationTool"
+        href="componentDiagram.gmftool#//@palette/@tools.0/@tools.3"/>
+    <diagramLink
+        href="../../org.opendds.modeling.graphics/diagrams/ports.gmfgraph#PortConnection"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="../model/metamodel.ecore#//Port/uses"/>
   </links>
   <diagram>
     <diagramCanvas
