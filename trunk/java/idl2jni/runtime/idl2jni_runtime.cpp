@@ -94,7 +94,7 @@ JniArgv::~JniArgv()
   jni_->DeleteLocalRef(outArray);
 }
 
-void copyToCxx(JNIEnv *jni, IDL2JNI_STRMAN &target, jobject source)
+void copyToCxx(JNIEnv *jni, TAO::String_Manager &target, jobject source)
 {
   if (!source) {
     target = "";
@@ -107,7 +107,7 @@ void copyToCxx(JNIEnv *jni, IDL2JNI_STRMAN &target, jobject source)
   target = c_str; //deep copy
 }
 
-void copyToJava(JNIEnv *jni, jobject &target, const IDL2JNI_STRMAN &source,
+void copyToJava(JNIEnv *jni, jobject &target, const TAO::String_Manager &source,
                 bool)
 {
   target = jni->NewStringUTF(source);
@@ -131,7 +131,8 @@ void copyToJava(JNIEnv *jni, jobject &target, const char *source, bool)
   target = jni->NewStringUTF(source);
 }
 
-void copyToCxx(JNIEnv *jni, IDL2JNI_STRELM target, jobject source)
+void copyToCxx(JNIEnv *jni, TAO::details::charstr_sequence_element target,
+               jobject source)
 {
   if (!source) {
     target = "";
@@ -145,7 +146,8 @@ void copyToCxx(JNIEnv *jni, IDL2JNI_STRELM target, jobject source)
 }
 
 void copyToJava(JNIEnv *jni, jobject &target,
-                const IDL2JNI_STRELM_CONST &source, bool)
+                const TAO::details::charstr_const_sequence_element &source,
+                bool)
 {
   target = jni->NewStringUTF(source);
 }
@@ -154,7 +156,7 @@ jobject currentThread(JNIEnv *jni)
 {
   jclass cls = jni->FindClass("java/lang/Thread");
   jmethodID mid = jni->GetStaticMethodID(cls,
-                                         "currentThread", "()Ljava/lang/Thread;");
+    "currentThread", "()Ljava/lang/Thread;");
   return jni->CallStaticObjectMethod(cls, mid);
 }
 
@@ -163,7 +165,7 @@ jobject getContextClassLoader(JNIEnv *jni)
   jobject thread = currentThread(jni);
   jclass cls = jni->GetObjectClass(thread);
   jmethodID mid = jni->GetMethodID(cls,
-                                   "getContextClassLoader", "()Ljava/lang/ClassLoader;");
+    "getContextClassLoader", "()Ljava/lang/ClassLoader;");
   return jni->CallObjectMethod(thread, mid);
 }
 
@@ -172,7 +174,7 @@ void setContextClassLoader(JNIEnv *jni, jobject cl)
   jobject thread = currentThread(jni);
   jclass cls = jni->GetObjectClass(thread);
   jmethodID mid = jni->GetMethodID(cls,
-                                   "setContextClassLoader", "(Ljava/lang/ClassLoader;)V");
+    "setContextClassLoader", "(Ljava/lang/ClassLoader;)V");
   jni->CallVoidMethod(thread, mid, cl);
 }
 
@@ -184,23 +186,22 @@ jclass findClass(JNIEnv *jni, const char *desc)
 
   jclass cls = jni->GetObjectClass(cl);
   jmethodID mid = jni->GetMethodID(cls,
-                                   "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+    "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
   return reinterpret_cast<jclass>
          (jni->CallObjectMethod(cl, mid, binary_name(jni, desc)));
 }
 
 #define HOLDER_PRIMITIVE(JNI_T, JNIFN, SIG)                                   \
-  void holderize (JNIEnv *jni, jobject holder, JNI_T value, const char *)       \
-  {                                                                             \
-    jclass holderClazz = jni->GetObjectClass (holder);                          \
-    jfieldID fid = jni->GetFieldID (holderClazz, "value", #SIG);                \
-    jni->Set##JNIFN##Field (holder, fid, value);                                \
-  }                                                                             \
-  void holderize (JNIEnv *jni, jobject holder, JNI_T##Array value, const char *)\
-  {                                                                             \
-    jclass holderClazz = jni->GetObjectClass (holder);                          \
-    jfieldID fid = jni->GetFieldID (holderClazz, "value", "[" #SIG);            \
-    jni->SetObjectField (holder, fid, value);                                   \
+  void holderize (JNIEnv *jni, jobject holder, JNI_T value, const char *) {   \
+    jclass holderClazz = jni->GetObjectClass (holder);                        \
+    jfieldID fid = jni->GetFieldID (holderClazz, "value", #SIG);              \
+    jni->Set##JNIFN##Field (holder, fid, value);                              \
+  }                                                                           \
+  void holderize (JNIEnv *jni, jobject holder, JNI_T##Array value,            \
+                  const char *) {                                             \
+    jclass holderClazz = jni->GetObjectClass (holder);                        \
+    jfieldID fid = jni->GetFieldID (holderClazz, "value", "[" #SIG);          \
+    jni->SetObjectField (holder, fid, value);                                 \
   }
 HOLDER_PRIMITIVE(jboolean, Boolean, Z)
 HOLDER_PRIMITIVE(jchar, Char, C)
@@ -275,9 +276,9 @@ void throw_java_exception(JNIEnv *jni, const CORBA::SystemException &se)
   CORBA::ULong minor = se.minor();
   jclass cs_clazz = jni->FindClass("org/omg/CORBA/CompletionStatus");
   jmethodID cs_mid = jni->GetStaticMethodID(cs_clazz, "from_int",
-                                            "(I)Lorg/omg/CORBA/CompletionStatus;");
+    "(I)Lorg/omg/CORBA/CompletionStatus;");
   jobject j_completed = jni->CallStaticObjectMethod(cs_clazz, cs_mid,
-                                                    static_cast<jint>(se.completed()));
+    static_cast<jint>(se.completed()));
   CORBA_SYSTEM_EXCEPTION(UNKNOWN)
   CORBA_SYSTEM_EXCEPTION(BAD_PARAM)
   CORBA_SYSTEM_EXCEPTION(NO_MEMORY)
@@ -323,7 +324,7 @@ void throw_java_exception(JNIEnv *jni, const CORBA::SystemException &se)
     jmethodID mid = jni->GetMethodID(clazz, "<init>",
                                      "(ILorg/omg/CORBA/CompletionStatus;)V");
     jthrowable jex = static_cast<jthrowable>(jni->NewObject(clazz, mid,
-                                                            minor, j_completed));
+                                               minor, j_completed));
     jni->Throw(jex);
   }
 }
