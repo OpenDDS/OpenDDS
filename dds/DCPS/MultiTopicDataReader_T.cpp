@@ -309,7 +309,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
 
   TypedDataReader* tdr = dynamic_cast<TypedDataReader*>(typed_reader_.in());
   for (typename std::map<TopicSet, SampleVec>::iterator iterPR =
-		  partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
+       partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
     for (typename SampleVec::iterator i = iterPR->second.begin();
          i != iterPR->second.end(); ++i) {
       InstanceHandle_t ih = tdr->store_synthetic_data(i->sample_, i->view_);

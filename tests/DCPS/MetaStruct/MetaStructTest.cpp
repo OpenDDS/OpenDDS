@@ -62,8 +62,8 @@ int check(const T& lhs, const T& rhs, const char* name)
 template<size_t N, size_t M>
 void fill_2d(short (&arr)[N][M])
 {
-  for (short i = 0; i < N; ++i) {
-    for (short j = 0; j < M; ++j) {
+  for (unsigned short i = 0; i < N; ++i) {
+    for (unsigned short j = 0; j < M; ++j) {
       arr[i][j] = j + i * M;
     }
   }
