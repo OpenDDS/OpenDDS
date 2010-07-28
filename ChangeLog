@@ -1,10 +1,27 @@
+Wed Jul 28 21:09:22 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/debug.cpp:
+
+          Removed incorrect comments
+
+        * java/idl2jni/codegen/idl2jni_codegen.mpc:
+
+          Added the verbatim(gnuace) section for setting the
+          TAO_IDL_PREPROCESSOR macro and also making the idl_stubs target
+          depend on this project.  (from dds/idl/opendds_idl.mpc)
+
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+
+          Removed preprocessor macros that were previously used for TAO 1.4a
+          compatibility but currently only have one possible definition.
+
 Wed Jul 28 20:49:46 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * NEWS:
-        
+
           Added notes for ownership, group presentation qos and etc.
-          
-          
+
 Wed Jul 28 20:20:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
