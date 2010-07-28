@@ -286,7 +286,7 @@ DDS::ReturnCode_t MultiTopicDataReaderBase::enable()
   return resulting_reader_->enable();
 }
 
-DDS::StatusCondition_ptr MultiTopicDataReaderBase::get_statuscondition()   
+DDS::StatusCondition_ptr MultiTopicDataReaderBase::get_statuscondition()
   ACE_THROW_SPEC((CORBA::SystemException))
 {
   return resulting_reader_->get_statuscondition();
@@ -316,7 +316,7 @@ DDS::QueryCondition_ptr MultiTopicDataReaderBase::create_querycondition(
   return resulting_reader_->create_querycondition(sample_states, view_states,
     instance_states, query_expression, query_parameters);
 }
-  
+
 DDS::ReturnCode_t MultiTopicDataReaderBase::delete_readcondition(
   DDS::ReadCondition_ptr a_condition)
   ACE_THROW_SPEC((CORBA::SystemException))

@@ -25,7 +25,7 @@ OpenDDS::DCPS::SimpleTcpDataLink::SimpleTcpDataLink(
   OpenDDS::DCPS::SimpleTcpTransport*  transport_impl,
   CORBA::Long priority,
   bool        is_loopback,
-  bool        is_active) 
+  bool        is_active)
   : DataLink(transport_impl, priority, is_loopback, is_active),
     remote_address_(remote_address),
     graceful_disconnect_sent_(false),
@@ -269,7 +269,7 @@ OpenDDS::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message()
 
   // give the message block ownership to TransportControlElement
   message->release ();
- 
+
   // I don't want to rebuild a connection in order to send
   // a graceful disconnect message.
   this->send_i(send_element, false);

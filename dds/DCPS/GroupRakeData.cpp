@@ -25,7 +25,7 @@ bool GroupRakeData::insert_sample(ReceivedDataElement* sample,
                                   SubscriptionInstance* instance,
                                   size_t index_in_instance)
 {
-  // Ignore DISPOSE and UNREGISTER messages in case they are sent 
+  // Ignore DISPOSE and UNREGISTER messages in case they are sent
   // in the group coherent changes, but it shouldn't.
   if (! sample->registered_data_) return false;
 
@@ -52,14 +52,14 @@ GroupRakeData::get_datareaders (DDS::DataReaderSeq & readers)
 }
 
 
-void 
+void
 GroupRakeData::reset ()
 {
   this->sorted_.clear ();
 }
 
 
-RakeData 
+RakeData
 GroupRakeData::get_data ()
 {
   RakeData data = *this->current_sample_;

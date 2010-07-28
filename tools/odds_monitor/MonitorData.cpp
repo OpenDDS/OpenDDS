@@ -62,7 +62,7 @@ Monitor::MonitorData::setRepoIor( const QString& ior)
   // to avoid QString-related aborts under windows.
   QByteArray ior_arr = ior.toLocal8Bit();
   const char* ior_str = ior_arr.constData();
-  
+
   // Return successfully if the requested repository is already the
   // active repository.
   if( this->storage_->activeIor() == ior_str) {

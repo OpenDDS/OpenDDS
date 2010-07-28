@@ -18,7 +18,7 @@ project: dcps_java {
 
     dynamicflags    += OPENDDS_JMS_NATIVE_BUILD_DLL
 
-    includes        += $(TAO_ROOT)/orbsvcs $(ACE_ROOT) 
+    includes        += $(TAO_ROOT)/orbsvcs $(ACE_ROOT)
 
     libs            += DCPSInfoRepoServ InfoRepoLib Federator
     libout           = $(DDS_ROOT)/lib

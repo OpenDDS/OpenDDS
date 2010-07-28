@@ -163,8 +163,8 @@ class MonitorDataStorage {
 
     /// Install or update a child value node.
     bool manageChildValue(
-      TreeNode*      parent, 
-      TreeNode*&     node, 
+      TreeNode*      parent,
+      TreeNode*&     node,
       const QString& label,
       const QString& value
     );
@@ -172,7 +172,7 @@ class MonitorDataStorage {
     /// Install or update a QoS policy node.
     template< class PolicyType>
     bool manageQosPolicy(
-           TreeNode*         node, 
+           TreeNode*         node,
            const QString&    label,
            const PolicyType& value
          );

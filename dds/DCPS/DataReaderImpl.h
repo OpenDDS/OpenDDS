@@ -117,7 +117,7 @@ public:
 
   /// Return the most recently observed contiguous sequence number.
   SequenceNumber ack_sequence() const;
-  
+
   Coherent_State coherent_change_received ();
   void reset_coherent_info ();
   void set_group_info (const CoherentChangeControl& info);
@@ -127,7 +127,7 @@ public:
   bool is_owner_evaluated (SubscriptionInstance* instance);
 
 private:
-                                             
+
   /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
   ACE_Time_Value last_liveliness_activity_time_;
 
@@ -150,7 +150,7 @@ private:
 
   /// Writer qos
   ::DDS::DataWriterQos writer_qos_;
-  
+
   /// The publication entity instance handle.
   ::DDS::InstanceHandle_t handle_;
 
@@ -160,14 +160,14 @@ private:
   /// Is this writer evaluated for owner ?
   typedef std::map <SubscriptionInstance*, bool> OwnerEvaluateFlag;
   OwnerEvaluateFlag owner_evaluated_;
-  
+
   /// Data to support GROUP access scope.
   bool group_coherent_;
   RepoId publisher_id_;
-  DisjointSequence coherent_sample_sequence_;   
+  DisjointSequence coherent_sample_sequence_;
   WriterCoherentSample  writer_coherent_samples_;
   GroupCoherentSamples  group_coherent_samples_;
- 
+
 };
 
 /// Elements stored for managing statistical data.
@@ -215,7 +215,7 @@ class OpenDDS_Dcps_Export DataReaderImpl
     public virtual ACE_Event_Handler {
 public:
   friend class RequestedDeadlineWatchdog;
-  
+
   typedef std::map<DDS::InstanceHandle_t, SubscriptionInstance*> SubscriptionInstanceMapType;
 
   /// Type of collection of statistics for writers to this reader.
@@ -507,7 +507,7 @@ public:
   typedef std::pair<PublicationId, WriterInfo::WriterState> WriterStatePair;
   typedef std::vector<WriterStatePair> WriterStatePairVec;
   void get_writer_states(WriterStatePairVec& writer_states);
-  
+
   void update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength);
 
@@ -552,15 +552,15 @@ public:
                         DDS::ViewStateMask view_states,
                         DDS::InstanceStateMask instance_states);
 
-  void accept_coherent (PublicationId& writer_id, 
+  void accept_coherent (PublicationId& writer_id,
                         RepoId& publisher_id);
-  void reject_coherent (PublicationId& writer_id, 
+  void reject_coherent (PublicationId& writer_id,
                         RepoId& publisher_id);
   void coherent_change_received (RepoId publisher_id, Coherent_State& result);
-  
+
   void coherent_changes_completed (DataReaderImpl* reader);
-  
-  void reset_coherent_info (const PublicationId& writer_id, 
+
+  void reset_coherent_info (const PublicationId& writer_id,
                             const RepoId& publisher_id);
 
   // Called upon subscriber qos change to update the local cache.
@@ -610,7 +610,7 @@ protected:
    *       QoS policy or DataReader's TIME_BASED_FILTER QoS policy.
    */
   bool filter_sample(const DataSampleHeader& header);
-  bool filter_instance(SubscriptionInstance* instance, 
+  bool filter_instance(SubscriptionInstance* instance,
                        const PublicationId& pubid);
 
   /// Data has arrived into the cache, unblock waiting ReadConditions
@@ -628,24 +628,24 @@ protected:
 
   typedef ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> Reverse_Lock_t;
   Reverse_Lock_t reverse_sample_lock_;
-  
+
   DomainParticipantImpl*       participant_servant_;
   TopicImpl*                   topic_servant_;
 
   bool is_exclusive_ownership_;
-  OwnershipManager* owner_manager_;  
+  OwnershipManager* owner_manager_;
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   DDS::ContentFilteredTopic_var content_filtered_topic_;
 #endif
 
-  
-  /// Is accessing to Group coherent changes ? 
+
+  /// Is accessing to Group coherent changes ?
   bool coherent_;
 
   /// Ordered group samples.
   GroupRakeData group_coherent_ordered_data_;
-  
+
   DDS::SubscriberQos subqos_;
 
 private:
@@ -661,7 +661,7 @@ private:
   bool lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  bool verify_coherent_changes_completion (WriterInfo* writer); 
+  bool verify_coherent_changes_completion (WriterInfo* writer);
   bool coherent_change_received (WriterInfo* writer);
 
   friend class WriterInfo;

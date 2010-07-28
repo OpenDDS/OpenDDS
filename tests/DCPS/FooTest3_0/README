@@ -12,8 +12,7 @@ Manually run test:
 
 (2) Launch the subscirber:
 
-    FooTest3_subscriber -DCPSInfoRepo file://repo.ior -p pubid.txt:localhost:5555 -s 2:localhost:6666
-		        -n <num_expected_messages> -v <file://PubDriver_ior_fname>
+    FooTest3_subscriber -DCPSInfoRepo file://repo.ior -p pubid.txt:localhost:5555 -s 2:localhost:6666 -n <num_expected_messages> -v <file://PubDriver_ior_fname>
 
 (3) Launch the publisher:
 

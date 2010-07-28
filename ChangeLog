@@ -1,3 +1,8 @@
+Wed Jul 28 20:01:02 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * converted tabs to spaces
+        * removed trailing whitespace from core middleware files
+
 Wed Jul 28 14:46:05 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/MultiTopicDataReader_T.cpp:

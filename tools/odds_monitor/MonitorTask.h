@@ -127,7 +127,7 @@ class MonitorTask : public ACE_Task_Base {
            DDS::Subscriber_ptr subscriber,
            const char*         topicName,
            int                 type
-         ); 
+         );
 
     /// Create subscriptions for Builtin Topics.
     void createBuiltinSubscription(
@@ -179,7 +179,7 @@ class MonitorTask : public ACE_Task_Base {
 
     /// Is any repo ever set to active ?
     bool activeKeyInited_;
-    
+
     /// Repository key value used for last IOR to be set.
     RepoKey lastKey_;
 };

@@ -477,13 +477,13 @@ protected:
    */
   PublicationInstance* get_handle_instance(
     DDS::InstanceHandle_t handle);
-    
+
   /// The type name of associated topic.
   CORBA::String_var               type_name_;
 
   /// The qos policy list of this datawriter.
   DDS::DataWriterQos              qos_;
-  
+
   /// The participant servant which creats the publisher that
   /// creates this datawriter.
   DomainParticipantImpl*          participant_servant_;
@@ -520,7 +520,7 @@ private:
   DDS::Topic_var                  topic_objref_;
   /// The topic servant.
   TopicImpl*                      topic_servant_;
-  
+
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.
   DDS::StatusMask                 listener_mask_;

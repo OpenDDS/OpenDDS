@@ -598,10 +598,10 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
 
   //The data_dropped could be called from the thread initiating sample remove
   //which already hold the lock. In this case, it's not necessary to acquire
-  //lock here. It also could be called from the transport thread in a delayed  
+  //lock here. It also could be called from the transport thread in a delayed
   //notification, it's necessary to acquire lock here to protect the internal
   //structures in this class.
-  
+
   ACE_GUARD (ACE_Recursive_Thread_Mutex,
     guard,
     this->lock_);
@@ -820,11 +820,10 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
 
       // wait for all "released" samples to be delivered
       // Timeout value from Qos.RELIABILITY.max_blocking_time
-      ACE_Time_Value abs_timeout
-      = ACE_OS::gettimeofday() + max_blocking_time_;
+      ACE_Time_Value abs_timeout = ACE_OS::gettimeofday() + max_blocking_time_;
       bool waited = false;
       while (!shutdown_ && ACE_OS::gettimeofday() < abs_timeout) {
-	waited = true;
+        waited = true;
         waiting_on_release_ = true; // reduces broadcast to only when waiting
 
         // lock is released while waiting and aquired before returning
@@ -850,19 +849,19 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
       }
       if (!waited) {
         // max-blocking_time_ was so short we did not even try to wait
-	ret = DDS::RETCODE_TIMEOUT;
+        ret = DDS::RETCODE_TIMEOUT;
       }
       if (ret != DDS::RETCODE_OK) {
-	// Remove from the waiting list if wait() timed out or return
-	// other errors.
-	if (instance->waiting_list_.dequeue_next_instance_sample(element) == false) {
-	  ACE_ERROR_RETURN((LM_ERROR,
-			    ACE_TEXT("(%P|%t) ERROR: ")
-			    ACE_TEXT("WriteDataContainer::obtain_buffer, ")
-			    ACE_TEXT("dequeue_next_instance_sample from ")
-			    ACE_TEXT("waiting list failed\n")),
-			   DDS::RETCODE_ERROR);
-	}
+        // Remove from the waiting list if wait() timed out or return
+        // other errors.
+        if (instance->waiting_list_.dequeue_next_instance_sample(element) == false) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) ERROR: ")
+                            ACE_TEXT("WriteDataContainer::obtain_buffer, ")
+                            ACE_TEXT("dequeue_next_instance_sample from ")
+                            ACE_TEXT("waiting list failed\n")),
+                           DDS::RETCODE_ERROR);
+        }
       }
     } // wait_needed
 
@@ -911,7 +910,7 @@ WriteDataContainer::unregister_all()
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
               guard,
               this->lock_);
-              
+
     // Tell transport remove all control messages currently
     // transport is processing.
     (void) this->writer_->remove_all_msgs();

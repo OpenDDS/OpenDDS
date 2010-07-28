@@ -248,7 +248,7 @@ public:
       ::CORBA::Long max_samples,
       ::DDS::ReadCondition_ptr a_condition)
     ACE_THROW_SPEC ((CORBA::SystemException));
-    
+
   virtual ::DDS::ReturnCode_t take_w_condition (
       ::<%SCOPED%>Seq & data_values,
       ::DDS::SampleInfoSeq & sample_infos,
@@ -377,7 +377,7 @@ public:
 
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
                                OpenDDS::DCPS::SubscriptionInstance*& instance);
-  
+
  protected:
 
     virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
@@ -387,14 +387,14 @@ public:
 
     virtual void dispose(const OpenDDS::DCPS::ReceivedDataSample& sample,
                          OpenDDS::DCPS::SubscriptionInstance*& instance);
-    
+
     virtual void unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
                             OpenDDS::DCPS::SubscriptionInstance*& instance);
 
     //virtual OpenDDS::DCPS::DataReaderRemote_ptr get_datareaderremote_obj_ref ();
 
     virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance* instance);
-    
+
     virtual void release_instance_i (::DDS::InstanceHandle_t handle);
 
   private:

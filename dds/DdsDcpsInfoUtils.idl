@@ -72,7 +72,7 @@ module OpenDDS
     // thrown when operation receives an
     // invalid topic id
     exception Invalid_Topic {};
-  
+
 
     struct IncompatibleQosStatus {
                   long total_count;

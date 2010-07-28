@@ -17,7 +17,7 @@ my $debug = '0';
 foreach my $i (@ARGV) {
     if ($i eq '-debug') {
         $debug = '10';
-    } 
+    }
 }
 
 my $iorfile = 'server.ior';
@@ -42,7 +42,7 @@ if (PerlACE::waitforfile_timed ($iorfile,
     print STDERR "ERROR: cannot find file <$iorfile>\n";
     $SV->Kill (); $SV->TimedWait (1);
     exit 1;
-} 
+}
 
 my $client_status = $CL->SpawnWaitKill (300);
 

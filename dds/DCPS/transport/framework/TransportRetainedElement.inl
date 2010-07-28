@@ -23,9 +23,9 @@ OpenDDS::DCPS::TransportRetainedElement::TransportRetainedElement(
     mb_allocator_( mb_allocator),
     db_allocator_( db_allocator)
 {
-  if (message != 0) { 
+  if (message != 0) {
     msg_ = TransportQueueElement::clone (message,
-                                        this->mb_allocator_, 
+                                        this->mb_allocator_,
                                         this->db_allocator_);
   }
 }
@@ -45,7 +45,7 @@ OpenDDS::DCPS::TransportRetainedElement::TransportRetainedElement(
 
 
 ACE_INLINE
-bool 
+bool
 OpenDDS::DCPS::TransportRetainedElement::owned_by_transport ()
 {
   return true;

@@ -548,31 +548,31 @@ ACE_THROW_SPEC((CORBA::SystemException))
                    guard,
                    this->si_lock_,
                    DDS::RETCODE_ERROR);
- 
+
   // If access_scope is GROUP and ordered_access is true then return readers as
-  // list which may contain same readers multiple times. Otherwise return readers 
+  // list which may contain same readers multiple times. Otherwise return readers
   // as set.
   if (this->qos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS) {
     if (this->access_depth_ == 0 && this->qos_.presentation.coherent_access) {
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
-    
+
     if (this->qos_.presentation.ordered_access) {
 
       GroupRakeData data;
       for (DataReaderSet::const_iterator pos = datareader_set_.begin() ;
         pos != datareader_set_.end() ; ++pos) {
-          (*pos)->get_ordered_data (data, sample_states, view_states, instance_states); 
+          (*pos)->get_ordered_data (data, sample_states, view_states, instance_states);
       }
 
       // Return list of readers in the order of the source timestamp of the received
       // samples from readers.
       data.get_datareaders (readers);
-      
+
       return DDS::RETCODE_OK ;
     }
   }
-  
+
   // Return set of datareaders.
   int count(0) ;
   readers.length(count);
@@ -764,7 +764,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
     return DDS::RETCODE_OK;
   }
-  
+
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    this->si_lock_,
@@ -798,7 +798,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
     return DDS::RETCODE_OK;
   }
-  
+
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    this->si_lock_,
@@ -1165,7 +1165,7 @@ SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
   }
 }
 
-void 
+void
 SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength)
 {
@@ -1179,20 +1179,20 @@ SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
        ++iter) {
     if (! iter->second->local_reader_impl_->is_bit ()) {
       iter->second->local_reader_impl_->update_ownership_strength (pub_id, ownership_strength);
-    } 
+    }
   }
-}                               
-             
-             
+}
+
+
 void
-SubscriberImpl::coherent_change_received (RepoId& publisher_id, 
-                                          DataReaderImpl* reader, 
+SubscriberImpl::coherent_change_received (RepoId& publisher_id,
+                                          DataReaderImpl* reader,
                                           Coherent_State& group_state)
-{   
+{
   // Verify if all readers complete the coherent changes. The result
   // is either COMPLETED or REJECTED.
-  group_state = COMPLETED;  
-  DataReaderSet::const_iterator endIter = datareader_set_.end();  
+  group_state = COMPLETED;
+  DataReaderSet::const_iterator endIter = datareader_set_.end();
   for (DataReaderSet::const_iterator iter = datareader_set_.begin() ;
     iter != endIter ; ++iter) {
 
@@ -1206,18 +1206,18 @@ SubscriberImpl::coherent_change_received (RepoId& publisher_id,
       group_state = REJECTED;
     }
   }
-  
+
   PublicationId writerId = GUID_UNKNOWN;
   for (DataReaderSet::const_iterator iter = datareader_set_.begin() ;
     iter != endIter ; ++iter) {
-      if (group_state == COMPLETED) { 
+      if (group_state == COMPLETED) {
         (*iter)->accept_coherent (writerId, publisher_id);
       }
       else { //REJECTED
         (*iter)->reject_coherent (writerId, publisher_id);
       }
   }
-  
+
   if (group_state == COMPLETED) {
     for (DataReaderSet::const_iterator iter = datareader_set_.begin() ;
       iter != endIter ; ++iter) {

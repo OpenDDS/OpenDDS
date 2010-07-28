@@ -27,7 +27,7 @@ Version 2.1.3 of OpenDDS.
 
 - Memory leak fixes.
 
-- Fixed deadlocks on reliable multicast transport during association 
+- Fixed deadlocks on reliable multicast transport during association
   and shutdown periods.
 
 - Improved reliable multicast transport and reduced nak overflow.
@@ -37,7 +37,7 @@ Version 2.1.3 of OpenDDS.
   well as additional execution and plotting scripts.  The user guide at
   performance-tests/Bench/doc/user_guide.html contains the details.
 
-- Masked interrupts in threads created by OpenDDS to avoid failures 
+- Masked interrupts in threads created by OpenDDS to avoid failures
   while in system calls.
   Example: ERROR: ACE::handle_write_ready return -1 while waiting
                   to unclog. handle_write_ready: Interrupted system call
@@ -56,7 +56,7 @@ New to this version are the following changes:
 
 - Various bugfixes for locking issues during sample removal.
 
-- Fixed a bug in obtain_buffer() that did not return the TIMEOUT error 
+- Fixed a bug in obtain_buffer() that did not return the TIMEOUT error
   code when max_blocking_time is 0 or a very small period.
 
 - Fixed a deadlock in the new IP multicast transport caused when data
@@ -104,7 +104,7 @@ New to this version are the following changes:
   Documentation is located at: $DDS_ROOT/performance-tests/Bench/doc.
 
 - The monitor library introduces a new instrumentation mechanism for
-  reporting OpenDDS run-time information.  This information is 
+  reporting OpenDDS run-time information.  This information is
   intended to supplement that provided by the standard-defined
   Built-In-Topics.  See $DDS_ROOT/dds/monitor/README for further
   details.
@@ -194,7 +194,7 @@ New to this version are the following changes:
 - Implemented TIME_BASED_FILTER as defined in formal/07-01-01.
 
 - create_*() functions now take a StatusMask argument.  A new constant
-  named OpenDDS::DCPS::DEFAULT_STATUS_MASK has been introduced as a 
+  named OpenDDS::DCPS::DEFAULT_STATUS_MASK has been introduced as a
   convenience to indicate interest in all status changes.
 
 - Implemented the following new methods on DomainParticipant as defined
@@ -210,15 +210,15 @@ New to this version are the following changes:
     * DURATION_INFINITY_NSEC    => DURATION_INFINITE_NSEC
     * TIMESTAMP_INVALID_SEC     => TIME_INVALID_SEC
     * TIMESTAMP_INVALID_NSEC    => TIME_INVALID_NSEC
-  
-- Removed constants: 
+
+- Removed constants:
     * TRANSPORTPRIORITY_QOS_POLICY_NAME
 
 - Type name changes:
     * StatusKindMask            => StatusMask
     * SubscriptionMatchStatus   => SubscriptionMatchedStatus
     * PublicationMatchStatus    => PublicationMatchedStatus
-  
+
 - Removed types:
     * SampleStateSeq
     * ViewStateSeq
@@ -387,27 +387,27 @@ New to this version are the following changes:
   the neccessary hooks for running the DCPSInfoRepo within another process.
   For example usage, see: $DDS_ROOT/dds/InfoRepo/DCPSInfoRepo.cpp.
 
-- Fixed bug in DCPSInfoRepo that did not re-evaluate the compatibility and 
-  associations when QoS change is made. 
-    
+- Fixed bug in DCPSInfoRepo that did not re-evaluate the compatibility and
+  associations when QoS change is made.
+
 - Fixed bugs that affected connection establishment.
-  
-  Fixed DataWriterImpl to handle the case that remove_association is called 
+
+  Fixed DataWriterImpl to handle the case that remove_association is called
   before fully_associated is called.
 
   Fixed a race condition that connection delay deletion removes new assocaitions.
 
-  Corrected fully association ack verification to fix issues when multiple 
+  Corrected fully association ack verification to fix issues when multiple
   associations of a datalink are added simultaneously.
-  
+
 - Added datalink_release_delay and removed keep_link configuration.
 
-  The datalink_release_delay is the delay for datalink release after no 
-  associations. It defaults to 10 seconds. This is to fix disconnect 
-  problem happened when removing and adding association related to 
+  The datalink_release_delay is the delay for datalink release after no
+  associations. It defaults to 10 seconds. This is to fix disconnect
+  problem happened when removing and adding association related to
   same datalink during short period.
 
-  Removed keep_link which can be replaced with a big value of 
+  Removed keep_link which can be replaced with a big value of
   datalink_release_delay.
 
 - Fixed a potential deadlock in reliable multicast transport.

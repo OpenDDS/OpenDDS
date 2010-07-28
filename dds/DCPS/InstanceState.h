@@ -124,9 +124,9 @@ public:
   bool registered();
   void registered (bool flag);
   bool is_last (const PublicationId& pub);
-  
+
   bool no_writer () const;
-  
+
 private:
   ACE_Recursive_Thread_Mutex& lock_;
 

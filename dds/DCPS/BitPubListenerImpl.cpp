@@ -60,7 +60,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
           ACE_TEXT("reset ownership strength %d for writer %C.\n"),
           this, ownership_strength, std::string(writer_converter).c_str()));
       }
-      else if (si.instance_state != DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE 
+      else if (si.instance_state != DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE
                && si.instance_state != DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
         ACE_ERROR((LM_ERROR,
               ACE_TEXT("(%P|%t)BitPubListenerImpl::on_data_available")

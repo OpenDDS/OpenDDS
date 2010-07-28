@@ -72,7 +72,7 @@ public class TestPublisher {
         DataWriter dw = pub.create_datawriter(top,
                                               DATAWRITER_QOS_DEFAULT.get(),
                                               null,
-					      DEFAULT_STATUS_MASK.value);
+                                              DEFAULT_STATUS_MASK.value);
         if (dw == null) {
             System.err.println("ERROR: DataWriter creation failed");
             return;

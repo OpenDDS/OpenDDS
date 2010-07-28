@@ -10,7 +10,7 @@ if not "%DDS_ROOT%" == "%CD%" (
 echo if (/[^^\r]\n$/) {print "$ARGV: $_\n"; exit 1} > ../detect.pl
 del ..\files.txt > NUL 2>&1
 for /r %%f in (*.h *.cpp *.inl *.mp? *.txt *.idl *.pl *. domain_id* *.conf *.ini *.mw?) do (
-	echo %%f | findstr \.svn > NUL
+        echo %%f | findstr \.svn > NUL
         if ERRORLEVEL 1 (
                 %CYGWIN_ROOT%\bin\perl -n ..\detect.pl %%f
                 if ERRORLEVEL 1 (
@@ -18,7 +18,7 @@ for /r %%f in (*.h *.cpp *.inl *.mp? *.txt *.idl *.pl *. domain_id* *.conf *.ini
                         %CYGWIN_ROOT%\bin\unix2dos %%f
                         echo %%f >> ..\files.txt
                 )
-	)
+        )
 )
 if not exist ..\files.txt (
         echo No files found with bad line endings

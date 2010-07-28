@@ -241,7 +241,7 @@ BE_GlobalData::usage() const
   be_util::usage();
 }
 
-AST_Generator* 
+AST_Generator*
 BE_GlobalData::generator_init()
 {
   return be_util::generator_init();

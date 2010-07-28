@@ -226,7 +226,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
         GenericData other_key(other_meta);
         for (size_t j = 0; j < keys.size(); ++j) {
           other_meta.assign(other_key.ptr_, keys[j].c_str(),
-                            &starting[i], keys[j].c_str(), resulting_meta); 
+                            &starting[i], keys[j].c_str(), resulting_meta);
         }
         join(join_result, starting[i], keys,
              other_key.ptr_, other_dr, other_meta);

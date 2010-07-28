@@ -44,34 +44,34 @@ module DDS {
 
    local interface DataWriter : Entity {
     // InstanceHandle_t register_instance(
-    //		in Data instance);
+    //          in Data instance);
     // InstanceHandle_t register_instance_w_timestamp(
-    //		in Data instance,
-    //		in Time_t timestamp);
+    //          in Data instance,
+    //          in Time_t timestamp);
     // ReturnCode_t unregister_instance(
-    //		in Data instance,
-    //		in InstanceHandle_t handle);
+    //          in Data instance,
+    //          in InstanceHandle_t handle);
     // ReturnCode_t unregister_instance_w_timestamp(
-    //		in Data instance,
-    //		in InstanceHandle_t handle,
-    //		in Time_t timestamp);
+    //          in Data instance,
+    //          in InstanceHandle_t handle,
+    //          in Time_t timestamp);
     // ReturnCode_t write(
-    //		in Data instance_data,
-    //		in InstanceHandle_t handle);
+    //          in Data instance_data,
+    //          in InstanceHandle_t handle);
     // ReturnCode_t write_w_timestamp(
-    //		in Data instance_data,
-    //		in InstanceHandle_t handle,
-    //		in Time_t source_timestamp);
+    //          in Data instance_data,
+    //          in InstanceHandle_t handle,
+    //          in Time_t source_timestamp);
     // ReturnCode_t dispose(
-    //		in Data instance_data,
-    //		in InstanceHandle_t instance_handle);
+    //          in Data instance_data,
+    //          in InstanceHandle_t instance_handle);
     // ReturnCode_t dispose_w_timestamp(
-    //		in Data instance_data,
-    //		in InstanceHandle_t instance_handle,
-    //		in Time_t source_timestamp);
+    //          in Data instance_data,
+    //          in InstanceHandle_t instance_handle,
+    //          in Time_t source_timestamp);
     // ReturnCode_t get_key_value(
-    //		inout Data key_holder,
-    //		in InstanceHandle_t handle);
+    //          inout Data key_holder,
+    //          in InstanceHandle_t handle);
     // InstanceHandle_t lookup_instance(
     //      in Data instance_data);
 
@@ -150,7 +150,7 @@ module DDS {
     ReturnCode_t begin_coherent_changes();
 
     ReturnCode_t end_coherent_changes();
-        
+
     ReturnCode_t wait_for_acknowledgments(
         in Duration_t max_wait);
 

@@ -50,7 +50,7 @@ private:
   MessageBlockAllocator* mb_allocator_;
   /// Cached allocator for DataSampleHeader data block
   DataBlockAllocator* db_allocator_;
-                           
+
   /// The publication_id() from the original TransportQueueElement
   RepoId publisher_id_;
 

@@ -47,7 +47,7 @@ public:
   DDS::ReturnCode_t enable()
     ACE_THROW_SPEC((CORBA::SystemException));
 
-  DDS::StatusCondition_ptr get_statuscondition()   
+  DDS::StatusCondition_ptr get_statuscondition()
     ACE_THROW_SPEC((CORBA::SystemException));
 
   DDS::StatusMask get_status_changes()
@@ -65,7 +65,7 @@ public:
     DDS::InstanceStateMask instance_states, const char* query_expression,
     const DDS::StringSeq& query_parameters)
     ACE_THROW_SPEC((CORBA::SystemException));
-    
+
   DDS::ReturnCode_t delete_readcondition(DDS::ReadCondition_ptr a_condition)
     ACE_THROW_SPEC((CORBA::SystemException));
 

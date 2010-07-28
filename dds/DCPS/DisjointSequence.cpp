@@ -54,7 +54,7 @@ DisjointSequence::shift(SequenceNumber value)
 
   // Shift low-water mark to inserted value:
   this->sequences_.erase(first, last);
-  
+
   normalize ();
 }
 
