@@ -1,3 +1,13 @@
+Wed Jul 28 14:46:05 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          whitespace / formatting
+
+        * tests/DCPS/MetaStruct/MetaStructTest.cpp:
+
+          Fixed a signed vs. unsigned comparison warning.
+
 Tue Jul 27 16:58:59 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/MetaStruct/MetaStructTest.cpp:
