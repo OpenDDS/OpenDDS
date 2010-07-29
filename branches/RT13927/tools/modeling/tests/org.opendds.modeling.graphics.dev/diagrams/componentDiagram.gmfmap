@@ -37,8 +37,6 @@
           referencedChild="//@nodes.1/@ownedChild">
         <containmentFeature
             href="../model/metamodel.ecore#//Component/classes"/>
-        <childrenFeature
-            href="../model/metamodel.ecore#//Component/classes"/>
       </children>
       <compartments
           children="//@nodes.0/@ownedChild/@children.0">

@@ -8,47 +8,42 @@
     <figures
         xsi:type="gmfgraph:PolylineDecoration"
         name="ClassChildrenTargetDecoration"/>
+    <figures
+        xsi:type="gmfgraph:PolylineDecoration"
+        name="PortConnectionTargetDecoration"/>
     <descriptors
         name="ComponentFigure">
       <actualFigure
           xsi:type="gmfgraph:Rectangle"
           name="ComponentFigure">
-        <insets
-            bottom="5"/>
+        <layout
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"
+            forceSingleLine="true"/>
         <children
-            xsi:type="gmfgraph:Rectangle"
-            name="ComponentIdentifierFigure">
-          <layout
-              xsi:type="gmfgraph:FlowLayout"
-              vertical="true"
-              forceSingleLine="true"/>
-          <children
-              xsi:type="gmfgraph:Label"
-              name="ComponentStereotypeFigure"
-              text="&lt;...>"/>
-          <children
-              xsi:type="gmfgraph:Label"
-              name="ComponentNameFigure"
-              text="&lt;...>"/>
-        </children>
+            xsi:type="gmfgraph:Label"
+            name="ComponentStereotypeFigure"
+            text="&lt;...>"/>
         <children
-            xsi:type="gmfgraph:Rectangle"
-            name="ComponentFigure_body">
-          <layout
-              xsi:type="gmfgraph:FlowLayout"
-              vertical="true"
-              forceSingleLine="true"/>
-        </children>
+            xsi:type="gmfgraph:Label"
+            name="ComponentNameFigure"
+            text="&lt;...>"/>
       </actualFigure>
       <accessors
           accessor="getFigureComponentNameFigure"
-          figure="//@figures.0/@descriptors.0/@actualFigure/@children.0/@children.1"/>
+          figure="//@figures.0/@descriptors.0/@actualFigure/@children.1"/>
       <accessors
           accessor="getFigureComponentStereotypeFigure"
-          figure="//@figures.0/@descriptors.0/@actualFigure/@children.0/@children.0"/>
-      <accessors
-          accessor="getFigureComponentBodyFigure"
-          figure="//@figures.0/@descriptors.0/@actualFigure/@children.1"/>
+          figure="//@figures.0/@descriptors.0/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors
+        name="ComponentBodyFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Rectangle"
+          name="ComponentBodyFigure">
+        <layout
+            xsi:type="gmfgraph:XYLayout"/>
+      </actualFigure>
     </descriptors>
     <descriptors
         name="ClassFigure">
@@ -56,20 +51,22 @@
           xsi:type="gmfgraph:Rectangle"
           name="ClassFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
-        <children
-            xsi:type="gmfgraph:Label"
-            name="ClassNameFigure"
-            text="&lt;...>"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"
+            forceSingleLine="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="ClassStereotypeFigure"
             text="&lt;...>"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="ClassNameFigure"
+            text="&lt;...>"/>
       </actualFigure>
       <accessors
-          figure="//@figures.0/@descriptors.1/@actualFigure/@children.0"/>
+          figure="//@figures.0/@descriptors.2/@actualFigure/@children.1"/>
       <accessors
-          figure="//@figures.0/@descriptors.1/@actualFigure/@children.1"/>
+          figure="//@figures.0/@descriptors.2/@actualFigure/@children.0"/>
     </descriptors>
     <descriptors
         name="ClassChildrenFigure">
@@ -77,6 +74,13 @@
           xsi:type="gmfgraph:PolylineConnection"
           name="ClassChildrenFigure"
           targetDecoration="//@figures.0/@figures.0"/>
+    </descriptors>
+    <descriptors
+        name="PortConnectionFigure">
+      <actualFigure
+          xsi:type="gmfgraph:PolylineConnection"
+          name="PortConnectionFigure"
+          targetDecoration="//@figures.0/@figures.1"/>
     </descriptors>
   </figures>
   <nodes
@@ -88,11 +92,13 @@
   <connections
       name="ClassChildren"
       figure="ClassChildrenFigure"/>
+  <connections
+      name="PortConnection"
+      figure="PortConnectionFigure"/>
   <compartments
       name="ComponentBodyCompartment"
-      figure="ComponentFigure"
-      collapsible="true"
-      accessor="//@figures.0/@descriptors.0/@accessors.2"/>
+      figure="ComponentBodyFigure"
+      collapsible="true"/>
   <labels
       name="ComponentName"
       figure="ComponentFigure"
@@ -105,10 +111,10 @@
   <labels
       name="ClassName"
       figure="ClassFigure"
-      accessor="//@figures.0/@descriptors.1/@accessors.0"/>
+      accessor="//@figures.0/@descriptors.2/@accessors.0"/>
   <labels
       name="ClassStereotype"
       figure="ClassFigure"
       elementIcon="false"
-      accessor="//@figures.0/@descriptors.1/@accessors.1"/>
+      accessor="//@figures.0/@descriptors.2/@accessors.1"/>
 </gmfgraph:Canvas>
