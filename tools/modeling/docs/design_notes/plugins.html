@@ -657,7 +657,7 @@ There are class diagrams (.ecore_diagram) that are visual representations of the
 {{imgcenter{[img[images/Enumerations.png]]}}}
 </pre>
 </div>
-<div title="GMF Details" modifier="Byron" created="201006231304" modified="201007161410" tags="publish details" changecount="39">
+<div title="GMF Details" modifier="Byron" created="201006231304" modified="201007291922" tags="publish details" changecount="41">
 <pre>!Making sure Java has enough ~PermGen memory
 
 It was found running SDK diagram code under Ubuntu 9.10 running eclipse 3.5.1 that the Java ~PermGen memory hit the maximum ~PermGen memory allowed causing the diagram code to crash. The ~PermGen memory is used to hold meta data about user classes.
@@ -844,6 +844,16 @@ Files used: ~MainDiagram.gmfgen, ~PolicyLibrary.gmfgen
 # Create a new ~OpenDDS diagram.
 # Create a ~PolicyLIbrary package and double-click on the package.
 # Verify that the sub-diagram opens up allowing to to add elements to the package.
+
+! UML Component figures with classes arbitrarily positioned
+
+For the SDK Middleware diagram UML components for domain participants are used. Simple attempts to do this using the GMF layout XY Layout were tried without success. Elements in the component would be as small as possible and stack on top of each other. Attempts to follow the lead of the ~UML2Tools Component was not successful either. For figure ~ComponentFigure_Body used by the compartment the custom layout org.eclipse.gmf.runtime.draw2d.ui.figures.~OneLineBorder is used and attempts to reproduce this also resulted in stacked elements.
+
+As a workaround an attempt was made to stack the elements on top of each other as is done with the DNC Package node as described in section 4.6, Developing the Color Modeling Diagram, in the Eclipse Modeling Project book. However, if side-affixed node was attached to an element (to represent a port) in the component it did not render properly nor was the label for the node visible. So this approach was not feasible.
+
+Finally, it was noticed after checking out the project for the [[GMF taipan example|http://wiki.eclipse.org/index.php/GMF_Tutorial]] from the CVS repository dev.eclipse.org that the Ship cargo compartment allowed cargo to be arbitrarily placed in the compartment. After investigating how this was done it found that the undocumented compartment setting listLayout in the .gmfgen file was set to false instead of the default value of true. For some reason this setting will override any layout setting used for the compartment's figure.
+
+Therefore, if a compartment's figure is to have XY Layout, make sure in the settings for the compartment in the .gmfgen file have listLayout set to false.
 </pre>
 </div>
 <div title="GMF Issues" modifier="Byron" created="201007061429" modified="201007261209" tags="issues publish" changecount="6">
