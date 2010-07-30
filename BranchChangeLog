@@ -1,3 +1,11 @@
+Fri Jul 30 13:49:30 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph:
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev/diagrams/componentDiagram.gmfgen:
+
+          Streamlined graphic definition model by removing redundant figures ComponentFigure and
+          ClassFigure and had nodes and diagram labels use new StereotypedFigure instead.
+
 Thu Jul 29 19:24:38 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/plugins.html:

@@ -12,31 +12,6 @@
         xsi:type="gmfgraph:PolylineDecoration"
         name="PortConnectionTargetDecoration"/>
     <descriptors
-        name="ComponentFigure">
-      <actualFigure
-          xsi:type="gmfgraph:Rectangle"
-          name="ComponentFigure">
-        <layout
-            xsi:type="gmfgraph:FlowLayout"
-            vertical="true"
-            forceSingleLine="true"/>
-        <children
-            xsi:type="gmfgraph:Label"
-            name="ComponentStereotypeFigure"
-            text="&lt;...>"/>
-        <children
-            xsi:type="gmfgraph:Label"
-            name="ComponentNameFigure"
-            text="&lt;...>"/>
-      </actualFigure>
-      <accessors
-          accessor="getFigureComponentNameFigure"
-          figure="//@figures.0/@descriptors.0/@actualFigure/@children.1"/>
-      <accessors
-          accessor="getFigureComponentStereotypeFigure"
-          figure="//@figures.0/@descriptors.0/@actualFigure/@children.0"/>
-    </descriptors>
-    <descriptors
         name="ComponentBodyFigure">
       <actualFigure
           xsi:type="gmfgraph:Rectangle"
@@ -44,29 +19,6 @@
         <layout
             xsi:type="gmfgraph:XYLayout"/>
       </actualFigure>
-    </descriptors>
-    <descriptors
-        name="ClassFigure">
-      <actualFigure
-          xsi:type="gmfgraph:Rectangle"
-          name="ClassFigure">
-        <layout
-            xsi:type="gmfgraph:FlowLayout"
-            vertical="true"
-            forceSingleLine="true"/>
-        <children
-            xsi:type="gmfgraph:Label"
-            name="ClassStereotypeFigure"
-            text="&lt;...>"/>
-        <children
-            xsi:type="gmfgraph:Label"
-            name="ClassNameFigure"
-            text="&lt;...>"/>
-      </actualFigure>
-      <accessors
-          figure="//@figures.0/@descriptors.2/@actualFigure/@children.1"/>
-      <accessors
-          figure="//@figures.0/@descriptors.2/@actualFigure/@children.0"/>
     </descriptors>
     <descriptors
         name="ClassChildrenFigure">
@@ -82,13 +34,36 @@
           name="PortConnectionFigure"
           targetDecoration="//@figures.0/@figures.1"/>
     </descriptors>
+    <descriptors
+        name="StereotypedFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Rectangle"
+          name="StereotypedFigure">
+        <layout
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"
+            forceSingleLine="true"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="StereotypedStereotypeFigure"
+            text="&lt;...>"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="StereotypedNameFigure"
+            text="&lt;...>"/>
+      </actualFigure>
+      <accessors
+          figure="//@figures.0/@descriptors.3/@actualFigure/@children.0"/>
+      <accessors
+          figure="//@figures.0/@descriptors.3/@actualFigure/@children.1"/>
+    </descriptors>
   </figures>
   <nodes
       name="Component"
-      figure="ComponentFigure"/>
+      figure="StereotypedFigure"/>
   <nodes
       name="Class"
-      figure="ClassFigure"/>
+      figure="StereotypedFigure"/>
   <connections
       name="ClassChildren"
       figure="ClassChildrenFigure"/>
@@ -101,20 +76,20 @@
       collapsible="true"/>
   <labels
       name="ComponentName"
-      figure="ComponentFigure"
-      accessor="//@figures.0/@descriptors.0/@accessors.0"/>
+      figure="StereotypedFigure"
+      accessor="//@figures.0/@descriptors.3/@accessors.1"/>
   <labels
       name="ComponentStereotype"
-      figure="ComponentFigure"
+      figure="StereotypedFigure"
       elementIcon="false"
-      accessor="//@figures.0/@descriptors.0/@accessors.1"/>
+      accessor="//@figures.0/@descriptors.3/@accessors.0"/>
   <labels
       name="ClassName"
-      figure="ClassFigure"
-      accessor="//@figures.0/@descriptors.2/@accessors.0"/>
+      figure="StereotypedFigure"
+      accessor="//@figures.0/@descriptors.3/@accessors.1"/>
   <labels
       name="ClassStereotype"
-      figure="ClassFigure"
+      figure="StereotypedFigure"
       elementIcon="false"
-      accessor="//@figures.0/@descriptors.2/@accessors.1"/>
+      accessor="//@figures.0/@descriptors.3/@accessors.0"/>
 </gmfgraph:Canvas>
