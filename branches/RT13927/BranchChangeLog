@@ -1,3 +1,16 @@
+Fri Jul 30 20:28:54 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/images/DCPS.png:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/DCPS.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/DCPS.ecore_diagram:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel:
+
+          Fixed discrepencies between DDS profile specification and Ecore model and made DataReader
+          and DataWriter QoS Policies match what is in the OpenDDS structs DataReaderQos and DataWriterQos
+          respectively.
+
 Fri Jul 30 13:49:30 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph:
