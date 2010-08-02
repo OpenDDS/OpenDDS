@@ -40,7 +40,7 @@ public class CodeGenNewWizardPage extends WizardPage {
 	 */
 	public CodeGenNewWizardPage(ISelection selection) {
 		super("wizardPage");
-		setTitle("Multi-page Editor File");
+		setTitle("OpenDDS Code Generation Specification");
 		setDescription("This wizard creates a new file with *.codegen extension that can be opened by a multi-page editor.");
 		this.selection = selection;
 	}

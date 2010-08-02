@@ -10,18 +10,20 @@ package org.opendds.modeling.sdk.codegen;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for instancespec complex type.
+ * <p>Java class for dependency complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="instancespec">
+ * &lt;complexType name="dependency">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;attribute name="file" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -30,8 +32,34 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "instancespec")
-public class Instancespec {
+@XmlType(name = "dependency", namespace = "http://www.example.org/externalfiles")
+public class Dependency {
 
+    @XmlAttribute
+    protected String file;
+
+    /**
+     * Gets the value of the file property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getFile() {
+        return file;
+    }
+
+    /**
+     * Sets the value of the file property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setFile(String value) {
+        this.file = value;
+    }
 
 }
