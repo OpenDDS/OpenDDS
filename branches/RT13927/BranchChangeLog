@@ -1,3 +1,41 @@
+Mon Aug  2 21:53:27 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3530] 2010-08-02 21:50  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/build.properties,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/Generator.xsd[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenForm.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/Dependency.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/Gencontrol.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/GeneratorManager.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/Genspec.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/IDataChangedListener.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/IManagerListener.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/InputsForm.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/InstanceForm.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/Instancespec.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/Modelfile.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/ObjectFactory.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/OutputsForm.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/Targetdir.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/package-info.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/wizards/CodeGenNewWizardPage.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/xml,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/xml/Generator.xsd[CPY],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/xml/cpp.xsl,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/xml/externalfiles.xsd,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/xml/extractRefs.xsl,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/xml/generate.pl,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/xml/h.xsl,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/xml/idl.xsl,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/xml/mpc.xsl:
+
+          Initial code generation with input form values stubbed in the
+          generation form. This demonstrates the workflow of generating the
+          code. The actual XSL transformations are different than those using
+          the xsltproc transformer and will need additional debugging using
+          the default eclipse transformer.
+
 Fri Jul 30 20:28:54 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/images/DCPS.png:
