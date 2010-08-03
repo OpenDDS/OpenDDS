@@ -311,13 +311,9 @@ public class OutputsForm extends FormPage implements IDataChangedListener {
 		StreamResult result = null;
 		try {
 			IFileStore fileStore = EFS.getStore(outputUri);
-			if( fileStore.fetchInfo().exists() && fileStore.fetchInfo().getLength() > 0) {
-				// Remove any previous version of the file.
-				fileStore.delete(EFS.NONE, null);
-			}
 			result = new StreamResult(
 					              new BufferedOutputStream(
-					      		  fileStore.openOutputStream( 07, null)));
+					      		  fileStore.openOutputStream( EFS.OVERWRITE, null)));
 		} catch (CoreException e) {
 			ErrorDialog.openError(
 					getSite().getShell(),
