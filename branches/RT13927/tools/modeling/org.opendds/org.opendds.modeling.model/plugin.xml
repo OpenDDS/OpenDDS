@@ -63,4 +63,10 @@
       </runtime>
    </extension>
 
+   <extension point="org.eclipse.emf.ecore.extension_parser">
+      <parser
+            type="*"
+            class="org.opendds.modeling.model.opendds.OpenDDSResourceFactory"/>
+   </extension>
+
 </plugin>

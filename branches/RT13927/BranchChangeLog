@@ -1,3 +1,13 @@
+Tue Aug  3 19:58:09 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/plugin.xml:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/OpenDDSResource.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/OpenDDSResourceFactory.java:
+
+          For hrefs in OpenDDS SDK XML files use UUID based IDs instead of
+          URI fragment paths.
+
 Tue Aug  3 14:08:02 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3532] 2010-08-03 14:05  martinezm

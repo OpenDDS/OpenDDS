@@ -29,3 +29,4 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport,
  org.eclipse.core.resources
 Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.emf.ecore.xmi.impl
