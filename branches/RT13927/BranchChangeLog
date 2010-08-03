@@ -1,3 +1,18 @@
+Tue Aug  3 22:45:45 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3536] 2010-08-03 22:42  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenEditor.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenForm.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/GeneratorManager.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/InputsForm.java[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/OutputsForm.java:
+
+          Cleaned up the code generation forms. Moved the model input file
+          selection to the output form, removed the input form, renamed the
+          output form to generate. Obtaining the model file from the UI and
+          extracting the modelname for the output files from the chosen model
+          file using an XPath expression.
+
 Tue Aug  3 19:58:09 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.model/META-INF/MANIFEST.MF:
