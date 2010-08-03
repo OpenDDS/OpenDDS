@@ -1,3 +1,11 @@
+Tue Aug  3 23:27:29 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3538] 2010-08-03 23:26  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/images/codegen-16x16.gif,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/images/codegen-32x32.gif:
+
+          Made the icon background transparent to blend in with the location.
+
 Tue Aug  3 22:45:45 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3536] 2010-08-03 22:42  martinezm
