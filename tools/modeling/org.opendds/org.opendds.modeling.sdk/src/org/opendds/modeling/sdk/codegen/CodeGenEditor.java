@@ -39,7 +39,7 @@ public class CodeGenEditor extends MultiPageEditorPart implements IResourceChang
 	private static final int XMLEDITOR_INDEX = 3;
 	
 	/** Editor for model source specification. */
-	private InputsForm inputsForm;
+//	private InputsForm inputsForm;
 	
 	/** Editor for model target output specification. */
  	private OutputsForm outputsForm;
@@ -155,7 +155,7 @@ public class CodeGenEditor extends MultiPageEditorPart implements IResourceChang
 		int index = getActivePage();
 		switch(index) {
 		case 0:
-			inputsForm.setFocus();
+//			inputsForm.setFocus();
 			break;
 		case 1:
 			outputsForm.setFocus();

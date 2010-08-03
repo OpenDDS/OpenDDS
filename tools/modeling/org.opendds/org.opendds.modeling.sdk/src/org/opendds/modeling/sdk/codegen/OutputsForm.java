@@ -6,10 +6,19 @@ package org.opendds.modeling.sdk.codegen;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.List;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.XMLConstants;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -18,6 +27,11 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
@@ -38,17 +52,19 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormPage;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
+import org.eclipse.ui.model.BaseWorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 /**
  * @author martinezm
@@ -57,7 +73,9 @@ import org.eclipse.ui.forms.widgets.TableWrapLayout;
 public class OutputsForm extends FormPage implements IDataChangedListener {
 	
 	private static final String PLUGINNAME = "org.opendds.modeling.sdk";
-	
+	private static final String modelNameExpression = "//generator:model/@name";
+	private static String generatorNamespace = "http://www.opendds.com/modeling/schemas/Generator/1.0";
+
 	private static enum TransformType {
 		IDL { public Transformer getTransformer() { return idlTransformer; };
 		      public void setTransformer( Transformer t) { idlTransformer = t;};
@@ -99,7 +117,18 @@ public class OutputsForm extends FormPage implements IDataChangedListener {
 	private GeneratorManager manager;
 	private Composite parent;
 	private Text targetText;
+	private Modelfile modelFile;
 	private Targetdir targetDir;
+	private Text sourceText;
+	private Label idlLabel;
+	private Label hLabel;
+	private Label cppLabel;
+	private Label mpcLabel;
+	
+	private static XPathFactory pathFactory;
+	private static XPath xpath;
+	private static XPathExpression nameExpr;
+	private String modelName;
 
 	private static TransformerFactory tFactory;
 	private static Transformer idlTransformer;
@@ -110,7 +139,24 @@ public class OutputsForm extends FormPage implements IDataChangedListener {
 	public OutputsForm(CodeGenForm editor, String id, String title) {
 		super(editor, id, title);
 		manager = editor.getManager();
-		tFactory = TransformerFactory.newInstance();
+		if( tFactory == null) {
+			tFactory = TransformerFactory.newInstance();
+		}
+	}
+	
+	private XPathExpression getNameExpr() {
+		if( nameExpr == null) {
+			pathFactory = XPathFactory.newInstance();
+			xpath = pathFactory.newXPath();
+			xpath.setNamespaceContext( new GeneratorNamespaceContext());
+			try {
+				nameExpr = xpath.compile(modelNameExpression);
+			} catch (XPathExpressionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return nameExpr;
 	}
 	
 	@Override
@@ -120,73 +166,108 @@ public class OutputsForm extends FormPage implements IDataChangedListener {
 	
 	@Override
 	protected void createFormContent(IManagedForm managedForm) {
-		parent = managedForm.getForm().getBody();
-		parent.setLayout(new TableWrapLayout());
+		FormToolkit toolkit = managedForm.getToolkit();
 		
-		Composite composite = new Composite(parent, SWT.BORDER);
-		composite.setLayout( new GridLayout( 3, false));
+		TableWrapLayout layout = new TableWrapLayout();
+		layout.numColumns = 2;
 
-		Label targetLabel = new Label(composite, SWT.LEFT);
-		targetLabel.setText("Target Container: ");
+		parent = managedForm.getForm().getBody();
+		parent.setLayout( layout);
+
+		Composite leftPanel = toolkit.createComposite(parent);
+		Composite rightPanel = toolkit.createComposite(parent);
 		
-		targetText = new Text(composite, SWT.LEFT | SWT.BORDER | SWT.SINGLE);
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		targetText.setLayoutData(gd);
+		TableWrapLayout leftLayout = new TableWrapLayout();
+		leftLayout.numColumns = 3;
+		leftPanel.setLayout(leftLayout);
+
+		TableWrapData leftData = new TableWrapData(TableWrapData.FILL_GRAB);
+		leftPanel.setLayoutData(leftData);
+		
+		TableWrapLayout rightLayout = new TableWrapLayout();
+		rightLayout.numColumns = 2;
+		rightPanel.setLayout(rightLayout);
+
+		toolkit.createLabel(leftPanel, "Model File: ", SWT.LEFT);
+		
+		sourceText = toolkit.createText(leftPanel, null, SWT.LEFT | SWT.BORDER | SWT.SINGLE);
+		TableWrapData sourceData = new TableWrapData(TableWrapData.FILL_GRAB);
+		sourceText.setLayoutData(sourceData);
+		sourceText.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				sourceChanged();
+			}
+		});
+		
+		Button button;
+
+		button = toolkit.createButton(leftPanel, "Browse...", SWT.PUSH | SWT.LEFT);
+		button.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleSourceBrowse();
+			}
+		});
+
+		toolkit.createLabel(leftPanel, "Target Folder: ", SWT.LEFT);
+		
+		targetText = toolkit.createText(leftPanel, null, SWT.LEFT | SWT.BORDER | SWT.SINGLE);
+		TableWrapData targetData = new TableWrapData(TableWrapData.FILL_GRAB);
+		targetText.setLayoutData(targetData);
 		targetText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				targetChanged();
 			}
 		});
 
-		Button button = new Button(composite, SWT.PUSH);
-		button.setText("Browse...");
+		button = toolkit.createButton(leftPanel, "Browse...", SWT.PUSH);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				handleBrowse();
+				handleTargetBrowse();
 			}
 		});
-		
-		Composite buttonBar = new Composite(composite, SWT.BORDER);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 3;
-		buttonBar.setLayoutData(gd);
-		buttonBar.setLayout(new FillLayout(SWT.HORIZONTAL));
-		
-		Button genIdlButton = new Button(buttonBar, SWT.PUSH);
-		genIdlButton.setText("Generate IDL");
-		genIdlButton.addSelectionListener(new SelectionAdapter() {
+
+		button = toolkit.createButton(rightPanel, "Generate IDL", SWT.PUSH);
+		TableWrapData idlData = new TableWrapData(TableWrapData.FILL);
+		button.setLayoutData(idlData);
+		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				generate(TransformType.IDL);
 			}
 		});
+		idlLabel = toolkit.createLabel(rightPanel, "<model>.idl", SWT.LEFT);
 		
-		Button genHButton = new Button(buttonBar, SWT.PUSH);
-		genHButton.setText("Generate C++ Header");
-		genHButton.addSelectionListener(new SelectionAdapter() {
+		button = toolkit.createButton(rightPanel, "Generate C++ Header", SWT.PUSH);
+		TableWrapData hData = new TableWrapData(TableWrapData.FILL);
+		button.setLayoutData(hData);
+		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				generate(TransformType.H);
 			}
 		});
+		hLabel = toolkit.createLabel(rightPanel, "<model>.h", SWT.LEFT);
 		
-		Button genCppButton = new Button(buttonBar, SWT.PUSH);
-		genCppButton.setText("Generate C++ Body");
-		genCppButton.addSelectionListener(new SelectionAdapter() {
+		button = toolkit.createButton(rightPanel, "Generate C++ Body", SWT.PUSH);
+		TableWrapData cppData = new TableWrapData(TableWrapData.FILL);
+		button.setLayoutData(cppData);
+		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				generate(TransformType.CPP);
 			}
 		});
+		cppLabel = toolkit.createLabel(rightPanel, "<model>.cpp", SWT.LEFT);
 		
-		Button genMpcButton = new Button(buttonBar, SWT.PUSH);
-		genMpcButton.setText("Generate MPC");
-		genMpcButton.addSelectionListener(new SelectionAdapter() {
+		button = toolkit.createButton(rightPanel, "Generate MPC", SWT.PUSH);
+		TableWrapData mpcData = new TableWrapData(TableWrapData.FILL);
+		button.setLayoutData(mpcData);
+		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				generate(TransformType.MPC);
 			}
 		});
+		mpcLabel = toolkit.createLabel(rightPanel, "<model>.mpc", SWT.LEFT);
 		
-		Button genAllButton = new Button(composite, SWT.PUSH);
-		genAllButton.setText("Generate All");
-		genAllButton.addSelectionListener(new SelectionAdapter() {
+		button = toolkit.createButton(rightPanel, "Generate ALL", SWT.PUSH);
+		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				generate(TransformType.IDL);
 				generate(TransformType.H);
@@ -198,8 +279,14 @@ public class OutputsForm extends FormPage implements IDataChangedListener {
 		dataChanged();
 		super.createFormContent(managedForm);
 	}
-	
+
 	private void initialize() {
+		List<Modelfile> modelList = manager.getModelfiles();
+		if( modelList.size() > 0) {
+			// Use only the first one if more than one.
+			modelFile = modelList.get(0);
+			sourceText.setText(modelFile.getName());
+		}
 		List<Targetdir> list = manager.getTargetdirs();
 		if( list.size() > 0) {
 			// There should be only one.
@@ -213,27 +300,27 @@ public class OutputsForm extends FormPage implements IDataChangedListener {
 							.findMember(new Path(getTargetName()));
 
 		if (getTargetName().length() == 0) {
-			updateStatus("Target must be specified");
+			updateTarget("Target folder must be specified");
 			return;
 		}
 		if (container == null
 				|| (container.getType() & (IResource.PROJECT | IResource.FOLDER)) == 0) {
-			updateStatus("Target must exist");
+			updateTarget("Target folder must exist");
 			return;
 		}
 		if (!container.isAccessible()) {
-			updateStatus("Project must be writable");
+			updateTarget("Target folder must be writable");
 			return;
 		}
-		updateStatus(null);
+		updateTarget(null);
 	}
 
-	private void updateStatus(String message) {
+	private void updateTarget(String message) {
 		if( message != null) {
 			ErrorDialog.openError(
 					getSite().getShell(),
 					"Output Updates",
-					"Target Directory not updated.",
+					"Target Folder not updated.",
 					new Status(IStatus.WARNING,PLUGINNAME,message));
 		} else {
 			targetDir.setName(getTargetName());
@@ -246,16 +333,189 @@ public class OutputsForm extends FormPage implements IDataChangedListener {
 		return targetText.getText();
 	}
 
-	private void handleBrowse() {
+	private void sourceChanged() {
+		IResource file = ResourcesPlugin.getWorkspace().getRoot()
+		.findMember( getSourceName());
+
+		if (getSourceName().length() == 0) {
+			updateSource("Model file must be specified");
+			return;
+		}
+		if (file == null
+				|| (file.getType() & IResource.FILE) == 0) {
+			updateSource("Model file must exist");
+			return;
+		}
+		if (!file.isAccessible()) {
+			updateSource("Model file must be readable");
+			return;
+		}
+		updateSource(null);
+	}
+
+	private void updateSource(String message) {
+		if( message != null) {
+			ErrorDialog.openError(
+					getSite().getShell(),
+					"Model File Updates",
+					"Model file not updated.",
+					new Status(IStatus.WARNING,PLUGINNAME,message));
+		} else {
+			modelName = null;
+			manager.setModelName(getModelName());
+			modelFile.setName(getSourceName());
+			manager.updated();
+			// TODO Indicate that we are dirty.
+		}
+	}
+
+	public String getSourceName() {
+		return sourceText.getText();
+	}
+	
+	protected void handleSourceBrowse() {
+		ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(
+				parent.getShell(),
+				new WorkbenchLabelProvider(),
+				new BaseWorkbenchContentProvider());
+		dialog.setTitle("Model Selection");
+		dialog.setMessage("Select Model file:");
+		dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());
+		if(dialog.open() == ElementTreeSelectionDialog.OK) {
+			Object[] result = dialog.getResult();
+			if( result.length == 1) {
+				Object r0 = result[0];
+				if( r0 instanceof IFile) {
+					sourceText.setText(((IFile)r0).getFullPath().toString());
+				}
+			}
+		}
+	}
+
+	private void handleTargetBrowse() {
 		ContainerSelectionDialog dialog = new ContainerSelectionDialog(
 				parent.getShell(), ResourcesPlugin.getWorkspace().getRoot(), false,
-				"Select target container");
+				"Select target folder:");
+		dialog.setTitle("Target Selection");
 		if (dialog.open() == ContainerSelectionDialog.OK) {
 			Object[] result = dialog.getResult();
 			if (result.length == 1) {
 				targetText.setText(((Path)result[0]).toString());
 			}
 		}
+	}
+
+	private String getModelName() {
+		if( modelName != null) {
+			return modelName;
+		}
+		
+		if( getNameExpr() == null) {
+			ErrorDialog.openError(
+					getSite().getShell(),
+					"getModelName",
+					"XPath expression not available to obtain the model name.",
+					new Status(IStatus.ERROR,PLUGINNAME,"Null pointer"));
+			return null;
+		}
+
+		IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
+		IFile modelFileResource = workspace.getFile(new Path(getSourceName()));
+		if(!modelFileResource.exists()) {
+			ErrorDialog.openError(
+					getSite().getShell(),
+					"getModelName",
+					"Model file " + getSourceName() + " does not exist.",
+					new Status(IStatus.ERROR,PLUGINNAME,"Resource does not exist."));
+			return null;
+		}
+		URI	inputUri = modelFileResource.getLocationURI();
+		
+		IFile[] modelFile = workspace.findFilesForLocationURI( inputUri);
+		if( modelFile.length > 0 && modelFile[0].exists()) {
+			// We have a good input file, now parse the XML.
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			docFactory.setNamespaceAware(true);
+			DocumentBuilder builder;
+			Document doc;
+			try {
+				builder = docFactory.newDocumentBuilder();
+				doc = builder.parse(modelFile[0].getContents());
+				Object result = getNameExpr().evaluate(doc, XPathConstants.NODESET);
+				NodeList nodes = (NodeList) result;
+				switch(nodes.getLength()) {
+				case 1:
+					modelName = nodes.item(0).getNodeValue();
+					updateModelnameLabels();
+					break;
+					
+				case 0:
+					ErrorDialog.openError(
+							getSite().getShell(),
+							"getModelName",
+							"Could not find any model name in the source file " + inputUri.toString(),
+							new Status(IStatus.ERROR,PLUGINNAME,"Null pointer"));
+					break;
+					
+					default:
+						ErrorDialog.openError(
+								getSite().getShell(),
+								"getModelName",
+								"Found " + nodes.getLength() + " candidate model names in the source file "
+								+ inputUri.toString() + ", which is too many!",
+								new Status(IStatus.ERROR,PLUGINNAME,"Null pointer"));
+						break;
+				}
+
+			} catch (ParserConfigurationException e) {
+				ErrorDialog.openError(
+						getSite().getShell(),
+						"getModelName",
+						"Problem configuring the parser for file " + inputUri.toString(),
+						new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+			} catch (SAXException e) {
+				ErrorDialog.openError(
+						getSite().getShell(),
+						"getModelName",
+						"Problem parsing the source file " + inputUri.toString(),
+						new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+			} catch (IOException e) {
+				ErrorDialog.openError(
+						getSite().getShell(),
+						"getModelName",
+						"Problem reading the source file " + inputUri.toString(),
+						new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+			} catch (CoreException e) {
+				ErrorDialog.openError(
+						getSite().getShell(),
+						"getModelName",
+						"Problem processing the source file " + inputUri.toString(),
+						new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+			} catch (XPathExpressionException e) {
+				ErrorDialog.openError(
+						getSite().getShell(),
+						"getModelName",
+						"Problem extracting the modelname from the source file " + inputUri.toString(),
+						new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+			}
+		}
+		return modelName;
+	}
+	
+	private void updateModelnameLabels() {
+		idlLabel.setText(modelName + TransformType.IDL.suffix());
+		idlLabel.setSize(idlLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+		
+		hLabel.setText(modelName + TransformType.H.suffix());
+		hLabel.setSize(hLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+		
+		cppLabel.setText(modelName + TransformType.CPP.suffix());
+		cppLabel.setSize(cppLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+		
+		mpcLabel.setText(modelName + TransformType.MPC.suffix());
+		mpcLabel.setSize(mpcLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+		
+		parent.layout(true);
 	}
 	
 	private void generate( TransformType which) {
@@ -280,33 +540,40 @@ public class OutputsForm extends FormPage implements IDataChangedListener {
 		}
 
 		IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
+
+		IFile modelFileResource = workspace.getFile(new Path(modelFile.getName()));
+		if(!modelFileResource.exists()) {
+			ErrorDialog.openError(
+					getSite().getShell(),
+					which.dialogTitle(),
+					"Model file " + modelFile.getName() + " does not exist.",
+					new Status(IStatus.ERROR,PLUGINNAME,"Resource does not exist."));
+			return;
+		}
+		
 		IFolder targetFolder = workspace.getFolder(new Path(targetDir.getName()));
 		if(!targetFolder.exists()) {
 			ErrorDialog.openError(
 					getSite().getShell(),
 					which.dialogTitle(),
-					"Target directory " + targetDir.getName() + " does not exist.",
+					"Target folder " + targetDir.getName() + " does not exist.",
 					new Status(IStatus.ERROR,PLUGINNAME,"Resource does not exist."));
 			return;
 		}
-		
-		// TODO Extract these from the input form.
-		String modelname = "modelname";
-		String inputFile = "/home/projects/martinezm/doc/DDS/sdk/tools/modeling/tests/Codegen/aModel.opendds";
 
-		URI inputUri = null;
-		URI outputUri = null;
-		try {
-			inputUri = new URI("file://" + inputFile);
-			outputUri = targetFolder.getFile(modelname + which.suffix()).getLocationURI();
-		} catch (URISyntaxException e) {
+		String modelname = getModelName();
+		if( modelname == null) {
 			ErrorDialog.openError(
 					getSite().getShell(),
 					which.dialogTitle(),
-					"URI Syntax problem.",
-					new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+					"Unable to generate output for unknown model in source file "
+					+ modelFileResource.getLocationURI().toString(),
+					new Status(IStatus.ERROR,PLUGINNAME,"Model is not parsable"));
 			return;
 		}
+
+		URI	inputUri  = modelFileResource.getLocationURI();
+		URI	outputUri = targetFolder.getFile(modelname + which.suffix()).getLocationURI();
 
 		StreamResult result = null;
 		try {
@@ -356,5 +623,26 @@ public class OutputsForm extends FormPage implements IDataChangedListener {
 					new Status(IStatus.WARNING,PLUGINNAME,e.getMessage()));
 		}
 	}
-	
+
+	// This is just annoying.
+	public class GeneratorNamespaceContext implements NamespaceContext {
+	    public String getNamespaceURI(String prefix) {
+	        if (prefix == null) throw new NullPointerException("Null prefix");
+	        else if ("generator".equals(prefix)) return generatorNamespace;
+	        else if ("xml".equals(prefix)) return XMLConstants.XML_NS_URI;
+	        return XMLConstants.NULL_NS_URI;
+	    }
+
+	    // This method isn't necessary for XPath processing.
+	    public String getPrefix(String uri) {
+	        throw new UnsupportedOperationException();
+	    }
+
+	    // This method isn't necessary for XPath processing either.
+	    @SuppressWarnings("unchecked")
+		public Iterator getPrefixes(String uri) {
+	        throw new UnsupportedOperationException();
+	    }
+
+	}
 }

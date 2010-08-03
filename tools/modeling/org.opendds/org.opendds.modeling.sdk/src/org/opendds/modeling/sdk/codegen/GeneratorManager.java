@@ -30,6 +30,7 @@ public class GeneratorManager  {
 	private ObjectFactory of;
 	private Genspec spec;
 	private boolean updated;
+	private String modelName;
 
 	private List<IManagerListener> managerListeners;
 	
@@ -318,6 +319,14 @@ public class GeneratorManager  {
 	
 	ITableLabelProvider getLabelProvider() {
 		return new CodegenLabelProvider();
+	}
+
+	public void setModelName(String modelName) {
+		this.modelName = modelName;
+	}
+
+	public String getModelName() {
+		return modelName;
 	}
 
 }

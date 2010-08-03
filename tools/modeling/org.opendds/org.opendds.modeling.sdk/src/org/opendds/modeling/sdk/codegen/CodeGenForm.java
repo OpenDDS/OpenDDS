@@ -27,9 +27,6 @@ import org.eclipse.ui.part.FileEditorInput;
 
 public class CodeGenForm extends FormEditor implements IResourceChangeListener {
 	private int XMLEDITOR_INDEX;
-
-	/** Editor for model source specification. */
-	private InputsForm inputsForm;
 	
 	/** Editor for model target output specification. */
  	private OutputsForm outputsForm;
@@ -90,12 +87,10 @@ public class CodeGenForm extends FormEditor implements IResourceChangeListener {
 
 	@Override
 	protected void addPages() {
-		inputsForm = new InputsForm(this,"org.opendds.modeling.sdk.forms.input","Model Input");
-		outputsForm = new OutputsForm(this,"org.opendds.modeling.sdk.forms.output","Model Output");
-		instanceForm = new InstanceForm(this,"org.opendds.modeling.sdk.forms.instance","Instance Customization");
+		outputsForm = new OutputsForm(this,"org.opendds.modeling.sdk.forms.output","Generate");
+		instanceForm = new InstanceForm(this,"org.opendds.modeling.sdk.forms.instance","Customize");
 		xmlEditor = new TextEditor();
 
-		addDataChangedListener(inputsForm);
 		addDataChangedListener(outputsForm);
 		addDataChangedListener(instanceForm);
 
@@ -103,7 +98,6 @@ public class CodeGenForm extends FormEditor implements IResourceChangeListener {
 		initializeContent();
 
 		try {
-			addPage(inputsForm);
 			addPage(outputsForm);
 			addPage(instanceForm);
 			XMLEDITOR_INDEX = addPage(xmlEditor, getEditorInput());
