@@ -94,7 +94,7 @@ public:
     ~AckToken() {}
 
     ACE_Time_Value deadline() const {
-      return this->tstamp_ + duration_to_time_value(this->max_wait_);
+      return duration_to_absolute_time_value(this->max_wait_, this->tstamp_);
     }
 
     DDS::Time_t timestamp() const {

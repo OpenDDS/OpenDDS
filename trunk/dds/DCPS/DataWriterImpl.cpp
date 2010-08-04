@@ -1147,13 +1147,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
     (qos_.history.kind == DDS::KEEP_ALL_HISTORY_QOS
      && qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
 
-  ACE_Time_Value max_blocking_time = ACE_Time_Value::zero;
-
-  if (should_block) {
-    max_blocking_time =
-      duration_to_time_value(qos_.reliability.max_blocking_time);
-  }
-
   CORBA::Long const depth =
     get_instance_sample_list_depth(
       qos_.history.kind,
@@ -1179,7 +1172,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   data_container_ = new WriteDataContainer(this,
                                            depth,
                                            should_block,
-                                           max_blocking_time,
+                                           qos_.reliability.max_blocking_time,
                                            n_chunks_,
                                            domain_id_,
                                            get_topic_name(),
