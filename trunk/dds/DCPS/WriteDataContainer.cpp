@@ -687,7 +687,6 @@ WriteDataContainer::remove_oldest_sample(
     // Move the element to the released_data_ list since it is still
     // in use, and we need to wait until it is told by the transport.
     //
-ACE_DEBUG ((LM_DEBUG, "(%P|%t)remove oldest %X \n", stale));
     result = this->sending_data_.dequeue_next_send_sample(stale) != 0;
     released_data_.enqueue_tail_next_send_sample(stale);
     released = false;
