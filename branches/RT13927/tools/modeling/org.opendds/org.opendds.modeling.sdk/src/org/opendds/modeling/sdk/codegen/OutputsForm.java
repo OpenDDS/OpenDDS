@@ -74,7 +74,7 @@ public class OutputsForm extends FormPage implements IDataChangedListener {
 	
 	private static final String PLUGINNAME = "org.opendds.modeling.sdk";
 	private static final String modelNameExpression = "//generator:model/@name";
-	private static String generatorNamespace = "http://www.opendds.com/modeling/schemas/Generator/1.0";
+	private static final String generatorNamespace = "http://www.opendds.com/modeling/schemas/Generator/1.0";
 
 	private static enum TransformType {
 		IDL { public Transformer getTransformer() { return idlTransformer; };
@@ -287,10 +287,10 @@ public class OutputsForm extends FormPage implements IDataChangedListener {
 			modelFile = modelList.get(0);
 			sourceText.setText(modelFile.getName());
 		}
-		List<Targetdir> list = manager.getTargetdirs();
-		if( list.size() > 0) {
+		List<Targetdir> targetList = manager.getTargetdirs();
+		if( targetList.size() > 0) {
 			// There should be only one.
-			targetDir = list.get(0);
+			targetDir = targetList.get(0);
 			targetText.setText( targetDir.getName());
 		}
 	}
@@ -412,7 +412,7 @@ public class OutputsForm extends FormPage implements IDataChangedListener {
 		
 		if( getNameExpr() == null) {
 			ErrorDialog.openError(
-					getSite().getShell(),
+					parent.getShell(),
 					"getModelName",
 					"XPath expression not available to obtain the model name.",
 					new Status(IStatus.ERROR,PLUGINNAME,"Null pointer"));
@@ -423,96 +423,97 @@ public class OutputsForm extends FormPage implements IDataChangedListener {
 		IFile modelFileResource = workspace.getFile(new Path(getSourceName()));
 		if(!modelFileResource.exists()) {
 			ErrorDialog.openError(
-					getSite().getShell(),
+					parent.getShell(),
 					"getModelName",
 					"Model file " + getSourceName() + " does not exist.",
 					new Status(IStatus.ERROR,PLUGINNAME,"Resource does not exist."));
 			return null;
 		}
-		URI	inputUri = modelFileResource.getLocationURI();
 		
-		IFile[] modelFile = workspace.findFilesForLocationURI( inputUri);
-		if( modelFile.length > 0 && modelFile[0].exists()) {
-			// We have a good input file, now parse the XML.
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-			docFactory.setNamespaceAware(true);
-			DocumentBuilder builder;
-			Document doc;
-			try {
-				builder = docFactory.newDocumentBuilder();
-				doc = builder.parse(modelFile[0].getContents());
-				Object result = getNameExpr().evaluate(doc, XPathConstants.NODESET);
-				NodeList nodes = (NodeList) result;
-				switch(nodes.getLength()) {
-				case 1:
-					modelName = nodes.item(0).getNodeValue();
-					updateModelnameLabels();
-					break;
-					
-				case 0:
-					ErrorDialog.openError(
-							getSite().getShell(),
-							"getModelName",
-							"Could not find any model name in the source file " + inputUri.toString(),
-							new Status(IStatus.ERROR,PLUGINNAME,"Null pointer"));
-					break;
-					
-					default:
-						ErrorDialog.openError(
-								getSite().getShell(),
-								"getModelName",
-								"Found " + nodes.getLength() + " candidate model names in the source file "
-								+ inputUri.toString() + ", which is too many!",
-								new Status(IStatus.ERROR,PLUGINNAME,"Null pointer"));
-						break;
-				}
+		// We have a good input file, now parse the XML.
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		docFactory.setNamespaceAware(true);
+		DocumentBuilder builder;
+		Document doc;
+		try {
+			builder = docFactory.newDocumentBuilder();
+			doc = builder.parse(modelFileResource.getContents());
+			Object result = getNameExpr().evaluate(doc, XPathConstants.NODESET);
+			NodeList nodes = (NodeList) result;
+			switch(nodes.getLength()) {
+			case 1:
+				modelName = nodes.item(0).getNodeValue();
+				updateModelnameLabels();
+				break;
 
-			} catch (ParserConfigurationException e) {
+			case 0:
 				ErrorDialog.openError(
-						getSite().getShell(),
+						parent.getShell(),
 						"getModelName",
-						"Problem configuring the parser for file " + inputUri.toString(),
-						new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
-			} catch (SAXException e) {
+						"Could not find any model name in the source file " + getSourceName(),
+						new Status(IStatus.ERROR,PLUGINNAME,"Null pointer"));
+				break;
+
+			default:
 				ErrorDialog.openError(
-						getSite().getShell(),
+						parent.getShell(),
 						"getModelName",
-						"Problem parsing the source file " + inputUri.toString(),
-						new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
-			} catch (IOException e) {
-				ErrorDialog.openError(
-						getSite().getShell(),
-						"getModelName",
-						"Problem reading the source file " + inputUri.toString(),
-						new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
-			} catch (CoreException e) {
-				ErrorDialog.openError(
-						getSite().getShell(),
-						"getModelName",
-						"Problem processing the source file " + inputUri.toString(),
-						new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
-			} catch (XPathExpressionException e) {
-				ErrorDialog.openError(
-						getSite().getShell(),
-						"getModelName",
-						"Problem extracting the modelname from the source file " + inputUri.toString(),
-						new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+						"Found " + nodes.getLength() + " candidate model names in the source file "
+						+ getSourceName() + ", which is too many!",
+						new Status(IStatus.ERROR,PLUGINNAME,"Null pointer"));
+				break;
 			}
+
+		} catch (ParserConfigurationException e) {
+			ErrorDialog.openError(
+					parent.getShell(),
+					"getModelName",
+					"Problem configuring the parser for file " + getSourceName(),
+					new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+		} catch (SAXException e) {
+			ErrorDialog.openError(
+					parent.getShell(),
+					"getModelName",
+					"Problem parsing the source file " + getSourceName(),
+					new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+		} catch (IOException e) {
+			ErrorDialog.openError(
+					parent.getShell(),
+					"getModelName",
+					"Problem reading the source file " + getSourceName(),
+					new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+		} catch (CoreException e) {
+			ErrorDialog.openError(
+					parent.getShell(),
+					"getModelName",
+					"Problem processing the source file " + getSourceName(),
+					new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+		} catch (XPathExpressionException e) {
+			ErrorDialog.openError(
+					parent.getShell(),
+					"getModelName",
+					"Problem extracting the modelname from the source file " + getSourceName(),
+					new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
 		}
 		return modelName;
 	}
 	
 	private void updateModelnameLabels() {
-		idlLabel.setText(modelName + TransformType.IDL.suffix());
+		String basename = modelName;
+		if( basename == null) {
+			basename = "{unnamed}";
+		}
+		
+		idlLabel.setText(basename + TransformType.IDL.suffix());
 		idlLabel.setSize(idlLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		
-		hLabel.setText(modelName + TransformType.H.suffix());
+		hLabel.setText(basename + TransformType.H.suffix());
 		hLabel.setSize(hLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		
-		cppLabel.setText(modelName + TransformType.CPP.suffix());
+		cppLabel.setText(basename + TransformType.CPP.suffix());
 		cppLabel.setSize(cppLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		
-		mpcLabel.setText(modelName + TransformType.MPC.suffix());
+		mpcLabel.setText(basename + TransformType.MPC.suffix());
 		mpcLabel.setSize(mpcLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		
 		parent.layout(true);
@@ -572,7 +573,6 @@ public class OutputsForm extends FormPage implements IDataChangedListener {
 			return;
 		}
 
-		URI	inputUri  = modelFileResource.getLocationURI();
 		URI	outputUri = targetFolder.getFile(modelname + which.suffix()).getLocationURI();
 
 		StreamResult result = null;
@@ -590,27 +590,24 @@ public class OutputsForm extends FormPage implements IDataChangedListener {
 			return;
 		}
 		
-		IFile[] modelFile = workspace.findFilesForLocationURI( inputUri);
-		if( modelFile.length > 0 && modelFile[0].exists()) {
-			StreamSource modelInput;
-			try {
-				modelInput = new StreamSource(modelFile[0].getContents());
-				which.transform(modelInput, result);
-			} catch (CoreException e) {
-				ErrorDialog.openError(
-						getSite().getShell(),
-						which.dialogTitle(),
-						"Unable to open input model file " + outputUri.toString() + " for conversion.",
-						new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
-				return;
-			} catch (TransformerException e) {
-				ErrorDialog.openError(
-						getSite().getShell(),
-						which.dialogTitle(),
-						"Transformation failed!",
-						new Status(IStatus.ERROR,PLUGINNAME,e.getMessageAndLocation()));
-				return;
-			}
+		StreamSource modelInput;
+		try {
+			modelInput = new StreamSource(modelFileResource.getContents());
+			which.transform(modelInput, result);
+		} catch (CoreException e) {
+			ErrorDialog.openError(
+					getSite().getShell(),
+					which.dialogTitle(),
+					"Unable to open input model file " + outputUri.toString() + " for conversion.",
+					new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+			return;
+		} catch (TransformerException e) {
+			ErrorDialog.openError(
+					getSite().getShell(),
+					which.dialogTitle(),
+					"Transformation failed!",
+					new Status(IStatus.ERROR,PLUGINNAME,e.getMessageAndLocation()));
+			return;
 		}
 		
 		try {
