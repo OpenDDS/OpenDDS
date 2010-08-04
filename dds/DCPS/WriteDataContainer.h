@@ -113,7 +113,7 @@ public:
     /// Should the write wait for available space?
     bool             should_block ,
     /// The timeout for write.
-    ACE_Time_Value   max_blocking_time,
+    ::DDS::Duration_t max_blocking_time,
     /// The number of chunks that the DataSampleListElementAllocator
     /// needs allocate.
     size_t           n_chunks,
@@ -347,6 +347,9 @@ private:
     DataSampleList& instance_list,
     bool& released);
 
+  void wakeup_blocking_writers (DataSampleListElement* stale,
+                               PublicationInstance* instance);
+
 private:
 
   /// List of data that has not been sent yet.
@@ -398,7 +401,7 @@ private:
 
   /// The maximum time to block on write operation.
   /// This comes from DataWriter's QoS HISTORY.max_blocking_time
-  ACE_Time_Value                  max_blocking_time_;
+  ::DDS::Duration_t               max_blocking_time_;
 
   /// The block waiting flag.
   bool                            waiting_on_release_;

@@ -1396,8 +1396,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       = this->writers_.find(sample.header_.publication_id_);
 
       if (where != this->writers_.end()) {
-        ACE_Time_Value now      = ACE_OS::gettimeofday();
-        ACE_Time_Value deadline = now + duration_to_time_value(delay);
+        ACE_Time_Value now = ACE_OS::gettimeofday();
+        ACE_Time_Value deadline = duration_to_absolute_time_value(delay, now);
 
         where->second->ack_deadline(ack, deadline);
 
