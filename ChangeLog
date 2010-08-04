@@ -1,3 +1,9 @@
+Wed Aug  4 17:41:10 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Removed a bebug message added in last commit.
+
 Wed Aug  4 16:45:10 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Qos_Helper.h:
