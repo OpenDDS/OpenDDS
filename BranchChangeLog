@@ -1,3 +1,11 @@
+Wed Aug  4 22:43:58 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3540] 2010-08-04 13:52  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/OutputsForm.java:
+
+          Simplified input file handling. Extended invalid input file labeling
+          in form.
+
 Tue Aug  3 23:27:29 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3538] 2010-08-03 23:26  martinezm
