@@ -1,3 +1,9 @@
+Thu Aug  5 21:39:53 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Fixed a GCC warning.
+
 Thu Aug  5 20:57:04 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         Commiting a change initially developed by Mike Martinez:

@@ -508,8 +508,9 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
   // now release the element.
   //
   PublicationInstance* instance = sample->handle_;
-  DataSampleListElement* stale = 0;
-  if (stale = released_data_.dequeue_next_send_sample(sample)) {
+  DataSampleListElement* stale =
+    released_data_.dequeue_next_send_sample(sample);
+  if (stale) {
     release_buffer(stale);
   } else {
     //
@@ -612,20 +613,23 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
     // transport and will be moved to the unsent list for resend.
     unsent_data_.enqueue_tail_next_send_sample(sample);
 
-  } else if (stale = released_data_.dequeue_next_send_sample(sample)) {
-    // The remove_sample is requested when sample list size
-    // reaches limit. In this case, the oldest sample is
-    // moved to released_data_ already.
-    release_buffer(stale);
-
   } else {
-    // The sample is neither in not in the
-    // released_data_ list.
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("WriteDataContainer::data_dropped, ")
-               ACE_TEXT("The dropped sample is not in released_data_ ")
-               ACE_TEXT("list.\n")));
+    stale = released_data_.dequeue_next_send_sample(sample);
+    if (stale) {
+      // The remove_sample is requested when sample list size
+      // reaches limit. In this case, the oldest sample is
+      // moved to released_data_ already.
+      release_buffer(stale);
+
+    } else {
+      // The sample is neither in not in the
+      // released_data_ list.
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("WriteDataContainer::data_dropped, ")
+                 ACE_TEXT("The dropped sample is not in released_data_ ")
+                 ACE_TEXT("list.\n")));
+    }
   }
 
   this->wakeup_blocking_writers (stale, sample->handle_);
