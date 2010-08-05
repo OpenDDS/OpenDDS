@@ -23,7 +23,7 @@ void
 usage_and_exit(int value = 0)
 {
   std::cout << std::endl
-            << "USAGE: odds_repoctl [opts] <cmd> <args> ..." << std::endl
+            << "USAGE: repoctl [opts] <cmd> <args> ..." << std::endl
             << std::endl
             << " The command line is a simplistic command/arguments format.  The first" << std::endl
             << " argument will *always* be the command and following arguments are" << std::endl
@@ -101,6 +101,11 @@ public:
   /// Virtual destructor.
   virtual ~Options() { }
 
+  /// Access the commmand line invocation name.
+  const std::string& name() const {
+    return this->name_;
+  }
+
   /// Access the verbose option.
   const bool& verbose() const {
     return this->verbose_;
@@ -127,6 +132,9 @@ public:
   }
 
 private:
+  /// Process name we were started with (the command line command).
+  std::string name_;
+
   /// Verbose output.
   bool verbose_;
 
@@ -147,6 +155,8 @@ Options::Options(int argc, ACE_TCHAR** argv)
   : verbose_(false)
   , federationDomain_(OpenDDS::Federator::DEFAULT_FEDERATIONDOMAIN)
 {
+  this->name_ = argv[0];
+
   ACE_Arg_Shifter arg_shifter(argc, argv);
 
   while (arg_shifter.is_anything_left()) {
@@ -218,6 +228,7 @@ Options::Options(int argc, ACE_TCHAR** argv)
 int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   int status = 0;
+  const char* exename = "repoctl";
 
   try {
     // Initialize an ORB.
@@ -225,6 +236,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // Grab our information from the command line.
     Options options(argc, argv);
+    exename = strdup( options.name().c_str());
 
     OpenDDS::DCPS::DCPSInfo_var ir;
     OpenDDS::Federator::Manager_var target;
@@ -239,8 +251,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
       if (options.verbose()) {
         ACE_DEBUG((LM_INFO,
-                   ACE_TEXT("(%P|%t) INFO: odds_repoctl: ")
+                   ACE_TEXT("(%P|%t) INFO: %C: ")
                    ACE_TEXT("attempting to resolve and connect to repository at: %C.\n"),
+                   exename,
                    iorString.c_str()));
       }
 
@@ -250,7 +263,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
       if (CORBA::is_nil(ir.in())) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: odds_repoctl: could not narrow %C.\n"),
+                   ACE_TEXT("(%P|%t) ERROR: %C: could not narrow %C.\n"),
+                   exename,
                    iorString.c_str()));
         return -4;
       }
@@ -264,8 +278,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
       if (options.verbose()) {
         ACE_DEBUG((LM_INFO,
-                   ACE_TEXT("(%P|%t) INFO: odds_repoctl: ")
+                   ACE_TEXT("(%P|%t) INFO: %C: ")
                    ACE_TEXT("attempting to resolve and connect to repository at: %C.\n"),
+                   exename,
                    iorString.c_str()));
       }
 
@@ -275,7 +290,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
       if (CORBA::is_nil(target.in())) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: odds_repoctl: could not narrow %C.\n"),
+                   ACE_TEXT("(%P|%t) ERROR: %C: could not narrow %C.\n"),
+                   exename,
                    iorString.c_str()));
         return -5;
       }
@@ -289,8 +305,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
         if (options.verbose()) {
           ACE_DEBUG((LM_INFO,
-                     ACE_TEXT("(%P|%t) INFO: odds_repoctl: ")
+                     ACE_TEXT("(%P|%t) INFO: %C: ")
                      ACE_TEXT("attempting to resolve and connect to repository at: %C.\n"),
+                     exename,
                      iorString.c_str()));
         }
 
@@ -300,7 +317,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
         if (CORBA::is_nil(peer.in())) {
           ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: odds_repoctl: could not narrow %C.\n"),
+                     ACE_TEXT("(%P|%t) ERROR: %C: could not narrow %C.\n"),
+                     exename,
                      iorString.c_str()));
           return -6;
         }
@@ -311,7 +329,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     case Options::JOIN: {
       if (options.verbose()) {
         ACE_DEBUG((LM_INFO,
-                   ACE_TEXT("(%P|%t) INFO: odds_repoctl: federating.\n")));
+                   ACE_TEXT("(%P|%t) INFO: %C: federating.\n"), exename));
       }
 
       target->join_federation(peer.in(), options.federationDomain());
@@ -321,7 +339,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     case Options::LEAVE: {
       if (options.verbose()) {
         ACE_DEBUG((LM_INFO,
-                   ACE_TEXT("(%P|%t) INFO: odds_repoctl: leaving and shutting down.\n")));
+                   ACE_TEXT("(%P|%t) INFO: %C: leaving and shutting down.\n"), exename));
       }
 
       target->leave_and_shutdown();
@@ -331,7 +349,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     case Options::SHUTDOWN: {
       if (options.verbose()) {
         ACE_DEBUG((LM_INFO,
-                   ACE_TEXT("(%P|%t) INFO: odds_repoctl: shutting down.\n")));
+                   ACE_TEXT("(%P|%t) INFO: %C: shutting down.\n"), exename));
       }
 
       target->shutdown();
@@ -341,7 +359,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     case Options::KILL: {
       if (options.verbose()) {
         ACE_DEBUG((LM_INFO,
-                   ACE_TEXT("(%P|%t) INFO: odds_repoctl: shutting down.\n")));
+                   ACE_TEXT("(%P|%t) INFO: %C: shutting down.\n"), exename));
       }
 
       ir->shutdown();
@@ -350,23 +368,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     default:
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: odds_repoctl: unknown command requested.\n ")));
+                 ACE_TEXT("(%P|%t) ERROR: %C: unknown command requested.\n "), exename));
       usage_and_exit(-7);
       break;
     }
 
   } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception("(%P|%t) ABORT: odds_repoctl: CORBA problem detected.\n");
+    std::string message = "(%P|%t) ABORT: ";
+    message += exename;
+    message += " : CORBA problem detected.\n";
+    ex._tao_print_exception(message.c_str());
     status = -1;
 
   } catch (const std::exception& ex) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ABORT: odds_repoctl: %C exception caught in main().\n"), ex.what()));
+               ACE_TEXT("(%P|%t) ABORT: %C: %C exception caught in main().\n"),
+               ex.what(), exename));
     status = -2;
 
   } catch (...) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ABORT: odds_repoctl: unspecified exception caught in main() - panic.\n")));
+               ACE_TEXT("(%P|%t) ABORT: %C: unspecified exception caught in main() - panic.\n"),
+               exename));
     status = -3;
 
   }

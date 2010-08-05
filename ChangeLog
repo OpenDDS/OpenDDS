@@ -1,3 +1,21 @@
+Thu Aug  5 16:16:43 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * NEWS:
+        * java/jms/compat/build.xml:
+        * tools/repoctl:
+        * tools/repoctl/repoctl.cpp:
+        * tools/repoctl/repoctl.mpc:
+
+          Removed 'odds_' decorator from the command name.
+
+        * tools/odds_repoctl:
+        * tools/odds_repoctl/odds_repoctl.mpc:
+        * tools/odds_repoctl/odds_repoctl.cpp:
+        * tools/repoctl/odds_repoctl.mpc:
+        * tools/repoctl/odds_repoctl.cpp:
+
+          Removed these files.
+
 Wed Aug  4 17:41:10 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:
@@ -9,37 +27,37 @@ Wed Aug  4 16:45:10 UTC 2010  Yan Dai  <dai_y@ociweb.com>
         * dds/DCPS/Qos_Helper.h:
         * dds/DCPS/Qos_Helper.inl:
 
-          - Validated sec part to avoid sec in ACE_Time_Value 
-            overflow in duration_to_time_value(). It returns 
+          - Validated sec part to avoid sec in ACE_Time_Value
+            overflow in duration_to_time_value(). It returns
             ACE_Time_Value as large as ACE_Time_Value::max_time.
           - Added duration_to_absolute_time_value() which also
-            validate the return ACE_Time_Value to avoid sec 
+            validate the return ACE_Time_Value to avoid sec
             overflow.
-          
+
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DataWriterImpl.h:
         * dds/DCPS/DataWriterImpl.cpp:
         * dds/DCPS/WaitSet.cpp:
-        
+
           Applied duration_to_absolute_time_value method.
-          
+
         * dds/DCPS/WriteDataContainer.h:
         * dds/DCPS/WriteDataContainer.cpp:
-             
+
           Fixed bugs that did not wake up blocking writers
           when receiving a sample already in release queue.
-          
+
         * tests/DCPS/FooTest3_1/SimpleDataReader.cpp:
         * tests/DCPS/FooTest3_1/Writer.cpp:
-        
-          Added some debugging message. 
+
+          Added some debugging message.
 
         * tests/DCPS/UnitTests/DurationToTimeValue.cpp:
         * tests/DCPS/UnitTests/UnitTests.mpc:
 
-          Added unit test for conversion of infinite Duration 
+          Added unit test for conversion of infinite Duration
           to ACE_Time_Value.
-          
+
 Fri Jul 30 13:23:02 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tools/scripts/set_svnignore.pl:
