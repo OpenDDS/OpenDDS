@@ -127,6 +127,8 @@ public:
 
   bool no_writer () const;
 
+  void reset_ownership (::DDS::InstanceHandle_t instance);
+
 private:
   ACE_Recursive_Thread_Mutex& lock_;
 
