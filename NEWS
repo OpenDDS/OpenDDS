@@ -22,6 +22,10 @@ Version 2.2 of OpenDDS.
 - Renamed odds_monitor command to monitor.  Add a decorator if needed when
   installing external to the OpenDDS directories.
 
+- Renamed Wireshark dissector 'odds' library to 'OpenDDS_Dissector'.
+  The source directory was renamed from $DDS_ROOT/tools/odds_dissector
+  to $DDS_ROOT/tools/dissector.
+
 - Fixed transport so it now allows associations between datareaders and
   datawriters attached to the same transport to work.
 

@@ -1,9 +1,36 @@
+Thu Aug  5 20:57:04 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        Commiting a change initially developed by Mike Martinez:
+
+        * NEWS:
+        * tools/dissector:
+        * tools/dissector/README:
+        * tools/dissector/colorfilters:
+        * tools/dissector/dissector.mpc:
+        * tools/dissector/dissector.rc:
+        * tools/dissector/dissector_export.h:
+        * tools/dissector/packet.cpp:
+        * tools/dissector/plugin.cpp:
+
+          Renamed Wireshark dissector 'odds' library to 'OpenDDS_Dissector'.
+          The source directory was renamed from tools/odds_dissector
+          to tools/dissector.
+
+        * tools/dissector/odds_dissector.mpc:
+        * tools/dissector/odds_dissector.rc:
+        * tools/dissector/odds_export.h:
+        * tools/dissector/odds_packet.cpp:
+        * tools/dissector/odds_plugin.cpp:
+        * tools/odds_dissector:
+
+          Removed these files.
+
 Thu Aug  5 20:13:26 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/UnitTests/DurationToTimeValue.cpp:
 
           Fixed test result verification on 64bits build.
-          
+
 Thu Aug  5 16:36:01 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * NEWS:
