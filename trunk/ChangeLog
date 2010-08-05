@@ -1,3 +1,9 @@
+Thu Aug  5 20:13:26 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/UnitTests/DurationToTimeValue.cpp:
+
+          Fixed test result verification on 64bits build.
+          
 Thu Aug  5 16:36:01 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * NEWS:
