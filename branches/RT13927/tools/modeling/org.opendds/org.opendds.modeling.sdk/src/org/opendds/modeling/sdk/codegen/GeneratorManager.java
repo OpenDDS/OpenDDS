@@ -29,10 +29,15 @@ public class GeneratorManager  {
 	
 	private ObjectFactory of;
 	private Genspec spec;
-	private boolean updated;
 	private String modelName;
 
 	private List<IManagerListener> managerListeners;
+
+	public GeneratorManager() {
+		of = new ObjectFactory();
+		spec = of.createGenspec();
+		managerListeners = new ArrayList<IManagerListener>();
+	}
 	
 	public void addManagerListener(IManagerListener listener) {
 		if(!managerListeners.contains(listener)) {			
@@ -44,19 +49,10 @@ public class GeneratorManager  {
 		managerListeners.remove(listener);
 	}
 
-	public GeneratorManager() {
-		updated = true;
-		of = new ObjectFactory();
-		spec = of.createGenspec();
-		managerListeners = new ArrayList<IManagerListener>();
-	}
-	
-	public void updated() {
-		updated = true;
-	}
-	
-	public boolean isUpdated() {
-		return updated;
+	public void fireModelChanged() {
+		for( IManagerListener listener: managerListeners) {
+			listener.modelChanged(this);
+		}		
 	}
 	
 	public void addInstanceSpec( String key, String value) {
@@ -138,12 +134,7 @@ public class GeneratorManager  {
 			@SuppressWarnings( "unchecked" )
 			JAXBElement<Genspec> doc = (JAXBElement<Genspec>)unmarshaller.unmarshal( inputStream );
 			spec = doc.getValue();
-	}
-
-	public void fireModelChanged() {
-		for( IManagerListener listener: managerListeners) {
-			listener.modelChanged(this);
-		}		
+			fireModelChanged();
 	}
 
 	public void marshal( OutputStream outputStream) {
@@ -155,7 +146,6 @@ public class GeneratorManager  {
 			Marshaller marshaller = context.createMarshaller();
 			marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
 			marshaller.marshal(element, outputStream);
-			updated = false;
 		} catch( JAXBException jbe) {
 			ErrorDialog.openError(
 					null,
