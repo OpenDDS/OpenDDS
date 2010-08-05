@@ -1,3 +1,17 @@
+Thu Aug  5 16:36:01 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * NEWS:
+        * tools/monitor:
+        * tools/monitor/Monitor.mpc:
+        * tools/monitor/README:
+        * tools/monitor/doc/userguide.html:
+
+          Rmoved 'odds_' decorator from the command name.
+
+        * tools/odds_monitor:
+
+          Removed these files.
+
 Thu Aug  5 16:16:43 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * NEWS:
