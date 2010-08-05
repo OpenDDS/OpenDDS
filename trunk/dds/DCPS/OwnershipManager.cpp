@@ -154,6 +154,12 @@ OwnershipManager::remove_writers (const ::DDS::InstanceHandle_t& instance_handle
             guard,
             this->instance_lock_);
 
+  if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) OwnershipManager::remove_writers: ")
+                           ACE_TEXT("disassociate writers with instance %d\n"),
+                           instance_handle));
+  }
+  
   InstanceOwnershipWriterInfos::iterator const the_end = instance_ownership_infos_.end ();
 
   InstanceOwnershipWriterInfos::iterator the_iter
@@ -161,7 +167,14 @@ OwnershipManager::remove_writers (const ::DDS::InstanceHandle_t& instance_handle
   if (the_iter != the_end) {
     the_iter->second.owner_ = WriterInfo();
     the_iter->second.candidates_.clear ();
+    InstanceStateVec::iterator const end = the_iter->second.instance_states_.end();
+    for (InstanceStateVec::iterator iter = the_iter->second.instance_states_.begin ();
+      iter != end; ++iter) {
+        (*iter)->reset_ownership(instance_handle);
+    }
     the_iter->second.instance_states_.clear ();
+    
+    instance_ownership_infos_.erase (the_iter);
   }
 }
 
@@ -364,7 +377,7 @@ OwnershipManager::select_owner (const ::DDS::InstanceHandle_t& instance_handle,
         this->remove_owner (instance_handle, infos, false);
       }
 
-      return false;
+      return infos.owner_.pub_id_ == pub_id;
     }
   }
   else {

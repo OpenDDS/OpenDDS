@@ -267,6 +267,13 @@ OpenDDS::DCPS::InstanceState::registered (bool flag)
   this->registered_ = flag;
 }
 
+void
+OpenDDS::DCPS::InstanceState::reset_ownership (::DDS::InstanceHandle_t instance)
+{
+  this->owner_ = GUID_UNKNOWN;
+  this->registered_ = false;
 
+  this->reader_->reset_ownership(instance);
+}
 
 

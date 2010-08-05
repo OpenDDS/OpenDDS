@@ -1,3 +1,41 @@
+Thu Aug  5 23:24:58 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/OwnershipManager.cpp:
+
+          - Made remove_writes(handle) to update all associated readers
+          to reinit the ownership related cached data.
+          - Fixed a bug in select_owner() that returned false when
+          the provided writer with higher strength replace current owner.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.cpp:
+
+          Updated related methods to support the ownership cached data
+          updates.
+
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+
+          Fixed execute() to call the listener, remove writes from
+          OwnershipManager and status update once per missed deadline period.
+          Previously it could be called twice when the timer is triggered
+          and then a new sample is received and missed deadline, it could
+          cause incorrect status counter.
+
+        * tests/DCPS/Ownership/DataReaderListener.h:
+        * tests/DCPS/Ownership/DataReaderListener.cpp:
+        * tests/DCPS/Ownership/Writer.cpp:
+        * tests/DCPS/Ownership/publisher.cpp:
+        * tests/DCPS/Ownership/run_test.pl:
+
+          Updated for missed deadline and liveliness change cases. The writers
+          write more samples. The writer 2 has higher strength then writer 1.
+          It sleeps for more than deadline or liveliness period after 5th sample,
+          then the readers should receive samples from writer 1 after deadline
+          missed or writer 2 liveliness lost. When writer 2 comes alive, the
+          readers should receive samples from writer 2.
+
 Thu Aug  5 21:39:53 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:

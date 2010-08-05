@@ -123,8 +123,8 @@ public:
   void set_group_info (const CoherentChangeControl& info);
 
   void clear_owner_evaluated ();
-  void set_owner_evaluated (SubscriptionInstance* instance, bool flag);
-  bool is_owner_evaluated (SubscriptionInstance* instance);
+  void set_owner_evaluated (::DDS::InstanceHandle_t instance, bool flag);
+  bool is_owner_evaluated (::DDS::InstanceHandle_t instance);
 
 private:
 
@@ -158,7 +158,7 @@ private:
   ACE_Atomic_Op<ACE_Thread_Mutex, ACE_UINT32> coherent_samples_;
 
   /// Is this writer evaluated for owner ?
-  typedef std::map <SubscriptionInstance*, bool> OwnerEvaluateFlag;
+  typedef std::map < ::DDS::InstanceHandle_t, bool> OwnerEvaluateFlag;
   OwnerEvaluateFlag owner_evaluated_;
 
   /// Data to support GROUP access scope.
@@ -565,6 +565,9 @@ public:
 
   // Called upon subscriber qos change to update the local cache.
   void set_subscriber_qos(const DDS::SubscriberQos & qos);
+
+  // Set the instance related writers to reevaluate the owner.
+  void reset_ownership (::DDS::InstanceHandle_t instance);
 
 protected:
 

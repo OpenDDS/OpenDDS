@@ -84,8 +84,12 @@ private:
   const char*          reader_id_;
   
   bool  verify_result_;
+  bool  result_verify_complete_;
+  long  current_strength_[2]; // instance 0, 1
   
-  long current_strength_[2]; 
+  // For deadline missed and liveliness changed test cases.
+  ACE_Time_Value start_missing_;
+  ACE_Time_Value end_missing_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

@@ -1297,7 +1297,19 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     bool is_new_instance = false;
     bool filtered = false;
     dds_demarshal(sample, instance, is_new_instance, filtered);
+    
+    if (DCPS_debug_level  >= 1) {
+      RepoIdConverter reader_converter(subscription_id_);
+      RepoIdConverter writer_converter(header.publication_id_);
 
+      ACE_DEBUG ((LM_DEBUG, 
+                  ACE_TEXT("(%P|%t)DataReaderImpl::data_received: reader %C writer %C ")
+                  ACE_TEXT("instance %d is_new_instance %d filtered %d \n"),
+                  std::string(reader_converter).c_str(),
+                  std::string(writer_converter).c_str(),
+                  instance->instance_handle_, is_new_instance, filtered));
+    }
+    
     if (filtered) break; // sample filtered from instance
     bool accepted = true;
     bool verify_coherent = false;
@@ -1940,13 +1952,16 @@ OpenDDS::DCPS::WriterInfo::clear_owner_evaluated ()
 }
 
 void
-OpenDDS::DCPS::WriterInfo::set_owner_evaluated (SubscriptionInstance* instance, bool flag)
+OpenDDS::DCPS::WriterInfo::set_owner_evaluated (::DDS::InstanceHandle_t instance, bool flag)
 {
-  this->owner_evaluated_ [instance] = flag;
+  if (flag || 
+      (! flag && owner_evaluated_.find (instance) != owner_evaluated_.end ())){
+    this->owner_evaluated_ [instance] = flag;
+  }
 }
 
 bool
-OpenDDS::DCPS::WriterInfo::is_owner_evaluated (SubscriptionInstance* instance)
+OpenDDS::DCPS::WriterInfo::is_owner_evaluated (::DDS::InstanceHandle_t instance)
 {
   OwnerEvaluateFlag::iterator iter = owner_evaluated_.find (instance);
   if (iter == owner_evaluated_.end ()) {
@@ -2789,19 +2804,41 @@ DataReaderImpl::filter_instance(SubscriptionInstance* instance,
     // Evaulate the owner of the instance if not selected and filter
     // current message if it's not from owner writer.
     if ( instance->instance_state_.get_owner () == GUID_UNKNOWN
-      || ! iter->second->is_owner_evaluated (instance)) {
+      || ! iter->second->is_owner_evaluated (instance->instance_handle_)) {
       bool is_owner = this->owner_manager_->select_owner (
                         instance->instance_handle_,
                         iter->second->writer_id_,
                         iter->second->writer_qos_.ownership_strength.value,
                         &instance->instance_state_);
-      iter->second->set_owner_evaluated (instance, true);
-
+      iter->second->set_owner_evaluated (instance->instance_handle_, true);
+      
       if (! is_owner) {
+        if (DCPS_debug_level >= 1) {
+          RepoIdConverter reader_converter(subscription_id_);
+          RepoIdConverter writer_converter(pubid);
+          RepoIdConverter owner_converter (instance->instance_state_.get_owner ());
+          ACE_DEBUG((LM_DEBUG,
+                    ACE_TEXT("(%P|%t) DataReaderImpl::filter_instance: ")
+                    ACE_TEXT("reader %C writer %C is not elected as owner %C\n"),
+                    std::string(reader_converter).c_str(),
+                    std::string(writer_converter).c_str(),
+                    std::string(owner_converter).c_str()));
+        }
         return true;
       }
     }
     else if (! (instance->instance_state_.get_owner () == pubid)) {
+        if (DCPS_debug_level >= 1) {
+          RepoIdConverter reader_converter(subscription_id_);
+          RepoIdConverter writer_converter(pubid);
+          RepoIdConverter owner_converter (instance->instance_state_.get_owner ());
+          ACE_DEBUG((LM_DEBUG,
+                    ACE_TEXT("(%P|%t) DataReaderImpl::filter_instance: ")
+                    ACE_TEXT("reader %C writer %C is not owner %C\n"),
+                    std::string(reader_converter).c_str(),
+                    std::string(writer_converter).c_str(),
+                    std::string(owner_converter).c_str()));
+        }
       return true;
     }
   }
@@ -3227,7 +3264,16 @@ DataReaderImpl::enable_filtering(ContentFilteredTopicImpl* cft)
 }
 #endif
 
-
+void
+DataReaderImpl::reset_ownership (::DDS::InstanceHandle_t instance)
+{
+  ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
+  for (WriterMapType::iterator iter = writers_.begin();
+      iter != writers_.end();
+      ++iter) {
+    iter->second->set_owner_evaluated(instance, false);
+  }
+}
 
 } // namespace DCPS
 } // namespace OpenDDS
