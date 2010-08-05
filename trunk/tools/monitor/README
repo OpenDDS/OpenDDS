@@ -1,5 +1,5 @@
 
-odds_monitor - instrumentation viewer application for OpenDDS.
+monitor - instrumentation viewer application for OpenDDS.
 
 This application provides a GUI view into instrumentation of the OpenDDS
 service.

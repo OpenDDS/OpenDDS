@@ -43,7 +43,7 @@ DAMAGE.
 <!--}}}-->
 
 <!--PRE-HEAD-END-->
-<title> OpenDDS / odds_monitor - Monitor Data Viewer   </title>
+<title> OpenDDS / monitor - Monitor Data Viewer   </title>
 <style id="styleArea" type="text/css">
 #saveTest {display:none;}
 #messageArea {display:none;}
@@ -511,18 +511,18 @@ Also see [[AdvancedOptions]]</pre>
 </div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="Building" modifier="AHM" created="201002021752" modified="201002051630" tags="publish" changecount="8">
-<pre>The //odds_monitor// application is built as an ~OpenDDS and a Qt4 application.  It uses ~OpenDDS to subscribe to the monitor data and the DDS specified Builtin Topic data.  It uses Qt4 as the GUI.  Building will require setting the ''qt4'' feature for MPC.  This can be set in the //$~ACE_ROOT/include/makeinclude/platform_macros.GNU// configuration file, or set on the individual command lines during the build process (recommended).  The following assumes that the //platform_macros.GNU// file does ''not'' have the ''qt4'' feature set, as it is not required for any of the dependent software.
+<div title="Building" modifier="MikeMartinez" created="201002021752" modified="201008051625" tags="publish" changecount="11">
+<pre>The //monitor// application is built as an ~OpenDDS and a Qt4 application.  It uses ~OpenDDS to subscribe to the monitor data and the DDS specified Builtin Topic data.  It uses Qt4 as the GUI.  Building will require setting the ''qt4'' feature for MPC.  This can be set in the //$~ACE_ROOT/include/makeinclude/platform_macros.GNU// configuration file, or set on the individual command lines during the build process (recommended).  The following assumes that the //platform_macros.GNU// file does ''not'' have the ''qt4'' feature set, as it is not required for any of the dependent software.
 
 The following steps should be followed:
 * Ensure that the [[dependent|Dependencies]] header files and libraries are available.
 * Ensure that the build [[environment|Setup]] is setup correctly.  Then work within the application directory:
 {{{
-  &gt; cd $DDS_ROOT/tools/odds_monitor
+  &gt; cd $DDS_ROOT/tools/monitor
 }}}
 For Windows:
 {{{
-  &gt; cd %DDS_ROOT%\tools\odds_monitor
+  &gt; cd %DDS_ROOT%\tools\monitor
 }}}
 * Create the makefiles / project files:
 {{{
@@ -540,7 +540,7 @@ Replace &quot;vc9&quot; with &quot;vc8&quot; or &quot;vc71&quot; as needed.
 }}}
 For Windows, build using Visual Studio.
 
-The //odds_monitor// application will be installed to the $~DDS_ROOT/bin directory and can be invoked from there.</pre>
+The //monitor// application will be installed to the $~DDS_ROOT/bin directory and can be invoked from there.</pre>
 </div>
 <div title="ColorPalette" modifier="OpenDDS" created="200911302008" modified="200912011920" changecount="17">
 <pre>Background: #fff
@@ -664,10 +664,10 @@ Error: #f88
     };
 }}}</pre>
 </div>
-<div title="Data" modifier="MikeMartinez" created="201002011901" modified="201002030005" tags="publish" changecount="68">
+<div title="Data" modifier="MikeMartinez" created="201002011901" modified="201008051627" tags="publish" changecount="69">
 <pre>The information hierarchy displayed in the tree view of the application [[GUI]] starts with the host at the top level.  Each executing process that publishes monitor information will appear within the host on which they are executing.  The data displayed is derived from [[Monitor Data Topics|MonitorTopics]] distributed in the ~OpenDDS specific ''~MONITOR_DOMAIN_ID'' and the DDS specification defined Builtin Topic data.  The information hierarchy is summarized in the following table.  The table includes references to the IDL data defintions for the data that will be displayed.
 
-The Monitor Topics include a variable field that allows the application programmer to extend the topics if desired.  Arbitrary name/value pairs can be added to the data for distribution and will be displayed by the //odds_monitor// application.  The data is defined in IDL with each topic constructed of portions of the [[common IDL|CommonIdl]] definitions.  These IDL definitions are all within the ''~OpenDDS::DCPS'' IDL module.  They are all defined within the file located at //$~DDS_ROOT/dds/monitor/monitor.idl//.
+The Monitor Topics include a variable field that allows the application programmer to extend the topics if desired.  Arbitrary name/value pairs can be added to the data for distribution and will be displayed by the //monitor// application.  The data is defined in IDL with each topic constructed of portions of the [[common IDL|CommonIdl]] definitions.  These IDL definitions are all within the ''~OpenDDS::DCPS'' IDL module.  They are all defined within the file located at //$~DDS_ROOT/dds/monitor/monitor.idl//.
 
 The Builtin Topics are defined in the DDS specification.  The table below includes links to the specific IDL for the Builtin Topic data for reference.  ~OpenDDS uses the IDL defined in //$~DDS_ROOT/dds/~DdsDcpsInfrastructure.idl// for the Builtin Topic definitions.
 
@@ -706,10 +706,10 @@ The //links// column in the table indicates which, if any, fields contained by t
 <div title="DefaultTiddlers" modifier="MikeMartinez" created="201002022045" modified="201002022052" changecount="2">
 <pre>[[Splash]]</pre>
 </div>
-<div title="Dependencies" modifier="MikeMartinez" created="201002021925" modified="201002022002" tags="publish" changecount="3">
-<pre>The //odds_monitor// application has the same dependencies as the [[OpenDDS|http://www.opendds.org/]] libraries.  These include the ''ACE'' and ''TAO'' libraries as well as ~OpenDDS itself.  Since the //odds_monitor// application is included in the ~OpenDDS distribution, the application and ~OpenDDS versions will be compatible.  Follow the [[directions|http://www.opendds.org/building.html]] for building ~OpenDDS to build all of these dependent libraries.
+<div title="Dependencies" modifier="MikeMartinez" created="201002021925" modified="201008051627" tags="publish" changecount="4">
+<pre>The //monitor// application has the same dependencies as the [[OpenDDS|http://www.opendds.org/]] libraries.  These include the ''ACE'' and ''TAO'' libraries as well as ~OpenDDS itself.  Since the //monitor// application is included in the ~OpenDDS distribution, the application and ~OpenDDS versions will be compatible.  Follow the [[directions|http://www.opendds.org/building.html]] for building ~OpenDDS to build all of these dependent libraries.
 
-In addition to ~OpenDDS, the //odds_monitor// application uses the [[Qt4|http://qt.nokia.com]] GUI libraries.  The best way to install these is to use whatever package manager or installer your system has available and install the development header files and libraries into system locations.  If this is not possible, obtain and install a local copy from the [[Qt4|http://qt.nokia.com/downloads]] website.</pre>
+In addition to ~OpenDDS, the //monitor// application uses the [[Qt4|http://qt.nokia.com]] GUI libraries.  The best way to install these is to use whatever package manager or installer your system has available and install the development header files and libraries into system locations.  If this is not possible, obtain and install a local copy from the [[Qt4|http://qt.nokia.com/downloads]] website.</pre>
 </div>
 <div title="DomainData" modifier="MikeMartinez" created="201002022334" modified="201002022350" tags="publish" changecount="3">
 <pre>The IDL used to define the data published as the ~DomainParticipantReport is included here for reference.  This IDL resides within the ''~OpenDDS::DCPS'' module and uses types and values defined in the [[common IDL|CommonIdl]].
@@ -724,8 +724,8 @@ In addition to ~OpenDDS, the //odds_monitor// application uses the [[Qt4|http://
     };
 }}}</pre>
 </div>
-<div title="GUI" modifier="MikeMartinez" created="201002022102" modified="201002030000" tags="publish" changecount="14">
-<pre>The Graphical User Interface (GUI) for the //odds_monitor// application is a simple window with three pushbuttons, a pulldown combo-box and a tree viewer with two columns:
+<div title="GUI" modifier="MikeMartinez" created="201002022102" modified="201008051628" tags="publish" changecount="15">
+<pre>The Graphical User Interface (GUI) for the //monitor// application is a simple window with three pushbuttons, a pulldown combo-box and a tree viewer with two columns:
 
 {{imgcenter{[img[images/gui.png]]}}}
 
@@ -772,8 +772,8 @@ An example of the application attached to a repository and displaying data from 
 [[Data]]
 </pre>
 </div>
-<div title="MonitorTopics" modifier="MikeMartinez" created="201002022328" modified="201002022330" tags="publish" changecount="2">
-<pre>The //odds_monitor// application subscribes to all of the available monitor application topics.  These topics include static topics as well as dynamic topics.  The static topics are published at the beginning and end of the lifetime of the corresponding Entity and the periodic topics are published at a rate determined by the configuration, with a default of once per second.  The topics are:
+<div title="MonitorTopics" modifier="MikeMartinez" created="201002022328" modified="201008051628" tags="publish" changecount="3">
+<pre>The //monitor// application subscribes to all of the available monitor application topics.  These topics include static topics as well as dynamic topics.  The static topics are published at the beginning and end of the lifetime of the corresponding Entity and the periodic topics are published at a rate determined by the configuration, with a default of once per second.  The topics are:
 # [[ServiceParticipantReport|ServiceData]] - contains static information about the application process ~ServiceParticipant.
 # [[DomainParticipantReport|DomainData]] - contains static information about each active ~DomainParticipant.
 # [[TransportReport|TransportData]] - contains static information about each active transport instance.
@@ -1111,15 +1111,15 @@ String.prototype.filenameEncode = function()
     };
 }}}</pre>
 </div>
-<div title="Quick Start" modifier="MikeMartinez" created="201002021625" modified="201002031908" tags="publish" changecount="11">
-<pre>The //odds_monitor// tool is provided to inspect information available about an operating ~OpenDDS system.  The viewer attaches to a single ~OpenDDS repostiory at a time and subscribes to both the DDS specification defined Builtin Topics and the ~OpenDDS specific Monitor topics.  It is possible to switch from viewing the information from one repository to another while the monitor is running.
+<div title="Quick Start" modifier="MikeMartinez" created="201002021625" modified="201008051629" tags="publish" changecount="12">
+<pre>The //monitor// tool is provided to inspect information available about an operating ~OpenDDS system.  The viewer attaches to a single ~OpenDDS repostiory at a time and subscribes to both the DDS specification defined Builtin Topics and the ~OpenDDS specific Monitor topics.  It is possible to switch from viewing the information from one repository to another while the monitor is running.
 
 To execute the application, do the following:
 * Make sure that the application is [[built|Building]].
 * Make sure that the [[environment|Setup]] is setup correctly for execution.
 * Start the application:
 {{{
-  &gt; odds_monitor
+  &gt; monitor
 }}}
 * Attach to a running ~OpenDDS service
 ** Add the repository:
@@ -1172,11 +1172,11 @@ To execute the application, do the following:
     };
 }}}</pre>
 </div>
-<div title="Setup" modifier="AHM" created="201002022012" modified="201002051616" tags="publish" changecount="15">
-<pre>Establishing the environment for building and executing the //odds_monitor// application consists of setting specific environment variables.  The environment required to execute the application is a subset of the environment required to build the application.
+<div title="Setup" modifier="MikeMartinez" created="201002022012" modified="201008051630" tags="publish" changecount="16">
+<pre>Establishing the environment for building and executing the //monitor// application consists of setting specific environment variables.  The environment required to execute the application is a subset of the environment required to build the application.
 
 !Build Environment
-The build environment includes the environment needed to build the ACE+TAO+~OpenDDS libraries as well as the additional environment needed to build the //odds_monitor// application itself.  The ACE+TAO+~OpenDDS build environment is described in the [[OpenDDS build instructions|http://www.opendds.org/building.html]] but is summarized here for reference.
+The build environment includes the environment needed to build the ACE+TAO+~OpenDDS libraries as well as the additional environment needed to build the //monitor// application itself.  The ACE+TAO+~OpenDDS build environment is described in the [[OpenDDS build instructions|http://www.opendds.org/building.html]] but is summarized here for reference.
 
 | ACE+TAO+~OpenDDS Build Environment |c
 | Variable | Status | Value | Description |
@@ -1186,17 +1186,17 @@ The build environment includes the environment needed to build the ACE+TAO+~Open
 |PATH | Required |Must include the path to the ACE and TAO command executables.&lt;br&gt;Must also include the path to the ~OpenDDS command executables. |This is the path searched for commands to execute. |
 |~LD_LIBRARY_PATH | Required |Must include directory with ACE+TAO libraries and directory with ~OpenDDS libraries |This contains the path searched for dynamically linked libraries at compile and load time for the application.  All of the libraries that will be linked at compile time must be reachable via either the standard path or be included in directories found in this path. |
 
-In addition to the ACE+TAO+~OpenDDS build environment, additional environment variables are needed for building the //odds_monitor// application.  There are described in the following table.
+In addition to the ACE+TAO+~OpenDDS build environment, additional environment variables are needed for building the //monitor// application.  There are described in the following table.
 
-| //odds_monitor// Build Environment |c
+| //monitor// Build Environment |c
 | Variable | Status | Value | Description |
 |QTDIR | Required |Must contain the base of the Qt4 software installation. |This is the base of the Qt4 installation and all Qt4 software - headers and libraries - will be found relative to this directory, with the possible exception noted below for the ~QT4_INCDIR variable. |
 |~QT4_INCDIR | Optional |May contain a separate directory where the Qt4 software header files are located. |Some system installations have the include files located under a separate base directory from the libraries.  For example, Ubuntu 9.10 locates the Qt4 software libraries relative to the ///usr// directory, but the include files are located relative to the ///usr/include/qt4// directory instead of the expected ///usr/include// directory.  Setting this variable accommodates installations with this feature. |
 |~QT_CFG | Optional |Determines library names for Qt. |If your Qt4 installation uses a suffix for the library names (for example, ~QtCore4.lib), set this variable to that suffix (for example, 4). |
 
 !Execution Environment
-To execute the //odds_monitor// application, the following environment variables need to be set:
-| //odds_monitor// Execution Environment |c
+To execute the //monitor// application, the following environment variables need to be set:
+| //monitor// Execution Environment |c
 | Variable | Status | Value | Description |
 |PATH | Optional |Should include the path to the application executable. |This is the path searched for commands to execute.  If this command path is not set, then a full path (relative or absolute) to the executable must be specified when starting the application. |
 |~LD_LIBRARY_PATH | Required |Must include directory with ACE+TAO libraries and directory with ~OpenDDS libraries |This contains the path searched for dynamically linked libraries at load time for the application.  All of the libraries that were linked at compile time must be reachable via either the standard path or be included in directories found in this path. |
@@ -1208,8 +1208,8 @@ To execute the //odds_monitor// application, the following environment variables
 <div title="SiteSubtitle" modifier="MikeMartinez" created="200911302000" modified="201002022054" tags="OpenDDS" changecount="7">
 <pre>Monitor Data Viewer&amp;nbsp;&amp;nbsp;</pre>
 </div>
-<div title="SiteTitle" modifier="MikeMartinez" created="200911301959" modified="201002021618" tags="OpenDDS" changecount="3">
-<pre>OpenDDS / odds_monitor</pre>
+<div title="SiteTitle" modifier="MikeMartinez" created="200911301959" modified="201008051622" tags="OpenDDS" changecount="4">
+<pre>OpenDDS / monitor</pre>
 </div>
 <div title="SiteUrl" modifier="OpenDDS" created="200911302027" changecount="1">
 <pre>http://www.ociweb.com/</pre>

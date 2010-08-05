@@ -19,6 +19,9 @@ Version 2.2 of OpenDDS.
 - Renamed odds_repoctl command to repoctl.  Add a decorator if needed when
   installing external to the OpenDDS directories.
 
+- Renamed odds_monitor command to monitor.  Add a decorator if needed when
+  installing external to the OpenDDS directories.
+
 - Fixed transport so it now allows associations between datareaders and
   datawriters attached to the same transport to work.
 
