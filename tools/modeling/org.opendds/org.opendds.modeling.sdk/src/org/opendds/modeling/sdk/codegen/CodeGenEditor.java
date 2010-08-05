@@ -1,109 +1,173 @@
 package org.opendds.modeling.sdk.codegen;
 
-
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import javax.xml.bind.JAXBException;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.*;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.part.MultiPageEditorPart;
-import org.eclipse.ui.texteditor.DocumentProviderRegistry;
-import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.ide.IDE;
 
-/**
- * The code generation specification editor.
- * 
- * This editor has 4 pages:
- * <ul>
- * <li>page 0 specifies the model input files
- * <li>page 1 specifies the model target output directory or project
- * <li>page 2 defines and customizes any instances of the model
- * <li>page 3 is the raw XML format for the specification file
- * </ul>
- */
-public class CodeGenEditor extends MultiPageEditorPart implements IResourceChangeListener{
-//	private static final int INPUTFORM_INDEX = 0;
-//	private static final int OUTPUTFORM_INDEX = 1;
-//	private static final int INSTANCEFORM_INDEX = 2;
-	private static final int XMLEDITOR_INDEX = 3;
+public class CodeGenEditor extends FormEditor implements IResourceChangeListener {
+	private int XMLEDITOR_INDEX;
 	
-	/** Editor for model source specification. */
-//	private InputsForm inputsForm;
+	/**
+	 * Used to indicated that the Code Generator specification data is newer
+	 * (has been modified since the last synchronization) than the data
+	 * retained in the XML text editor. 
+	 */
+	private boolean isModified;
 	
-	/** Editor for model target output specification. */
+ 	/**
+ 	 * Form to present some of the Code Generator specification information
+ 	 * for viewing and modification.  This form also contains controls to
+ 	 * allow users to actually generate code from the model.
+ 	 */
  	private OutputsForm outputsForm;
 	
-	/** Editor for defining and customizing instance specifications. */
+ 	/**
+ 	 * Form to present portions of the Code Generator specification
+ 	 * information for viewing and modification.  This form is intended to
+ 	 * allow specification of instance customizations and is likely to
+ 	 * become the transport parameter specification editor.
+ 	 */
  	private InstanceForm instanceForm;
 
-	/** The XML text editor for the resource. */
+	/**
+	 * XML Text Editor used to allow the user to directly edit the Code
+	 * Generator specification information.  This is set as the editor that
+	 * is attached to the IEditorInput for the multi-page editor and will
+	 * be synchronized with the data presented (and edited) in the forms
+	 * on the other pages.
+	 */
 	private TextEditor xmlEditor;
 	
-	/** Manage the specification contents while editing. */
+	/**
+	 * Code Generator specification data manager.  This encapsulates the JAXB
+	 * interfaces used to synchronize the data with the XML format.
+	 */
 	private GeneratorManager manager;
-
-	/** The editor's explicit document provider. */
-//	private IDocumentProvider provider;
+	
+	/**
+	 * Listener used to propagate changes in the Code Generator specification
+	 * data in the Forms to the XML text editor.
+	 */
+	private final IManagerListener managerListener = new IManagerListener() {
+		@Override
+		public void modelChanged(GeneratorManager manager) {
+			dataModified();
+		}
+	};
 
 	/**
-	 * Creates a code generation specification editor.
+	 * Used to suppress actions while we are still initializing the editor.
 	 */
+	private boolean isInitializing = true;
+ 	
 	public CodeGenEditor() {
 		super();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 		manager = new GeneratorManager();
+		manager.addManagerListener(managerListener);
 	}
+
 	/**
-	 * Create the input specification page.
+	 * getManager - access the underlying form input data.
+	 * 
+	 * @return GeneratorManager
 	 */
-	void createInputsForm() {
-//		inputsForm = new InputsForm(getContainer());
-//		addPage(INPUTFORM_INDEX,inputsForm);
-//		setPageText(INPUTFORM_INDEX,"Model Input");
+	public GeneratorManager getManager() {
+		return manager;
 	}
-	/**
-	 * Create the target output specification page.
-	 */
-	void createOutputsForm() {
-//		outputsForm = new OutputsForm(getContainer());
-//		addPage(OUTPUTFORM_INDEX,outputsForm);
-//		setPageText(OUTPUTFORM_INDEX,"Code Output");
+	
+	@Override
+	protected void pageChange(int newPageIndex) {
+		// Editor lifecycle management for the form data and text editor.
+		if(newPageIndex != XMLEDITOR_INDEX) {
+			// The new page is a form.
+			if( isDirty()) {
+				// The XML editor contains changes, so synchronize the
+				// manager data with the editor.  After synchronization,
+				// the modification indicator is cleared.
+				loadContentFromXMLEditor();
+				isModified = false;
+			}
+		} else if(isModified) {
+			// The new page is the XML text editor and the manager data
+			// has been changed, so synchronize the editor with the
+			// new manager data.  After synchronization, the modification
+			// indicator is cleared.
+			loadEditorFromContent();
+			isModified = false;
+		}
+		super.pageChange(newPageIndex);
 	}
+	
 	/**
-	 * Create the instance definition and customization page.
+	 * Called to indicate that the Code Generator specification data has
+	 * changed.  This means that the data should be propagated to the XML
+	 * text editor before it is viewed or saved next.
 	 */
-	void createInstanceForm() {
-//		instanceForm = new InstanceForm(getContainer());
-//		addPage(INSTANCEFORM_INDEX,instanceForm);
-//		setPageText(INSTANCEFORM_INDEX,"Instance Customization");
-	}
-	/**
-	 * Creates the page with the XML text editor showing the contents of the resource.
-	 */
-	void createXmlEditor() {
-		try {
-			xmlEditor = new TextEditor();
-			addPage(XMLEDITOR_INDEX, xmlEditor, getEditorInput());
-			setPageText(XMLEDITOR_INDEX, xmlEditor.getTitle());
-		} catch (PartInitException e) {
-			ErrorDialog.openError(
-				getSite().getShell(),
-				"Error creating nested XML text editor",
-				null,
-				e.getStatus());
+	public void dataModified() {
+		if(isInitializing) {
+			return;
+		}
+		boolean wasDirty = isDirty();
+		isModified = true;
+		if(!wasDirty) {
+			firePropertyChange(IEditorPart.PROP_DIRTY);
 		}
 	}
+	
+	@Override
+	protected void handlePropertyChange( int propertyId) {
+		if(propertyId == IEditorPart.PROP_DIRTY) {
+			isModified = isDirty();
+		}
+		super.handlePropertyChange(propertyId);
+	}
+	
+	@Override
+	public boolean isDirty() {
+		// Include our Form data when determining if the complete multi-page
+		// editor has been modified.
+		return isModified || super.isDirty();
+	}
+
+	@Override
+	protected void addPages() {
+		outputsForm  = new OutputsForm( this,"org.opendds.modeling.sdk.forms.output",  "Generate");
+		instanceForm = new InstanceForm(this,"org.opendds.modeling.sdk.forms.instance","Customize");
+		xmlEditor    = new TextEditor();
+
+		try {
+			addPage(outputsForm);
+			addPage(instanceForm);
+			XMLEDITOR_INDEX = addPage(xmlEditor, getEditorInput());
+		} catch (PartInitException e) {
+			ErrorDialog.openError(
+					getSite().getShell(),
+					"Error adding form pages",
+					e.getMessage(),
+					e.getStatus());
+		}
+		initializeContent();
+		updateTitle();
+		setPageText(XMLEDITOR_INDEX, xmlEditor.getTitle());
+	}
+
 	/**
 	 * Updates the title by the resource name.
 	 */
@@ -112,115 +176,86 @@ public class CodeGenEditor extends MultiPageEditorPart implements IResourceChang
 		setPartName( input.getName());
 		setTitleToolTip(input.getToolTipText());
 	}
+
 	/**
-	 * Creates the pages of the multi-page editor.
+	 * Synchronize the Form data with the Editor data on the GUI thread.
 	 */
-	protected void createPages() {
-		createInputsForm();
-		createOutputsForm();
-		createInstanceForm();
-		createXmlEditor();
-		updateTitle();
-		loadManager( getEditorInput());
+	private void initializeContent() {
+		getContainer().getDisplay().asyncExec( new Runnable() {
+			@Override
+			public void run() {
+				isInitializing = true;
+				loadContentFromXMLEditor();
+				isInitializing = false;
+			}
+		});
 	}
-	protected void loadManager( IEditorInput input) {
+	
+	/**
+	 * Synchronize the Form data with the XML text editor data.
+	 */
+	protected void loadContentFromXMLEditor() {
 		try {
-			IDocumentProvider provider = DocumentProviderRegistry.getDefault().
-			                                                      getDocumentProvider(getEditorInput());
-			if( provider == null) {
-				System.out.println("Failed to get a provider");
-				return;
-			}
-			IDocument document= provider.getDocument(getEditorInput());
-			if( document == null) {
-				System.out.println("Failed to get the document");
-				return;
-			}
-			InputStream in = new ByteArrayInputStream( document.get().getBytes());
-			if( in == null) {
-				System.out.println("Failed to get a stream");
-				return;
-			}
+			InputStream in = new ByteArrayInputStream(
+					xmlEditor.getDocumentProvider()
+					         .getDocument(xmlEditor.getEditorInput())
+					         .get()
+					         .getBytes());
 			manager.unmarshal(in);
-//			manager.marshal(System.out);
+			outputsForm.dataChanged();
 		} catch (JAXBException e) {
 			ErrorDialog.openError(
 					getSite().getShell(),
 					"Error parsing XML specification",
 					e.getMessage(),
 					null);
-		}
+		}		
 	}
-	public void setFocus() {
-		int index = getActivePage();
-		switch(index) {
-		case 0:
-//			inputsForm.setFocus();
-			break;
-		case 1:
-			outputsForm.setFocus();
-			break;
-		case 2:
-			instanceForm.setFocus();
-			break;
-		case 3:
-			xmlEditor.setFocus();
-			break;
-		}
-	}
+	
 	/**
-	 * The <code>MultiPageEditorPart</code> implementation of this 
-	 * <code>IWorkbenchPart</code> method disposes all nested editors.
-	 * Subclasses may extend.
+	 * Synchronize the XML text editor data with the Form data.
 	 */
+	protected void loadEditorFromContent() {
+		OutputStream result = new ByteArrayOutputStream();
+		manager.marshal(result);
+		xmlEditor.getDocumentProvider()
+			.getDocument(xmlEditor.getEditorInput())
+			.set(result.toString());
+	}
+
 	public void dispose() {
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
 		super.dispose();
 	}
-	/**
-	 * Saves the multi-page editor's document.
-	 */
+
+	@Override
 	public void doSave(IProgressMonitor monitor) {
-		getEditor(3).doSave(monitor);
+		if( getActivePage() != XMLEDITOR_INDEX && isModified) {
+			loadEditorFromContent();
+		}
+		isModified = false;
+		getEditor(XMLEDITOR_INDEX).doSave(monitor);
 	}
-	/**
-	 * Saves the multi-page editor's document as another file.
-	 * Also updates the text for page 3's tab, and updates this multi-page editor's input
-	 * to correspond to the nested editor's.
-	 */
+
+	@Override
 	public void doSaveAs() {
-		IEditorPart editor = getEditor(3);
+		if( getActivePage() != XMLEDITOR_INDEX && isModified) {
+			loadEditorFromContent();
+		}
+		isModified = false;
+		IEditorPart editor = getEditor(XMLEDITOR_INDEX);
 		editor.doSaveAs();
-		setPageText(3, editor.getTitle());
 		setInput(editor.getEditorInput());
+		updateTitle();
 	}
-	/* (non-Javadoc)
-	 * Method declared on IEditorPart
-	 */
-	public void gotoMarker(IMarker marker) {
-		setActivePage(3);
-		IDE.gotoMarker(getEditor(3), marker);
-	}
-	/**
-	 * The <code>MultiPageEditorExample</code> implementation of this method
-	 * checks that the input is an instance of <code>IFileEditorInput</code>.
-	 */
-	public void init(IEditorSite site, IEditorInput editorInput)
-		throws PartInitException {
-		if (!(editorInput instanceof IFileEditorInput))
-			throw new PartInitException("Invalid Input: Must be IFileEditorInput");
-		super.init(site, editorInput);
-	}
-	/* (non-Javadoc)
-	 * Method declared on IEditorPart.
-	 */
+
+	@Override
 	public boolean isSaveAsAllowed() {
 		return true;
 	}
-	/**
-	 * Closes all project files on project close.
-	 */
-	public void resourceChanged(final IResourceChangeEvent event){
+
+	@Override
+	public void resourceChanged(final IResourceChangeEvent event) {
 		if(event.getType() == IResourceChangeEvent.PRE_CLOSE){
 			Display.getDefault().asyncExec(new Runnable(){
 				public void run(){
@@ -234,5 +269,7 @@ public class CodeGenEditor extends MultiPageEditorPart implements IResourceChang
 				}            
 			});
 		}
+		
 	}
+
 }

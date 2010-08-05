@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.opendds.modeling.sdk.codegen.CodeGenForm"
+            class="org.opendds.modeling.sdk.codegen.CodeGenEditor"
             contributorClass="org.opendds.modeling.sdk.codegen.CodeGenEditorContributor"
             extensions="codegen"
             icon="images/codegen-16x16.gif"
@@ -21,6 +21,57 @@
             id="org.opendds.modeling.sdk.wizards.CodeGenNewWizard"
             name="OpenDDS Code Generator Specification">
       </wizard>
+   </extension>
+   <extension
+         id="org.opendds.modeling.sdk.actionSet"
+         name="OpenDDS ActionSet"
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            description="These are the SDK actions that can be added to menus and toolbars."
+            id="org.opendds.modeling.sdk.actionSet"
+            label="Sample Action Set"
+            visible="true">
+         <menu
+               icon="images/logo-32x32.gif"
+               id="OpenDDSMenu"
+               label="&amp;OpenDDS"
+               path="additions">
+            <groupMarker
+                  name="content">
+            </groupMarker>
+            <separator
+                  name="additions">
+            </separator>
+         </menu>
+         <menu
+               id="org.opendds.modeling.sdk.menus.newMenu"
+               label="&amp;New"
+               path="OpenDDSMenu/content">
+            <groupMarker
+                  name="content">
+            </groupMarker>
+            <separator
+                  name="additions">
+            </separator>
+         </menu>
+         <action
+               class="org.opendds.modeling.sdk.actions.sdkActions"
+               icon="images/logo-32x32.gif"
+               id="org.opendds.modeling.sdk.actions.newCodegen"
+               label="Code &amp;Generator Specification"
+               menubarPath="OpenDDSMenu/org.opendds.modeling.sdk.menus.newMenu/content"
+               toolbarPath="additions"
+               tooltip="Create OpenDDS Models">
+         </action>
+         <action
+               class="org.opendds.modeling.sdk.actions.sdkActions:IDL"
+               icon="images/codegen-32x32.gif"
+               id="org.opendds.modeling.sdk.actions.generateIdl"
+               label="Generate &amp;IDL"
+               menubarPath="OpenDDSMenu/additions"
+               tooltip="Generate IDL code from the current code generation specification">
+         </action>
+      </actionSet>
    </extension>
 
 </plugin>
