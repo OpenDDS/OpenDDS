@@ -148,7 +148,7 @@
 
     <target name="teardown">
         <echo message="Stopping DCPSInfoRepo in ${env.DDS_ROOT}"/>
-        <exec executable="${env.DDS_ROOT}/bin/odds_repoctl">
+        <exec executable="${env.DDS_ROOT}/bin/repoctl">
             <arg line="kill localhost:6666"/>
         </exec>
     </target>
