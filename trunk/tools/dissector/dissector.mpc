@@ -3,24 +3,24 @@
 //
 
 project : dcps, wireshark {
-  sharedname    = odds
-  dynamicflags += ODDS_BUILD_DLL
+  sharedname    = OpenDDS_Dissector
+  dynamicflags += DISSECTOR_BUILD_DLL
   macros       += NOMINMAX
   libout        = .
 
   Source_Files {
-    odds_plugin.cpp
-    odds_packet.cpp
+    plugin.cpp
+    packet.cpp
   }
 
   Resource_Files {
-    odds_dissector.rc
+    dissector.rc
   }
 
   // Wireshark does not support traditional `lib' prefixes
   // when applied to plugins; omit on affected platforms:
   verbatim(gnuace, macros) {
-    LIB_NAME        = odds
+    LIB_NAME        = OpenDDS_Dissector
     LIB_UNCHECKED   = $(LIB_NAME).$(LIBEXT)
     SHLIB_UNCHECKED = $(LIB_NAME).$(SOEXT)
   }

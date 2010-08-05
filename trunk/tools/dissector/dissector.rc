@@ -15,10 +15,10 @@ BEGIN
         BEGIN
             VALUE "FileDescription", "OpenDDS DCPS dissector (opendds.org)\0"
             VALUE "FileVersion", DDS_VERSION "\0"
-            VALUE "InternalName", "odds_dissector\0"
+            VALUE "InternalName", "dissector\0"
             VALUE "LegalCopyright", "See the LICENSE file\0"
             VALUE "LegalTrademarks", "See the LICENSE file\0"
-            VALUE "OriginalFilename", "ODDS.DLL\0"
+            VALUE "OriginalFilename", "OpenDDS_Dissector.DLL\0"
             VALUE "ProductName", "OpenDDS\0"
             VALUE "ProductVersion", DDS_VERSION "\0"
         END

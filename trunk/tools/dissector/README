@@ -48,11 +48,11 @@ according to the Wireshark Developer's Guide (see above).
 3. Generate MPC workspace
 
    Linux and Solaris:
-     cd $DDS_ROOT/tools/odds_dissector/
+     cd $DDS_ROOT/tools/dissector/
      perl $ACE_ROOT/bin/mwc.pl -type gnuace -features wireshark=1
 
    Windows:
-     cd %DDS_ROOT%\tools\odds_dissector\
+     cd %DDS_ROOT%\tools\dissector\
      perl %ACE_ROOT%\bin\mwc.pl -type [CompilerType] -features wireshark=1
        "CompilerTypes" tested includes vc71, vc8, vc9, and nmake
 
@@ -64,14 +64,14 @@ according to the Wireshark Developer's Guide (see above).
 
    Linux and Solaris:
      export WIRESHARK_ROOT=<full path to the Wireshark root directory>
-     cp odds.so $WIRESHARK_ROOT/lib/wireshark/plugins/<version>/
+     cp OpenDDS_Dissector.so $WIRESHARK_ROOT/lib/wireshark/plugins/<version>/
 
    Windows:
      The default Wireshark install directory is the wireshark-gtk2
      subdirectory of the WIRESHARK_ROOT (top of the source tree).
-     copy odds.dll <full path to the Wireshark install>\plugins\<version>\
+     copy OpenDDS_Dissector.dll <full path to the Wireshark install>\plugins\<version>\
      -or-
-     copy oddsd.dll <full path to the Wireshark install>\plugins\<version>\
+     copy OpenDDS_Dissectord.dll <full path to the Wireshark install>\plugins\<version>\
 
 6. Run Wireshark
 
@@ -91,57 +91,57 @@ A number of display filters are supported by the OpenDDS DCPS dissector:
 
 1. Transport header display filters
 
-   odds.version
+   opendds.version
      Revision of the DCPS protocol.
 
-   odds.byte_order
+   opendds.byte_order
      Byte order of transport header contents.
 
-   odds.length
+   opendds.length
      Total length of payload, including sample headers.
 
-   odds.sequence
+   opendds.sequence
      Sequence number of transmitted PDU.
 
-   odds.source
+   opendds.source
      Source identifier; only used by the multicast transport.
 
 2. Sample header display filters
 
-   odds.sample.id
+   opendds.sample.id
      Message ID of sample (i.e. SAMPLE_DATA).
 
-   odds.sample.sub_id
+   opendds.sample.sub_id
      Sub-Message ID of sample (i.e. MULTICAST_SYN).
 
-   odds.sample.flags
+   opendds.sample.flags
      Flags field (see below).
 
-   odds.sample.flags.byte_order
+   opendds.sample.flags.byte_order
      Indicates byte order of sample data.
 
-   odds.sample.flags.coherent
+   opendds.sample.flags.coherent
      Indicates sample belongs to a coherent change group.
 
-   odds.sample.flags.historic
+   opendds.sample.flags.historic
      Indicates sample is historic; resent by DataWriter.
 
-   odds.sample.flags.lifespan
+   opendds.sample.flags.lifespan
      Indicates sample defines a lifespan.
 
-   odds.sample.length
+   opendds.sample.length
      Total length of sample data, not including sample header.
 
-   odds.sample.sequence
+   opendds.sample.sequence
      Sequence number of transmitted SAMPLE_DATA.
 
-   odds.sample.timestamp
+   opendds.sample.timestamp
      Source timestamp of sample.
 
-   odds.sample.lifespan
+   opendds.sample.lifespan
      Lifespan duration of sample (iff lifespan flag is set).
 
-   odds.sample.publication
+   opendds.sample.publication
      Publication ID of transmitting DataWriter.
 
 
@@ -153,7 +153,7 @@ be imported to highlight DCPS protocol packets.
 
 To import these filters, click on the View -> Coloring Rules menu item,
 followed by the the Import button.  Select the colorfilters file in the
-$DDS_ROOT/tools/odds_dissector/ directory and click the Open button.
+$DDS_ROOT/tools/dissector/ directory and click the Open button.
 
 NOTE: Coloring rules are applied on a first match basis; you may need to
       move the imported rules above the "tcp" and "udp" rules using the

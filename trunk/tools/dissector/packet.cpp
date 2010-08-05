@@ -35,13 +35,13 @@ extern "C" {
 #include <sstream>
 #include <string>
 
-#include "odds_export.h"
+#include "dissector_export.h"
 
 using namespace OpenDDS::DCPS;
 
 namespace {
 
-int proto_odds    = -1;
+int proto_opendds    = -1;
 
 int hf_version    = -1;
 int hf_byte_order = -1;
@@ -297,8 +297,8 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
 } // namespace
 
 extern "C"
-odds_Export void
-dissect_odds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
+dissector_Export void
+dissect_opendds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 {
   gint offset = 0;
 
@@ -319,7 +319,7 @@ dissect_odds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 
   if (tree != NULL) {
     proto_item* item =
-      proto_tree_add_protocol_format(tree, proto_odds, tvb, 0, -1,
+      proto_tree_add_protocol_format(tree, proto_opendds, tvb, 0, -1,
         "OpenDDS DCPS Protocol, %s", header_str.c_str());
 
     proto_tree* header_tree = proto_item_add_subtree(item, ett_header);
@@ -342,8 +342,8 @@ dissect_odds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 }
 
 extern "C"
-odds_Export gboolean
-dissect_odds_heur(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
+dissector_Export gboolean
+dissect_opendds_heur(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 {
   size_t len = sizeof(TransportHeader::DCPS_PROTOCOL);
   guint8* data = tvb_get_ephemeral_string(tvb, 0, len);
@@ -352,18 +352,18 @@ dissect_odds_heur(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
     return FALSE;
   }
 
-  dissect_odds(tvb, pinfo, tree);
+  dissect_opendds(tvb, pinfo, tree);
   return TRUE;
 }
 
 extern "C"
-odds_Export void
-proto_register_odds()
+dissector_Export void
+proto_register_opendds()
 {
   static hf_register_info hf[] = {
     { &hf_version,
       { "Version",
-        "odds.version",
+        "opendds.version",
         FT_BYTES,
         BASE_HEX,
         NULL,
@@ -374,7 +374,7 @@ proto_register_odds()
     },
     { &hf_byte_order,
       { "Byte order",
-        "odds.byte_order",
+        "opendds.byte_order",
         FT_UINT8,
         BASE_HEX,
         VALS(byte_order_vals),
@@ -385,7 +385,7 @@ proto_register_odds()
     },
     { &hf_length,
       { "Length",
-        "odds.length",
+        "opendds.length",
         FT_UINT16,
         BASE_HEX,
         NULL,
@@ -396,7 +396,7 @@ proto_register_odds()
     },
     { &hf_sequence,
       { "Sequence",
-        "odds.sequence",
+        "opendds.sequence",
         FT_UINT16,
         BASE_HEX,
         NULL,
@@ -407,7 +407,7 @@ proto_register_odds()
     },
     { &hf_source,
       { "Source",
-        "odds.source",
+        "opendds.source",
         FT_UINT32,
         BASE_HEX,
         NULL,
@@ -418,7 +418,7 @@ proto_register_odds()
     },
     { &hf_sample,
       { "Sample",
-        "odds.sample",
+        "opendds.sample",
         FT_NONE,
         BASE_NONE,
         NULL,
@@ -429,7 +429,7 @@ proto_register_odds()
     },
     { &hf_sample_id,
       { "ID",
-        "odds.sample.id",
+        "opendds.sample.id",
         FT_UINT8,
         BASE_HEX,
         VALS(sample_id_vals),
@@ -440,7 +440,7 @@ proto_register_odds()
     },
     { &hf_sample_sub_id,
       { "Sub-ID",
-        "odds.sample.sub_id",
+        "opendds.sample.sub_id",
         FT_UINT8,
         BASE_HEX,
         VALS(sample_sub_id_vals),
@@ -451,7 +451,7 @@ proto_register_odds()
     },
     { &hf_sample_flags,
       { "Flags",
-        "odds.sample.flags",
+        "opendds.sample.flags",
         FT_UINT8,
         BASE_HEX,
         NULL,
@@ -462,7 +462,7 @@ proto_register_odds()
     },
     { &hf_sample_flags_byte_order,
       { "Byte order",
-        "odds.sample.flags.byte_order",
+        "opendds.sample.flags.byte_order",
         FT_BOOLEAN,
         sample_flags_bits,
         TFS(&byte_order_tfs),
@@ -473,7 +473,7 @@ proto_register_odds()
     },
     { &hf_sample_flags_coherent,
       { "Coherent",
-        "odds.sample.flags.coherent",
+        "opendds.sample.flags.coherent",
         FT_BOOLEAN,
         sample_flags_bits,
         NULL,
@@ -484,7 +484,7 @@ proto_register_odds()
     },
     { &hf_sample_flags_historic,
       { "Historic",
-        "odds.sample.flags.historic",
+        "opendds.sample.flags.historic",
         FT_BOOLEAN,
         sample_flags_bits,
         NULL,
@@ -495,7 +495,7 @@ proto_register_odds()
     },
     { &hf_sample_flags_lifespan,
       { "Lifespan",
-        "odds.sample.flags.lifespan",
+        "opendds.sample.flags.lifespan",
         FT_BOOLEAN,
         sample_flags_bits,
         NULL,
@@ -506,7 +506,7 @@ proto_register_odds()
     },
     { &hf_sample_length,
       { "Length",
-        "odds.sample.length",
+        "opendds.sample.length",
         FT_UINT32,
         BASE_HEX,
         NULL,
@@ -517,7 +517,7 @@ proto_register_odds()
     },
     { &hf_sample_sequence,
       { "Sequence",
-        "odds.sample.sequence",
+        "opendds.sample.sequence",
         FT_UINT16,
         BASE_HEX,
         NULL,
@@ -528,7 +528,7 @@ proto_register_odds()
     },
     { &hf_sample_timestamp,
       { "Timestamp",
-        "odds.sample.timestamp",
+        "opendds.sample.timestamp",
         FT_ABSOLUTE_TIME,
         BASE_NONE,
         NULL,
@@ -539,7 +539,7 @@ proto_register_odds()
     },
     { &hf_sample_lifespan,
       { "Lifespan",
-        "odds.sample.lifespan",
+        "opendds.sample.lifespan",
         FT_RELATIVE_TIME,
         BASE_NONE,
         NULL,
@@ -550,7 +550,7 @@ proto_register_odds()
     },
     { &hf_sample_publication,
       { "Publication",
-        "odds.sample.publication",
+        "opendds.sample.publication",
         FT_BYTES,
         BASE_HEX,
         NULL,
@@ -567,24 +567,24 @@ proto_register_odds()
     &ett_sample_flags
   };
 
-  proto_odds = proto_register_protocol(
+  proto_opendds = proto_register_protocol(
     "OpenDDS DCPS Protocol",  // name
     "OpenDDS",                // short_name
-    "odds");                  // filter_name
+    "opendds");                  // filter_name
 
-  proto_register_field_array(proto_odds, hf, array_length(hf));
+  proto_register_field_array(proto_opendds, hf, array_length(hf));
   proto_register_subtree_array(ett, array_length(ett));
 }
 
 extern "C"
-odds_Export void
-proto_reg_handoff_odds()
+dissector_Export void
+proto_reg_handoff_opendds()
 {
-  static dissector_handle_t odds_handle =
-    create_dissector_handle(dissect_odds, proto_odds);
+  static dissector_handle_t opendds_handle =
+    create_dissector_handle(dissect_opendds, proto_opendds);
 
-  ACE_UNUSED_ARG(odds_handle);
+  ACE_UNUSED_ARG(opendds_handle);
 
-  heur_dissector_add("tcp", dissect_odds_heur, proto_odds);
-  heur_dissector_add("udp", dissect_odds_heur, proto_odds);
+  heur_dissector_add("tcp", dissect_opendds_heur, proto_opendds);
+  heur_dissector_add("udp", dissect_opendds_heur, proto_opendds);
 }
