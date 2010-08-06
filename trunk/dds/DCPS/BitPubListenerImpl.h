@@ -13,6 +13,7 @@
 #ifndef DDS_HAS_MINIMUM_BIT
 
 #include "dds/DdsDcpsSubscriptionS.h"
+#include "Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

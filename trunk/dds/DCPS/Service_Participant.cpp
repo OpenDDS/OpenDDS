@@ -291,7 +291,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
           // Load configuration only if the configuration
           // file exists.
           FILE* in = ACE_OS::fopen(config_fname.c_str(),
-                                   ACE_LIB_TEXT("r"));
+                                   ACE_TEXT("r"));
 
           if (!in) {
             ACE_DEBUG((LM_INFO,

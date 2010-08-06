@@ -114,7 +114,7 @@ const value_string sample_sub_id_vals[] = {
 };
 
 template<typename T>
-ACE_INLINE T
+T
 demarshal_data(tvbuff_t* tvb, gint offset)
 {
   T t;

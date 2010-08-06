@@ -12,6 +12,7 @@
 
 #include "dcps_export.h"
 #include "DdsDcpsDataReaderRemoteS.h"
+#include "Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -30,8 +31,7 @@ class DataReaderImpl;
 *
 */
 class OpenDDS_Dcps_Export DataReaderRemoteImpl
-  : public virtual POA_OpenDDS::DCPS::DataReaderRemote
-  , public virtual PortableServer::RefCountServantBase {
+  : public virtual POA_OpenDDS::DCPS::DataReaderRemote {
 public:
 
   //Constructor

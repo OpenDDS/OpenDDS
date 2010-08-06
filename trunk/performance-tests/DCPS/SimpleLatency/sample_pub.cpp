@@ -84,7 +84,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        std::setbuf( stdout, NULL ); /* no buffering for standard-out */
 #endif
 
-       ACE_Get_Opt get_opts (argc, argv, ACE_LIB_TEXT("c:ut"));
+       ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("c:ut"));
        int ich;
        while ((ich = get_opts ()) != EOF) {
         switch (ich) {

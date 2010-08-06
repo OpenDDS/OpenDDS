@@ -180,8 +180,8 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
   DBG_ENTRY_LVL("DummyTcpTransport","configure_i",5);
 
   // Downcast the config argument to a DummyTcpConfiguration*
-  DummyTcpConfiguration* tcp_config = ACE_static_cast(DummyTcpConfiguration*,
-                                                       config);
+  DummyTcpConfiguration* tcp_config =
+    static_cast<DummyTcpConfiguration*>(config);
 
   if (tcp_config == 0)
     {
@@ -393,7 +393,7 @@ OpenDDS::DCPS::DummyTcpTransport::release_datalink_i(DataLink* link,
 
   ACE_UNUSED_ARG (release_pending);
 
-  DummyTcpDataLink* tcp_link = ACE_static_cast(DummyTcpDataLink*,link);
+  DummyTcpDataLink* tcp_link = static_cast<DummyTcpDataLink*>(link);
 
   if (tcp_link == 0)
     {

@@ -525,8 +525,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
   if (ignore_kind != DONT_IGNORE)
   {
-    ACE_RANDR_TYPE seed =
-      ACE_static_cast(ACE_RANDR_TYPE, ACE_OS::time (0));
+    ACE_RANDR_TYPE seed = static_cast<ACE_RANDR_TYPE>(ACE_OS::time(0));
     // GCC complains about seed not being used.
     ACE_UNUSED_ARG(seed);
 

@@ -12,6 +12,7 @@
 
 #include "dds/DdsDcpsTopicS.h"
 #include "dds/DdsDcpsTypeSupportExtS.h"
+#include "Definitions.h"
 #include "ace/SString.h"
 #include "ace/Atomic_Op.h"
 

@@ -92,7 +92,7 @@ public:
     void* rtn = this->free_list_.remove()->addr();
 
     if (0 == rtn) {
-      rtn = ACE_reinterpret_cast(void*, new char[chunk_size_]);
+      rtn = reinterpret_cast<void*>(new char[chunk_size_]);
       allocs_from_heap_++;
 
       if (DCPS_debug_level >= 2) {
@@ -149,9 +149,9 @@ public:
 
   /// Return a chunk of memory back to free list cache.
   void free(void * ptr) {
-    if (ptr < ACE_reinterpret_cast(void*, pool_) ||
-        ptr > ACE_reinterpret_cast(void*, last_)) {
-      char* tmp = ACE_reinterpret_cast(char *, ptr);
+    if (ptr < reinterpret_cast<void*>(pool_) ||
+        ptr > reinterpret_cast<void*>(last_)) {
+      char* tmp = reinterpret_cast<char*>(ptr);
       delete []tmp;
       frees_to_heap_ ++;
 

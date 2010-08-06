@@ -68,4 +68,8 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
+#if defined (__ACE_INLINE__)
+#include "TransportControlElement.inl"
+#endif /* __ACE_INLINE__ */
+
 #endif  /* OPENDDS_DCPS_TRANSPORTGDCONTROLELEMENT_H */

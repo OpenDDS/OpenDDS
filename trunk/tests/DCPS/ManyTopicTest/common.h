@@ -46,9 +46,9 @@ static int using_udp = 0;
 // These files need to be unlinked in the run test script before and
 // after running.
 //static ACE_TString pub_ready_filename = ACE_TEXT("publisher_ready.txt");
-static ACE_TString pub_finished_filename = ACE_LIB_TEXT("_publisher_finished.txt");
+static ACE_TString pub_finished_filename = ACE_TEXT("_publisher_finished.txt");
 //static ACE_TString sub_ready_filename = ACE_TEXT("subscriber_ready.txt");
-static ACE_TString sub_finished_filename = ACE_LIB_TEXT("_subscriber_finished.txt");
+static ACE_TString sub_finished_filename = ACE_TEXT("_subscriber_finished.txt");
 
 enum TransportTypeId
 {

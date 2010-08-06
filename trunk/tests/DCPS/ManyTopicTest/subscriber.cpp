@@ -479,7 +479,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 /*
       // Indicate that the subscriber is ready
-      FILE* readers_ready = ACE_OS::fopen (sub_ready_filename.c_str (), ACE_LIB_TEXT("w"));
+      FILE* readers_ready = ACE_OS::fopen (sub_ready_filename.c_str (), ACE_TEXT("w"));
       if (readers_ready == 0)
         {
           ACE_ERROR ((LM_ERROR,
@@ -492,7 +492,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         {
           ACE_Time_Value small(0,250000);
           ACE_OS::sleep (small);
-          writers_ready = ACE_OS::fopen (pub_ready_filename.c_str (), ACE_LIB_TEXT("r"));
+          writers_ready = ACE_OS::fopen (pub_ready_filename.c_str (), ACE_TEXT("r"));
         } while (0 == writers_ready);
 
       ACE_OS::fclose(readers_ready);
@@ -503,7 +503,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         {
           ACE_TString t1_fn = ACE_TEXT(MY_TOPIC1) + sub_finished_filename ;
           FILE* readers_completed =
-              ACE_OS::fopen (t1_fn.c_str (), ACE_LIB_TEXT("w"));
+              ACE_OS::fopen (t1_fn.c_str (), ACE_TEXT("w"));
           if (readers_completed == 0)
             {
               ACE_ERROR ((LM_ERROR,
@@ -516,7 +516,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         {
           ACE_TString t2_fn = ACE_TEXT(MY_TOPIC2) + sub_finished_filename ;
           FILE* readers_completed =
-              ACE_OS::fopen (t2_fn.c_str (), ACE_LIB_TEXT("w"));
+              ACE_OS::fopen (t2_fn.c_str (), ACE_TEXT("w"));
           if (readers_completed == 0)
             {
               ACE_ERROR ((LM_ERROR,
@@ -529,7 +529,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         {
           ACE_TString t3_fn = ACE_TEXT(MY_TOPIC3) + sub_finished_filename ;
           FILE* readers_completed =
-              ACE_OS::fopen (t3_fn.c_str (), ACE_LIB_TEXT("w"));
+              ACE_OS::fopen (t3_fn.c_str (), ACE_TEXT("w"));
           if (readers_completed == 0)
             {
               ACE_ERROR ((LM_ERROR,
@@ -548,7 +548,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
               ACE_Time_Value small_time(0, 250000);
               ACE_OS::sleep (small_time);
               writers_completed =
-                  ACE_OS::fopen (t1_fn.c_str (), ACE_LIB_TEXT("r"));
+                  ACE_OS::fopen (t1_fn.c_str (), ACE_TEXT("r"));
             } while (0 == writers_completed);
 
           ACE_OS::fclose(writers_completed);
@@ -563,7 +563,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
               ACE_Time_Value small_time(0,250000);
               ACE_OS::sleep (small_time);
               writers_completed =
-                  ACE_OS::fopen (t2_fn.c_str (), ACE_LIB_TEXT("r"));
+                  ACE_OS::fopen (t2_fn.c_str (), ACE_TEXT("r"));
             } while (0 == writers_completed);
 
           ACE_OS::fclose(writers_completed);
@@ -578,7 +578,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
               ACE_Time_Value small_time(0,250000);
               ACE_OS::sleep (small_time);
               writers_completed =
-                  ACE_OS::fopen (t3_fn.c_str (), ACE_LIB_TEXT("r"));
+                  ACE_OS::fopen (t3_fn.c_str (), ACE_TEXT("r"));
             } while (0 == writers_completed);
 
           ACE_OS::fclose(writers_completed);

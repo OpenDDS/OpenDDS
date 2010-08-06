@@ -14,6 +14,7 @@
 
 #include <dds/DdsDcpsSubscriptionS.h>
 #include <dds/DCPS/LocalObject.h>
+#include <dds/DCPS/Definitions.h>
 
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {

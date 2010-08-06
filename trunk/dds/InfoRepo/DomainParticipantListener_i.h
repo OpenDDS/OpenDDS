@@ -12,6 +12,7 @@
 
 #include "inforepo_export.h"
 #include "dds/DdsDcpsDomainS.h"
+#include "dds/DCPS/Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

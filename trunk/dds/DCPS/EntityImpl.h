@@ -13,6 +13,7 @@
 #include "dds/DdsDcpsInfrastructureS.h"
 #include "ace/Atomic_Op_T.h"
 #include "dds/DCPS/LocalObject.h"
+#include "Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

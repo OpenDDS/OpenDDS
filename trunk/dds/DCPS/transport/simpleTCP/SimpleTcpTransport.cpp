@@ -197,8 +197,8 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
   DBG_ENTRY_LVL("SimpleTcpTransport","configure_i",6);
 
   // Downcast the config argument to a SimpleTcpConfiguration*
-  SimpleTcpConfiguration* tcp_config = ACE_static_cast(SimpleTcpConfiguration*,
-                                                       config);
+  SimpleTcpConfiguration* tcp_config =
+    static_cast<SimpleTcpConfiguration*>(config);
 
   if (tcp_config == 0) {
     // The downcast failed.
@@ -402,7 +402,7 @@ OpenDDS::DCPS::SimpleTcpTransport::release_datalink_i(DataLink* link,
 {
   DBG_ENTRY_LVL("SimpleTcpTransport","release_datalink_i",6);
 
-  SimpleTcpDataLink* tcp_link = ACE_static_cast(SimpleTcpDataLink*,link);
+  SimpleTcpDataLink* tcp_link = static_cast<SimpleTcpDataLink*>(link);
 
   if (tcp_link == 0) {
     // Really an assertion failure

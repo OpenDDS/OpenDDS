@@ -14,9 +14,15 @@
 #include "tao/Basic_Types.h"
 #include "idl2jni_runtime_Export.h"
 #include "15a_compat.h"
+#include "ace/Global_Macros.h"
 
 #include <vector>
 #include <string>
+
+// Newer versions of ACE+TAO do not define ACE_THROW_SPEC
+#ifndef ACE_THROW_SPEC
+#define ACE_THROW_SPEC(X)
+#endif
 
 namespace TAO {
 

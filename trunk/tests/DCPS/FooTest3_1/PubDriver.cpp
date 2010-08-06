@@ -393,7 +393,7 @@ PubDriver::run()
 {
   ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::run() entered.\n"));
 
-  FILE* fp = ACE_OS::fopen (pub_id_fname_.c_str (), ACE_LIB_TEXT("w"));
+  FILE* fp = ACE_OS::fopen (pub_id_fname_.c_str (), ACE_TEXT("w"));
   if (fp == 0)
   {
     ACE_ERROR ((LM_ERROR,
@@ -430,7 +430,7 @@ PubDriver::run()
     {
       ACE_Time_Value small_time(0,250000);
       ACE_OS::sleep (small_time);
-      readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_LIB_TEXT("r"));
+      readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_TEXT("r"));
     } while (0 == readers_ready);
 
   ACE_OS::fclose(readers_ready);

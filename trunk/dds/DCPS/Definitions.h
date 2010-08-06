@@ -14,6 +14,7 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "ace/Message_Block.h"
+#include "ace/Global_Macros.h"
 
 #include <functional>
 #include <utility>
@@ -21,6 +22,11 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+// Newer versions of ACE+TAO do not define ACE_THROW_SPEC
+#ifndef ACE_THROW_SPEC
+#define ACE_THROW_SPEC(X)
+#endif
 
 // More strict check than ACE does: if we have GNU lib C++ without support for
 // wchar_t (std::wstring, std::wostream, etc.) then we don't have DDS_HAS_WCHAR
