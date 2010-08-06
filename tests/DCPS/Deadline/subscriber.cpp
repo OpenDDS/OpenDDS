@@ -290,8 +290,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
       // ----------------------------------------------
 
-      // Wait for deadline periods to expire.
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: sleep for %d seconds\n"), 
+                            SLEEP_DURATION));
+      // Wait for deadline periods to expire. 
       ACE_OS::sleep (SLEEP_DURATION);
+
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: now verify missed ")
+                            ACE_TEXT ("deadline status \n")));
 
       DDS::RequestedDeadlineMissedStatus deadline_status1;
       if (dr1->get_requested_deadline_missed_status(deadline_status1) != ::DDS::RETCODE_OK)
@@ -306,6 +311,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         cerr << "ERROR: Failed to get requested deadline missed status" << endl;
         exit (1);
       }
+      
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: got missed")
+                            ACE_TEXT ("deadline status \n")));
 
       Messenger::Message message;
       message.subject_id = 99;
@@ -335,11 +343,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status1.total_count != NUM_EXPIRATIONS * NUM_INSTANCE
-          || deadline_status2.total_count != NUM_EXPIRATIONS * NUM_INSTANCE)
+      //The reader deadline period is 5 seconds and writer writes 
+      //each instance every 9 seconds, so after SLEEP_DURATION(11secs),
+      //the deadline missed should be 1 per instance
+      if (deadline_status1.total_count != NUM_INSTANCE
+          || deadline_status2.total_count != NUM_INSTANCE)
       {
         cerr << "ERROR: Expected number of missed requested "
-             << "deadlines (" << NUM_EXPIRATIONS * NUM_INSTANCE << ") " << "did " << endl
+             << "deadlines (" << NUM_INSTANCE << ") " << "did " << endl
              << "       not occur ("
              << deadline_status1.total_count << " and/or "
              << deadline_status2.total_count << ")." << endl;
@@ -347,8 +358,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status1.total_count_change != NUM_EXPIRATIONS * NUM_INSTANCE
-          || deadline_status2.total_count_change != NUM_EXPIRATIONS * NUM_INSTANCE)
+      if (deadline_status1.total_count_change != NUM_INSTANCE
+          || deadline_status2.total_count_change != NUM_INSTANCE)
       {
         cerr << "ERROR: Incorrect missed requested "
              << "deadline count change" << endl
@@ -362,11 +373,20 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
+      // Here the writers should continue writes all samples with
+      // .5 second interval.
       ACE_Time_Value no_miss_period = num_messages * write_interval;
 
-      // Wait for another set of deadline periods to expire after
-      // writing/receiving period.
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: sleep for %d \n"), 
+                            SLEEP_DURATION + no_miss_period));
+
+      // Wait for another set of deadline periods(5 + 11 secs).
+      // During this period, the writers continue write all samples with
+      // .5 second interval. 
       ACE_OS::sleep (SLEEP_DURATION + no_miss_period);
+
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: now verify missed ")
+                            ACE_TEXT ("deadline status \n")));
 
       if ((dr1->get_requested_deadline_missed_status(deadline_status1) != ::DDS::RETCODE_OK)
         || (dr2->get_requested_deadline_missed_status(deadline_status2) != ::DDS::RETCODE_OK))
@@ -374,6 +394,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         cerr << "ERROR: failed to get requested deadline missed status" << endl;
         exit (1);
       }
+      
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: got missed")
+                            ACE_TEXT ("deadline status \n")));
 
       if (deadline_status1.last_instance_handle != dr1_hd1
         && deadline_status1.last_instance_handle != dr1_hd2)
@@ -395,11 +418,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status1.total_count != 2 * NUM_EXPIRATIONS * NUM_INSTANCE
-          || deadline_status2.total_count != 2 * NUM_EXPIRATIONS * NUM_INSTANCE)
+      if (deadline_status1.total_count != 3 * NUM_INSTANCE
+          || deadline_status2.total_count != 3 * NUM_INSTANCE)
       {
         cerr << "ERROR: Another expected number of missed requested "
-             << "deadlines (" << 2 * NUM_EXPIRATIONS * NUM_INSTANCE << ")" << endl
+             << "deadlines (" << NUM_INSTANCE << ")" << endl
              << "       did not occur ("
              << deadline_status1.total_count << " and/or "
              << deadline_status2.total_count << ")." << endl;
@@ -407,8 +430,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status1.total_count_change != NUM_EXPIRATIONS * NUM_INSTANCE
-          || deadline_status2.total_count_change != NUM_EXPIRATIONS * NUM_INSTANCE)
+      if (deadline_status1.total_count_change != 2 * NUM_INSTANCE
+          || deadline_status2.total_count_change != 2 * NUM_INSTANCE)
       {
         cerr << "ERROR: Incorrect missed requested "
              << "deadline count" << endl

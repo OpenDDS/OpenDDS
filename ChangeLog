@@ -1,3 +1,23 @@
+Fri Aug  6 21:14:26 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+
+          Fixed execute() to call the listener once per missed 
+          deadline period. Previously it could be called twice 
+          when the timer is triggered and then a new sample is 
+          received right after and missed deadline, it could
+          cause incorrect status counter.
+
+        * tests/DCPS/Deadline/DataReaderListener.cpp:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.cpp:
+        * tests/DCPS/Deadline/Writer.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/Deadline/subscriber.cpp:
+
+          - Adjusted the missed deadline status counter.
+          - Cleaned and added loggings to make debugging easier.
+          
 Fri Aug  6 20:06:25 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * removed trailing whitespace from many files 

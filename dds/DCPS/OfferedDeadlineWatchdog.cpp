@@ -73,43 +73,44 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(void const * act, bool timer_cal
       ACE_Time_Value diff = instance->cur_sample_tv_ - instance->last_sample_tv_;
       missed = diff > this->interval_;
     }
-
+    
     if (missed) {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, monitor, this->status_lock_);
+      
+      if (timer_called) {
+        ++this->status_.total_count;
+        this->status_.total_count_change =
+          this->status_.total_count - this->last_total_count_;
+        this->status_.last_instance_handle = instance->instance_handle_;
 
-      ++this->status_.total_count;
-      this->status_.total_count_change =
-        this->status_.total_count - this->last_total_count_;
-      this->status_.last_instance_handle = instance->instance_handle_;
+        this->writer_impl_->set_status_changed_flag(
+          DDS::OFFERED_DEADLINE_MISSED_STATUS, true);
 
-      this->writer_impl_->set_status_changed_flag(
-        DDS::OFFERED_DEADLINE_MISSED_STATUS, true);
+        DDS::DataWriterListener * const listener =
+          this->writer_impl_->listener_for(
+            DDS::OFFERED_DEADLINE_MISSED_STATUS);
 
-      DDS::DataWriterListener * const listener =
-        this->writer_impl_->listener_for(
-          DDS::OFFERED_DEADLINE_MISSED_STATUS);
+        if (listener != 0) {
+          // Copy before releasing the lock.
+          DDS::OfferedDeadlineMissedStatus const status = this->status_;
 
-      if (listener != 0) {
-        // Copy before releasing the lock.
-        DDS::OfferedDeadlineMissedStatus const status = this->status_;
+          // Release the lock during the upcall.
+          ACE_GUARD(reverse_lock_type, reverse_monitor, this->reverse_status_lock_);
 
-        // Release the lock during the upcall.
-        ACE_GUARD(reverse_lock_type, reverse_monitor, this->reverse_status_lock_);
+          // @todo Will this operation ever throw?  If so we may want to
+          //       catch all exceptions, and act accordingly.
+          listener->on_offered_deadline_missed(this->writer_.in(),
+                                              status);
+        }
 
-        // @todo Will this operation ever throw?  If so we may want to
-        //       catch all exceptions, and act accordingly.
-        listener->on_offered_deadline_missed(this->writer_.in(),
-                                             status);
+        this->writer_impl_->notify_status_condition();
       }
-
-      this->writer_impl_->notify_status_condition();
-
       if (!timer_called) {
         this->cancel_timer(instance);
         this->schedule_timer(instance);
       }
     }
-
+    
   } else {
     ACE_ERROR((LM_ERROR, "(%P|%t)OfferedDeadlineWatchdog::execute: "
                "the current timer should not be invalid for instance %X\n",

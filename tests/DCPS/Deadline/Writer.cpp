@@ -35,7 +35,7 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
 void
 Writer::start ()
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)%T Writer::start \n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start \n")));
   // Launch threads.
   if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1)
   {
@@ -94,7 +94,7 @@ Writer::svc ()
     message.count      = 0;
 
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t)%T Writer::svc sleep for %d seconds.\n"),
+              ACE_TEXT("(%P|%t)Writer::svc sleep for %d seconds.\n"), 
               this->sleep_duration_.sec()));
 
     ACE_OS::sleep (this->sleep_duration_);
@@ -102,6 +102,10 @@ Writer::svc ()
     for (int i = 0; i< num_messages; i ++)
     {
       ++message.count;
+
+      ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t)Writer::svc write sample %d to instance %d.\n"),
+              message.count, this->instance_handle_));
 
       ::DDS::ReturnCode_t const ret = message_dw->write (message, this->instance_handle_);
 
@@ -126,8 +130,8 @@ Writer::svc ()
     cerr << "Exception caught in svc:" << endl
          << e << endl;
   }
-
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)%T Writer::svc finished.\n")));
+  
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)Writer::svc finished.\n")));
 
   return 0;
 }
