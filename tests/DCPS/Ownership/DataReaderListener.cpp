@@ -23,13 +23,13 @@ extern int testcase;
 const int num_messages_per_writer = 10;
 
 DataReaderListenerImpl::DataReaderListenerImpl(const char* reader_id)
-  : num_reads_(0), 
-    reader_id_ (reader_id), 
-    verify_result_ (true), 
+  : num_reads_(0),
+    reader_id_ (reader_id),
+    verify_result_ (true),
     result_verify_complete_ (false)
 {
-  this->current_strength_[0] = 0; 
-  this->current_strength_[1] = 0; 
+  this->current_strength_[0] = 0;
+  this->current_strength_[1] = 0;
 }
 
 DataReaderListenerImpl::~DataReaderListenerImpl()
@@ -40,7 +40,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 throw(CORBA::SystemException)
 {
   num_reads_ ++;
-  
+
   try {
     Messenger::MessageDataReader_var message_dr =
       Messenger::MessageDataReader::_narrow(reader);
@@ -61,16 +61,16 @@ throw(CORBA::SystemException)
       if (si.valid_data) {
         ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t)%s->%s subject_id: %d ")
           ACE_TEXT("count: %d strength: %d\n"),
-          message.from.in(), this->reader_id_, message.subject_id, 
-          message.count, message.strength)); 
-        std::cout << message.from.in() << "->" << this->reader_id_ 
-        << " subject_id: " << message.subject_id  
-        << " count: " << message.count 
-        << " strength: " << message.strength 
+          message.from.in(), this->reader_id_, message.subject_id,
+          message.count, message.strength));
+        std::cout << message.from.in() << "->" << this->reader_id_
+        << " subject_id: " << message.subject_id
+        << " count: " << message.count
+        << " strength: " << message.strength
         << std::endl;
         bool result = verify (message);
         this->verify_result_ &= result;
-        
+
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
 
@@ -122,7 +122,7 @@ throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)%s: on_liveliness_changed(): ")
           ACE_TEXT(" handle %d alive_count_change %d not_alive_count_change %d \n"),
-          this->reader_id_, status.last_publication_handle, status.alive_count_change, 
+          this->reader_id_, status.last_publication_handle, status.alive_count_change,
           status.alive_count_change));
 }
 
@@ -155,7 +155,7 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
 {
   if (msg.subject_id != msg.count % 2)
     return false;
-    
+
   int previous_strength = this->current_strength_[msg.subject_id];
   // record the strength of writer that sample is from.
   this->current_strength_[msg.subject_id] = msg.strength;
@@ -180,54 +180,54 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
     else {
       start_missing_ = now;
     }
-    
+
     if (msg.count == 6 && msg.strength != 12) {
       return false;
     }
     else {
       end_missing_ = now;
     }
-    
+
     if (now < end_missing_ && now > start_missing_ && msg.strength != 10)
       return false;
   }
   break;
   case update_strength:
   {
-    // strength should not be less then before  
+    // strength should not be less then before
     if (! result_verify_complete_ && msg.strength < previous_strength) {
       return false;
-    } 
-        
+    }
+
     if (! result_verify_complete_ && num_messages_per_writer == msg.count) {
       // The owner writer is done. so the other writer will become
       // owner, then it will not meet the condition of the strength
       // always increase.
-      this->result_verify_complete_ = true; 
-      
+      this->result_verify_complete_ = true;
+
       if (msg.strength != 15) {
         return false;
       }
     }
-   
+
   }
   break;
   default:
   ACE_OS::exit(1);
   break;
   }
-  
+
   return true;
 }
 
 
-bool 
-DataReaderListenerImpl::verify_result ()  
+bool
+DataReaderListenerImpl::verify_result ()
 {
   switch (testcase) {
   case strength:
   {
-    this->verify_result_ &= 
+    this->verify_result_ &=
         (this->current_strength_[0] == this->current_strength_[1]
         && this->current_strength_[0] == 12);
   }
@@ -237,7 +237,7 @@ DataReaderListenerImpl::verify_result ()
   {
     // The liveliness is changed for both writers in the middle of sending
     // total messages but finally, the higher strength writer takes ownership.
-    this->verify_result_ &=   
+    this->verify_result_ &=
         (this->current_strength_[0] == this->current_strength_[1]
         && this->current_strength_[0] == 12);
   }

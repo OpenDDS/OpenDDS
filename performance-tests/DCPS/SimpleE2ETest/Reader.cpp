@@ -97,7 +97,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
           //ACE_DEBUG((LM_DEBUG,"got RETCODE_NO_DATA\n"));
           if (dr_servant->get_sample_rejected_status (rejected) != ::DDS::RETCODE_OK)
             {
-              ACE_ERROR((LM_ERROR, 
+              ACE_ERROR((LM_ERROR,
                 ACE_TEXT ("ERROR: Failed to get sample rejected status.\n")));
               ACE_OS::exit (7);
             }
@@ -110,7 +110,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
 
           if (dr_servant->get_sample_lost_status (lost) != ::DDS::RETCODE_OK)
             {
-              ACE_ERROR((LM_ERROR, 
+              ACE_ERROR((LM_ERROR,
                 ACE_TEXT ("ERROR: Failed to get sample lost status.\n")));
               ACE_OS::exit (7);
             }

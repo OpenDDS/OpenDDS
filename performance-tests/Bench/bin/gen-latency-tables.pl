@@ -76,32 +76,32 @@ die "Unable to open output: $nj_filename - $!"
 
     print LATOUT "<h3 class=\"data_tables\">" . transportName($transport) . "</h3>\n";
     print LATOUT "<table class=\"data_tables\">\n";
-    print LATOUT "<tr class=\"data_tables\">" . 
-                 "<th class=\"data_tables\">Message Size</th>" . 
-                 "<th class=\"data_tables\">Mean</th>" . 
-                 "<th class=\"data_tables\">Std. Dev.</th>" . 
-                 "<th class=\"data_tables\">Median</th>" . 
+    print LATOUT "<tr class=\"data_tables\">" .
+                 "<th class=\"data_tables\">Message Size</th>" .
+                 "<th class=\"data_tables\">Mean</th>" .
+                 "<th class=\"data_tables\">Std. Dev.</th>" .
+                 "<th class=\"data_tables\">Median</th>" .
                  "<th class=\"data_tables\">Median Abs. Dev.</th>" .
-                 "<th class=\"data_tables\">Min</th>" . 
+                 "<th class=\"data_tables\">Min</th>" .
                  "<th class=\"data_tables\">Max</th></tr>\n";
 
     print JITOUT "<h3 class=\"data_tables\">" . transportName($transport) . "</h3>\n";
     print JITOUT "<table class=\"data_tables\">\n";
-    print JITOUT "<tr class=\"data_tables\">" . 
-                 "<th class=\"data_tables\">Message Size</th>" . 
-                 "<th class=\"data_tables\">Mean</th>" . 
-                 "<th class=\"data_tables\">Std. Dev.</th>" . 
-                 "<th class=\"data_tables\">Median</th>" . 
+    print JITOUT "<tr class=\"data_tables\">" .
+                 "<th class=\"data_tables\">Message Size</th>" .
+                 "<th class=\"data_tables\">Mean</th>" .
+                 "<th class=\"data_tables\">Std. Dev.</th>" .
+                 "<th class=\"data_tables\">Median</th>" .
                  "<th class=\"data_tables\">Median Abs. Dev.</th>" .
-                 "<th class=\"data_tables\">Min</th>" . 
+                 "<th class=\"data_tables\">Min</th>" .
                  "<th class=\"data_tables\">Max</th></tr>\n";
 
     print NMJOUT "<h3 class=\"data_tables\">" . transportName($transport) . "</h3>\n";
     print NMJOUT "<table class=\"data_tables\">\n";
-    print NMJOUT "<tr class=\"data_tables\">" . 
-                 "<th class=\"data_tables\">Message Size</th>" . 
-                 "<th class=\"data_tables\">Norm. Std. Dev.</th>" . 
-                 "<th class=\"data_tables\">Norm. Min</th>" . 
+    print NMJOUT "<tr class=\"data_tables\">" .
+                 "<th class=\"data_tables\">Message Size</th>" .
+                 "<th class=\"data_tables\">Norm. Std. Dev.</th>" .
+                 "<th class=\"data_tables\">Norm. Min</th>" .
                  "<th class=\"data_tables\">Norm. Max</th></tr>\n";
 
     foreach my $size (sort { $a <=> $b; } keys %{$data->{$transport}}) {

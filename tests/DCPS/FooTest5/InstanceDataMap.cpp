@@ -13,7 +13,7 @@ InstanceDataMap::InstanceDataMap()
 
 void InstanceDataMap::init()
 {
-  num_messages_expected_ 
+  num_messages_expected_
     = num_datawriters * num_instances_per_writer * num_samples_per_instance;
   maps_ = new DataMap[num_datawriters];
 
@@ -32,24 +32,24 @@ InstanceDataMap::~InstanceDataMap()
   delete [] maps_;
 }
 
-int 
+int
 InstanceDataMap::add (Xyz::Foo& sample)
 {
-  ACE_GUARD_RETURN (ACE_Thread_Mutex, 
-                    guard, 
-                    this->lock_, 
+  ACE_GUARD_RETURN (ACE_Thread_Mutex,
+                    guard,
+                    this->lock_,
                     -1);
-  if (sample.x >= num_samples_per_instance) 
+  if (sample.x >= num_samples_per_instance)
   {
-    ACE_ERROR_RETURN ((LM_ERROR, 
+    ACE_ERROR_RETURN ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: reader received unexpected message number %d!\n"),
       sample.x),
       -1);
   }
 
-  if (sample.y >= num_datawriters) 
+  if (sample.y >= num_datawriters)
   {
-    ACE_ERROR_RETURN ((LM_ERROR, 
+    ACE_ERROR_RETURN ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: reader received unexpected message from writer %d!\n"),
       sample.y),
       -1);
@@ -59,7 +59,7 @@ InstanceDataMap::add (Xyz::Foo& sample)
 
   if (length != (CORBA::ULong) sequence_length)
   {
-    ACE_ERROR_RETURN ((LM_ERROR, 
+    ACE_ERROR_RETURN ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: unexpected sequence length %d expected %d!\n"),
       length, sequence_length),
       -1);
@@ -69,7 +69,7 @@ InstanceDataMap::add (Xyz::Foo& sample)
   {
     if (sample.values[i] != sample.x * sample.x - i)
     {
-      ACE_ERROR_RETURN ((LM_ERROR, 
+      ACE_ERROR_RETURN ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: incorrect sequence %dth value %f expected %f %x!\n"),
         i, sample.values[i], sample.x * sample.x - i, sample.values[i]),
         -1);
@@ -82,7 +82,7 @@ InstanceDataMap::add (Xyz::Foo& sample)
   {
     if ((entry->int_id_)[(int)sample.x] >= num_receives_per_sample_)
     {
-      ACE_ERROR ((LM_ERROR, 
+      ACE_ERROR ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: reader received duplicate message %d ")
         ACE_TEXT("from writer %d!\n"),
         sample.x, sample.y));
@@ -97,7 +97,7 @@ InstanceDataMap::add (Xyz::Foo& sample)
     array[(int)sample.x] ++;
     if( map.bind (sample.data_source, array) != 0)
     {
-      ACE_ERROR_RETURN ((LM_ERROR, 
+      ACE_ERROR_RETURN ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: failed to bind instance %d results!\n"),
       sample.data_source),
       -1);
@@ -108,24 +108,24 @@ InstanceDataMap::add (Xyz::Foo& sample)
 }
 
 
-int 
+int
 InstanceDataMap::add (Xyz::FooNoKey& sample)
 {
-  ACE_GUARD_RETURN (ACE_Thread_Mutex, 
-                    guard, 
-                    this->lock_, 
+  ACE_GUARD_RETURN (ACE_Thread_Mutex,
+                    guard,
+                    this->lock_,
                     -1);
-  if (sample.x >= num_samples_per_instance) 
+  if (sample.x >= num_samples_per_instance)
   {
-    ACE_ERROR_RETURN ((LM_ERROR, 
+    ACE_ERROR_RETURN ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: reader received unexpected message number %d!\n"),
       sample.x),
       -1);
   }
 
-  if (sample.y >= num_datawriters) 
+  if (sample.y >= num_datawriters)
   {
-    ACE_ERROR_RETURN ((LM_ERROR, 
+    ACE_ERROR_RETURN ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: reader received unexpected message from writer %d!\n"),
       sample.y),
       -1);
@@ -135,7 +135,7 @@ InstanceDataMap::add (Xyz::FooNoKey& sample)
 
   if (length != (CORBA::ULong) sequence_length)
   {
-    ACE_ERROR_RETURN ((LM_ERROR, 
+    ACE_ERROR_RETURN ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: unexpected sequence length %d expected %d!\n"),
       length, sequence_length),
       -1);
@@ -145,7 +145,7 @@ InstanceDataMap::add (Xyz::FooNoKey& sample)
   {
     if ((int)sample.values[i] != sample.x * sample.x - i)
     {
-      ACE_ERROR_RETURN ((LM_ERROR, 
+      ACE_ERROR_RETURN ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: incorrect sequence value %d expected %d!\n"),
         sample.values[i], sample.x * sample.x - i),
         -1);
@@ -158,7 +158,7 @@ InstanceDataMap::add (Xyz::FooNoKey& sample)
   {
     if ((entry->int_id_)[(int)sample.x] >= num_receives_per_sample_)
     {
-      ACE_ERROR ((LM_ERROR, 
+      ACE_ERROR ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: reader received duplicate message %d ")
         ACE_TEXT("from writer %d!\n"),
         sample.x, sample.y));
@@ -174,7 +174,7 @@ InstanceDataMap::add (Xyz::FooNoKey& sample)
     array[(int)sample.x] ++;
     if( map.bind (sample.data_source, array) != 0)
     {
-      ACE_ERROR_RETURN ((LM_ERROR, 
+      ACE_ERROR_RETURN ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: failed to bind instance %d results!\n"),
       sample.data_source),
       -1);
@@ -186,11 +186,11 @@ InstanceDataMap::add (Xyz::FooNoKey& sample)
 
 
 bool
-InstanceDataMap::test_passed(int expected) 
+InstanceDataMap::test_passed(int expected)
 {
-  ACE_GUARD_RETURN (ACE_Thread_Mutex, 
-                    guard, 
-                    this->lock_, 
+  ACE_GUARD_RETURN (ACE_Thread_Mutex,
+                    guard,
+                    this->lock_,
                     false);
 
   bool expect_receive_all = expected == num_messages_expected_;
@@ -201,11 +201,11 @@ InstanceDataMap::test_passed(int expected)
   for (int i = 0; i < num_datawriters; i++)
   {
     DataMap& map = maps_[i];
-    
-    if (expect_receive_all 
+
+    if (expect_receive_all
       && map.current_size () != (unsigned) num_instances_per_writer)
     {
-      ACE_ERROR ((LM_ERROR, 
+      ACE_ERROR ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: get %d instances expected %d!\n"),
         map.current_size (), num_instances_per_writer));
       return false;
@@ -220,7 +220,7 @@ InstanceDataMap::test_passed(int expected)
       {
         if (expect_receive_all && (entry->int_id_)[i] < num_receives_per_sample_)
         {
-          ACE_ERROR ((LM_ERROR, 
+          ACE_ERROR ((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: received %d msg from %d instance ")
             ACE_TEXT("for %d times, expected %d!\n"),
             i, entry->ext_id_, (entry->int_id_)[i], num_receives_per_sample_));
@@ -234,10 +234,10 @@ InstanceDataMap::test_passed(int expected)
     }
   }
 
-  // If we are not expect receive all messages that the publisher called 
+  // If we are not expect receive all messages that the publisher called
   // write() then we make sure we received the number of expected messages
-  // which excludes the failed writes. 
-  if (! expect_receive_all 
+  // which excludes the failed writes.
+  if (! expect_receive_all
     && received_messages == expected)
   {
     result = true;

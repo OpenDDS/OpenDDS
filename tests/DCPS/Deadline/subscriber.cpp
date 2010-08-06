@@ -93,9 +93,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // Initialize the transport
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl = 
+      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
         TheTransportFactory->create_transport_impl (
-          transport_impl_id, 
+          transport_impl_id,
           ::OpenDDS::DCPS::AUTO_CONFIG);
 
       // Create the subscriber and attach to the corresponding
@@ -148,7 +148,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // incompatible QoS.
         DDS::DataReaderQos bogus_qos;
         sub->get_default_datareader_qos (bogus_qos);
-      
+
         // Set up a 2 second recurring deadline.  DataReader creation
         // should fail with this QoS since the requested deadline period
         // will be less than the test configured offered deadline
@@ -247,13 +247,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dr_qos.deadline.period.nanosec = DEADLINE_PERIOD.nanosec;
 
       // Reset qos to have deadline. The watch dog now starts.
-      if (dr1->set_qos (dr_qos) != ::DDS::RETCODE_OK 
+      if (dr1->set_qos (dr_qos) != ::DDS::RETCODE_OK
         || dr2->set_qos (dr_qos) != ::DDS::RETCODE_OK)
       {
         cerr << "ERROR: set deadline qos failed." << endl;
         exit(1);
       }
-      
+
       Messenger::MessageDataReader_var message_dr1 =
         Messenger::MessageDataReader::_narrow(dr1.in());
 
@@ -276,7 +276,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           ++ attempts;
           ACE_OS::sleep (1);
         }
-        else 
+        else
         {
           cerr << "ERROR: Failed to get subscription matched status" << endl;
           exit (1);
@@ -290,7 +290,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
       // ----------------------------------------------
 
-      // Wait for deadline periods to expire. 
+      // Wait for deadline periods to expire.
       ACE_OS::sleep (SLEEP_DURATION);
 
       DDS::RequestedDeadlineMissedStatus deadline_status1;
@@ -315,7 +315,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::InstanceHandle_t dr1_hd2 = message_dr1->lookup_instance (message);
       ::DDS::InstanceHandle_t dr2_hd2 = message_dr2->lookup_instance (message);
 
-      if (deadline_status1.last_instance_handle != dr1_hd1 
+      if (deadline_status1.last_instance_handle != dr1_hd1
         && deadline_status1.last_instance_handle != dr1_hd2)
       {
         cerr << "ERROR: Expected DR1 last instance handle ("
@@ -325,7 +325,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status2.last_instance_handle != dr2_hd1 
+      if (deadline_status2.last_instance_handle != dr2_hd1
         && deadline_status2.last_instance_handle != dr2_hd2)
       {
         cerr << "ERROR: Expected DR2 last instance handle ("
@@ -375,7 +375,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status1.last_instance_handle != dr1_hd1 
+      if (deadline_status1.last_instance_handle != dr1_hd1
         && deadline_status1.last_instance_handle != dr1_hd2)
       {
         cerr << "ERROR: Expected DR1 last instance handle ("
@@ -385,7 +385,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status2.last_instance_handle != dr2_hd1 
+      if (deadline_status2.last_instance_handle != dr2_hd1
         && deadline_status2.last_instance_handle != dr2_hd2)
       {
         cerr << "ERROR: Expected DR2 last instance handle ("

@@ -95,7 +95,7 @@ Writer::svc ()
 
     for (int i = 0; i< num_writes_per_thread_; i ++)
     {
-      ::DDS::InstanceHandle_t handle 
+      ::DDS::InstanceHandle_t handle
         = foo_dw->register_instance(foo);
       foo.handle_value = handle;
       foo.sample_sequence = i;
@@ -114,11 +114,11 @@ Writer::svc ()
         // check for equality
         TEST_CHECK (foo.a_long_value == key_holder.a_long_value); // It is the instance key.
       }
-     
+
       if (OpenDDS::DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG ((LM_DEBUG, "(%P|%t)write sample: %d \n", foo.sample_sequence));
       }
-      
+
       ret = foo_dw->write(foo,
                           handle);
       TEST_CHECK (ret == ::DDS::RETCODE_OK);

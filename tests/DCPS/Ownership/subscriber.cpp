@@ -142,7 +142,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create DataReader
     DataReaderListenerImpl* listener_svt1 = new DataReaderListenerImpl("DataReader1");
     DataReaderListenerImpl* listener_svt2 = new DataReaderListenerImpl("DataReader2");
-    
+
     DDS::DataReaderListener_var listener1(listener_svt1);
     DDS::DataReaderListener_var listener2(listener_svt2);
 
@@ -165,7 +165,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
     }
-    
+
     DDS::DataReader_var reader2 =
       sub->create_datareader(topic.in(),
                              dr_qos,
@@ -212,7 +212,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
       }
-      
+
       if (reader2->get_subscription_matched_status(matches2) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
@@ -230,7 +230,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     TheTransportFactory->release();
     TheServiceParticipant->shutdown();
-    
+
     if (listener_svt1->verify_result () == false || listener_svt2->verify_result () == false) {
       ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")

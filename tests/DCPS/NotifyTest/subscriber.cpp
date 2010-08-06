@@ -45,10 +45,10 @@ parse_args (int argc, ACE_TCHAR *argv[])
       num_expected_dispose = 1;
       break;
     case 'u':
-      //If writer calls unregister_instance, do not expect 
+      //If writer calls unregister_instance, do not expect
       //the unregister message because the reader defaults to
       //auto dispose upon unregister, it will send dispose which
-      //cause the instance release and state not change so 
+      //cause the instance release and state not change so
       //unregister instance message is ignored.
       num_expected_unregister = 0;
       ++ num_expected_dispose;
@@ -178,8 +178,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       int expected = num_expected_data + num_expected_dispose + num_expected_unregister;
 cerr << " expected " <<  num_expected_data << "/" << num_expected_dispose << "/" << num_expected_unregister <<endl;
-           
-      while ( listener_servant.num_reads() < expected ) { 
+
+      while ( listener_servant.num_reads() < expected ) {
         cerr << " recv " << listener_servant.num_reads() << endl;
         ACE_OS::sleep (1);
       }
@@ -199,13 +199,13 @@ cerr << " expected " <<  num_expected_data << "/" << num_expected_dispose << "/"
 
       if (listener_servant.num_received_dispose () != num_expected_dispose)
       {
-         cerr << "did not receive dispose sample as expected." << num_expected_dispose 
+         cerr << "did not receive dispose sample as expected." << num_expected_dispose
            << "/" << listener_servant.num_received_dispose () << endl;
          return 1;
       }
       if (listener_servant.num_received_unregister () != num_expected_unregister)
       {
-         cerr << "did not receive unregister sample as expected." << num_expected_unregister 
+         cerr << "did not receive unregister sample as expected." << num_expected_unregister
            << "/" << listener_servant.num_received_unregister () << endl;
          return 1;
       }

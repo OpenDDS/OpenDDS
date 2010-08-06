@@ -49,7 +49,7 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
           (const char*)data.value
         ));
       }
-    } 
+    }
     else if (info.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
     {
       ACE_DEBUG((LM_DEBUG,

@@ -78,11 +78,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       dpf->get_default_participant_qos(partQos);
 
       // set up user data in DP qos
-      CORBA::ULong part_user_data_len 
+      CORBA::ULong part_user_data_len
         = static_cast<CORBA::ULong>(ACE_OS::strlen (PART_USER_DATA));
       partQos.user_data.value.length (part_user_data_len);
-      partQos.user_data.value.replace (part_user_data_len, 
-                                       part_user_data_len, 
+      partQos.user_data.value.replace (part_user_data_len,
+                                       part_user_data_len,
                                        reinterpret_cast<CORBA::Octet*>(PART_USER_DATA));
 
       DDS::DomainParticipant_var participant =
@@ -181,12 +181,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       dw_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
       dw_qos.resource_limits.max_samples_per_instance = 1000;
       dw_qos.history.kind  = ::DDS::KEEP_ALL_HISTORY_QOS;
-      
+
       // set up user data in DW qos
       CORBA::ULong dw_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (DW_USER_DATA));
       dw_qos.user_data.value.length (dw_user_data_len);
-      dw_qos.user_data.value.replace (dw_user_data_len, 
-                                      dw_user_data_len, 
+      dw_qos.user_data.value.replace (dw_user_data_len,
+                                      dw_user_data_len,
                                       reinterpret_cast<CORBA::Octet*>(DW_USER_DATA));
 
       DDS::DataWriter_var dw =
@@ -218,29 +218,29 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
 
       part_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (UPDATED_PART_USER_DATA));
       partQos.user_data.value.length (part_user_data_len);
-      partQos.user_data.value.replace (part_user_data_len, 
-                                       part_user_data_len, 
+      partQos.user_data.value.replace (part_user_data_len,
+                                       part_user_data_len,
                                        reinterpret_cast<CORBA::Octet*>(UPDATED_PART_USER_DATA));
       participant->set_qos (partQos);
 
       dw_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (UPDATED_DW_USER_DATA));
       dw_qos.user_data.value.length (dw_user_data_len);
-      dw_qos.user_data.value.replace (dw_user_data_len, 
-                                      dw_user_data_len, 
+      dw_qos.user_data.value.replace (dw_user_data_len,
+                                      dw_user_data_len,
                                       reinterpret_cast<CORBA::Octet*>(UPDATED_DW_USER_DATA));
       dw->set_qos (dw_qos);
 
       group_data_len = static_cast<CORBA::ULong> (ACE_OS::strlen (UPDATED_GROUP_DATA));
       pub_qos.group_data.value.length (group_data_len);
-      pub_qos.group_data.value.replace (group_data_len, 
-                                        group_data_len, 
+      pub_qos.group_data.value.replace (group_data_len,
+                                        group_data_len,
                                         reinterpret_cast<CORBA::Octet*>(UPDATED_GROUP_DATA));
       pub->set_qos (pub_qos);
 
       topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (UPDATED_TOPIC_DATA));
       topic_qos.topic_data.value.length (topic_data_len);
-      topic_qos.topic_data.value.replace (topic_data_len, 
-                                          topic_data_len, 
+      topic_qos.topic_data.value.replace (topic_data_len,
+                                          topic_data_len,
                                           reinterpret_cast<CORBA::Octet*>(UPDATED_TOPIC_DATA));
       topic->set_qos (topic_qos);
 

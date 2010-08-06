@@ -26,14 +26,14 @@ $publisher2_completed = "T2_publisher_finished.txt";
 $publisher3_completed = "T3_publisher_finished.txt";
 #$publisher_ready = "publisher_ready.txt";
 
-unlink $subscriber1_completed; 
-unlink $subscriber2_completed; 
-unlink $subscriber3_completed; 
-#unlink $subscriber_ready; 
-unlink $publisher1_completed; 
-unlink $publisher2_completed; 
-unlink $publisher3_completed; 
-#unlink $publisher_ready; 
+unlink $subscriber1_completed;
+unlink $subscriber2_completed;
+unlink $subscriber3_completed;
+#unlink $subscriber_ready;
+unlink $publisher1_completed;
+unlink $publisher2_completed;
+unlink $publisher3_completed;
+#unlink $publisher_ready;
 
 # single reader with single instances test
 $multiple_instance=0;
@@ -51,31 +51,31 @@ if ($ARGV[0] eq 'udp') {
 
 
 # multiple instances test
-if ($ARGV[$arg_idx] eq 'mi') { 
+if ($ARGV[$arg_idx] eq 'mi') {
   $multiple_instance=1;
   $num_samples_per_reader=10;
-  $num_readers=1; 
+  $num_readers=1;
 }
 # multiple datareaders with single instance test
-elsif ($ARGV[$arg_idx] eq 'mr') {  
+elsif ($ARGV[$arg_idx] eq 'mr') {
   $multiple_instance=0;
   $num_samples_per_reader=5;
-  $num_readers=2; 
+  $num_readers=2;
 }
 # multiple datareaders with multiple instances test
-elsif ($ARGV[$arg_idx] eq 'mri') {  
+elsif ($ARGV[$arg_idx] eq 'mri') {
   $multiple_instance=1;
   $num_samples_per_reader=4;
-  $num_readers=3; 
+  $num_readers=3;
 }
 # multiple datareaders with multiple instances test
-elsif ($ARGV[$arg_idx] eq 'mrit') {  
+elsif ($ARGV[$arg_idx] eq 'mrit') {
   $multiple_instance=1;
   $num_samples_per_reader=4;
-  $num_readers=3; 
+  $num_readers=3;
   $use_take=1;
 }
-elsif ($ARGV[$arg_idx] eq '') { 
+elsif ($ARGV[$arg_idx] eq '') {
   #default test - single datareader single instance.
 }
 else {
@@ -85,7 +85,7 @@ else {
 
 $dcpsrepo_ior = "repo.ior";
 
-unlink $dcpsrepo_ior; 
+unlink $dcpsrepo_ior;
 
 # test multiple cases
 $sub1_parameters = "-t 1" ;
@@ -161,14 +161,14 @@ if ($ir != 0) {
 }
 
 
-unlink $subscriber1_completed; 
-unlink $subscriber2_completed; 
-unlink $subscriber3_completed; 
-#unlink $subscriber_ready; 
-unlink $publisher1_completed; 
-unlink $publisher2_completed; 
-unlink $publisher3_completed; 
-#unlink $publisher_ready; 
+unlink $subscriber1_completed;
+unlink $subscriber2_completed;
+unlink $subscriber3_completed;
+#unlink $subscriber_ready;
+unlink $publisher1_completed;
+unlink $publisher2_completed;
+unlink $publisher3_completed;
+#unlink $publisher_ready;
 
 if ($status == 0) {
   print "test PASSED.\n";

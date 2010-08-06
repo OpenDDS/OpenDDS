@@ -5,8 +5,8 @@
 #include "PubDriver.h"
 #include "TestException.h"
 #include "dds/DCPS/RepoIdBuilder.h"
-// Add the TransportImpl.h before TransportImpl_rch.h is included to  
-// resolve the build problem that the class is not defined when 
+// Add the TransportImpl.h before TransportImpl_rch.h is included to
+// resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
@@ -105,18 +105,18 @@ PubDriver::init()
   // SimpleTcp factory. We also assign an impl id (aka instance id) to
   // the TransportImpl object that gets created - the impl id we assign
   // to this TransportImpl object is TRANSPORT_IMPL_ID.  After the
-  // create_transport_impl() has completed, the 
-  // obtain() would give a "copy" of the cached reference to the 
+  // create_transport_impl() has completed, the
+  // obtain() would give a "copy" of the cached reference to the
   // TransportImpl object.
-  OpenDDS::DCPS::TransportImpl_rch transport_impl 
-    = TheTransportFactory->create_transport_impl (TRANSPORT_IMPL_ID, 
+  OpenDDS::DCPS::TransportImpl_rch transport_impl
+    = TheTransportFactory->create_transport_impl (TRANSPORT_IMPL_ID,
                                                   ACE_TEXT("SimpleTcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
   // Now we can configure the TransportImpl object.
-  OpenDDS::DCPS::TransportConfiguration_rch config 
+  OpenDDS::DCPS::TransportConfiguration_rch config
     = TheTransportFactory->create_configuration (TRANSPORT_IMPL_ID, ACE_TEXT("SimpleTcp"));
-      
-  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config 
+
+  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   // We use all of the default configuration settings, except for those
@@ -272,7 +272,7 @@ PubDriver::parse_arg_p(const ACE_TCHAR* arg, bool& flag)
   builder.participantId(1);
   builder.entityKey(ACE_OS::atoi(pub_id_str.c_str()));
   builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
-  
+
   OpenDDS::DCPS::RepoId repoId(builder);
   publisher_.set_local_publisher(repoId);
 
@@ -327,7 +327,7 @@ PubDriver::parse_arg_s(const ACE_TCHAR* arg, bool& flag)
   builder.participantId(1);
   builder.entityKey(ACE_OS::atoi(sub_id_str.c_str()));
   builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
-  
+
   OpenDDS::DCPS::RepoId repoId(builder);
 
   ACE_INET_Addr sub_addr(sub_addr_str.c_str());

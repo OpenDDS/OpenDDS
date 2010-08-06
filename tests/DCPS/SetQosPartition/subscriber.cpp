@@ -30,7 +30,7 @@
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 const char PARTITION_A[] = "ZiggieStardust";
-const char PARTITION_B[] = "Amadeus"; 
+const char PARTITION_B[] = "Amadeus";
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
@@ -76,14 +76,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // Initialize the transport
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl = 
+      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
         TheTransportFactory->create_transport_impl (
-          transport_impl_id, 
+          transport_impl_id,
           ::OpenDDS::DCPS::AUTO_CONFIG);
 
-      // Create the first subscriber belongs to PARTITION A 
+      // Create the first subscriber belongs to PARTITION A
       DDS::SubscriberQos sub_qos1;
-      participant->get_default_subscriber_qos (sub_qos1);      
+      participant->get_default_subscriber_qos (sub_qos1);
 
       sub_qos1.partition.name.length (1);
       sub_qos1.partition.name[0] = PARTITION_A;
@@ -100,7 +100,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // Create the second subscriber belongs to PARTITION B
       DDS::SubscriberQos sub_qos2;
       participant->get_default_subscriber_qos (sub_qos2);
-      
+
       sub_qos2.partition.name.length (1);
       sub_qos2.partition.name[0] = PARTITION_B;
 
@@ -150,7 +150,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           << status_str.c_str() << endl;
         exit(1);
       }
-     
+
       status = sub_impl2->attach_transport(tcp_impl.in());
       if (status != OpenDDS::DCPS::ATTACH_OK) {
         std::string status_str;
@@ -173,7 +173,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-      DDS::DataReaderQos dr_qos; 
+      DDS::DataReaderQos dr_qos;
       sub1->get_default_datareader_qos (dr_qos);
 
       // Create first DataReader with listener.
@@ -215,7 +215,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       DataReaderListenerImpl* listener_servant2 =
         dynamic_cast<DataReaderListenerImpl*>(listener2.in());
 
-      int expected = 10; 
+      int expected = 10;
       // Writer of PARTITION A -> Reader of PARTITION A
       while ( listener_servant1->num_reads() < expected) {
         ACE_OS::sleep (1);
@@ -225,7 +225,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       while ( listener_servant2->num_reads() < expected) {
         ACE_OS::sleep (1);
       }
-      
+
       // ----------------------------------------------
       // Now switch first reader/subscriber from A to B
       // and it should be connected with DataWriter.
@@ -247,8 +247,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       while ( listener_servant2->num_reads() < expected) {
         ACE_OS::sleep (1);
       }
-      
-      if (listener_servant1->num_reads() > expected 
+
+      if (listener_servant1->num_reads() > expected
         || listener_servant2->num_reads() > expected)
       {
         cerr << "ERROR: received more than excepted messages" << endl;

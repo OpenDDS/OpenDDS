@@ -17,7 +17,7 @@
 #include <ace/streams.h>
 #include <orbsvcs/Time_Utilities.h>
 
-// constants used by this publisher for transport; the 
+// constants used by this publisher for transport; the
 // TRANSPORT_IMPL_ID must match the value in the configuration file.
 const OpenDDS::DCPS::TransportIdType TRANSPORT_IMPL_ID = 1;
 
@@ -100,7 +100,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
     // Register the Quote type
     // (same as publisher)
-    StockQuoter::QuoteTypeSupport_var quote_servant 
+    StockQuoter::QuoteTypeSupport_var quote_servant
       = new StockQuoter::QuoteTypeSupportImpl();
 
     if (DDS::RETCODE_OK != quote_servant->register_type(participant.in (),
@@ -111,12 +111,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
     // Register the ExchangeEvent type
     // (same as publisher)
-    StockQuoter::ExchangeEventTypeSupport_var exchange_evt_servant  
+    StockQuoter::ExchangeEventTypeSupport_var exchange_evt_servant
       = new StockQuoter::ExchangeEventTypeSupportImpl();
 
     if (DDS::RETCODE_OK != exchange_evt_servant->register_type(participant.in (),
                                                                QUOTER_EXCHANGE_EVENT_TYPE)) {
-      cerr << "register_type for " << QUOTER_EXCHANGE_EVENT_TYPE 
+      cerr << "register_type for " << QUOTER_EXCHANGE_EVENT_TYPE
            << " failed." << endl;
       ACE_OS::exit(1);
     }
@@ -178,13 +178,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     DDS::DataReaderQos dr_default_qos;
     sub->get_default_datareader_qos (dr_default_qos);
 
-    DDS::DataReader_var quote_dr = 
+    DDS::DataReader_var quote_dr =
       sub->create_datareader(quote_topic.in (),
                              dr_default_qos,
                              quote_listener.in (),
                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    DDS::DataReader_var exchange_evt_dr = 
+    DDS::DataReader_var exchange_evt_dr =
       sub->create_datareader(exchange_evt_topic.in (),
                              dr_default_qos,
                              exchange_evt_listener.in (),

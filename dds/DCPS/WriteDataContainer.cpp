@@ -490,7 +490,7 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
     ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t)WriteDataContainer::data_delivered")
                           ACE_TEXT(" %X \n"), sample));
   }
-  
+
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
             this->lock_);
@@ -528,7 +528,7 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
                  ACE_TEXT("released_data_ list.\n")));
       return;
     }
-  
+
     if (instance->waiting_list_.head_ != 0) {
       // Remove the delivered sample from the instance sample list
       // and release.
@@ -558,9 +558,9 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
       sent_data_.enqueue_tail_next_send_sample(sample);
     }
   }
-  
+
   this->wakeup_blocking_writers (stale, instance);
-    
+
   // Signal if there is no pending data.
   if (!pending_data())
     empty_condition_.broadcast();
@@ -571,10 +571,10 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
                                  bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("WriteDataContainer","data_dropped",6);
-  
+
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t)WriteDataContainer::data_dropped")
-                          ACE_TEXT(" sample %X dropped_by_transport %d\n"), 
+                          ACE_TEXT(" sample %X dropped_by_transport %d\n"),
                           sample, dropped_by_transport));
   }
 
@@ -605,7 +605,7 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
   // keep the sample from the sending_data_ list still in
   // sample list since we will send it.
   DataSampleListElement* stale = 0;
-  
+
   if (sending_data_.dequeue_next_send_sample(sample)) {
     // else: The data_dropped is called as a result of remove_sample()
     // called from reenqueue_all() which supports the TRANSIENT_LOCAL
@@ -633,7 +633,7 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
   }
 
   this->wakeup_blocking_writers (stale, sample->handle_);
-  
+
   if (!pending_data())
     empty_condition_.broadcast();
 }
@@ -821,13 +821,13 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
       while (!shutdown_ && ACE_OS::gettimeofday() < abs_timeout) {
         waited = true;
         waiting_on_release_ = true; // reduces broadcast to only when waiting
-        
+
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)WriteDataContainer::obtain_buffer, ")
                                 ACE_TEXT ("wait for condition, oldest_released %d waiting %X\n"),
                                 oldest_released, instance->waiting_list_.head_));
         }
-        
+
         // lock is released while waiting and aquired before returning
         // from wait.
         int const wait_result = condition_.wait(&abs_timeout);
@@ -1143,14 +1143,14 @@ WriteDataContainer::wakeup_blocking_writers (DataSampleListElement* stale,
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t)WriteDataContainer::wakeup_blocking_writers ")
                                 ACE_TEXT("removed sample %X and broadcast to wake up ")
-                                ACE_TEXT("blocking threads for available spot \n"), 
+                                ACE_TEXT("blocking threads for available spot \n"),
                                 stale));
         }
-      
+
         condition_.broadcast();
       }
   }
 }
-  
+
 } // namespace OpenDDS
 } // namespace DCPS

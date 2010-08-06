@@ -294,7 +294,7 @@ Reader::start1 ()
                   ::DDS::ANY_INSTANCE_STATE) ;
             if (status == ::DDS::RETCODE_OK)
             {
-              handle = si[0].instance_handle ; 
+              handle = si[0].instance_handle ;
               ACE_OS::printf ("%s foo.x = %f foo.y = %f, foo.key = %d\n",
                       action, foo[0].x, foo[0].y, foo[0].key);
 

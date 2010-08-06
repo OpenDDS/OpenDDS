@@ -168,7 +168,7 @@ bool run_multitopic_test(const DomainParticipant_var& dp,
   info.length(0);
   ret = res_dr->read_w_condition(data, info, LENGTH_UNLIMITED, rc);
   dr->delete_readcondition(rc);
-  if (ret != RETCODE_NO_DATA) return false;  
+  if (ret != RETCODE_NO_DATA) return false;
 
   // Dispose
 

@@ -15,7 +15,7 @@ use PerlDDS::Run_Test;
 # the FooTyoe* library.
 PerlDDS::add_lib_path('../FooType3NoKey');
 
-#Clean the Foo.txt file which is used as a storage of the 
+#Clean the Foo.txt file which is used as a storage of the
 #data written.
 
 unlink "Foo.txt";
@@ -28,7 +28,7 @@ $num_writers=2;
 
 $dcpsrepo_ior = "dcps_ir.ior";
 
-unlink $dcpsrepo_ior; 
+unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("../../../../DDS/DCPSInfoRepo",
                                "-o $dcpsrepo_ior ");
@@ -39,7 +39,7 @@ $FooTest_1 = PerlDDS::create_process ("FooTest3NoKey",
                               . "-t $num_threads_to_write -i $num_writes_per_thread "
                               . "-w $num_writers");
 
-#Test write block waiting for available space with RELIABLE and 
+#Test write block waiting for available space with RELIABLE and
 #KEEP_ALL qos.
 $FooTest_2 = PerlDDS::create_process ("FooTest3NoKey",
                               "-DCPSInfoRepo file://$dcpsrepo_ior "

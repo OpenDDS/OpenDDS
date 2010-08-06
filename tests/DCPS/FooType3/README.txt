@@ -1,7 +1,7 @@
-This library is used by the FooTest3* to test opendds_idl and TAO_IDL compiler 
+This library is used by the FooTest3* to test opendds_idl and TAO_IDL compiler
 working together.
 
-3) To make idl compiler gerenated code have the FooKeyLessThan defined, 
+3) To make idl compiler gerenated code have the FooKeyLessThan defined,
    the FooDef.idl needs have following statements.
 
 ---in FooDef.idl
@@ -10,7 +10,7 @@ working together.
 
 
 ---in idl compiler generated FooDefTypeSupportImpl.h
-struct FooType_Export FooKeyLessThan 
+struct FooType_Export FooKeyLessThan
 {
 bool operator ()(const Xyz::Foo& v1, const Xyz::Foo& v2) const
 {

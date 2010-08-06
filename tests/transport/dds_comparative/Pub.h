@@ -44,7 +44,7 @@ class Pub : public OpenDDS::DCPS::TransportInterface
     void init(unsigned impl_id);
 
     /// Run the publisher.  This causes this publisher to send() all of the
-    /// messages to the transport. 
+    /// messages to the transport.
     void run();
 
     /// Wait until the publisher gets confirmation from the transport that
@@ -85,7 +85,7 @@ class Pub : public OpenDDS::DCPS::TransportInterface
       ACE_INET_Addr     sub_addr_;
       ACE_TString       sub_addr_str_;
 
-      SubInfo(OpenDDS::DCPS::RepoId sub_id, 
+      SubInfo(OpenDDS::DCPS::RepoId sub_id,
               const ACE_INET_Addr& sub_addr,
               const ACE_TString& sub_addr_str)
         : sub_id_(sub_id), sub_addr_(sub_addr), sub_addr_str_(sub_addr_str)

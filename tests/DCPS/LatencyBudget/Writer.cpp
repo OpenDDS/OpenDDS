@@ -142,7 +142,7 @@ Writer::get_timeout_writes () const
 int
 Writer::write (Messenger::MessageDataWriter_ptr message_dw,
                ::DDS::InstanceHandle_t& handle,
-               Messenger::Message& message, 
+               Messenger::Message& message,
                int num_messages)
 {
   for (int i = 0; i < num_messages; ++i)

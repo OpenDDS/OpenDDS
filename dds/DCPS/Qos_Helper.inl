@@ -466,7 +466,7 @@ ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t)
 {
   CORBA::LongLong sec = t.sec + t.nanosec/1000/ACE_ONE_SECOND_IN_USECS;
   CORBA::ULong usec = t.nanosec/1000 % ACE_ONE_SECOND_IN_USECS;
-   
+
   if (sec > ACE_Time_Value::max_time.sec()) {
     return ACE_Time_Value::max_time;
   }
@@ -477,13 +477,13 @@ ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t)
 
 
 ACE_INLINE
-ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t, 
+ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
                                                const ACE_Time_Value now)
-{ 
-  CORBA::LongLong sec 
+{
+  CORBA::LongLong sec
     = t.sec + now.sec() + (t.nanosec/1000 + now.usec())/ACE_ONE_SECOND_IN_USECS;
   CORBA::ULong usec = (t.nanosec/1000 + now.usec()) % ACE_ONE_SECOND_IN_USECS;
-   
+
   if (sec > ACE_Time_Value::max_time.sec()) {
     return ACE_Time_Value::max_time;
   }

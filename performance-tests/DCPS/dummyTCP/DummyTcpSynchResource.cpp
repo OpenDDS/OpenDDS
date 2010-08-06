@@ -16,10 +16,10 @@ OpenDDS::DCPS::DummyTcpSynchResource::DummyTcpSynchResource
 
   if (max_output_pause_period_ms >= 0)
   {
-    this->timeout_ = new ACE_Time_Value (max_output_pause_period_ms/1000, 
+    this->timeout_ = new ACE_Time_Value (max_output_pause_period_ms/1000,
                                          max_output_pause_period_ms % 1000 * 1000);
   }
-    
+
   // Keep our own "copy" of the reference to the connection.
   connection->_add_ref();
   this->connection_ = connection;

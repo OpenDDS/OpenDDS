@@ -79,7 +79,7 @@ if (! -s $nsadd.$exec_extn) {
     $NS->Kill();
     exit 1;
   }
-}  
+}
 
 $NSADD = PerlDDS::create_process($nsadd,
                               "$arg_ns_ref --name InfoRepo --ior file://$dcpsrepo_ior");

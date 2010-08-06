@@ -36,7 +36,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: cannot find file <$dcpsrepo_ior>\n";
     $DCPSREPO->Kill (); $DCPSREPO->TimedWait (1);
     exit 1;
-} 
+}
 
 print $PUBLISHER->CommandLine() . "\n" if $debug ;
 $PUBLISHER->Spawn ();

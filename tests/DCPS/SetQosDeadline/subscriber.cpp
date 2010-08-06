@@ -74,9 +74,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // Initialize the transport
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl = 
+      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
         TheTransportFactory->create_transport_impl (
-          transport_impl_id, 
+          transport_impl_id,
           ::OpenDDS::DCPS::AUTO_CONFIG);
 
       // Create the subscriber and attach to the corresponding
@@ -122,7 +122,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
 
-      DDS::DataReaderQos dr_qos; 
+      DDS::DataReaderQos dr_qos;
       sub->get_default_datareader_qos (dr_qos);
 
       // Set up a 5 second recurring deadline.
@@ -175,14 +175,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       DataReaderListenerImpl* listener_servant2 =
         dynamic_cast<DataReaderListenerImpl*>(listener2.in());
 
-      int expected = 10; 
+      int expected = 10;
       // Writer of deadline 4 -> Reader of deadline 5
       while ( listener_servant1->num_reads() < expected) {
         ACE_OS::sleep (1);
       }
 
       // Writer of deadline 4 and Reader of deadline 3 is not
-      // compatible so second DataReader should not receive 
+      // compatible so second DataReader should not receive
       // any message from DataWriter.
       if (listener_servant2->num_reads() > 0)
       {
@@ -190,18 +190,18 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           << "datawriter as their deadline QoS is not compatible" << endl;
         exit (1);
       }
-      
-      // Now change second DataReader to have deadline period to be 10 seconds. This 
+
+      // Now change second DataReader to have deadline period to be 10 seconds. This
       // value is compatible with DataWriter so it was accepted.
-      dr_qos.deadline.period.sec = 5; 
-      
+      dr_qos.deadline.period.sec = 5;
+
       if (dr2->set_qos (dr_qos) != ::DDS::RETCODE_OK)
       {
         cerr << "ERROR: DataReader changed deadline period to make it compatible "
           << "with datawriter" << endl;
         exit (1);
       }
-      
+
       // second DataReader should receive 20 messages so far.
       while ( listener_servant1->num_reads() < 2 * expected) {
         ACE_OS::sleep (1);

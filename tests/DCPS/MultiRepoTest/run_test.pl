@@ -64,7 +64,7 @@ if ($ARGV[0] eq 'fileconfig') {
   $monitor_config = "-DCPSConfigFile $monitor_ini "
                   . "-WriterDomain $sys1_sub_domain -ReaderDomain $sys1_pub_domain "
                   . "-WriterDomain $sys2_sub_domain -ReaderDomain $sys2_pub_domain "
-                  . "-WriterDomain $sys3_sub_domain -ReaderDomain $sys3_pub_domain "; 
+                  . "-WriterDomain $sys3_sub_domain -ReaderDomain $sys3_pub_domain ";
   print STDERR "WARNING: file configuration test not implemented\n";
 
 } elsif ($ARGV[0] eq '') {
@@ -82,7 +82,7 @@ if ($ARGV[0] eq 'fileconfig') {
                   . "-InfoRepo file://$dcpsrepo2_ior "
                   . "-WriterDomain $sys2_sub_domain -ReaderDomain $sys2_pub_domain "
                   . "-InfoRepo file://$dcpsrepo3_ior "
-                  . "-WriterDomain $sys3_sub_domain -ReaderDomain $sys3_pub_domain "; 
+                  . "-WriterDomain $sys3_sub_domain -ReaderDomain $sys3_pub_domain ";
 
 } elsif ($ARGV[0] eq 'monitor') {
   # Default: Command line configuration test.
@@ -99,7 +99,7 @@ if ($ARGV[0] eq 'fileconfig') {
                   . "-InfoRepo file://$dcpsrepo2_ior "
                   . "-WriterDomain $sys2_sub_domain -ReaderDomain $sys2_pub_domain "
                   . "-InfoRepo file://$dcpsrepo3_ior "
-                  . "-WriterDomain $sys3_sub_domain -ReaderDomain $sys3_pub_domain "; 
+                  . "-WriterDomain $sys3_sub_domain -ReaderDomain $sys3_pub_domain ";
 
   $svc_conf = "../../../tools/odds_monitor/monitor.conf ";
   $samples = 10000;

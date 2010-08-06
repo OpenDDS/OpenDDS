@@ -131,8 +131,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     CORBA::String_var sp_type_name = sp_ts->get_type_name();
     DDS::DataReaderListener_var sp_drl(new SPMDataReaderListenerImpl);
-    reader = create_data_reader(participant.in(), 
-                                sub.in(), 
+    reader = create_data_reader(participant.in(),
+                                sub.in(),
                                 sp_type_name.in(),
                                 OpenDDS::DCPS::SERVICE_PARTICIPANT_MONITOR_TOPIC,
                                 dr_qos,
@@ -153,8 +153,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     CORBA::String_var dp_type_name = dp_ts->get_type_name();
     DDS::DataReaderListener_var dp_drl(new DPMDataReaderListenerImpl);
-    reader = create_data_reader(participant.in(), 
-                                sub.in(), 
+    reader = create_data_reader(participant.in(),
+                                sub.in(),
                                 dp_type_name.in(),
                                 OpenDDS::DCPS::DOMAIN_PARTICIPANT_MONITOR_TOPIC,
                                 dr_qos,
@@ -175,8 +175,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     CORBA::String_var topic_type_name = topic_ts->get_type_name();
     DDS::DataReaderListener_var topic_drl(new TopicMDataReaderListenerImpl);
-    reader = create_data_reader(participant.in(), 
-                                sub.in(), 
+    reader = create_data_reader(participant.in(),
+                                sub.in(),
                                 topic_type_name.in(),
                                 OpenDDS::DCPS::TOPIC_MONITOR_TOPIC,
                                 dr_qos,
@@ -197,8 +197,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     CORBA::String_var publisher_type_name = publisher_ts->get_type_name();
     DDS::DataReaderListener_var publisher_drl(new PublisherMDataReaderListenerImpl);
-    reader = create_data_reader(participant.in(), 
-                                sub.in(), 
+    reader = create_data_reader(participant.in(),
+                                sub.in(),
                                 publisher_type_name.in(),
                                 OpenDDS::DCPS::PUBLISHER_MONITOR_TOPIC,
                                 dr_qos,
@@ -219,8 +219,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     CORBA::String_var subscriber_type_name = subscriber_ts->get_type_name();
     DDS::DataReaderListener_var subscriber_drl(new SubscriberMDataReaderListenerImpl);
-    reader = create_data_reader(participant.in(), 
-                                sub.in(), 
+    reader = create_data_reader(participant.in(),
+                                sub.in(),
                                 subscriber_type_name.in(),
                                 OpenDDS::DCPS::SUBSCRIBER_MONITOR_TOPIC,
                                 dr_qos,
@@ -241,8 +241,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     CORBA::String_var dw_type_name = dw_ts->get_type_name();
     DDS::DataReaderListener_var dw_drl(new DWMDataReaderListenerImpl);
-    reader = create_data_reader(participant.in(), 
-                                sub.in(), 
+    reader = create_data_reader(participant.in(),
+                                sub.in(),
                                 dw_type_name.in(),
                                 OpenDDS::DCPS::DATA_WRITER_MONITOR_TOPIC,
                                 dr_qos,
@@ -263,8 +263,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     CORBA::String_var dwper_type_name = dwper_ts->get_type_name();
     DDS::DataReaderListener_var dwper_drl(new DWPerMDataReaderListenerImpl);
-    reader = create_data_reader(participant.in(), 
-                                sub.in(), 
+    reader = create_data_reader(participant.in(),
+                                sub.in(),
                                 dwper_type_name.in(),
                                 OpenDDS::DCPS::DATA_WRITER_PERIODIC_MONITOR_TOPIC,
                                 dr_qos,
@@ -285,8 +285,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     CORBA::String_var dr_type_name = dr_ts->get_type_name();
     DDS::DataReaderListener_var dr_drl(new DRMDataReaderListenerImpl);
-    reader = create_data_reader(participant.in(), 
-                                sub.in(), 
+    reader = create_data_reader(participant.in(),
+                                sub.in(),
                                 dr_type_name.in(),
                                 OpenDDS::DCPS::DATA_READER_MONITOR_TOPIC,
                                 dr_qos,
@@ -307,8 +307,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     CORBA::String_var drper_type_name = drper_ts->get_type_name();
     DDS::DataReaderListener_var drper_drl(new DRPerMDataReaderListenerImpl);
-    reader = create_data_reader(participant.in(), 
-                                sub.in(), 
+    reader = create_data_reader(participant.in(),
+                                sub.in(),
                                 drper_type_name.in(),
                                 OpenDDS::DCPS::DATA_READER_PERIODIC_MONITOR_TOPIC,
                                 dr_qos,
@@ -329,8 +329,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     CORBA::String_var transport_type_name = transport_ts->get_type_name();
     DDS::DataReaderListener_var transport_drl(new TransportMDataReaderListenerImpl);
-    reader = create_data_reader(participant.in(), 
-                                sub.in(), 
+    reader = create_data_reader(participant.in(),
+                                sub.in(),
                                 transport_type_name.in(),
                                 OpenDDS::DCPS::TRANSPORT_MONITOR_TOPIC,
                                 dr_qos,

@@ -14,7 +14,7 @@ class Reader : public ACE_Task_Base
 public:
 
   Reader (::DDS::Subscriber_ptr subscriber,
-          ::DDS::DataReader_ptr reader, 
+          ::DDS::DataReader_ptr reader,
           int num_publishers,
           int num_samples,
           int data_size);
@@ -33,7 +33,7 @@ public:
   bool is_finished () const;
 
 private:
-  
+
   ::DDS::Subscriber_var subscriber_;
   ::DDS::DataReader_var reader_;
   int num_publishers_;

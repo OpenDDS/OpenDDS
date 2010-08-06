@@ -75,16 +75,16 @@ BEGIN {
   # Seed the test types and the transports so that we can maintain a
   # consistent set of indices in the output for our plotting scripts.
   $data = { bidir =>    { 'SimpleTcp'             => undef,
-                          'best effort multicast' => undef, 
-                          'reliable multicast'    => undef, 
+                          'best effort multicast' => undef,
+                          'reliable multicast'    => undef,
                           'udp'                   => undef},
             pubbound => { 'SimpleTcp'             => undef,
-                          'best effort multicast' => undef, 
-                          'reliable multicast'    => undef, 
+                          'best effort multicast' => undef,
+                          'reliable multicast'    => undef,
                           'udp'                   => undef},
             subbound => { 'SimpleTcp'             => undef,
-                          'best effort multicast' => undef, 
-                          'reliable multicast'    => undef, 
+                          'best effort multicast' => undef,
+                          'reliable multicast'    => undef,
                           'udp'                   => undef}
           };
 }

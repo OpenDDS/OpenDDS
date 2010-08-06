@@ -33,12 +33,12 @@ using namespace Messenger;
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 // Set up a 4 second recurring deadline.
-static DDS::Duration_t const DEADLINE_PERIOD = 
+static DDS::Duration_t const DEADLINE_PERIOD =
 {
   4,  // seconds
   0   // nanoseconds
 };
-        
+
 static int NUM_EXPIRATIONS = 2;
 
 // Time to sleep waiting for deadline periods to expire
@@ -168,7 +168,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         cerr << "ERROR: set deadline qos failed." << endl;
         exit(1);
       }
-      
+
       {
         // Two threads use same datawriter to write different instances.
         std::auto_ptr<Writer> writer1 (new Writer (dw.in (), 99, SLEEP_DURATION));
@@ -200,8 +200,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         if (deadline_status.total_count != NUM_EXPIRATIONS * NUM_WRITE_THREADS)
         {
           cerr << "ERROR: Unexpected number of missed offered "
-            << "deadlines (" << deadline_status.total_count 
-            << " instead of " << NUM_EXPIRATIONS * NUM_WRITE_THREADS << ") " 
+            << "deadlines (" << deadline_status.total_count
+            << " instead of " << NUM_EXPIRATIONS * NUM_WRITE_THREADS << ") "
             << endl;
 
           exit (1);
@@ -222,8 +222,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
           && deadline_status.last_instance_handle != handle2)
         {
           cerr << "ERROR: Unexpected last instance handle "
-            << deadline_status.last_instance_handle << " instead of " 
-            << handle1 << " or " 
+            << deadline_status.last_instance_handle << " instead of "
+            << handle1 << " or "
             << handle2 << endl;
           exit (1);
         }
@@ -246,12 +246,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         // was sent about 2 seconds ago and it will be triggered at the second time
         // the timer is called. It should expect additional 2 deadline missed calls
         // (1 per instance).
-        
-        if (deadline_status.total_count != (NUM_EXPIRATIONS+1) * NUM_WRITE_THREADS) 
+
+        if (deadline_status.total_count != (NUM_EXPIRATIONS+1) * NUM_WRITE_THREADS)
         {
           cerr << "ERROR: Unexpected number of missed offered "
-            << "deadlines (" << deadline_status.total_count 
-            << " instead of " << (NUM_EXPIRATIONS + 1) * NUM_WRITE_THREADS << ") " 
+            << "deadlines (" << deadline_status.total_count
+            << " instead of " << (NUM_EXPIRATIONS + 1) * NUM_WRITE_THREADS << ") "
             << endl;
 
           exit (1);
@@ -272,8 +272,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
           && deadline_status.last_instance_handle != handle2)
         {
           cerr << "ERROR: Unexpected last instance handle "
-            << deadline_status.last_instance_handle << " instead of " 
-            << handle1 << " or " 
+            << deadline_status.last_instance_handle << " instead of "
+            << handle1 << " or "
             << handle2 << endl;
           exit (1);
         }

@@ -172,7 +172,7 @@ Test::DataReaderListener::display_partitions (
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("** Zero length partition name ")
                 ACE_TEXT ("sequence (default) **\n")));
-  
+
   for (CORBA::ULong i = 0; i != len; ++i)
     {
       char const * s = partition.name[i];

@@ -12,7 +12,7 @@
 class SubDriver
 {
   public:
-  
+
     typedef std::vector < ::OpenDDS::DCPS::PublicationId > PublicationIds;
 
     SubDriver();

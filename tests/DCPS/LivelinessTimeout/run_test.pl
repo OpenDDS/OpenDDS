@@ -47,7 +47,7 @@ $repoTransportDebug = $transportDebug if not $repoTransportDebug and $transportD
 $subTransportDebug  = $transportDebug if not $subTransportDebug  and $transportDebug;
 $pubTransportDebug  = $transportDebug if not $pubTransportDebug  and $transportDebug;
 
-unlink $dcpsrepo_ior; 
+unlink $dcpsrepo_ior;
 
 my $repoArgs = "$repo_bit_conf ";
 $repoArgs .= "-DCPSDebugLevel $repoDebug " if $repoDebug;

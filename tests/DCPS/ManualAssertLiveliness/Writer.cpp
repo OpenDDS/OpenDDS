@@ -13,7 +13,7 @@ extern int assert_liveliness_period;
 extern bool liveliness_lost_test;
 
 
-Writer_Base::Writer_Base(::DDS::DataWriter_ptr writer) 
+Writer_Base::Writer_Base(::DDS::DataWriter_ptr writer)
 : writer_ (::DDS::DataWriter::_duplicate (writer))
 {}
 
@@ -78,9 +78,9 @@ Manual_By_Participant_Writer_1::svc ()
 
     ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%T (%P|%t) Manual_By_Participant_Writer_1::svc starting to write.\n")));
-    for (int i = 0; i< num_messages; i ++) 
+    for (int i = 0; i< num_messages; i ++)
     {
-      if (liveliness_lost_test &&  i > 0 && i < num_messages - 1) 
+      if (liveliness_lost_test &&  i > 0 && i < num_messages - 1)
       {
         ACE_OS::sleep (assert_liveliness_period);
         continue;
@@ -99,7 +99,7 @@ Manual_By_Participant_Writer_1::svc ()
 
       ACE_OS::sleep (assert_liveliness_period);
     }
-    
+
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl
          << e << endl;
@@ -119,8 +119,8 @@ Manual_By_Participant_Writer_1::svc ()
 }
 
 
-Manual_By_Participant_Writer_2::Manual_By_Participant_Writer_2(::DDS::DomainParticipant_ptr part, 
-               ::DDS::DataWriter_ptr writer) 
+Manual_By_Participant_Writer_2::Manual_By_Participant_Writer_2(::DDS::DomainParticipant_ptr part,
+               ::DDS::DataWriter_ptr writer)
     : Writer_Base(writer),
       participant_ (::DDS::DomainParticipant::_duplicate (part))
 {
@@ -147,7 +147,7 @@ Manual_By_Participant_Writer_2::svc ()
 
     ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%T (%P|%t) Manual_By_Participant_Writer_2::svc starting to send liveliness.\n")));
-    for (int i = 0; i< num_messages; i ++) 
+    for (int i = 0; i< num_messages; i ++)
     {
       if (liveliness_lost_test &&  i > 0 && i < num_messages - 1)
       {
@@ -165,7 +165,7 @@ Manual_By_Participant_Writer_2::svc ()
       }
       ACE_OS::sleep (assert_liveliness_period);
     }
-    
+
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl
          << e << endl;
@@ -228,7 +228,7 @@ Manual_By_Topic_Writer_1::svc ()
 
     ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("%T (%P|%t) Manual_By_Topic_Writer_1::svc starting to write.\n")));
-    for (int i = 0; i< num_messages; i ++) 
+    for (int i = 0; i< num_messages; i ++)
     {
       if (liveliness_lost_test &&  i > 0 && i < num_messages - 1)
       {
@@ -249,7 +249,7 @@ Manual_By_Topic_Writer_1::svc ()
 
       ACE_OS::sleep (assert_liveliness_period);
     }
-    
+
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl
          << e << endl;
@@ -313,7 +313,7 @@ Manual_By_Topic_Writer_2::svc ()
 
       ACE_OS::sleep (assert_liveliness_period);
     }
-    
+
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl
          << e << endl;

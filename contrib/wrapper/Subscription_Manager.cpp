@@ -31,7 +31,7 @@ Subscription_Manager::Subscription_Manager (const Subscription_Manager & copy)
 {
 }
 
-void 
+void
 Subscription_Manager::operator= (const Subscription_Manager & copy)
 {
   // check for self assignment

@@ -141,7 +141,7 @@ SimpleDataWriter::data_delivered(const OpenDDS::DCPS::DataSampleListElement* sam
 
   //TBD: Cannot delete the sample here because this sample will be
   //     used by the TransportInterface::send to look for the next
-  //     send sample. 
+  //     send sample.
   //     Just leak here or put into a list for deletion later.
   // Delete the element
   //delete sample;
@@ -173,7 +173,7 @@ SimpleDataWriter::data_dropped(const OpenDDS::DCPS::DataSampleListElement* sampl
 
   //TBD: Cannot delete the sample here because this sample will be
   //     used by the TransportInterface::send to look for the next
-  //     send sample. 
+  //     send sample.
   //     Just leak here or put into a list for deletion later.
   // Delete the element
   //delete sample;

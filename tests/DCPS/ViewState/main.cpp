@@ -417,19 +417,19 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       try { // the real testing.
           //=====================================================
-          // show view state change in a single generation and 
-          // samples of an instance returned from a read/take 
+          // show view state change in a single generation and
+          // samples of an instance returned from a read/take
           // have same view state
           //=====================================================
           ACE_DEBUG((LM_INFO,"==== TEST case 1 : show view state change in a single generation.\n"));
 
           CORBA::Long max_samples = 5;
-          
+
           Test::SimpleSeq     data1 (max_samples);
           ::DDS::SampleInfoSeq info1;
 
           ::Test::Simple foo1;
-          foo1.key  = 1; 
+          foo1.key  = 1;
           foo1.count = 1;
 
           // register the data so we can use the handle.
@@ -447,7 +447,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           // read should return one sample with view state NEW.
           DDS::ReturnCode_t status  ;
-          status = fast_dr->read(  data1 
+          status = fast_dr->read(  data1
             , info1
             , max_samples
             , ::DDS::ANY_SAMPLE_STATE
@@ -477,9 +477,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           // since depth=10 the previous sample will be kept
           // in the instance container.
           ::Test::Simple foo2;
-          foo2.key  = 1; 
+          foo2.key  = 1;
           foo2.count = 2;
- 
+
           // write second sample
           fast_dw->write(foo2, handle);
 
@@ -489,20 +489,20 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             ACE_TEXT("(%P|%t) ERROR: timeout waiting for data.\n")),
             1);
 
-          // Read should return two samples with view state NOT NEW since 
+          // Read should return two samples with view state NOT NEW since
           // we read previously and the instance is not reborn.
           Test::SimpleSeq     data2 (max_samples);
           ::DDS::SampleInfoSeq info2;
-          status = fast_dr->read(  data2 
+          status = fast_dr->read(  data2
             , info2
             , max_samples
             , ::DDS::ANY_SAMPLE_STATE
             , ::DDS::ANY_VIEW_STATE
             , ::DDS::ANY_INSTANCE_STATE );
-  
+
           check_read_status(status, data2, 2, "second read");
 
-          if (info2[0].view_state != ::DDS::NOT_NEW_VIEW_STATE 
+          if (info2[0].view_state != ::DDS::NOT_NEW_VIEW_STATE
             || info2[1].view_state != ::DDS::NOT_NEW_VIEW_STATE)
           {
             ACE_ERROR ((LM_ERROR,
@@ -518,16 +518,16 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
 
           //=====================================================
-          // show view state change in multiple generations and 
-          // samples of an instance returned from a read/take 
+          // show view state change in multiple generations and
+          // samples of an instance returned from a read/take
           // have same view state.
           //=====================================================
           ACE_DEBUG((LM_INFO,"==== TEST case 2 : show view state change in multiple generations.\n"));
-             
+
           // The datareader will receive the DISPOSE message and change the
           // instance state from ALIVE to NOT ALIVE.
           // The dispose sample is an invalid data sample which is used for notification.
-          // Upon receiving dispose, a NEW sample is created which marks InstanceState 
+          // Upon receiving dispose, a NEW sample is created which marks InstanceState
           // has NOT_READ_SAMPLE, but won't change the view state. The view state is
           // changed to NEW_VIEW when data sample is received.
           fast_dw->dispose(foo1, handle);
@@ -538,14 +538,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             ACE_TEXT("(%P|%t) ERROR: timeout waiting for data.\n")),
             1);
 
-          // Read the dispose sample so the view state be NOT_NEW and 
-          // sample state be READ before next write/read 
+          // Read the dispose sample so the view state be NOT_NEW and
+          // sample state be READ before next write/read
           max_samples = 1;
 
           Test::SimpleSeq     disposeData (max_samples);
           ::DDS::SampleInfoSeq disposeDataInfo;
 
-          status = fast_dr->read(  disposeData 
+          status = fast_dr->read(  disposeData
             , disposeDataInfo
             , max_samples
             , ::DDS::NOT_READ_SAMPLE_STATE
@@ -553,7 +553,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             , ::DDS::ANY_INSTANCE_STATE );
 
           // verify dispose sample
-          if (disposeDataInfo[0].valid_data == 1 
+          if (disposeDataInfo[0].valid_data == 1
             || disposeDataInfo[0].instance_state != DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
             {
               ACE_ERROR ((LM_ERROR,
@@ -561,10 +561,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
               test_failed = 1;
             }
 
-          // Write sample after dispose. The datareader will change the 
+          // Write sample after dispose. The datareader will change the
           // view state from NOT_NEW to NEW.
           ::Test::Simple foo3;
-          foo3.key  = 1; 
+          foo3.key  = 1;
           foo3.count = 3;
 
           fast_dw->write (foo3, handle);
@@ -575,15 +575,15 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             ACE_TEXT("(%P|%t) ERROR: timeout waiting for data.\n")),
             1);
 
-          // Read maximum 2 samples which should be from the old 
-          // generation (before dispose). The view state should not 
+          // Read maximum 2 samples which should be from the old
+          // generation (before dispose). The view state should not
           // be changed during this read. The view state should stay
           // NEW.
           max_samples = 2;
 
           Test::SimpleSeq     data3 (max_samples);
           ::DDS::SampleInfoSeq info3;
-          status = fast_dr->read(  data3 
+          status = fast_dr->read(  data3
             , info3
             , max_samples
             , ::DDS::ANY_SAMPLE_STATE
@@ -592,7 +592,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           check_read_status(status, data3, 2, "read samples in old generation");
 
-          if (info3[0].view_state != ::DDS::NEW_VIEW_STATE 
+          if (info3[0].view_state != ::DDS::NEW_VIEW_STATE
             || info3[1].view_state != ::DDS::NEW_VIEW_STATE)
           {
             ACE_ERROR ((LM_ERROR,
@@ -609,15 +609,15 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           // Extend max_sample to receive all samples from the instance.
           // This time read() should return 3 samples. The first and second
-          // samples are from old generation and the third is from most 
-          // recent generation. These samples have NEW view state. Since 
-          // this read() reads samples from most recent generation then 
+          // samples are from old generation and the third is from most
+          // recent generation. These samples have NEW view state. Since
+          // this read() reads samples from most recent generation then
           // the view state should be changed from NOT NEW.
           max_samples = 5;
 
           Test::SimpleSeq     data4 (max_samples);
           ::DDS::SampleInfoSeq info4;
-          status = fast_dr->read(  data4 
+          status = fast_dr->read(  data4
             , info4
             , max_samples
             , ::DDS::ANY_SAMPLE_STATE
@@ -633,7 +633,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
              test_failed = 1;
           }
 
-          if (info4[0].view_state != ::DDS::NEW_VIEW_STATE 
+          if (info4[0].view_state != ::DDS::NEW_VIEW_STATE
             || info4[1].view_state != ::DDS::NEW_VIEW_STATE
             || info4[3].view_state != ::DDS::NEW_VIEW_STATE)
           {
@@ -642,7 +642,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             test_failed = 1;
           }
 
-          if (data4[0].count != foo1.count || data4[1].count != foo2.count 
+          if (data4[0].count != foo1.count || data4[1].count != foo2.count
             || data4[3].count != foo3.count)
           {
             ACE_ERROR ((LM_ERROR,
@@ -651,13 +651,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             test_failed = 1;
           }
 
-          // Read again should get all samples in datareader data container. 
+          // Read again should get all samples in datareader data container.
           // The view state of the samples should be NOT NEW and this read()
           // will not change it.
-          
+
           Test::SimpleSeq     data5 (max_samples);
           ::DDS::SampleInfoSeq info5;
-          status = fast_dr->read(  data5 
+          status = fast_dr->read(  data5
             , info5
             , max_samples
             , ::DDS::ANY_SAMPLE_STATE
@@ -667,7 +667,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           check_read_status(status, data5, 4, "read after read most recent generation samples");
 
-          if (info5[0].view_state != ::DDS::NOT_NEW_VIEW_STATE 
+          if (info5[0].view_state != ::DDS::NOT_NEW_VIEW_STATE
             || info5[1].view_state != ::DDS::NOT_NEW_VIEW_STATE
             || info5[3].view_state != ::DDS::NOT_NEW_VIEW_STATE)
           {
@@ -683,10 +683,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
               ACE_TEXT("(%P|%t) ERROR: read after read most recent generation samples ")
               ACE_TEXT("failed to provide same data.\n") ));
             test_failed = 1;
-          }    
+          }
 
           //=====================================================
-          // show view state belongs to an instance and not be 
+          // show view state belongs to an instance and not be
           // affected by other instances in same reader.
           //=====================================================
           ACE_DEBUG((LM_INFO,"==== TEST case 3 : show view state and instance relation.\n"));
@@ -698,7 +698,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           //Since it's a different instance, can not use previous handle.
           //Let it automatically register.
-          fast_dw->write (xfoo, ::DDS::HANDLE_NIL); 
+          fast_dw->write (xfoo, ::DDS::HANDLE_NIL);
 
           //// wait for write to propogate
           if (!wait_for_data(sub.in (), 5))
@@ -710,7 +710,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           ::DDS::SampleInfoSeq info6;
 
           // read should return one sample with view state NEW.
-          status = fast_dr->read(  data6 
+          status = fast_dr->read(  data6
             , info6
             , max_samples
             , ::DDS::ANY_SAMPLE_STATE

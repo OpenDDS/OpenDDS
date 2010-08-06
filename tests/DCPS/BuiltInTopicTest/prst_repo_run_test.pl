@@ -91,7 +91,7 @@ print "Spawning subscriber.\n";
 
 print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn ();
- 
+
 sleep (15);
 
 print "Killing first DCPSInfoRepo.\n";
@@ -119,13 +119,13 @@ print "Spawning second monitor.\n";
 
 print $Monitor2->CommandLine() . "\n";
 $Monitor2->Spawn ();
- 
+
 $MonitorResult = $Monitor1->WaitKill (20);
 if ($MonitorResult != 0) {
     print STDERR "ERROR: Monitor1 returned $MonitorResult \n";
     $status = 1;
 }
- 
+
 $MonitorResult = $Monitor2->WaitKill (300);
 if ($MonitorResult != 0) {
     print STDERR "ERROR: Monitor2 returned $MonitorResult \n";

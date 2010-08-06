@@ -57,7 +57,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
               node_name = get_opts.opt_arg ();
               break;
 
-            case '?': 
+            case '?':
               ACE_ERROR_RETURN(
                 (LM_ERROR,
                   ACE_TEXT("usage: -d <file directory>  -n <node name>  -f <start file name>\n")),

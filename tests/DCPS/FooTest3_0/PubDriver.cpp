@@ -798,7 +798,7 @@ PubDriver::listener_test ()
 
   TEST_CHECK (CORBA::is_nil (dwl_got.in ()));
 
-  // Since datawriter has nil listner with 
+  // Since datawriter has nil listner with
   TEST_CHECK (datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS) == dpl.in ());
 
   foo_datawriter_->set_listener (dwl.in (), ::OpenDDS::DCPS::ALL_STATUS_MASK);

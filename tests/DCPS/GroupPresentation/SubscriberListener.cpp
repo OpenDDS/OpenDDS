@@ -30,11 +30,11 @@ SubscriberListenerImpl::~SubscriberListenerImpl()
 {
 }
 
-void 
+void
 SubscriberListenerImpl::on_data_on_readers(
   DDS::Subscriber_ptr subs)
 ACE_THROW_SPEC((CORBA::SystemException))
-{  
+{
   ::DDS::ReturnCode_t ret = subs->begin_access ();
   if (ret != ::DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR,
@@ -42,7 +42,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
                   ACE_TEXT(" ERROR: begin_access failed!\n")));
     ACE_OS::exit(-1);
   }
-  
+
   DDS::SubscriberQos qos;
   ret = subs->get_qos (qos);
   if (ret != ::DDS::RETCODE_OK) {
@@ -51,7 +51,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
                   ACE_TEXT(" ERROR: get_qos failed!\n")));
     ACE_OS::exit(-1);
   }
-  
+
   ::DDS::DataReaderSeq_var readers = new ::DDS::DataReaderSeq(100);
 
   ret = subs->get_datareaders(readers.inout(),
@@ -64,9 +64,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
                   ACE_TEXT(" ERROR: get_datareaders failed!\n")));
     ACE_OS::exit(-1);
   }
-  
+
   CORBA::ULong len = readers->length ();
-  
+
   if (qos.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS) {
     // redirect datareader listener to receive DISPOSE and UNREGISTER notifications.
     if (len == 0) {
@@ -76,7 +76,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
                     ACE_TEXT(" ERROR: notify_datareaders failed!\n")));
         this->verify_result_ = false;
       }
-      
+
       return;
     }
 
@@ -87,11 +87,11 @@ ACE_THROW_SPEC((CORBA::SystemException))
                     len));
       this->verify_result_ = false;
     }
-    
+
     for (CORBA::ULong i = 0; i < len; ++i) {
       Messenger::MessageDataReader_var message_dr =
         Messenger::MessageDataReader::_narrow(readers[i]);
-        
+
       Messenger::MessageSeq msg;
       ::DDS::SampleInfoSeq si;
       ret = message_dr->take(msg, si,
@@ -102,18 +102,18 @@ ACE_THROW_SPEC((CORBA::SystemException))
       if (msg.length() != 1 || si.length() != 1) {
         ACE_ERROR((LM_ERROR,
                     ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
-                    ACE_TEXT(" ERROR: MessageSeq %d SampleInfoSeq %d!\n"), 
+                    ACE_TEXT(" ERROR: MessageSeq %d SampleInfoSeq %d!\n"),
                     msg.length(), si.length()));
         this->verify_result_ = false;
       }
-      
+
       if (ret != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
                     ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
                     ACE_TEXT(" ERROR: read failed!\n")));
         ACE_OS::exit(-1);
       }
-      
+
       this->verify (msg[0], si[0], qos, false);
     }
   }
@@ -126,15 +126,15 @@ ACE_THROW_SPEC((CORBA::SystemException))
                     ACE_TEXT(" ERROR: notify_datareaders failed!\n")));
         this->verify_result_ = false;
       }
-      
+
       return;
     }
-  
+
 
     for (CORBA::ULong i = 0; i < len; ++i) {
       Messenger::MessageDataReader_var message_dr =
         Messenger::MessageDataReader::_narrow(readers[i]);
-        
+
       Messenger::MessageSeq msg;
       ::DDS::SampleInfoSeq si;
       ret = message_dr->take(msg, si,
@@ -142,35 +142,35 @@ ACE_THROW_SPEC((CORBA::SystemException))
               ::DDS::NOT_READ_SAMPLE_STATE,
               ::DDS::ANY_VIEW_STATE,
               ::DDS::ANY_INSTANCE_STATE) ;
-              
+
       if (si[0].instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE
          || si[0].instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
-         
+
       if (msg.length() != num_messages || si.length() != num_messages) {
         ACE_ERROR((LM_ERROR,
                     ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
-                    ACE_TEXT(" ERROR: MessageSeq %d SampleInfoSeq %d !\n"), 
+                    ACE_TEXT(" ERROR: MessageSeq %d SampleInfoSeq %d !\n"),
                     msg.length(), si.length()));
         this->verify_result_ = false;
       }
-      
+
       if (ret != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
                     ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
                     ACE_TEXT(" ERROR: read failed!\n")));
         ACE_OS::exit(-1);
       }
-      
+
       CORBA::ULong num_samples = si.length();
       for (CORBA::ULong i = 0; i < num_samples; ++i) {
         this->verify (msg[i], si[i], qos, i == num_samples - 1 ? true : false);
       }
     }
   }
-  else { //::DDS::INSTANCE_PRESENTATION_QOS 
+  else { //::DDS::INSTANCE_PRESENTATION_QOS
     subs->notify_datareaders ();
   }
-  
+
   ret = subs->end_access ();
   if (ret != ::DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR,
@@ -183,7 +183,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 
 void
-SubscriberListenerImpl::verify (const Messenger::Message& msg, 
+SubscriberListenerImpl::verify (const Messenger::Message& msg,
                                 const ::DDS::SampleInfo& si,
                                 const DDS::SubscriberQos& qos,
                                 const bool reset_last_timestamp)
@@ -238,7 +238,7 @@ SubscriberListenerImpl::verify (const Messenger::Message& msg,
       timestamps[msg.subject_id] = si.source_timestamp;
       return;
     }
-      
+
   #ifdef OPENDDS_GCC33
     if (OpenDDS::DCPS::operator<(si.source_timestamp, timestamps[msg.subject_id]))
   #else
@@ -251,7 +251,7 @@ SubscriberListenerImpl::verify (const Messenger::Message& msg,
                 ACE_TEXT(" ERROR: Samples taken out of order!\n")));
       this->verify_result_ = false;
     }
-    
+
     if (reset_last_timestamp) {
       timestamps.clear();
     }

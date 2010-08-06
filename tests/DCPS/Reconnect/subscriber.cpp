@@ -293,8 +293,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     }
     ACE_OS::fclose(readers_completed);
 
-    // Wait for 5 seconds to (>passive_reconnect_duration) 
-    // to give transport time to detect the connection lost due to 
+    // Wait for 5 seconds to (>passive_reconnect_duration)
+    // to give transport time to detect the connection lost due to
     // backpressure timeout before shutdown the datareader.
     if (end_with_publisher)
       ACE_OS::sleep (5);
@@ -313,7 +313,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     return 1;
   }
 
-  if (verify_lost_sub_notification 
+  if (verify_lost_sub_notification
     && actual_lost_sub_notification != expected_lost_sub_notification)
   {
     ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: on_subscription_lost called %d times "

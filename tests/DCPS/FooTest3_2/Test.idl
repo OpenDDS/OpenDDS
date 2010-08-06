@@ -5,7 +5,7 @@
 /// Put the interfaces in a module, to avoid global namespace pollution
 module Test
 {
-  
+
   interface TestPubDriver
   {
     /// A method to shutdown the PubDriver

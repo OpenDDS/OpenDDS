@@ -49,11 +49,11 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
   // Initialize the transports (uses SimpleTcp transport)
   // The code in this section would need to be changed if the system needs to
   //  use another transport type.
-  pub_tcp_impl_ = TheTransportFactory->create_transport_impl (TCP_IMPL_PUB_ID, 
-                                                              ACE_TEXT("SimpleTcp"), 
+  pub_tcp_impl_ = TheTransportFactory->create_transport_impl (TCP_IMPL_PUB_ID,
+                                                              ACE_TEXT("SimpleTcp"),
                                                               ::OpenDDS::DCPS::AUTO_CONFIG);
-  sub_tcp_impl_ = TheTransportFactory->create_transport_impl (TCP_IMPL_SUB_ID, 
-                                                              ACE_TEXT("SimpleTcp"), 
+  sub_tcp_impl_ = TheTransportFactory->create_transport_impl (TCP_IMPL_SUB_ID,
+                                                              ACE_TEXT("SimpleTcp"),
                                                               ::OpenDDS::DCPS::AUTO_CONFIG);
 
   // Create publisher

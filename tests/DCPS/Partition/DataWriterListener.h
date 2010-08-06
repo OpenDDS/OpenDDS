@@ -37,7 +37,7 @@ namespace Test
         ::DDS::DataWriter_ptr writer,
         const ::DDS::LivelinessLostStatus & status)
       ACE_THROW_SPEC ((::CORBA::SystemException));
-  
+
     virtual void on_publication_matched (
         ::DDS::DataWriter_ptr writer,
         const ::DDS::PublicationMatchedStatus & status)
@@ -52,7 +52,7 @@ namespace Test
         ::DDS::DataWriter_ptr reader,
         const ::OpenDDS::DCPS::PublicationReconnectedStatus & status)
       ACE_THROW_SPEC ((::CORBA::SystemException));
-    
+
     virtual void on_publication_lost (
         ::DDS::DataWriter_ptr writer,
         const ::OpenDDS::DCPS::PublicationLostStatus & status)

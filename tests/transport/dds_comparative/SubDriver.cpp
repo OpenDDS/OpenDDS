@@ -5,8 +5,8 @@
 #include "SubDriver.h"
 #include "TestException.h"
 #include "dds/DCPS/RepoIdBuilder.h"
-// Add the TransportImpl.h before TransportImpl_rch.h is included to  
-// resolve the build problem that the class is not defined when 
+// Add the TransportImpl.h before TransportImpl_rch.h is included to
+// resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
@@ -98,14 +98,14 @@ SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
 void
 SubDriver::init()
 {
-  OpenDDS::DCPS::TransportImpl_rch transport_impl 
-    = TheTransportFactory->create_transport_impl (TRANSPORT_IMPL_ID, 
+  OpenDDS::DCPS::TransportImpl_rch transport_impl
+    = TheTransportFactory->create_transport_impl (TRANSPORT_IMPL_ID,
                                                   ACE_TEXT("SimpleTcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
-  OpenDDS::DCPS::TransportConfiguration_rch config 
+  OpenDDS::DCPS::TransportConfiguration_rch config
     = TheTransportFactory->create_configuration (TRANSPORT_IMPL_ID, ACE_TEXT("SimpleTcp"));
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config 
+  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->local_address_;
@@ -240,13 +240,13 @@ SubDriver::parse_arg_p(const ACE_TCHAR* arg, bool& flag)
   builder.participantId(1);
   builder.entityKey(ACE_OS::atoi(pub_id_str.c_str()));
   builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
-  
+
   OpenDDS::DCPS::RepoId repoId(builder);
 
   ACE_INET_Addr pub_addr(pub_addr_str.c_str());
 
   subscriber_.add_remote_publisher(repoId, pub_addr, pub_addr_str);
-  
+
   flag = true;
 }
 
@@ -295,7 +295,7 @@ SubDriver::parse_arg_s(const ACE_TCHAR* arg, bool& flag)
   // Parse the sub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString sub_id_str(arg_str.c_str() ,pos);
   this->sub_addr_str_ = arg_str.c_str() + pos + 1;
-  
+
   // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.
   OpenDDS::DCPS::RepoIdBuilder builder;
@@ -303,7 +303,7 @@ SubDriver::parse_arg_s(const ACE_TCHAR* arg, bool& flag)
   builder.participantId(1);
   builder.entityKey(ACE_OS::atoi(sub_id_str.c_str()));
   builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
-  
+
   OpenDDS::DCPS::RepoId repoId(builder);
 
   this->local_address_ = ACE_INET_Addr(this->sub_addr_str_.c_str());

@@ -265,7 +265,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dr_qos.liveliness.lease_duration.sec = 2 ;
       dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
-      DataReaderListenerImpl* dr_listener_impl = 
+      DataReaderListenerImpl* dr_listener_impl =
         new DataReaderListenerImpl(num_datawriters,
                                    NUM_SAMPLES,
                                    DATA_SIZE,

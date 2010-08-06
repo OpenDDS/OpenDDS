@@ -2754,7 +2754,7 @@ Options::loadSubscription(
     //tbd: what's right value for autopurge_disposed_samples_delay?
     profile->readerQos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec = 0;
     profile->readerQos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec
-      = 0; 
+      = 0;
     profile->readerQosMask |= SetReaderDataLifecycleQos;
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,

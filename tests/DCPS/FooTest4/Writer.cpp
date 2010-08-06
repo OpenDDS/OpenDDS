@@ -69,7 +69,7 @@ Writer::start ()
       sample.header_.message_length_ = sizeof(foo) ;
       sample.header_.message_id_ = ::OpenDDS::DCPS::SAMPLE_DATA ;
       sample.header_.sequence_ = seq.getValue();
-  
+
       // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
       // generated here are for the sole purpose of verifying internal behavior.
       OpenDDS::DCPS::RepoIdBuilder builder(sample.header_.publication_id_);

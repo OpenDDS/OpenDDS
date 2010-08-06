@@ -77,8 +77,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
 
       // Initialize the transport
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl = 
-        TheTransportFactory->create_transport_impl (transport_impl_id, 
+      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
+        TheTransportFactory->create_transport_impl (transport_impl_id,
                                                     ::OpenDDS::DCPS::AUTO_CONFIG);
 
       size_t const num_partitions =

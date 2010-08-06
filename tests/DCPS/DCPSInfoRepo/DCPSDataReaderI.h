@@ -33,7 +33,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 //Class TAO_DDS_DCPSDataReader_i
-class TAO_DDS_DCPSDataReader_i   
+class TAO_DDS_DCPSDataReader_i
   : public virtual POA_OpenDDS::DCPS::DataReaderRemote
 {
 public:

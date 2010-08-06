@@ -123,15 +123,15 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(sequence.low() == SequenceNumber(0));
     TEST_CHECK(sequence.high() == SequenceNumber(5));
     TEST_CHECK(sequence.disjoint());
-  
+
     sequence.update(1);
 
     TEST_CHECK(sequence.low() == SequenceNumber(2));
     TEST_CHECK(sequence.high() == SequenceNumber(5));
     TEST_CHECK(sequence.disjoint());
 
-    // ASSERT update of range from low +1 updates the 
-    //        low water mark and preserves existing 
+    // ASSERT update of range from low +1 updates the
+    //        low water mark and preserves existing
     //        discontiguities:
     sequence = DisjointSequence(0);
     sequence.update(3);
@@ -141,7 +141,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(sequence.low() == SequenceNumber(0));
     TEST_CHECK(sequence.high() == SequenceNumber(6));
     TEST_CHECK(sequence.disjoint());
-  
+
     sequence.update(SequenceRange(1, 2));
 
     TEST_CHECK(sequence.low() == SequenceNumber(3));

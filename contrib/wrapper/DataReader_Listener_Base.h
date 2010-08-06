@@ -47,14 +47,14 @@ public:
     const DDS::RequestedIncompatibleQosStatus & status)
   throw (CORBA::SystemException);
 
-  /// this callback is called when the liveliness of one or more DataWriter 
+  /// this callback is called when the liveliness of one or more DataWriter
   /// that were writing instances read through the DataReader has changed.
   virtual void on_liveliness_changed (
     DDS::DataReader_ptr reader,
     const DDS::LivelinessChangedStatus & status)
   throw (CORBA::SystemException);
 
-  /// this callback is called when the DataReader has found a DataWriter 
+  /// this callback is called when the DataReader has found a DataWriter
   /// that matches the topic and has compatible QoS.
   virtual void on_subscription_matched (
     DDS::DataReader_ptr reader,

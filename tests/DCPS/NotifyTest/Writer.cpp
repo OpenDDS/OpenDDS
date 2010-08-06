@@ -94,7 +94,7 @@ Writer::svc ()
         message_dw->unregister_instance(message, handle);
         handle = message_dw->register_instance(message);
       }
- 
+
       message.count++;
     }
 
@@ -102,7 +102,7 @@ Writer::svc ()
     {
       message_dw->dispose (message, handle);
     }
-    
+
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl
          << e << endl;

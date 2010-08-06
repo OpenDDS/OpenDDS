@@ -11,9 +11,9 @@ bool dump_buffer = false;
 #define DONT_CHECK_MS 0
 
 template<typename FOO>
-int try_marshaling(const FOO &in_foo, FOO &out_foo, 
+int try_marshaling(const FOO &in_foo, FOO &out_foo,
                    size_t expected_ms,
-                   size_t expected_cs, 
+                   size_t expected_cs,
                    const char* name)
 {
   CORBA::Boolean bounded = OpenDDS::DCPS::gen_is_bounded_size(in_foo);
@@ -21,13 +21,13 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
   size_t cs = OpenDDS::DCPS::gen_find_size(in_foo);
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%C: OpenDDS::DCPS::gen_is_bounded_size(foo) => %d\n"), 
+    ACE_TEXT("%C: OpenDDS::DCPS::gen_is_bounded_size(foo) => %d\n"),
     name, bounded));
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%C: _max_marshaled_size(my_foo) => %d\n"), 
+    ACE_TEXT("%C: _max_marshaled_size(my_foo) => %d\n"),
     name, ms));
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%C: OpenDDS::DCPS::gen_find_size(my_foo) => %d\n"), 
+    ACE_TEXT("%C: OpenDDS::DCPS::gen_find_size(my_foo) => %d\n"),
     name, cs));
 
   // NOTE:_max_marshaled_size is not always > for unbounded.
@@ -65,7 +65,7 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
   TAO_OutputCDR cdr;
   if (false == (cdr << in_foo))
     {
-      ACE_ERROR((LM_ERROR, 
+      ACE_ERROR((LM_ERROR,
         ACE_TEXT("%C: TAO_OutputCDR << failed\n"), name));
       failed = true;
     }
@@ -76,41 +76,41 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
 
   OpenDDS::DCPS::Serializer ss(mb);
 
-  if (dump_buffer) 
+  if (dump_buffer)
     {
-      ACE::format_hexdump( mb->rd_ptr(), mb->length(), ebuffer, 
+      ACE::format_hexdump( mb->rd_ptr(), mb->length(), ebuffer,
         sizeof(ebuffer)) ;
-      ACE_DEBUG((LM_DEBUG, 
-        ACE_TEXT("%C: BEFORE WRITING, LENGTH: %d, BUFFER:\n%s\n"), 
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("%C: BEFORE WRITING, LENGTH: %d, BUFFER:\n%s\n"),
         name, mb->length(), ebuffer));
     }
 
   if (false == ss << in_foo)
     {
-      ACE_ERROR((LM_ERROR, 
+      ACE_ERROR((LM_ERROR,
         ACE_TEXT("%C: Serializing failed\n"), name));
       failed = true;
       return false;
     }
 
-  if (dump_buffer) 
+  if (dump_buffer)
     {
-      ACE::format_hexdump( mb->rd_ptr(), mb->length(), ebuffer, 
+      ACE::format_hexdump( mb->rd_ptr(), mb->length(), ebuffer,
         sizeof(ebuffer)) ;
-      ACE_DEBUG((LM_DEBUG, 
-        ACE_TEXT("%C: AFTER WRITING, LENGTH: %d, BUFFER:\n%s\n"), 
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("%C: AFTER WRITING, LENGTH: %d, BUFFER:\n%s\n"),
         name, mb->length(), ebuffer));
     }
 
   // Reset the chain back to the beginning.
   // This is needed when the buffer size = find_size(my_foo) because
-  // the the serialize method set current_ the next block in the chain 
+  // the the serialize method set current_ the next block in the chain
   // which is nil; so deserializing will fail.
   ss.add_chain(mb) ;
 
   if (false == ss >> out_foo)
     {
-      ACE_ERROR((LM_ERROR, 
+      ACE_ERROR((LM_ERROR,
         ACE_TEXT("%C: Deserializing failed\n"), name));
       failed = true;
       mb->release(); // don't leak memory!
@@ -127,10 +127,10 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
 // this test tests the -Gdcps generated code for type XyZ::Foo from foo_test1_lib.
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
- 
+
   if (argc > 1) dump_buffer = true;
 
-  // ARRAYS 
+  // ARRAYS
   const CORBA::ULong ARRAY_LEN = 5;
   { //=====================================================================
     Xyz::StructOfArrayOfBoolean val;
@@ -139,7 +139,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         val.f[ii] = (ii % 2 == 0) ? true : false;
       }
     Xyz::StructOfArrayOfBoolean val_out;
-    if (try_marshaling<Xyz::StructOfArrayOfBoolean>(val, val_out, 
+    if (try_marshaling<Xyz::StructOfArrayOfBoolean>(val, val_out,
                             DONT_CHECK_MS, ARRAY_LEN, "Xyz::ArrayOfBoolean"))
       {
         for (CORBA::ULong ii =0; ii < ARRAY_LEN;ii++)
@@ -161,7 +161,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     val.f[3] = CORBA::string_dup("works");
     val.f[4] = CORBA::string_dup("");
     Xyz::StructOfArrayOfString val_out;
-    if (try_marshaling<Xyz::StructOfArrayOfString>(val, val_out, 
+    if (try_marshaling<Xyz::StructOfArrayOfString>(val, val_out,
                             DONT_CHECK_MS, ARRAY_LEN*4+14, "Xyz::StructOfArrayOfString"))
       {
         for (CORBA::ULong ii =0; ii < ARRAY_LEN;ii++)
@@ -182,7 +182,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         val.f[ii] = static_cast<char>(65+ii);
       }
     Xyz::StructOfArrayOfChar val_out;
-    if (try_marshaling<Xyz::StructOfArrayOfChar>(val, val_out, 
+    if (try_marshaling<Xyz::StructOfArrayOfChar>(val, val_out,
                             DONT_CHECK_MS, ARRAY_LEN, "Xyz::StructOfArrayOfChar"))
       {
         for (CORBA::ULong ii =0; ii < ARRAY_LEN;ii++)
@@ -203,7 +203,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         val.f[ii] = ii;
       }
     Xyz::StructOfArrayOfOctet val_out;
-    if (try_marshaling<Xyz::StructOfArrayOfOctet>(val, val_out, 
+    if (try_marshaling<Xyz::StructOfArrayOfOctet>(val, val_out,
                             DONT_CHECK_MS, ARRAY_LEN, "Xyz::StructOfArrayOfOctet"))
       {
         for (CORBA::Octet ii =0; ii < ARRAY_LEN;ii++)
@@ -224,7 +224,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         val.f[ii] = static_cast<CORBA::Long>(ii);
       }
     Xyz::StructOfArrayOfLong val_out;
-    if (try_marshaling<Xyz::StructOfArrayOfLong>(val, val_out, 
+    if (try_marshaling<Xyz::StructOfArrayOfLong>(val, val_out,
                             DONT_CHECK_MS, 4*ARRAY_LEN, "Xyz::StructOfArrayOfLong"))
       {
         for (CORBA::ULong ii =0; ii < ARRAY_LEN;ii++)
@@ -245,7 +245,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         val.f[ii] = (ii % 2 == 0) ? Xyz::greenx : Xyz::bluex;
       }
     Xyz::StructOfArrayOfAnEnum val_out;
-    if (try_marshaling<Xyz::StructOfArrayOfAnEnum>(val, val_out, 
+    if (try_marshaling<Xyz::StructOfArrayOfAnEnum>(val, val_out,
                             DONT_CHECK_MS, 4*ARRAY_LEN, "Xyz::StructOfArrayOfAnEnum"))
       {
         for (CORBA::ULong ii =0; ii < ARRAY_LEN;ii++)
@@ -270,7 +270,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           val.f[jj][ii] = ii+jj*ARRAY_LEN;
         }
     Xyz::StructOfArrayOfArrayOfLong val_out;
-    if (try_marshaling<Xyz::StructOfArrayOfArrayOfLong>(val, val_out, 
+    if (try_marshaling<Xyz::StructOfArrayOfArrayOfLong>(val, val_out,
                             DONT_CHECK_MS, 4*ARRAY_LEN*AofA_LEN, "Xyz::ArrayOfArrayOfLong"))
       {
         for (CORBA::ULong jj =0; jj < AofA_LEN; jj++)
@@ -300,7 +300,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         val[ii] = (ii % 2 == 0) ? true : false;
       }
     Xyz::SeqOfBoolean val_out;
-    if (try_marshaling<Xyz::SeqOfBoolean>(val, val_out, 
+    if (try_marshaling<Xyz::SeqOfBoolean>(val, val_out,
                             DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN, "Xyz::SeqOfBoolean"))
       {
         for (CORBA::ULong ii =0; ii < SEQ_LEN;ii++)
@@ -323,7 +323,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     val[3] = CORBA::string_dup("works");
     val[4] = CORBA::string_dup("");
     Xyz::SeqOfString val_out;
-    if (try_marshaling<Xyz::SeqOfString>(val, val_out, 
+    if (try_marshaling<Xyz::SeqOfString>(val, val_out,
                             DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN*4+14, "Xyz::SeqOfString"))
       {
         for (CORBA::ULong ii =0; ii < SEQ_LEN;ii++)
@@ -345,7 +345,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         val[ii] = static_cast<char>(65+ii);
       }
     Xyz::SeqOfChar val_out;
-    if (try_marshaling<Xyz::SeqOfChar>(val, val_out, 
+    if (try_marshaling<Xyz::SeqOfChar>(val, val_out,
                             DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN, "Xyz::SeqOfChar"))
       {
         for (CORBA::ULong ii =0; ii < SEQ_LEN;ii++)
@@ -367,7 +367,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         val[ii] = ii;
       }
     Xyz::SeqOfOctet val_out;
-    if (try_marshaling<Xyz::SeqOfOctet>(val, val_out, 
+    if (try_marshaling<Xyz::SeqOfOctet>(val, val_out,
                             DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN, "Xyz::SeqOfOctet"))
       {
         for (CORBA::Octet ii =0; ii < SEQ_LEN;ii++)
@@ -389,7 +389,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         val[ii] = ii;
       }
     Xyz::SeqOfLong val_out;
-    if (try_marshaling<Xyz::SeqOfLong>(val, val_out, 
+    if (try_marshaling<Xyz::SeqOfLong>(val, val_out,
                             DONT_CHECK_MS, SEQ_LEN_SIZE+4*SEQ_LEN, "Xyz::SeqOfLong"))
       {
         for (CORBA::ULong ii =0; ii < SEQ_LEN;ii++)
@@ -411,7 +411,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         val[ii] = (ii % 2 == 0) ? Xyz::greenx : Xyz::bluex;
       }
     Xyz::SeqOfAnEnum val_out;
-    if (try_marshaling<Xyz::SeqOfAnEnum>(val, val_out, 
+    if (try_marshaling<Xyz::SeqOfAnEnum>(val, val_out,
                             DONT_CHECK_MS, SEQ_LEN_SIZE+4*SEQ_LEN, "Xyz::SeqOfAnEnum"))
       {
         for (CORBA::ULong ii =0; ii < SEQ_LEN;ii++)
@@ -439,7 +439,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             }
       }
     Xyz::StructOfArrayOfSeqOfLong val_out;
-    if (try_marshaling<Xyz::StructOfArrayOfSeqOfLong>(val, val_out, 
+    if (try_marshaling<Xyz::StructOfArrayOfSeqOfLong>(val, val_out,
                             DONT_CHECK_MS, 4*ARRAY_LEN*AofS_LEN + 4*AofS_LEN, "Xyz::ArrayOfSeqOfLong"))
       {
         for (CORBA::ULong jj =0; jj < AofS_LEN; jj++)
@@ -469,10 +469,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             }
       }
     Xyz::SeqOfSeqOfLong val_out;
-    if (try_marshaling<Xyz::SeqOfSeqOfLong>(val, val_out, 
-                            DONT_CHECK_MS, 
+    if (try_marshaling<Xyz::SeqOfSeqOfLong>(val, val_out,
+                            DONT_CHECK_MS,
                             // longs + inner lengths + outter length
-                            4*SEQ_LEN*SofS_LEN + 4*SofS_LEN + 4, 
+                            4*SEQ_LEN*SofS_LEN + 4*SofS_LEN + 4,
                             "Xyz::SeqOfSeqOfLong"))
       {
         for (CORBA::ULong jj =0; jj < SofS_LEN; jj++)
@@ -488,15 +488,15 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
   }
 
-  // OTHER 
-  
+  // OTHER
+
   { //=====================================================================
     Xyz::StructAUnion val;
     val.sau_f1._d(Xyz::redx);
     val.sau_f1.rv(CORBA::string_dup("joe"));
     // size = union descr/4 + string length/4 + string contents/3
     Xyz::StructAUnion val_out;
-    if (try_marshaling<Xyz::StructAUnion>(val, val_out, 
+    if (try_marshaling<Xyz::StructAUnion>(val, val_out,
                             DONT_CHECK_MS, SEQ_LEN_SIZE+4+3, "Xyz::StructAUnion"))
       {
          if (strcmp(val.sau_f1.rv (), val_out.sau_f1.rv ()))
@@ -514,7 +514,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     val[0] = CORBA::string_dup("four"); //4+4 strlen & string
     val[1] = CORBA::string_dup("five5"); //4+5 strlen + string
     Xyz::SeqOfString val_out;
-    if (try_marshaling<Xyz::SeqOfString>(val, val_out, 
+    if (try_marshaling<Xyz::SeqOfString>(val, val_out,
                             DONT_CHECK_MS, 21, "Xyz::SeqOfString"))
       {
          if (strcmp(val[1], val_out[1]))
@@ -621,7 +621,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
   Xyz::Foo ss_foo;
-  if (try_marshaling<Xyz::Foo>(my_foo, ss_foo, 
+  if (try_marshaling<Xyz::Foo>(my_foo, ss_foo,
                            DONT_CHECK_MS, DONT_CHECK_CS, "Xyz::Foo"))
     {
 
@@ -652,7 +652,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
       else if (0 != strcmp(ss_foo.theString.in (), my_foo.theString.in ()))
         {
-          ACE_ERROR((LM_ERROR, 
+          ACE_ERROR((LM_ERROR,
             ACE_TEXT("Failed to serialize theString \"%C\" => \"%C\"\n"),
             my_foo.theString.in (), ss_foo.theString.in ()));
           failed = true;

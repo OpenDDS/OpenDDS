@@ -39,7 +39,7 @@ class DDSWrapper_Export Topic_Manager
   Topic_Manager (const Topic_Manager & copy);
 
   /// assignment operator
-  void operator= (const Topic_Manager& copy);  
+  void operator= (const Topic_Manager& copy);
 
   /// dtor
   ~Topic_Manager ();

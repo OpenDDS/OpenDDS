@@ -92,7 +92,7 @@ Writer::svc ()
       message.count++;
     }
 
-    
+
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl
          << e << endl;

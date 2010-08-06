@@ -22,7 +22,7 @@
 //Class SubscriberListenerImpl
 class SubscriberListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::SubscriberListener> {
-  
+
 public:
 
   //Constructor
@@ -68,14 +68,14 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status)
   ACE_THROW_SPEC((CORBA::SystemException));
-  
+
   bool verify_result () const {
     return verify_result_;
   }
-  
+
 private:
 
-  void verify (const Messenger::Message& msg, 
+  void verify (const Messenger::Message& msg,
                const ::DDS::SampleInfo& si,
                const DDS::SubscriberQos& qos,
                const bool reset_last_timestamp);

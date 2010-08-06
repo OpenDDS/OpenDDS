@@ -9,15 +9,15 @@
 #include "dds/DCPS/DataWriterImpl.h"
 #include "ace/Task.h"
 
-  
+
 class PubDriver;
 
-class Writer : public ACE_Task_Base 
+class Writer : public ACE_Task_Base
 {
 public:
-  
+
   Writer (PubDriver*            pubdriver,
-          ::DDS::DataWriter_ptr writer, 
+          ::DDS::DataWriter_ptr writer,
           int num_thread_to_write = 1,
           int num_writes_per_thread = 1,
           int multiple_instances = 0,
@@ -38,7 +38,7 @@ public:
   InstanceDataMap& data_map ();
 
 private:
-  
+
   InstanceDataMap       data_map_;
   ::DDS::DataWriter_var writer_;
   ::OpenDDS::DCPS::DataWriterImpl* writer_servant_;
