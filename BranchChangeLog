@@ -1,3 +1,10 @@
+Fri Aug  6 13:46:25 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3553] 2010-08-06 13:44  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenerator.java:
+
+          Minor code cleanup.
+
 Thu Aug  5 23:16:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3550] 2010-08-05 23:09  martinezm
