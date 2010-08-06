@@ -1,3 +1,117 @@
+Fri Aug  6 18:28:57 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportControlElement.inl:
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportReplacedElement.inl:
+        * dds/DCPS/transport/framework/TransportReplacedElement.cpp:
+
+          Added an .inl file for TransportControlElement.
+          Moved trivial methods from .cpp to .inl for TransportReplacedElement.
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListenerImpl.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListenerImpl.h:
+        * dds/DCPS/BitPubListenerImpl.h:
+        * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/DataReaderRemoteImpl.h:
+        * dds/DCPS/DataWriterRemoteImpl.h:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/FailoverListener.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/TopicDescriptionImpl.h:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/InfoRepo/DomainParticipantListener_i.h:
+        * examples/DCPS/DistributedContent/FileInfoListener.h:
+        * examples/DCPS/DistributedContent/main.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/Aggregator.h:
+        * examples/DCPS/Messenger_IOGR_Imr/Aggregator.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.h:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataWriterListenerImpl.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DcpsIntegration/DomainParticipantListener.h:
+        * tests/DCPS/DcpsIntegration/TopicListener.h:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.h:
+        * tests/DCPS/Federation/DataWriterListenerImpl.h:
+        * tests/DCPS/FooTest3_0/DataWriterListener.h:
+        * tests/DCPS/FooTest3_0/DomainParticipantListener.h:
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/PublisherListener.h:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.h:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.h:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/LatencyBudget/DataWriterListenerImpl.h:
+        * tests/DCPS/Lifespan/DataWriterListenerImpl.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.h:
+        * tests/DCPS/LivelinessTimeout/DataWriterListenerImpl.h:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.h:
+        * tests/DCPS/ManyTopicTest/DataReaderListener.h:
+        * tests/DCPS/ManyTopicTest/common.h:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/DataReaderListener.h:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/Partition/DataWriterListener.h:
+        * tests/DCPS/PersistentDurability/DataWriterListenerImpl.h:
+        * tests/DCPS/Reconnect/DataWriterListener.h:
+        * tests/DCPS/TransientDurability/DataWriterListenerImpl.h:
+        * tests/DCPS/TransientLocalTest/DataWriterListenerImpl.h:
+
+          DOC group ACE+TAO has removed a few macros that were still in use
+          here.  ACE_THROW_SPEC is still used for TAO 1.5a, so we will define
+          it to empty if ACE doesn't define it.  This requires #including
+          dds/DCPS/Definitions.h.
+          Other changes:
+          - ACE_{static,const,reinterpret}_cast (replaced with C++ cast)
+          - ACE_LIB_TEXT -> ACE_TEXT
+          - ACE_PRINT_EXCEPTION(e,s) -> e._tao_print_exception(s)
+          - Removed PortableServer::RefCountServantBase
+          - Removed lingering excption emulation macros (ACE_ENV_*)
+
+        * tests/DCPS/FooTest2/main.cpp:
+        * tools/monitor/Monitor_main.cpp:
+
+          Change to wchar-compliant main function (ACE_TMAIN).
+
+        * tools/dissector/packet.cpp:
+
+          Removed unneeded ACE_INLINE.
+
+        * dds/DCPS/yard/CHANGELOG.txt:
+        * java/jms/compat/src/META-INF/ejb-jar.xml:
+        * java/jms/compat/src/META-INF/jboss.xml:
+
+          Added newline at end of file.
+
 Thu Aug  5 23:24:58 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/OwnershipManager.cpp:

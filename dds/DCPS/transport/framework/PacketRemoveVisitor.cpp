@@ -57,8 +57,8 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
 
   // These is the head of the chain of "source" blocks from the element
   // currently being visited.
-  ACE_Message_Block* element_blocks = ACE_const_cast(ACE_Message_Block*,
-                                                     element->msg());
+  ACE_Message_Block* element_blocks =
+    const_cast<ACE_Message_Block*>(element->msg());
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "element_blocks == [%0x]\n", element_blocks));
@@ -367,7 +367,7 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
     // with duplicates from the msg() chain of the replacement element.
 
     ACE_Message_Block* replacement_element_blocks =
-      ACE_const_cast(ACE_Message_Block*, element->msg());
+      const_cast<ACE_Message_Block*>(element->msg());
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Set replacement_element_blocks to the replacement element's "
           "msg() [%0x]\n",

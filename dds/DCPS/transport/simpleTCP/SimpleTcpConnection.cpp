@@ -133,7 +133,7 @@ OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
   // The passed-in arg is really the acceptor object that created this
   // SimpleTcpConnection object, and is also the caller of this open()
   // method.  We need to cast the arg to the SimpleTcpAcceptor* type.
-  SimpleTcpAcceptor* acceptor = ACE_static_cast(SimpleTcpAcceptor*,arg);
+  SimpleTcpAcceptor* acceptor = static_cast<SimpleTcpAcceptor*>(arg);
 
   if (acceptor == 0) {
     // The cast failed.

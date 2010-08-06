@@ -14,8 +14,7 @@
 
 class PubDriver
   : public ACE_Task_Base,
-    public virtual POA_Test::TestPubDriver,
-    public virtual PortableServer::RefCountServantBase
+    public virtual POA_Test::TestPubDriver
 {
   public:
 

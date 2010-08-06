@@ -11,6 +11,7 @@
 #define OPENDDS_DCPS_DATAWRITERREMOTE_H
 
 #include "dds/DdsDcpsDataWriterRemoteS.h"
+#include "Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -28,8 +29,7 @@ class DataWriterImpl;
 *
 */
 class OpenDDS_Dcps_Export DataWriterRemoteImpl
-  : public virtual POA_OpenDDS::DCPS::DataWriterRemote
-  , public virtual PortableServer::RefCountServantBase {
+  : public virtual POA_OpenDDS::DCPS::DataWriterRemote {
 public:
   ///Constructor
   DataWriterRemoteImpl(DataWriterImpl* parent);

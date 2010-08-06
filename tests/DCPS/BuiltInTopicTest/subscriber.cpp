@@ -211,15 +211,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       // Wait for Monitor 1 done.
-      FILE* fp = ACE_OS::fopen (synch_fname, ACE_LIB_TEXT("r"));
+      FILE* fp = ACE_OS::fopen (synch_fname, ACE_TEXT("r"));
       int i = 0;
       while (fp == 0 &&  i < 15)
       {
         ACE_DEBUG ((LM_DEBUG,
-          ACE_LIB_TEXT("(%P|%t)waiting monitor1 done ...\n")));
+          ACE_TEXT("(%P|%t)waiting monitor1 done ...\n")));
         ACE_OS::sleep (1);
         ++i;
-        fp = ACE_OS::fopen (synch_fname, ACE_LIB_TEXT("r"));
+        fp = ACE_OS::fopen (synch_fname, ACE_TEXT("r"));
       }
       if (fp != 0)
         ACE_OS::fclose (fp);

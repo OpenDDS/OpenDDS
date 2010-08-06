@@ -11,6 +11,7 @@
 #define FAILOVERLISTENER_T_H
 
 #include "dds/DdsDcpsSubscriptionExtC.h"
+#include "Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

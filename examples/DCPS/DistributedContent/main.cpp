@@ -39,7 +39,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
     // parse commmand line options
-    ACE_Get_Opt get_opts (argc, argv, ACE_LIB_TEXT("d:f:n:"));
+    ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("d:f:n:"));
     int optionIterator;
     while ((optionIterator = get_opts ()) != EOF) {
       switch (optionIterator) {

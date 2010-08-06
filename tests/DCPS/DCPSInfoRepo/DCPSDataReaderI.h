@@ -26,6 +26,7 @@
 #define DCPSDATAREADERI_H_
 
 #include "dds/DdsDcpsDataReaderRemoteS.h"
+#include "dds/DCPS/Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

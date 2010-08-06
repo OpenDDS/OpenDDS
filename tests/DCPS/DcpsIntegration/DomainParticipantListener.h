@@ -26,6 +26,7 @@
 #define DDSDCPSDOMAIN_PARTICIPANT_LISTENER_I_H_
 
 #include "dds/DdsDcpsDomainS.h"
+#include "dds/DCPS/Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

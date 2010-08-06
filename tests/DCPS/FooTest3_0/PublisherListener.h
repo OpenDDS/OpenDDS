@@ -5,6 +5,7 @@
 #define PUBLISHER_LISTENER_IMPL
 
 #include "dds/DdsDcpsPublicationS.h"
+#include "dds/DCPS/Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
