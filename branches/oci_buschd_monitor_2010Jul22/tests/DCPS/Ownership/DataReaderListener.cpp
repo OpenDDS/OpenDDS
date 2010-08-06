@@ -20,12 +20,16 @@
 #include <iostream>
 
 extern int testcase;
+const int num_messages_per_writer = 10;
 
 DataReaderListenerImpl::DataReaderListenerImpl(const char* reader_id)
-  : num_reads_(0), reader_id_ (reader_id), verify_result_ (true)
+  : num_reads_(0), 
+    reader_id_ (reader_id), 
+    verify_result_ (true), 
+    result_verify_complete_ (false)
 {
-  this->current_strength_[0] = 0;
-  this->current_strength_[1] = 0;
+  this->current_strength_[0] = 0; 
+  this->current_strength_[1] = 0; 
 }
 
 DataReaderListenerImpl::~DataReaderListenerImpl()
@@ -55,9 +59,9 @@ throw(CORBA::SystemException)
 
     if (status == DDS::RETCODE_OK) {
       if (si.valid_data) {
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t)%X %s->%s subject_id: %d ")
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t)%s->%s subject_id: %d ")
           ACE_TEXT("count: %d strength: %d\n"),
-          this, message.from.in(), this->reader_id_, message.subject_id, 
+          message.from.in(), this->reader_id_, message.subject_id, 
           message.count, message.strength)); 
         std::cout << message.from.in() << "->" << this->reader_id_ 
         << " subject_id: " << message.subject_id  
@@ -65,7 +69,7 @@ throw(CORBA::SystemException)
         << " strength: " << message.strength 
         << std::endl;
         bool result = verify (message);
-        this->verify_result_ = result ? this->verify_result_ : false;
+        this->verify_result_ &= result;
         
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
@@ -98,9 +102,9 @@ void DataReaderListenerImpl::on_requested_deadline_missed(
   const DDS::RequestedDeadlineMissedStatus & status)
 throw(CORBA::SystemException)
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)%X: on_requested_deadline_missed(): ")
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)%s: on_requested_deadline_missed(): ")
           ACE_TEXT(" handle %d total_count_change %d \n"),
-          this, status.last_instance_handle, status.total_count_change));
+          this->reader_id_, status.last_instance_handle, status.total_count_change));
 }
 
 void DataReaderListenerImpl::on_requested_incompatible_qos(
@@ -116,9 +120,9 @@ void DataReaderListenerImpl::on_liveliness_changed(
   const DDS::LivelinessChangedStatus & status)
 throw(CORBA::SystemException)
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)%X: on_liveliness_changed(): ")
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)%s: on_liveliness_changed(): ")
           ACE_TEXT(" handle %d alive_count_change %d not_alive_count_change %d \n"),
-          this, status.last_publication_handle, status.alive_count_change, 
+          this->reader_id_, status.last_publication_handle, status.alive_count_change, 
           status.alive_count_change));
 }
 
@@ -151,33 +155,61 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
 {
   if (msg.subject_id != msg.count % 2)
     return false;
+    
+  int previous_strength = this->current_strength_[msg.subject_id];
+  // record the strength of writer that sample is from.
+  this->current_strength_[msg.subject_id] = msg.strength;
 
   switch (testcase) {
   case strength:
   {
-    // strength should be not be less then before  
-    if (msg.strength < this->current_strength_[msg.subject_id]) {
+    // strength should be not be less then before
+    if (msg.strength < previous_strength) {
+      // record the strength of writer that sample is from.
       return false;
-    } 
-    // record the strength of writer that sample is from.
-    this->current_strength_[msg.subject_id] = msg.strength;
+    }
   }
   break;
   case liveliness_change:
   case miss_deadline:
   {
-    // record the strength of writer that sample is from.
-    this->current_strength_[msg.subject_id] = msg.strength;
+    ACE_Time_Value now = ACE_OS::gettimeofday();
+    if (msg.count == 5 && msg.strength != 12) {
+      return false;
+    }
+    else {
+      start_missing_ = now;
+    }
+    
+    if (msg.count == 6 && msg.strength != 12) {
+      return false;
+    }
+    else {
+      end_missing_ = now;
+    }
+    
+    if (now < end_missing_ && now > start_missing_ && msg.strength != 10)
+      return false;
   }
   break;
   case update_strength:
   {
-    // strength should be not be less then before  
-    if (msg.strength < this->current_strength_[msg.subject_id]) {
+    // strength should not be less then before  
+    if (! result_verify_complete_ && msg.strength < previous_strength) {
       return false;
     } 
-    // record the strength of writer that sample is from.
-    this->current_strength_[msg.subject_id] = msg.strength;
+        
+    if (! result_verify_complete_ && num_messages_per_writer == msg.count) {
+      // The owner writer is done. so the other writer will become
+      // owner, then it will not meet the condition of the strength
+      // always increase.
+      this->result_verify_complete_ = true; 
+      
+      if (msg.strength != 15) {
+        return false;
+      }
+    }
+   
   }
   break;
   default:
@@ -195,10 +227,9 @@ DataReaderListenerImpl::verify_result ()
   switch (testcase) {
   case strength:
   {
-    this->verify_result_ 
-      = this->verify_result_ 
-        && this->current_strength_[0] == this->current_strength_[1]
-        && this->current_strength_[0] == 12;
+    this->verify_result_ &= 
+        (this->current_strength_[0] == this->current_strength_[1]
+        && this->current_strength_[0] == 12);
   }
   break;
   case liveliness_change:
@@ -206,18 +237,13 @@ DataReaderListenerImpl::verify_result ()
   {
     // The liveliness is changed for both writers in the middle of sending
     // total messages but finally, the higher strength writer takes ownership.
-    this->verify_result_ 
-      = this->verify_result_ 
-        && this->current_strength_[0] == this->current_strength_[1]
-        && this->current_strength_[0] == 12;
+    this->verify_result_ &=   
+        (this->current_strength_[0] == this->current_strength_[1]
+        && this->current_strength_[0] == 12);
   }
   break;
   case update_strength:
   {
-    this->verify_result_ 
-      = this->verify_result_ 
-        && this->current_strength_[0] == this->current_strength_[1]
-        && this->current_strength_[0] == 15;
   }
   break;
   default:

@@ -27,7 +27,7 @@ OpenDDS::DCPS::TransportSendControlElement::TransportSendControlElement
 
 
 ACE_INLINE
-bool 
+bool
 OpenDDS::DCPS::TransportSendControlElement::owned_by_transport ()
 {
   return false;

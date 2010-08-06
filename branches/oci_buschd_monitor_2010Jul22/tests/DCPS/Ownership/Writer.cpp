@@ -18,10 +18,10 @@
 #include "Writer.h"
 
 const int num_instances_per_writer = 1;
-const int num_messages = 10;
+const int num_messages = 20;
 extern int reset_ownership_strength;
-extern int dds_delay;
-extern int reset_delay;
+extern ACE_Time_Value dds_delay;
+extern ACE_Time_Value reset_delay;
 extern int ownership_strength;
 
 Writer::Writer(DDS::DataWriter_ptr writer, const char* ownership_dw_id)
@@ -100,8 +100,6 @@ Writer::svc()
 
     Messenger::Message message;
 
-    DDS::InstanceHandle_t handle = message_dw->register_instance(message);
-
     message.from       = CORBA::string_dup(ownership_dw_id_.c_str());
     message.subject    = CORBA::string_dup("Review");
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
@@ -110,8 +108,9 @@ Writer::svc()
 
     for (int i = 0; i < num_messages; i++) {
       message.subject_id = message.count % 2;  // 0 or 1
-      
-      DDS::ReturnCode_t error = message_dw->write(message, handle);
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t)%s writes instance %d count %d\n", 
+      ownership_dw_id_.c_str(), message.subject_id, message.count));   
+      DDS::ReturnCode_t error = message_dw->write(message, ::DDS::HANDLE_NIL);
 
       if (error != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
@@ -122,10 +121,8 @@ Writer::svc()
           timeout_writes_++;
         }
       }
-      
-      message.count++;
-      
-      if (i == num_messages/2) {
+            
+      if (message.count == 5) {
         ::DDS::DataWriterQos qos;
         error = this->writer_->get_qos (qos);
         if (error != ::DDS::RETCODE_OK) {
@@ -155,14 +152,17 @@ Writer::svc()
         
       }
 
-      if (i == num_messages/2 && reset_delay != 0) {
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)%s : reset delay from %d to %d\n"), 
-          ownership_dw_id_.c_str(), dds_delay, reset_delay));
+      if ((message.count == 5)
+           && reset_delay > ACE_Time_Value::zero) {
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)%s : reset delay from %d to %d at sample %d\n"), 
+          ownership_dw_id_.c_str(), dds_delay.msec(), reset_delay.msec(), message.count));
         ACE_OS::sleep (reset_delay);
       }
-      else if (dds_delay > 0) {
+      else if (dds_delay > ACE_Time_Value::zero) {
         ACE_OS::sleep (dds_delay);
       }
+      
+      message.count++;
     }
  
 

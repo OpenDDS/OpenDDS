@@ -703,7 +703,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications(TransportSendEl
   size_t num_delayed_notifications = 0;
 
   TransportQueueElement* found_element = 0;
-  
+
   {
     GuardType guard(this->lock_);
 
@@ -721,7 +721,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications(TransportSendEl
       {
         found_element = sample;
       }
-        
+
       delayed_delivered_notification_queue_ [0] = NULL;
       delayed_notification_mode_ [0] = MODE_NOT_SET;
 
@@ -736,7 +736,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications(TransportSendEl
         if ((element.sample () != 0) && (element.msg () == samples[i]->msg ())) {
           found_element = samples[i];
         }
-        
+
         delayed_delivered_notification_queue_[i] = NULL;
         delayed_notification_mode_[i] = MODE_NOT_SET;
       }
@@ -826,7 +826,7 @@ OpenDDS::DCPS::TransportSendStrategy::clear(SendMode mode)
 
   TransportSendElement element (0, 0);
   this->send_delayed_notifications(element);
-  
+
   QueueType* elems = 0;
   QueueType* queue = 0;
   {
@@ -1308,23 +1308,23 @@ OpenDDS::DCPS::TransportSendStrategy::remove_sample(TransportSendElement& elemen
   DBG_ENTRY_LVL("TransportSendStrategy","remove_sample",6);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t)  Removing sample: %@", element.msg ()),5);
-  
+
   // The sample to remove is either in temporary delayed notification list or
-  // internal list (elems_ or queue_). If it's going to be removed from temporary delayed 
+  // internal list (elems_ or queue_). If it's going to be removed from temporary delayed
   // notification list by transport thread, it needs acquire WriterDataContainer lock for
   // data_dropped/data_delivered callback, then it needs wait for this remove_sample() call
-  // complete as this call already hold the WriterContainer's lock. So this call is safe to 
+  // complete as this call already hold the WriterContainer's lock. So this call is safe to
   // access the sample to remove. If it's going to be removed by this remove_sample() calling
   // thread, it will be removed either from delayed notification list or from internal list
-  // in which case the element carry the info if the sample is released so the datalinkset 
+  // in which case the element carry the info if the sample is released so the datalinkset
   // can stop calling rest datalinks to remove this sample if it's already released..
-  
+
   this->send_delayed_notifications (element);
 
   if (element.released ()) {
     return 0;
   }
-  
+
   GuardType guard(this->lock_);
 
   // Process any specific sample storage first.
@@ -1524,7 +1524,7 @@ OpenDDS::DCPS::TransportSendStrategy::direct_send(bool relink)
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "The outcome of the send_packet() was "
               "OUTCOME_PEER_LOST.\n"));
-      }      
+      }
 
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                 "Now flip to MODE_SUSPEND before we try to reconnect.\n"), 5);

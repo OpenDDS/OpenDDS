@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPSINFO_IDL
-#define TAO_DDS_DCPSINFO_IDL
+#ifndef OPENDDS_DCPSINFO_IDL
+#define OPENDDS_DCPSINFO_IDL
 
 #include "dds/DdsDcpsInfrastructure.idl"
 #include "dds/DdsDcpsPublication.idl"
@@ -198,7 +198,7 @@ module OpenDDS {
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Publication);
-      
+
       //=======================================================
       // Update the QoS of an enitity to support Built-in Topics
       // and updating the other side of assocations.
@@ -240,12 +240,9 @@ module OpenDDS {
                 Invalid_Subscription);
 
       void shutdown();
-
-      //====== support built-in Topics
-      // TBD for AAC - see design/DCPS/built_in_topics.txt
     };
 
   }; // module DDS
 }; // module OpenDDS
 
-#endif /* TAO_DDS_DCPSINFO_IDL */
+#endif /* OPENDDS_DCPSINFO_IDL */

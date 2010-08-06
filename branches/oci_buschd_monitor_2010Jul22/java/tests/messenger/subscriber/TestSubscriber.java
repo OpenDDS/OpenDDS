@@ -73,7 +73,7 @@ public class TestSubscriber {
         DataReader dr = sub.create_datareader(top,
                                               DATAREADER_QOS_DEFAULT.get(),
                                               listener,
-					      DEFAULT_STATUS_MASK.value);
+                                              DEFAULT_STATUS_MASK.value);
         if (dr == null) {
             System.err.println("ERROR: DataReader creation failed");
             return;

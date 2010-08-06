@@ -26,9 +26,9 @@ namespace OpenDDS {
 namespace DCPS {
 
 struct WriterCoherentSample {
-  WriterCoherentSample (ACE_UINT32 num_sample = 0, 
+  WriterCoherentSample (ACE_UINT32 num_sample = 0,
                         SequenceNumber last_sample = SequenceNumber());
-  
+
   void reset ();
   ACE_UINT32 num_samples_;
   SequenceNumber last_sample_;
@@ -43,13 +43,13 @@ struct OpenDDS_Dcps_Export CoherentChangeControl {
   bool                  group_coherent_;
   RepoId                publisher_id_;
   GroupCoherentSamples  group_coherent_samples_;
-  
+
   /// Default constructor.
   CoherentChangeControl() ;
 
   /// Similar to IDL compiler generated methods.
   size_t max_marshaled_size() ;
-  
+
   void reset ();
 };
 

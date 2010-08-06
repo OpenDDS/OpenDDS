@@ -12,8 +12,8 @@ local interface <%TYPE%>TypeSupport : OpenDDS::DCPS::TypeSupport {
     DDS::ReturnCode_t register_type(
                 in DDS::DomainParticipant participant,
                 in string type_name);
-                
-    string get_type_name ();            
+
+    string get_type_name ();
 };
 
 /** DataWriter interface for <%TYPE%> data type.
@@ -170,7 +170,7 @@ local interface <%TYPE%>DataReader : OpenDDS::DCPS::DataReaderEx {
     DDS::ReturnCode_t get_key_value(
                 inout <%SCOPED%> key_holder,
                 in DDS::InstanceHandle_t handle);
-                
+
     DDS::InstanceHandle_t lookup_instance(
                 in <%SCOPED%> instance_data);
 };

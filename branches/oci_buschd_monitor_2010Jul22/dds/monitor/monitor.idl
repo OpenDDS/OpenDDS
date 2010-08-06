@@ -33,7 +33,7 @@ module OpenDDS {
 
     //typedef sequence<GUID_t> GUIDSeq;
 
-    enum ValueEnumType { INTEGER_TYPE, DOUBLE_TYPE, STRING_TYPE, 
+    enum ValueEnumType { INTEGER_TYPE, DOUBLE_TYPE, STRING_TYPE,
                          STATISTICS_TYPE, STRING_LIST_TYPE };
     union ValueUnion switch (ValueEnumType) {
       case INTEGER_TYPE:     long       integer_value;
@@ -346,23 +346,23 @@ module OpenDDS {
       TRANSPORT_REPORT_TYPE
     };
     union GenericReport switch (ReportType) {
-      case SERVICE_PARTICIPANT_REPORT_TYPE: 
+      case SERVICE_PARTICIPANT_REPORT_TYPE:
         ServiceParticipantReport sp_report;
-      case DOMAIN_PARTICIPANT_REPORT_TYPE: 
+      case DOMAIN_PARTICIPANT_REPORT_TYPE:
         DomainParticipantReport dp_report;
-      case TOPIC_REPORT_TYPE: 
+      case TOPIC_REPORT_TYPE:
         TopicReport topic_report;
-      case PUBLISHER_REPORT_TYPE: 
+      case PUBLISHER_REPORT_TYPE:
         PublisherReport publisher_report;
-      case SUBSCRIBER_REPORT_TYPE: 
+      case SUBSCRIBER_REPORT_TYPE:
         SubscriberReport subscriber_report;
-      case DATA_WRITER_REPORT_TYPE: 
+      case DATA_WRITER_REPORT_TYPE:
         DataWriterReport dw_report;
-      case DATA_WRITER_PERIODIC_REPORT_TYPE: 
+      case DATA_WRITER_PERIODIC_REPORT_TYPE:
         DataWriterPeriodicReport dw_per_report;
-      case DATA_READER_REPORT_TYPE: 
+      case DATA_READER_REPORT_TYPE:
         DataReaderReport dr_report;
-      case DATA_READER_PERIODIC_REPORT_TYPE: 
+      case DATA_READER_PERIODIC_REPORT_TYPE:
         DataReaderPeriodicReport dr_per_report;
       case TRANSPORT_REPORT_TYPE:
         TransportReport transport_report;
@@ -392,6 +392,6 @@ module OpenDDS {
       DDS::Duration_t get_publishing_period();
     };
 
-  }; 
+  };
 
 };

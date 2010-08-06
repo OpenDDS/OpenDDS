@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_DOMAIN_PARTICIPANT_FACTORY_IMPL_H
-#define TAO_DDS_DCPS_DOMAIN_PARTICIPANT_FACTORY_IMPL_H
+#ifndef OPENDDS_DCPS_DOMAIN_PARTICIPANT_FACTORY_IMPL_H
+#define OPENDDS_DCPS_DOMAIN_PARTICIPANT_FACTORY_IMPL_H
 
 #include "Definitions.h"
 #include "dds/DdsDcpsDomainS.h"
@@ -120,4 +120,4 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* TAO_DDS_DCPS_DOMAIN_PARTICIPANT_FACTORY_IMPL_H  */
+#endif /* OPENDDS_DCPS_DOMAIN_PARTICIPANT_FACTORY_IMPL_H  */

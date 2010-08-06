@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_RCHANDLE_T_H
-#define TAO_DDS_RCHANDLE_T_H
+#ifndef OPENDDS_RCHANDLE_T_H
+#define OPENDDS_RCHANDLE_T_H
 
 #include <algorithm>
 
@@ -43,10 +43,10 @@ public:
     this->bump_down();
   }
 
-  RcHandle& operator=(T* p) {   
+  RcHandle& operator=(T* p) {
     RcHandle tmp(p);
     std::swap(this->ptr_, tmp.ptr_);
-    
+
     return *this;
   }
 
@@ -113,4 +113,4 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif  /* TAO_DDS_RCHANDLE_T_H */
+#endif  /* OPENDDS_RCHANDLE_T_H */

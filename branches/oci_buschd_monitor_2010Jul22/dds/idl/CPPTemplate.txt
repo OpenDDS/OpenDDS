@@ -60,6 +60,22 @@ char *
   return reader_impl;
 }
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+::DDS::DataReader_ptr
+<%TYPE%>TypeSupportImpl::create_multitopic_datareader()
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  return new OpenDDS::DCPS::MultiTopicDataReader_T<<%TYPE%>,
+    <%TYPE%>DataReaderImpl>;
+}
+
+const OpenDDS::DCPS::MetaStruct&
+<%TYPE%>TypeSupportImpl::getMetaStructForType()
+{
+  return OpenDDS::DCPS::getMetaStruct<<%TYPE%>>();
+}
+
+#endif
 
 <%TYPE%>DataWriterImpl::<%TYPE%>DataWriterImpl ()
   : marshaled_size_ (0)
@@ -168,7 +184,7 @@ DDS::ReturnCode_t
                         handle, registered_handle),
                         ::DDS::RETCODE_ERROR);
   }
-  
+
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
                     get_lock (),
@@ -310,7 +326,7 @@ DDS::ReturnCode_t
 }
 
 
-::DDS::InstanceHandle_t 
+::DDS::InstanceHandle_t
 <%TYPE%>DataWriterImpl::lookup_instance (
     const ::<%SCOPED%> & instance_data)
   ACE_THROW_SPEC ((CORBA::SystemException))
@@ -330,7 +346,7 @@ DDS::ReturnCode_t
   {
     return it->second;
   }
-}  
+}
 
 
 void
@@ -631,15 +647,20 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
+  if (this->subqos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS
+    && ! this->coherent_) {
+    return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   bool group_coherent_ordered
     = this->subqos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS
-      && this->subqos_.presentation.coherent_access 
+      && this->subqos_.presentation.coherent_access
       && this->subqos_.presentation.ordered_access;
 
   if (group_coherent_ordered && this->coherent_) {
     max_samples = 1;
   }
-    
+
   ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%>Seq >
     results(this, received_data, info_seq, max_samples,
             this->subqos_.presentation, a_condition,
@@ -686,7 +707,7 @@ DDS::ReturnCode_t
   }
 
   post_read_or_take();
- 
+
   return ret;
 }
 
@@ -728,15 +749,20 @@ DDS::ReturnCode_t
                     this->sample_lock_,
                     ::DDS::RETCODE_ERROR);
 
+  if (this->subqos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS
+    && ! this->coherent_) {
+    return ::DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   bool group_coherent_ordered
     = this->subqos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS
-      && this->subqos_.presentation.coherent_access 
+      && this->subqos_.presentation.coherent_access
       && this->subqos_.presentation.ordered_access;
-      
+
   if (group_coherent_ordered && this->coherent_) {
     max_samples = 1;
   }
-  
+
   ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%>Seq >
      results(this, received_data, info_seq, max_samples,
              this->subqos_.presentation, a_condition,
@@ -770,7 +796,7 @@ DDS::ReturnCode_t
     OpenDDS::DCPS::RakeData item = this->group_coherent_ordered_data_.get_data();
     results.insert_sample(item.rde_, item.si_, item.index_in_instance_);
   }
-  
+
   results.copy_to_user();
 
   ::DDS::ReturnCode_t ret = ::DDS::RETCODE_NO_DATA;
@@ -1059,7 +1085,7 @@ DDS::ReturnCode_t
     ::DDS::QueryCondition_ptr a_condition)
 {
   ::<%SCOPED%>Seq::PrivateMemberAccess received_data_p(received_data);
-  
+
   ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%>Seq >
      results(this, received_data, info_seq, max_samples,
              this->subqos_.presentation, a_condition,
@@ -1136,7 +1162,7 @@ DDS::ReturnCode_t
     ::DDS::QueryCondition_ptr a_condition)
 {
   ::<%SCOPED%>Seq::PrivateMemberAccess received_data_p(received_data);
-  
+
   ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%>Seq >
      results(this, received_data, info_seq, max_samples,
              this->subqos_.presentation, a_condition,
@@ -1415,7 +1441,7 @@ void
   )
 {
   using ::OpenDDS::DCPS::ReceivedDataElement;
-    
+
   if (0 == item->dec_ref())
   {
     if (item->registered_data_ != 0)
@@ -1487,7 +1513,7 @@ DDS::ReturnCode_t
 }
 
 
-::DDS::InstanceHandle_t 
+::DDS::InstanceHandle_t
 <%TYPE%>DataReaderImpl::lookup_instance (
     const ::<%SCOPED%> & instance_data)
   ACE_THROW_SPEC ((CORBA::SystemException))
@@ -1502,7 +1528,7 @@ DDS::ReturnCode_t
   {
     return it->second;
   }
-}  
+}
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 bool
@@ -1532,6 +1558,135 @@ bool
 
   return false;
 }
+
+DDS::ReturnCode_t
+<%TYPE%>DataReaderImpl::read_generic(
+  OpenDDS::DCPS::DataReaderImpl::GenericBundle& gen,
+  DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+  DDS::InstanceStateMask instance_states)
+{
+  <%SCOPED%>Seq data;
+  DDS::ReturnCode_t rc = read_i(data, gen.info_, DDS::LENGTH_UNLIMITED,
+    sample_states, view_states, instance_states, NULL);
+  gen.samples_.reserve(data.length());
+  for (CORBA::ULong i = 0; i < data.length(); ++i) {
+    gen.samples_.push_back(&data[i]);
+  }
+  return rc;
+}
+
+DDS::InstanceHandle_t
+<%TYPE%>DataReaderImpl::lookup_instance_generic(const void* data)
+{
+  return lookup_instance(*static_cast<const <%SCOPED%>*>(data));
+}
+
+DDS::ReturnCode_t
+<%TYPE%>DataReaderImpl::read_instance_generic(void*& data,
+  DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
+  DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+  DDS::InstanceStateMask instance_states)
+{
+  <%SCOPED%>Seq dataseq;
+  DDS::SampleInfoSeq infoseq;
+  DDS::ReturnCode_t rc = read_instance_i(dataseq, infoseq,
+    DDS::LENGTH_UNLIMITED, instance, sample_states, view_states,
+    instance_states, NULL);
+  if (rc == DDS::RETCODE_NO_DATA) return rc;
+  const CORBA::ULong last = dataseq.length() - 1;
+  data = new <%SCOPED%>(dataseq[last]);
+  info = infoseq[last];
+  return rc;
+}
+
+DDS::ReturnCode_t
+<%TYPE%>DataReaderImpl::read_next_instance_generic(void*& data,
+  DDS::SampleInfo& info, DDS::InstanceHandle_t previous_instance,
+  DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+  DDS::InstanceStateMask instance_states)
+{
+  <%SCOPED%>Seq dataseq;
+  DDS::SampleInfoSeq infoseq;
+  DDS::ReturnCode_t rc = read_next_instance_i(dataseq, infoseq,
+    DDS::LENGTH_UNLIMITED, previous_instance, sample_states, view_states,
+    instance_states, NULL);
+  if (rc == DDS::RETCODE_NO_DATA) return rc;
+  const CORBA::ULong last = dataseq.length() - 1;
+  data = new <%SCOPED%>(dataseq[last]);
+  info = infoseq[last];
+  return rc;
+}
+
+DDS::InstanceHandle_t
+<%TYPE%>DataReaderImpl::store_synthetic_data(const <%SCOPED%>& sample,
+  DDS::ViewStateKind view)
+{
+  using namespace OpenDDS::DCPS;
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_,
+                   DDS::HANDLE_NIL);
+
+  DDS::TopicDescription_var descr = get_topicdescription();
+  if (MultiTopicImpl* mt = dynamic_cast<MultiTopicImpl*>(descr.in())) {
+    if (!mt->filter(sample)) {
+      return DDS::HANDLE_NIL;
+    }
+  }
+
+  get_subscriber_servant()->data_received(this);
+
+  DDS::InstanceHandle_t inst = lookup_instance(sample);
+  bool filtered;
+  SubscriptionInstance* instance = 0;
+
+  // Call store_instance_data() once or twice, depending on if we need to
+  // process the INSTANCE_REGISTRATION.  In either case, store_instance_data()
+  // owns the memory for the sample and it must come from the correct allocator.
+  for (int i = 0; i < 2; ++i) {
+    if (i == 0 && inst != DDS::HANDLE_NIL) continue;
+
+    DataSampleHeader header;
+    header.message_id_ = i ? SAMPLE_DATA : INSTANCE_REGISTRATION;
+    bool just_registered;
+    <%SCOPED%>* data;
+    ACE_NEW_MALLOC_NORETURN(data,
+      static_cast< <%SCOPED%>*>(data_allocator_->malloc(sizeof(<%SCOPED%>))),
+      <%SCOPED%>(sample));
+    store_instance_data(data, header, instance, just_registered, filtered);
+    inst = instance->instance_handle_;
+  }
+
+  if (!filtered) {
+    if (view == DDS::NOT_NEW_VIEW_STATE) {
+      instance->instance_state_.accessed();
+    }
+    notify_read_conditions();
+  }
+  return inst;
+}
+
+void
+<%TYPE%>DataReaderImpl::set_instance_state(DDS::InstanceHandle_t instance,
+  DDS::InstanceStateKind state)
+{
+  using namespace OpenDDS::DCPS;
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+
+  SubscriptionInstance* si = get_handle_instance(instance);
+  if (si && state != DDS::ALIVE_INSTANCE_STATE) {
+    DataSampleHeader header;
+    header.message_id_ = (state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
+      ? DISPOSE_INSTANCE : UNREGISTER_INSTANCE;
+    bool just_registered, filtered;
+    <%SCOPED%>* data;
+    ACE_NEW_MALLOC_NORETURN(data,
+      static_cast< <%SCOPED%>*>(data_allocator_->malloc(sizeof(<%SCOPED%>))),
+      <%SCOPED%>);
+    get_key_value(*data, instance);
+    store_instance_data(data, header, si, just_registered, filtered);
+    notify_read_conditions();
+  }
+}
+
 #endif
 
 void
@@ -1576,7 +1731,7 @@ void
                                         OpenDDS::DCPS::SubscriptionInstance*& instance)
 {
   //!!! caller should already have the sample_lock_
-    
+
   ::<%SCOPED%> data;
 
   ::OpenDDS::DCPS::Serializer ser(
@@ -1590,7 +1745,7 @@ void
   if (it != instance_map_.end()) {
     handle = it->second;
   }
-  
+
   if (handle == ::DDS::HANDLE_NIL) {
     instance = 0;
   }
@@ -1631,14 +1786,14 @@ void
   if (it == instance_map_.end())
   {
     // first find the instance mapin the participant instance map.
-    // if the instance map for the type is not refistered, then 
+    // if the instance map for the type is not refistered, then
     // create the instance map.
-    // if the instance map for the type exists, then find the 
+    // if the instance map for the type exists, then find the
     // handle of the instance. If the instance is not registered
-    // 
+    //
     InstanceMap* inst = 0;
-    bool new_handle = true;  
-    if (this->is_exclusive_ownership_) { 
+    bool new_handle = true;
+    if (this->is_exclusive_ownership_) {
       if (this->owner_manager_->instance_lock_acquire () != 0) {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) ")
@@ -1647,7 +1802,7 @@ void
                     ACE_TEXT("acquire instance_lock failed. \n")));
         return;
       }
-      
+
       inst = (InstanceMap*)(
         this->owner_manager_->get_instance_map(this->topic_servant_->type_name(), this));
       if (inst != 0) {
@@ -1656,9 +1811,9 @@ void
           handle = iter->second;
           new_handle = false;
         }
-      } 
+      }
     }
-  
+
     just_registered = true;
     OpenDDS::DCPS::SubscriptionInstance* instance = 0;
     DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample( instance_data);
@@ -1688,9 +1843,9 @@ void
         this->owner_manager_->set_instance_map(
           this->topic_servant_->type_name(), reinterpret_cast <void* > (inst), this);
       }
-      
+
       if (new_handle) {
-        std::pair<InstanceMap::iterator, bool> bpair = 
+        std::pair<InstanceMap::iterator, bool> bpair =
           inst->insert(InstanceMap::value_type(*instance_data,
                                 handle));
         if (bpair.second == false)
@@ -1702,8 +1857,8 @@ void
                       ACE_TEXT("insert to participant scope ::<%SCOPED%> failed. \n")));
           return;
         }
-      }                            
-    
+      }
+
       if (this->owner_manager_->instance_lock_release () != 0) {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) ")
@@ -1713,7 +1868,7 @@ void
         return;
       }
     }
-            
+
     std::pair<InstanceMap::iterator, bool> bpair =
       instance_map_.insert(InstanceMap::value_type(*instance_data,
                                handle));
@@ -1760,11 +1915,11 @@ void
         this->qos_.resource_limits.max_samples_per_instance))
     {
 
-        // According to spec 1.2, Samples that contain no data do not 
+        // According to spec 1.2, Samples that contain no data do not
         // count towards the limits imposed by the RESOURCE_LIMITS QoS policy
         // so do not remove the oldest sample when unregister/dispose
         // message arrives.
-        
+
         if  (! is_dispose_msg  && ! is_unregister_msg
           && instance_ptr->rcvd_samples_.head_->sample_state_
           == ::DDS::NOT_READ_SAMPLE_STATE)
@@ -1787,7 +1942,7 @@ void
         if (listener != 0)
         {
           ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-          
+
           ::DDS::DataReader_var dr = get_dr_obj_ref();
           listener->on_sample_rejected(dr.in (),
                                        sample_rejected_status_);
@@ -1835,12 +1990,12 @@ void
     if (this->is_exclusive_ownership_ && is_unregister_msg) {
       this->owner_manager_->unregister_reader (this->topic_servant_->type_name(),this);
     }
-    
+
     if (! event_notify)
-    {       
+    {
        return;
     }
-    
+
     OpenDDS::DCPS::ReceivedDataElement *ptr;
     ACE_NEW_MALLOC (ptr,
                     static_cast<OpenDDS::DCPS::ReceivedDataElement *> (
@@ -1848,7 +2003,7 @@ void
                             sizeof (OpenDDS::DCPS::ReceivedDataElement))),
                     OpenDDS::DCPS::ReceivedDataElement(header,
                                                        instance_data));
-    
+
     ptr->disposed_generation_count_ =
         instance_ptr->instance_state_.disposed_generation_count();
     ptr->no_writers_generation_count_ =
@@ -1889,7 +2044,7 @@ void
 
       dec_ref_data_element(head_ptr);
     }
-   
+
     if (! ptr->coherent_change_) {
       OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant ();
 
@@ -1901,7 +2056,7 @@ void
       if (sub_listener != 0 && !this->coherent_)
       {
         ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-        
+
         sub_listener->on_data_on_readers(get_subscriber()) ;
         sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
       }
@@ -1915,7 +2070,7 @@ void
         if (listener != 0)
         {
           ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-          
+
           ::DDS::DataReader_var dr = get_dr_obj_ref();
           listener->on_data_available(dr.in ());
           set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
@@ -1946,7 +2101,7 @@ void
 
   // The data sample in this dispose message does not contain any valid data.
   // What it needs here is the key value to identify the instance to dispose.
-  // The demarshal push this "sample" to received sample list so the user 
+  // The demarshal push this "sample" to received sample list so the user
   // can be notified the dispose event.
   bool just_registered = false;
   bool filtered = false;
@@ -1961,7 +2116,7 @@ void
 
   // The data sample in this unregister message does not contain any valid data.
   // What it needs here is the key value to identify the instance to unregister.
-  // The demarshal push this "sample" to received sample list so the user 
+  // The demarshal push this "sample" to received sample list so the user
   // can be notified the unregister event.
   bool just_registered = false;
   bool filtered = false;
@@ -2102,7 +2257,7 @@ void
   }
 }
 
-void 
+void
 <%TYPE%>DataReaderImpl::delete_instance_map (void* map)
 {
   InstanceMap* instances = reinterpret_cast <InstanceMap* > (map);

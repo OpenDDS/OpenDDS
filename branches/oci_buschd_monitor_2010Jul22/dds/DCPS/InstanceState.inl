@@ -142,16 +142,16 @@ OpenDDS::DCPS::InstanceState::empty(bool value)
 
 
 ACE_INLINE
-bool 
+bool
 OpenDDS::DCPS::InstanceState::is_last (const PublicationId& pub)
 {
   return (this->writers_.size () == 1) && *(this->writers_.begin ()) == pub;
 }
 
 ACE_INLINE
-bool 
+bool
 OpenDDS::DCPS::InstanceState::no_writer () const
 {
   return this->writers_.size () == 0;
 }
-  
+

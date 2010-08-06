@@ -15,6 +15,8 @@
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/FilterEvaluator.h"
 
+#include <string>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -52,6 +54,7 @@ public:
   }
 
 private:
+  std::string filter_expression_;
   FilterEvaluator filter_eval_;
   DDS::StringSeq expression_parameters_;
   DDS::Topic_var related_topic_;

@@ -25,10 +25,10 @@ public:
 
   virtual void add(ReceivedDataElement* data_sample);
 
-  virtual void accept_coherent(PublicationId& writer, 
+  virtual void accept_coherent(PublicationId& writer,
                                RepoId& publisher);
 
-  virtual void reject_coherent(PublicationId& writer, 
+  virtual void reject_coherent(PublicationId& writer,
                                RepoId& publisher);
 
 protected:

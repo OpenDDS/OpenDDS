@@ -74,7 +74,7 @@ OpenDDS::DCPS::TransportImpl::shutdown()
 
   // Stop datalink clean task.
   this->dl_clean_task_.close(1);
-  
+
   if (!this->reactor_task_.is_nil()) {
     this->reactor_task_->stop();
   }

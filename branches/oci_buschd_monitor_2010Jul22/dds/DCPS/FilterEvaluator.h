@@ -28,7 +28,12 @@ const MetaStruct& getMetaStruct();
 
 class OpenDDS_Dcps_Export FilterEvaluator {
 public:
+
+  struct AstNodeWrapper;
+
   FilterEvaluator(const char* filter, bool allowOrderBy);
+
+  explicit FilterEvaluator(const AstNodeWrapper& yardNode);
 
   ~FilterEvaluator();
 
@@ -43,24 +48,17 @@ public:
                   getMetaStruct<T>(), params);
   }
 
-  const char* getFilterString() const
-  {
-    return filter_.c_str();
-  }
-
   class EvalNode;
 
 private:
   FilterEvaluator(const FilterEvaluator&);
   FilterEvaluator& operator=(const FilterEvaluator&);
 
-  struct AstNodeWrapper;
   EvalNode* walkAst(const AstNodeWrapper& node, EvalNode* prev);
 
   bool eval_i(const void* sample, const MetaStruct& meta,
               const DDS::StringSeq& params) const;
 
-  std::string filter_;
   EvalNode* filter_root_;
   std::vector<std::string> order_bys_;
 };
@@ -109,9 +107,28 @@ struct OpenDDS_Dcps_Export Value {
 class OpenDDS_Dcps_Export MetaStruct {
 public:
   virtual ~MetaStruct();
+
   virtual Value getValue(const void* stru, const char* fieldSpec) const = 0;
+
   virtual ComparatorBase::Ptr create_qc_comparator(const char* fieldSpec,
     ComparatorBase::Ptr next) const = 0;
+
+  virtual const char** getFieldNames() const = 0;
+
+  virtual size_t numDcpsKeys() const = 0;
+
+  virtual bool compare(const void* lhs, const void* rhs,
+                       const char* fieldSpec) const = 0;
+
+  virtual void assign(void* lhs, const char* lhsFieldSpec,
+                      const void* rhs, const char* rhsFieldSpec,
+                      const MetaStruct& rhsMeta) const = 0;
+
+  virtual const void* getRawField(const void* stru,
+                                  const char* fieldSpec) const = 0;
+
+  virtual void* allocate() const = 0;
+  virtual void deallocate(void* stru) const = 0;
 };
 
 /// Each user-defined struct type will have an instantiation of this template

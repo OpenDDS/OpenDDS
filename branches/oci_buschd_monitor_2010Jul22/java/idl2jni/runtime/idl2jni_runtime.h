@@ -18,11 +18,6 @@
 #include <vector>
 #include <string>
 
-#define IDL2JNI_STRINGVAR typedef TAO::String_var<CORBA::Char> String_var;
-#define IDL2JNI_STRMAN TAO::String_Manager
-#define IDL2JNI_STRELM TAO::details::charstr_sequence_element
-#define IDL2JNI_STRELM_CONST TAO::details::charstr_const_sequence_element
-
 namespace TAO {
 
 template<typename charT> class String_Manager_T;
@@ -32,20 +27,18 @@ typedef String_Manager_T<CORBA::Char> String_Manager;
 template <typename charT> class String_var;
 
 namespace details {
-template<typename details> class string_sequence_element;
-template<typename details> class string_const_sequence_element;
+  template<typename details> class string_sequence_element;
+  template<typename details> class string_const_sequence_element;
 
-template<typename charT, bool dummy> struct string_traits;
+  template<typename charT, bool dummy> struct string_traits;
 
-typedef string_traits<CORBA::Char, true> char_string_traits;
-typedef string_sequence_element<char_string_traits>
-charstr_sequence_element;
-typedef IDL2JNI_CONST_SEQ_ELEM charstr_const_sequence_element;
+  typedef string_traits<CORBA::Char, true> char_string_traits;
+  typedef string_sequence_element<char_string_traits> charstr_sequence_element;
+  typedef IDL2JNI_CONST_SEQ_ELEM charstr_const_sequence_element;
 
-template<typename obj_ref_traits>
-class object_reference_sequence_element;
-template<typename obj_ref_traits>
-class object_reference_const_sequence_element;
+  template<typename obj_ref_traits> class object_reference_sequence_element;
+  template<typename obj_ref_traits>
+    class object_reference_const_sequence_element;
 }
 
 } // namespace TAO
@@ -55,15 +48,15 @@ namespace CORBA {
 class SystemException;
 class Object;
 typedef Object *Object_ptr;
-IDL2JNI_STRINGVAR
+typedef TAO::String_var<CORBA::Char> String_var;
 
 } // namespace CORBA
 
 idl2jni_runtime_Export
-void copyToCxx(JNIEnv *jni, IDL2JNI_STRMAN &target, jobject source);
+void copyToCxx(JNIEnv *jni, TAO::String_Manager &target, jobject source);
 
 idl2jni_runtime_Export
-void copyToJava(JNIEnv *jni, jobject &target, const IDL2JNI_STRMAN &source,
+void copyToJava(JNIEnv *jni, jobject &target, const TAO::String_Manager &source,
                 bool createNewObject = false);
 
 idl2jni_runtime_Export
@@ -74,11 +67,13 @@ void copyToJava(JNIEnv *jni, jobject &target, const char *source,
                 bool createNewObject = false);
 
 idl2jni_runtime_Export
-void copyToCxx(JNIEnv *jni, IDL2JNI_STRELM target, jobject source);
+void copyToCxx(JNIEnv *jni, TAO::details::charstr_sequence_element target,
+               jobject source);
 
 idl2jni_runtime_Export
 void copyToJava(JNIEnv *jni, jobject &target,
-                const IDL2JNI_STRELM_CONST &source, bool createNewObject = false);
+                const TAO::details::charstr_const_sequence_element &source,
+                bool createNewObject = false);
 
 template <typename Traits>
 void copyToCxx(JNIEnv *jni,
@@ -92,8 +87,8 @@ void copyToCxx(JNIEnv *jni,
 
 template <typename Traits>
 void copyToJava(JNIEnv *jni, jobject &target,
-                const TAO::details::object_reference_const_sequence_element<Traits> &source,
-                bool createNewObject = false)
+  const TAO::details::object_reference_const_sequence_element<Traits> &source,
+  bool createNewObject = false)
 {
   typename Traits::object_type_var var = Traits::duplicate(source);
   copyToJava(jni, target, var);

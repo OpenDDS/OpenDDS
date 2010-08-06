@@ -37,7 +37,7 @@ sub create_process {
     # try and substitute the coverage dir for the local dir
     if($cov_executable !~ /$local_dir/)
     {
-      # since it didn't match the executable must be 
+      # since it didn't match the executable must be
       # a relative path so add the cwd
       $cov_executable = getcwd() . '/' . $executable;
     }
@@ -56,7 +56,7 @@ sub create_process {
 
 sub is_process_special {
   my $executable = shift;
-  
+
   # skip all this if we already have a special process
   # NOTE: may want to move this and log a message if we are trying to start 2
   if(!PerlDDS::is_special_process_created())

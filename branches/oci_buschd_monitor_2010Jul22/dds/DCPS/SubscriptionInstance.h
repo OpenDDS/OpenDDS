@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_SUBSCRIPTION_INSTANCE_H
-#define TAO_DDS_DCPS_SUBSCRIPTION_INSTANCE_H
+#ifndef OPENDDS_DCPS_SUBSCRIPTION_INSTANCE_H
+#define OPENDDS_DCPS_SUBSCRIPTION_INSTANCE_H
 
 #include "ace/OS_Memory.h"
 
@@ -100,4 +100,4 @@ public:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* TAO_DDS_DCPS_SUBSCRIPTION_INSTANCE_H */
+#endif /* OPENDDS_DCPS_SUBSCRIPTION_INSTANCE_H */

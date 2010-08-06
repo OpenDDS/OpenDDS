@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
-#define TAO_DDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
+#ifndef OPENDDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
+#define OPENDDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
 
 #include "EntityImpl.h"
 #include "Definitions.h"
@@ -175,7 +175,7 @@ public:
 
   virtual DDS::MultiTopic_ptr create_multitopic(
     const char * name,
-    const char * type_name, 
+    const char * type_name,
     const char * subscription_expression,
     const DDS::StringSeq & expression_parameters)
   ACE_THROW_SPEC((CORBA::SystemException));
@@ -330,8 +330,8 @@ public:
   /** Accessor for ownership manager.
   */
   OwnershipManager* ownership_manager ();
-  
-  /** 
+
+  /**
   * Called upon receiving new BIT publication data to
   * update the ownership strength of a publication.
   */
@@ -453,14 +453,14 @@ private:
   DDS::SubscriptionBuiltinTopicDataDataReader_var bit_sub_dr_;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
   Monitor* monitor_;
-  
+
   OwnershipManager owner_man_;
-  
-  /// Publisher ID generator. 
+
+  /// Publisher ID generator.
   RepoIdGenerator  pub_id_generator_;
 };
 
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* TAO_DDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H  */
+#endif /* OPENDDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H  */

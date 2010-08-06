@@ -69,7 +69,7 @@ OpenDDS::DCPS::TransportControlElement::msg() const
 }
 
 ACE_INLINE
-bool 
+bool
 OpenDDS::DCPS::TransportControlElement::owned_by_transport ()
 {
   return true;

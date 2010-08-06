@@ -17,7 +17,7 @@ my $debug = '0';
 foreach my $i (@ARGV) {
     if ($i eq '-debug') {
         $debug = '10';
-    } 
+    }
 }
 
 my $transport = pop;

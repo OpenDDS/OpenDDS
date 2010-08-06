@@ -99,20 +99,20 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
   ACE_HANDLE handle = this->socket_.get_handle();
   char ttl = this->config_->ttl_;
 
-  if (ACE_OS::setsockopt(handle,	
-                         IPPROTO_IP, 
-						 IP_MULTICAST_TTL, 
-						 &ttl, 
-						 sizeof(ttl)) < 0) {
+  if (ACE_OS::setsockopt(handle,
+                         IPPROTO_IP,
+                         IP_MULTICAST_TTL,
+                         &ttl,
+                         sizeof(ttl)) < 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastDataLink::join: ")
                       ACE_TEXT("ACE_OS::setsockopt TTL failed.\n")),
-                     false);	
-	}
+                     false);
+        }
 
   int rcv_buffer_size = ACE_Utils::truncate_cast<int>(this->config_->rcv_buffer_size_);
-  if (rcv_buffer_size != 0 
+  if (rcv_buffer_size != 0
       && ACE_OS::setsockopt(handle, SOL_SOCKET,
                             SO_RCVBUF,
                             (char *) &rcv_buffer_size,
@@ -121,15 +121,15 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastDataLink::join: ")
                       ACE_TEXT("ACE_OS::setsockopt RCVBUF failed.\n")),
-                     false);	
-	}
+                     false);
+        }
 
   if (start(this->send_strategy_.in(), this->recv_strategy_.in()) != 0) {
     this->socket_.close();
     ACE_ERROR_RETURN((LM_ERROR,
-		      ACE_TEXT("(%P|%t) ERROR: ")
-		      ACE_TEXT("MulticastDataLink::join: ")
-		      ACE_TEXT("DataLink::start failed!\n")),
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("MulticastDataLink::join: ")
+                      ACE_TEXT("DataLink::start failed!\n")),
                      false);
   }
 
@@ -190,7 +190,7 @@ bool
 MulticastDataLink::check_header(const TransportHeader& header)
 {
   // Skip messages we just sent.
-  
+
   if (header.source_ == this->local_peer() && ! this->is_loopback_) {
     return false;
   }
@@ -204,8 +204,8 @@ MulticastDataLink::check_header(const TransportHeader& header)
   if (it == this->sessions_.end()) return false;
   if (it->second->acked()) {
     return it->second->check_header(header);
-  } 
-  
+  }
+
   return true;
 }
 
@@ -241,7 +241,7 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
         it->second->control_received(sample.header_.submessage_id_,
                                     sample.sample_);
         // reset read pointer
-        sample.sample_->rd_ptr(ptr);      
+        sample.sample_->rd_ptr(ptr);
       }
     }
     if (this->check_fully_association_) {
@@ -276,7 +276,7 @@ MulticastDataLink::stop_i()
 }
 
 
-void 
+void
 MulticastDataLink::set_check_fully_association ()
 {
   this->check_fully_association_ = true;

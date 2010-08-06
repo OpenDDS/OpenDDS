@@ -1,3 +1,28 @@
+Fri Aug 6 16:25:59 UTC 2010  Don Busch <buschd@ociweb.com>
+
+        * DDS_TAO_all.mwc:
+
+        * dds/DCPS/InfoRepoUtils.h:
+
+        * examples/DCPS/DistributedContent/run_test.pl:
+
+        * tests/DCPS/Messenger/run_corbaloc_test.pl:
+
+        * tools/monitor/RepoDialog.ui:
+
+        * tools/dissector/packet.cpp:
+
+        Resolved code inspection comments from Adam Mitz:
+        Added DDS_TAO_all.mwc build file instead of modifying DDS_TAO.mwc
+        Added Doxygen comment to InfoRepoUtils.h
+        Changed 127.0.0.1 to localhost in test script
+        Changed "IOR:" to "IOR/Endpoint:" in Monitor GUI
+        Changed "class" to "struct" in packet.cpp
+
+Fri Aug 6 12:05:59 UTC 2010  Don Busch <buschd@ociweb.com>
+
+        * Merged from r3492 through r3556
+
 Sat Jul 24 20:45:59 UTC 2010  Don Busch <buschd@ociweb.com>
 
         * DDS_TAO.mwc:

@@ -23,12 +23,26 @@
 namespace OpenDDS {
 namespace DCPS {
 
-namespace FilterExpressionGrammar {
+namespace GrammarUtils {
   using namespace yard;
   using namespace text_grammar;
 
   struct WS : CharSetParser<WhiteSpaceCharSet> {};
   template<typename T> struct Tok : Seq<T, Star<WS> > {};
+  template<typename T> struct Keyword : Tok<Seq<T, NotAlphaNum> > {};
+  template<typename T> struct ST : Tok<Store<T> > {}; // "Store-Tokenize"
+
+  struct LPAREN : Tok<Char<'('> > {};
+  struct RPAREN : Tok<Char<')'> > {};
+
+  template<typename R, typename D>
+  struct DelimitedList : Seq<R, Star<Seq<D, R> > > {};
+}
+
+namespace FilterExpressionGrammar {
+  using namespace yard;
+  using namespace text_grammar;
+  using namespace GrammarUtils;
 
   struct OptPlusMinus : Opt<Or<Char<'+'>, Char<'-'> > > {};
   struct IntValDec : Seq<OptPlusMinus, Plus<Digit>,
@@ -55,7 +69,6 @@ namespace FilterExpressionGrammar {
   struct Param : Tok<Or<Store<IntVal>, Store<CharVal>, Store<FloatVal>,
     Store<StrVal>, Store<ParamVal> > > {}; // EnumVal is parsed as StrVal
 
-  template<typename T> struct Keyword : Tok<Seq<T, NotAlphaNum> > {};
   struct AND : Keyword<CharSeqIgnoreCase<'a', 'n', 'd'> > {};
   struct OR : Keyword<CharSeqIgnoreCase<'o', 'r'> > {};
   struct NOT : Keyword<CharSeqIgnoreCase<'n', 'o', 't'> > {};
@@ -71,14 +84,9 @@ namespace FilterExpressionGrammar {
   struct OP_LIKE : Keyword<CharSeqIgnoreCase<'l', 'i', 'k', 'e'> > {};
   struct RelOp : Or<Store<OP_EQ>, Store<OP_LT>, Store<OP_GT>, Store<OP_LTEQ>,
     Store<OP_GTEQ>, Store<OP_NEQ>, Store<OP_LIKE> > {};
-  struct LPAREN : Tok<Char<'('> > {};
-  struct RPAREN : Tok<Char<')'> > {};
 
-  template<typename R, typename D>
-  struct DelimitedList : Seq<R, Star<Seq<D, R> > > {};
   struct FieldName : DelimitedList<Seq<Letter, Star<IdentNextChar> >,
     Char<'.'> > {};
-  template<typename T> struct ST : Tok<Store<T> > {}; // "Store-Tokenize"
 
   struct BetweenPred : Seq<ST<FieldName>, Opt<Store<NOT> >, BETWEEN,
     Param, AND, Param> {};

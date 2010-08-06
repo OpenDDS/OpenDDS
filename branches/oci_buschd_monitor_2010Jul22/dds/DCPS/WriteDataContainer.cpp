@@ -71,7 +71,7 @@ WriteDataContainer::WriteDataContainer(
   DataWriterImpl* writer,
   CORBA::Long    depth,
   bool           should_block ,
-  ACE_Time_Value max_blocking_time,
+  ::DDS::Duration_t max_blocking_time,
   size_t         n_chunks,
   DDS::DomainId_t domain_id,
   char const * topic_name,
@@ -486,6 +486,11 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
 {
   DBG_ENTRY_LVL("WriteDataContainer","data_delivered",6);
 
+  if (DCPS_debug_level >= 2) {
+    ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t)WriteDataContainer::data_delivered")
+                          ACE_TEXT(" %X \n"), sample));
+  }
+  
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
             this->lock_);
@@ -502,10 +507,11 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
   // by transport.  We are now been notified by transport, so we can
   // now release the element.
   //
-  if (DataSampleListElement* stale =
-      released_data_.dequeue_next_send_sample(sample)) {
+  PublicationInstance* instance = sample->handle_;
+  DataSampleListElement* stale =
+    released_data_.dequeue_next_send_sample(sample);
+  if (stale) {
     release_buffer(stale);
-
   } else {
     //
     // Search the sending_data_ list first.
@@ -520,46 +526,23 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
                  ACE_TEXT("WriteDataContainer::data_delivered, ")
                  ACE_TEXT("The delivered sample is not in sending_data_ and ")
                  ACE_TEXT("released_data_ list.\n")));
+      return;
     }
-
-    //remove fix this one
-    PublicationInstance* instance = sample->handle_;
-
+  
     if (instance->waiting_list_.head_ != 0) {
       // Remove the delivered sample from the instance sample list
       // and release.
-      DataSampleListElement* stale =
-        instance->samples_.dequeue_next_instance_sample(sample);
+      stale = instance->samples_.dequeue_next_instance_sample(sample);
       if (stale == 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: ")
                    ACE_TEXT("WriteDataContainer::data_delivered, ")
                    ACE_TEXT("dequeue_next_instance_sample from instance ")
                    ACE_TEXT("list failed\n")));
+        return;
       }
 
       release_buffer(stale);
-
-      // Mark the first waiting sample will be next to add to instance
-      // list.
-      instance->waiting_list_.head_->space_available_ = true;
-      // Remove this waiting sample from waiting list.
-      stale = 0;
-
-      if (instance->waiting_list_.dequeue_head_next_instance_sample(stale) == false) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: ")
-                   ACE_TEXT("WriteDataContainer::data_delivered, ")
-                   ACE_TEXT("dequeue_head_next_instance_sample from waiting ")
-                   ACE_TEXT("list failed\n")));
-      }
-
-      if (waiting_on_release_) {
-        waiting_on_release_ = false;
-        // Broadcast the blocked enqueue threads.
-        condition_.broadcast();
-      }
-
     } else {
       if (DCPS_debug_level > 9) {
         RepoIdConverter converter(publication_id_);
@@ -575,7 +558,9 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
       sent_data_.enqueue_tail_next_send_sample(sample);
     }
   }
-
+  
+  this->wakeup_blocking_writers (stale, instance);
+    
   // Signal if there is no pending data.
   if (!pending_data())
     empty_condition_.broadcast();
@@ -586,6 +571,12 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
                                  bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("WriteDataContainer","data_dropped",6);
+  
+  if (DCPS_debug_level >= 2) {
+    ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t)WriteDataContainer::data_dropped")
+                          ACE_TEXT(" sample %X dropped_by_transport %d\n"), 
+                          sample, dropped_by_transport));
+  }
 
   // If the transport initiates the data dropping, we need do same thing
   // as data_delivered. e.g. remove the sample from the internal list
@@ -598,10 +589,10 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
 
   //The data_dropped could be called from the thread initiating sample remove
   //which already hold the lock. In this case, it's not necessary to acquire
-  //lock here. It also could be called from the transport thread in a delayed  
+  //lock here. It also could be called from the transport thread in a delayed
   //notification, it's necessary to acquire lock here to protect the internal
   //structures in this class.
-  
+
   ACE_GUARD (ACE_Recursive_Thread_Mutex,
     guard,
     this->lock_);
@@ -613,7 +604,8 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
   // now release the sample from released_data_ list and
   // keep the sample from the sending_data_ list still in
   // sample list since we will send it.
-
+  DataSampleListElement* stale = 0;
+  
   if (sending_data_.dequeue_next_send_sample(sample)) {
     // else: The data_dropped is called as a result of remove_sample()
     // called from reenqueue_all() which supports the TRANSIENT_LOCAL
@@ -621,23 +613,27 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
     // transport and will be moved to the unsent list for resend.
     unsent_data_.enqueue_tail_next_send_sample(sample);
 
-  } else if (DataSampleListElement* stale =
-             released_data_.dequeue_next_send_sample(sample)) {
-    // The remove_sample is requested when sample list size
-    // reaches limit. In this case, the oldest sample is
-    // moved to released_data_ already.
-    release_buffer(stale);
-
   } else {
-    // The sample is neither in not in the
-    // released_data_ list.
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("WriteDataContainer::data_dropped, ")
-               ACE_TEXT("The dropped sample is not in released_data_ ")
-               ACE_TEXT("list.\n")));
+    stale = released_data_.dequeue_next_send_sample(sample);
+    if (stale) {
+      // The remove_sample is requested when sample list size
+      // reaches limit. In this case, the oldest sample is
+      // moved to released_data_ already.
+      release_buffer(stale);
+
+    } else {
+      // The sample is neither in not in the
+      // released_data_ list.
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("WriteDataContainer::data_dropped, ")
+                 ACE_TEXT("The dropped sample is not in released_data_ ")
+                 ACE_TEXT("list.\n")));
+    }
   }
 
+  this->wakeup_blocking_writers (stale, sample->handle_);
+  
   if (!pending_data())
     empty_condition_.broadcast();
 }
@@ -820,13 +816,18 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
 
       // wait for all "released" samples to be delivered
       // Timeout value from Qos.RELIABILITY.max_blocking_time
-      ACE_Time_Value abs_timeout
-      = ACE_OS::gettimeofday() + max_blocking_time_;
+      ACE_Time_Value abs_timeout = duration_to_absolute_time_value (max_blocking_time_);
       bool waited = false;
       while (!shutdown_ && ACE_OS::gettimeofday() < abs_timeout) {
-	waited = true;
+        waited = true;
         waiting_on_release_ = true; // reduces broadcast to only when waiting
-
+        
+        if (DCPS_debug_level >= 2) {
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)WriteDataContainer::obtain_buffer, ")
+                                ACE_TEXT ("wait for condition, oldest_released %d waiting %X\n"),
+                                oldest_released, instance->waiting_list_.head_));
+        }
+        
         // lock is released while waiting and aquired before returning
         // from wait.
         int const wait_result = condition_.wait(&abs_timeout);
@@ -850,19 +851,19 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
       }
       if (!waited) {
         // max-blocking_time_ was so short we did not even try to wait
-	ret = DDS::RETCODE_TIMEOUT;
+        ret = DDS::RETCODE_TIMEOUT;
       }
       if (ret != DDS::RETCODE_OK) {
-	// Remove from the waiting list if wait() timed out or return
-	// other errors.
-	if (instance->waiting_list_.dequeue_next_instance_sample(element) == false) {
-	  ACE_ERROR_RETURN((LM_ERROR,
-			    ACE_TEXT("(%P|%t) ERROR: ")
-			    ACE_TEXT("WriteDataContainer::obtain_buffer, ")
-			    ACE_TEXT("dequeue_next_instance_sample from ")
-			    ACE_TEXT("waiting list failed\n")),
-			   DDS::RETCODE_ERROR);
-	}
+        // Remove from the waiting list if wait() timed out or return
+        // other errors.
+        if (instance->waiting_list_.dequeue_next_instance_sample(element) == false) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) ERROR: ")
+                            ACE_TEXT("WriteDataContainer::obtain_buffer, ")
+                            ACE_TEXT("dequeue_next_instance_sample from ")
+                            ACE_TEXT("waiting list failed\n")),
+                           DDS::RETCODE_ERROR);
+        }
       }
     } // wait_needed
 
@@ -911,7 +912,7 @@ WriteDataContainer::unregister_all()
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
               guard,
               this->lock_);
-              
+
     // Tell transport remove all control messages currently
     // transport is processing.
     (void) this->writer_->remove_all_msgs();
@@ -1115,5 +1116,41 @@ WriteDataContainer::get_instance_handles(InstanceHandleVec& instance_handles)
   }
 }
 
+void
+WriteDataContainer::wakeup_blocking_writers (DataSampleListElement* stale,
+                                            PublicationInstance* instance)
+{
+  if (stale && instance->waiting_list_.head_ != 0) {
+      // Mark the first waiting sample will be next to add to instance
+      // list.
+      instance->waiting_list_.head_->space_available_ = true;
+      // Remove this waiting sample from waiting list.
+      DataSampleListElement* waiting = 0;
+
+      if (instance->waiting_list_.dequeue_head_next_instance_sample(waiting) == false) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("WriteDataContainer::data_delivered, ")
+                   ACE_TEXT("dequeue_head_next_instance_sample from waiting ")
+                   ACE_TEXT("list failed\n")));
+        return;
+      }
+
+
+      if (waiting_on_release_) {
+        waiting_on_release_ = false;
+        // Broadcast the blocked enqueue threads.
+        if (DCPS_debug_level >= 2) {
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t)WriteDataContainer::wakeup_blocking_writers ")
+                                ACE_TEXT("removed sample %X and broadcast to wake up ")
+                                ACE_TEXT("blocking threads for available spot \n"), 
+                                stale));
+        }
+      
+        condition_.broadcast();
+      }
+  }
+}
+  
 } // namespace OpenDDS
 } // namespace DCPS

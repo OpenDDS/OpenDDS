@@ -118,7 +118,7 @@ private:
   typedef ACE_SYNCH_MUTEX         LockType;
   typedef ACE_Guard<LockType>     GuardType;
   typedef ACE_Condition<LockType> ConditionType;
-  
+
   typedef ACE_Reverse_Lock<ReservationLockType> Reverse_Lock_t;
   Reverse_Lock_t reverse_reservation_lock_;
 

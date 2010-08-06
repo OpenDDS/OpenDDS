@@ -94,8 +94,7 @@ Writer::svc ()
       }
     }
   } catch (CORBA::Exception& e) {
-    cerr << "Exception caught in svc:" << endl
-	 << e << endl;
+    cerr << "Exception caught in svc:" << endl << e << endl;
   }
 
   while (1)
@@ -121,13 +120,13 @@ void Writer::set_message (Messenger::Message& message, const int& count)
   {
     case 9:
       {
-        size_t len = ACE_OS::strlen (wcharseq); 
-        message.bounded_wchar_seq = BoundedWCharSeq (len + 1, wcharseq); 
+        size_t len = ACE_OS::strlen (wcharseq);
+        message.bounded_wchar_seq = BoundedWCharSeq (len + 1, wcharseq);
       }
     case 8:
       {
-        size_t len = ACE_OS::strlen (charseq); 
-        message.bounded_char_seq = BoundedCharSeq (len + 1, charseq); 
+        size_t len = ACE_OS::strlen (charseq);
+        message.bounded_char_seq = BoundedCharSeq (len + 1, charseq);
       }
     case 7:
       {
@@ -141,13 +140,13 @@ void Writer::set_message (Messenger::Message& message, const int& count)
       }
     case 5:
       {
-        size_t len = ACE_OS::strlen (wcharseq); 
-        message.wchar_seq.replace (len + 1, len + 1, wcharseq); 
+        size_t len = ACE_OS::strlen (wcharseq);
+        message.wchar_seq.replace (len + 1, len + 1, wcharseq);
       }
     case 4:
       {
-        size_t len = ACE_OS::strlen (charseq); 
-        message.char_seq.replace (len + 1, len + 1, charseq); 
+        size_t len = ACE_OS::strlen (charseq);
+        message.char_seq.replace (len + 1, len + 1, charseq);
       }
     case 3:
       {
@@ -167,7 +166,7 @@ void Writer::set_message (Messenger::Message& message, const int& count)
       }
     break;
     default:
-      ACE_ERROR ((LM_ERROR, 
+      ACE_ERROR ((LM_ERROR,
                   "(%P|%t)ERROR: unknown message\n"));
     break;
   }

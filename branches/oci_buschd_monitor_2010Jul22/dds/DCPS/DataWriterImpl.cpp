@@ -169,7 +169,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
-  
+
   //Note: OK to _duplicate(nil).
   listener_ = DDS::DataWriterListener::_duplicate(a_listener);
 
@@ -445,7 +445,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   ReaderIdSeq rds;
   CORBA::ULong rds_len = 0;
   DDS::InstanceHandleSeq handles;
-  
+
   {
     // Ensure the same acquisition order as in wait_for_acknowledgments().
     ACE_GUARD(ACE_SYNCH_MUTEX, wfaGuard, this->wfaLock_);
@@ -556,7 +556,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
       }
     }
   }
-  
+
   if (rds_len > 0) {
     this->publisher_servant_->remove_associations(rds,
                                                   this->publication_id_);
@@ -593,7 +593,7 @@ void DataWriterImpl::remove_all_associations()
     for (IdSet::iterator it = pending_readers_.begin(); it != itEnd; ++it) {
       readers[i ++] = *it;
     }
-    
+
     if (num_pending_readers > 0) {
       ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::remove_all_associations() - ")
@@ -1147,13 +1147,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
     (qos_.history.kind == DDS::KEEP_ALL_HISTORY_QOS
      && qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
 
-  ACE_Time_Value max_blocking_time = ACE_Time_Value::zero;
-
-  if (should_block) {
-    max_blocking_time =
-      duration_to_time_value(qos_.reliability.max_blocking_time);
-  }
-
   CORBA::Long const depth =
     get_instance_sample_list_depth(
       qos_.history.kind,
@@ -1179,7 +1172,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   data_container_ = new WriteDataContainer(this,
                                            depth,
                                            should_block,
-                                           max_blocking_time,
+                                           qos_.reliability.max_blocking_time,
                                            n_chunks_,
                                            domain_id_,
                                            get_topic_name(),
@@ -1480,7 +1473,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   if (this->coherent_) {
     ++this->coherent_samples_;
   }
-  
+
   return DDS::RETCODE_OK;
 }
 
@@ -1664,8 +1657,8 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
     ? !TAO_ENCAP_BYTE_ORDER
   : TAO_ENCAP_BYTE_ORDER;
   header_data.coherent_change_ = this->coherent_;
-  header_data.group_coherent_ 
-    = this->publisher_servant_->qos_.presentation.access_scope 
+  header_data.group_coherent_
+    = this->publisher_servant_->qos_.presentation.access_scope
       == ::DDS::GROUP_PRESENTATION_QOS;
   header_data.message_length_ = data->total_length();
   ++this->sequence_number_;
@@ -1803,7 +1796,7 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
             get_lock());
-  
+
   CoherentChangeControl end_msg;
   end_msg.coherent_samples_.num_samples_ = this->coherent_samples_;
   end_msg.coherent_samples_.last_sample_ = this->sequence_number_;
@@ -1813,14 +1806,14 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
     end_msg.publisher_id_ = this->publisher_servant_->publisher_id_;
     end_msg.group_coherent_samples_ = group_samples;
   }
-  
+
   ACE_Message_Block* data = 0;
   size_t max_marshaled_size = end_msg.max_marshaled_size();
-  
+
   ACE_NEW(data, ACE_Message_Block(max_marshaled_size));
 
   Serializer serializer(
-      data, 
+      data,
       this->publisher_servant_->swap_bytes());
 
   serializer << end_msg;

@@ -2,8 +2,8 @@
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl tao_java
 // ------------------------------
-#ifndef TAO_JAVA_EXPORT_H
-#define TAO_JAVA_EXPORT_H
+#ifndef OPENDDS_TAO_JAVA_EXPORT_H
+#define OPENDDS_TAO_JAVA_EXPORT_H
 
 #include "ace/config-all.h"
 
@@ -51,6 +51,6 @@
 #  include "ace/Trace.h"
 #endif /* (TAO_JAVA_NTRACE == 1) */
 
-#endif /* TAO_JAVA_EXPORT_H */
+#endif /* OPENDDS_TAO_JAVA_EXPORT_H */
 
 // End of auto generated file.

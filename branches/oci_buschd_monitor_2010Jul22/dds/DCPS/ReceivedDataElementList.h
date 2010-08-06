@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_RECEIVEDDATAELEMENTLIST_H
-#define TAO_DDS_DCPS_RECEIVEDDATAELEMENTLIST_H
+#ifndef OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H
+#define OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 
 #include "ace/Atomic_Op_T.h"
 #include "ace/Thread_Mutex.h"
@@ -48,7 +48,7 @@ public:
       next_data_sample_(0),
       ref_count_(1)
   {
-  
+
     this->destination_timestamp_ = time_value_to_time(ACE_OS::gettimeofday());
 
     this->source_timestamp_.sec = header.source_timestamp_sec_;
@@ -84,10 +84,10 @@ public:
 
   /// Sample belongs to an active coherent change set
   bool coherent_change_;
-  
+
   /// Sample belongs to a group coherent changes.
   bool group_coherent_;
-  
+
   /// Publisher id represent group identifier.
   RepoId publisher_id_;
 
@@ -173,4 +173,4 @@ private:
 # include "ReceivedDataElementList.inl"
 #endif  /* __ACE_INLINE__ */
 
-#endif /* TAO_DDS_DCPS_RECEIVEDDATAELEMENTLIST_H  */
+#endif /* OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H  */

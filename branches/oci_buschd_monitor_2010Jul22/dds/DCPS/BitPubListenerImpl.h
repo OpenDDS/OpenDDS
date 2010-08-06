@@ -66,10 +66,10 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status)
   ACE_THROW_SPEC((CORBA::SystemException));
-  
+
 private:
   DomainParticipantImpl* partipant_;
-  
+
 };
 
 } // namespace DCPS
