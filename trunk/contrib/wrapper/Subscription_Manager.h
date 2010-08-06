@@ -23,7 +23,7 @@
  *
  * This class plays the role of an Abstraction in the Bridge pattern.
  */
-class DDSWrapper_Export Subscription_Manager 
+class DDSWrapper_Export Subscription_Manager
 {
  public:
   /// default ctor
@@ -58,7 +58,7 @@ class DDSWrapper_Export Subscription_Manager
   DDS::DataReader_ptr lookup_datareader (const std::string & topic_name);
 
   /// returns the underlying subsriber instance
-  /// memory management of the returned publisher reference is done by the 
+  /// memory management of the returned publisher reference is done by the
   /// Subscription_Manager itself
   DDS::Subscriber_ptr subscriber () const;
 

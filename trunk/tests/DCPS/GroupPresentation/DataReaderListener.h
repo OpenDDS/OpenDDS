@@ -70,15 +70,15 @@ public:
   bool verify_result () const {
     return verify_result_;
   }
-  
+
 private:
 
   DDS::DataReader_var  reader_;
   long                 num_reads_;
   const char*          reader_id_;
-  
+
   bool  verify_result_;
-  
+
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

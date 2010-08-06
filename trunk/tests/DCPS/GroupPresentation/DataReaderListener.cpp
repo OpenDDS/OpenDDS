@@ -34,7 +34,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 throw(CORBA::SystemException)
 {
   num_reads_ ++;
-  
+
   try {
     Messenger::MessageDataReader_var message_dr =
       Messenger::MessageDataReader::_narrow(reader);
@@ -54,7 +54,7 @@ throw(CORBA::SystemException)
     if (status == DDS::RETCODE_OK) {
       if (si.valid_data) {
          if (acess_scope != ::DDS::INSTANCE_PRESENTATION_QOS) {
-           this->verify_result_ = false;        
+           this->verify_result_ = false;
          }
          else {
             std::cout << "Message: subject    = " << message.subject.in() << std::endl
@@ -74,7 +74,7 @@ throw(CORBA::SystemException)
                    ACE_TEXT("%N:%l: on_data_available()")
                    ACE_TEXT(" ERROR: unknown instance state: %d\n"),
                    si.instance_state));
-        this->verify_result_ = false; 
+        this->verify_result_ = false;
       }
 
     } else {
@@ -82,7 +82,7 @@ throw(CORBA::SystemException)
                  ACE_TEXT("%N:%l: on_data_available()")
                  ACE_TEXT(" ERROR: unexpected status: %d\n"),
                  status));
-      this->verify_result_ = false; 
+      this->verify_result_ = false;
     }
 
   } catch (const CORBA::Exception& e) {

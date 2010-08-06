@@ -61,7 +61,7 @@ module DDSPerfTest {
   };
 
 #pragma DCPS_DATA_TYPE "DDSPerfTest::AckMessage"
-       
+
   struct AckMessage {
     long seqnum;
   };

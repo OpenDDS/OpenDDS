@@ -732,7 +732,7 @@ TestMonitor::run()
         sample
       ));
     }
-    
+
     ACE_DEBUG ((LM_DEBUG, "(%P|%t) got sample %d interval %d\n", this->config_.samples(), this->config_.sample_interval ()));
     if (this->config_.sample_interval () > 0)
     {

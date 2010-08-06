@@ -38,7 +38,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
     if (message.bool_seq.length () != 5
       || message.longdouble_seq.length () != 5
-      || message.short_seq.length () != 5 
+      || message.short_seq.length () != 5
       || message.ushort_seq.length () != 5
       || message.char_seq.length () != 5
       || message.longlong_seq.length () != 5
@@ -57,9 +57,9 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     }
 
     if (message.count != message.short_seq[4]
-      || message.count != message.long_seq[4] 
+      || message.count != message.long_seq[4]
       || message.count != message.octet_seq[4]
-      || message.count != message.outside_long_seq[4] 
+      || message.count != message.outside_long_seq[4]
       || ACE_OS::strcmp (message.string_seq[4], "test"))
     {
       cerr << "ERROR: received incorrect result!" << endl;

@@ -21,7 +21,7 @@
 #include "FooTypeTypeSupportImpl.h"
 
 namespace
-{  
+{
   ACE_Atomic_Op<ACE_Thread_Mutex, OpenDDS::DCPS::TransportIdType> transportIds(0);
 } // namespace
 
@@ -56,7 +56,7 @@ ParticipantTask::svc()
       participant->create_publisher(PUBLISHER_QOS_DEFAULT,
                                     DDS::PublisherListener::_nil(),
                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-   
+
     if (CORBA::is_nil(publisher.in()))
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: svc()")
@@ -73,7 +73,7 @@ ParticipantTask::svc()
 
     OpenDDS::DCPS::PublisherImpl* publisher_i =
       dynamic_cast<OpenDDS::DCPS::PublisherImpl*>(publisher.in());
-    
+
     if (publisher_i == 0)
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: svc()")
@@ -81,12 +81,12 @@ ParticipantTask::svc()
 
     OpenDDS::DCPS::AttachStatus status =
       publisher_i->attach_transport(transport.in());
-    
+
     if (status != OpenDDS::DCPS::ATTACH_OK)
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: svc()")
                         ACE_TEXT(" attach_transport failed!\n")), 1);
-    
+
     // Register Type (FooType)
     FooTypeSupport_var ts = new FooTypeSupportImpl;
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK)
@@ -106,7 +106,7 @@ ParticipantTask::svc()
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: svc()")
                         ACE_TEXT(" create_topic failed!\n")), 1);
-      
+
     // Create DataWriter
     DDS::DataWriterQos writer_qos;
     publisher->get_default_datawriter_qos(writer_qos);
@@ -118,12 +118,12 @@ ParticipantTask::svc()
                                    writer_qos,
                                    DDS::DataWriterListener::_nil(),
                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    
+
     if (CORBA::is_nil(writer.in()))
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: svc()")
                         ACE_TEXT(" create_datawriter failed!\n")), 1);
-    
+
     FooDataWriter_var writer_i = FooDataWriter::_narrow(writer);
     if (CORBA::is_nil(writer_i))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -140,7 +140,7 @@ ParticipantTask::svc()
     DDS::Duration_t timeout =
       { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 
-    DDS::ConditionSeq conditions; 
+    DDS::ConditionSeq conditions;
     DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
     do
     {
@@ -178,7 +178,7 @@ ParticipantTask::svc()
                           ACE_TEXT(" write failed!\n")), 1);
       ++progress;
     }
-   
+
     DDS::Duration_t interval = { 30, 0};
     if( DDS::RETCODE_OK != writer->wait_for_acknowledgments( interval)) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -187,7 +187,7 @@ ParticipantTask::svc()
       ), 1);
     }
     publisher->delete_datawriter(writer);
-    
+
     // Clean-up!
     participant->delete_contained_entities();
     TheParticipantFactory->delete_participant(participant.in());
@@ -197,7 +197,7 @@ ParticipantTask::svc()
     e._tao_print_exception("caught in svc()");
     return 1;
   }
-    
+
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- PARTICIPANT FINISHED\n")));
 
   return 0;

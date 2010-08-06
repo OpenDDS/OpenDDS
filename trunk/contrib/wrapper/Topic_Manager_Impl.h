@@ -29,7 +29,7 @@ class Topic_Manager_Impl;
 
 /// this defines a reference counted pointer for a topic manager
 /// implementation
-typedef class ACE_Refcounted_Auto_Ptr <Topic_Manager_Impl, 
+typedef class ACE_Refcounted_Auto_Ptr <Topic_Manager_Impl,
                                        ACE_Null_Mutex> Topic_Manager_Ptr;
 
 /**

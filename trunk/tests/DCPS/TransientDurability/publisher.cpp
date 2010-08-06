@@ -181,7 +181,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       int const max_attempts = 50;
-      int attempts; 
+      int attempts;
       for (attempts = 1;
            attempts != max_attempts && publication_matched.value () == false;
            ++attempts)

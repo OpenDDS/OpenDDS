@@ -73,7 +73,7 @@ TestCase::test()
 
   // As there are no fully assoication establishment between pub and sub for UDP
   // transport, a delay is required for the test to receive all messages.
-  if (local_transport_type == ACE_TEXT("udp")) { 
+  if (local_transport_type == ACE_TEXT("udp")) {
     ACE_OS::sleep (2);
   }
 
@@ -129,7 +129,7 @@ TestCase::test()
                   status), -1);
     }
   }
- #endif 
+ #endif
   return 0;
 }
 

@@ -30,7 +30,7 @@ $dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = "-NOBITS";
 $app_bit_conf = "-DCPSBit 0";
 
-unlink $dcpsrepo_ior; 
+unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              "$repo_bit_conf -o $dcpsrepo_ior ");
@@ -45,7 +45,7 @@ $sub_parameters = "-ORBSvcConf multicast.conf $app_bit_conf -p $num_writers"
               . " -n $num_messages -d $data_size"
               . " -msi $num_messages -mxs $num_messages -multicast $local_address";
 #use -msi $num_messages to avoid rejected samples
-#use -mxs $num_messages to avoid using the heap 
+#use -mxs $num_messages to avoid using the heap
 #   (could be less than $num_messages but I am not sure of the limit).
 
 $Sub1 = PerlDDS::create_process ("subscriber", $sub_parameters );
@@ -63,8 +63,8 @@ $sub_addr_port++;
 
 $pub_parameters = "-ORBSvcConf multicast.conf $app_bit_conf -p 1"
 #              . " -DCPSDebugLevel 6"
-              . " -r $num_readers" 
-              . " -n $num_messages -d $data_size" 
+              . " -r $num_readers"
+              . " -n $num_messages -d $data_size"
               . " -msi 1000 -mxs 1000 -h $write_throttle -multicast $local_address";
 
 $Pub1 = PerlDDS::create_process ("publisher", $pub_parameters . " -i $pub_writer_id ");

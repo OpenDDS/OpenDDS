@@ -31,16 +31,16 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     time_t sec = tv.sec ();
     suseconds_t usec = tv.usec ();
     unsigned long msec = tv.msec ();
-    
-    //std::cout << "infinite sec and nsec convert to time value: sec=" 
+
+    //std::cout << "infinite sec and nsec convert to time value: sec="
     //          << sec << " usec=" << usec << " msec=" << msec << std::endl;
-    
-    TEST_CHECK (tv.sec() == ACE_Time_Value::max_time.sec() 
+
+    TEST_CHECK (tv.sec() == ACE_Time_Value::max_time.sec()
              || tv.sec() == duration.sec  + duration.nanosec/1000/ACE_ONE_SECOND_IN_USECS);
-    TEST_CHECK (tv.usec() == ACE_Time_Value::max_time.usec() 
+    TEST_CHECK (tv.usec() == ACE_Time_Value::max_time.usec()
              || tv.usec() == duration.nanosec/1000%ACE_ONE_SECOND_IN_USECS);
   }
-  
+
   {
     ACE_Time_Value now = ACE_OS::gettimeofday ();
     ACE_Time_Value tv = duration_to_absolute_time_value(duration, now);
@@ -49,12 +49,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     suseconds_t usec = tv.usec ();
     unsigned long msec = tv.msec ();
 
-    //std::cout << "infinite sec and nsec convert to absolute time value: sec=" 
+    //std::cout << "infinite sec and nsec convert to absolute time value: sec="
     //          << sec << " usec=" << usec << " msec=" << msec << std::endl;
 
-    TEST_CHECK (tv.sec() == ACE_Time_Value::max_time.sec() 
+    TEST_CHECK (tv.sec() == ACE_Time_Value::max_time.sec()
              || tv.sec() == duration.sec  + now.sec() + (duration.nanosec/1000 + now.usec ())/ACE_ONE_SECOND_IN_USECS);
-    TEST_CHECK (tv.usec() == ACE_Time_Value::max_time.usec() 
+    TEST_CHECK (tv.usec() == ACE_Time_Value::max_time.usec()
              || tv.usec() == (duration.nanosec/1000 + now.usec ())%ACE_ONE_SECOND_IN_USECS);
   }
   {
@@ -66,7 +66,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     suseconds_t usec = tv.usec ();
     unsigned long msec = tv.msec ();
 
-    //std::cout << "finite sec convert to time value: sec=" 
+    //std::cout << "finite sec convert to time value: sec="
     //          << sec << " usec=" << usec << " msec=" << msec << std::endl;
 
     TEST_CHECK (tv.sec() == duration.sec  + duration.nanosec/1000/ACE_ONE_SECOND_IN_USECS);

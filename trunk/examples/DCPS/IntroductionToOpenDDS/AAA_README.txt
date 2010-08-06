@@ -5,7 +5,7 @@
 //
 // *******************************************************************
 
-Instructions for Building the Example (assuming ACE, TAO, DDS, and MPC 
+Instructions for Building the Example (assuming ACE, TAO, DDS, and MPC
 are installed and configured):
 
 1) Run Make Project Creator to generate build files:
@@ -26,13 +26,13 @@ For TCP pub/sub:
 
 2)  Run the Subscriber
 
-       ./subscriber -ORBSvcConf tcp.conf -DCPSConfigFile dds_tcp_conf.ini 
-                    
+       ./subscriber -ORBSvcConf tcp.conf -DCPSConfigFile dds_tcp_conf.ini
+
 
 3)  Run the Publisher
 
-       ./publisher -ORBSvcConf tcp.conf -DCPSConfigFile dds_tcp_conf.ini 
-                   
+       ./publisher -ORBSvcConf tcp.conf -DCPSConfigFile dds_tcp_conf.ini
+
 
 For UDP pub/sub:
 
@@ -43,14 +43,14 @@ For UDP pub/sub:
 2)  Run the Subscriber
 
        ./subscriber -ORBSvcConf udp.conf -ORBSvcConf tcp.conf
-                    -DCPSConfigFile sub_udp_conf.ini 
-                    
+                    -DCPSConfigFile sub_udp_conf.ini
+
 
 3)  Run the Publisher
 
        ./publisher -ORBSvcConf udp.conf -ORBSvcConf tcp.conf
-                   -DCPSConfigFile pub_udp_conf.ini 
-                   
+                   -DCPSConfigFile pub_udp_conf.ini
+
 
 
 -Don Busch

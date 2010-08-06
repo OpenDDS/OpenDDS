@@ -5,7 +5,7 @@
  *  @file    Subscription_Manager.inl
  *
  *  $Id$
- * 
+ *
  *  @author  Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  */
 //=============================================================================
@@ -26,13 +26,13 @@ Subscription_Manager::access_topic (const Topic_Manager & topic,
   manager_impl_->access_topic (topic, qos, manager_impl_);
 }
 
-ACE_INLINE DDS::DataReader_ptr 
+ACE_INLINE DDS::DataReader_ptr
 Subscription_Manager::lookup_datareader (const std::string & topic_name)
 {
   return manager_impl_->lookup_datareader (topic_name);
 }
 
-ACE_INLINE void 
+ACE_INLINE void
 Subscription_Manager::remove_topic (const Topic_Manager & topic)
 {
   return manager_impl_->remove_topic (topic);

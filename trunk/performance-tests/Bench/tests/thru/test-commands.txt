@@ -32,16 +32,16 @@ all hosts: ulimit -c unlimited
 repository host: $PROJECTBASE/bin/run_test -S -h $REPOHOST:$REPOPORT
 
 --- Test Execution patterns:
---- 
+---
 --- bidir (modified latency):
 ---   host 1: run_test -P -i <transportconfig> -s p1-1sub-*-*.ini
 ---   host 2: run_test -P -i <transportconfig> -s p2-*.ini
---- 
+---
 --- publication bound:
 ---   host 1: run_test -P -i <transportconfig> -s pub-2sub-*-*.ini
 ---   host 2: run_test -P -i <transportconfig> -s sub-*.ini
 ---   host 3: run_test -P -i <transportconfig> -s sub-*.ini
---- 
+---
 --- subscription bound:
 ---   host 1: run_test -P -i <transportconfig> -s pub-1sub-*-*.ini
 ---   host 2: run_test -P -i <transportconfig> -s pub-1sub-*-*.ini

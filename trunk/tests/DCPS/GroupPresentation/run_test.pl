@@ -24,7 +24,7 @@ $sub_opts = "$opts -DCPSTransportDebugLevel $debuglevel -ORBDebugLevel $debuglev
 $testcase = "";
 
 if ($ARGV[0] eq 'group') {
-  $testcase = "-q 2"; #default 
+  $testcase = "-q 2"; #default
 }
 elsif ($ARGV[0] eq 'topic') {
   $testcase = "-q 1";
@@ -32,7 +32,7 @@ elsif ($ARGV[0] eq 'topic') {
 elsif ($ARGV[0] eq 'instance') {
   $testcase = "-q 0";
 }
-elsif ($ARGV[0] ne '') { 
+elsif ($ARGV[0] ne '') {
   print STDERR "ERROR: invalid parameter $ARGV[0] \n";
   exit 1;
 }

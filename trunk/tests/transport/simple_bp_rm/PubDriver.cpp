@@ -1,7 +1,7 @@
 #include "PubDriver.h"
 #include "TestException.h"
-// Add the TransportImpl.h before TransportImpl_rch.h is included to  
-// resolve the build problem that the class is not defined when 
+// Add the TransportImpl.h before TransportImpl_rch.h is included to
+// resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
@@ -157,14 +157,14 @@ PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
 void
 PubDriver::init()
 {
-  OpenDDS::DCPS::TransportImpl_rch transport_impl 
-    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, 
+  OpenDDS::DCPS::TransportImpl_rch transport_impl
+    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC,
                                                   ACE_TEXT("SimpleTcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
-  OpenDDS::DCPS::TransportConfiguration_rch config 
+  OpenDDS::DCPS::TransportConfiguration_rch config
     = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("SimpleTcp"));
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config 
+  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
     = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->pub_addr_;
@@ -219,7 +219,7 @@ PubDriver::run()
   // Wait for subsciber to receive messages and then close the connection.
   // Increase the time when more messages are sent.
   //ACE_OS::sleep (5);
-  
+
   OpenDDS::DCPS::ReaderIdSeq readers;
   readers.length(1);
   readers[0] = this->sub_id_;
@@ -264,7 +264,7 @@ PubDriver::parse_pub_arg(const ACE_TString& arg)
   // Parse the pub_id from left of ':' char, and remainder to right of ':'.
   ACE_TString pub_id_str(arg.c_str(), pos);
   this->pub_addr_str_ = arg.c_str() + pos + 1;
-  
+
   // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.
   OpenDDS::DCPS::RepoIdBuilder builder(pub_id_);
@@ -272,7 +272,7 @@ PubDriver::parse_pub_arg(const ACE_TString& arg)
   builder.participantId(1);
   builder.entityKey(ACE_OS::atoi(pub_id_str.c_str()));
   builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
-  
+
   this->pub_addr_ = ACE_INET_Addr(this->pub_addr_str_.c_str());
 
   return 0;

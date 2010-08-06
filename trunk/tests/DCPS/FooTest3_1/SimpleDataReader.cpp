@@ -42,7 +42,7 @@ SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t)Received sample: %d\n", foo.sample_sequence));
   }
-  
+
   // Shouldn't be printing this all the time.
   //ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: a_long_value=%d handle_value=%d "
   //"sample_sequence=%d writer_id=%d\n", foo.a_long_value, foo.handle_value,

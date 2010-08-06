@@ -11,10 +11,10 @@
 #include <set>
 #include <map>
 
-class InstanceDataMap 
+class InstanceDataMap
 {
   public:
-    struct FooSequenceLessThan 
+    struct FooSequenceLessThan
     {
       bool operator() (
         const ::Xyz::Foo& v1,
@@ -33,16 +33,16 @@ class InstanceDataMap
 
     int insert (::DDS::InstanceHandle_t, ::Xyz::Foo& sample);
     int remove (::DDS::InstanceHandle_t, ::Xyz::Foo& sample);
-    
+
     ssize_t num_instances();
-    ssize_t num_samples(); 
+    ssize_t num_samples();
     bool    is_empty ();
 
   private:
 
     DataMap          map_;
     ACE_Thread_Mutex lock_;
-    long             current_sequence_number_; 
+    long             current_sequence_number_;
 };
 
 #endif /* INSTANCE_DATA_MAP_H */

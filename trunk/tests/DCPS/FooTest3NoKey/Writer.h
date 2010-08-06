@@ -11,11 +11,11 @@
 #include "ace/Task.h"
 
 
-class Writer : public ACE_Task_Base 
+class Writer : public ACE_Task_Base
 {
 public:
 
-  Writer (::DDS::DataWriter_ptr writer, 
+  Writer (::DDS::DataWriter_ptr writer,
           int num_thread_to_write = 1,
           int num_writes_per_thread = 1,
           int writer_id = -1);
@@ -33,7 +33,7 @@ public:
 
 private:
 
-  ::Xyz::FooDataWriter_var foo_dw_; 
+  ::Xyz::FooDataWriter_var foo_dw_;
   InstanceDataMap       data_map_;
   ::DDS::DataWriter_var writer_;
   int num_thread_to_write_;

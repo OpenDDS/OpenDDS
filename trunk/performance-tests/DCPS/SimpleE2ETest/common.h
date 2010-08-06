@@ -34,7 +34,7 @@ CORBA::ULong max_mili_sec_blocking = 5000;
 
 int num_datawriters = 1;
 // largest positive value of a long is 2147483647
-CORBA::Long MAX_SAMPLES_PER_INSTANCE = ::DDS::LENGTH_UNLIMITED; 
+CORBA::Long MAX_SAMPLES_PER_INSTANCE = ::DDS::LENGTH_UNLIMITED;
 CORBA::Long MAX_SAMPLES = ::DDS::LENGTH_UNLIMITED;
 CORBA::Long MAX_INSTANCES = ::DDS::LENGTH_UNLIMITED;
 
@@ -62,13 +62,13 @@ int init_reader_tranport ()
       TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
                                                   ACE_TEXT("SimpleTcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
-  
-  OpenDDS::DCPS::TransportConfiguration_rch reader_config 
+
+  OpenDDS::DCPS::TransportConfiguration_rch reader_config
         = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
-      
+
   OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
         = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
-      
+
   if (0 != ACE_OS::strcmp(ACE_TEXT("default"), reader_address_str) )
     {
       ACE_INET_Addr reader_address (reader_address_str);
@@ -96,13 +96,13 @@ int init_writer_tranport ()
       TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
                                                   ACE_TEXT("SimpleTcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
-  
-  OpenDDS::DCPS::TransportConfiguration_rch writer_config 
+
+  OpenDDS::DCPS::TransportConfiguration_rch writer_config
         = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
-      
+
   OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
         = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
-      
+
   if (0 != ACE_OS::strcmp(ACE_TEXT("default"), writer_address_str) )
     {
       ACE_INET_Addr writer_address (writer_address_str);

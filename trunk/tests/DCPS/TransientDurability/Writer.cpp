@@ -90,7 +90,7 @@ bool
 Writer::end ()
 {
   int const result = this->wait ();
-   
+
   if (result != 0)
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("(%P|%t) %p\n"),

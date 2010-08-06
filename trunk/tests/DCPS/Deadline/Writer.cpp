@@ -16,7 +16,7 @@ static int const num_messages = 10;
 static ACE_Time_Value write_interval(0, 500000);
 extern ACE_Time_Value SLEPP_DURATION;
 
-Writer::Writer(::DDS::DataWriter_ptr writer, 
+Writer::Writer(::DDS::DataWriter_ptr writer,
                CORBA::Long key,
                ACE_Time_Value sleep_duration)
 : writer_ (::DDS::DataWriter::_duplicate (writer)),
@@ -58,7 +58,7 @@ Writer::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
-  
+
   try
   {
     while (1)
@@ -92,9 +92,9 @@ Writer::svc ()
     message.subject    = CORBA::string_dup("Review");
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
     message.count      = 0;
-    
+
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t)%T Writer::svc sleep for %d seconds.\n"), 
+              ACE_TEXT("(%P|%t)%T Writer::svc sleep for %d seconds.\n"),
               this->sleep_duration_.sec()));
 
     ACE_OS::sleep (this->sleep_duration_);
@@ -133,7 +133,7 @@ Writer::svc ()
 }
 
 
-::DDS::InstanceHandle_t 
+::DDS::InstanceHandle_t
 Writer::get_instance_handle()
 {
   return this->instance_handle_;

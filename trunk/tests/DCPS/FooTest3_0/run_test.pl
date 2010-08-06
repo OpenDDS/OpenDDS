@@ -32,7 +32,7 @@ $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
 
 if ($ARGV[0] eq 'unregister') {
     $test_to_run = 1;
-    $num_writes = 6;  # 1 register, 1 unregister, 1 reregister, 3 writes. 
+    $num_writes = 6;  # 1 register, 1 unregister, 1 reregister, 3 writes.
 }
 elsif ($ARGV[0] eq 'dispose') {
     $test_to_run = 2;

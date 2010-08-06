@@ -94,7 +94,7 @@ int init (int argc, ACE_TCHAR *argv[])
                                                   PARTICIPANT_QOS_DEFAULT,
                                                   ::DDS::DomainParticipantListener::_nil (),
                                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      
+
       //SHH create a separate particpant for the subscriber and publisher
 
       // Wait a while to give the transport thread time
@@ -241,7 +241,7 @@ void test_bit_participant ()
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
       OpenDDS::DCPS::RepoIdConverter converter(participant_servant->get_id());
-      
+
       DDS::BuiltinTopicKey_t key;
       converter.get_BuiltinTopicKey(key);
 
@@ -287,11 +287,11 @@ void test_bit_topic ()
       TEST_CHECK (info_len == 1);
 
       ::DDS::TopicQos topic_qos;
-      
+
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
       OpenDDS::DCPS::RepoIdConverter converter(topic_servant->get_id());
-      
+
       DDS::BuiltinTopicKey_t key;
       converter.get_BuiltinTopicKey(key);
 
@@ -362,7 +362,7 @@ void test_bit_publication ()
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
       OpenDDS::DCPS::RepoIdConverter pub_converter(datawriter_servant->get_publication_id());
-      
+
       DDS::BuiltinTopicKey_t pub_key;
       pub_converter.get_BuiltinTopicKey(pub_key);
 
@@ -373,7 +373,7 @@ void test_bit_publication ()
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
       OpenDDS::DCPS::RepoIdConverter part_converter(participant_servant->get_id());
-      
+
       DDS::BuiltinTopicKey_t part_key;
       part_converter.get_BuiltinTopicKey(part_key);
 
@@ -443,7 +443,7 @@ void test_bit_subscription ()
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
       OpenDDS::DCPS::RepoIdConverter sub_converter(datareader_servant->get_subscription_id());
-      
+
       DDS::BuiltinTopicKey_t sub_key;
       sub_converter.get_BuiltinTopicKey(sub_key);
 
@@ -454,7 +454,7 @@ void test_bit_subscription ()
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
       OpenDDS::DCPS::RepoIdConverter part_converter(participant_servant->get_id());
-      
+
       DDS::BuiltinTopicKey_t part_key;
       part_converter.get_BuiltinTopicKey(part_key);
 

@@ -108,8 +108,8 @@ Writer::svc()
 
     for (int i = 0; i < num_messages; i++) {
       message.subject_id = message.count % 2;  // 0 or 1
-      ACE_DEBUG ((LM_DEBUG, "(%P|%t)%s writes instance %d count %d\n", 
-      ownership_dw_id_.c_str(), message.subject_id, message.count));   
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t)%s writes instance %d count %d\n",
+      ownership_dw_id_.c_str(), message.subject_id, message.count));
       DDS::ReturnCode_t error = message_dw->write(message, ::DDS::HANDLE_NIL);
 
       if (error != DDS::RETCODE_OK) {
@@ -121,7 +121,7 @@ Writer::svc()
           timeout_writes_++;
         }
       }
-            
+
       if (message.count == 5) {
         ::DDS::DataWriterQos qos;
         error = this->writer_->get_qos (qos);
@@ -137,41 +137,41 @@ Writer::svc()
           // with previous strength is received by datareader. This helps simplify
           // result verification on subscriber side.
           ACE_OS::sleep (1);
-          ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)%s : reset ownership strength from %d to %d\n"), 
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)%s : reset ownership strength from %d to %d\n"),
             ownership_dw_id_.c_str(), old, reset_ownership_strength));
           error = this->writer_->set_qos (qos);
           if (error != ::DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: set_qos returned %d!\n"), error));
-          } 
+          }
           else {
             message.strength   =  reset_ownership_strength;
           }
         }
-        
+
       }
 
       if ((message.count == 5)
            && reset_delay > ACE_Time_Value::zero) {
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)%s : reset delay from %d to %d at sample %d\n"), 
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)%s : reset delay from %d to %d at sample %d\n"),
           ownership_dw_id_.c_str(), dds_delay.msec(), reset_delay.msec(), message.count));
         ACE_OS::sleep (reset_delay);
       }
       else if (dds_delay > ACE_Time_Value::zero) {
         ACE_OS::sleep (dds_delay);
       }
-      
+
       message.count++;
     }
- 
+
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in svc():");
   }
 
   finished_instances_ ++;
- 
+
   return 0;
 }
 

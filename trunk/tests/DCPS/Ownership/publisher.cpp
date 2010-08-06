@@ -60,17 +60,17 @@ parse_args(int argc, ACE_TCHAR *argv[])
       break;
     case 'y':
       dds_delay.msec (ACE_OS::atoi (get_opts.opt_arg()));
-      break;    
+      break;
     case 'l':
       liveliness.sec = ACE_OS::atoi (get_opts.opt_arg());
-      break;    
+      break;
     case 'c':
       delay_reset = true;
-      break;    
+      break;
     case '?':
     default:
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("usage: %C -s <ownership_strength> ") 
+                        ACE_TEXT("usage: %C -s <ownership_strength> ")
                         ACE_TEXT("-i <ownership_dw_id> -r <reset_ownership_strength> ")
                         ACE_TEXT("-d <deadline> -y <delay> -l <liveliness>\n"),
                         argv[0]),
@@ -85,12 +85,12 @@ parse_args(int argc, ACE_TCHAR *argv[])
     if (liveliness.sec != ::DDS::DURATION_INFINITE_SEC && reset_delay.sec() < liveliness.sec) {
       reset_delay.sec(liveliness.sec);
     }
-    
+
     if (reset_delay > ACE_Time_Value::zero) {
-      reset_delay += ACE_Time_Value (4); 
+      reset_delay += ACE_Time_Value (4);
     }
   }
-  
+
   return 0;
 }
 

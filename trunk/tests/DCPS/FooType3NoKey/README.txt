@@ -1,10 +1,10 @@
 This library is similar to the FooType3 lib except the data type does not
-have a key. 
+have a key.
 
 
 
-  The FooKeyLessThan will always return false, so the datatype map in 
-  FooDataWriter just has a single instance handle. 
+  The FooKeyLessThan will always return false, so the datatype map in
+  FooDataWriter just has a single instance handle.
 
 
 
@@ -14,7 +14,7 @@ have a key.
 
 
 ---in idl compiler generated FooDefTypeSupportImpl.h
-struct FooType_Export FooKeyLessThan 
+struct FooType_Export FooKeyLessThan
 {
 bool operator ()(const Xyz::Foo& v1, const Xyz::Foo& v2) const
 {

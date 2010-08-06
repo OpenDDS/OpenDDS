@@ -1297,19 +1297,19 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     bool is_new_instance = false;
     bool filtered = false;
     dds_demarshal(sample, instance, is_new_instance, filtered);
-    
+
     if (DCPS_debug_level  >= 1) {
       RepoIdConverter reader_converter(subscription_id_);
       RepoIdConverter writer_converter(header.publication_id_);
 
-      ACE_DEBUG ((LM_DEBUG, 
+      ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT("(%P|%t)DataReaderImpl::data_received: reader %C writer %C ")
                   ACE_TEXT("instance %d is_new_instance %d filtered %d \n"),
                   std::string(reader_converter).c_str(),
                   std::string(writer_converter).c_str(),
                   instance->instance_handle_, is_new_instance, filtered));
     }
-    
+
     if (filtered) break; // sample filtered from instance
     bool accepted = true;
     bool verify_coherent = false;
@@ -1954,7 +1954,7 @@ OpenDDS::DCPS::WriterInfo::clear_owner_evaluated ()
 void
 OpenDDS::DCPS::WriterInfo::set_owner_evaluated (::DDS::InstanceHandle_t instance, bool flag)
 {
-  if (flag || 
+  if (flag ||
       (! flag && owner_evaluated_.find (instance) != owner_evaluated_.end ())){
     this->owner_evaluated_ [instance] = flag;
   }
@@ -2811,7 +2811,7 @@ DataReaderImpl::filter_instance(SubscriptionInstance* instance,
                         iter->second->writer_qos_.ownership_strength.value,
                         &instance->instance_state_);
       iter->second->set_owner_evaluated (instance->instance_handle_, true);
-      
+
       if (! is_owner) {
         if (DCPS_debug_level >= 1) {
           RepoIdConverter reader_converter(subscription_id_);

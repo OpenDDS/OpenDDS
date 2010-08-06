@@ -6,7 +6,7 @@ The test does not take any parameters.
 
 Run the test by:
   idl_test1
-  
+
 Or
 
   run_test.pl

@@ -32,7 +32,7 @@ private:
 
   int write(Messenger::MessageDataWriter_ptr message_dw,
             ::DDS::InstanceHandle_t& handle,
-            Messenger::Message& message, 
+            Messenger::Message& message,
             int num_messages);
 
   ::DDS::DataWriter_var writer_;

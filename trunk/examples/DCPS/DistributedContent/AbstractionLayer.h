@@ -60,7 +60,7 @@ public:
   /**
    * Attach application level code to the abstraction layer.
    *
-   * @param app 
+   * @param app
    */
   void attach_application(ApplicationLevel* app);
 
@@ -79,7 +79,7 @@ public:
    *
    * @param diff - FileDiff to be sent by the DDS publisher
    *
-   * @return 
+   * @return
    */
   bool send_diff(const DistributedContent::FileDiff& diff);
 

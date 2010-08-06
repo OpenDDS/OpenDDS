@@ -37,11 +37,11 @@ TestConfig::TestConfig( int argc, ACE_TCHAR** argv, char** /* envp */)
       this->samples_ = ACE_OS::atoi( currentArg);
       parser.consume_arg();
 
-    }     
+    }
     else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-SampleInterval")))) {
       this->sample_interval_ = ACE_OS::atoi( currentArg);
       parser.consume_arg();
-    } 
+    }
     else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-v")))) {
       this->verbose_ = true;
 

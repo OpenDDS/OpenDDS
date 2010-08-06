@@ -52,7 +52,7 @@ class TestConfig {
 
     /// Number of samples to emit into the subsystems.
     int samples_;
-    
+
     /// Interval in seconds between sample sending.
     int sample_interval_;
 

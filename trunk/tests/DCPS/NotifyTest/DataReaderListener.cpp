@@ -26,7 +26,7 @@ DataReaderListenerImpl::~DataReaderListenerImpl ()
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   throw (CORBA::SystemException)
 {
-  if (! shutdown_) 
+  if (! shutdown_)
     num_reads_ ++;
 
   try {
@@ -57,13 +57,13 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
       {
         cout << "instance is disposed" << endl;
-        if (! shutdown_) 
+        if (! shutdown_)
           ++ num_received_dispose_;
       }
       else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
       {
         cout << "instance is unregistered" << endl;
-        if (! shutdown_) 
+        if (! shutdown_)
           ++ num_received_unregister_;
       }
       else

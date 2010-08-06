@@ -13,7 +13,7 @@
 
 
 //Class DataWriterListenerImpl
-class DataWriterListenerImpl 
+class DataWriterListenerImpl
   // note: TAO specific extensions
   : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataWriterListener>
 {

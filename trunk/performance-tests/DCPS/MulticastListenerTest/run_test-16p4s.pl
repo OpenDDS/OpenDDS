@@ -34,7 +34,7 @@ $num_pubs = 16;
 $num_writers = $num_pubs * $num_writers_per_pub;
 $num_readers = $num_subs * $num_readers_per_sub;
 
-unlink $dcpsrepo_ior; 
+unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              "$repo_bit_conf -o $dcpsrepo_ior ");
@@ -49,7 +49,7 @@ $sub_parameters = "-ORBSvcConf multicast.conf $app_bit_conf -p $num_writers"
               . " -n $num_messages -d $data_size"
               . " -msi $num_messages -mxs $num_messages -multicast $local_address";
 #use -msi $num_messages to avoid rejected samples
-#use -mxs $num_messages to avoid using the heap 
+#use -mxs $num_messages to avoid using the heap
 #   (could be less than $num_messages but I am not sure of the limit).
 
 for ($n = 0; $n < $num_subs; ++$n) {
@@ -59,8 +59,8 @@ for ($n = 0; $n < $num_subs; ++$n) {
 
 $pub_parameters = "-ORBSvcConf multicast.conf $app_bit_conf -p $num_writers_per_pub"
 #              . " -DCPSDebugLevel 6"
-              . " -ORBVerboseLogging 1 -r $num_readers" 
-              . " -n $num_messages -d $data_size" 
+              . " -ORBVerboseLogging 1 -r $num_readers"
+              . " -n $num_messages -d $data_size"
               . " -msi 1000 -mxs 1000 -h $write_throttle -multicast $local_address";
 
 for ($n = 0; $n < $num_pubs; ++$n) {

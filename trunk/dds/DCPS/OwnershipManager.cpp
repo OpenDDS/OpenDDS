@@ -159,7 +159,7 @@ OwnershipManager::remove_writers (const ::DDS::InstanceHandle_t& instance_handle
                            ACE_TEXT("disassociate writers with instance %d\n"),
                            instance_handle));
   }
-  
+
   InstanceOwnershipWriterInfos::iterator const the_end = instance_ownership_infos_.end ();
 
   InstanceOwnershipWriterInfos::iterator the_iter
@@ -173,7 +173,7 @@ OwnershipManager::remove_writers (const ::DDS::InstanceHandle_t& instance_handle
         (*iter)->reset_ownership(instance_handle);
     }
     the_iter->second.instance_states_.clear ();
-    
+
     instance_ownership_infos_.erase (the_iter);
   }
 }

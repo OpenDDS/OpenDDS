@@ -21,7 +21,7 @@ namespace Test
 
     char const * const * const partitions;
     short const expected_matches;
-    
+
   };
 
   namespace Offered
@@ -41,7 +41,7 @@ namespace Test
       };
 
     /// Partition Three
-    char const * Three[] = 
+    char const * Three[] =
       {
         "Amadeus",
         "Ziggie*dust",   // A wildcard
@@ -90,7 +90,7 @@ namespace Test
       };
 
     /// Partition Three
-    char const * Three[] = 
+    char const * Three[] =
       {
         "ZiggieStardust",
         0

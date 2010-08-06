@@ -74,7 +74,7 @@ bool testParsing() {
     "t8 NATURAL JOIN (t9 NATURAL INNER JOIN t0)",
     "a NATURAL JOIN (b NATURAL JOIN (c NATURAL JOIN d NATURAL JOIN e))"};
   ok &= parserTest<TopicExpressionGrammar::Selection>(selectiontests);
-  
+
   const char* aggtests[] = {"*", "f1", "f2.f3", "f3 f4", "f5 AS f6", "f7,  f8",
     "f9, f10, f11, f12", "f13.f14, f15.f16 f17.f18, f19.f20 AS f21.f22, aa, b"};
   ok &= parserTest<TopicExpressionGrammar::Aggregation>(aggtests);

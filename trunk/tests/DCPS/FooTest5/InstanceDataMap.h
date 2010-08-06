@@ -11,7 +11,7 @@
 #include "ace/Array.h"
 #include "ace/Hash_Map_Manager.h"
 
-class InstanceDataMap 
+class InstanceDataMap
 {
   public:
 
@@ -26,8 +26,8 @@ class InstanceDataMap
     int add (Xyz::Foo& sample);
     int add (Xyz::FooNoKey& sample);
 
-    bool test_passed(int expected); 
-  
+    bool test_passed(int expected);
+
   private:
 
     DataMap*          maps_;

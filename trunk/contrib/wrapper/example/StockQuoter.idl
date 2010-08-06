@@ -23,10 +23,10 @@ module StockQuoter
 #pragma DCPS_DATA_TYPE "StockQuoter::ExchangeEvent"
 #pragma DCPS_DATA_KEY "StockQuoter::ExchangeEvent exchange"
 
-  enum ExchangeEventType { TRADING_OPENED, 
+  enum ExchangeEventType { TRADING_OPENED,
                            TRADING_CLOSED,
-                           TRADING_SUSPENDED, 
-                           TRADING_RESUMED }; 
+                           TRADING_SUSPENDED,
+                           TRADING_RESUMED };
   struct ExchangeEvent {
     string exchange;
     ExchangeEventType event;

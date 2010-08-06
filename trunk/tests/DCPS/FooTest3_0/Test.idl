@@ -7,7 +7,7 @@
 
 module Test
 {
-  
+
   interface TestPubDriver
   {
     /// A method to shutdown the PubDriver

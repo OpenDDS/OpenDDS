@@ -22,7 +22,7 @@ PubDataReaderListenerImpl::PubDataReaderListenerImpl()
 {
 }
 
-void PubDataReaderListenerImpl::init(DDS::DataReader_ptr dr, 
+void PubDataReaderListenerImpl::init(DDS::DataReader_ptr dr,
                                      DDS::DataWriter_ptr dw,
                                      bool use_zero_copy_read)
 {
@@ -32,12 +32,12 @@ void PubDataReaderListenerImpl::init(DDS::DataReader_ptr dr,
 
   AckMessageDataWriter_var ackmessage_dw =
     AckMessageDataWriter::_narrow (this->writer_.in ());
-  this->dw_servant_ = 
+  this->dw_servant_ =
     dynamic_cast<AckMessageDataWriterImpl*>(ackmessage_dw.in());
   DDSPerfTest::AckMessage msg;
   this->handle_ = this->dw_servant_->register_instance(msg);
 
-  PubMessageDataReader_var pubmessage_dr = 
+  PubMessageDataReader_var pubmessage_dr =
     PubMessageDataReader::_unchecked_narrow(this->reader_.in());
   this->dr_servant_ =
     dynamic_cast<PubMessageDataReaderImpl*>(pubmessage_dr.in());
@@ -58,7 +58,7 @@ void PubDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
       ::CORBA::Long max_read_samples = 1;
       DDSPerfTest::PubMessageSeq message(0, max_read_samples);
       DDS::SampleInfoSeq              si(0, max_read_samples);
-      // Use the reader data member (instead of the argument) for efficiency 
+      // Use the reader data member (instead of the argument) for efficiency
       // reasons
       this->dr_servant_->take(message, si, max_read_samples,
                               ::DDS::NOT_READ_SAMPLE_STATE,
@@ -72,7 +72,7 @@ void PubDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
     {
       DDSPerfTest::PubMessage message;
       DDS::SampleInfo si;
-      // Use the reader data member (instead of the argument) for efficiency 
+      // Use the reader data member (instead of the argument) for efficiency
       // reasons
       this->dr_servant_->take_next_sample(message, si) ;
 
@@ -87,7 +87,7 @@ void PubDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
 
     if (seqnum != this->sample_num_)
     {
-      fprintf(stderr, 
+      fprintf(stderr,
               "ERROR - TAO_Sub: recieved seqnum %d on %d\n",
               seqnum, this->sample_num_);
       exit (1);
@@ -99,7 +99,7 @@ void PubDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
     this->dw_servant_->write (msg, this->handle_);
 
     this->sample_num_++;
-    return;    
+    return;
 }
 
 void PubDataReaderListenerImpl::on_requested_deadline_missed (

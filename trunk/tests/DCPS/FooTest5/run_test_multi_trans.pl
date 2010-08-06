@@ -143,7 +143,7 @@ $pub_parameters = "$svc_config -u $use_udp -c $use_multicast -w $num_writers "
 
 $Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
 print $Subscriber->CommandLine(), "\n";
-  
+
 $Publisher = PerlDDS::create_process ("publisher", $pub_parameters);
 
 print $Publisher->CommandLine(), "\n";

@@ -17,9 +17,9 @@
 #include "DataReaderListenerImpl.h"
 #include "FooTypeTypeSupportImpl.h"
 
-#ifdef ACE_AS_STATIC_LIBS                                                   
-# include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>                         
-#endif            
+#ifdef ACE_AS_STATIC_LIBS
+# include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#endif
 
 namespace
 {
@@ -31,7 +31,7 @@ namespace
   parse_args(int& argc, ACE_TCHAR** argv)
   {
     ACE_Arg_Shifter shifter(argc, argv);
-   
+
     while (shifter.is_anything_left())
     {
       const ACE_TCHAR* arg;
@@ -58,9 +58,9 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   parse_args(argc, argv);
-  
+
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> SUBSCRIBER STARTED\n")));
-             
+
   try
   {
     DDS::DomainParticipantFactory_var dpf =
@@ -105,7 +105,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     OpenDDS::DCPS::AttachStatus status =
       subscriber_i->attach_transport(transport.in());
-    
+
     if (status != OpenDDS::DCPS::ATTACH_OK)
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
@@ -161,11 +161,11 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(cond);
-    
+
     DDS::Duration_t timeout =
       { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 
-    DDS::ConditionSeq conditions; 
+    DDS::ConditionSeq conditions;
     DDS::SubscriptionMatchedStatus matches = {0, 0, 0, 0, 0};
     do
     {

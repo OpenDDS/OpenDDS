@@ -127,7 +127,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
     dpf->create_participant(23, PARTICIPANT_QOS_DEFAULT, 0,
                             DEFAULT_STATUS_MASK);
   MessageTypeSupport_var ts = new MessageTypeSupportImpl;
-  ts->register_type(dp, ""); 
+  ts->register_type(dp, "");
 
   Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
                                            DEFAULT_STATUS_MASK);

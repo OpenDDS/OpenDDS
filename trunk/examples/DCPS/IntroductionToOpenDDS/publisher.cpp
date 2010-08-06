@@ -14,7 +14,7 @@
 #include <ace/streams.h>
 #include <orbsvcs/Time_Utilities.h>
 
-// constant used by this publisher for transport; 
+// constant used by this publisher for transport;
 // must match transport id in config file
 const OpenDDS::DCPS::TransportIdType TRANSPORT_IMPL_ID = 1;
 
@@ -69,7 +69,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     // Initialize the transport; the TRANSPORT_IMPL_ID must match the
     // value in the configuration file.
     OpenDDS::DCPS::TransportImpl_rch trans_impl =
-      TheTransportFactory->create_transport_impl (TRANSPORT_IMPL_ID, 
+      TheTransportFactory->create_transport_impl (TRANSPORT_IMPL_ID,
                                                   OpenDDS::DCPS::AUTO_CONFIG);
 
     // Attach the publisher to the TCP transport.
@@ -102,7 +102,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     }
 
     // Register the Quote type
-    StockQuoter::QuoteTypeSupport_var quote_servant 
+    StockQuoter::QuoteTypeSupport_var quote_servant
       = new StockQuoter::QuoteTypeSupportImpl();
     if (DDS::RETCODE_OK != quote_servant->register_type(participant.in (),
                                                         QUOTER_QUOTE_TYPE)) {
@@ -111,12 +111,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     }
 
     // Register the ExchangeEvent type
-    StockQuoter::ExchangeEventTypeSupport_var exchange_evt_servant 
+    StockQuoter::ExchangeEventTypeSupport_var exchange_evt_servant
       = new StockQuoter::ExchangeEventTypeSupportImpl();
 
     if (DDS::RETCODE_OK != exchange_evt_servant->register_type(participant.in (),
                                                                QUOTER_EXCHANGE_EVENT_TYPE)) {
-      cerr << "register_type for " << QUOTER_EXCHANGE_EVENT_TYPE 
+      cerr << "register_type for " << QUOTER_EXCHANGE_EVENT_TYPE
            << " failed." << endl;
       ACE_OS::exit(1);
     }

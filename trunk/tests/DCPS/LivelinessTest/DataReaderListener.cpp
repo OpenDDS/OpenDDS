@@ -81,7 +81,7 @@ void DataReaderListenerImpl::on_liveliness_changed (
     ACE_UNUSED_ARG(status);
 
     liveliness_changed_count_++ ;
-    
+
     if (liveliness_changed_count_ > 1)
     {
       if (last_status_.alive_count == 0 && last_status_.not_alive_count == 0)
@@ -99,14 +99,14 @@ void DataReaderListenerImpl::on_liveliness_changed (
       {
         ::DDS::LivelinessChangedStatus expected_status;
         // expect the alive_count either 0 or 1
-        expected_status.alive_count = 1 - last_status_.alive_count;     
-        expected_status.not_alive_count = 1 - last_status_.not_alive_count; 
+        expected_status.alive_count = 1 - last_status_.alive_count;
+        expected_status.not_alive_count = 1 - last_status_.not_alive_count;
         expected_status.alive_count_change = status.alive_count - last_status_.alive_count;
         expected_status.not_alive_count_change = status.not_alive_count - last_status_.not_alive_count;
 
         if (status.alive_count != expected_status.alive_count
-          || status.not_alive_count != expected_status.not_alive_count 
-          || status.alive_count_change != expected_status.alive_count_change 
+          || status.not_alive_count != expected_status.not_alive_count
+          || status.alive_count_change != expected_status.alive_count_change
           || status.not_alive_count_change != expected_status.not_alive_count_change)
         {
           ACE_ERROR ((LM_ERROR,
@@ -120,7 +120,7 @@ void DataReaderListenerImpl::on_liveliness_changed (
         }
       }
     }
-  
+
     last_status_ = status;
     ACE_DEBUG((LM_DEBUG,
       "%T (%P|%t) DataReaderListenerImpl::on_liveliness_changed %d\n"

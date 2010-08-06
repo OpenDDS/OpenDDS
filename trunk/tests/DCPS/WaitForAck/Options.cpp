@@ -64,8 +64,8 @@ Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
 
     } else if (0 <= (parser.cur_arg_strncasecmp(PUBLISHER_ARGUMENT))) {
       this->publisher_ = true;
-      parser.consume_arg(); 
-      
+      parser.consume_arg();
+
     } else {
       if( ::OpenDDS::DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG((LM_WARNING,

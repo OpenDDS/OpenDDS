@@ -169,11 +169,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ::DDS::ReturnCode_t deleteParticipantReturnCode =
       dpFactory->delete_participant(testParticipant.in ());
-      
+
       if (::DDS::RETCODE_OK != deleteParticipantReturnCode)
         {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) The delete_participant returned %d!\n"), 
+                            ACE_TEXT("(%P|%t) The delete_participant returned %d!\n"),
                             deleteParticipantReturnCode),
                             4);
         }

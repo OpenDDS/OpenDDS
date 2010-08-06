@@ -19,7 +19,7 @@ module Xyz {
 
   // Example user defined "FooNoKey" structure
   struct FooNoKey {
-    long  data_source; 
+    long  data_source;
     float x;
     float y;
     FloatSeq values;

@@ -31,7 +31,7 @@ ProgressIndicator::operator++()
     ACE_DEBUG((LM_DEBUG, format_, pct, curr_));
     last_ += grad_;
   }
-  
+
   return *this;
 }
 

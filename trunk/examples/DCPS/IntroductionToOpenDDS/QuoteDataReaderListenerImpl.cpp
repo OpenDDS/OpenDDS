@@ -27,7 +27,7 @@ void QuoteDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   throw (CORBA::SystemException)
 {
   try {
-    StockQuoter::QuoteDataReader_var quote_dr 
+    StockQuoter::QuoteDataReader_var quote_dr
       = StockQuoter::QuoteDataReader::_narrow(reader);
     if (CORBA::is_nil (quote_dr.in ())) {
       cerr << "QuoteDataReaderListenerImpl::on_data_available: _narrow failed." << endl;
