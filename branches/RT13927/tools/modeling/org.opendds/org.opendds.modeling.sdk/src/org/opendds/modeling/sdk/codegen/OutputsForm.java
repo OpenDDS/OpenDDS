@@ -56,7 +56,6 @@ public class OutputsForm extends FormPage {
 	public OutputsForm(CodeGenEditor editor, String id, String title) {
 		super(editor, id, title);
 		manager = editor.getManager();
-		generator = new CodeGenerator();
 	}
 	
 	@Override
@@ -68,6 +67,7 @@ public class OutputsForm extends FormPage {
 
 		parent = managedForm.getForm().getBody();
 		parent.setLayout( layout);
+		generator = new CodeGenerator( parent);
 
 		Composite leftPanel = toolkit.createComposite(parent);
 		Composite rightPanel = toolkit.createComposite(parent);
