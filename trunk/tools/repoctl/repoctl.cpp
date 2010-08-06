@@ -155,7 +155,7 @@ Options::Options(int argc, ACE_TCHAR** argv)
   : verbose_(false)
   , federationDomain_(OpenDDS::Federator::DEFAULT_FEDERATIONDOMAIN)
 {
-  this->name_ = argv[0];
+  this->name_ = ACE_TEXT_ALWAYS_CHAR(argv[0]);
 
   ACE_Arg_Shifter arg_shifter(argc, argv);
 
