@@ -1,3 +1,11 @@
+Fri Aug  6 13:56:36 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3555] 2010-08-06 13:55  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/OutputsForm.java:
+
+          Minor code cleanup. This should have been part of the previous
+          check-in.
+
 Fri Aug  6 13:46:25 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3553] 2010-08-06 13:44  martinezm
