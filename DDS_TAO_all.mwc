@@ -1,0 +1,13 @@
+// -*- MPC -*-
+// $Id$
+
+workspace {
+  $(TAO_ROOT)/tao/PI_Server.mpc
+  $(TAO_ROOT)/tao/IORManipulation.mpc
+  $(TAO_ROOT)/tao/Valuetype.mpc
+  $(TAO_ROOT)/tao/Messaging.mpc
+  $(TAO_ROOT)/orbsvcs/orbsvcs/CosNaming.mpc
+  $(TAO_ROOT)/orbsvcs/orbsvcs/PortableGroup.mpc
+  $(TAO_ROOT)/orbsvcs/orbsvcs/FTORB.mpc
+  DDS_TAO.mwc
+}

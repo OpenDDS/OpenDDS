@@ -27,11 +27,12 @@
 
 ::DDS::Duration_t deadline = {::DDS::DURATION_INFINITE_SEC, 0};
 ::DDS::Duration_t liveliness = {::DDS::DURATION_INFINITE_SEC, 0};
-int dds_delay = 1;
-int reset_delay = 0;
+ACE_Time_Value dds_delay(1);
+ACE_Time_Value reset_delay(ACE_Time_Value::zero);
 int ownership_strength = 0;
 int reset_ownership_strength = -1;
 ACE_CString ownership_dw_id = "OwnershipDataWriter";
+bool delay_reset = false;
 
 namespace {
 
@@ -40,7 +41,7 @@ OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 int
 parse_args(int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("s:i:r:d:y:l:"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("s:i:r:d:y:l:c"));
 
   int c;
   while ((c = get_opts()) != -1) {
@@ -58,10 +59,13 @@ parse_args(int argc, ACE_TCHAR *argv[])
       deadline.sec = ACE_OS::atoi (get_opts.opt_arg());
       break;
     case 'y':
-      dds_delay = ACE_OS::atoi (get_opts.opt_arg());
+      dds_delay.msec (ACE_OS::atoi (get_opts.opt_arg()));
       break;    
     case 'l':
       liveliness.sec = ACE_OS::atoi (get_opts.opt_arg());
+      break;    
+    case 'c':
+      delay_reset = true;
       break;    
     case '?':
     default:
@@ -74,15 +78,17 @@ parse_args(int argc, ACE_TCHAR *argv[])
     }
   }
 
-  if (deadline.sec != ::DDS::DURATION_INFINITE_SEC) {
-    reset_delay = deadline.sec;
-  }
-  if (liveliness.sec != ::DDS::DURATION_INFINITE_SEC && reset_delay < liveliness.sec) {
-    reset_delay = liveliness.sec;
-  }
-  
-  if (reset_delay > 0) {
-    reset_delay += 4; 
+  if (delay_reset) {
+    if (deadline.sec != ::DDS::DURATION_INFINITE_SEC) {
+      reset_delay.sec(deadline.sec);
+    }
+    if (liveliness.sec != ::DDS::DURATION_INFINITE_SEC && reset_delay.sec() < liveliness.sec) {
+      reset_delay.sec(liveliness.sec);
+    }
+    
+    if (reset_delay > ACE_Time_Value::zero) {
+      reset_delay += ACE_Time_Value (4); 
+    }
   }
   
   return 0;

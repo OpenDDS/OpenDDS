@@ -694,11 +694,11 @@ ACE_THROW_SPEC((CORBA::SystemException))
     GroupCoherentSamples group_samples;
     for (PublicationMap::iterator it = this->publication_map_.begin();
          it != this->publication_map_.end(); ++it) {
-      
+
       if (it->second->local_writer_impl_->coherent_samples_ == 0) {
         continue;
       }
-      
+
       std::pair<GroupCoherentSamples::iterator, bool> pair
         = group_samples.insert(GroupCoherentSamples::value_type(
         it->second->local_writer_impl_->publication_id_,
@@ -712,13 +712,13 @@ ACE_THROW_SPEC((CORBA::SystemException))
           DDS::RETCODE_ERROR);
         }
     }
-    
+
     for (PublicationMap::iterator it = this->publication_map_.begin();
          it != this->publication_map_.end(); ++it) {
       if (it->second->local_writer_impl_->coherent_samples_ == 0) {
         continue;
       }
-      
+
       it->second->local_writer_impl_->end_coherent_changes(group_samples);
     }
   }

@@ -62,7 +62,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink(
   DBG_ENTRY_LVL("SimpleTcpTransport","find_or_create_datalink",6);
 
   ACE_INET_Addr& remote_address = const_cast<AssociationData*> (remote_association)->get_remote_address();
-  
+
   bool is_loopback = remote_address == this->tcp_config_->local_address_;
   VDBG_LVL((LM_DEBUG, "(%P|%t)SimpleTcpTransport::find_or_create_datalink remote addr str "
             "\"%s\" remote_address \"%C:%d priority %d is_loopback %d active %d\"\n",
@@ -74,7 +74,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink(
 
   SimpleTcpDataLink_rch link;
   PriorityKey key(priority, remote_address, is_loopback, active);
-    
+
 
   { // guard scope
     GuardType guard(this->links_lock_);
@@ -484,9 +484,9 @@ OpenDDS::DCPS::SimpleTcpTransport::passive_connection
               , this->connections_.size()), 5);
 
     // Check and report and problems.
-    PriorityKey key(connection->transport_priority(), 
-                    remote_address, 
-                    remote_address==this->tcp_config_->local_address_, 
+    PriorityKey key(connection->transport_priority(),
+                    remote_address,
+                    remote_address==this->tcp_config_->local_address_,
                     connection->is_connector());
     ConnectionMap::iterator where = this->connections_.find(key);
 
@@ -499,7 +499,7 @@ OpenDDS::DCPS::SimpleTcpTransport::passive_connection
                  remote_address.get_port_number(),
                  connection->transport_priority()));
     }
-    
+
     // Swap in the new connection.
     this->connections_[ key] = connection_obj;
 
@@ -612,7 +612,7 @@ OpenDDS::DCPS::SimpleTcpTransport::make_passive_connection
       }
 
       if (link->is_loopback()) {
-        // The reservation lock needs be released at this point so the publisher 
+        // The reservation lock needs be released at this point so the publisher
         // attached to same transport can make reservation and try to connect to
         // peer in TransportInterface::add_associations().
         ACE_GUARD_RETURN (Reverse_Lock_t, unlock_guard, reverse_reservation_lock_, -1);
@@ -634,8 +634,8 @@ OpenDDS::DCPS::SimpleTcpTransport::make_passive_connection
 
 
 void
-OpenDDS::DCPS::SimpleTcpTransport::wait_for_connection (const ACE_Time_Value& abs_timeout) 
-{   
+OpenDDS::DCPS::SimpleTcpTransport::wait_for_connection (const ACE_Time_Value& abs_timeout)
+{
   // Now lets wait for an update
   if (abs_timeout == ACE_Time_Value::zero) {
     this->connections_updated_.wait(0);
@@ -697,8 +697,8 @@ OpenDDS::DCPS::SimpleTcpTransport::fresh_link(SimpleTcpConnection_rch connection
   SimpleTcpDataLink_rch link;
   GuardType guard(this->links_lock_);
 
-  PriorityKey key(connection->transport_priority(), 
-                  connection->get_remote_address(), 
+  PriorityKey key(connection->transport_priority(),
+                  connection->get_remote_address(),
                   connection->get_remote_address() == this->tcp_config_->local_address_,
                   connection->is_connector());
 

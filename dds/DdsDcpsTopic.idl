@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_TOPIC_IDL
-#define TAO_DDS_DCPS_TOPIC_IDL
+#ifndef OPENDDS_DCPS_TOPIC_IDL
+#define OPENDDS_DCPS_TOPIC_IDL
 
 #include "dds/DdsDcpsInfrastructure.idl"
 
@@ -34,10 +34,10 @@ module DDS {
     local interface Topic : Entity, TopicDescription {
         ReturnCode_t set_qos(
             in TopicQos qos);
-        ReturnCode_t get_qos( 
+        ReturnCode_t get_qos(
             inout TopicQos qos);
         ReturnCode_t set_listener(
-            in TopicListener a_listener, 
+            in TopicListener a_listener,
             in StatusMask mask);
         TopicListener get_listener();
         // Access the status
@@ -67,12 +67,12 @@ module DDS {
 
     local interface TypeSupport {
                  //        ReturnCode_t register_type(
-                 //                in DomainParticipant domain, 
+                 //                in DomainParticipant domain,
                  //                in string type_name);
-                 //        
-                  
+                 //
+
                  //        string get_type_name ();
                 };
 };
 
-#endif /* TAO_DDS_DCPS_TOPIC_IDL */
+#endif /* OPENDDS_DCPS_TOPIC_IDL */

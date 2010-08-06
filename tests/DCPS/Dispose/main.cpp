@@ -50,9 +50,9 @@ public:
     return reader_->take(foo,
                          si,
                          DDS::LENGTH_UNLIMITED,
-	                 DDS::ANY_SAMPLE_STATE,
-			 DDS::ANY_VIEW_STATE,
-			 DDS::ANY_INSTANCE_STATE) == DDS::RETCODE_OK;
+                         DDS::ANY_SAMPLE_STATE,
+                         DDS::ANY_VIEW_STATE,
+                         DDS::ANY_INSTANCE_STATE) == DDS::RETCODE_OK;
   }
 
   bool operator!()

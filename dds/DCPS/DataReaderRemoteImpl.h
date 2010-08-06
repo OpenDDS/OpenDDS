@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_DATAREADERREMOTE_H
-#define TAO_DDS_DCPS_DATAREADERREMOTE_H
+#ifndef OPENDDS_DCPS_DATAREADERREMOTE_H
+#define OPENDDS_DCPS_DATAREADERREMOTE_H
 
 #include "dcps_export.h"
 #include "DdsDcpsDataReaderRemoteS.h"
@@ -61,4 +61,4 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* TAO_DDS_DCPS_DATAREADERREMOTE_H  */
+#endif /* OPENDDS_DCPS_DATAREADERREMOTE_H  */

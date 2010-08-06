@@ -25,7 +25,9 @@
 #include "AssociationData.h"
 #include "Transient_Kludge.h"
 #include "ContentFilteredTopicImpl.h"
+#include "MultiTopicImpl.h"
 #include "GroupRakeData.h"
+#include "MultiTopicDataReaderBase.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/DataLinkSet.h"
@@ -34,6 +36,8 @@
 
 #include "ace/Auto_Ptr.h"
 #include "ace/Vector_T.h"
+
+#include <stdexcept>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -143,12 +147,14 @@ ACE_THROW_SPEC((CORBA::SystemException))
   TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic_desc);
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  // only used for ContentFilteredTopic and MultiTopic
   ContentFilteredTopicImpl* cft = 0;
+  MultiTopicImpl* mt = 0;
   if (!topic_servant) {
     cft = dynamic_cast<ContentFilteredTopicImpl*>(a_topic_desc);
     if (cft) {
       topic_servant = dynamic_cast<TopicImpl*>(cft->get_related_topic());
+    } else {
+      mt = dynamic_cast<MultiTopicImpl*>(a_topic_desc);
     }
   }
 #endif
@@ -157,6 +163,17 @@ ACE_THROW_SPEC((CORBA::SystemException))
     this->get_default_datareader_qos(dr_qos);
 
   } else if (qos == DATAREADER_QOS_USE_TOPIC_QOS) {
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    if (mt) {
+      if (DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("SubscriberImpl::create_opendds_datareader, ")
+          ACE_TEXT("DATAREADER_QOS_USE_TOPIC_QOS can not be used ")
+          ACE_TEXT("to create a MultiTopic DataReader.\n")));
+      }
+      return DDS::DataReader::_nil();
+    }
+#endif
     DDS::TopicQos topic_qos;
     topic_servant->get_qos(topic_qos);
 
@@ -184,6 +201,36 @@ ACE_THROW_SPEC((CORBA::SystemException))
                ACE_TEXT("inconsistent qos.\n")));
     return DDS::DataReader::_nil();
   }
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  if (mt) {
+    try {
+      DDS::DataReader_var dr =
+        mt->get_type_support()->create_multitopic_datareader();
+      MultiTopicDataReaderBase* mtdr =
+        dynamic_cast<MultiTopicDataReaderBase*>(dr.in());
+      mtdr->init(dr_qos, ext_qos, a_listener, mask, this, mt);
+      if (enabled_.value() && qos_.entity_factory.autoenable_created_entities) {
+        if (dr->enable() != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) ERROR: ")
+                     ACE_TEXT("SubscriberImpl::create_datareader, ")
+                     ACE_TEXT("enable of MultiTopicDataReader failed.\n")));
+          return DDS::DataReader::_nil();
+        }
+        multitopic_reader_enabled(dr);
+      }
+      return dr._retn();
+    } catch (const std::exception& e) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("SubscriberImpl::create_datareader, ")
+                   ACE_TEXT("creation of MultiTopicDataReader failed: %C.\n"),
+                   e.what()));
+    }
+    return DDS::DataReader::_nil();
+  }
+#endif
 
   OpenDDS::DCPS::TypeSupport_ptr typesupport =
     topic_servant->get_type_support();
@@ -265,7 +312,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   DataReaderImpl* dr_servant
   = dynamic_cast<DataReaderImpl*>(a_datareader);
 
-  {
+  if (dr_servant) { // for MultiTopic this will be false
     DDS::Subscriber_var dr_subscriber(dr_servant->get_subscriber());
 
     if (dr_subscriber.in() != this) {
@@ -277,12 +324,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
                  std::string(converter).c_str()));
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
-  }
 
-  int loans = dr_servant->num_zero_copies();
+    int loans = dr_servant->num_zero_copies();
 
-  if (0 != loans) {
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
+    if (0 != loans) {
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
   }
 
   SubscriberDataReaderInfo* dr_info = 0;
@@ -304,7 +351,18 @@ ACE_THROW_SPEC((CORBA::SystemException))
     }
 
     if (it == datareader_map_.end()) {
-      CORBA::String_var topic_name = dr_servant->get_topic_name();
+      DDS::TopicDescription_var td = a_datareader->get_topicdescription();
+      CORBA::String_var topic_name = td->get_name();
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+      std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
+        multitopic_reader_map_.find(topic_name.in());
+      if (mt_iter != multitopic_reader_map_.end()) {
+        DDS::DataReader_ptr ptr = mt_iter->second;
+        dynamic_cast<MultiTopicDataReaderBase*>(ptr)->cleanup();
+        multitopic_reader_map_.erase(mt_iter);
+        return DDS::RETCODE_OK;
+      }
+#endif
       RepoId id = dr_servant->get_subscription_id();
       RepoIdConverter converter(id);
       ACE_ERROR_RETURN((LM_ERROR,
@@ -404,6 +462,14 @@ ACE_THROW_SPEC((CORBA::SystemException))
                      this->si_lock_,
                      DDS::RETCODE_ERROR);
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    for (std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
+           multitopic_reader_map_.begin();
+         mt_iter != multitopic_reader_map_.end(); ++mt_iter) {
+      drs.push_back(mt_iter->second);
+    }
+#endif
+
     DataReaderMap::iterator it;
     DataReaderMap::iterator itEnd = datareader_map_.end();
 
@@ -447,6 +513,14 @@ ACE_THROW_SPEC((CORBA::SystemException))
   DataReaderMap::iterator it = datareader_map_.find(topic_name);
 
   if (it == datareader_map_.end()) {
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
+      multitopic_reader_map_.find(topic_name);
+    if (mt_iter != multitopic_reader_map_.end()) {
+      return DDS::DataReader::_duplicate(mt_iter->second);
+    }
+#endif
+
     if (DCPS_debug_level >= 2) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) ")
@@ -474,31 +548,31 @@ ACE_THROW_SPEC((CORBA::SystemException))
                    guard,
                    this->si_lock_,
                    DDS::RETCODE_ERROR);
- 
+
   // If access_scope is GROUP and ordered_access is true then return readers as
-  // list which may contain same readers multiple times. Otherwise return readers 
+  // list which may contain same readers multiple times. Otherwise return readers
   // as set.
   if (this->qos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS) {
     if (this->access_depth_ == 0 && this->qos_.presentation.coherent_access) {
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
-    
+
     if (this->qos_.presentation.ordered_access) {
 
       GroupRakeData data;
       for (DataReaderSet::const_iterator pos = datareader_set_.begin() ;
         pos != datareader_set_.end() ; ++pos) {
-          (*pos)->get_ordered_data (data, sample_states, view_states, instance_states); 
+          (*pos)->get_ordered_data (data, sample_states, view_states, instance_states);
       }
 
       // Return list of readers in the order of the source timestamp of the received
       // samples from readers.
       data.get_datareaders (readers);
-      
+
       return DDS::RETCODE_OK ;
     }
   }
-  
+
   // Return set of datareaders.
   int count(0) ;
   readers.length(count);
@@ -540,6 +614,22 @@ ACE_THROW_SPEC((CORBA::SystemException))
         DDS::DATA_AVAILABLE_STATUS, false);
     }
   }
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  for (std::map<std::string, DDS::DataReader_var>::iterator it =
+         multitopic_reader_map_.begin(); it != multitopic_reader_map_.end();
+       ++it) {
+    MultiTopicDataReaderBase* dri =
+      dynamic_cast<MultiTopicDataReaderBase*>(it->second.in());
+    if (dri->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
+      DDS::DataReaderListener_var listener = dri->get_listener();
+      if (!CORBA::is_nil(listener)) {
+        listener->on_data_available(dri);
+      }
+      dri->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
+    }
+  }
+#endif
 
   return DDS::RETCODE_OK ;
 }
@@ -674,7 +764,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
     return DDS::RETCODE_OK;
   }
-  
+
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    this->si_lock_,
@@ -708,7 +798,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
     return DDS::RETCODE_OK;
   }
-  
+
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    this->si_lock_,
@@ -1022,6 +1112,17 @@ ACE_THROW_SPEC((CORBA::SystemException))
   return DDS::RETCODE_OK;
 }
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+DDS::ReturnCode_t
+SubscriberImpl::multitopic_reader_enabled(DDS::DataReader_ptr reader)
+{
+  DDS::TopicDescription_var td = reader->get_topicdescription();
+  CORBA::String_var topic = td->get_name();
+  multitopic_reader_map_[topic.in()] = DDS::DataReader::_duplicate(reader);
+  return DDS::RETCODE_OK;
+}
+#endif
+
 DDS::SubscriberListener*
 SubscriberImpl::listener_for(::DDS::StatusKind kind)
 {
@@ -1064,7 +1165,7 @@ SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
   }
 }
 
-void 
+void
 SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength)
 {
@@ -1078,20 +1179,20 @@ SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
        ++iter) {
     if (! iter->second->local_reader_impl_->is_bit ()) {
       iter->second->local_reader_impl_->update_ownership_strength (pub_id, ownership_strength);
-    } 
+    }
   }
-}                               
-             
-             
+}
+
+
 void
-SubscriberImpl::coherent_change_received (RepoId& publisher_id, 
-                                          DataReaderImpl* reader, 
+SubscriberImpl::coherent_change_received (RepoId& publisher_id,
+                                          DataReaderImpl* reader,
                                           Coherent_State& group_state)
-{   
+{
   // Verify if all readers complete the coherent changes. The result
   // is either COMPLETED or REJECTED.
-  group_state = COMPLETED;  
-  DataReaderSet::const_iterator endIter = datareader_set_.end();  
+  group_state = COMPLETED;
+  DataReaderSet::const_iterator endIter = datareader_set_.end();
   for (DataReaderSet::const_iterator iter = datareader_set_.begin() ;
     iter != endIter ; ++iter) {
 
@@ -1105,18 +1206,18 @@ SubscriberImpl::coherent_change_received (RepoId& publisher_id,
       group_state = REJECTED;
     }
   }
-  
+
   PublicationId writerId = GUID_UNKNOWN;
   for (DataReaderSet::const_iterator iter = datareader_set_.begin() ;
     iter != endIter ; ++iter) {
-      if (group_state == COMPLETED) { 
+      if (group_state == COMPLETED) {
         (*iter)->accept_coherent (writerId, publisher_id);
       }
       else { //REJECTED
         (*iter)->reject_coherent (writerId, publisher_id);
       }
   }
-  
+
   if (group_state == COMPLETED) {
     for (DataReaderSet::const_iterator iter = datareader_set_.begin() ;
       iter != endIter ; ++iter) {

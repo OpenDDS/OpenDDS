@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_INSTANCESTATE_H
-#define TAO_DDS_DCPS_INSTANCESTATE_H
+#ifndef OPENDDS_DCPS_INSTANCESTATE_H
+#define OPENDDS_DCPS_INSTANCESTATE_H
 
 #include "dcps_export.h"
 #include "ace/Time_Value.h"
@@ -124,9 +124,11 @@ public:
   bool registered();
   void registered (bool flag);
   bool is_last (const PublicationId& pub);
-  
+
   bool no_writer () const;
-  
+
+  void reset_ownership (::DDS::InstanceHandle_t instance);
+
 private:
   ACE_Recursive_Thread_Mutex& lock_;
 
@@ -209,4 +211,4 @@ private:
 # include "InstanceState.inl"
 #endif  /* __ACE_INLINE__ */
 
-#endif /* TAO_DDS_DCPS_INSTANCESTATE_H */
+#endif /* OPENDDS_DCPS_INSTANCESTATE_H */

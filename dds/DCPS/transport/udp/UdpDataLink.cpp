@@ -36,7 +36,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
 {
   this->remote_address_ = remote_address;
   this->is_loopback_ = this->remote_address_ == this->config_->local_address_;
-  
+
   ACE_INET_Addr local_address;
   if (!this->active_) {
     local_address = this->config_->local_address_;
@@ -52,8 +52,8 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
   if (start(this->send_strategy_.in(), this->recv_strategy_.in()) != 0) {
     stop_i();
     ACE_ERROR_RETURN((LM_ERROR,
-		      ACE_TEXT("(%P|%t) ERROR: ")
-		      ACE_TEXT("UdpDataLink::open: start failed!\n")),
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("UdpDataLink::open: start failed!\n")),
                      false);
   }
 

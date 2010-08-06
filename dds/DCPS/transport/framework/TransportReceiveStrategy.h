@@ -40,7 +40,7 @@ public:
   virtual void relink(bool do_suspend = true);
 
   /// Provides access to the received transport header
-  /// for subclasses. 
+  /// for subclasses.
   const TransportHeader& received_header() const;
 
 protected:
@@ -83,12 +83,12 @@ private:
 
   /// Current receive TransportHeader.
   TransportHeader receive_transport_header_;
-  
+
   //
-  // The total available space in the receive buffers must have enough to hold 
-  // a max sized message.  The max message is about 64K and the low water for 
+  // The total available space in the receive buffers must have enough to hold
+  // a max sized message.  The max message is about 64K and the low water for
   // a buffer is 4096.  Therefore, 16 receive buffers is appropriate.
-  // 
+  //
   enum { RECEIVE_BUFFERS  =   16 };
   enum { BUFFER_LOW_WATER = 4096 };
 

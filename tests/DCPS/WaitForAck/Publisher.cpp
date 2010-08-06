@@ -311,9 +311,9 @@ Publisher::run()
     if (error != DDS::RETCODE_OK)
     {
       ACE_DEBUG((LM_DEBUG,
-	ACE_TEXT("(%P|%t) ERROR Publisher::run() - ")
-	ACE_TEXT("publisher wait failed with code: %d.\n"),
-	error));
+        ACE_TEXT("(%P|%t) ERROR Publisher::run() - ")
+        ACE_TEXT("publisher wait failed with code: %d.\n"),
+        error));
       ++this->status_;
     }
   }
@@ -322,15 +322,15 @@ Publisher::run()
     for( unsigned int index = 0; index < this->publications_.size(); ++index) {
       // First wait on this writer.
       ::DDS::ReturnCode_t result
-	= this->publications_[ index]->wait_for_acks( delay);
+        = this->publications_[ index]->wait_for_acks( delay);
       if( result != ::DDS::RETCODE_OK) {
-	ACE_DEBUG((LM_DEBUG,
-	  ACE_TEXT("(%P|%t) ERROR Publisher::run() - ")
-	  ACE_TEXT("publication %d wait failed with code: %d.\n"),
-	  index,
-	  result
-	));
-	++this->status_;
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) ERROR Publisher::run() - ")
+          ACE_TEXT("publication %d wait failed with code: %d.\n"),
+          index,
+          result
+        ));
+        ++this->status_;
       }
     }
   }

@@ -464,11 +464,11 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPendingTimeout"))) != 0) {
       this->pending_timeout_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
-    
+
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationRecoveryDuration"))) != 0) {
       this->federation_recovery_duration_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
-    
+
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationInitialBackoffSeconds"))) != 0) {
       this->federation_initial_backoff_seconds_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
@@ -706,8 +706,8 @@ Service_Participant::initializeScheduling()
 
 #ifdef DDS_HAS_WCHAR
 void
-Service_Participant::set_repo_ior(const wchar_t* ior, 
-                                  const RepoKey key, 
+Service_Participant::set_repo_ior(const wchar_t* ior,
+                                  const RepoKey key,
                                   bool  attach_participant)
 {
   set_repo_ior(ACE_Wide_To_Ascii(ior).char_rep(), key, attach_participant);
@@ -777,7 +777,7 @@ Service_Participant::set_repo(DCPSInfo_ptr repo, const RepoKey key, bool attach_
 }
 
 void
-Service_Participant::remap_domains(const RepoKey oldKey, 
+Service_Participant::remap_domains(const RepoKey oldKey,
                                    const RepoKey newKey,
                                    bool attach_participant)
 {
@@ -804,7 +804,7 @@ Service_Participant::remap_domains(const RepoKey oldKey,
 }
 
 void
-Service_Participant::set_repo_domain(const DDS::DomainId_t domain, 
+Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
                                      const RepoKey key,
                                      bool attach_participant)
 {
@@ -892,7 +892,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
                  std::string(converter).c_str(),
                  key));
     }
-    
+
     if (attach_participant)
     {
       repoList[ index].first->attach_participant(domain, repoList[ index].second);
@@ -1140,7 +1140,7 @@ Service_Participant::init_bit_transport_impl(DDS::DomainId_t domain)
   = static_cast <SimpleTcpConfiguration*>(config.in());
 
   tcp_config->datalink_release_delay_ = 0;
-  
+
   if (0 == this->bitTransportIpMap_[ repo].length()) {
     tcp_config->local_address_.set_port_number(this->bitTransportPortMap_[ repo]);
 

@@ -51,7 +51,7 @@ SubscriberMonitorImpl::report() {
          iter != readers.end();
          ++iter) {
       report.readers[length++] = *iter;
-    }    
+    }
     this->sub_writer_->write(report, DDS::HANDLE_NIL);
   }
 }

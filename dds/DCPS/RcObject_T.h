@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_RCOBJECT_T_H
-#define TAO_DDS_RCOBJECT_T_H
+#ifndef OPENDDS_RCOBJECT_T_H
+#define OPENDDS_RCOBJECT_T_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "ace/Atomic_Op.h"
@@ -78,4 +78,4 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif  /*TAO_DDS_RCOBJECT_T_H */
+#endif  /*OPENDDS_RCOBJECT_T_H */

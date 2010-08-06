@@ -229,18 +229,18 @@ public:
 
 #ifdef DDS_HAS_WCHAR
   /// Convenience overload for wchar_t
-  void set_repo_ior(const wchar_t* ior, 
+  void set_repo_ior(const wchar_t* ior,
                     const RepoKey key = DEFAULT_REPO,
                     bool  attach_participant = true);
 #endif
 
   /// Load DCPSInfoRepo reference directly.
-  void set_repo(DCPSInfo_ptr repo, 
+  void set_repo(DCPSInfo_ptr repo,
                 const RepoKey key = DEFAULT_REPO,
                 bool  attach_participant = true);
 
   /// Rebind a domain from one repository to another.
-  void remap_domains(const RepoKey oldKey, 
+  void remap_domains(const RepoKey oldKey,
                      const RepoKey newKey,
                      bool attach_participant = true);
 
@@ -494,7 +494,7 @@ private:
   ACE_Configuration_Heap cf_;
 
 public:
-  /// Pointer to the monitor factory that is used to create 
+  /// Pointer to the monitor factory that is used to create
   /// monitor objects.
   MonitorFactory* monitor_factory_;
 

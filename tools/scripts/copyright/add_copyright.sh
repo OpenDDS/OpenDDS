@@ -6,7 +6,7 @@
 if [ ! "$DDS_ROOT" ]; then
   echo "ERROR: DDS_ROOT environment variable not set!"
   exit 1
-fi 
+fi
 
 TOOLS_HOME="$DDS_ROOT/tools"
 

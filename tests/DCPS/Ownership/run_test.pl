@@ -18,9 +18,10 @@ $opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
 $repo_bit_opt = $opts;
 
 $debuglevel = 0;
+$debug_opts = "-ORBDebugLevel $debuglevel -ORBVerboseLogging 1 -DCPSDebugLevel $debuglevel -DCPSTransportDebugLevel $debuglevel";
 
-$pub_opts = "$opts -ORBDebugLevel $debuglevel -DCPSConfigFile pub.ini -DCPSDebugLevel $debuglevel";
-$sub_opts = "$opts -DCPSTransportDebugLevel $debuglevel -ORBDebugLevel $debuglevel -DCPSConfigFile sub.ini -DCPSDebugLevel $debuglevel";
+$pub_opts = "$opts $debug_opts -DCPSConfigFile pub.ini";
+$sub_opts = "$opts $debug_opts -DCPSConfigFile sub.ini";
 $shutdown_pub = 0;
 $sub_deadline = "";
 $pub1_deadline = "";
@@ -33,14 +34,14 @@ $testcase = 0;
 
 if ($ARGV[0] eq 'liveliness_change') {
     $sub_liveliness = "-l 2";
-    $pub1_liveliness = "-l 1";
-    $pub2_liveliness = "-l 1";
+    $pub1_liveliness = "-l 1 -y 250";
+    $pub2_liveliness = "-l 1 -y 250 -c";
     $testcase = 1;
 }
 elsif ($ARGV[0] eq 'miss_deadline') {
     $sub_deadline = "-d 2";
-    $pub1_deadline = "-d 1";
-    $pub2_deadline = "-d 1";
+    $pub1_deadline = "-d 1 -y 500";
+    $pub2_deadline = "-d 1 -y 500 -c";
     $testcase = 2;
 }
 elsif ($ARGV[0] eq 'update_strength') {
@@ -58,12 +59,12 @@ unlink $dcpsrepo_ior;
 unlink <*.log>;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "-ORBDebugLevel 10 -ORBVerboseLogging 1 -DCPSDebugLevel $debuglevel -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior ");
+                                  "$debug_opts -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior ");
 
-$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts -ORBVerboseLogging 1 -ORBLogFile sub.log $sub_deadline $sub_liveliness -t $testcase");
+$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts -ORBLogFile sub.log $sub_deadline $sub_liveliness -t $testcase");
 
-$Publisher1 = PerlDDS::create_process ("publisher", " $pub_opts -s 10 -i datawriter1 $pub1_reset_strength $pub1_deadline $pub1_liveliness -ORBLogFile pub1.log");
-$Publisher2 = PerlDDS::create_process ("publisher", " $pub_opts -s 12 -i datawriter2 $pub2_deadline $pub2_liveliness -ORBLogFile pub2.log");
+$Publisher1 = PerlDDS::create_process ("publisher", "$pub_opts -ORBLogFile pub1.log -s 10 -i datawriter1 $pub1_reset_strength $pub1_deadline $pub1_liveliness");
+$Publisher2 = PerlDDS::create_process ("publisher", "$pub_opts -ORBLogFile pub2.log -s 12 -i datawriter2 $pub2_deadline $pub2_liveliness");
 
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();

@@ -31,7 +31,7 @@ class Topic_Manager_T : public Topic_Manager_Impl
   ///                 method.
   Topic_Manager_T (const std::string& name,
                    DDS::DataReaderListener_ptr listener = 
-                     DDS::DataReaderListener::_nil (),		     
+                     DDS::DataReaderListener::_nil (),
                    bool create_new_topic = true);
 
   /// dtor

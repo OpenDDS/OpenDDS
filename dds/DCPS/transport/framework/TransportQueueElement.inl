@@ -76,8 +76,8 @@ OpenDDS::DCPS::TransportQueueElement::decision_made(bool dropped_by_transport)
     // The queue elements are released to its cached allocator
     // in release_element() call.
     // It's not necessary to set the released_ flag to true
-    // as this element will be released anyway and not be 
-    // accessible. Note it can not be set after release_element 
+    // as this element will be released anyway and not be
+    // accessible. Note it can not be set after release_element
     // call.
     // this->released_ = true;
     this->release_element(dropped_by_transport);
@@ -101,7 +101,7 @@ OpenDDS::DCPS::TransportQueueElement::was_dropped() const
 }
 
 ACE_INLINE
-bool 
+bool
 OpenDDS::DCPS::TransportQueueElement::released() const
 {
   return this->released_;
@@ -109,11 +109,11 @@ OpenDDS::DCPS::TransportQueueElement::released() const
 
 
 ACE_INLINE
-void 
+void
 OpenDDS::DCPS::TransportQueueElement::released(bool flag)
 {
   this->released_ = flag;
 }
 
-   
+
 

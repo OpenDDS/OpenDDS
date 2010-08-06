@@ -160,5 +160,5 @@ module simple {
     StructWithObjref op3(in StructWithObjref p1, inout StructWithObjref p2,
                          out StructWithObjref p3);
   };
-  
+
 };

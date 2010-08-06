@@ -17,14 +17,8 @@ workspace {
   $(TAO_ROOT)/tao/PortableServer.mpc
   $(TAO_ROOT)/tao/ImR_Client.mpc
   $(TAO_ROOT)/tao/PI.mpc
-  $(TAO_ROOT)/tao/PI_Server.mpc
   $(TAO_ROOT)/tao/CodecFactory.mpc
-  $(TAO_ROOT)/tao/IORManipulation.mpc
-  $(TAO_ROOT)/tao/Valuetype.mpc
-  $(TAO_ROOT)/tao/Messaging.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/Svc_Utils.mpc
-  $(TAO_ROOT)/orbsvcs/orbsvcs/CosNaming.mpc
-  $(TAO_ROOT)/orbsvcs/orbsvcs/PortableGroup.mpc
-  $(TAO_ROOT)/orbsvcs/orbsvcs/FTORB.mpc
   dds
+  tools
 }
