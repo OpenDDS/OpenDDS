@@ -1,3 +1,19 @@
+Thu Aug  5 23:16:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3550] 2010-08-05 23:09  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/plugin.xml,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenEditor.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenForm.java[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenerator.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/GeneratorManager.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/IDataChangedListener.java[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/InstanceForm.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/OutputsForm.java:
+
+          Finished implementing editor lifecycle management. Factored the code
+          generation into its own class to anticipate using it as an action
+          delegate.
+
 Wed Aug  4 22:43:58 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3540] 2010-08-04 13:52  martinezm
