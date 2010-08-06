@@ -40,8 +40,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -107,12 +105,8 @@ public class CodeGenerator {
 			public abstract String suffix();
 	};
 	
-	public CodeGenerator() {
-		Shell[] shells = Display.getCurrent().getShells();
-		if( shells.length == 0) {
-			throw new RuntimeException("CodeGenerator: Unable to find display");
-		}
-		this.parent = shells[0];
+	public CodeGenerator( Composite parent) {
+		this.parent = parent;
 	}
 	
 	private TransformerFactory getTransformerFactory() {
@@ -297,9 +291,8 @@ public class CodeGenerator {
 			return; // messages were generated in the get call.
 		}
 
+		Result result = null;
 		URI	outputUri = targetFolder.getFile(modelname + which.suffix()).getLocationURI();
-
-		StreamResult result = null;
 		try {
 			IFileStore fileStore = EFS.getStore(outputUri);
 			result = new StreamResult(
@@ -314,14 +307,13 @@ public class CodeGenerator {
 			return;
 		}
 		
-		Source modelInput;
 		try {
-			Document doc = getModelDocument( sourceName);
-			if( doc == null) {
+			Document document = getModelDocument( sourceName);
+			if( document == null) {
 				return; // messages were generated in the get call.
 			}
-			modelInput = new DOMSource(doc);
-			which.transform(modelInput, result);
+			Source source = new DOMSource(document);
+			which.transform(source, result);
 		} catch (TransformerException e) {
 			ErrorDialog.openError(
 					parent.getShell(),		// XXX
