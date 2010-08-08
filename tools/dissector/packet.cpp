@@ -14,6 +14,7 @@ extern "C" {
 #include <glib.h>
 #include <gmodule.h>
 
+#include <epan/value_string.h>
 #include <epan/ipproto.h>
 #include <epan/packet.h>
 
@@ -39,7 +40,22 @@ extern "C" {
 
 using namespace OpenDDS::DCPS;
 
+// value ABSOLUTE_TIME_LOCAL, 1.2.x does not.  This technique uses
+// the ABSOLUTE_TIME_LOCAL value if it is present (1.3.x), 
+// and uses BASE_NONE if it is not (1.2.x).  This must be in
+// the same scope as the Wireshark 1.2.x declaration of
+// the ABSOLUTE_TIME_LOCAL enum value, which is why it is in the
+// global namespace.
+struct ABSOLUTE_TIME_LOCAL {
+  static const int value = BASE_NONE;
+};
+
 namespace {
+
+// These two functions are the rest of the 
+// Wireshark 1.2.x / 1.3.x compatibility solution.
+template <int V> int enum_value() { return V; }
+template <typename T> int enum_value() { return T::value; }
 
 int proto_opendds    = -1;
 
@@ -365,7 +381,7 @@ proto_register_opendds()
       { "Version",
         "opendds.version",
         FT_BYTES,
-        BASE_HEX,
+        BASE_NONE,
         NULL,
         0,
         NULL,
@@ -530,7 +546,7 @@ proto_register_opendds()
       { "Timestamp",
         "opendds.sample.timestamp",
         FT_ABSOLUTE_TIME,
-        BASE_NONE,
+        enum_value<ABSOLUTE_TIME_LOCAL>(),
         NULL,
         0,
         NULL,
@@ -552,7 +568,7 @@ proto_register_opendds()
       { "Publication",
         "opendds.sample.publication",
         FT_BYTES,
-        BASE_HEX,
+        BASE_NONE,
         NULL,
         0,
         NULL,

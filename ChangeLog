@@ -1,10 +1,19 @@
+Sun Aug  8 16:54:25 UTC 2010  Don Busch  <buschd@ociweb.com>
+
+        * Merged the branch "oci_buschd_monitor_2010Jul22", which 
+          includes handling of a host:port endpoint for the InfoRepo
+          IOR, integraton of the dissector with Wireshark 1.3.x,
+          a new default IOR/Endpoint for the monitor, and tests.
+          For details see the branch-specific change log at
+          docs/history/ChangeLog-oci_buschd_monitor_2010Jul22.
+        
 Fri Aug  6 21:14:26 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/OfferedDeadlineWatchdog.cpp:
 
-          Fixed execute() to call the listener once per missed 
-          deadline period. Previously it could be called twice 
-          when the timer is triggered and then a new sample is 
+          Fixed execute() to call the listener once per missed
+          deadline period. Previously it could be called twice
+          when the timer is triggered and then a new sample is
           received right after and missed deadline, it could
           cause incorrect status counter.
 
@@ -17,10 +26,10 @@ Fri Aug  6 21:14:26 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
           - Adjusted the missed deadline status counter.
           - Cleaned and added loggings to make debugging easier.
-          
+
 Fri Aug  6 20:06:25 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
-        * removed trailing whitespace from many files 
+        * removed trailing whitespace from many files
 
 Fri Aug  6 19:25:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
