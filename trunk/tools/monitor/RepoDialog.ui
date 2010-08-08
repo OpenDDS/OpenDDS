@@ -37,7 +37,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>IOR:</string>
+        <string>IOR/Endpoint:</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -47,7 +47,7 @@
      <item>
       <widget class="QLineEdit" name="iorLineEdit">
        <property name="text">
-        <string>corbaloc::iiop:</string>
+        <string>&lt;host&gt;&lt;port&gt;</string>
        </property>
       </widget>
      </item>
