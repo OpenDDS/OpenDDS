@@ -1,3 +1,12 @@
+Mon Aug  9 17:29:37 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/org.opendds/org.opendds.modeling.model.editor/plugin.properties:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+          Accidently checked in. Reverted to version previous to "Mon Aug  9 14:22:43 UTC 2010"
+          commit.
+
 Mon Aug  9 14:22:43 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/testdata/DataLibrary/DataLibraryTest.opendds:
