@@ -1,45 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<opendds:MiddlewareLibrary xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" name="aModel">
-  <domains name="1"/>
-  <domains name="2"/>
-  <participants name="part1" domain="//@domains.0">
-    <qosPolicy xsi:type="opendds:qosProperty" name="part1QosProperty">
-      <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#//@policyLibrary.0/@policies.21"/>
+<opendds:MiddlewareLibrary xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_P4hVUKO9Ed-9KMRPTsXTAg" name="MiddlewareLibraryTest">
+  <domains xmi:id="_fRQZ4KO9Ed-9KMRPTsXTAg" name="domain 1"/>
+  <domains xmi:id="_inPeQKO9Ed-9KMRPTsXTAg" name="domain 2"/>
+  <participants xmi:id="_oeKOUKO9Ed-9KMRPTsXTAg" name="part1" domain="_fRQZ4KO9Ed-9KMRPTsXTAg">
+    <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_86HVIKO9Ed-9KMRPTsXTAg" name="part1QosProperty">
+      <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_OEdGIKGNEd-D-tWBUFz4zw"/>
     </qosPolicy>
-    <publishers xsi:type="opendds:publisher" name="pub1">
-      <qosPolicy xsi:type="opendds:qosProperty" name="policyFromLibrary">
-        <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#//@policyLibrary.0/@policies.8"/>
+    <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_SxFL8KO_Ed-9KMRPTsXTAg" name="part1entityfactory">
+      <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_U5UFIKGNEd-D-tWBUFz4zw"/>
+    </qosPolicy>
+    <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_Zf-s4KO_Ed-9KMRPTsXTAg" name="part1userdata">
+      <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_Pw72EKGNEd-D-tWBUFz4zw"/>
+    </qosPolicy>
+    <publishers xsi:type="opendds:publisher" xmi:id="_YkGI4KO-Ed-9KMRPTsXTAg" name="pub1">
+      <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_etCdEKO-Ed-9KMRPTsXTAg" name="policyFromLibrary">
+        <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_MiaroKGNEd-D-tWBUFz4zw"/>
       </qosPolicy>
-      <presentation xsi:type="opendds:presentationQosPolicy" name="pub1presentation" coherent_access="true" ordered_access="true"/>
-      <partition xsi:type="opendds:partitionQosPolicy" name="pub1partition"/>
-      <writer xsi:type="opendds:dataWriter" name="writer1" topic="//@topics.0">
-        <qosPolicy xsi:type="opendds:qosProperty" name="write1QosProperty">
-          <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#//@policyLibrary.0/@policies.9"/>
+      <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_kiZG4KO-Ed-9KMRPTsXTAg" name="pub1presentation">
+        <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_W7gmYKGNEd-D-tWBUFz4zw"/>
+      </qosPolicy>
+      <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_p8pwIKO-Ed-9KMRPTsXTAg" name="pub1partition"/>
+      <writers xsi:type="opendds:dataWriter" xmi:id="_x5RBYKO-Ed-9KMRPTsXTAg" name="writer1">
+        <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_MLwBQKPAEd-9KMRPTsXTAg" name="writer1QosProperty">
+          <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_cOcfoKGNEd-D-tWBUFz4zw"/>
         </qosPolicy>
-        <resource_limits xsi:type="opendds:rlQosPolicy" name="writer1limits"/>
-        <durability_service xsi:type="opendds:dsQosPolicy" name="write1DsQosPolicy" max_instances="3" max_samples="4" max_samples_per_instance="2"/>
-      </writer>
+        <resource_limits xsi:type="opendds:rlQosPolicy" xmi:id="_WUH_cKPAEd-9KMRPTsXTAg" name="writer1limits" max_instances="3" max_samples="4" max_samples_per_instance="2"/>
+        <durability_service xsi:type="opendds:dsQosPolicy" xmi:id="_f5TxAKPAEd-9KMRPTsXTAg" name="writer1durability" max_instances="3" max_samples="4" max_samples_per_instance="2"/>
+      </writers>
     </publishers>
-    <subscribers xsi:type="opendds:subscriber" name="sub1">
-      <qosPolicy xsi:type="opendds:qosProperty" name="sub1QosProperty">
-        <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#//@policyLibrary.0/@policies.3"/>
+    <subscribers xsi:type="opendds:subscriber" xmi:id="_3y_N0KO-Ed-9KMRPTsXTAg" name="sub1">
+      <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_76vtYKO-Ed-9KMRPTsXTAg" name="sub1QosProperty">
+        <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_bS-V4KGNEd-D-tWBUFz4zw"/>
       </qosPolicy>
-      <reader xsi:type="opendds:dataReader" name="reader1" topic="//@topics.0">
-        <qosPolicy xsi:type="opendds:qosProperty" name="reader1QosProperty">
-          <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#//@policyLibrary.0/@policies.19"/>
+      <readers xsi:type="opendds:dataReader" xmi:id="_tG3XcKPAEd-9KMRPTsXTAg" name="reader1" topic="_hRao4KO_Ed-9KMRPTsXTAg">
+        <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_1V2LEKPAEd-9KMRPTsXTAg" name="reader1QosProperty">
+          <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_LopLAKGNEd-D-tWBUFz4zw"/>
         </qosPolicy>
-      </reader>
+      </readers>
     </subscribers>
-    <entity_factory xsi:type="opendds:efQosPolicy" name="part1entityfactory"/>
-    <user_data name="part1userdata" value="42"/>
   </participants>
-  <topics name="topic1">
-    <qosPolicy name="myDeadlineQosPolicy">
-      <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#//@policyLibrary.0/@policies.0"/>
+  <topics xmi:id="_hRao4KO_Ed-9KMRPTsXTAg" name="topic1">
+    <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_x_g94KO_Ed-9KMRPTsXTAg" name="myDeadlineQosPolicy">
+      <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_VizHAKGNEd-D-tWBUFz4zw"/>
     </qosPolicy>
-    <qosPolicy name="myDestinationOrderQosPolicy">
-      <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#//@policyLibrary.0/@policies.1"/>
+    <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_3dtE4KO_Ed-9KMRPTsXTAg" name="myDestinationOrderQosPolicy">
+      <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_cOcfoKGNEd-D-tWBUFz4zw"/>
     </qosPolicy>
-    <datatype xsi:type="types:idlStruct" href="../DataLibrary/DataLibraryTest.opendds#//@dataTypes.3"/>
+    <datatype xsi:type="types:idlStruct" href="../DataLibrary/DataLibraryTest.opendds#_Mod2oKO5Ed-9KMRPTsXTAg"/>
   </topics>
 </opendds:MiddlewareLibrary>

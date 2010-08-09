@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<types:DataLibrary xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0">
-  <dataTypes xsi:type="types:Short"/>
-  <dataTypes xsi:type="types:Sequence" name="ShortSequence" subtype="//@dataTypes.0"/>
-  <dataTypes xsi:type="types:idlTypedef" name="shortseqtypedef" type="//@dataTypes.1"/>
-  <dataTypes xsi:type="types:idlStruct" name="type1">
-    <members xsi:type="types:String" name="name"/>
-    <members xsi:type="types:ULong" name="value"/>
-    <members xsi:type="types:Short" name="key"/>
-    <members xsi:type="types:TypedefRef" name="bseq" reference="//@dataTypes.2"/>
-    <keys member="//@dataTypes.3/@members.2"/>
+<types:DataLibrary xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_bVL_MKO4Ed-9KMRPTsXTAg" name="DataLibraryTest">
+  <dataTypes xsi:type="types:Short" xmi:id="_5BtScKO4Ed-9KMRPTsXTAg"/>
+  <dataTypes xsi:type="types:Sequence" xmi:id="_Ap0TUKO5Ed-9KMRPTsXTAg" name="ShortSequence" length="10" subtype="_5BtScKO4Ed-9KMRPTsXTAg"/>
+  <dataTypes xsi:type="types:idlTypedef" xmi:id="_Iq8RIKO5Ed-9KMRPTsXTAg" name="shortseqtypedef" type="_Ap0TUKO5Ed-9KMRPTsXTAg"/>
+  <dataTypes xsi:type="types:idlStruct" xmi:id="_Mod2oKO5Ed-9KMRPTsXTAg">
+    <members xsi:type="types:String" xmi:id="_SkZpkKO5Ed-9KMRPTsXTAg" name="name"/>
+    <members xsi:type="types:ULong" xmi:id="_hrbTEKO5Ed-9KMRPTsXTAg" name="value"/>
+    <members xsi:type="types:Short" xmi:id="_j8Np8KO5Ed-9KMRPTsXTAg" name="key"/>
+    <members xsi:type="types:TypedefRef" xmi:id="_pBUikKO5Ed-9KMRPTsXTAg" name="bseq" reference="_Iq8RIKO5Ed-9KMRPTsXTAg"/>
+    <keys xmi:id="_u9oI8KO5Ed-9KMRPTsXTAg" member="_5BtScKO4Ed-9KMRPTsXTAg"/>
   </dataTypes>
 </types:DataLibrary>

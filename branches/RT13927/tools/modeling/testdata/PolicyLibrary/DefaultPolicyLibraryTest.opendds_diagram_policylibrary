@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmi:id="_aVWBoJgZEd-BkJUiXXQMKA" type="OpenDDS PolicyLibrary" measurementUnit="Pixel">
-  <styles xmi:type="notation:DiagramStyle" xmi:id="_aVWBoZgZEd-BkJUiXXQMKA"/>
-  <element xmi:type="opendds:PolicyLibrary" href="DefaultPolicyLibraryTest.opendds#//@policyLibrary.0"/>
+<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmi:id="_105DcKGPEd-D-tWBUFz8zw" type="OpenDDS PolicyLibrary" measurementUnit="Pixel">
+  <styles xmi:type="notation:DiagramStyle" xmi:id="_105DcaGPEd-D-tWBUFz8zw"/>
+  <element xmi:type="opendds:PolicyLibrary" href="DefaultPolicyLibraryTest.opendds#_HeBksKGNEd-D-tWBUFz8zw"/>
 </notation:Diagram>
