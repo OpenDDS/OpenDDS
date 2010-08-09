@@ -191,7 +191,7 @@
     </genClasses>
   </genPackages>
   <genPackages prefix="Types" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
-      generateExampleClass="false" ecorePackage="Types.ecore#/">
+      generateExampleClass="false" generateModelWizard="false" ecorePackage="Types.ecore#/">
     <genClasses ecoreClass="Types.ecore#//DataLibrary">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//DataLibrary/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//DataLibrary/dataTypes"/>
@@ -308,7 +308,7 @@
     </genClasses>
   </genPackages>
   <genPackages prefix="Application" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
-      generateExampleClass="false" ecorePackage="Application.ecore#/">
+      generateExampleClass="false" generateModelWizard="false" ecorePackage="Application.ecore#/">
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="Application.ecore#//LanguageType">
       <genEnumLiterals ecoreEnumLiteral="Application.ecore#//LanguageType/CXX"/>
     </genEnums>
@@ -333,7 +333,7 @@
     </genClasses>
   </genPackages>
   <genPackages prefix="Enumerations" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
-      generateExampleClass="false" ecorePackage="Enumerations.ecore#/">
+      generateExampleClass="false" generateModelWizard="false" ecorePackage="Enumerations.ecore#/">
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="Enumerations.ecore#//ReliabilityQosPolicyKind">
       <genEnumLiterals ecoreEnumLiteral="Enumerations.ecore#//ReliabilityQosPolicyKind/BEST_EFFORT"/>
       <genEnumLiterals ecoreEnumLiteral="Enumerations.ecore#//ReliabilityQosPolicyKind/RELIABLE"/>
