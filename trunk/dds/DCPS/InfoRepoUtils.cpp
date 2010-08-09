@@ -33,8 +33,8 @@ namespace DCPS {
 
         o = orb->string_to_object(second_try.c_str());
       }
-      
-      return DCPSInfo::_narrow(o.in());  
+
+      return DCPSInfo::_narrow(o.in());
     }
   } // InfoRepoUtils
 

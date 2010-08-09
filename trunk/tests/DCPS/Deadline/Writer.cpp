@@ -94,7 +94,7 @@ Writer::svc ()
     message.count      = 0;
 
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t)Writer::svc sleep for %d seconds.\n"), 
+              ACE_TEXT("(%P|%t)Writer::svc sleep for %d seconds.\n"),
               this->sleep_duration_.sec()));
 
     ACE_OS::sleep (this->sleep_duration_);
@@ -130,7 +130,7 @@ Writer::svc ()
     cerr << "Exception caught in svc:" << endl
          << e << endl;
   }
-  
+
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)Writer::svc finished.\n")));
 
   return 0;

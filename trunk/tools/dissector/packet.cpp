@@ -41,7 +41,7 @@ extern "C" {
 using namespace OpenDDS::DCPS;
 
 // value ABSOLUTE_TIME_LOCAL, 1.2.x does not.  This technique uses
-// the ABSOLUTE_TIME_LOCAL value if it is present (1.3.x), 
+// the ABSOLUTE_TIME_LOCAL value if it is present (1.3.x),
 // and uses BASE_NONE if it is not (1.2.x).  This must be in
 // the same scope as the Wireshark 1.2.x declaration of
 // the ABSOLUTE_TIME_LOCAL enum value, which is why it is in the
@@ -52,7 +52,7 @@ struct ABSOLUTE_TIME_LOCAL {
 
 namespace {
 
-// These two functions are the rest of the 
+// These two functions are the rest of the
 // Wireshark 1.2.x / 1.3.x compatibility solution.
 template <int V> int enum_value() { return V; }
 template <typename T> int enum_value() { return T::value; }
