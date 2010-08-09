@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.opendds.modeling.feature"
-      label="OpenDDS Modeling SDK"
-      version="1.0.0.dev20100720"
+      label="OpenDDS Modeling SDK Feature Bundle"
+      version="1.0.0.qualifier"
       provider-name="Object Computing, Inc."
       plugin="org.opendds.modeling.sdk">
 
@@ -41,7 +41,7 @@ development model.
    </license>
 
    <url>
-      <update label="OpenDDS Modeling SDK" url="https://maple.ociweb.com/~martinezm/opendds.org/modeling/eclipse/plugins/"/>
+      <update label="OpenDDS Modeling SDK" url="https://extranet.ociweb.com/navair/estel/plugins/"/>
    </url>
 
    <plugin
@@ -67,20 +67,6 @@ development model.
 
    <plugin
          id="org.opendds.modeling.sdk"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.opendds.modeling.uml2tools.mirrored"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.opendds.modeling.gmf"
          download-size="0"
          install-size="0"
          version="0.0.0"
