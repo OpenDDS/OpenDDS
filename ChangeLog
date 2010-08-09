@@ -1,3 +1,11 @@
+Mon Aug  9 17:46:13 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/UnitTests/DurationToTimeValue.cpp:
+
+          Fixed a few warnings.
+          
 Mon Aug  9 15:21:25 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * java/jms/build.xml:
