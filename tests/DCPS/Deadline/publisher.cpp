@@ -185,12 +185,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
           exit (1);
         }
 
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Publisher: sleep for %d seconds\n"), 
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Publisher: sleep for %d seconds\n"),
                               SLEEP_DURATION));
 
         // Wait for a set of deadline periods to expire.
         ACE_OS::sleep (SLEEP_DURATION);
-        
+
         ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Publisher: now verify missed ")
                             ACE_TEXT ("deadline status \n")));
 
@@ -241,9 +241,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         writer1->wait ();
         writer2->wait ();
 
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Publisher: sleep for %d seconds\n"), 
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Publisher: sleep for %d seconds\n"),
                               SLEEP_DURATION));
-       
+
         // Wait for another set of deadline periods to expire.
         ACE_OS::sleep (SLEEP_DURATION);
 
@@ -265,8 +265,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         // was sent about 2 seconds ago and it will be triggered at the second time
         // the timer is called. It should expect additional 2 deadline missed calls
         // (1 per instance).
-        
-        if (deadline_status.total_count != (NUM_EXPIRATIONS + 1) * NUM_WRITE_THREADS) 
+
+        if (deadline_status.total_count != (NUM_EXPIRATIONS + 1) * NUM_WRITE_THREADS)
         {
           cerr << "ERROR: Unexpected number of missed offered "
             << "deadlines (" << deadline_status.total_count

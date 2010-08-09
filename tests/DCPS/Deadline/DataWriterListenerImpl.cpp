@@ -21,7 +21,7 @@ DataWriterListenerImpl::on_offered_deadline_missed (
     ::DDS::OfferedDeadlineMissedStatus const & status)
   ACE_THROW_SPEC ((::CORBA::SystemException))
 {
-  ACE_DEBUG ((LM_DEBUG, 
+  ACE_DEBUG ((LM_DEBUG,
     ACE_TEXT("(%P|%t)DataWriterListenerImpl::on_offered_deadline_missed:")
     ACE_TEXT("total_count=%d total_count_change=%d last_instance_handle=%d \n"),
     status.total_count, status.total_count_change, status.last_instance_handle));

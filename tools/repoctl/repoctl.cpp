@@ -13,6 +13,7 @@
 
 #include "ace/Arg_Shifter.h"
 #include "ace/OS_main.h"
+#include "ace/OS_NS_string.h"
 
 #include <string>
 #include <iostream>
@@ -236,7 +237,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // Grab our information from the command line.
     Options options(argc, argv);
-    exename = strdup( options.name().c_str());
+    exename = ACE_OS::strdup( options.name().c_str());
 
     OpenDDS::DCPS::DCPSInfo_var ir;
     OpenDDS::Federator::Manager_var target;

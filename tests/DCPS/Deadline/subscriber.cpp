@@ -290,9 +290,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
       // ----------------------------------------------
 
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: sleep for %d seconds\n"), 
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: sleep for %d seconds\n"),
                             SLEEP_DURATION));
-      // Wait for deadline periods to expire. 
+      // Wait for deadline periods to expire.
       ACE_OS::sleep (SLEEP_DURATION);
 
       ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: now verify missed ")
@@ -311,7 +311,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         cerr << "ERROR: Failed to get requested deadline missed status" << endl;
         exit (1);
       }
-      
+
       ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: got missed")
                             ACE_TEXT ("deadline status \n")));
 
@@ -343,7 +343,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      //The reader deadline period is 5 seconds and writer writes 
+      //The reader deadline period is 5 seconds and writer writes
       //each instance every 9 seconds, so after SLEEP_DURATION(11secs),
       //the deadline missed should be 1 per instance
       if (deadline_status1.total_count != NUM_INSTANCE
@@ -377,12 +377,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // .5 second interval.
       ACE_Time_Value no_miss_period = num_messages * write_interval;
 
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: sleep for %d \n"), 
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: sleep for %d \n"),
                             SLEEP_DURATION + no_miss_period));
 
       // Wait for another set of deadline periods(5 + 11 secs).
       // During this period, the writers continue write all samples with
-      // .5 second interval. 
+      // .5 second interval.
       ACE_OS::sleep (SLEEP_DURATION + no_miss_period);
 
       ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: now verify missed ")
@@ -394,7 +394,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         cerr << "ERROR: failed to get requested deadline missed status" << endl;
         exit (1);
       }
-      
+
       ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: got missed")
                             ACE_TEXT ("deadline status \n")));
 

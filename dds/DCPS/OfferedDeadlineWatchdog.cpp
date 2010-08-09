@@ -73,10 +73,10 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(void const * act, bool timer_cal
       ACE_Time_Value diff = instance->cur_sample_tv_ - instance->last_sample_tv_;
       missed = diff > this->interval_;
     }
-    
+
     if (missed) {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, monitor, this->status_lock_);
-      
+
       if (timer_called) {
         ++this->status_.total_count;
         this->status_.total_count_change =
@@ -110,7 +110,7 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(void const * act, bool timer_cal
         this->schedule_timer(instance);
       }
     }
-    
+
   } else {
     ACE_ERROR((LM_ERROR, "(%P|%t)OfferedDeadlineWatchdog::execute: "
                "the current timer should not be invalid for instance %X\n",
