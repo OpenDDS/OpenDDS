@@ -1,3 +1,43 @@
+Mon Aug  9 20:22:35 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3574] 2010-08-09 20:18  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/images/logo-32x32.gif:
+
+          Attempt to clean up the logo size and shape.
+
+        * [r3572] 2010-08-09 19:13  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/build.properties:
+
+          Remove stale reference to an obsolete properties file.
+
+        * [r3571] 2010-08-09 19:10  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/about.ini,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/build.properties,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/images/logo-32x32-text.gif,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/plugin.properties[DEL],
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/plugin.xml:
+
+          Some cleanup for site generation.
+
+        * [r3568] 2010-08-09 15:59  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.feature/feature.xml,
+          tools/modeling/org.opendds/org.opendds.modeling.gmf/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.gmf/plugin.properties,
+          tools/modeling/org.opendds/org.opendds.modeling.graphics/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.model.edit/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.model.editor/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.model/META-INF/MANIFEST.MF,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/plugin.properties:
+
+          Switch explicit qualifier with configurable one. Externalize the
+          plugin name and provider.
+
+        * [r3567] 2010-08-09 15:48  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/META-INF/MANIFEST.MF:
+
+          Removing version specification from jxpath and filesystem plugins.
+
 Mon Aug  9 17:29:37 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.model.edit/plugin.properties:
