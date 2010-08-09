@@ -1,3 +1,11 @@
+Mon Aug  9 15:21:25 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/jms/build.xml:
+        * java/jms/compat/build.xml:
+
+          Added 'includeAntRuntime' attribute to <javac> to avoid warning
+          on newer versions of ant.
+
 Mon Aug  9 14:38:13 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tools/repoctl/repoctl.cpp:

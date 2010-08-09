@@ -188,7 +188,8 @@
                destdir="${build.dir}/tests"
                debug="true"
                source="${project.source}"
-               classpathref="project.classpath">
+               classpathref="project.classpath"
+               includeAntRuntime="no">
         </javac>
     </target>
 
