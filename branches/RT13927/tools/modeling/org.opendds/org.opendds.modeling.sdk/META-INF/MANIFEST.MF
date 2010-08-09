@@ -1,17 +1,17 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: %pluginName
+Bundle-Name: OpenDDS Modeling SDK Code Generation
 Bundle-SymbolicName: org.opendds.modeling.sdk;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Vendor: %providerName
+Bundle-Vendor: Object Computing, Inc.
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
  org.eclipse.jface.text,
  org.eclipse.ui.editors,
  org.eclipse.core.resources,
  org.eclipse.ui.ide,
- org.eclipse.ui.forms;bundle-version="3.4.1",
- javax.xml;bundle-version="1.3.4",
+ org.eclipse.ui.forms,
+ javax.xml,
  org.apache.commons.jxpath,
  org.eclipse.core.filesystem
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
