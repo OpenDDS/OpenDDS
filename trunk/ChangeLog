@@ -1,3 +1,12 @@
+Mon Aug  9 19:52:13 UTC 2010  Don Busch <buschd@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+        Fixed bug in the MultiTopicDataReader_T<Sample, TypedDataReader>::join
+        method; added a check for DDS::RETCODE_OK to ensure that a sample has
+        been taken from the reader's read_instance_generic() before it is 
+        processed.
+
 Mon Aug  9 17:46:13 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Deadline/publisher.cpp:

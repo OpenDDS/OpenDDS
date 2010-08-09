@@ -102,11 +102,12 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
         throw std::runtime_error("In join(), incoming DataReader for " +
           std::string(other_topic) + " read_instance_generic, error #" +
           rc_ss.str());
+      } else if (ret == DDS::RETCODE_OK) {
+        resulting.push_back(prototype);
+        resulting.back().combine(SampleWithInfo(other_topic.in(), info));
+        assign_fields(other_data.ptr_, resulting.back().sample_,
+                      other_qp, other_meta);
       }
-      resulting.push_back(prototype);
-      resulting.back().combine(SampleWithInfo(other_topic.in(), info));
-      assign_fields(other_data.ptr_, resulting.back().sample_,
-                    other_qp, other_meta);
     }
   } else { // incomplete key or cross-join (0 key fields)
     SampleVec new_resulting;
