@@ -32,7 +32,7 @@
             label="Sample Action Set"
             visible="true">
          <menu
-               icon="images/logo-32x32.gif"
+               icon="images/logo-32x32-text.gif"
                id="OpenDDSMenu"
                label="&amp;OpenDDS"
                path="additions">
@@ -56,7 +56,7 @@
          </menu>
          <action
                class="org.opendds.modeling.sdk.actions.sdkActions"
-               icon="images/logo-32x32.gif"
+               icon="images/logo-32x32-text.gif"
                id="org.opendds.modeling.sdk.actions.newCodegen"
                label="Code &amp;Generator Specification"
                menubarPath="OpenDDSMenu/org.opendds.modeling.sdk.menus.newMenu/content"
