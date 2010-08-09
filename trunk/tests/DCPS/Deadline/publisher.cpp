@@ -185,8 +185,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
           exit (1);
         }
 
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Publisher: sleep for %d seconds\n"),
-                              SLEEP_DURATION));
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Publisher: sleep for %d milliseconds\n"), 
+                              SLEEP_DURATION.msec ()));
 
         // Wait for a set of deadline periods to expire.
         ACE_OS::sleep (SLEEP_DURATION);
@@ -241,8 +241,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         writer1->wait ();
         writer2->wait ();
 
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Publisher: sleep for %d seconds\n"),
-                              SLEEP_DURATION));
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Publisher: sleep for %d milliseconds\n"), 
+                              SLEEP_DURATION.msec()));
 
         // Wait for another set of deadline periods to expire.
         ACE_OS::sleep (SLEEP_DURATION);
