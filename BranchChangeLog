@@ -1,3 +1,18 @@
+Mon Aug  9 14:22:43 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/DataLibrary/DataLibraryTest.opendds:
+        * tools/modeling/testdata/Middleware/MiddlewareTest.opendds:
+        * tools/modeling/testdata/PolicyLibrary/DefaultPolicyLibraryTest.opendds:
+        * tools/modeling/testdata/PolicyLibrary/DefaultPolicyLibraryTest.opendds_diagram_policylibrary:
+        * tools/modeling/testdata/PolicyLibrary/NonDefaultPolicyLibraryTest.opendds:
+        * tools/modeling/testdata/PolicyLibrary/NonDefaultPolicyLibraryTest.opendds_diagram_policylibrary:
+
+          Updated to contain UUID-based IDs for XML elements instead of using URI fragment paths.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgraph:
+
+          Removed this file.
+
 Fri Aug  6 13:56:36 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3555] 2010-08-06 13:55  martinezm
