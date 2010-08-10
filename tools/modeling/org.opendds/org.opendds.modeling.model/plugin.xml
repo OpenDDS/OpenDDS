@@ -65,7 +65,7 @@
 
    <extension point="org.eclipse.emf.ecore.extension_parser">
       <parser
-            type="*"
+            type="opendds"
             class="org.opendds.modeling.model.opendds.OpenDDSResourceFactory"/>
    </extension>
 
