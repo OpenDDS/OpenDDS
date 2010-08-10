@@ -290,7 +290,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
       // ----------------------------------------------
 
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: sleep for %d milliseconds\n"), 
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: sleep for %d milliseconds\n"),
                             SLEEP_DURATION.msec()));
 
       // Wait for deadline periods to expire.
@@ -378,7 +378,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // .5 second interval.
       ACE_Time_Value no_miss_period = num_messages * write_interval;
 
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: sleep for %d msec\n"), 
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: sleep for %d msec\n"),
                             (SLEEP_DURATION + no_miss_period).msec()));
 
       // Wait for another set of deadline periods(5 + 11 secs).
