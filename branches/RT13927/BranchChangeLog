@@ -1,3 +1,10 @@
+Tue Aug 10 18:54:06 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/plugin.xml:
+
+          Restricted file type for extension point org.eclipse.emf.ecore.extension_parser
+          to avoid eclipse warning about conflicts for files of type "*".
+
 Tue Aug 10 18:21:21 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.model.edit/plugin.properties:
