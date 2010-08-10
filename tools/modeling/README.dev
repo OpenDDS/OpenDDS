@@ -21,24 +21,25 @@ Source Projects (in repository https://svn.dre.vanderbilt.edu/DOC/DDS):
     - Segregated ecore metamodels and profile.
 
   org.opendds.modeling.gmf     (at tools/modeling/org.opendds/org.opendds.modeling.gmf)
-    - Graphical model capture editor based on the ecore profile.
+    - Graphical model capture editor generator based on the ecore profiles.
+
+  org.opendds.modeling.graphics (at tools/modeling/org.opendds/org.opendds.modeling.graphics)
+    - Graphical editor Figure Gallery images used by the graphical model
+        capture editor.
 
   org.opendds.modeling.sdk     (at tools/modeling/org.opendds/org.opendds.modeling.sdk)
-    - OpenDDS Modeling SDK plugin.  This will incorporate the gmf project
-      graphical model capture editor as well as the following elements:
-        actions, menus, logs, key bindings, perspectives, view, editor,
-        dialogs, wizards, preferences, properties, markers, nature,
-        branding
-
-  org.opendds.modeling.tests   (at tools/modeling/org.opendds/org.opendds.modeling.tests)
-    - Regression tests.
+    - OpenDDS Modeling SDK plugin.  This implements a code generation
+        editor, to specify and execute the code generation steps.  This
+        plug-in will also incorporate the following elements: actions,
+        menus, logs, key bindings, perspectives, view, editor, dialogs,
+        wizards, preferences, properties, markers, nature, branding
 
   org.opendds.modeling.help    (at tools/modeling/org.opendds/org.opendds.modeling.help)
     - Help text, tips, and cheat sheets.
 
   org.opendds.modeling.feature (at tools/modeling/org.opendds/org.opendds.modeling.feature)
     - OpenDDS Modeling SDK feature defining the plugins comprising the
-      deployed feature.
+        deployed feature.
 
 ************************************************************************
 Generated Projects (partially in repository https://svn.dre.vanderbilt.edu/DOC/DDS):
@@ -46,7 +47,7 @@ Generated Projects (partially in repository https://svn.dre.vanderbilt.edu/DOC/D
   NOTE: The source of these projects are mostly generated from the
         org.eclipse.modeling.model/models/OpenDDS.genmodel code generation
         specification.  The MANIFEST, XML and properties files controlling
-        the behavior of these plugins are retained in the subversion
+        the behavior of these plugins are retained in the OpenDDS subversion
         repository.  The non-tailored (generated) source files are not
         checked into the repository and need to be generated for use.
 
@@ -55,6 +56,18 @@ Generated Projects (partially in repository https://svn.dre.vanderbilt.edu/DOC/D
 
   org.opendds.modeling.model.editor (generated from org.opendds.modeling.model/models/OpenDDS.genmodel)
     - ecore editor for the metamodels and profile.
+
+************************************************************************
+Generated Projects (completely generated, not in any repository):
+
+  org.opendds.modeling.diagram.main           (generated from org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen)
+    - graphical model capture for the top level packages contained in the model.
+
+  org.opendds.modeling.diagram.datalibrary    (generated from org.opendds.modeling.gmf/diagrams/DataLibrary.gmfgen)
+    - graphical model capture for the data definitions used in the model.
+
+  org.opendds.modeling.diagram.policylibrary  (generated from org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfgen)
+    - graphical model capture for the QoS policy values used in the model.
 
 ************************************************************************
 Other Projects (not in this repository):
