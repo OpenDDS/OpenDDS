@@ -521,6 +521,11 @@ Also see [[AdvancedOptions]]</pre>
 {{imgcenter{[img[images/Application.png]]}}}
 </pre>
 </div>
+<div title="Code Generation" modifier="MikeMartinez" created="201008101531" modified="201008101539" tags="publish" changecount="3">
+<pre>Transforming the captured model into an executable application is done using the [[org.opendds.modeling.sdk]] plug-in.  This plug-in provides a code generation multi-page editor and contributes actions to the SDK menus and toolbars for generating code.
+
+Design notes for the actual code generation translations, generated code, support libraries, and usage examples are maintained in a separate [[document|codegen.html]].</pre>
+</div>
 <div title="ColorPalette" modifier="OpenDDS" created="200911302008" modified="200912011920" changecount="17">
 <pre>Background: #fff
 Foreground: #000
@@ -559,7 +564,7 @@ Error: #f88
 {{imgcenter{[img[images/DCPS.png]]}}}
 </pre>
 </div>
-<div title="DCPSProfile" modifier="MikeMartinez" created="201006152310" tags="publish" changecount="1">
+<div title="DCPSProfile" modifier="MikeMartinez" created="201006152310" modified="201008101821" tags="publish" changecount="2">
 <pre>Section 7.2 of the specification defines the DDS Profile using the previously defined metamodel classifiers.  Stereotypes are defined for each construct that can be added to a DDS model.  The ecore model for this includes the definitions for all of the specified stereotypes as well as some additional
 </pre>
 </div>
@@ -856,7 +861,7 @@ Finally, it was noticed after checking out the project for the [[GMF taipan exam
 Therefore, if a compartment's figure is to have XY Layout, make sure in the settings for the compartment in the .gmfgen file have listLayout set to false.
 </pre>
 </div>
-<div title="GMF Issues" modifier="Byron" created="201007061429" modified="201007261209" tags="issues publish" changecount="6">
+<div title="GMF Issues" modifier="MikeMartinez" created="201007061429" modified="201008101522" tags="issues publish" changecount="7">
 <pre>! Diagram refresh problem
 
 On Ubuntu 9.10, running eclipse 3.5.1 on top of GTK 2.10.0, there is a refresh problem for GMF based diagrams. When a diagram is opened, and either another editor tab is activated or another application is placed on top of the diagram, then after making the diagram visible again some of the diagram elements are partially or completely invisible. The only way to confidently make all the diagram elements visible again is to zoom and unzoom the diagram.
@@ -867,7 +872,7 @@ The symptoms of this problem seem similar to [[Eclipse bug 164623|https://bugs.e
 
 Unlike diagram partitioning (sub-diagram) support for the Policy Library, it was found that GMF 2.2.2 would not work properly with the ~DataLibrary class defined in the ~OpenDDS package in ~OpenDDS.ecore. The GMF wizards seemed to get confused with this arrangement, and after manually populating the GMF Tool and GMF Map file the resulting diagram code would not work properly- nodes could not be created on the canvas. The reason for this could not be determined and there is not a [[bug|https://bugs.eclipse.org/bugs/]] posted against this problem. The workaround was to move ~DataLibrary and stereotype classes that inherit from ~TopicField to the Types package in Types.ecore. Therefore there is a discrepancy between the Policy Library elements and Data Library elements in the Ecore models.
 
-! Unable to use Graphic Definition Models from UML2Tools
+! Unable to use Graphic Definition Models from ~UML2Tools
 
 It was hoped that the graphic definition models from [[UML2Tools|http://wiki.eclipse.org/MDT-UML2Tools]] could be reused in the SDK. However, when trying to reuse the Component graphics several issues were encountered which are listed below. Because of these problems it was decided to work with custom graphic models instead.
 
@@ -899,10 +904,13 @@ The error is
 [[GMF Issues]] contains known issues with the SDK's usage of GMF.
 [[GMF TODO]] contains skipped tasks related to GMF that still need to be done.</pre>
 </div>
-<div title="GMF TODO" modifier="Byron" created="201006211445" modified="201006231215" tags="publish todo" changecount="4">
-<pre>! Attribution for ~UML2 Tools mirrored graphic plug-in
+<div title="GMF TODO" modifier="MikeMartinez" created="201006211445" modified="201008101520" tags="publish todo" changecount="7">
+<pre>! --Attribution for ~UML2 Tools mirrored graphic plug-in--
 
-As discussed in section 4.5.5 of the [[EMP book|http://www.informit.com/store/product.aspx?isbn=0321534077]], a separate plug-in needs to be generated that holds the &quot;mirrored&quot; [[UML2 Tools|http://wiki.eclipse.org/MDT-UML2Tools]] graphic definitions that are used by the SDK if we want to re-use these graphics. It's need to be determine how to properly attribute the ~UML2 Tools project in our mirrored plug-in.
+--As discussed in section 4.5.5 of the [[EMP book|http://www.informit.com/store/product.aspx?isbn=0321534077]], a separate plug-in needs to be generated that holds the &quot;mirrored&quot; [[UML2 Tools|http://wiki.eclipse.org/MDT-UML2Tools]] graphic definitions that are used by the SDK if we want to re-use these graphics. It's need to be determine how to properly attribute the ~UML2 Tools project in our mirrored plug-in.--
+
+We are no longer using the Figure Gallery from the UML2 project.  Our graphics Figure Gallery is located in our [[org.opendds.modeling.graphics]] plug-in.
+
 </pre>
 </div>
 <div title="GettingStarted" modifier="MikeMartinez" created="201002011551" modified="201002011553" changecount="3">
@@ -964,26 +972,55 @@ OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
-<div title="Plug-in Architecture" modifier="MikeMartinez" created="201006151743" modified="201006152336" tags="publish" changecount="10">
-<pre>The OpenDDS Modeling SDK is built from a set of Eclipse plug-in projects and distributed as a Feature that includes the set of plug-ins required.  The plug-ins include:
+<div title="Plug-in Architecture" modifier="MikeMartinez" created="201006151743" modified="201008101838" tags="publish" changecount="19">
+<pre>The ~OpenDDS Modeling SDK is built from a set of Eclipse plug-in projects and distributed as a Feature that includes the set of plug-ins required.  The plug-ins include:
 
 {{centeredTable{
-| ''OpenDDS Modeling SDK Plug-ins'' |c
+| ''~OpenDDS Modeling SDK Plug-ins'' |c
 |[[org.opendds.modeling.model]] |Ecore metamodel and profile definition derived from the OMG UML Profile for DDS ([[ptc/08-07-02|http://www.omg.org/spec/UML4DDS/1.0/Beta1/PDF/]]). |
 |[[org.opendds.modeling.model.edit]] |Edit support for the org.opendds.modeling.model ecore model. |
 |[[org.opendds.modeling.model.editor]] |Generated EMF editor for the org.opendds.modeling.model ecore model. |
 |[[org.opendds.modeling.gmf]] |GMF graphical modeling framework for graphical model capture based on the org.opendds.modeling.model ecore model. |
+|[[org.opendds.modeling.graphics]] |GEF Graphics Figure Gallery for diagrams. |
+|[[org.opendds.modeling.diagram.main]] |Main SDK model capture diagram.  This is the component diagram to capture the ~OpenDDS artifacts. |
+|[[org.opendds.modeling.diagram.policylibrary]] |~QoS Policy library capture diagram.  This captures the non-default ~QoS policy values. |
+|[[org.opendds.modeling.diagram.datalibrary]] |Data type library capture diagram.  This captures the data types and structures used by the middleware. |
 |[[org.opendds.modeling.sdk]] |Top level SDK plug-in including the code generation capability from the capture models. |
-|[[org.opendds.modeling.feature]] |Feature definition for the OpenDDS Modeling SDK. |
-|[[org.opendds.modeling.tests]] |Regression tests for the feature. |
+|[[org.opendds.modeling.feature]] |Feature definition for the ~OpenDDS Modeling SDK. |
 |[[org.opendds.site]] |Plug-in distribution site.  This is where Eclipse can find the plug-ins for installation. |
 }}}
 
-These eclipse projects are stored in two separate subversion repositories.  Most are held in the OpenDDS source repository (//{{{https://svn.dre.vanderbilt.edu/DOC/DDS}}}//), while the org.opendds.site project is held in the [[Object Computing, Inc. (OCI)|http://www.ociweb.com/]] internal repository for the http://www.opendds.org/ website.  This allows updates to the site to be managed directly from the subversion sources.
+These eclipse projects are stored in two separate subversion repositories.  Most are held in the ~OpenDDS source repository (//{{{https://svn.dre.vanderbilt.edu/DOC/DDS}}}//), while the //org.opendds.site// plug-in is held in the [[Object Computing, Inc. (OCI)|http://www.ociweb.com/]] internal repository for the http://www.opendds.org/ website.  This allows updates to the site to be managed directly from the subversion sources.  During development the //org.opendds.site// plug-in is located in a development repository to allow test installation and updates to be performed.  The site plug-in will be moved to the opendds.org repository as the SDK is released.
 
-The public update site is located at: http://www.opendds.org/modeling/eclipse/plugins.
+The public update site is located at: http://www.opendds.org/modeling/eclipse/plugins.  Until the initial version of the SDK is released, this site will not be available for installation or updates.   A development site will be maintained for internal use.
 
 The plug-in projects are being developed initially in the //'branches/~RT13927'// branch.  The source and associated information is located in the //'tools/modeling'// directory, with the plug-ins located in the //'tools/modeling/org.opendds'// directory.  An internal distribution site is available during development for testing the distribution mechanism.</pre>
+</div>
+<div title="Plug-in TODO" modifier="MikeMartinez" created="201008101924" modified="201008101929" tags="publish" changecount="5">
+<pre>!org.opendds.modeling.sdk
+The following are things to do for this plug-in:
+!!!New Wizard
+This should provide the following behaviors:
+#If there is a single selected container resource, populate the initial Container value with it;
+#If there is a single selected file resource, populate the initial Container with its parent and the initial model source file with the selected file;
+#Allow container browse for container;
+#Allow resource browse for model source file;
+#Allow container browse for target directory;
+#Allow target directory to be empty;
+#Require container to exist, be writable, and have an //'~OpenDDS'// nature;
+#Allow model source file to be empty;
+#Require source model file, if specified, to contain a model name (obtained via ~XPath expression);
+!!!Actions
+Implement Actions and Commands to allow the code generation steps to be invoked from different triggers
+!!!Menus
+#Create and manage an //'~OpenDDS'// top menu and context menu;
+#Add the code generation actions to the menus;
+#Add actions to create //'~OpenDDS'// projects, diagrams, and code generation specifications to the menus;
+!!!Perspective
+#Create and manage an //'~OpenDDS'// perspective.
+!!!Preferences
+#Create and manage an '//~OpenDDS'// preferences page.
+</pre>
 </div>
 <div title="PublishIndexTemplate" modifier="MikeMartinez" created="201002011539" server.type="file" server.host="jackparke.googlepages.com/jtw.html" changecount="1">
 <pre>&lt;div class='viewer' id='contentWrapper'&gt;&lt;small&gt;&lt;a href=&quot;index.html&quot;&gt;Home&lt;/a&gt; &gt; %1&lt;/small&gt;&lt;h1 class='publishLogo'&gt;%0&lt;/h1&gt;
@@ -1501,11 +1538,102 @@ h2,h3 {border-bottom:1px solid [[ColorPalette::TertiaryLight]];}
 * location: //{{{http://www.opendds.org/modeling/schemas/Types/1.0}}}//
 {{imgcenter{[img[images/Types.png]]</pre>
 </div>
-<div title="org.opendds.modeling.model" modifier="MikeMartinez" created="201006152326" modified="201006152334" tags="publish" changecount="2">
-<pre>This package is where the OpenDDS Modeling SDK metamodels and profile are captured.  These [[EMF Models]] provide the stereotype elements that are used to capture a middleware model using OpenDDS.  They include the individual specification package models as well as the overall OpenDDS profile model.
+<div title="org.opendds.modeling.feature" modifier="MikeMartinez" created="201008101818" modified="201008101841" tags="publish" changecount="5">
+<pre>This plug-in package is where the components of the ~OpenDDS Modeling Software Development Kit (SDK) are defined as a feature that can be installed as a unit.  It defines the information presented to the user during installation and updates, along with branding icons, web pages, and links.
 
-This model was created as an EMF project and implements several extension points from within the EMF project.
+The following plug-ins are included in this feature:
+|[[org.opendds.modeling.model]] |Specification defined and ~OpenDDS extended meta-models and profile stereotypes. |
+|[[org.opendds.modeling.model.edit]] |Ecore editor support for the metamodel and profile stereotypes. |
+|[[org.opendds.modeling.model.editor]] |Ecore editors for the meta-models and Profile stereotypes. |
+|[[org.opendds.modeling.diagram.main]] |GMF generated graphical editor to capture the top level packages of an ~OpenDDS model. |
+|[[org.opendds.modeling.diagram.datalibrary]] |GMF generated graphical editor to capture the data definitions used by an ~OpenDDS model. |
+|[[org.opendds.modeling.diagram.policylibrary]] |GMF generated graphical editor to capture the ~QoS policy definitions used by an ~OpenDDS model. |
+|[[org.opendds.modeling.sdk]] |Code generation plug-in to convert an ~OpenDDS model to C++ code, DDS IDL, and MPC build files. |
+
+This plug-in specifies that branding information can be found in the [[org.opendds.modeling.sdk]] plug-in.</pre>
+</div>
+<div title="org.opendds.modeling.model" modifier="MikeMartinez" created="201006152326" modified="201008101844" tags="publish" changecount="16">
+<pre>This package is where the ~OpenDDS Modeling SDK metamodels and profile are captured.  These [[EMF Models]] provide the stereotype elements that are used to capture a middleware model using ~OpenDDS.  They include the individual specification package models as well as the overall ~OpenDDS profile model.
+!Code Generation
+This plug-in generates local model Java source code, the //'org.opendds.modeling.model.edit'// editor support project, the //'org.opendds.modeling.model.editor'// ecore editor project, and XML schema definitions for the ecore models.  This is done using the file:
+{{{
+  models/OpenDDS.genmodel
+}}}
+as the code generation specification file.  Properties for each Ecore model and generated output are defined within this specification.
+!Extensions
+This plug-in was created as an EMF project and implements several extension points from within the EMF project.  These include:
+!!org.eclipse.emf.ecore.generated_package
+There are several extensions of of this EMF extension point implemented.  They define the several different Ecore models of the profile.  The models, along with the URI used for the extension point package, are:
+| ''Class'' | ''Schema URI'' |
+|org.opendds.modeling.model.opendds.~OpenDDSPackage |{{{http://www.opendds.org/modeling/schemas/OpenDDS/1.0}}} |
+|org.opendds.modeling.model.core.Core |{{{http://www.opendds.org/modeling/schemas/Core/1.0}}} |
+|org.opendds.modeling.model.domain.~DomainPackage |{{{http://www.opendds.org/modeling/schemas/Domain/1.0}}} |
+|org.opendds.modeling.model.qos.~QoSPackage |{{{http://www.opendds.org/modeling/schemas/QoS/1.0}}} |
+|org.opendds.modeling.model.topics.~TopicsPackage |{{{http://www.opendds.org/modeling/schemas/Topics/1.0}}} |
+|org.opendds.modeling.model.dcps.~DCPSPackage |{{{http://www.opendds.org/modeling/schemas/DCPS/1.0}}} |
+
+Each of these package extensions defines an Ecore metamodel corresponding to a Module of the profile.  They are all included in the //~OpenDDS.genmodel// editor generation specification file.  Only the ~OpenDDSPackage package should be generated for use by the GMF editor extensions.
+!!org.eclipse.core.resources.natures
+This extension point provides and explicit //'~OpenDDS'// nature for projects and files that are part of the SDK.  The class implementing the nature is:
+{{{
+  org.opendds.modeling.model.opendds.OpenDDSProjectNature
+}}}
+!!org.eclipse.emf.ecore.extension_parser
+This extension point is required in order to define the use of XMI Id values for model elements and the use of the values as the fragment part of //'href'// attributes within the model.  This removes the positional notation that is used by default.  This is done in the class:
+{{{
+  org.opendds.modeling.model.opendds.OpenDDSResourceFactory
+}}}
+The files for which this is done are the //'.opendds'// extension.
+!Required Plug-ins
+This plug-in depends on the installation of the following plug-ins:
+*org.eclipse.core.runtime
+*org.eclipse.core.resources
+*org.eclipse.emf.ecore
 </pre>
+</div>
+<div title="org.opendds.modeling.model.edit" modifier="MikeMartinez" created="201008101827" tags="publish" changecount="1">
+<pre>This plug-in is generated by the [[org.opendds.modeling.model]] plugin using the models/~OpenDDS.genmodel generation specification file.  Only the plug-in Manifest and properties are not regenerated from scratch as changes are made to the source plug-in.</pre>
+</div>
+<div title="org.opendds.modeling.model.editor" modifier="MikeMartinez" created="201008101828" tags="publish" changecount="1">
+<pre>This plug-in is generated by the [[org.opendds.modeling.model]] plugin using the models/~OpenDDS.genmodel generation specification file.  Only the plug-in Manifest, properties, and New wizard icon are not regenerated from scratch as changes are made to the source plug-in.</pre>
+</div>
+<div title="org.opendds.modeling.sdk" modifier="MikeMartinez" created="201008101840" modified="201008101915" tags="publish" changecount="5">
+<pre>This plug-in provides the code generation feature for the ~OpenDDS Modeling SDK.  Branding information for the entire SDK is also provided by this package.  This package is where contributions to the menus, actions, and toolbars are made as well.
+!Extensions
+This plug-in is a standard Eclipse plug-in and was created with a Multi-page editor.  It implements extension points for several other plug-ins.  These include:
+!!org.eclipse.ui.editors
+A single multi-page editor is implemented from this extension point named //'~OpenDDS Code Generator'// with implementing class
+{{{
+  org.opendds.modeling.sdk.codegen.CodeGenEditor
+}}}
+This editor is implemented with several UI forms and using a standard text editor as the final tab.  The editor tabs include:
+| ''Tab'' | ''Description'' |
+|Generate |This form includes the ability to specify the model source file and the target generation directory.  The source file is parsed for a model name and that name is used to name the generated output files.  Pushbuttons to allow generating single or all possible output files are on the form.  Generated files are placed in the specified target folder with the extracted model name and appropriate extension for the generated file. |
+|Customize |This form is planned to include the ability to customize any transport specification information for the generated code.  The ability to specify that the transport information be included as generated API code or external configuration files is expected to be allowed. |
+|&lt;filename&gt;.codegen |This is the text editor exposing the raw XML format of the code generation specification. |
+!!org.eclipse.ui.newWizards
+A file creation wizard is implemented from this extension named //'~OpenDDS Code Generator Specification'// with implementing class
+{{{
+  org.opendds.modeling.sdk.wizards.CodeGenNewWizard
+}}}
+This wizard will create a single code generation specification file, with file extension //'.opendds'// and open an editor with this file.  The wizard will suggest the selected container, if any, or the container of any selected single file, if any as the container for the new resource.
+
+It is planned to implement using any single selected file as the suggested model input file for the code generation specification.
+!Required Plug-ins
+This plug-in depends on the installation of the following plug-ins:
+*org.eclipse.core.runtime
+*org.eclipse.core.resources
+*org.eclipse.core.filesystem
+*org.eclipse.ui
+*org.eclipse.ui.editors
+*org.eclipse.ui.ide
+*org.eclipse.ui.forms
+*org.eclipse.jface.text
+*org.apache.commons.jxpath
+*javax.xml</pre>
+</div>
+<div title="org.opendds.site" modifier="MikeMartinez" created="201008101835" modified="201008101835" tags="publish" changecount="2">
+<pre>This plug-in specifies the information to allow the ~OpenDDS Modeling SDK to be installed and updated as a unit.  It defines the Category: //'~OpenDDS Modeling SDK'// which is used by eclipse to group features for installation.  The [[org.opendds.modeling.feature]] is included under this category.</pre>
 </div>
 </div>
 <!--POST-STOREAREA-->
