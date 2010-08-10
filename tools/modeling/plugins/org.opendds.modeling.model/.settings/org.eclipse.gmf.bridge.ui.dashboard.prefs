@@ -1,8 +1,0 @@
-#Mon Apr 12 15:15:12 CDT 2010
-eclipse.preferences.version=1
-gmf_dashboard/domainGenerationModel=platform\:/resource/org.opendds.modeling.model/models/OpenDDS.genmodel
-gmf_dashboard/domainModel=platform\:/resource/org.opendds.modeling.model/models/OpenDDS.ecore
-gmf_dashboard/generationModel=platform\:/resource/org.opendds.modeling.model/models/Application.gmfgen
-gmf_dashboard/graphicalDefinitionModel=platform\:/resource/org.opendds.modeling.model/models/Application.gmfgraph
-gmf_dashboard/mappingModel=platform\:/resource/org.opendds.modeling.model/models/Application.gmfmap
-gmf_dashboard/toolingDefinitionModel=platform\:/resource/org.opendds.modeling.model/models/Application.gmftool

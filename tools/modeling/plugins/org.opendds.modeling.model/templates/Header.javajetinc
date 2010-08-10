@@ -1,9 +1,0 @@
-/*
- * <%="$"%>Id<%="$"%>
- *
-<%final String year = new java.text.SimpleDateFormat("yyyy").format(new java.util.Date());%>
- * Copyright <%=year%> Object Computing, Inc.
- *
- * Distributed under the OpenDDS License.
- * See: http://www.opendds.org/license.html
- */
