@@ -1,3 +1,17 @@
+Tue Aug 10 18:21:21 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model.edit/plugin.properties:
+
+          Content was accidently truncated. Added back.
+
+        * tools/modeling/testdata/PolicyLibrary/DefaultPolicyLibraryTest.opendds:
+        * tools/modeling/testdata/PolicyLibrary/DefaultPolicyLibraryTest.opendds_diagram_policylibrary:
+        * tools/modeling/testdata/PolicyLibrary/NonDefaultPolicyLibraryTest.opendds:
+        * tools/modeling/testdata/PolicyLibrary/NonDefaultPolicyLibraryTest.opendds_diagram_policylibrary:
+
+          Model data was accidently created using OpenDDSModel as the root. Fixed
+          so that PolicyLibrary is the root.
+
 Mon Aug  9 20:22:35 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3574] 2010-08-09 20:18  martinezm

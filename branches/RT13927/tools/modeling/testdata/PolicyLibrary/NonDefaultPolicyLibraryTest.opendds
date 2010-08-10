@@ -1,30 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmi:id="_BD-5cKGNEd-D-tWBUFz4zw">
-  <policyLibrary xmi:id="_HeBksKGNEd-D-tWBUFz4zw" name="NonDefaultPolicyLibraryTest">
-    <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_VizHAKGNEd-D-tWBUFz4zw" name="deadlineQosPolicyNonDefaultTest"/>
-    <policies xsi:type="opendds:destinationOrderQosPolicy" xmi:id="_cOcfoKGNEd-D-tWBUFz4zw" name="destinationOrderQosPolicyNonDefaultTest"/>
-    <policies xsi:type="opendds:dsQosPolicy" xmi:id="_aC4nAKGNEd-D-tWBUFz4zw" name="dsQosPolicyNonDefaultTest" history_depth="2" history_kind="KEEP_ALL" max_instances="4" max_samples="8" max_samples_per_instance="16"/>
-    <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_bS-V4KGNEd-D-tWBUFz4zw" name="durabilityQosPolicyNonDefaultTest" kind="TRANSIENT"/>
-    <policies xsi:type="opendds:efQosPolicy" xmi:id="_U5UFIKGNEd-D-tWBUFz4zw" name="efQosPolicyNonDefaultTest" autoenable_created_entities="false"/>
-    <policies xsi:type="opendds:gdQosPolicy" xmi:id="_TCOAoKGNEd-D-tWBUFz4zw" name="gdQosPolicyNonDefaultTest" datavalue="test"/>
-    <policies xsi:type="opendds:historyQosPolicy" xmi:id="_LopLAKGNEd-D-tWBUFz4zw" name="historyQosPolicyNonDefaultTest" depth="2" kind="KEEP_ALL"/>
-    <policies xsi:type="opendds:lbQosPolicy" xmi:id="_RIxywKGNEd-D-tWBUFz4zw" name="lbQosPolicyNonDefaultTest"/>
-    <policies xsi:type="opendds:lifespanQosPolicy" xmi:id="_MiaroKGNEd-D-tWBUFz4zw" name="lifespanQosPolicyNonDefaultTest"/>
-    <policies xsi:type="opendds:livelinessQosPolicy" xmi:id="_aqZS8KGNEd-D-tWBUFz4zw" name="livelinessQosPolicyNonDefaultTest" kind="MANUAL_BY_PARTICIPANT"/>
-    <policies xsi:type="opendds:osQosPolicy" xmi:id="_Ng_MsKGNEd-D-tWBUFz4zw" name="osQosPolicyNonDefaultTest" value="1"/>
-    <policies xsi:type="opendds:ownershipQosPolicy" xmi:id="_ND62MKGNEd-D-tWBUFz4zw" name="ownershipQosPolicyNonDefaultTest" kind="EXCLUSIVE"/>
-    <policies xsi:type="opendds:partitionQosPolicy" xmi:id="_XinpsKGNEd-D-tWBUFz4zw" name="partitionQosPolicyNonDefaultTest">
+<opendds:PolicyLibrary xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmi:id="_BD-5cKGNEd-D-tWBUFz4zw">
+  <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_VizHAKGNEd-D-tWBUFz4zw" name="deadlineQosPolicyNonDefaultTest"/>
+  <policies xsi:type="opendds:destinationOrderQosPolicy" xmi:id="_cOcfoKGNEd-D-tWBUFz4zw" name="destinationOrderQosPolicyNonDefaultTest"/>
+  <policies xsi:type="opendds:dsQosPolicy" xmi:id="_aC4nAKGNEd-D-tWBUFz4zw" name="dsQosPolicyNonDefaultTest" history_depth="2" history_kind="KEEP_ALL" max_instances="4" max_samples="8" max_samples_per_instance="16"/>
+  <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_bS-V4KGNEd-D-tWBUFz4zw" name="durabilityQosPolicyNonDefaultTest" kind="TRANSIENT"/>
+  <policies xsi:type="opendds:efQosPolicy" xmi:id="_U5UFIKGNEd-D-tWBUFz4zw" name="efQosPolicyNonDefaultTest" autoenable_created_entities="false"/>
+  <policies xsi:type="opendds:gdQosPolicy" xmi:id="_TCOAoKGNEd-D-tWBUFz4zw" name="gdQosPolicyNonDefaultTest" datavalue="test"/>
+  <policies xsi:type="opendds:historyQosPolicy" xmi:id="_LopLAKGNEd-D-tWBUFz4zw" name="historyQosPolicyNonDefaultTest" depth="2" kind="KEEP_ALL"/>
+  <policies xsi:type="opendds:lbQosPolicy" xmi:id="_RIxywKGNEd-D-tWBUFz4zw" name="lbQosPolicyNonDefaultTest"/>
+  <policies xsi:type="opendds:lifespanQosPolicy" xmi:id="_MiaroKGNEd-D-tWBUFz4zw" name="lifespanQosPolicyNonDefaultTest"/>
+  <policies xsi:type="opendds:livelinessQosPolicy" xmi:id="_aqZS8KGNEd-D-tWBUFz4zw" name="livelinessQosPolicyNonDefaultTest" kind="MANUAL_BY_PARTICIPANT"/>
+  <policies xsi:type="opendds:osQosPolicy" xmi:id="_Ng_MsKGNEd-D-tWBUFz4zw" name="osQosPolicyNonDefaultTest" value="1"/>
+  <policies xsi:type="opendds:ownershipQosPolicy" xmi:id="_ND62MKGNEd-D-tWBUFz4zw" name="ownershipQosPolicyNonDefaultTest" kind="EXCLUSIVE"/>
+  <policies xsi:type="opendds:partitionQosPolicy" xmi:id="_XinpsKGNEd-D-tWBUFz4zw" name="partitionQosPolicyNonDefaultTest">
       <names>Fred</names>
       <names>Wilma</names>
     </policies>
-    <policies xsi:type="opendds:presentationQosPolicy" xmi:id="_W7gmYKGNEd-D-tWBUFz4zw" name="presentationQosPolicyNonDefaultTest" access_scope="TOPIC" coherent_access="true" ordered_access="true"/>
-    <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_PGfK4KGNEd-D-tWBUFz4zw" name="rdlQosPolicyNonDefaultTest" autopurge_nowriter_sample_delay="1"/>
-    <policies xsi:type="opendds:reliabilityQosPolicy" xmi:id="_ZA2iQKGNEd-D-tWBUFz4zw" name="reliabilityQosPolicyNonDefaultTest" kind="RELIABLE"/>
-    <policies xsi:type="opendds:rlQosPolicy" xmi:id="_WEYxIKGNEd-D-tWBUFz4zw" name="rlQosPolicyNonDefaultTest" max_instances="1" max_samples="2" max_samples_per_instance="4"/>
-    <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_Ry9YMKGNEd-D-tWBUFz4zw" name="tbfQosPolicyNonDefaultTest" minimum_separation="1"/>
-    <policies xsi:type="opendds:tdQosPolicy" xmi:id="_QkbIgKGNEd-D-tWBUFz4zw" name="tdQosPolicyNonDefaultTest" value="Fred"/>
-    <policies xsi:type="opendds:tpQosPolicy" xmi:id="_UCLo0KGNEd-D-tWBUFz4zw" name="tpQosPolicyNonDefaultTest" value="1"/>
-    <policies xsi:type="opendds:udQosPolicy" xmi:id="_Pw72EKGNEd-D-tWBUFz4zw" name="udQosPolicyNonDefaultTest" value="Fred"/>
-    <policies xsi:type="opendds:wdlQosPolicy" xmi:id="_OEdGIKGNEd-D-tWBUFz4zw" name="wdlQosPolicyNonDefaultTest" autodispose_unregistered_instances="false"/>
-  </policyLibrary>
-</opendds:OpenDDSModel>
+  <policies xsi:type="opendds:presentationQosPolicy" xmi:id="_W7gmYKGNEd-D-tWBUFz4zw" name="presentationQosPolicyNonDefaultTest" access_scope="TOPIC" coherent_access="true" ordered_access="true"/>
+  <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_PGfK4KGNEd-D-tWBUFz4zw" name="rdlQosPolicyNonDefaultTest" autopurge_nowriter_sample_delay="1"/>
+  <policies xsi:type="opendds:reliabilityQosPolicy" xmi:id="_ZA2iQKGNEd-D-tWBUFz4zw" name="reliabilityQosPolicyNonDefaultTest" kind="RELIABLE"/>
+  <policies xsi:type="opendds:rlQosPolicy" xmi:id="_WEYxIKGNEd-D-tWBUFz4zw" name="rlQosPolicyNonDefaultTest" max_instances="1" max_samples="2" max_samples_per_instance="4"/>
+  <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_Ry9YMKGNEd-D-tWBUFz4zw" name="tbfQosPolicyNonDefaultTest" minimum_separation="1"/>
+  <policies xsi:type="opendds:tdQosPolicy" xmi:id="_QkbIgKGNEd-D-tWBUFz4zw" name="tdQosPolicyNonDefaultTest" value="Fred"/>
+  <policies xsi:type="opendds:tpQosPolicy" xmi:id="_UCLo0KGNEd-D-tWBUFz4zw" name="tpQosPolicyNonDefaultTest" value="1"/>
+  <policies xsi:type="opendds:udQosPolicy" xmi:id="_Pw72EKGNEd-D-tWBUFz4zw" name="udQosPolicyNonDefaultTest" value="Fred"/>
+  <policies xsi:type="opendds:wdlQosPolicy" xmi:id="_OEdGIKGNEd-D-tWBUFz4zw" name="wdlQosPolicyNonDefaultTest" autodispose_unregistered_instances="false"/>
+</opendds:PolicyLibrary>
