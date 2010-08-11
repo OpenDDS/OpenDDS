@@ -3,7 +3,13 @@
     xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="dcps"
     nsURI="http://www.opendds.org/modeling/schemas/DCPS/1.0" nsPrefix="dcps">
-  <eClassifiers xsi:type="ecore:EClass" name="Domain" eSuperTypes="Core.ecore#//Entity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Domain" eSuperTypes="Core.ecore#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="domainId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong">
+      <eAnnotations source="GenModel">
+        <details key="documentation" value="This is an extension to the DDS profile spec (ptc/2008-07-02) to allow a numeric ID to be associated with a domain as required by OpenDDS."/>
+      </eAnnotations>
+    </eStructuralFeatures>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DomainParticipant" eSuperTypes="Domain.ecore#//DomainEntity">
     <eStructuralFeatures xsi:type="ecore:EReference" name="domain" lowerBound="1"
         eType="#//Domain"/>
