@@ -1,3 +1,16 @@
+Tue Aug 10 21:21:39 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/build.properties:
+        * tools/modeling/build.xml:
+
+          Removed these ant related files as ant is not being used for the build process.
+
+        * tools/modeling/plugins/*:
+
+          The Ecore file under plugins has been broken out into separate files corresponding
+          to the packages defined in the DDS profile and put in project org.opendds.modeling.model
+          alongside other eclipse plug-ins in directory tools/modeling/org.opendds.
+
 Tue Aug 10 20:20:29 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/README.dev:
