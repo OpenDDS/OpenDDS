@@ -6,8 +6,10 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # -*- perl -*-
 
 use Env (ACE_ROOT);
+use Env (DDS_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use lib "$DDS_ROOT/bin";
+use PerlDDS::Run_Test;
 
 use Getopt::Long qw( :config bundling) ;
 use Pod::Usage ;
@@ -78,19 +80,10 @@ my $PUBLISHER;
 my $SUBSCRIBER1;
 my $SUBSCRIBER2;
 
-if (PerlACE::is_vxworks_test()) {
-  $REPO        = new PerlACE::ProcessVX ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $repo_args);
-  $PUBLISHER   = new PerlACE::ProcessVX ("publisher", $publisher_args);
-  $SUBSCRIBER1 = new PerlACE::ProcessVX ("subscriber", $subscriber1_args);
-  $SUBSCRIBER2 = new PerlACE::ProcessVX ("subscriber", $subscriber2_args);
-
-} else {
-  $REPO        = new PerlACE::Process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $repo_args);
-  $PUBLISHER   = new PerlACE::Process ("publisher", $publisher_args);
-  $SUBSCRIBER1 = new PerlACE::Process ("subscriber", $subscriber1_args);
-  $SUBSCRIBER2 = new PerlACE::Process ("subscriber", $subscriber2_args);
-
-}
+$REPO        = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $repo_args);
+$PUBLISHER   = PerlDDS::create_process ("publisher", $publisher_args);
+$SUBSCRIBER1 = PerlDDS::create_process ("subscriber", $subscriber1_args);
+$SUBSCRIBER2 = PerlDDS::create_process ("subscriber", $subscriber2_args);
 
 unlink $repo_ior;
 

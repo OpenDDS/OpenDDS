@@ -1,3 +1,28 @@
+Tue Aug 10 20:49:31 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * contrib/wrapper/example/run_test.pl:
+        * examples/DCPS/IntroductionToOpenDDS/run_test.pl:
+        * java/build_scripts/jms_scoreboard.pl:
+        * java/tests/hello/run_test.pl:
+        * performance-tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/ContentFilteredTopic/run_test.pl:
+        * tests/DCPS/Federation/run_test.pl:
+        * tests/DCPS/FileSystemStorage/run_test.pl:
+        * tests/DCPS/FilterExpression/run_test.pl:
+        * tests/DCPS/GuardCondition/run_test.pl:
+        * tests/DCPS/MetaStruct/run_test.pl:
+        * tests/DCPS/MultiTopic/run_test.pl:
+        * tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/QueryCondition/run_test.pl:
+        * tests/DCPS/ReadCondition/run_test.pl:
+        * tests/DCPS/StatusCondition/run_test.pl:
+        * tests/DCPS/TopicExpression/run_test.pl:
+        * tests/DCPS/WaitForAck/run_test.pl:
+        * tools/monitor/start_repos.pl:
+
+          Changing all run_test.pl to use PerlDDS::Run_Test and 
+          PerlDDS::create_process.
+
 Mon Aug  9 19:52:13 UTC 2010  Don Busch <buschd@ociweb.com>
 
         * dds/DCPS/MultiTopicDataReader_T.cpp:
