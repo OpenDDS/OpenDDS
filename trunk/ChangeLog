@@ -1,3 +1,10 @@
+Wed Aug 11 21:04:25 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Serializer_wstring/Serializer_wstring.mpc:
+
+          Removed "requires += exceptions" since it is unnecessary and it
+          no longer works with DOC group TAO.
+
 Wed Aug 11 20:13:47 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_TAO.mwc:

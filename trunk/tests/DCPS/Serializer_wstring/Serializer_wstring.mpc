@@ -1,6 +1,5 @@
 
 project(*Publisher) : dcpsexe_with_tcp {
-  requires += exceptions
   exename   = publisher
 
   TypeSupport_Files {
@@ -14,7 +13,6 @@ project(*Publisher) : dcpsexe_with_tcp {
 }
 
 project(*Subscriber) : dcpsexe_with_tcp {
-  requires += exceptions
   exename   = subscriber
   after    += *Publisher
 
