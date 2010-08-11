@@ -71,7 +71,7 @@ Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
   while( parser.is_anything_left()) {
     const ACE_TCHAR* currentArg = 0;
     if( 0 != (currentArg = parser.get_the_parameter( TRANSPORT_TYPE_ARGUMENT))) {
-      this->transportType_ = NONE;
+      this->transportType_ = TRANSPORT_NONE;
       for( unsigned int index = 0;
            index < sizeof(transportTypeArgMappings)/sizeof(transportTypeArgMappings[0]);
            ++index
@@ -82,7 +82,7 @@ Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
           break;
         }
       }
-      if( this->transportType_ == NONE) {
+      if( this->transportType_ == TRANSPORT_NONE) {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: Options::Options() - ")
           ACE_TEXT("unrecognized transport type: %s.\n"),
@@ -123,7 +123,7 @@ operator<<( std::ostream& str, Test::Options::TransportType value)
     case Test::Options::MC:  return str << "MC";
 
     default:
-    case Test::Options::NONE: return str << "NONE";
+    case Test::Options::TRANSPORT_NONE: return str << "NONE";
   }
 }
 

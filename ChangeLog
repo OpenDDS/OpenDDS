@@ -1,3 +1,22 @@
+Wed Aug 11 20:13:47 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_TAO.mwc:
+
+          Re-removed a comment that I already removed but seems to have
+          reappeared after a merge.
+
+        * performance-tests/DCPS/Priority/Options.h:
+        * performance-tests/DCPS/Priority/Options.cpp:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Options.cpp:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+
+          Changed a enumerator from NONE to TRANSPORT_NONE because VxWorks
+          system headers define NONE as a preprocessor macro.
+
 Tue Aug 10 20:49:31 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
 
         * contrib/wrapper/example/run_test.pl:
@@ -20,7 +39,7 @@ Tue Aug 10 20:49:31 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
         * tests/DCPS/WaitForAck/run_test.pl:
         * tools/monitor/start_repos.pl:
 
-          Changing all run_test.pl to use PerlDDS::Run_Test and 
+          Changing all run_test.pl to use PerlDDS::Run_Test and
           PerlDDS::create_process.
 
 Mon Aug  9 19:52:13 UTC 2010  Don Busch <buschd@ociweb.com>
@@ -29,7 +48,7 @@ Mon Aug  9 19:52:13 UTC 2010  Don Busch <buschd@ociweb.com>
 
         Fixed bug in the MultiTopicDataReader_T<Sample, TypedDataReader>::join
         method; added a check for DDS::RETCODE_OK to ensure that a sample has
-        been taken from the reader's read_instance_generic() before it is 
+        been taken from the reader's read_instance_generic() before it is
         processed.
 
 Mon Aug  9 17:46:13 UTC 2010  Yan Dai  <dai_y@ociweb.com>
@@ -39,7 +58,7 @@ Mon Aug  9 17:46:13 UTC 2010  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/UnitTests/DurationToTimeValue.cpp:
 
           Fixed a few warnings.
-          
+
 Mon Aug  9 15:21:25 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * java/jms/build.xml:
