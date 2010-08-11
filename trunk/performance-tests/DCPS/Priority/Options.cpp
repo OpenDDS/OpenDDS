@@ -117,7 +117,7 @@ Options::Options(int argc, ACE_TCHAR** argv, char** /* envp */)
     }
     const ACE_TCHAR* currentArg = 0;
     if( 0 != (currentArg = parser.get_the_parameter( TRANSPORT_TYPE_ARGUMENT))) {
-      this->transportType_ = NONE;
+      this->transportType_ = TRANSPORT_NONE;
       for( unsigned int index = 0;
            index < sizeof(transportTypeArgMappings)/sizeof(transportTypeArgMappings[0]);
            ++index
@@ -128,7 +128,7 @@ Options::Options(int argc, ACE_TCHAR** argv, char** /* envp */)
           break;
         }
       }
-      if( this->transportType_ == NONE) {
+      if( this->transportType_ == TRANSPORT_NONE) {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: Options::Options() - ")
           ACE_TEXT("unrecognized transport type on command line: %s, ")
@@ -206,7 +206,7 @@ Options::configureScenarios(const ACE_TCHAR* filename)
   // Transport = tcp | udp | mc | rmc              OPTIONAL
   ACE_TString transportString;
   if( 0 == heap.get_string_value( root, TRANSPORT_KEY_NAME, transportString)) {
-    this->transportType_ = NONE;
+    this->transportType_ = TRANSPORT_NONE;
     for( unsigned int index = 0;
          index < sizeof(transportTypeArgMappings)/sizeof(transportTypeArgMappings[0]);
          ++index
@@ -224,7 +224,7 @@ Options::configureScenarios(const ACE_TCHAR* filename)
         break;
       }
     }
-    if( this->transportType_ == NONE) {
+    if( this->transportType_ == TRANSPORT_NONE) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Options::configureScenarios() - ")
         ACE_TEXT("unrecognized transport type: %s, defaulting to TCP.\n"),
@@ -352,7 +352,7 @@ operator<<( std::ostream& str, Test::Options::TransportType value)
     case Test::Options::MC:  return str << "MC";
 
     default:
-    case Test::Options::NONE: return str << "NONE";
+    case Test::Options::TRANSPORT_NONE: return str << "NONE";
   }
 }
 
