@@ -1,3 +1,10 @@
+Wed Aug 11 15:51:10 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/plugins.html:
+
+          Updated details on creating sub-diagrams based on using the details
+          to add the middleware library diagram.
+
 Wed Aug 11 14:47:41 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:

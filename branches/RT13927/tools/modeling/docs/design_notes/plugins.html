@@ -662,7 +662,7 @@ There are class diagrams (.ecore_diagram) that are visual representations of the
 {{imgcenter{[img[images/Enumerations.png]]}}}
 </pre>
 </div>
-<div title="GMF Details" modifier="Byron" created="201006231304" modified="201007291922" tags="publish details" changecount="41">
+<div title="GMF Details" modifier="Byron" created="201006231304" modified="201008111547" tags="publish details" changecount="44">
 <pre>!Making sure Java has enough ~PermGen memory
 
 It was found running SDK diagram code under Ubuntu 9.10 running eclipse 3.5.1 that the Java ~PermGen memory hit the maximum ~PermGen memory allowed causing the diagram code to crash. The ~PermGen memory is used to hold meta data about user classes.
@@ -696,18 +696,16 @@ The starting point for these steps are the [[Diagram Partitioning wiki page|http
 
 !! Definitions
 
-The terms and definitions used here are taken from the Diagram Partitioning wiki. To help make them concrete, example usage taken from the Policy Library diagram are included.
+The terms and definitions used here are taken from the Diagram Partitioning wiki. Replace references to &quot;My Library&quot; below with the appropriate package the diagram is based on (e.g. &quot;Policy Library&quot;) in the discussion that follows.
 
 |!Term|!SDK Example|!Definition|h
-|Partitioning node|Policy Library package in the main diagram|The node that can be double-clicked on open the sub-diagram.|
+|Partitioning node|The package shown in the main diagram|The node that can be double-clicked on open the sub-diagram.|
 |Super-diagram|Main Diagram|The diagram that contains the partitioning node.|
 |Super-mapping|~MainDiagram.gmfmap|The GMF mapping file for the super-diagram.|
-|Sub-diagram|Policy Library diagram|The diagram that is opened after double-clicking on the partitioning node.|
-|Sub-mapping|~PolicyLibrary.gmfmap|The GMF mapping file for the sub-diagram.|
+|Sub-diagram|My Library diagram|The diagram that is opened after double-clicking on the partitioning node.|
+|Sub-mapping|~MyLibrary.gmfmap|The GMF mapping file for the sub-diagram.|
 
 !! Steps
-
-For the steps the Policy Library is used as an example. It is assumed that the ~UML2 Tools graphics will be used for the diagram elements so there will be no need to create graphic definition models.
 
 !!! 1. Define the Main Diagram tools
 File used: ~MainDiagram.gmftool
@@ -718,12 +716,12 @@ File used: ~MainDiagram.gmfmap
 
 Use the UML Package diagram in the project org.opendds.modeling.uml2tools.mirrored for the graphics definition model in ~MainDiagram.gmfmap and use ~OpenDDSModel found in ~OpenDDS.ecore as the Canvas mapping element.
 
-!!! 3. Define Policy Library diagram tools
-File used: ~PolicyLibrary.gmftool
+!!! 3. Define My Library diagram tools
+File used: ~MyLibrary.gmftool
 
 # Bring up the Tooling Definition wizard. From the context menu select New -&gt; Other -&gt; Graphical Modeling Framework -&gt; Simple Tooling Definition Model.
-# Pick ~OpenDDS.ecore as the file containing the ecore domain model. (In the case of the DataLibrary, Types.ecore was specified.)
-# Pick ~PolicyLibrary as the diagram element.
+# Pick ~OpenDDS.ecore as the file containing the ecore domain model. (In the case of the ~DataLibrary, Types.ecore was specified.)
+# Pick ~MyLibrary as the diagram element.
 # Unselect elements that shouldn't appear in the palette in the &quot;Domain model elements to process&quot; dialog.
 # Note that the order of tools is based on their order in the model. You may want to edit the content and sort the tools alphabetically.
 
@@ -756,53 +754,52 @@ for t in sorted(tools):
 }}}
 
 !!! 4. Specify unique class name qualifier for sub-diagram GMF generator model
-Files used: ~OpenDDS.genmodel, ~OpenDDS_dup_PolicyLibrary.genmodel
+Files used: ~OpenDDS.genmodel, ~OpenDDS_dup_MyLibrary.genmodel
 
-In anticipation of being able to bring up a Policy Library subdiagram by double-clicking on a ~PolicyLibrary node in the main diagram, a near duplicate of ~OpenDDS.genmodel will be created here and referred to later when the EMF generator model is requested.
+In anticipation of being able to bring up a My Library subdiagram by double-clicking on a ~MyLibrary node in the main diagram, a near duplicate of ~OpenDDS.genmodel will be created here and referred to later when the EMF generator model is requested.
 
 What needs to be done is to change qualifer that prepends generated class names. As stated in step 6 of the Diagram Partitioning wiki, this is the &quot;hacky&quot; part needed because of how the dependency on EMF generator model is handled. Although this step is not mentioned in the eclipse Modeling Project book, failure to do this results the error
 
-&gt; Unable to open editor, unknown editor ID: org.opendds.modeling.model.opendds.diagram.policylibrary.part.~OpenDDSPolicyLibraryDiagramEditorID
+&gt; Unable to open editor, unknown editor ID: org.opendds.modeling.model.opendds.diagram.mylibrary.part.~OpenDDSMyLibraryDiagramEditorID
 
-# Copy ~OpenDDS.genmodel to ~OpenDDS_dup_PolicyLibrary.genmodel.
-# In ~OpenDDS_dup_PolicyLibrary.genmodel change the Model Name property to ~OpenDDSPolicyLibrary.
+# Copy ~OpenDDS.genmodel to ~OpenDDS_dup_MyLibrary.genmodel.
+# In ~OpenDDS_dup_MyLibrary.genmodel change the Model Name property to ~OpenDDSMyLibrary.
 
-!!! 5. Define Policy Library diagram mapping
-File used: ~PolicyLibrary.gmfmap
+!!! 5. Define My Library diagram mapping
+File used: ~MyLibrary.gmfmap
 
 # Bring up the Mapping Definition wizard. From the context menu select New -&gt; Other -&gt; Graphical Modeling Framework -&gt; Guide Mapping Model Creation.
 # Pick ~OpenDDS.ecore as the file containing the ecore domain model.
-# Pick ~PolicyLibrary as the diagram element.
-# Pick ~PolicyLibrary.gmftool created from the previous step as the diagram palette.
-# Pick the appropriate mirrored graphic file in org.opendds.modeling.uml2tools.mirrored. For the Policy Library this is classDiagram_classifiers.mirrored.gmfgraph.
-# In the &quot;Map domain model elements&quot; dialog remove inappropriate links. In the case of the Policy Library this is all links. Verify that all the nodes used in the mapping are appropriate.
+# Pick ~MyLibrary as the diagram element.
+# Pick ~MyLibrary.gmftool created from the previous step as the diagram palette.
+# Pick the appropriate mirrored graphic file in org.opendds.modeling.uml2tools.mirrored. For the My Library this is classDiagram_classifiers.mirrored.gmfgraph.
+# In the &quot;Map domain model elements&quot; dialog remove inappropriate links. In the case of the My Library this is all links. Verify that all the nodes used in the mapping are appropriate.
 
-!!! 6. Create the Policy Library GMF generator model
-File used: ~PolicyLibrary.gmfgen
+!!! 6. Create the My Library GMF generator model
+File used: ~MyLibrary.gmfgen
 
-# From the context menu for ~PolicyLibrary.gmfmap, select &quot;Create generator model...&quot; and use the defaults provided by the wizard.
+# From the context menu for ~MyLibrary.gmfmap, select &quot;Create generator model...&quot; and use the defaults provided by the wizard.
 
 !!!! 6.1 Gen Editor Generator category changes
 
 | Copyright Text | (c) Copyright Object Computing, Incorporated.  2005,2010.  All rights reserved. |
-| Diagram File Extension | opendds_diagram_policylibrary |
-| Package Name Prefix | org.opendds.modeling.model.opendds.diagram.policylibrary |
-| Model ID | ~OpenDDS ~PolicyLibrary |
+| Diagram File Extension | opendds_diagram_mylibrary |
+| Package Name Prefix | org.opendds.modeling.model.opendds.diagram.mylibrary |
+| Model ID | ~OpenDDS ~MyLibrary |
 
 !!!! 6.2 Gen Plugin
-| ID | org.opendds.modeling.diagram.policylibrary |
-| Name | ~OpenDDS ~PolicyLibrary Plugin |
-| Required Plugin Identifiers | Add org.eclipse.uml2.diagram.common |
+| ID | org.opendds.modeling.diagram.mylibrary |
+| Name | ~OpenDDS ~MyLibrary Plugin |
 | Provider | Object Computing, Inc. |
 | Version | (current version) |
 
 
 !!! 7. (Optional) Check that the sub-diagram works
-File used: ~PolicyLibrary.gmfgen
+File used: ~MyLibrary.gmfgen
 
 To verify that the sub-diagram works correctly, you can run launch the
-diagram editor for the sub-diagram after creating the Policy Library
-GMF generator model (~PolicyLibrary.gmfgen).
+diagram editor for the sub-diagram after creating the My Library
+GMF generator model (~MyLibrary.gmfgen).
 
 Before doing this close project org.opendds.modeling.diagram.main if
 it exists. Otherwise you may see in the error log the message
@@ -812,42 +809,34 @@ it exists. Otherwise you may see in the error log the message
 After verifying the sub-diagram works re-open project
 org.opendds.modeling.diagram.main.
 
-!!! 8. Update the sub-diagram GMF generator model
-File used: ~PolicyLibrary.gmfgen
-
-# Open the GMF generator model.
-# Select the sub-node Gen Editor Generator.
-# Make the Diagram File Extension property agree with that for the Main Diagram.
-# Make the Model ID property unique (.e.g. ~OpenDDS ~PolicyLibrary)
-
-!!! 9. Relate the sub-diagram to the super-diagram
+!!! 8. Relate the sub-diagram to the super-diagram
 File used: ~MainDiagram.gmfmap
 
 # Open ~MainDiagram.gmfmap with the GMF Map Model editor
-# Load as a resource ~PolicyLibrary.gmfmap
-# Go to the Node Mapping for the Policy Library
+# Load as a resource ~MyLibrary.gmfmap
+# Go to the Node Mapping for the My Library
 # Under the Misc category edit the value for Related Diagrams
 # Add the second Canvas Mapping in the list
-# In a text editor verify that the relatedDiagrams element of the Policy Library node points to ~PolicyLibrary.gmfmap.
+# In a text editor verify that the relatedDiagrams element of the My Library node points to ~MyLibrary.gmfmap.
 
-!!! 10. Update Gen Editor View for the super-diagram GMF generator model
-Files used: ~MainDiagram.gmfgen, ~PolicyLibrary.gmfgen
+!!! 9. Update Gen Editor View for the super-diagram GMF generator model
+Files used: ~MainDiagram.gmfgen, ~MyLibrary.gmfgen
 
-# Re-generate the ~MainDiagram.gmfgen to account for changes made in the previous step.
+# Update (context menu item &quot;Create generator model...&quot; for ~MainDiagram.gmfmap) the ~MainDiagram.gmfgen to account for changes made in the previous step.
 # Open ~MainDiagram.gmfgen.
-# Go to node Gen Diagram -&gt; Gen Top Level Node ~PolicyLibraryEditPart -&gt; Open Diagram Behavior
-# Set property Diagram Kind to ~OpenDDS ~PolicyLibrary.
-# Set Edit Policy Class Name to ~OpenDiagramEditPolicyPolicyLibrary.
-# We need the Gen Editor View ID for the sub-diagram. The Open ~PolicyLibrary.gmfgen and go to Gen Editor Generator -&gt; Gen Editor View org.opendds.modeling.model.opendds.diagram.policylibrary.part and copy the value for ID into the clipboard.
-# Back in ~MainDiagram.gmfgen, node ~PolicyLibraryEditPart, set property Editor ID to what is in the clipboard.
+# Go to node Gen Diagram ~OpenDDSModelEditPart -&gt; Gen Top Level Node ~MyLibraryEditPart -&gt; Open Diagram Behavior
+# Set property Diagram Kind to ~OpenDDS ~MyLibrary.
+# Set Edit My Class Name to ~OpenDiagramEditPolicyMyLibrary.
+# We need the Gen Editor View ID for the sub-diagram. Open ~MyLibrary.gmfgen and go to Gen Editor Generator -&gt; Gen Editor View org.opendds.modeling.model.opendds.diagram.mylibrary.part and copy the value for ID into the clipboard.
+# Back in ~MainDiagram.gmfgen, go to node Gen Diagram ~OpenDDSModelEditPart -&gt; Gen Top Level Node ~MyLibraryEditPart -&gt; Open Diagram Behavior ~OpenDiagramEditPolicy, set property Editor ID to what is in the clipboard.
 
-!!! 11. Test sub-diagram usage
+!!! 10. Test sub-diagram usage
 
 # Re-generate project org.opendds.modeling.diagram.main.
-# Generate project org.opendds.modeling.diagram.policylibrary.
+# Generate project org.opendds.modeling.diagram.mylibrary.
 # Launch org.opendds.modeling.diagram.main as an eclipse application.
 # Create a new ~OpenDDS diagram.
-# Create a ~PolicyLIbrary package and double-click on the package.
+# Create a ~MyLibrary package and double-click on the package.
 # Verify that the sub-diagram opens up allowing to to add elements to the package.
 
 ! UML Component figures with classes arbitrarily positioned
