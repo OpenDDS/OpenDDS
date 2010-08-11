@@ -1,3 +1,24 @@
+Wed Aug 11 14:47:41 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLibrary.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLibrary.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLibrary.gmftool:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLibrary.trace:
+
+          Preliminary version of middleware library digram (QoS properties and Topic types not
+          yet part of diagram).
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/DCPS.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel:
+
+          Added attribute to Domain to hold the numeric ID.
+
 Tue Aug 10 21:21:39 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/build.properties:

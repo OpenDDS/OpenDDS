@@ -26,6 +26,8 @@
         <features
             href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/name"/>
       </labelMappings>
+      <relatedDiagrams
+          href="MiddlewareLibrary.gmfmap#//@diagram"/>
       <tool
           xsi:type="gmftool:CreationTool"
           href="MainDiagram.gmftool#//@palette/@tools.0/@tools.1"/>

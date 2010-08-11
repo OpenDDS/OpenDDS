@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<trace:TraceModel xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:trace="http://www.eclipse.org/gmf/2006/Trace">
+  <nodeTraces
+      visualID="2001"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'domainParticipant') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'MiddlewareLibrary') and _containmentMF_.name = 'participants')">
+    <nodeLabelTraces
+        visualID="5001"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5004"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7001"
+        queryText="true"/>
+  </nodeTraces>
+  <nodeTraces
+      visualID="2002"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'domain') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'MiddlewareLibrary') and _containmentMF_.name = 'domains')">
+    <nodeLabelTraces
+        visualID="5002"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5005"
+        queryText="true"/>
+  </nodeTraces>
+  <nodeTraces
+      visualID="2003"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'topic') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'MiddlewareLibrary') and _containmentMF_.name = 'topics')">
+    <nodeLabelTraces
+        visualID="5003"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5012"
+        queryText="true"/>
+  </nodeTraces>
+  <childNodeTraces
+      visualID="3001"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'publisher') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'DomainParticipant') and _containmentMF_.name = 'publishers')">
+    <nodeLabelTraces
+        visualID="5006"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5007"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3002"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'subscriber') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'DomainParticipant') and _containmentMF_.name = 'subscribers')">
+    <nodeLabelTraces
+        visualID="5008"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5009"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3003"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'dataWriter') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'Publisher') and _containmentMF_.name = 'writers')">
+    <nodeLabelTraces
+        visualID="5010"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3004"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'dataReader') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'Subscriber') and _containmentMF_.name = 'readers')">
+    <nodeLabelTraces
+        visualID="5011"
+        queryText="true"/>
+  </childNodeTraces>
+  <linkTraces
+      visualID="4001"
+      queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'dataReader')"/>
+  <linkTraces
+      visualID="4002"
+      queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'dataWriter')"/>
+</trace:TraceModel>

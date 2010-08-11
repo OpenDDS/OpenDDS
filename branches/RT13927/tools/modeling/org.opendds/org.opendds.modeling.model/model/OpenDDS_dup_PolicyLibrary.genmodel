@@ -261,7 +261,9 @@
   </genPackages>
   <genPackages prefix="DCPS" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
       generateExampleClass="false" generateModelWizard="false" ecorePackage="DCPS.ecore#/">
-    <genClasses ecoreClass="DCPS.ecore#//Domain"/>
+    <genClasses ecoreClass="DCPS.ecore#//Domain">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute DCPS.ecore#//Domain/domainId"/>
+    </genClasses>
     <genClasses ecoreClass="DCPS.ecore#//DomainParticipant">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//DomainParticipant/domain"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DomainParticipant/publishers"/>
