@@ -7,7 +7,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 use Env qw(ACE_ROOT TAO_ROOT DDS_ROOT);
 use lib "$ACE_ROOT/bin";
 use lib "$DDS_ROOT/bin";
-use PerlACE::Run_Test;
+use PerlDDS::Run_Test;
 use PerlDDS::Process_Java;
 use strict;
 
@@ -23,7 +23,7 @@ foreach my $i (@ARGV) {
 my $iorfile = 'server.ior';
 unlink $iorfile;
 
-my $SV = new PerlACE::Process ("$TAO_ROOT/tests/Hello/server",
+my $SV = PerlDDS::create_process ("$TAO_ROOT/tests/Hello/server",
                                "-ORBDebugLevel $debug -o $iorfile");
 
 PerlACE::add_lib_path ('.');

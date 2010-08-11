@@ -11,7 +11,8 @@ use strict;
 use Env qw(ANT_HOME DDS_ROOT ACE_ROOT);
 use Cwd;
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use lib "$DDS_ROOT/bin";
+use PerlDDS::Run_Test;
 
 chdir $DDS_ROOT;
 my $opt_d = 'java/jms';
@@ -52,12 +53,12 @@ for my $tgt (@targets) {
     if ($tgt->[1] eq 'jboss42x') {
       my $PROC;
       if ($^O eq 'MSWin32') {
-        $PROC = new PerlACE::Process("$ENV{windir}\\system32\\cmd",
+        $PROC = PerlDDS::create_process("$ENV{windir}\\system32\\cmd",
                                      "/c $ANT_HOME/bin/ant @ARGV $extra " .
                                      "$tgt->[1]");
       }
       else {
-        $PROC = new PerlACE::Process("$ANT_HOME/bin/ant",
+        $PROC = PerlDDS::create_process("$ANT_HOME/bin/ant",
                                      "@ARGV $extra $tgt->[1]");
       }
       $status = $PROC->SpawnWaitKill(600);
