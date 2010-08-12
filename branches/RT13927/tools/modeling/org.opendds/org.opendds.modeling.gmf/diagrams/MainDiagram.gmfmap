@@ -13,7 +13,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/packageDiagram.gmfgraph#PackageName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/name"/>
       </labelMappings>
@@ -22,7 +22,7 @@
           readOnly="true"
           viewPattern="«middleware»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/packageDiagram.gmfgraph#PackageStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/name"/>
       </labelMappings>
@@ -32,7 +32,7 @@
           xsi:type="gmftool:CreationTool"
           href="MainDiagram.gmftool#//@palette/@tools.0/@tools.1"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/packageDiagram.gmfgraph#Package"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -44,7 +44,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/packageDiagram.gmfgraph#PackageName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/name"/>
       </labelMappings>
@@ -53,7 +53,7 @@
           readOnly="true"
           viewPattern="«policyLibrary»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/packageDiagram.gmfgraph#PackageStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/name"/>
       </labelMappings>
@@ -63,7 +63,7 @@
           xsi:type="gmftool:CreationTool"
           href="MainDiagram.gmftool#//@palette/@tools.0/@tools.0"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/packageDiagram.gmfgraph#Package"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -75,7 +75,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/packageDiagram.gmfgraph#PackageName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Types.ecore#//DataLibrary/name"/>
       </labelMappings>
@@ -84,7 +84,7 @@
           readOnly="true"
           viewPattern="«dataLibrary»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/packageDiagram.gmfgraph#PackageStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Types.ecore#//DataLibrary/name"/>
       </labelMappings>
@@ -94,12 +94,12 @@
           xsi:type="gmftool:CreationTool"
           href="MainDiagram.gmftool#//@palette/@tools.0/@tools.2"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/packageDiagram.gmfgraph#Package"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <diagram>
     <diagramCanvas
-        href="../../org.opendds.modeling.graphics/diagrams/packageDiagram.gmfgraph#metamodel"/>
+        href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#stereotypedelement"/>
     <domainModel
         href="../../org.opendds.modeling.model/model/OpenDDS.ecore#/"/>
     <domainMetaElement
