@@ -1,3 +1,14 @@
+Thu Aug 12 23:13:58 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Updated documentation.  This document is now complete and can
+          be reviewed for correctness.
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Added a usage message and option.
+
 Thu Aug 12 19:15:02 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
@@ -7,7 +18,7 @@ Thu Aug 12 19:15:02 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
           Solaris.  (Since there was only a depth of 1 the
           previous sample was being removed, like it should be,
           when a new sample of the same instance came in)
-        
+
 Thu Aug 12 13:54:28 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/lj-plots.gpi:
