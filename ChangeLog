@@ -1,3 +1,35 @@
+Thu Aug 12 13:54:28 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/lj-plots.gpi:
+        * performance-tests/Bench/bin/plot-density.gpi:
+        * performance-tests/Bench/bin/plot-jitter.gpi:
+        * performance-tests/Bench/bin/plot-quantiles.gpi:
+        * performance-tests/Bench/bin/plot-throughput-testformats.gpi:
+        * performance-tests/Bench/bin/plot-throughput-transports.gpi:
+        * performance-tests/Bench/bin/plot-transports-scaling.gpi:
+        * performance-tests/Bench/bin/plot-transports.gpi:
+
+          Added a timestamp to the plots.
+
+        * performance-tests/Bench/bin/extract-throughput.pl:
+        * performance-tests/Bench/bin/gen-latency-stats.pl:
+        * performance-tests/Bench/bin/generate-test-results.sh:
+        * performance-tests/Bench/bin/run_test:
+        * performance-tests/Bench/doc/userguide.html:
+        * performance-tests/Bench/tests/latency/run_test.pl:
+        * performance-tests/Bench/tests/thru/run_test.pl:
+
+          Updated documentation.
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Updated with removed files.
+
+        * performance-tests/Bench/bin/runcmd:
+        * performance-tests/Bench/tools/convert-all:
+
+          Removed these files.
+
 Wed Aug 11 21:04:25 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Serializer_wstring/Serializer_wstring.mpc:

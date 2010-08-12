@@ -26,20 +26,30 @@ The test consists of two halves, an originating (server) side and a reflecting
 test_list.txt file in test-host groupings.  The grouping consists of an
 ID, client host, and server host.  The script identifies the host's behavior
 by identifying the test group ID and the local host's name.  The test group
-ID is identified using the environement variable CROSS_GRP.
+ID is identified using the environment variable CROSS_GRP.
 
-The server (originiating) side starts the DCPSInfoRepo for the test.
+The server (originating) side starts the DCPSInfoRepo for the test.
 
 The transport has to be one of the following values:
+
 =over 8
+
 =item tcp
-SimpleTCP
+
+uses the SimpleTCP transport implementation
+
 =item udp
-SimpleUDP
+
+uses the udp transport implementation
+
 =item multi-be
-multicast (Best Effort)
+
+uses the multicast implementation with reliability disabled (Best Effort)
+
 =item multi-rel
-multicast (Reliable)
+
+uses the multicast implementation with reliability enabled
+
 =back
 
 =head1 EXAMPLE

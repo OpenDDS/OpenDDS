@@ -31,20 +31,29 @@ ID is identified using the environement variable CROSS_GRP.
 The server (originiating) side starts the DCPSInfoRepo for the test.
 
 The transport has to be one of the following values:
+
 =over 8
+
 =item tcp
-SimpleTCP
+
+uses the SimpleTCP transport implementation
+
 =item udp
-SimpleUDP
+
+uses the udp transport implementation
+
 =item multi-be
-multicast (Best Effort)
+
+uses the multicast implementation with reliability disabled (Best Effort)
+
 =item multi-rel
-multicast (Reliable)
+
+uses the multicast implementation with reliability enabled
+
 =back
 
 Supported message sizes are B<50> B<100> B<250> B<500> B<1000>
  B<2500> B<5000> B<8000> B<16000> B<32000>
-
 
 =head1 EXAMPLE
 

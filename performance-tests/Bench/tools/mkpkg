@@ -78,7 +78,6 @@ cp $DDS_ROOT/bin/DCPSInfoRepo                        $PKG/bin/
 cp $DDS_ROOT/bin/odds_repoctl                        $PKG/bin/
 cp $DDS_ROOT/performance-tests/Bench/bin/testprocess $PKG/bin/
 cp $DDS_ROOT/performance-tests/Bench/bin/run_test    $PKG/bin/
-cp $DDS_ROOT/performance-tests/Bench/bin/runcmd      $PKG/bin/
 
 mkdir -p $PKG/etc
 
