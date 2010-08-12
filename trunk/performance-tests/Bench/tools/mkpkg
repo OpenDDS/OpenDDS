@@ -1,5 +1,31 @@
 #!/bin/bash -x
 
+# $Id$
+
+###############################################################################
+#
+# usage
+#
+###############################################################################
+usage ()
+{
+  set +x
+  echo "Usage: `basename $0` [destination_directory]"
+  echo ""
+  echo "destination_directory   This is the location of the directory"
+  echo "                         for the packaged files."
+  echo ""
+  echo "If not supplied a destination directory of 'pkg' will be used."
+  echo ""
+  echo "Examples:"
+  echo "`basename $0` dts-dirname"
+  exit
+}
+
+case $1 in
+  -[?hH]*) usage; exit;
+esac
+
 PKG=$1
 if test x"$PKG" == x""
 then
