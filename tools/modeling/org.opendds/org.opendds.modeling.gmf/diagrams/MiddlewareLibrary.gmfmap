@@ -15,7 +15,7 @@
           xsi:type="gmfmap:FeatureLabelMapping"
           viewPattern="">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ComponentName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -24,7 +24,7 @@
           readOnly="true"
           viewPattern="«domainParticipant»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ComponentStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -32,7 +32,7 @@
           xsi:type="gmftool:CreationTool"
           href="MiddlewareLibrary.gmftool#//@palette/@tools.0/@tools.1"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#Component"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
       <children
           compartment="//@nodes.0/@ownedChild/@compartments.0"
           referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild">

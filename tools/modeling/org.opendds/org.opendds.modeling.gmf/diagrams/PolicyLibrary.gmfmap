@@ -13,7 +13,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -22,7 +22,7 @@
           readOnly="true"
           viewPattern="«lifespanQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -30,7 +30,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.8"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -42,7 +42,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -51,7 +51,7 @@
           readOnly="true"
           viewPattern="«osQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -59,7 +59,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.10"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -71,7 +71,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -80,7 +80,7 @@
           readOnly="true"
           viewPattern="«gdQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -88,7 +88,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.5"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -100,7 +100,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -109,7 +109,7 @@
           readOnly="true"
           viewPattern="«rlQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -117,7 +117,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.16"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -129,7 +129,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -138,7 +138,7 @@
           readOnly="true"
           viewPattern="«reliabilityQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -146,7 +146,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.15"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -158,7 +158,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -167,7 +167,7 @@
           readOnly="true"
           viewPattern="«presentationQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -175,7 +175,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.13"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -187,7 +187,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -196,7 +196,7 @@
           readOnly="true"
           viewPattern="«efQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -204,7 +204,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.4"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -216,7 +216,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -225,7 +225,7 @@
           readOnly="true"
           viewPattern="«tdQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -233,7 +233,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.18"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -245,7 +245,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -254,7 +254,7 @@
           readOnly="true"
           viewPattern="«wdlQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -262,7 +262,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.21"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -274,7 +274,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -283,7 +283,7 @@
           readOnly="true"
           viewPattern="«destinationOrderQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -291,7 +291,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.1"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -303,7 +303,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -312,7 +312,7 @@
           readOnly="true"
           viewPattern="«ownershipQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -320,7 +320,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.11"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -332,7 +332,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -341,7 +341,7 @@
           readOnly="true"
           viewPattern="«udQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -349,7 +349,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.20"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -361,7 +361,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -370,7 +370,7 @@
           readOnly="true"
           viewPattern="«lbQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -378,7 +378,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.7"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -390,7 +390,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -399,7 +399,7 @@
           readOnly="true"
           viewPattern="«durabilityQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -407,7 +407,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.3"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -419,7 +419,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -428,7 +428,7 @@
           readOnly="true"
           viewPattern="«tbfQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -436,7 +436,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.17"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -448,7 +448,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -457,7 +457,7 @@
           readOnly="true"
           viewPattern="«rdlQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -465,7 +465,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.14"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -477,7 +477,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -486,7 +486,7 @@
           readOnly="true"
           viewPattern="«livelinessQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -494,7 +494,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.9"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -506,7 +506,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -515,7 +515,7 @@
           readOnly="true"
           viewPattern="«partitionQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -523,7 +523,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.12"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -535,7 +535,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -544,7 +544,7 @@
           readOnly="true"
           viewPattern="«tpQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -552,7 +552,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.19"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -564,7 +564,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -573,7 +573,7 @@
           readOnly="true"
           viewPattern="«historyQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -581,7 +581,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.6"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -593,7 +593,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -602,7 +602,7 @@
           readOnly="true"
           viewPattern="«deadlineQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -610,7 +610,7 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.0"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -622,7 +622,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -631,7 +631,7 @@
           readOnly="true"
           viewPattern="«dsQosPolicy»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
@@ -639,12 +639,12 @@
           xsi:type="gmftool:CreationTool"
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.2"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
     </ownedChild>
   </nodes>
   <diagram>
     <diagramCanvas
-        href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#metamodel"/>
+        href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#stereotypedelement"/>
     <domainModel
         href="../../org.opendds.modeling.model/model/OpenDDS.ecore#/"/>
     <domainMetaElement
