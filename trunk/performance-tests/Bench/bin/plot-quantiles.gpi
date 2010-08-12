@@ -3,6 +3,7 @@
 #   $1 - output directory
 
 set datafile separator whitespace
+set timestamp
 
 set terminal push
 set terminal png size 1290,770

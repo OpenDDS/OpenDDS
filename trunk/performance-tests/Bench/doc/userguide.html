@@ -532,9 +532,13 @@ Error: #f88
 <div title="DCPSInfoRepo" modifier="MikeMartinez" created="201003011936" changecount="1">
 <pre>This is the executable that manages metadata for OpenDDS.  This is where associations are made between publications and subscriptions.  Builtin Topics are distributed from here.  One process of this type is required for operaion of OpenDDS.  It implements CORBA interfaces that allow the individual DDS Participants to register for discovery and update internal state as necessary.</pre>
 </div>
-<div title="Data Reduction" modifier="MikeMartinez" created="201003082209" modified="201004231451" tags="publish" changecount="33">
-<pre>Test execution will result in data being generated and stored.  This data can then be post processed to reduce it to understandable summaries as well as to visualize the results.  OpenDDS-Bench produces output to the console while operating and will create latency data files if directed to do so as part of the test configuration.
-
+<div title="Data Reduction" modifier="MikeMartinez" created="201003082209" modified="201008111926" tags="publish" changecount="44">
+<pre>Test execution will result in data being generated and stored.  This data can then be post processed to reduce it to understandable summaries as well as to visualize the results.  OpenDDS-Bench produces output to the console while operating and will create latency data files if directed to do so as part of the test configuration.  A data reduction script for bash shells is available that performs data reduction on the pre-configured latency and throughput test results:
+{{indent{
+;$~BENCH_ROOT/bin/generate-test-results.sh
+:This script will reduce data from the pre-configured tests for [[latency|Latency Tests]] and [[throughput|Throughput Tests]].  The results will be located in a new 'data' subdirectory of the test execution base directory.
+}}}
+The data reduction steps for the existing tests are summarized here:
 {{chunk{
 !Latency Test data reduction
 
@@ -546,10 +550,13 @@ Scripts are available to convert the data into plottable format.  These include 
 ;[[$BENCH_ROOT/bin/reduce-latency-data.pl|ReduceLatencyManPage]]
 :This script will convert individual latency test output files into a format suitable for use by GNUPlot for [[visualization|Data Visualization]].
 }}}
-
 {{indent{
 ;[[$BENCH_ROOT/bin/extract-latency.pl|ExtractLatencyManPage]]
 :This script will extract the data from the previously converted plot data and create a summary table for plotting overall trend data.
+}}}
+{{indent{
+;[[$BENCH_ROOT/bin/gen-latency-stats.pl|GenLatencyStatsManPage]]
+:This script will extract latency statistical data from the previously converted plot data and create GNUPlot variable assignments suitable for use in displaying the data in plots.
 }}}
 
 In addition to these scripts, a helper script to show how the other scripts can be used to reduce the data produced by the pre-defined [[existing tests|Existing Tests]] is available at //$~BENCH_ROOT/tools/convert-latency//.  The commands in there assume a directory structure in which the tests were executed and in which the analysis will be performed.  You will need to tailor a set of commands similar to these to your test environment in order to effectively use the data reduction scripts.
@@ -585,39 +592,19 @@ The data reduction steps peformed include the following:
 
 Throughput test analysis will rely on the number of samples received at the test subscriptions.  Typically no latency data will be gathered during these tests so they will not be slowed by data collection.  The summary number of samples received can be gathered from the output of the test execution.
 
-!!NOTE: This is incomplete and needs to be expanded.
+The following script is available to convert the data into plottable format:
+{{indent{
+;[[$BENCH_ROOT/bin/extract-throughput.pl|ExtractThroughputManPage]]
+:This script will extract throughput data from throughput test results files and create a summary table for plotting overall trend data.
 }}}
-</pre>
-</div>
-<div title="Data Visualization" modifier="TrevorFields" created="201003082219" modified="201004231821" tags="publish" changecount="4">
-<pre>!!NOTE: This is a documentation placeholder and needs to be expanded.
-There are several scripts to assist in visualizing the reduced test data.  These include:
-;//[[$BENCH_ROOT/bin/mktable.pl|MktableManPage]]//
-:script to create a table of results.  This currently creates only a TiddlyWiki format table.
-;//[[$BENCH_ROOT/bin/expandColors.pl|ExpandcolorsManPage]]//
-:script to replace color table lookups from TiddlyWiki in the data table from //mktable.pl// with actual color references.
-;//[[$BENCH_ROOT/bin/gen-latency-stats.pl|GenstatsManPage]]//
-:script to create file with GNUPlot label string definitions containing summary statistics information to be added as labels to histogram charts.
-;//$~BENCH_ROOT/bin/lj-plots.gp//
-:GNUPlot script to create Latency and Jitter timeline charts and histograms in a quad-plot format.
-;//$~BENCH_ROOT/bin/plot-jitter.gp//
-:GNUPlot script to create a plot of jitter summary data for all tests.
-;//$~BENCH_ROOT/bin/plot-transports.gp//
-:GNUPlot script to create a plot of summary latency data for all tests.
-;//$~BENCH_ROOT/bin/plot-throughput-testformats.gp//
-:GNUPlot script to create a plot of summary throughput data organized by test type.
-;//$~BENCH_ROOT/bin/plot-throughput-transports.gp//
-:GNUPlot script to create a plot of summary  throughput data organized by transport type.
-;//$~BENCH_ROOT/tools/plot-latency.gp//
-:notional GNUPlot script to create plots for gathered latency data.
-;//$~BENCH_ROOT/tools/plot-throughput.gp//
-:notional GNUPlot script to create plots for gathered throughput data.
+The output of this data reduction script can be used directly to plot the throughput summary results.
+}}}
 </pre>
 </div>
 <div title="DefaultTiddlers" modifier="MikeMartinez" created="201002181950" modified="201002182002" changecount="2">
 <pre>[[OpenDDS-Bench]]</pre>
 </div>
-<div title="Existing Tests" modifier="MikeMartinez" created="201003031715" modified="201003221816" tags="publish" changecount="3">
+<div title="Existing Tests" modifier="MikeMartinez" created="201003031715" modified="201008111523" tags="publish" changecount="5">
 <pre>There are existing test configurations for common test scenarios provided with the framework.  These are:
 ;[[latency|Latency Tests]]
 :measures latency from publication to reception of each sample
@@ -626,11 +613,11 @@ There are several scripts to assist in visualizing the reduced test data.  These
 ;[[scaling|Scaling Tests]]
 :measures the incremental performance as hosts are added to a distribution
 
-In addition to the test specification files, the transport specification files may need to be updated for your test environment.  Today, only the //$~BENCH_ROOT/etc/transport-udp.ini// file will need to be udpated.  Replace the &lt;%HOSTNAME%&gt; placeholders with IP addresses or resolvable hostnames in your environment.
+In addition to the test specification files, the transport specification files may need to be updated for your test environment.  Currently, only the //$~BENCH_ROOT/etc/transport-udp.ini// file will need to be udpated.  Replace the &lt;%HOSTNAME%&gt; placeholders with IP addresses or resolvable hostnames in your environment.
 
 Included in the test specification directories is a file &quot;//test-commands.txt//&quot; which contains a set of bash script commands that can be used to execute the full set of tests in a Linux environment.  These can be used as an example and tailored to your specific test environment.  Beyond translating to the native shell type, the IP addresses used should be changed to those that are valid in your environment.</pre>
 </div>
-<div title="ExpandcolorsManPage" modifier="MikeMartinez" created="201004272157" changecount="1">
+<div title="ExpandcolorsManPage" modifier="MikeMartinez" created="201004272157" modified="201008111556" tags="publish scripts" changecount="2">
 <pre>&lt;html&gt;
 &lt;head&gt;
 &lt;title&gt;expandColors.pl - Convert the TiddlyWiki ColorPalette slices to actual CSS colors&lt;/title&gt;
@@ -660,7 +647,6 @@ Included in the test specification directories is a file &quot;//test-commands.t
 &lt;/p&gt;
 &lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;expandColors.pl - Convert the TiddlyWiki ColorPalette slices to actual CSS colors&lt;/p&gt;
-&lt;p&gt;$Id$&lt;/p&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
@@ -686,7 +672,7 @@ The export plugin does not do this conversion for us.&lt;/p&gt;
 
 &lt;/html&gt;</pre>
 </div>
-<div title="ExtractLatencyManPage" modifier="TrevorFields" created="201003191853" modified="201004232244" tags="publish" changecount="3">
+<div title="ExtractLatencyManPage" modifier="MikeMartinez" created="201003191853" modified="201008111553" tags="publish scripts" changecount="5">
 <pre>&lt;html&gt;
 &lt;head&gt;
 &lt;title&gt;extract-latency.pl - extract summary statistics from plot datafiles.&lt;/title&gt;
@@ -729,10 +715,10 @@ The export plugin does not do this conversion for us.&lt;/p&gt;
 &lt;h1&gt;&lt;a name=&quot;description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/h1&gt;
 &lt;p&gt;This script processes the input files and prints a summary from all files
 in comma separated values (CSV) format to standard output.&lt;/p&gt;
-&lt;p&gt;The input file is expected to be in the format produced by the reduce.pl
-data reduction script.  This file type has statistical summary data in
-the Index 1 and Index 2 section header comments that are parsed by this
-script and gathered from all input files.&lt;/p&gt;
+&lt;p&gt;The input file is expected to be in the format produced by the
+reduce-latency-data.pl data reduction script.  This file type has
+statistical summary data in the Index 1 and Index 2 section header
+comments that are parsed by this script and gathered from all input files.&lt;/p&gt;
 &lt;p&gt;This input file name is expected to be in a format that includes '-'
 separated fields and a fixed extension of &amp;quot;.gpd&amp;quot;.&lt;/p&gt;
 &lt;pre&gt;
@@ -740,19 +726,23 @@ separated fields and a fixed extension of &amp;quot;.gpd&amp;quot;.&lt;/p&gt;
 &lt;p&gt;The &amp;lt;transport&amp;gt; and &amp;lt;size&amp;gt; fields are used to populate two columns in the
 output data.&lt;/p&gt;
 &lt;p&gt;This output consists of a single CSV file with a single record (line)
-generated from each input file.  The output files include:&lt;/p&gt;
+generated from each input file.  The output lines include:&lt;/p&gt;
 &lt;table border&gt;
   &lt;tr&gt;&lt;th&gt;Field&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;&lt;/tr&gt;
   &lt;tr&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;transport type (derived from input filename)&lt;/td&gt;&lt;/tr&gt;
   &lt;tr&gt;&lt;td&gt;2&lt;/td&gt;&lt;td&gt;test message size (derived from input filename)&lt;/td&gt;&lt;/tr&gt;
   &lt;tr&gt;&lt;td&gt;3&lt;/td&gt;&lt;td&gt;latency mean statistic&lt;/td&gt;&lt;/tr&gt;
   &lt;tr&gt;&lt;td&gt;4&lt;/td&gt;&lt;td&gt;latency standard deviation statistic&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;5&lt;/td&gt;&lt;td&gt;latency maximum statistic&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;6&lt;/td&gt;&lt;td&gt;latency minimum statistic&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;7&lt;/td&gt;&lt;td&gt;jitter mean statistic&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;8&lt;/td&gt;&lt;td&gt;jitter standard deviation statistic&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;9&lt;/td&gt;&lt;td&gt;jitter maximum statistic&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;10&lt;/td&gt;&lt;td&gt;jitter minimum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;5&lt;/td&gt;&lt;td&gt;latency median statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;6&lt;/td&gt;&lt;td&gt;latency median absolute deviation statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;7&lt;/td&gt;&lt;td&gt;latency maximum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;8&lt;/td&gt;&lt;td&gt;latency minimum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;9&lt;/td&gt;&lt;td&gt;jitter mean statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;10&lt;/td&gt;&lt;td&gt;jitter standard deviation statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;11&lt;/td&gt;&lt;td&gt;jitter median statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;12&lt;/td&gt;&lt;td&gt;jitter median absolute deviation statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;13&lt;/td&gt;&lt;td&gt;jitter maximum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;14&lt;/td&gt;&lt;td&gt;jitter minimum statistic&lt;/td&gt;&lt;/tr&gt;
 &lt;/table&gt;&lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
@@ -761,16 +751,199 @@ generated from each input file.  The output files include:&lt;/p&gt;
   extract-latency.pl data/*.gpd &amp;gt; data/latency.csv&lt;/pre&gt;
 
 &lt;/body&gt;
-
 &lt;/html&gt;
 </pre>
+</div>
+<div title="ExtractThroughputManPage" modifier="MikeMartinez" created="201008111855" modified="201008111914" tags="publish script" changecount="3">
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;extract-throughput.pl - extract summary statistics from test results.&lt;/title&gt;
+&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
+&lt;/head&gt;
+
+&lt;body style=&quot;background-color: white&quot;&gt;
+
+
+&lt;!-- INDEX BEGIN --&gt;
+&lt;div name=&quot;index&quot;&gt;
+&lt;p&gt;&lt;a name=&quot;__index__&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+
+	&lt;li&gt;&lt;a href=&quot;#name&quot;&gt;NAME&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr name=&quot;index&quot; /&gt;
+&lt;/div&gt;
+&lt;!-- INDEX END --&gt;
+
+&lt;p&gt;
+&lt;/p&gt;
+&lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;extract-throughput.pl - extract summary statistics from test results.&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  extract-throughput.pl &amp;lt;infile&amp;gt; ...&lt;/pre&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This script processes the logfiles created by executing the througput
+tests and generates a series of indexed data sets suitable for plotting
+by GNUPlot.&lt;/p&gt;
+&lt;p&gt;All input files named on the command line are processed and the transport
+used, the message sizes and rates, as well as the elapsed test time and
+actual number of messages received are extracted.&lt;/p&gt;
+&lt;p&gt;The input files are expected to be in logfile format as produced by the
+testprocess &lt;code&gt;-v&lt;/code&gt; option.  Logfiles produced by the subscription end of
+the testing contain the data required to produce plottable data sets.&lt;/p&gt;
+&lt;p&gt;The supported tests that can be reduced from the pre-configured throughput
+tests:&lt;/p&gt;
+&lt;table border&gt;
+  &lt;tr&gt;&lt;th&gt;Test Type&lt;/th&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;Bidirectional Throughput&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;Publication Bound&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;Subscription Bound&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;&lt;p&gt;Each of these test types has a pre-configured set of test conditions that
+can be executed.  The sets of test conditions are grouped into three
+different categories:&lt;/p&gt;
+&lt;table border&gt;
+  &lt;tr&gt;&lt;th&gt;Test Conditions&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;Steepest Ascent&lt;/td&gt;&lt;td&gt;A group of tests that simultaneously
+  increase both the message size and message rate resulting in a large
+  nominal throughput increase between tests.&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;Fixed Rate&lt;/td&gt;&lt;td&gt;A group of tests where the message rate is
+  held constant for all of the tests.&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;Fixed Size&lt;/td&gt;&lt;td&gt;A group of tests where the message size is
+  held constant for all of the tests.&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;&lt;p&gt;The transport types included in the pre-configured tests are:&lt;/p&gt;
+&lt;table border&gt;
+  &lt;tr&gt;&lt;th&gt;Transport&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;UDP&lt;/td&gt;&lt;td&gt;best effort datagram transport.&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;TCP&lt;/td&gt;&lt;td&gt;reliable stream transport.&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;Best Effort Multicast&lt;/td&gt;&lt;td&gt;best effort multicast datagram transport.&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;Reliable Multicast&lt;/td&gt;&lt;td&gt;reliable multicast datagram transport.&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;&lt;p&gt;Each index set in the output represents the combination of a test type,
+a set of test conditions, and a transport type with each entry within
+the index representing a single size/rate test result.&lt;/p&gt;
+&lt;p&gt;The output data within an index is formatted as a comma separated value
+file (CSV), with the following fields:&lt;/p&gt;
+&lt;table border&gt;
+  &lt;tr&gt;&lt;th&gt;Field&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;test message size&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;2&lt;/td&gt;&lt;td&gt;test message rate&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;3&lt;/td&gt;&lt;td&gt;actual (measured) bandwidth&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;4&lt;/td&gt;&lt;td&gt;test type&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;5&lt;/td&gt;&lt;td&gt;transport type&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  extract-throughput.pl */*.results &amp;gt; data/throughput.csv&lt;/pre&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
 </div>
 <div title="FAQ" modifier="MikeMartinez" created="201003022001" modified="201004231456" tags="publish faq" changecount="4">
 <pre>#''What kind of document is this?''&lt;br&gt;{{indent{This is a TiddlyWiki document.}}}
 #''What is the latency data output file format?''&lt;br&gt;{{indent{The output files generated when gathering latency data is: [[latency file format|LatencyDataFileFormat]].}}}</pre>
 </div>
-<div title="GNUPlot" modifier="MikeMartinez" created="201003082221" modified="201003082223" changecount="4">
-<pre>GNUPlot is a data visualization tool available as from [[gnuplot.info|http://gnuplot.info/]]</pre>
+<div title="GNUPlot" modifier="MikeMartinez" created="201003082221" modified="201008111450" changecount="5">
+<pre>GNUPlot is a data visualization tool available from [[gnuplot.info|http://gnuplot.info/]]</pre>
+</div>
+<div title="GenLatencyStatsManPage" modifier="MikeMartinez" created="201008111552" modified="201008111553" tags="publish scripts" changecount="3">
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;gen-latency-stats.pl - create GNUPlot statistical summary data string variables&lt;/title&gt;
+&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
+&lt;/head&gt;
+
+&lt;body style=&quot;background-color: white&quot;&gt;
+
+
+&lt;!-- INDEX BEGIN --&gt;
+&lt;div name=&quot;index&quot;&gt;
+&lt;p&gt;&lt;a name=&quot;__index__&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+
+	&lt;li&gt;&lt;a href=&quot;#name&quot;&gt;NAME&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr name=&quot;index&quot; /&gt;
+&lt;/div&gt;
+&lt;!-- INDEX END --&gt;
+
+&lt;p&gt;
+&lt;/p&gt;
+&lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;gen-latency-stats.pl - create GNUPlot statistical summary data string variables&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  gen-latency-stats.pl &amp;lt;infile&amp;gt;&lt;/pre&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This script processes a comma separated value (CSV) input file and
+creates an output file for each record of the input.  Each output file is
+placed in the same directory that the input file was located in.  The
+output file names are constructed using fields from the input record as:&lt;/p&gt;
+&lt;pre&gt;
+  latency-&amp;lt;transport&amp;gt;-&amp;lt;size&amp;gt;.stats&lt;/pre&gt;
+&lt;p&gt;The input file is expected to be in the format produced by the extract.pl
+data reduction script.  Each record (line) of the input file contains the
+following fields:&lt;/p&gt;
+&lt;table border&gt;
+  &lt;tr&gt;&lt;th&gt;Field&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;transport type (derived from input filename)&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;2&lt;/td&gt;&lt;td&gt;test message size (derived from input filename)&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;3&lt;/td&gt;&lt;td&gt;latency mean statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;4&lt;/td&gt;&lt;td&gt;latency standard deviation statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;5&lt;/td&gt;&lt;td&gt;latency median statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;6&lt;/td&gt;&lt;td&gt;latency median absolute deviation statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;7&lt;/td&gt;&lt;td&gt;latency maximum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;8&lt;/td&gt;&lt;td&gt;latency minimum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;9&lt;/td&gt;&lt;td&gt;jitter mean statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;10&lt;/td&gt;&lt;td&gt;jitter standard deviation statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;11&lt;/td&gt;&lt;td&gt;jitter median statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;12&lt;/td&gt;&lt;td&gt;jitter median absolute deviation statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;13&lt;/td&gt;&lt;td&gt;jitter maximum statistic&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;14&lt;/td&gt;&lt;td&gt;jitter minimum statistic&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;&lt;p&gt;The output includes two GNUPlot string variable definitions suitable for
+'load' or 'call' operations within GNUPlot.  Provided GNUPlot data
+visualization scripts use these variables to generate label information
+to place on plots.  The variables are:&lt;/p&gt;
+&lt;pre&gt;
+  latency_stats
+  jitter_stats&lt;/pre&gt;
+&lt;p&gt;Each variable contains the median, median absolute deviation, maximum,
+and minimum data values for the output file (transport/size) in a newline
+separated single string suitable for use as a label within GNUPlot.&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  gen-latency-stats.pl data/latency.csv&lt;/pre&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
 </div>
 <div title="GenstatsManPage" modifier="TrevorFields" created="201003191859" modified="201004231825" tags="publish" changecount="2">
 <pre>&lt;html&gt;
@@ -956,7 +1129,7 @@ As an aid to packaging these files into a distributable form, the //$~BENCH_ROOT
 
 The script makes copies and links in a named (default //pkg//) target directory that can then be tar'ed or zip'ed into a distributable file.  The {{{run_test}}} test management script will configure the environment of processes that it starts to find libraries and commands in the subdirectories created by this script, making use of the distribution straightforward.</pre>
 </div>
-<div title="Latency Tests" modifier="MikeMartinez" created="201003042136" modified="201003311508" tags="publish" changecount="19">
+<div title="Latency Tests" modifier="MikeMartinez" created="201003042136" modified="201008111945" tags="publish" changecount="21">
 <pre>The OpenDDS-Bench framework includes configuration files for latency testing.  These files are located in the //$~BENCH_ROOT/tests/latency// sub-directory.  The latency testing covers several different conditions.  The configuration for these tests are illustrated in the following diagram.
 [img[Latency Test|images/latencytest.jpg]]
 The message size is varied for each test execution run and latency data for the full loopback path gathered and analyzed.  Latency data is measured by extracting a timestamp at the time of the write() call and inserting that into the data sample.  Once the sample has been received at the terminus of the path, another timestamp will be extracted and the difference logged as the latency.  Since the clocks on different hosts tend to drift at different rates, it is best to have both the write() and read() calls executed on the same host so the latency measurements are made using the same system clock.  This is ensured for these tests by placing the publication and subscription in the same process.  Typically the two processes of this test will be executed on different hosts to include network effects in the measurements.  While executing them on the same host will exclude network effects from the results, it is possible to encounter processor effects depending on the capacity of the host on which the test is executing.
@@ -992,7 +1165,15 @@ host2&gt; $~BENCH_ROOT/bin/run_test -P -t 120 -h &lt;repohost&gt;:2809 -i $~BENC
 host1&gt; cd &lt;testdir&gt;
 host1&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/latency/p1-&lt;size&gt;.ini
 &lt;&lt;&lt;
-}}}</pre>
+}}}
+{{itemBlock{
+A script that can be used to execute these tests is available as:
+{{indent{
+;[[$BENCH_ROOT/tests/latency/run_test.pl|LatencyRunTestManPage]]
+:This script will execute one side (or host) of a latency test for a specific message size and transport using the available test configuration files for that message size.
+}}}
+}}}
+</pre>
 </div>
 <div title="LatencyDataFileFormat" modifier="MikeMartinez" created="201003191950" modified="201003221736" tags="publish" changecount="9">
 <pre>Latency data files include last hop and full path information in both summary and detailed forms.  in the output files specified as part of the test configuration for a subscription, the summary data appears first, followed by the detailed data.  The summary data is shown organized by last hop then full path, and within each category the information is broken down and summarized by publication that wrote the data.
@@ -1071,6 +1252,96 @@ SUBSCRIPTION s5 DETAILED DATA
 3.12000e-04
 }}}
 </pre>
+</div>
+<div title="LatencyRunTestManPage" modifier="MikeMartinez" created="201008111946" modified="201008111949" tags="publish scripts" changecount="3">
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;run_test.pl - run one side of a latency cross host test&lt;/title&gt;
+&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
+&lt;/head&gt;
+
+&lt;body style=&quot;background-color: white&quot;&gt;
+
+
+&lt;!-- INDEX BEGIN --&gt;
+&lt;div name=&quot;index&quot;&gt;
+&lt;p&gt;&lt;a name=&quot;__index__&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+
+	&lt;li&gt;&lt;a href=&quot;#name&quot;&gt;NAME&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr name=&quot;index&quot; /&gt;
+&lt;/div&gt;
+&lt;!-- INDEX END --&gt;
+
+&lt;p&gt;
+&lt;/p&gt;
+&lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;run_test.pl - run one side of a latency cross host test&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  run_test.pl &amp;lt;transport&amp;gt; &amp;lt;message size&amp;gt;&lt;/pre&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This script runs one side of the latency test for a cross host testing.  The
+script needs to be run on each of the two hosts involved in the test using
+the same parameters on each host.&lt;/p&gt;
+&lt;p&gt;The test consists of two halves, an originating (server) side and a reflecting
+(client) side. The servers involved in the test are are stored in
+test_list.txt file in test-host groupings.  The grouping consists of an
+ID, client host, and server host.  The script identifies the host's behavior
+by identifying the test group ID and the local host's name.  The test group
+ID is identified using the environement variable CROSS_GRP.&lt;/p&gt;
+&lt;p&gt;The server (originiating) side starts the DCPSInfoRepo for the test.&lt;/p&gt;
+&lt;p&gt;The transport has to be one of the following values:&lt;/p&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;tcp&quot; class=&quot;item&quot;&gt;tcp&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;SimpleTCP&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;udp&quot; class=&quot;item&quot;&gt;udp&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;SimpleUDP&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;multi_be&quot; class=&quot;item&quot;&gt;multi-be&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;multicast (Best Effort)&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;multi_rel&quot; class=&quot;item&quot;&gt;multi-rel&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;multicast (Reliable)&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;Supported message sizes are &lt;strong&gt;50&lt;/strong&gt; &lt;strong&gt;100&lt;/strong&gt; &lt;strong&gt;250&lt;/strong&gt; &lt;strong&gt;500&lt;/strong&gt; &lt;strong&gt;1000&lt;/strong&gt;
+ &lt;strong&gt;2500&lt;/strong&gt; &lt;strong&gt;5000&lt;/strong&gt; &lt;strong&gt;8000&lt;/strong&gt; &lt;strong&gt;16000&lt;/strong&gt; &lt;strong&gt;32000&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  run the same command on both hosts:&lt;/pre&gt;
+&lt;pre&gt;
+  run_test.pl tcp 1000&lt;/pre&gt;
+&lt;pre&gt;
+  run_test.pl multi-be 50&lt;/pre&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
 </div>
 <div title="MainMenu" modifier="MikeMartinez" created="201002181950" modified="201003031716" changecount="7">
 <pre>[[Introduction|OpenDDS-Bench]]
@@ -1208,7 +1479,7 @@ from the input file.&lt;/p&gt;
 
 OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 </div>
-<div title="OpenDDS-Bench" modifier="MikeMartinez" created="201002182000" modified="201003031652" tags="publish" changecount="20">
+<div title="OpenDDS-Bench" modifier="MikeMartinez" created="201002182000" modified="201008111604" tags="publish" changecount="21">
 <pre>OpenDDS-Bench is a testing framework for specifying and executing performance testing of OpenDDS.  It supports testing on one or more hosts; each host with one or more processes.  Any test process may contain any number of DDS service publications or subscriptions.
 
 The framework consists of:
@@ -1687,7 +1958,7 @@ The following steps need to be performed on each host for each test.  The ''&lt;
 Note that it is important to start the tests within 60 seconds of each other.  This is due to the script timeout value, which is set to 60 seconds after the specified duration.  The test execution does not start until the entire test is connected, so if any host is not started within the 60 seconds interval processes that were started first will time out before the test is complete.
 }}}</pre>
 </div>
-<div title="ReduceLatencyManPage" modifier="TrevorFields" created="201003191851" modified="201004232243" tags="publish" changecount="4">
+<div title="ReduceLatencyManPage" modifier="MikeMartinez" created="201003191851" modified="201008111553" tags="publish scripts" changecount="7">
 <pre>&lt;html&gt;
 &lt;head&gt;
 &lt;title&gt;reduce-latency-data.pl - reduce test results into plottable data&lt;/title&gt;
@@ -1733,7 +2004,7 @@ standard output.&lt;/p&gt;
 &lt;p&gt;The input file is expected to be in the format produced by the OpenDDS
 performance test bench latency data summary.&lt;/p&gt;
 &lt;p&gt;The output consists of data suitable for plotting using GNUPlot.  There
-are 4 indexed sections with the following data in the columns of each
+are 5 indexed sections with the following data in the columns of each
 section:&lt;/p&gt;
 &lt;dl&gt;
 &lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;index_0&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Index 0&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
@@ -1746,7 +2017,9 @@ using $0 for the x axis in the GNUPlot plot command.&lt;/p&gt;
 &lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;column_1&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Column 1&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
 &lt;dd&gt;
-&lt;p&gt;Individual data points for 1/2 full path latency from the input file.&lt;/p&gt;
+&lt;p&gt;Individual data points for 1/HOPS full path latency from the input file.
+HOPS is set internally to a value of 2 corresponding to the
+pre-configured OpenDDS-Bench latency tests.&lt;/p&gt;
 &lt;/dd&gt;
 &lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;column_2&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Column 2&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
 
@@ -1793,6 +2066,32 @@ the data is placed.&lt;/p&gt;
 &lt;/dd&gt;
 &lt;/dl&gt;
 &lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;index_3&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Index 3&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Latency quantile data.  This index has sorted latency data derived from
+the index 0 / column 1 data points.&lt;/p&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;column_14&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Column 1&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Latency data from Index 0, sorted.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;index_4&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Index 4&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Jitter quantile data.  This index has sorted jitter data derived from
+the index 0 / column 2 data points.&lt;/p&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;column_15&quot; class=&quot;item&quot;&gt;&lt;strong&gt;Column 1&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;Jitter data from Index 0, sorted.&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;/dd&gt;
 &lt;/dl&gt;
 &lt;p&gt;Each index section has a header comment.  The histogram sections (Index 1
 and Index 2) have statistical summary data included as well.  This
@@ -1800,22 +2099,21 @@ statistical summary data is usable by the 'extract.pl' script to provide
 plottable summary data.&lt;/p&gt;
 &lt;p&gt;If the data produced by this script is to be used by the 'extract.pl'
 script, then the output file needs to be named such that it consists of
-two '-' separated fields followed by the extension &amp;quot;.gpd&amp;quot; (representing
-GNUPlot data file).  The fields represent the transport type and the
-message size of the test data.&lt;/p&gt;
+three '-' separated fields followed by the extension &amp;quot;.gpd&amp;quot; (representing
+GNUPlot data file).  The fields represent the test type, the transport
+type, and the message size of the test data.&lt;/p&gt;
 &lt;p&gt;
 &lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1&gt;&lt;a name=&quot;example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/h1&gt;
 &lt;pre&gt;
-  reduce-latency-data.pl tcp/run/latency-1000.data &amp;gt; data/latency-tcp-1000.gpd&lt;/pre&gt;
+  reduce-latency-data.pl tcp/latency-1000.data &amp;gt; data/latency-tcp-1000.gpd&lt;/pre&gt;
 
 &lt;/body&gt;
-
 &lt;/html&gt;
 </pre>
 </div>
-<div title="RunTestManPage" modifier="MikeMartinez" created="201002251721" modified="201004272251" tags="publish" changecount="10">
+<div title="RunTestManPage" modifier="MikeMartinez" created="201002251721" modified="201008111555" tags="publish scripts" changecount="12">
 <pre>&lt;html&gt;
 &lt;head&gt;
 &lt;title&gt;run_test - Execute test processes for distributed testing&lt;/title&gt;
@@ -2042,7 +2340,7 @@ scenario configuration file.&lt;/p&gt;
 &lt;p&gt;The default is not specified.  This will result in no test processes
 being started if the &lt;strong&gt;-P&lt;/strong&gt; argument is given.&lt;/p&gt;
 &lt;/dd&gt;
-&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;r_file_rawdatafile_file&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-r FILE&lt;/strong&gt; | &lt;strong&gt;--rawdatafile=FILE&lt;/strong&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;r_file_rawdatafile_file&quot; class=&quot;item&quot;&gt;&lt;strong&gt;-r FILE&lt;/strong&gt; | &lt;strong&gt;--rawdatafile=FILE&lt;/strong&gt;&lt;/a&gt;  [DEPRECATED]&lt;/strong&gt;&lt;/dt&gt;
 
 &lt;dd&gt;
 &lt;p&gt;Raw data output filename.  This file is where any raw latency data
@@ -2124,6 +2422,42 @@ filenames will appear as: &lt;code&gt;system-&amp;lt;host&amp;gt;-&amp;lt;time&a
 &lt;/body&gt;
 
 &lt;/html&gt;</pre>
+</div>
+<div title="Script Summary" modifier="MikeMartinez" created="201003082219" modified="201008112247" tags="publish scripts" changecount="9">
+<pre>Scripts are available for building, executing, analyzing, and visualizing performance testing for OpenDDS,  These scripts can be organized into broad categories of:
+;Execution
+:used to execute or help test execution of performance tests.
+;Analysis
+:used to perform data reduction on raw test results.
+;Visualization
+:used to plot or help plot results from performance test execution.
+;Commands
+:used to list or describe commands or sets of commands to perform specific tasks related to the performance testing.
+;Documentation
+:used to provide or format information for documentation purposes.
+;Utility
+:used for miscellaneous purposes to assist the performance testing process.
+| Scripts (relative to $~BENCH_ROOT) |c
+| ''Script'' | ''Category'' | ''Type'' | ''Description'' |
+|[[$BENCH_ROOT/bin/run_test|RunTestManPage]] |Execution |Perl |script to execute performance tests. |
+|[[$BENCH_ROOT/tests/latency/run_test.pl|LatencyRunTestManPage]] |Execution |Perl |script to execute latency performance tests. |
+|[[$BENCH_ROOT/tests/thru/run_test.pl|ThroughputRunTestManPage]] |Execution |Perl |script to execute throughput performance tests. |
+|[[$BENCH_ROOT/bin/reduce_latency.pl|ReduceLatencyManPage]] |Analysis |Perl |Perform data reduction on latency test data results. |
+|[[$BENCH_ROOT/bin/extract_latency.pl|ExtractLatencyManPage]] |Analysis |Perl |Perform data reduction on latency test data results. |
+|[[$BENCH_ROOT/bin/extract_throughput.pl|ExtractThroughputManPage]] |Analysis |Perl |Perform data reduction on throughput test data results. |
+|[[$BENCH_ROOT/bin/gen-latency-stats.pl|GenstatsManPage]] |Analysis |Perl |script to create file with GNUPlot label string definitions containing summary statistics information to be added as labels to histogram charts. |
+|[[$BENCH_ROOT/bin/lj-plots.gpi|LJPlotsManPage]] |Visualization |GNUPlot |script to create Latency and Jitter timeline charts and histograms in a quad-plot format. |
+|[[$BENCH_ROOT/bin/plot-jitter.gpi|PlotJitterManPage]] |Visualization |GNUPlot |script to create a plot of jitter summary data for all tests. |
+|[[$BENCH_ROOT/bin/plot-density.gpi|PlotDensityManPage]] |Visualization |GNUPlot |script to create a plot of density data for all tests. |
+|[[$BENCH_ROOT/bin/plot-quantiles.gpi|PlotQuantilesManPage]] |Visualization |GNUPlot |script to create a plot of quantile data for all tests. |
+|[[$BENCH_ROOT/bin/plot-transports.gpi|PlotTransportsManPage]] |Visualization |GNUPlot |script to create a plot of summary latency data for all tests. |
+|[[$BENCH_ROOT/bin/plot-throughput-testformats.gpi|PlotThroughputFormatsManPage]] |Visualization |GNUPlot |script to create a plot of summary throughput data organized by test type. |
+|[[$BENCH_ROOT/bin/plot-throughput-transports.gpi|PlotThrougputTransportsManPage]] |Visualization |GNUPlot |script to create a plot of summary  throughput data organized by transport type. |
+|[[$BENCH_ROOT/tools/plot-latency.gpi|PlotLatencyManPage]] |Commands |GNUPlot |script to create plots for gathered latency data. |
+|[[$BENCH_ROOT/tools/plot-throughput.gpi|PlotThroughputManPage]] |Commands |GNUPlot |script to create plots for gathered throughput data. |
+|[[$BENCH_ROOT/bin/mktable.pl|MktableManPage]] |Documentation |Perl |script to create a table of results.  This currently creates only a TiddlyWiki format table. |
+|[[$BENCH_ROOT/bin/expandColors.pl|ExpandcolorsManPage]] |Documentation |Perl |script to replace color table lookups from TiddlyWiki in the data table from //mktable.pl// with actual color references. |
+</pre>
 </div>
 <div title="SideBarOptions" modifier="MikeMartinez" created="200911302023" modified="201002011534" changecount="2">
 <pre>&lt;&lt;search&gt;&gt;&lt;&lt;closeAll&gt;&gt;&lt;&lt;permaview&gt;&gt;&lt;&lt;newTiddler&gt;&gt;&lt;&lt;saveChanges&gt;&gt;&lt;&lt;doPublish&gt;&gt;&lt;&lt;slider chkSliderOptionsPanel OptionsPanel &quot;options »&quot; &quot;Change TiddlyWiki advanced options&quot;&gt;&gt;</pre>
@@ -2419,7 +2753,7 @@ DataCollectionBound = 5000
 DataCollectionRetention = NEWEST
 }}}</pre>
 </div>
-<div title="Test Execution" modifier="MikeMartinez" created="201002221632" modified="201003031707" tags="publish" changecount="33">
+<div title="Test Execution" modifier="MikeMartinez" created="201002221632" modified="201008111927" tags="publish" changecount="34">
 <pre>Test execution using the framework involves a test script to manage the processing on each host involved in the testing, the OpenDDS [[repository|DCPSInfoRepo]] process, and a test process that creates the OpenDDS service Entities and executes the actual test operations.
 
 {{itemBlock{
@@ -2444,13 +2778,13 @@ The {{{testprocess}}} test executable is what reads the configuration files, cre
 : execute for at least {{{duration}}} seconds
 ; ''-f &lt;file&gt;''
 : use ''&lt;file&gt;'' as the test specification file for this execution.
-; ''-t &lt;type&gt;''
+; ''-t &lt;type&gt;''  [DEPRECATED]
 : save the specified data when collecting timing statistics.  ''&lt;type&gt;'' is one of: ''unbounded'', ''newest'', or ''oldest''.
 //this is deprecated in favor of the configuration file specification for the same parameter//
 ; ''-s &lt;size&gt;''
 : gather the specified amount of timing data.
 //this is deprecated in favor of the configuration file specification for the same parameter//
-; ''-r &lt;file&gt;''
+; ''-r &lt;file&gt;''  [DEPRECATED]
 : place the gathered timing data into the specified file.
 //this is deprecated in favor of the configuration file specification for the same parameter//
 }}}
@@ -2492,7 +2826,7 @@ The specific Entity specifications that are supported include:
 #[[Subscription|Subscription Specifications]]
 </pre>
 </div>
-<div title="Throughput Tests" modifier="MikeMartinez" created="201003081923" modified="201003311533" tags="publish" changecount="19">
+<div title="Throughput Tests" modifier="MikeMartinez" created="201003081923" modified="201008112014" tags="publish" changecount="20">
 <pre>The OpenDDS-Bench framework includes configuration files for throughput testing.  These files are located in the //$~BENCH_ROOT/tests/thru// sub-directory.  The throughput testing covers several different conditions.  These include a bidirectional test, topologically equivalent to the [[latency tests|Latency Tests]], publication bound tests, and subscription bound tests.  Publication bound testing publishes test data from one publication to two distinct subscriptions.  When these processes are on three separate hosts, the publication processing will dominate and likely be the limiting factor in throughput.  Subscription bound testing publishes test data from two separate publications to a single subscription.  When these processes are on three separate hosts, the subscription processing will dominate and likely be the limiting factor in throughput.  If the test environment does not have adequate network bandwidth, then this will dominate either or both of these tests and the CPU usage observed during the tests will give an indication of what margins are available in the test setup.  The configuration for these tests are illustrated in the following diagrams.
 [img[Bidirectional Test|images/bidirtest.jpg]]
 [img[Publication Bound Test|images/pubboundtest.jpg]]
@@ -2616,7 +2950,103 @@ host2&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~B
 host3&gt; cd &lt;testdir&gt;
 host3&gt; $~BENCH_ROOT/bin/run_test -P -v -t 120 -h &lt;repohost&gt;:2809 -i $~BENCH_ROOT/etc/&lt;transportconfigfile&gt; -s $~BENCH_ROOT/tests/thru/sub-&lt;rel&gt;.ini
 &lt;&lt;&lt;
-}}}</pre>
+}}}
+{{itemBlock{
+A script that can be used to execute these tests is available as:
+{{indent{
+;[[$BENCH_ROOT/tests/thru/run_test.pl|ThroughputRunTestManPage]]
+:This script will execute one side (or host) of a throughput test for all or a specific test case and transport using the available test configuration files.
+}}}
+}}}
+</pre>
+</div>
+<div title="ThroughputRunTestManPage" modifier="MikeMartinez" created="201008112015" modified="201008112016" tags="publish scripts" changecount="2">
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;run_test.pl - run one side of a throughput cross host test&lt;/title&gt;
+&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;link rev=&quot;made&quot; href=&quot;mailto:root@localhost&quot; /&gt;
+&lt;/head&gt;
+
+&lt;body style=&quot;background-color: white&quot;&gt;
+
+
+&lt;!-- INDEX BEGIN --&gt;
+&lt;div name=&quot;index&quot;&gt;
+&lt;p&gt;&lt;a name=&quot;__index__&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+
+	&lt;li&gt;&lt;a href=&quot;#name&quot;&gt;NAME&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;a href=&quot;#example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr name=&quot;index&quot; /&gt;
+&lt;/div&gt;
+&lt;!-- INDEX END --&gt;
+
+&lt;p&gt;
+&lt;/p&gt;
+&lt;h1&gt;&lt;a name=&quot;name&quot;&gt;NAME&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;run_test.pl - run one side of a throughput cross host test&lt;/p&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;synopsis&quot;&gt;SYNOPSIS&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  run_test.pl &amp;lt;transport&amp;gt;&lt;/pre&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;description&quot;&gt;DESCRIPTION&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;This script runs one side of the throughput test for a cross host testing.
+The script needs to be run on each of the two hosts involved in the test
+using the same parameters on each host.&lt;/p&gt;
+&lt;p&gt;The test consists of two halves, an originating (server) side and a reflecting
+(client) side. The servers involved in the test are are stored in
+test_list.txt file in test-host groupings.  The grouping consists of an
+ID, client host, and server host.  The script identifies the host's behavior
+by identifying the test group ID and the local host's name.  The test group
+ID is identified using the environment variable CROSS_GRP.&lt;/p&gt;
+&lt;p&gt;The server (originating) side starts the DCPSInfoRepo for the test.&lt;/p&gt;
+&lt;p&gt;The transport has to be one of the following values:&lt;/p&gt;
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;tcp&quot; class=&quot;item&quot;&gt;tcp&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;uses the SimpleTCP transport implementation&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;udp&quot; class=&quot;item&quot;&gt;udp&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;uses the udp transport implementation&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;multi_be&quot; class=&quot;item&quot;&gt;multi-be&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;uses the multicast implementation with reliability disabled (Best Effort)&lt;/p&gt;
+&lt;/dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a name=&quot;multi_rel&quot; class=&quot;item&quot;&gt;multi-rel&lt;/a&gt;&lt;/strong&gt;&lt;/dt&gt;
+
+&lt;dd&gt;
+&lt;p&gt;uses the multicast implementation with reliability enabled&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;p&gt;
+&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1&gt;&lt;a name=&quot;example&quot;&gt;EXAMPLE&lt;/a&gt;&lt;/h1&gt;
+&lt;pre&gt;
+  run the same command on both hosts:&lt;/pre&gt;
+&lt;pre&gt;
+  run_test.pl tcp&lt;/pre&gt;
+&lt;pre&gt;
+  run_test.pl multi-be&lt;/pre&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
 </div>
 <div title="TiddlyWiki" modifier="MikeMartinez" created="201003022002" modified="201003082219" changecount="2">
 <pre>~TiddlyWiki is a complete [[wiki|http://en.wikipedia.org/wiki/Wiki]] in a single HTML file. It contains the entire text of the wiki, and all the ~JavaScript, CSS and HTML goodness to be able to display it, and let you edit it or search it. Without needing a server.

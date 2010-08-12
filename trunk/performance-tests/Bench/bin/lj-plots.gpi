@@ -6,6 +6,7 @@
 #   $3 - multiplot title
 
 set datafile separator whitespace
+set timestamp
 
 load '$1'
 set terminal push
