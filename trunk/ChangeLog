@@ -1,3 +1,13 @@
+Thu Aug 12 19:15:02 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+
+          Changed test to send each sample as a new instance
+          to prevent test failures do to slow transports on
+          Solaris.  (Since there was only a depth of 1 the
+          previous sample was being removed, like it should be,
+          when a new sample of the same instance came in)
+        
 Thu Aug 12 13:54:28 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/lj-plots.gpi:
