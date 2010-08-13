@@ -10,4 +10,8 @@ workspace {
   $(TAO_ROOT)/orbsvcs/orbsvcs/PortableGroup.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/FTORB.mpc
   DDS_TAO.mwc
+  DevGuideExamples
+  examples
+  performance-tests
+  tests
 }

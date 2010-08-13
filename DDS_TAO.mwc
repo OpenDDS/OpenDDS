@@ -16,4 +16,8 @@ workspace {
   $(TAO_ROOT)/orbsvcs/orbsvcs/Svc_Utils.mpc
   dds
   tools
+  java
+  exclude {
+    java/jms
+  }
 }
