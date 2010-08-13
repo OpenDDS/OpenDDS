@@ -448,6 +448,11 @@ else {
         print $PMG "$macro = $opts{$key}\n";
       }
     }
+    if ($opts{'nonstdcompiler'}) {
+      for my $var ('CC', 'CXX', 'LD') {
+        print $PMG "$var = $opts{'compiler'}\n";
+      }
+    }
     my $plat = $opts{'host'};
     if ($pi->{'aceplatform'}) {
       $plat = $pi->{'aceplatform'};
