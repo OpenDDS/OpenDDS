@@ -1,3 +1,9 @@
+Fri Aug 13 22:23:08 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * configure:
+
+          Add CC, CXX, LD variables to platform_macros.GNU if needed.
+
 Fri Aug 13 22:10:12 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * README:
