@@ -129,13 +129,10 @@ plot_throughput_results ()
   if [ -e "$DATADIR/throughput.csv" ]; then
     gnuplot <<EOF
       # Plotting test format charts
-      call
-      "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-testformats.gpi"  "$DATADIR/throughput.csv" "$OUTDIR"
+      call "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-testformats.gpi"  "$DATADIR/throughput.csv" "$OUTDIR"
       # Plotting transport charts
-      call
-      "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-transports.gpi"  "$DATADIR/throughput.csv" "$OUTDIR"
-      call
-      "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-transports.gpi"  "$DATADIR/throughput.csv" "$OUTDIR" "smooth acspline"
+      call "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-transports.gpi"  "$DATADIR/throughput.csv" "$OUTDIR"
+      call "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-transports.gpi"  "$DATADIR/throughput.csv" "$OUTDIR" "smooth acspline"
       exit
 EOF
   else
