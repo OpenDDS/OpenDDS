@@ -1,3 +1,9 @@
+Fri Aug 13 22:02:16 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * configure:
+
+          Removed some extra Getopt::Long calls that don't work in perl 5.8.
+
 Fri Aug 13 21:16:08 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_TAO.mwc:

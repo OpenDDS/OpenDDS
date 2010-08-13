@@ -130,8 +130,6 @@ if (! -r 'rules.dds.GNU') {
   exit 1;
 }
 
-Getopt::Long::Configure('prefix_pattern=--|-|\+|\/',
-                        'long_prefix_pattern=--|\/');
 GetOptions(\%opts, @getopts) or usage();
 usage() if $opts{'help'};
 
