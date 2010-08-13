@@ -1,3 +1,26 @@
+Fri Aug 13 21:16:08 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_TAO.mwc:
+
+          Include java (will only be enabled with MPC feature 'java').
+
+        * DDS_TAO_all.mwc:
+
+          Include tests/examples/etc (DDS_TAO.mwc excludes them).
+
+        * DDS_no_tests.mwc:
+
+          Build DDS libraries and tools, excluding tests/examples/etc.
+
+        * configure:
+
+          Configuration script (in Perl) for OpenDDS, includes configuration
+          and (optional) download of ACE+TAO.
+
+        * configure.cmd:
+
+          Windows wrapper for configure.
+
 Fri Aug 13 19:41:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/bin/plot-test-results.sh:

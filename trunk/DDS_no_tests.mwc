@@ -1,0 +1,11 @@
+workspace {
+
+  dds
+  java
+  tools
+
+  exclude {
+    java/jms
+  }
+
+}
