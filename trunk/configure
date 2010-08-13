@@ -537,8 +537,9 @@ else {
 
 for my $feat ('built-in-topics', 'content-subscription') {
   if (exists $opts{$feat} && !$opts{$feat}) {
-    $feat =~ s/-/_/g;
-    push(@features, "$feat=0");
+    my $f = $feat;
+    $f =~ s/-/_/g;
+    push(@features, "$f=0");
   }
 }
 

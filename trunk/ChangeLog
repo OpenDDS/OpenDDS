@@ -1,3 +1,13 @@
+Fri Aug 13 22:10:12 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * README:
+
+          Updated compilers.
+
+        * configure:
+
+          Perl bug fix.
+
 Fri Aug 13 22:02:16 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * configure:
