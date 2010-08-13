@@ -1,3 +1,14 @@
+Fri Aug 13 19:41:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/plot-test-results.sh:
+
+          put commands on a single line so they parse correctly.
+
+        * performance-tests/Bench/bin/reduce-latency-data.pl:
+
+          Add block syntax to map command so the nested commands parse
+          correctly.
+
 Thu Aug 12 23:13:58 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * performance-tests/Bench/doc/userguide.html:
