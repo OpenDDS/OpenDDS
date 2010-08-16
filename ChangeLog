@@ -1,10 +1,17 @@
+Mon Aug 16 20:56:09 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+        
+          Corrected the default DataWriterQos reliability max_blocking_time 
+          to be 100ms to be consistent with spec 1.2.
+
 Mon Aug 16 17:33:37 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
 
         * performance-tests/DCPS/InfoRepo_population/run_test.pl:
-        
+
           If sync.ior existed prior to run_test.pl being run, the
           script would continue on before SyncServer actually created
-          its own sync.ior file, now sync.ior is removed prior to 
+          its own sync.ior file, now sync.ior is removed prior to
           starting the SyncServer.
 
 Mon Aug 16 17:30:29 UTC 2010  Adam Mitz  <mitza@ociweb.com>
