@@ -71,6 +71,8 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     exit 1;
 }
 
+#make sure that the $SyncServer has created the $sync_ior file
+unlink $sync_ior;
 print $SyncServer->CommandLine() . "\n";
 $SyncServer->Spawn ();
 if (PerlACE::waitforfile_timed ($sync_ior, 20) == -1) {
@@ -167,6 +169,7 @@ if ($ir != 0) {
 }
 
 unlink $dcpsrepo_ior;
+# $SyncServer will clean-up $sync_ior
 
 if ($status == 0) {
   print "test PASSED.\n";
