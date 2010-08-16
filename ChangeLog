@@ -1,3 +1,12 @@
+Mon Aug 16 17:33:37 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+        
+          If sync.ior existed prior to run_test.pl being run, the
+          script would continue on before SyncServer actually created
+          its own sync.ior file, now sync.ior is removed prior to 
+          starting the SyncServer.
+
 Mon Aug 16 17:30:29 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_TAO_all.mwc:
@@ -11,7 +20,7 @@ Mon Aug 16 17:30:29 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 Mon Aug 16 16:31:09 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Ownership/DataReaderListener.cpp:
-        
+
           Corrected num_messages_per_writer.
 
 Mon Aug 16 15:49:47 UTC 2010  Adam Mitz  <mitza@ociweb.com>
