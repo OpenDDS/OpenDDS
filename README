@@ -78,8 +78,12 @@ please see the Support section for contact information.
 ** TAO
 
 OpenDDS requires TAO for both IDL compilation as well as interaction
-with the DCPSInfoRepo.  At a minimum, you must be at one of the following
-versions in order to properly compile OpenDDS:
+with the DCPSInfoRepo.  If you will be using the "configure" script for OpenDDS
+(see the INSTALL file for details), you do not need to download TAO first --
+the "configure" script will download it for you.
+
+At a minimum, you must be at one of the following versions in order to properly
+compile OpenDDS:
 
 *** TAO 1.5a patch 21
 *** TAO 1.6a patch 7
