@@ -1,3 +1,9 @@
+Mon Aug 16 14:51:06 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+
+          Updated to match DevGuide text.  Removed unnecessary string_dups.
+
 Fri Aug 13 22:23:08 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * configure:
