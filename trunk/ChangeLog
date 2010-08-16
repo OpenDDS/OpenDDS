@@ -1,3 +1,13 @@
+Mon Aug 16 17:30:29 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_TAO_all.mwc:
+
+          Should have been updated along with the latest mwc updates.
+
+        * README:
+
+          More documentation updates for "configure".
+
 Mon Aug 16 16:31:09 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/Ownership/DataReaderListener.cpp:
