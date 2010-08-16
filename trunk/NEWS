@@ -43,6 +43,8 @@ Version 2.2 of OpenDDS.
   for OpenDDS compilation, including optionally downloading ACE+TAO.  See the
   INSTALL file for details.
 
+- Changed the default DataWriterQos reliability max_blocking_time from infinite
+  to be 100ms to be consistent with spec 1.2.
 
 ========================================================================
 

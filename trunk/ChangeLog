@@ -1,8 +1,14 @@
+Mon Aug 16 21:50:02 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * NEWS:
+        
+          Added entry for max_blocking_time default value change.
+
 Mon Aug 16 20:56:09 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
-        
-          Corrected the default DataWriterQos reliability max_blocking_time 
+
+          Corrected the default DataWriterQos reliability max_blocking_time
           to be 100ms to be consistent with spec 1.2.
 
 Mon Aug 16 17:33:37 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
