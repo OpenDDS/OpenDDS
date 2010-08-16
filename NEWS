@@ -39,6 +39,10 @@ Version 2.2 of OpenDDS.
 - Added nak_delay_intervals and nak_max configuration options for reliable
   multicast to help reduce naks.
 
+- A new "configure" script is available to assist with setting up prerequisites
+  for OpenDDS compilation, including optionally downloading ACE+TAO.  See the
+  INSTALL file for details.
+
 
 ========================================================================
 

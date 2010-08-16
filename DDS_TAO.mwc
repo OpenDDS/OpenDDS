@@ -17,6 +17,8 @@ workspace {
   dds
   tools
   java
+  DevGuideExamples
+
   exclude {
     java/jms
   }

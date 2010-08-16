@@ -1,15 +1,32 @@
 If you're building OpenDDS for use by Java applications, please see the file
-java/INSTALL instead of this one.
+$DDS_ROOT/java/INSTALL instead of this one.
 
 BUILDING OpenDDS
 ========================
 
-* Supported platform:
+* Supported platforms:
 
   We have built OpenDDS on number of different platforms and compilers.  See
-  $DDS_ROOT/README for a more complete description of supported configurations.
+  $DDS_ROOT/README for a complete description of supported platforms.
 
-* Compiling:
+* Compiling [Option A]:
+
+  Starting with version 2.2, OpenDDS has a "configure" script to automate the
+  steps described below (Option B).  This script requires Perl to be installed
+  and available on the system PATH.  To start the script simply change to the
+  directory containing this INSTALL file, and run
+  ./configure         (Unix)
+  configure           (Windows)
+  Optionally add "--help" to the command line to see the advanced options
+  available for this script.  The configure script will download ACE+TAO and
+  configure it for your platform.  To use an existing ACE+TAO installation,
+  either set the ACE_ROOT and TAO_ROOT enviornment variables or pass the --ace
+  and --tao (if TAO is not at $ACE_ROOT/TAO) options to configure.
+  If configure runs successfully it will end with a message about the next
+  steps for compiling OpenDDS.  If it fails, you may need to follow the
+  "Option B" steps below for manual configuration.
+
+* Compiling [Option B]:
 
     DDS requires the TAO PortableServer and dependent libraries to build.  It
     is preferable to have a complete build of TAO's core (every library under
@@ -21,8 +38,6 @@ BUILDING OpenDDS
     http://theaceorb.com/faq/index.html#HowToBuildACEandTAOonWindows
     or http://theaceorb.com/faq/index.html#HowToBuildACEandTAOonLinux,
     or the relevant sections in OCI's TAO Developer's Guide.
-
-    If you are using TAO 1.4a, see $DDS_ROOT/14a_README for more information.
 
   2 Set the environment variables.
 
@@ -44,12 +59,14 @@ BUILDING OpenDDS
 
     On Windows:
     Load the solution of your choice into Visual Studio and build all.  There
-    are four solutions to select from:
+    are a few solutions to select from:
         DDS.sln - VC71, DLLs
         DDS_Static.sln - VC71, Static libs
         DDS_vc8.sln - VC8, DLLs
         DDS_Static_vc8.sln - VC8, Static libs
-    (Do not up-convert a VC71 solution/project into VC8)
+        DDS_vc9.sln - VC9, DLLs
+        DDS_Static_vc9.sln - VC9, Static libs
+    (Do not up-convert a VC71 solution or project to VC8/VC9)
 
   5 Test
 
@@ -63,6 +80,8 @@ BUILDING OpenDDS
 
 * Note:
 
+ [ This note does not apply to using the "configure" script because it will   ]
+ [ generate the makefiles or project files.                                   ]
  The instructions above assume you have obtained OpenDDS as a released version
  from the website.  If you have obtained OpenDDS from subversion, you will need
  to generate makefiles or Visual Studio project files first.
