@@ -96,15 +96,11 @@ on Unix and Linux systems.
 
 ** Perl
 
-Perl is needed at build time (for both OpenDDS and applications built
-upon OpenDDS).  A Perl script, $DDS_ROOT/bin/dcps_ts.pl, generates the
-"type support" code based on the user's IDL definition of DCPS data
-types.  Additionally, Perl is used for running the automated tests and
-examples included in this source tree, or if you will be generating
-Makefiles or Visual Studio project files.  In most cases you will
-*not* need to generate Makefiles/project files, but see the INSTALL
-file for details.  On Windows platforms, we recommend the use of
-ActiveState Perl.
+Perl is used for running the automated tests and examples included in this
+source tree, or if you will be generating Makefiles or Visual Studio project
+files.  In most cases you will *not* need to generate Makefiles/project files,
+but see the INSTALL file for details.  On Windows platforms, we recommend the
+use of ActiveState Perl.  The "configure" script also uses Perl.
 
 * Build Targets
 

@@ -1,3 +1,16 @@
+Mon Aug 16 15:49:47 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_TAO.mwc:
+        * DDS_no_tests.mwc:
+
+          Build the DevGuideExamples even in a "no tests" configuration.
+
+        * INSTALL:
+        * NEWS:
+        * README:
+
+          Documented the configure script.
+
 Mon Aug 16 14:51:06 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
