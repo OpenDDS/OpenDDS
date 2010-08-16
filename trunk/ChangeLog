@@ -1,3 +1,9 @@
+Mon Aug 16 16:31:09 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/Ownership/DataReaderListener.cpp:
+        
+          Corrected num_messages_per_writer.
+
 Mon Aug 16 15:49:47 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_TAO.mwc:

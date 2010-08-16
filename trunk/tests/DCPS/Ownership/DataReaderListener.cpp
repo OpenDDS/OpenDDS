@@ -20,7 +20,7 @@
 #include <iostream>
 
 extern int testcase;
-const int num_messages_per_writer = 10;
+const int num_messages_per_writer = 20;
 
 DataReaderListenerImpl::DataReaderListenerImpl(const char* reader_id)
   : num_reads_(0),
