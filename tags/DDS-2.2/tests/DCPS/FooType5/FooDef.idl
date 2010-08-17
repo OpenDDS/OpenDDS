@@ -1,0 +1,27 @@
+
+#include "tao/orb.idl"
+
+module Xyz {
+
+#pragma DCPS_DATA_TYPE "Xyz::Foo"
+#pragma DCPS_DATA_KEY "Xyz::Foo data_source"
+#pragma DCPS_DATA_TYPE "Xyz::FooNoKey"
+
+  typedef sequence<float> FloatSeq;
+
+  // Example user defined "Foo" structure
+  struct Foo {
+    long  data_source;  // the instance key
+    float x;
+    float y;
+    FloatSeq values;
+  };
+
+  // Example user defined "FooNoKey" structure
+  struct FooNoKey {
+    long  data_source;
+    float x;
+    float y;
+    FloatSeq values;
+  };
+};
