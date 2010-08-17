@@ -32,19 +32,20 @@ Version 2.2 of OpenDDS.
 - Fixed a bug that causes samples larger than 64K to not work correctly with
   the SimpleTCP transport.
 
+- Added nak_delay_intervals and nak_max configuration options for reliable
+  multicast to help reduce naks.
+
 - Added support for Ownership qos.
 
 - Added support for GROUP presentation.
 
-- Added nak_delay_intervals and nak_max configuration options for reliable
-  multicast to help reduce naks.
+- Changed the default DataWriterQos reliability max_blocking_time from infinite
+  to be 100ms to be consistent with spec 1.2.
 
 - A new "configure" script is available to assist with setting up prerequisites
   for OpenDDS compilation, including optionally downloading ACE+TAO.  See the
   INSTALL file for details.
 
-- Changed the default DataWriterQos reliability max_blocking_time from infinite
-  to be 100ms to be consistent with spec 1.2.
 
 ========================================================================
 
