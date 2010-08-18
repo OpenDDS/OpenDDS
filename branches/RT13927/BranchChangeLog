@@ -1,3 +1,10 @@
+Wed Aug 18 13:51:12 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/QoS.ecore:
+
+          Fixed cardinality of Period members in QoS Policy classes to be [1..1]
+          instead of [0..1].
+
 Thu Aug 12 14:52:32 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
