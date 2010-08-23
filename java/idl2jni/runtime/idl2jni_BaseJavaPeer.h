@@ -14,9 +14,15 @@
 #include "idl2jni_runtime.h"
 #include "idl2jni_jni.h"
 #include "tao/LocalObject.h"
+#include "tao/Version.h"
 
 class idl2jni_runtime_Export IDL2JNI_BaseJavaPeer
-  : public virtual TAO_Local_RefCounted_Object {
+#if TAO_MAJOR_VERSION > 1 || TAO_MINOR_VERSION > 6
+  : public virtual CORBA::LocalObject
+#else
+  : public virtual TAO_Local_RefCounted_Object
+#endif
+{
 public:
   IDL2JNI_BaseJavaPeer(JNIEnv *jni, jobject local)
     : globalCallback_(jni->NewGlobalRef(local))

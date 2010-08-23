@@ -11,6 +11,7 @@
 #define OPENDDS_DCPS_LOCALOBJECT_H
 
 #include "tao/LocalObject.h"
+#include "tao/Version.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -26,7 +27,12 @@ typedef CORBA::LocalObject_var LocalObject_var;
 template <class Stub>
 class LocalObject
   : public virtual Stub
-  , public virtual TAO_Local_RefCounted_Object {
+#if TAO_MAJOR_VERSION > 1 || TAO_MINOR_VERSION > 6
+  , public virtual CORBA::LocalObject
+#else
+  , public virtual TAO_Local_RefCounted_Object
+#endif
+{
 public:
   typedef typename Stub::_ptr_type _ptr_type;
   typedef typename Stub::_var_type _var_type;
