@@ -71,6 +71,16 @@ namespace {
     }
   }
 
+  bool field_check_anon(AST_Field* f, const char* ct, const char* cn)
+  {
+    AST_Decl::NodeType nt = f->field_type()->node_type();
+    if (nt == AST_Decl::NT_array || nt == AST_Decl::NT_sequence) {
+      std::cerr << "ERROR: field " << f->local_name()->get_string()
+                << " in " << ct << " " << cn << " has an anonymous type.\n";
+      return false;
+    }
+    return true;
+  }
 } // namespace
 
 dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
@@ -219,6 +229,10 @@ dds_visitor::visit_structure(AST_Structure* node)
   for (CORBA::ULong i = 0; i < nfields; ++i) {
     AST_Field** f;
     node->field(f, i);
+    if (!field_check_anon(*f, "struct", name)) {
+      error_ = true;
+      return -1;
+    }
     fields.push_back(*f);
   }
 
@@ -375,6 +389,11 @@ dds_visitor::visit_union(AST_Union* node)
   for (CORBA::ULong i = 0; i < nfields; ++i) {
     AST_Field** f;
     node->field(f, i);
+    if (!field_check_anon(*f, "union", name)) {
+      error_ = true;
+      return -1;
+    }
+
     AST_UnionBranch* ub = AST_UnionBranch::narrow_from_decl(*f);
 
     if (!ub) {
@@ -549,7 +568,7 @@ int dds_visitor::visit_valuebox(AST_ValueBox*)
   return 0;
 }
 
-#if (TAO_MAJOR_VERSION > 2 || (TAO_MAJOR_VERSION == 1 && \
+#if (TAO_MAJOR_VERSION > 1 || (TAO_MAJOR_VERSION == 1 && \
     (TAO_MINOR_VERSION >= 7)))
 
 int
