@@ -1,3 +1,14 @@
+Thu Aug 26 21:15:53 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/dds_visitor.h:
+        * dds/idl/dds_visitor.cpp:
+
+          Added a check for use of anonymous sequence or array fields in
+          unions or structs.  These anonymous types are deprecated in OMG IDL
+          and not supported at all with opendds_idl.  Use a typedef instead.
+
+          Fixed a TAO version check off-by-one error.
+
 Mon Aug 23 20:13:06 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/LocalObject.h:
