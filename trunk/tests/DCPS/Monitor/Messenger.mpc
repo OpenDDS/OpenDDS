@@ -13,7 +13,7 @@ project(Monitor*idl): dcps {
 project(Monitor*Publisher) : dcpsexe_with_tcp {
 
   exename   = publisher
-  after    += DDS*idl
+  after    += Monitor*idl
   after    += monitor
   libs     += OpenDDS_monitor
 
@@ -30,7 +30,7 @@ project(Monitor*Publisher) : dcpsexe_with_tcp {
 project(Monitor*Subscriber) : dcpsexe_with_tcp {
 
   exename   = subscriber
-  after    += DDS*idl
+  after    += Monitor*idl
   after    += monitor
   libs     += OpenDDS_monitor
 
@@ -47,7 +47,7 @@ project(Monitor*Subscriber) : dcpsexe_with_tcp {
 project(Monitor*monitor) : dcpsexe_with_tcp {
 
   exename   = monitor
-  after    += DDS*idl
+  after    += Monitor*idl
   after    += monitor
   libs     += OpenDDS_monitor
 
