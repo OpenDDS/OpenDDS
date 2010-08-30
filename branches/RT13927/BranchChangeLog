@@ -1,3 +1,11 @@
+Mon Aug 30 18:59:01 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+          Re-ordered QoS policy stereotypes to be in alphabetical order to ease
+          navigation of policies in GMF graphical definition and mapping models.
+
 Thu Aug 19 18:09:10 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/testdata/Middleware/MiddlewareTest.opendds:
