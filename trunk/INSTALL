@@ -12,11 +12,13 @@ BUILDING OpenDDS
 * Compiling [Option A]:
 
   Starting with version 2.2, OpenDDS has a "configure" script to automate the
-  steps described below (Option B).  This script requires Perl to be installed
-  and available on the system PATH.  To start the script simply change to the
-  directory containing this INSTALL file, and run
+  steps described below (Option B).  This script requires Perl 5.10 or newer to
+  be installed and available on the system PATH.  Perl 5.8 may be sufficient on
+  Unix systems but ActiveState Perl 5.10 or newer should be used on Windows.
+  To start the script simply change to the directory containing this INSTALL
+  file, and run
   ./configure         (Unix)
-  configure           (Windows)
+  configure           (Windows: use a Visual Studio Command Prompt)
   Optionally add "--help" to the command line to see the advanced options
   available for this script.  The configure script will download ACE+TAO and
   configure it for your platform.  To use an existing ACE+TAO installation,

@@ -78,7 +78,7 @@ sub iterate {
 sub usage {
   my $current;
   my $ver;
-  open VER, 'dds/Version.h' or die "can't open dds/Version.h";
+  open VER, 'dds/Version.h' or die "can't open dds/Version.h, stopped";
   while (<VER>) {
     $ver = $1 if /#define DDS_VERSION "([^"]+)"/;
   }
@@ -175,7 +175,7 @@ my %platforminfo =
 
 $opts{'host'} = get_host() unless $opts{'host'};
 if (!exists $platforminfo{$opts{'host'}}) {
-  die "ERROR: unknown host $opts{'host'}";
+  die "ERROR: unknown host $opts{'host'}, stopped";
 }
 print "host system is: $opts{'host'}\n" if $opts{'verbose'};
 if ($opts{'host'} eq 'macosx') {
@@ -183,7 +183,7 @@ if ($opts{'host'} eq 'macosx') {
   $vers =~ /10\.(\d+)\./;
   my %versToName = (5 => 'leopard', 6 => 'snowleopard');
   if (!exists $versToName{$1}) {
-    die "ERROR: Unknown/unsupported Mac OS X version: $1";
+    die "ERROR: Unknown/unsupported Mac OS X version: $1, stopped";
   }
   $opts{'host_version'} = $versToName{$1};
   print "Mac OS X version is: $opts{'host_version'}\n" if $opts{'verbose'};
@@ -229,9 +229,9 @@ else {
   $opts{'compiler'} = get_compiler();
   if (!defined $opts{'compiler'}) {
     die "Can't find a compiler, set PATH or run this script with the ".
-      "--compiler option." . ($slash eq '\\' ? "  For Microsoft Visual C++, ".
-                              "run this script from the Visual Studio ".
-                              "Command Prompt." : '');
+      "--compiler option.\n" . ($slash eq '\\' ? "  For Microsoft Visual C++, ".
+                                "run this script from the Visual Studio ".
+                                "Command Prompt.\n" : '') . "Stopped";
   }
 }
 print "compiler is: $opts{'compiler'}\n" if $opts{'verbose'};
@@ -248,7 +248,7 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
   while (<CL>) {
     if (/Compiler Version (\d+)\./) {
       if (!exists $vers{$1}) {
-        die "Unknown or unsupported Visual C++ compiler version: $1";
+        die "Unknown or unsupported Visual C++ compiler version: $1\nStopped";
       }
       $opts{'compiler_version'} = $vers{$1};
       last;
@@ -256,8 +256,8 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
   }
   close CL;
   if (!$opts{'compiler_version'}) {
-    die "Could not detect Visual C++ version, try running this script from " .
-      "the Visual Studio Command Prompt.";
+    die "Could not detect Visual C++ version, try running this script from\n" .
+      "the Visual Studio Command Prompt.\nStopped";
   }
   $ENV{'PATH'} = $savepath;
   print "detected Visual C++ version: $opts{'compiler_version'}\n"
@@ -267,7 +267,7 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
 ## target
 
 if ($opts{'target'}) {
-  die "Cross-compilation is not yet supported with this script (--target)";
+  die "Cross-compilation is not yet supported with this script (--target)\n";
 }
 
 ## DDS_ROOT
@@ -287,12 +287,12 @@ setenv('DDS_ROOT', '.');
 
 if ($opts{'ace'}) {
   if (!-r $opts{'ace'} . '/ace/ACE.h') {
-    die "Can't find ACE at $opts{'ace'}";
+    die "Can't find ACE at $opts{'ace'}\n";
   }
   setenv('ACE_ROOT', $opts{'ace'});
 }
 elsif ($ENV{'ACE_ROOT'} && !-r $ENV{'ACE_ROOT'} . '/ace/ACE.h') {
-  die "Can't find ACE at $ENV{'ACE_ROOT'}";
+  die "Can't find ACE at $ENV{'ACE_ROOT'}\n";
 }
 elsif (!$ENV{'ACE_ROOT'} && -r '../ACE_wrappers/ace/ACE.h'
        && -r '../ACE_wrappers/TAO/tao/ORB.h') {
@@ -304,12 +304,12 @@ elsif (!$ENV{'ACE_ROOT'} && -r '../ACE_wrappers/ace/ACE.h'
 
 if ($opts{'tao'}) {
   if (!-r $opts{'tao'} . '/tao/ORB.h') {
-    die "Can't find TAO at $opts{'tao'}";
+    die "Can't find TAO at $opts{'tao'}\n";
   }
   setenv('TAO_ROOT', $opts{'tao'});
 }
 elsif ($ENV{'TAO_ROOT'} && !-r $ENV{'TAO_ROOT'} . '/tao/ORB.h') {
-  die "Can't find TAO at $ENV{'TAO_ROOT'}";
+  die "Can't find TAO at $ENV{'TAO_ROOT'}\n";
 }
 elsif (!$ENV{'TAO_ROOT'} && $ENV{'ACE_ROOT'}
        && -r $ENV{'ACE_ROOT'} . '/TAO/tao/ORB.h') {
@@ -331,18 +331,18 @@ if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
       if (which('wget')) {
         print "Downloading ACE+TAO 1.6a with latest patches (using wget)\n";
         if (system("wget $urlbase$file")) {
-          die "ERROR from wget";
+          die "ERROR from wget, stopped";
         }
       }
       elsif (which('curl')) {
         print "Downloading ACE+TAO 1.6a with latest patches (using curl)\n";
         if (system("curl $urlbase$file -o $file")) {
-          die "ERROR from curl";
+          die "ERROR from curl, stopped";
         }
       }
       else {
-        die "Can't download ACE+TAO using LWP, wget, or curl.  Download it ".
-          "from $urlbase$file, place the file here, and re-run the script.";
+        die "Can't download ACE+TAO using LWP, wget, or curl.\nDownload it ".
+          "from $urlbase$file, place the file here\n, and re-run the script.\n";
       }
     }
     else {
@@ -351,7 +351,7 @@ if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
       print "Downloading ACE+TAO 1.6a with latest patches\n";
       my $response = $ua->get($urlbase . $file, ':content_file' => $file);
       if ($response->is_error) {
-        die $response->message;
+        die $response->message . "\nstopped";
       }
     }
   }
@@ -366,15 +366,15 @@ if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
       $err = system(($^O eq 'solaris' ? 'g' : '') . "tar xzf $ddsroot/$file");
     }
     if ($err) {
-      die "Can't extract $file, extract it to " . Cwd::abspath('.') .
-        " and run this script again.";
+      die "Can't extract $file, extract it to " . Cwd::abs_path('.') .
+        "\nand run this script again.\nStopped";
     }
     chdir($ddsroot);
   }
   else {
     my $ae = Archive::Extract->new('archive' => $file);
     if (!$ae->extract('to' => '..')) {
-      die $ae->error;
+      die $ae->error . "\nstopped";
     }
   }
 
@@ -396,7 +396,7 @@ sub backup_and_open {
       "$backup)\n";
   }
   my $fh = new FileHandle;
-  open $fh, ">$file" or die "Can't write to $file";
+  open $fh, ">$file" or die "Can't write to $file, stopped";
   return $fh;
 }
 
@@ -409,7 +409,8 @@ else {
   my $pi = $platforminfo{$opts{'host'}};
 
   # config.h
-  open CFGH, ">$ENV{'ACE_ROOT'}/ace/config.h" or die "Can't write to config.h";
+  open CFGH, ">$ENV{'ACE_ROOT'}/ace/config.h"
+    or die "Can't write to config.h, stopped";
   for my $line (@{$opts{'configh'}}) {
     print CFGH "$line\n";
   }
@@ -479,7 +480,7 @@ my %optdep =
 
 if (exists $opts{'java'}) {
   if ($opts{'static'}) {
-    die "ERROR: --static can't be used with --java";
+    die "ERROR: --static can't be used with --java\n";
   }
   setenv('JAVA_PLATFORM', $opts{'host'});
 }
@@ -493,22 +494,22 @@ for my $key(keys %optdep) {
       setenv($e, $opts{$key});
     }
     if ($s && !-r $ENV{$e} . '/' . $s) {
-      die "Can't find $key at $ENV{$e} (using $s)";
+      die "Can't find $key at $ENV{$e} (using $s)\n";
     }
     push(@features, $m) if $m;
   }
 }
 
 if (exists $opts{'jboss'} && !exists $opts{'java'}) {
-  die "--java is required for --jboss (OpenDDS JMS Provider)";
+  die "--java is required for --jboss (OpenDDS JMS Provider)\n";
 }
 
 if (exists $opts{'jboss'} && !exists $opts{'ant'}) {
-  die "--ant is required for --jboss (OpenDDS JMS Provider)";
+  die "--ant is required for --jboss (OpenDDS JMS Provider)\n";
 }
 
 if (exists $opts{'wireshark'} && !exists $opts{'glib'}) {
-  die "--glib is required for --wireshark";
+  die "--glib is required for --wireshark\n";
 }
 
 if ($opts{'qt-include'}) {
@@ -519,7 +520,7 @@ if (exists $opts{'qt'} && !-r ($ENV{'QT4_INCDIR'} ? $ENV{'QT4_INCDIR'} :
                                "$ENV{'QTDIR'}/include")
     . '/QtCore/qconfig.h') {
   die "Can't find qt at " . ($ENV{'QT4_INCDIR'} ? $ENV{'QT4_INCDIR'} :
-                             $ENV{'QTDIR'});
+                             $ENV{'QTDIR'}) . "\nstopped";
 }
 
 ## PATH and LD_LIBRARY_PATH
@@ -577,8 +578,8 @@ if ($needmpc) {
     setenv('MPC_ROOT', $ENV{'ACE_ROOT'} . $slash . 'MPC');
   }
   elsif (!$ENV{'MPC_ROOT'}) {
-    die "Can't find MPC.  Please set MPC_ROOT or make sure MPC exists in the ".
-      "'MPC' directory under ACE_ROOT ($ENV{'ACE_ROOT'})";
+    die "Can't find MPC.  Please set MPC_ROOT or make sure MPC exists in the\n".
+      "'MPC' directory under ACE_ROOT ($ENV{'ACE_ROOT'}), stopped";
   }
 
   my $feat = '';
@@ -611,7 +612,7 @@ if ($needmpc) {
     if $opts{'verbose'};
   if (system("$ENV{'ACE_ROOT'}/bin/mwc.pl -type $needmpc $feat $ws $static")
       != 0) {
-    die "Error from MPC";
+    die "Error from MPC, stopped";
   }
 
   $ws =~ s/\.mwc$/.sln/;
