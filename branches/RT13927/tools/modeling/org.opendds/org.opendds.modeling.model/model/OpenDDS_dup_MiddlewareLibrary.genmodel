@@ -25,28 +25,28 @@
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//dataWriter/topic"/>
     </genClasses>
     <genClasses ecoreClass="OpenDDS.ecore#//ddsAppTarget"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//historyQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//lifespanQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//ownershipQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//osQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//wdlQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//rdlQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//udQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//tdQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//lbQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//tbfQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//gdQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//tpQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//efQosPolicy"/>
     <genClasses ecoreClass="OpenDDS.ecore#//deadlineQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//rlQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//presentationQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//partitionQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//reliabilityQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//dsQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//livelinessQosPolicy"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//durabilityQosPolicy"/>
     <genClasses ecoreClass="OpenDDS.ecore#//destinationOrderQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//dsQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//durabilityQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//efQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//gdQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//historyQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//lbQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//lifespanQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//livelinessQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//osQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//ownershipQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//partitionQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//presentationQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//rdlQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//reliabilityQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//rlQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//tbfQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//tdQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//tpQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//udQosPolicy"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//wdlQosPolicy"/>
     <genClasses ecoreClass="OpenDDS.ecore#//OpenDDSModel">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/policyLibrary"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/middlewareLibrary"/>
