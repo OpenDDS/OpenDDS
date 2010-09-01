@@ -1,3 +1,12 @@
+Wed Sep  1 21:23:35 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * INSTALL:
+        * configure:
+
+          Improved error messages and documentation for the configure script.
+          Fixed a bug that called the wrong function in the Cwd module only
+          when generating a certain error message.
+
 Fri Aug 27 14:44:12 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Monitor/Messenger.mpc:
