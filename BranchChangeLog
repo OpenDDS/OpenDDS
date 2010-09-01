@@ -1,3 +1,43 @@
+Wed Sep  1 15:15:16 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/plugins.html:
+
+          Added details about support for enumeration selection in GMF figures.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylibrary/src/com/ociweb/gmf/EnumDirectEdit/EnumDirectEditManager.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylibrary/src/com/ociweb/gmf/EnumDirectEdit/EnumDirectEditPolicy.java:
+
+          Extension to GMF to support combo box selection of enumeration literals
+          for Ecore EEnum attributes.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylibrary/src/org/opendds/modeling/model/opendds/diagram/policylibrary/edit/parts/DestinationOrderQosPolicyKindEditPart.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylibrary/src/org/opendds/modeling/model/opendds/diagram/policylibrary/edit/parts/DsQosPolicyHistory_kindEditPart.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylibrary/src/org/opendds/modeling/model/opendds/diagram/policylibrary/edit/parts/DurabilityQosPolicyKindEditPart.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylibrary/src/org/opendds/modeling/model/opendds/diagram/policylibrary/edit/parts/HistoryQosPolicyKindEditPart.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylibrary/src/org/opendds/modeling/model/opendds/diagram/policylibrary/edit/parts/LivelinessQosPolicyKindEditPart.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylibrary/src/org/opendds/modeling/model/opendds/diagram/policylibrary/edit/parts/OwnershipQosPolicyKindEditPart.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylibrary/src/org/opendds/modeling/model/opendds/diagram/policylibrary/edit/parts/PresentationQosPolicyAccess_scopeEditPart.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylibrary/src/org/opendds/modeling/model/opendds/diagram/policylibrary/edit/parts/ReliabilityQosPolicyKindEditPart.java:
+
+          Modification of GMF generated code to use the EnumDirectEdit classes instead of
+          text editing for enumerations.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.trace:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/QosPolicies.gmfgraph:
+
+          Replaced uses of generic class graphical definiton model with custom definitions for
+          each policy that that policy attributes can be viewed/modified directly in policy figure
+          (attributes of type Period still need to be added).
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel:
+
+          Updated to account for re-ordering of QoS policy stereotypes done in check in
+          from Mon Aug 30 18:59:01 UTC 2010.
+
 Mon Aug 30 18:59:01 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore:
