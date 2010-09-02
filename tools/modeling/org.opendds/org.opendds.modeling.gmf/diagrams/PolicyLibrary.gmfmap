@@ -2,6 +2,7 @@
 <gmfmap:Mapping xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
     xmlns:gmfmap="http://www.eclipse.org/gmf/2008/mappings"
     xmlns:gmftool="http://www.eclipse.org/gmf/2005/ToolDefinition">
   <nodes>
@@ -10,6 +11,33 @@
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//deadlineQosPolicy"/>
+      <domainInitializer
+          xsi:type="gmfmap:FeatureSeqInitializer">
+        <initializers
+            xsi:type="gmfmap:ReferenceNewElementSpec">
+          <feature
+              xsi:type="ecore:EReference"
+              href="../../org.opendds.modeling.model/model/QoS.ecore#//DeadlineQosPolicy/period"/>
+          <newElementInitializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
+              <value
+                  body="0"/>
+            </initializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
+              <value
+                  body="0"/>
+            </initializers>
+          </newElementInitializers>
+        </initializers>
+      </domainInitializer>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"
@@ -78,6 +106,33 @@
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//dsQosPolicy"/>
+      <domainInitializer
+          xsi:type="gmfmap:FeatureSeqInitializer">
+        <initializers
+            xsi:type="gmfmap:ReferenceNewElementSpec">
+          <feature
+              xsi:type="ecore:EReference"
+              href="../../org.opendds.modeling.model/model/QoS.ecore#//DurabilityServiceQosPolicy/service_cleanup_delay"/>
+          <newElementInitializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
+              <value
+                  body="0"/>
+            </initializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
+              <value
+                  body="0"/>
+            </initializers>
+          </newElementInitializers>
+        </initializers>
+      </domainInitializer>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"
@@ -323,6 +378,33 @@
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//lbQosPolicy"/>
+      <domainInitializer
+          xsi:type="gmfmap:FeatureSeqInitializer">
+        <initializers
+            xsi:type="gmfmap:ReferenceNewElementSpec">
+          <feature
+              xsi:type="ecore:EReference"
+              href="../../org.opendds.modeling.model/model/QoS.ecore#//LatencyBudgetQosPolicy/duration"/>
+          <newElementInitializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
+              <value
+                  body="0"/>
+            </initializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
+              <value
+                  body="0"/>
+            </initializers>
+          </newElementInitializers>
+        </initializers>
+      </domainInitializer>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"
@@ -352,6 +434,33 @@
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//lifespanQosPolicy"/>
+      <domainInitializer
+          xsi:type="gmfmap:FeatureSeqInitializer">
+        <initializers
+            xsi:type="gmfmap:ReferenceNewElementSpec">
+          <feature
+              xsi:type="ecore:EReference"
+              href="../../org.opendds.modeling.model/model/QoS.ecore#//LifespanQosPolicy/duration"/>
+          <newElementInitializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
+              <value
+                  body="0"/>
+            </initializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
+              <value
+                  body="0"/>
+            </initializers>
+          </newElementInitializers>
+        </initializers>
+      </domainInitializer>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"
@@ -381,6 +490,33 @@
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//livelinessQosPolicy"/>
+      <domainInitializer
+          xsi:type="gmfmap:FeatureSeqInitializer">
+        <initializers
+            xsi:type="gmfmap:ReferenceNewElementSpec">
+          <feature
+              xsi:type="ecore:EReference"
+              href="../../org.opendds.modeling.model/model/QoS.ecore#//LivelinessQosPolicy/lease_duration"/>
+          <newElementInitializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
+              <value
+                  body="0"/>
+            </initializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
+              <value
+                  body="0"/>
+            </initializers>
+          </newElementInitializers>
+        </initializers>
+      </domainInitializer>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"
@@ -619,6 +755,33 @@
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//reliabilityQosPolicy"/>
+      <domainInitializer
+          xsi:type="gmfmap:FeatureSeqInitializer">
+        <initializers
+            xsi:type="gmfmap:ReferenceNewElementSpec">
+          <feature
+              xsi:type="ecore:EReference"
+              href="../../org.opendds.modeling.model/model/QoS.ecore#//ReliabilityQosPolicy/max_blocking_time"/>
+          <newElementInitializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
+              <value
+                  body="0"/>
+            </initializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
+              <value
+                  body="0"/>
+            </initializers>
+          </newElementInitializers>
+        </initializers>
+      </domainInitializer>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"

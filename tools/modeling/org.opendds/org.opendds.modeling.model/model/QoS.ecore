@@ -28,7 +28,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="max_samples_per_instance"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong" defaultValueLiteral="-1"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="service_cleanup_delay"
-        lowerBound="1" eType="ecore:EClass Enumerations.ecore#//Period"/>
+        lowerBound="1" eType="ecore:EClass Enumerations.ecore#//Period" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EntityFactoryQosPolicy" eSuperTypes="#//QosPolicy">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="autoenable_created_entities"
@@ -55,7 +55,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="kind" eType="ecore:EEnum Enumerations.ecore#//LivelinessQosPolicyKind"
         defaultValueLiteral="AUTOMATIC"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="lease_duration" lowerBound="1"
-        eType="ecore:EClass Enumerations.ecore#//Period"/>
+        eType="ecore:EClass Enumerations.ecore#//Period" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="OwnershipQosPolicy" eSuperTypes="#//QosPolicy">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="kind" eType="ecore:EEnum Enumerations.ecore#//OwnershipQosPolicyKind"
@@ -85,7 +85,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="kind" eType="ecore:EEnum Enumerations.ecore#//ReliabilityQosPolicyKind"
         defaultValueLiteral="BEST_EFFORT"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="max_blocking_time" lowerBound="1"
-        eType="ecore:EClass Enumerations.ecore#//Period"/>
+        eType="ecore:EClass Enumerations.ecore#//Period" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ResourceLimitsQosPolicy" eSuperTypes="#//QosPolicy">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="max_instances" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"

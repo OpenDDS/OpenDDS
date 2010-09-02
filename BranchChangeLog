@@ -1,3 +1,23 @@
+Thu Sep  2 22:09:08 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfmap:
+
+          For the policies that contain a Period attribute, initialize the Period to zero
+          seconds/nanoseconds using GMF's Feature Seq Initialization.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel:
+
+          Set Child Creation property of Period attributes to true, otherwise with Period
+          initialization an error occurs when trying to save the diagram/model.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/QoS.ecore:
+
+          Fixed so all policies have their Period reference's containment set to true.
+
 Wed Sep  1 15:15:16 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/plugins.html:
