@@ -100,7 +100,8 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//DurabilityServiceQosPolicy/max_instances"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//DurabilityServiceQosPolicy/max_samples"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//DurabilityServiceQosPolicy/max_samples_per_instance"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference QoS.ecore#//DurabilityServiceQosPolicy/service_cleanup_delay"/>
+      <genFeatures property="None" notify="false" children="true" createChild="true"
+          ecoreFeature="ecore:EReference QoS.ecore#//DurabilityServiceQosPolicy/service_cleanup_delay"/>
     </genClasses>
     <genClasses ecoreClass="QoS.ecore#//EntityFactoryQosPolicy">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//EntityFactoryQosPolicy/autoenable_created_entities"/>
@@ -120,7 +121,8 @@
     </genClasses>
     <genClasses ecoreClass="QoS.ecore#//LivelinessQosPolicy">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//LivelinessQosPolicy/kind"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference QoS.ecore#//LivelinessQosPolicy/lease_duration"/>
+      <genFeatures property="None" notify="false" children="true" createChild="true"
+          ecoreFeature="ecore:EReference QoS.ecore#//LivelinessQosPolicy/lease_duration"/>
     </genClasses>
     <genClasses ecoreClass="QoS.ecore#//OwnershipQosPolicy">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//OwnershipQosPolicy/kind"/>
@@ -141,7 +143,7 @@
     </genClasses>
     <genClasses ecoreClass="QoS.ecore#//ReliabilityQosPolicy">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//ReliabilityQosPolicy/kind"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference QoS.ecore#//ReliabilityQosPolicy/max_blocking_time"/>
+      <genFeatures notify="false" children="true" createChild="true" ecoreFeature="ecore:EReference QoS.ecore#//ReliabilityQosPolicy/max_blocking_time"/>
     </genClasses>
     <genClasses ecoreClass="QoS.ecore#//ResourceLimitsQosPolicy">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//ResourceLimitsQosPolicy/max_instances"/>
