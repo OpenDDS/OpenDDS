@@ -1,4 +1,4 @@
-project(*InfoRepoLib): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_utils {
+project(*InfoRepoLib): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_utils, install_lib {
   sharedname = InfoRepoLib
   dynamicflags = OPENDDS_INFOREPOLIB_BUILD_DLL
   libout     = $(DDS_ROOT)/lib
@@ -35,7 +35,7 @@ project(*InfoRepoLib): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_utils 
 }
 
 
-project(*DCPSInfoRepoServ): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_utils {
+project(*DCPSInfoRepoServ): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_utils, install_lib {
   sharedname = DCPSInfoRepoServ
   dynamicflags = OPENDDS_DCPSINFOREPOSERV_BUILD_DLL
   libout     = $(DDS_ROOT)/lib
@@ -66,7 +66,7 @@ project(*DCPSInfoRepoServ): dcps, iortable, DCPSInfoRepo_bits, imr_client, svc_u
 }
 
 
-project(*Federator): dcps, dcps_tcp, iortable {
+project(*Federator): dcps, dcps_tcp, iortable, install {
   sharedname = Federator
   dynamicflags = OPENDDS_FEDERATOR_BUILD_DLL
   libout     = $(DDS_ROOT)/lib
@@ -99,6 +99,7 @@ project(*Federator): dcps, dcps_tcp, iortable {
   }
 
   Header_Files {
+    federator_export.h
     UpdateListener_T.h
     UpdateReceiver_T.h
     UpdateProcessor_T.h
@@ -113,10 +114,14 @@ project(*Federator): dcps, dcps_tcp, iortable {
   Resource_Files {
     Federator.rc
   }
+
+  specific {
+    install_dir = dds/InfoRepo
+  }
 }
 
 
-project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils {
+project(*InfoRepo): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils, install {
   exename = DCPSInfoRepo
   exeout  = $(DDS_ROOT)/bin
 

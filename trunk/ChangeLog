@@ -1,3 +1,22 @@
+Fri Sep  3 18:02:20 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/multicast.mpc:
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.mpc:
+        * dds/DCPS/transport/udp/udp.mpc:
+        * dds/DdsDcps.mpc:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/idl/opendds_idl.mpc:
+        * dds/monitor/monitor.mpc:
+
+          Enabled a "make install" installation of core executables and
+          libraries (those in dds/*).
+
+        * performance-tests/DCPS/dummyTCP/DummyTcpReceiveStrategy.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.cpp:
+
+          Changed some #includes to allow the test to be built against a set of
+          installed libraries and headers.
+
 Wed Sep  1 21:23:35 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * INSTALL:
