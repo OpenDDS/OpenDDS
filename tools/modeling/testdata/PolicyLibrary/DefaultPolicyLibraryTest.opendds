@@ -1,21 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <opendds:PolicyLibrary xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmi:id="_BD-5cKGNEd-D-tWBUFz8zw">
-  <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_VizHAKGNEd-D-tWBUFz8zw" name="deadlineQosPolicyDefaultTest"/>
+  <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_VizHAKGNEd-D-tWBUFz8zw" name="deadlineQosPolicyDefaultTest">
+    <period xmi:id="_cGnWILeCEd-nAsONlpcwOw"/>
+  </policies>
   <policies xsi:type="opendds:destinationOrderQosPolicy" xmi:id="_cOcfoKGNEd-D-tWBUFz8zw" name="destinationOrderQosPolicyDefaultTest"/>
-  <policies xsi:type="opendds:dsQosPolicy" xmi:id="_aC4nAKGNEd-D-tWBUFz8zw" name="dsQosPolicyDefaultTest"/>
+  <policies xsi:type="opendds:dsQosPolicy" xmi:id="_aC4nAKGNEd-D-tWBUFz8zw" name="dsQosPolicyDefaultTest">
+    <service_cleanup_delay xmi:id="_drqoYLeCEd-nAsONlpcwOw"/>
+  </policies>
   <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_bS-V4KGNEd-D-tWBUFz8zw" name="durabilityQosPolicyDefaultTest"/>
   <policies xsi:type="opendds:efQosPolicy" xmi:id="_U5UFIKGNEd-D-tWBUFz8zw" name="efQosPolicyDefaultTest"/>
   <policies xsi:type="opendds:gdQosPolicy" xmi:id="_TCOAoKGNEd-D-tWBUFz8zw" name="gdQosPolicyDefaultTest"/>
   <policies xsi:type="opendds:historyQosPolicy" xmi:id="_LopLAKGNEd-D-tWBUFz8zw" name="historyQosPolicyDefaultTest"/>
-  <policies xsi:type="opendds:lbQosPolicy" xmi:id="_RIxywKGNEd-D-tWBUFz8zw" name="lbQosPolicyDefaultTest"/>
-  <policies xsi:type="opendds:lifespanQosPolicy" xmi:id="_MiaroKGNEd-D-tWBUFz8zw" name="lifespanQosPolicyDefaultTest"/>
-  <policies xsi:type="opendds:livelinessQosPolicy" xmi:id="_aqZS8KGNEd-D-tWBUFz8zw" name="livelinessQosPolicyDefaultTest"/>
+  <policies xsi:type="opendds:lbQosPolicy" xmi:id="_RIxywKGNEd-D-tWBUFz8zw" name="lbQosPolicyDefaultTest">
+    <duration xmi:id="_fvln8LeCEd-nAsONlpcwOw"/>
+  </policies>
+  <policies xsi:type="opendds:lifespanQosPolicy" xmi:id="_MiaroKGNEd-D-tWBUFz8zw" name="lifespanQosPolicyDefaultTest">
+    <duration xmi:id="_hBVjsLeCEd-nAsONlpcwOw"/>
+  </policies>
+  <policies xsi:type="opendds:livelinessQosPolicy" xmi:id="_aqZS8KGNEd-D-tWBUFz8zw" name="livelinessQosPolicyDefaultTest">
+    <lease_duration xmi:id="_lssfkLeCEd-nAsONlpcwOw"/>
+  </policies>
   <policies xsi:type="opendds:osQosPolicy" xmi:id="_Ng_MsKGNEd-D-tWBUFz8zw" name="osQosPolicyDefaultTest"/>
   <policies xsi:type="opendds:ownershipQosPolicy" xmi:id="_ND62MKGNEd-D-tWBUFz8zw" name="ownershipQosPolicyDefaultTest"/>
   <policies xsi:type="opendds:partitionQosPolicy" xmi:id="_XinpsKGNEd-D-tWBUFz8zw" name="partitionQosPolicyDefaultTest"/>
   <policies xsi:type="opendds:presentationQosPolicy" xmi:id="_W7gmYKGNEd-D-tWBUFz8zw" name="presentationQosPolicyDefaultTest"/>
   <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_PGfK4KGNEd-D-tWBUFz8zw" name="rdlQosPolicyDefaultTest"/>
-  <policies xsi:type="opendds:reliabilityQosPolicy" xmi:id="_ZA2iQKGNEd-D-tWBUFz8zw" name="reliabilityQosPolicyDefaultTest"/>
+  <policies xsi:type="opendds:reliabilityQosPolicy" xmi:id="_ZA2iQKGNEd-D-tWBUFz8zw" name="reliabilityQosPolicyDefaultTest">
+    <max_blocking_time xmi:id="_i49zsLeCEd-nAsONlpcwOw"/>
+  </policies>
   <policies xsi:type="opendds:rlQosPolicy" xmi:id="_WEYxIKGNEd-D-tWBUFz8zw" name="rlQosPolicyDefaultTest"/>
   <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_Ry9YMKGNEd-D-tWBUFz8zw" name="tbfQosPolicyDefaultTest"/>
   <policies xsi:type="opendds:tdQosPolicy" xmi:id="_QkbIgKGNEd-D-tWBUFz8zw" name="tdQosPolicyDefaultTest"/>

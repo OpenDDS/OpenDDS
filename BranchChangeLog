@@ -1,3 +1,27 @@
+Fri Sep  3 19:35:52 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.trace:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/QosPolicies.gmfgraph:
+
+          Policies with Period attributes now have those attributes showing in their figures.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel:
+
+          Fixed ReliabilityQosProperty's Edit/PropertyType setting so max_blocking_time does
+          not show up in property sheet (it cannot be edited from the sheet).
+
+        * tools/modeling/testdata/PolicyLibrary/DefaultPolicyLibraryTest.opendds:
+        * tools/modeling/testdata/PolicyLibrary/DefaultPolicyLibraryTest.opendds_diagram_policylibrary:
+        * tools/modeling/testdata/PolicyLibrary/NonDefaultPolicyLibraryTest.opendds:
+        * tools/modeling/testdata/PolicyLibrary/NonDefaultPolicyLibraryTest.opendds_diagram_policylibrary:
+
+          Updated to reflect policy attributes showing up in figures now.
+
 Thu Sep  2 22:09:08 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfgen:

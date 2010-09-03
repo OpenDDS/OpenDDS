@@ -143,7 +143,8 @@
     </genClasses>
     <genClasses ecoreClass="QoS.ecore#//ReliabilityQosPolicy">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//ReliabilityQosPolicy/kind"/>
-      <genFeatures notify="false" children="true" createChild="true" ecoreFeature="ecore:EReference QoS.ecore#//ReliabilityQosPolicy/max_blocking_time"/>
+      <genFeatures property="None" notify="false" children="true" createChild="true"
+          ecoreFeature="ecore:EReference QoS.ecore#//ReliabilityQosPolicy/max_blocking_time"/>
     </genClasses>
     <genClasses ecoreClass="QoS.ecore#//ResourceLimitsQosPolicy">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//ResourceLimitsQosPolicy/max_instances"/>

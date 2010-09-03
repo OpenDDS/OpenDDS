@@ -11,6 +11,9 @@
     <nodeLabelTraces
         visualID="5043"
         queryText="true"/>
+    <compartmentTraces
+        visualID="7001"
+        queryText="true"/>
   </nodeTraces>
   <nodeTraces
       visualID="2022"
@@ -48,6 +51,9 @@
         queryText="true"/>
     <nodeLabelTraces
         visualID="5091"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7002"
         queryText="true"/>
   </nodeTraces>
   <nodeTraces
@@ -114,6 +120,9 @@
     <nodeLabelTraces
         visualID="5057"
         queryText="true"/>
+    <compartmentTraces
+        visualID="7003"
+        queryText="true"/>
   </nodeTraces>
   <nodeTraces
       visualID="2029"
@@ -123,6 +132,9 @@
         queryText="true"/>
     <nodeLabelTraces
         visualID="5059"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7004"
         queryText="true"/>
   </nodeTraces>
   <nodeTraces
@@ -136,6 +148,9 @@
         queryText="true"/>
     <nodeLabelTraces
         visualID="5097"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7005"
         queryText="true"/>
   </nodeTraces>
   <nodeTraces
@@ -217,6 +232,9 @@
         queryText="true"/>
     <nodeLabelTraces
         visualID="5104"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7006"
         queryText="true"/>
   </nodeTraces>
   <nodeTraces
@@ -303,4 +321,64 @@
         visualID="5112"
         queryText="true"/>
   </nodeTraces>
+  <childNodeTraces
+      visualID="3001"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Enumerations/1.0' and _eClass_.name = 'Period') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/QoS/1.0' and _eClass_.name = 'DeadlineQosPolicy') and _containmentMF_.name = 'period')">
+    <nodeLabelTraces
+        visualID="5113"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5114"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3002"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Enumerations/1.0' and _eClass_.name = 'Period') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/QoS/1.0' and _eClass_.name = 'DurabilityServiceQosPolicy') and _containmentMF_.name = 'service_cleanup_delay')">
+    <nodeLabelTraces
+        visualID="5115"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5116"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3003"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Enumerations/1.0' and _eClass_.name = 'Period') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/QoS/1.0' and _eClass_.name = 'LatencyBudgetQosPolicy') and _containmentMF_.name = 'duration')">
+    <nodeLabelTraces
+        visualID="5117"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5118"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3004"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Enumerations/1.0' and _eClass_.name = 'Period') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/QoS/1.0' and _eClass_.name = 'LifespanQosPolicy') and _containmentMF_.name = 'duration')">
+    <nodeLabelTraces
+        visualID="5119"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5120"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3005"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Enumerations/1.0' and _eClass_.name = 'Period') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/QoS/1.0' and _eClass_.name = 'LivelinessQosPolicy') and _containmentMF_.name = 'lease_duration')">
+    <nodeLabelTraces
+        visualID="5121"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5122"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3006"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Enumerations/1.0' and _eClass_.name = 'Period') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/QoS/1.0' and _eClass_.name = 'ReliabilityQosPolicy') and _containmentMF_.name = 'max_blocking_time')">
+    <nodeLabelTraces
+        visualID="5123"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5124"
+        queryText="true"/>
+  </childNodeTraces>
 </trace:TraceModel>
