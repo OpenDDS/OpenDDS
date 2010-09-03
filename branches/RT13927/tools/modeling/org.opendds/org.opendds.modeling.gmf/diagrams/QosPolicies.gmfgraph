@@ -635,6 +635,25 @@
       <accessors
           figure="//@figures.0/@descriptors.21/@actualFigure/@children.2"/>
     </descriptors>
+    <descriptors
+        name="PeriodFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Rectangle"
+          name="PeriodFigure">
+        <layout
+            xsi:type="gmfgraph:FlowLayout"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="PeriodSecondFigure"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="PeriodNanosecondFigure"/>
+      </actualFigure>
+      <accessors
+          figure="//@figures.0/@descriptors.22/@actualFigure/@children.0"/>
+      <accessors
+          figure="//@figures.0/@descriptors.22/@actualFigure/@children.1"/>
+    </descriptors>
   </figures>
   <nodes
       name="DeadlineQosPolicy"
@@ -702,6 +721,29 @@
   <nodes
       name="WdlQosPolicy"
       figure="WdlQosPolicyFigure"/>
+  <nodes
+      name="Period"
+      figure="PeriodFigure"/>
+  <compartments
+      name="period"
+      figure="PeriodFigure"
+      needsTitle="true"/>
+  <compartments
+      name="service_cleanup_delay"
+      figure="PeriodFigure"
+      needsTitle="true"/>
+  <compartments
+      name="duration"
+      figure="PeriodFigure"
+      needsTitle="true"/>
+  <compartments
+      name="lease_duration"
+      figure="PeriodFigure"
+      needsTitle="true"/>
+  <compartments
+      name="max_blocking_time"
+      figure="PeriodFigure"
+      needsTitle="true"/>
   <labels
       name="DeadlineQosPolicyStereotype"
       figure="DeadlineQosPolicyFigure"
@@ -1018,4 +1060,14 @@
       name="WdlQosPolicyAutodispose_unregistered_instances"
       figure="WdlQosPolicyFigure"
       accessor="//@figures.0/@descriptors.21/@accessors.2"/>
+  <labels
+      name="PeriodSecond"
+      figure="PeriodFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.22/@accessors.0"/>
+  <labels
+      name="PeriodNanosecond"
+      figure="PeriodFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.22/@accessors.1"/>
 </gmfgraph:Canvas>

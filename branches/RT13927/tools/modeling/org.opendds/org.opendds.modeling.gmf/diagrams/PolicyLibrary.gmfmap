@@ -59,6 +59,42 @@
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.0"/>
       <diagramNode
           href="QosPolicies.gmfgraph#DeadlineQosPolicy"/>
+      <children
+          compartment="//@nodes.0/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/QoS.ecore#//DeadlineQosPolicy/period"/>
+        <ownedChild>
+          <domainMetaElement
+              href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              viewPattern="second: {0}"
+              editorPattern="{0}"
+              editPattern="{0}">
+            <diagramLabel
+                href="QosPolicies.gmfgraph#PeriodSecond"/>
+            <features
+                href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
+          </labelMappings>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              viewPattern="nanosecond: {0}"
+              editorPattern="{0}"
+              editPattern="{0}">
+            <diagramLabel
+                href="QosPolicies.gmfgraph#PeriodNanosecond"/>
+            <features
+                href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
+          </labelMappings>
+          <diagramNode
+              href="QosPolicies.gmfgraph#Period"/>
+        </ownedChild>
+      </children>
+      <compartments
+          children="//@nodes.0/@ownedChild/@children.0">
+        <compartment
+            href="QosPolicies.gmfgraph#period"/>
+      </compartments>
     </ownedChild>
   </nodes>
   <nodes>
@@ -204,6 +240,42 @@
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.2"/>
       <diagramNode
           href="QosPolicies.gmfgraph#DsQosPolicy"/>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/QoS.ecore#//DurabilityServiceQosPolicy/service_cleanup_delay"/>
+        <ownedChild>
+          <domainMetaElement
+              href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              viewPattern="second: {0}"
+              editorPattern="{0}"
+              editPattern="{0}">
+            <diagramLabel
+                href="QosPolicies.gmfgraph#PeriodSecond"/>
+            <features
+                href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
+          </labelMappings>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              viewPattern="nanosecond: {0}"
+              editorPattern="{0}"
+              editPattern="{0}">
+            <diagramLabel
+                href="QosPolicies.gmfgraph#PeriodNanosecond"/>
+            <features
+                href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
+          </labelMappings>
+          <diagramNode
+              href="QosPolicies.gmfgraph#Period"/>
+        </ownedChild>
+      </children>
+      <compartments
+          children="//@nodes.2/@ownedChild/@children.0">
+        <compartment
+            href="QosPolicies.gmfgraph#service_cleanup_delay"/>
+      </compartments>
     </ownedChild>
   </nodes>
   <nodes>
@@ -426,6 +498,42 @@
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.7"/>
       <diagramNode
           href="QosPolicies.gmfgraph#LbQosPolicy"/>
+      <children
+          compartment="//@nodes.7/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/QoS.ecore#//LatencyBudgetQosPolicy/duration"/>
+        <ownedChild>
+          <domainMetaElement
+              href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              viewPattern="second: {0}"
+              editorPattern="{0}"
+              editPattern="{0}">
+            <diagramLabel
+                href="QosPolicies.gmfgraph#PeriodSecond"/>
+            <features
+                href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
+          </labelMappings>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              viewPattern="nanosecond: {0}"
+              editorPattern="{0}"
+              editPattern="{0}">
+            <diagramLabel
+                href="QosPolicies.gmfgraph#PeriodNanosecond"/>
+            <features
+                href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
+          </labelMappings>
+          <diagramNode
+              href="QosPolicies.gmfgraph#Period"/>
+        </ownedChild>
+      </children>
+      <compartments
+          children="//@nodes.7/@ownedChild/@children.0">
+        <compartment
+            href="QosPolicies.gmfgraph#duration"/>
+      </compartments>
     </ownedChild>
   </nodes>
   <nodes>
@@ -482,6 +590,42 @@
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.8"/>
       <diagramNode
           href="QosPolicies.gmfgraph#LifespanQosPolicy"/>
+      <children
+          compartment="//@nodes.8/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/QoS.ecore#//LifespanQosPolicy/duration"/>
+        <ownedChild>
+          <domainMetaElement
+              href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              viewPattern="second: {0}"
+              editorPattern="{0}"
+              editPattern="{0}">
+            <diagramLabel
+                href="QosPolicies.gmfgraph#PeriodSecond"/>
+            <features
+                href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
+          </labelMappings>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              viewPattern="nanosecond: {0}"
+              editorPattern="{0}"
+              editPattern="{0}">
+            <diagramLabel
+                href="QosPolicies.gmfgraph#PeriodNanosecond"/>
+            <features
+                href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
+          </labelMappings>
+          <diagramNode
+              href="QosPolicies.gmfgraph#Period"/>
+        </ownedChild>
+      </children>
+      <compartments
+          children="//@nodes.8/@ownedChild/@children.0">
+        <compartment
+            href="QosPolicies.gmfgraph#duration"/>
+      </compartments>
     </ownedChild>
   </nodes>
   <nodes>
@@ -548,6 +692,42 @@
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.9"/>
       <diagramNode
           href="QosPolicies.gmfgraph#LivelinessQosPolicy"/>
+      <children
+          compartment="//@nodes.9/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/QoS.ecore#//LivelinessQosPolicy/lease_duration"/>
+        <ownedChild>
+          <domainMetaElement
+              href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              viewPattern="second: {0}"
+              editorPattern="{0}"
+              editPattern="{0}">
+            <diagramLabel
+                href="QosPolicies.gmfgraph#PeriodSecond"/>
+            <features
+                href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
+          </labelMappings>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              viewPattern="nanosecond: {0}"
+              editorPattern="{0}"
+              editPattern="{0}">
+            <diagramLabel
+                href="QosPolicies.gmfgraph#PeriodNanosecond"/>
+            <features
+                href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
+          </labelMappings>
+          <diagramNode
+              href="QosPolicies.gmfgraph#Period"/>
+        </ownedChild>
+      </children>
+      <compartments
+          children="//@nodes.9/@ownedChild/@children.0">
+        <compartment
+            href="QosPolicies.gmfgraph#lease_duration"/>
+      </compartments>
     </ownedChild>
   </nodes>
   <nodes>
@@ -690,14 +870,20 @@
             href="../../org.opendds.modeling.model/model/QoS.ecore#//PresentationQosPolicy/access_scope"/>
       </labelMappings>
       <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="coherent_access: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
         <diagramLabel
             href="QosPolicies.gmfgraph#PresentationQosPolicyCoherent_access"/>
         <features
             href="../../org.opendds.modeling.model/model/QoS.ecore#//PresentationQosPolicy/coherent_access"/>
       </labelMappings>
       <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="ordered_access: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
         <diagramLabel
             href="QosPolicies.gmfgraph#PresentationQosPolicyOrdered_access"/>
         <features
@@ -813,6 +999,42 @@
           href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.15"/>
       <diagramNode
           href="QosPolicies.gmfgraph#ReliabilityQosPolicy"/>
+      <children
+          compartment="//@nodes.15/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/QoS.ecore#//ReliabilityQosPolicy/max_blocking_time"/>
+        <ownedChild>
+          <domainMetaElement
+              href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              viewPattern="second: {0}"
+              editorPattern="{0}"
+              editPattern="{0}">
+            <diagramLabel
+                href="QosPolicies.gmfgraph#PeriodSecond"/>
+            <features
+                href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
+          </labelMappings>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              viewPattern="nanosecond: {0}"
+              editorPattern="{0}"
+              editPattern="{0}">
+            <diagramLabel
+                href="QosPolicies.gmfgraph#PeriodNanosecond"/>
+            <features
+                href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
+          </labelMappings>
+          <diagramNode
+              href="QosPolicies.gmfgraph#Period"/>
+        </ownedChild>
+      </children>
+      <compartments
+          children="//@nodes.15/@ownedChild/@children.0">
+        <compartment
+            href="QosPolicies.gmfgraph#max_blocking_time"/>
+      </compartments>
     </ownedChild>
   </nodes>
   <nodes>
