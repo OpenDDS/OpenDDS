@@ -2,7 +2,11 @@
 // $Id$
 //
 
-project(opendds_udp) : dcps {
+project(opendds_udp) : dcps, install {
   sharedname    = OpenDDS_Udp
   dynamicflags  = OPENDDS_UDP_BUILD_DLL
+
+  specific {
+    install_dir = dds/DCPS/transport/udp
+  }
 }

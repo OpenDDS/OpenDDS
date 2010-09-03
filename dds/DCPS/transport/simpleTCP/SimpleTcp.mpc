@@ -1,4 +1,8 @@
-project : dcps {
+project : dcps, install {
   sharedname   = SimpleTcp
   dynamicflags = SIMPLETCP_BUILD_DLL
+
+  specific {
+    install_dir = dds/DCPS/transport/simpleTCP
+  }
 }
