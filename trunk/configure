@@ -610,8 +610,8 @@ if ($needmpc) {
                                      'project files'), ".\n";
   print "mwc command line: -type $needmpc $feat $ws $static\n"
     if $opts{'verbose'};
-  if (system("$ENV{'ACE_ROOT'}/bin/mwc.pl -type $needmpc $feat $ws $static")
-      != 0) {
+  if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl " .
+             "-type $needmpc $feat $ws $static") != 0) {
     die "Error from MPC, stopped";
   }
 
