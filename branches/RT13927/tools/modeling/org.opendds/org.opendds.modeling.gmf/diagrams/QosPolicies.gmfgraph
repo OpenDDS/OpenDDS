@@ -356,17 +356,11 @@
             xsi:type="gmfgraph:Label"
             name="PartitionQosPolicyNameFigure"
             text="&lt;name>"/>
-        <children
-            xsi:type="gmfgraph:Label"
-            name="PartitionQosPolicyNamesFigure"
-            text="&lt;...>"/>
       </actualFigure>
       <accessors
           figure="//@figures.0/@descriptors.12/@actualFigure/@children.0"/>
       <accessors
           figure="//@figures.0/@descriptors.12/@actualFigure/@children.1"/>
-      <accessors
-          figure="//@figures.0/@descriptors.12/@actualFigure/@children.2"/>
     </descriptors>
     <descriptors
         name="PresentationQosPolicyFigure">
@@ -923,10 +917,6 @@
       name="PartitionQosPolicyName"
       figure="PartitionQosPolicyFigure"
       accessor="//@figures.0/@descriptors.12/@accessors.1"/>
-  <labels
-      name="PartitionQosPolicyNames"
-      figure="PartitionQosPolicyFigure"
-      accessor="//@figures.0/@descriptors.12/@accessors.2"/>
   <labels
       name="PresentationQosPolicyStereotype"
       figure="PresentationQosPolicyFigure"

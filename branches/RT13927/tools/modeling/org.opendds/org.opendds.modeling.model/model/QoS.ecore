@@ -66,8 +66,15 @@
         defaultValueLiteral="0"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PartitionQosPolicy" eSuperTypes="#//QosPolicy">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="names" upperBound="-1"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="names" lowerBound="1" upperBound="-1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString">
+      <eAnnotations source="GenModel">
+        <details key="documentation" value="In contrast to the DDS Profile specification (formal/07-01-01) which has a lower bound of 0 for name, a lower bound of 1 is used here. This is to reflect the fact that it would not make sense to construct a Partition policy without having at least one name."/>
+      </eAnnotations>
+      <eAnnotations source="GenModel">
+        <details key="documentation" value="The DDS Profile specification (formal/07-01-01) uses 'name' instead of 'names' for the association. However, this causes a conflict with Entity::name resulting in not being able to open the EMF Generator Model."/>
+      </eAnnotations>
+    </eStructuralFeatures>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PresentationQosPolicy" eSuperTypes="#//QosPolicy">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="access_scope" eType="ecore:EEnum Enumerations.ecore#//PresentationQosPolicyAccessScopeKind"
