@@ -31,6 +31,8 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="transport_priority" eType="ecore:EClass QoS.ecore#//TransportPriorityQosPolicy"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="lifespan" eType="ecore:EClass QoS.ecore#//LifespanQosPolicy"
+        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ContentFilteredTopic" eSuperTypes="#//TopicDescription">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="filter_expression" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
