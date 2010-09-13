@@ -1,3 +1,20 @@
+Mon Sep 13 17:30:50 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/transport/framework/QueueTaskBase_T.h:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
+        * dds/DCPS/transport/framework/ThreadSynchStrategy.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * performance-tests/Bench/src/Process.h:
+        * performance-tests/DCPS/MulticastListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.h:
+        * tests/DCPS/Deadline/Writer.h:
+        * tests/DCPS/FooTest5/InstanceDataMap.h:
+
+          Updated #includes for latest DOC group changes to ACE.
+
 Mon Sep 13 16:25:28 UTC 2010  Yan Dai  <dai_y@ociweb.com>
 
         * tests/DCPS/FooTest3/FooTest3.mpc:
@@ -20,7 +37,7 @@ Mon Sep 13 16:25:28 UTC 2010  Yan Dai  <dai_y@ociweb.com>
         * tests/DCPS/FooTest3NoKey/special_build_test.pl:
         * tests/DCPS/FooTest3NoKey/special_build_test_mw.pl:
 
-          Removed obsolete tests. These tests require PUBLISHER_TEST 
+          Removed obsolete tests. These tests require PUBLISHER_TEST
           defined in DCPS layer code which no longer exist.
 
 Fri Sep  3 19:44:20 UTC 2010  Adam Mitz  <mitza@ociweb.com>

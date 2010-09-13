@@ -16,6 +16,7 @@
 #include "BasicQueue_T.h"
 #include "ace/Task.h"
 #include "ace/Synch.h"
+#include "ace/Condition_T.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once

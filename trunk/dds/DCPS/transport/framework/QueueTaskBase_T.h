@@ -22,6 +22,7 @@
 #include "ace/Synch.h"
 #include "ace/Unbounded_Queue.h"
 #include "ace/INET_Addr.h"
+#include "ace/Condition_T.h"
 
 namespace OpenDDS {
 namespace DCPS {

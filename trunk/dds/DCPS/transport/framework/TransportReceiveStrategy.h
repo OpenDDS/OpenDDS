@@ -16,6 +16,7 @@
 #include "ReceivedDataSample.h"
 #include "TransportDefs.h"
 #include "ace/Synch.h"
+#include "ace/Lock_Adapter_T.h"
 
 namespace OpenDDS {
 namespace DCPS {

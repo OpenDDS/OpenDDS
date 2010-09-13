@@ -21,6 +21,7 @@
 #include "ace/INET_Addr.h"
 #include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
+#include "ace/Reverse_Lock_T.h"
 
 namespace OpenDDS {
 namespace DCPS {
