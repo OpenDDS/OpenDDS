@@ -15,7 +15,7 @@
 #include "DataSampleList.h"
 #include "OfferedDeadlineWatchdog.h"
 
-#include "ace/Synch_T.h"
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 
 #include <map>
 #include <set>
