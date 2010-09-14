@@ -1,3 +1,44 @@
+Tue Sep 14 15:48:17 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Serializer.cpp:
+        * dds/DCPS/transport/framework/BasicQueueLinkAllocator_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * performance-tests/Bench/src/Options.h:
+        * performance-tests/DCPS/MulticastListenerTest/TestStats.h:
+        * performance-tests/DCPS/Priority/Options.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/common/TestData.h:
+        * performance-tests/DCPS/TCPListenerTest/TestStats.h:
+        * performance-tests/DCPS/TCPProfilingTest/TestStats.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/common/TestData.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestStats.h:
+        * performance-tests/DCPS/UDPListenerTest/TestStats.h:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/LargeSample/Writer.cpp:
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+        * tests/DCPS/UnitTests/DurationToTimeValue.cpp:
+        * tests/DCPS/common/SampleInfo.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple_bp/SimpleDataReader.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataReader.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_n/SimpleDataWriter.cpp:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tools/monitor/MonitorTask.cpp:
+        * tools/monitor/Options.h:
+
+           Updated #includes for latest DOC group changes to ACE.
+
 Mon Sep 13 17:30:50 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:

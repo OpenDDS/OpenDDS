@@ -2,7 +2,7 @@
 #define TESTDATA_H
 
 #include "TestException.h"
-#include <ace/OS.h>
+#include <ace/OS_NS_string.h>
 #include <ace/Log_Msg.h>
 
 #define TESTDATA_PACKET_DECL(X) typedef Packet<X> Packet_ ## X

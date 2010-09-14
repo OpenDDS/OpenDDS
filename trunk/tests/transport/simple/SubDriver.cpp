@@ -14,7 +14,6 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "SimpleSubscriber.h"
 #include <ace/Arg_Shifter.h>
-#include <ace/OS.h>
 
 #include "dds/DCPS/transport/framework/EntryExit.h"
 

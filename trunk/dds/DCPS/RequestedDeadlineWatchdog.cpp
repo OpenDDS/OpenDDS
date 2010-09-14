@@ -15,7 +15,6 @@
 #include "Qos_Helper.h"
 
 #include "ace/Recursive_Thread_Mutex.h"
-#include "ace/OS.h"
 
 OpenDDS::DCPS::RequestedDeadlineWatchdog::RequestedDeadlineWatchdog(
   ACE_Reactor * reactor,

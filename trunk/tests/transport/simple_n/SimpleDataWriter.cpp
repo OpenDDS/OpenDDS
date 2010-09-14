@@ -8,7 +8,7 @@
 #include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/GuidBuilder.h"
-#include "ace/OS.h"
+#include "ace/OS_NS_unistd.h"
 #include <sstream>
 
 

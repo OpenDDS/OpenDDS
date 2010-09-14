@@ -11,7 +11,7 @@
 // ============================================================================
 
 #include "SampleInfo.h"
-#include "ace/OS.h"
+#include "ace/OS_NS_stdio.h"
 
 #include <string>
 

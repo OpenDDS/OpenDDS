@@ -8,7 +8,6 @@
  */
 
 #include "ace/OS_main.h"
-#include "ace/OS.h"
 #include "ace/Time_Value.h"
 
 #include "dds/DCPS/Qos_Helper.h"
