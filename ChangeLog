@@ -37,7 +37,7 @@ Tue Sep 14 15:48:17 UTC 2010  Adam Mitz  <mitza@ociweb.com>
         * tools/monitor/MonitorTask.cpp:
         * tools/monitor/Options.h:
 
-           Updated #includes for latest DOC group changes to ACE.
+          Updated #includes for latest DOC group changes to ACE.
 
 Mon Sep 13 17:30:50 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
