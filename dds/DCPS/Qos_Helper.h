@@ -11,7 +11,7 @@
 #define OPENDDS_DCPS_QOS_HELPER_H
 
 #include "dds/DdsDcpsC.h"
-#include "ace/OS.h"
+#include "ace/OS_NS_sys_time.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

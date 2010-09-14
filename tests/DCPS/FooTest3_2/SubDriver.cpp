@@ -14,7 +14,6 @@
 #include "tests/DCPS/common/TestSupport.h"
 #include <ace/Arg_Shifter.h>
 #include <ace/Argv_Type_Converter.h>
-#include <ace/OS.h>
 #include <string>
 
 #include <sstream>

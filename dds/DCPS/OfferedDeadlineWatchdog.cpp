@@ -13,7 +13,6 @@
 #include "DataWriterImpl.h"
 #include "Qos_Helper.h"
 #include "ace/Recursive_Thread_Mutex.h"
-#include "ace/OS.h"
 
 OpenDDS::DCPS::OfferedDeadlineWatchdog::OfferedDeadlineWatchdog(
   ACE_Reactor * reactor,

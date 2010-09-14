@@ -12,7 +12,8 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "SimpleSubscriber.h"
 #include <ace/Arg_Shifter.h>
-#include <ace/OS.h>
+#include <ace/OS_NS_unistd.h>
+#include <ace/OS_NS_stdio.h>
 
 
 SubDriver::SubDriver()

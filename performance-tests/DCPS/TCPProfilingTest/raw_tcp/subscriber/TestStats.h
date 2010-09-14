@@ -5,6 +5,7 @@
 #include <ace/Time_Value.h>
 #include <ace/Log_Msg.h>
 #include <ace/Message_Block.h>
+#include <ace/OS_NS_sys_time.h>
 #include <list>
 
 #define TESTSTATS_MAX_PUBLISHERS 256

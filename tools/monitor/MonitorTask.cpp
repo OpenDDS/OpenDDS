@@ -17,6 +17,8 @@
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 
+#include "ace/OS_NS_Thread.h"
+
 #include <sstream>
 
 namespace { // Anonymous namespace for file scope.
