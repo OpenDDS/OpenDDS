@@ -1,3 +1,17 @@
+Thu Sep 16 00:13:51 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Moved the delete_datawriter call out of pi_lock_
+          guard. This intended to fix a deadlock due to reverse 
+          locking with pi_lock and TransportImpl lock. The deadlock 
+          happend when the delete_contained_entities is called
+          which acquire pi_lock and then transport lock to unregister
+          writer from transport. It's possible another thread (e.g.
+          reactor thread) handling imcoming fully association message
+          which hold TransportImpl lock and then wait on pi_lock due
+          to TRANSIENT_LOCAL support.
+    
 Tue Sep 14 15:48:17 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/OfferedDeadlineWatchdog.cpp:
