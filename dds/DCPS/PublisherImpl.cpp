@@ -404,23 +404,26 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // mark that the entity is being deleted
   set_deleted(true);
 
-  DataWriterMap::iterator it;
-  DataWriterMap::iterator cur;
+  while (1) {
+    PublicationId pub_id = GUID_UNKNOWN;
+    DDS::DataWriter_ptr a_datawriter;
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->pi_lock_,
-                   DDS::RETCODE_ERROR);
+    {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+        guard,
+        this->pi_lock_,
+        DDS::RETCODE_ERROR);
 
-  for (it = datawriter_map_.begin(); it != datawriter_map_.end();) {
-    // Get the iterator for next entry before erasing current entry since
-    // the iterator will be invalid after deletion.
-    cur = it;
-    ++ it;
+      if (datawriter_map_.empty())
+        break;
+      else {
+        pub_id = datawriter_map_.begin()->second->publication_id_;
+        a_datawriter = datawriter_map_.begin()->second->local_writer_objref_;
+      }
+    }
 
-    PublicationId pub_id = cur->second->publication_id_;
     DDS::ReturnCode_t ret =
-      delete_datawriter(cur->second->local_writer_objref_);
+      delete_datawriter(a_datawriter);
 
     if (ret != DDS::RETCODE_OK) {
       RepoIdConverter converter(pub_id);
