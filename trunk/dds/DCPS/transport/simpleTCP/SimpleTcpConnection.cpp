@@ -17,6 +17,7 @@
 #include "SimpleTcpReconnectTask.h"
 #include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
 #include "ace/os_include/netinet/os_tcp.h"
+#include "ace/OS_NS_arpa_inet.h"
 
 #if !defined (__ACE_INLINE__)
 #include "SimpleTcpConnection.inl"
