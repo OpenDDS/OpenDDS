@@ -2,6 +2,7 @@
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_stdlib.h"
+#include "ace/OS_NS_sys_stat.h"
 #include "ace/Time_Value.h"
 #include "ace/streams.h"
 
