@@ -145,6 +145,7 @@
             <arg value="${env.ACE_ROOT}/bin/mwc.pl"/>
             <arg line="-type ${mwc.type}"/>
             <arg line="-features ${mwc.features}"/>
+            <arg line="${mwc.arguments}"/>
         </exec>
     </target>
 

@@ -1,3 +1,13 @@
+Tue Sep 21 18:34:45 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          Add quotes around arguments with spaces when invoking ant.
+
+        * java/jms/native/build.xml:
+
+          Allow arbitrary extra args to mwc.pl with -Dmwc.arguments=...
+
 Fri Sep 17 14:29:04 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
