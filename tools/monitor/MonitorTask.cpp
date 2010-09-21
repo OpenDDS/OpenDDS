@@ -420,7 +420,7 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
   if( transport.is_nil()) {
     transport = TheTransportFactory->create_transport_impl(
                   transportKey,
-                  "SimpleTcp",
+                  ACE_TEXT("SimpleTcp"),
                   OpenDDS::DCPS::AUTO_CONFIG
                 );
     if( transport.is_nil()) {
