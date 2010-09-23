@@ -52,6 +52,8 @@ DDS_MINOR_VERSION := $(shell awk '/DDS_MINOR_VERSION/ { print $$3}' ${DDS_ROOT}/
 DDS_MICRO_VERSION := $(shell awk '/DDS_MICRO_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
 endif
 
+GNUACE_PROJECT_VERSION ?= $(DDS_MAJOR_VERSION).$(DDS_MINOR_VERSION).$(DDS_MICRO_VERSION)
+
 # Version number of the libraries
 #
 ifeq ($(versioned_so),1)
