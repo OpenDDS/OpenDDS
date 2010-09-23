@@ -1,7 +1,16 @@
+Thu Sep 23 14:09:46 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_TAO.mwc:
+        * DDS_docgroup_TAO.mwc:
+
+          Reverted the previous change to DDS_TAO.mwc.  This file needs to
+          stay compatible with TAO 1.5a and 1.6a.
+          Added the new DDS_docgroup_TAO.mwc with Jeff's changes.
+
 Wed Sep 22 20:49:30 UTC 2010  Jeff Parsons <j.parsons@vanderbilt.edu>
 
         * DDS_TAO.mwc:
-        
+
           Changes reflecting the recent relocation of TAO MPC files.
 
 Tue Sep 21 20:21:09 UTC 2010  Adam Mitz  <mitza@ociweb.com>
