@@ -1,3 +1,14 @@
+Thu Sep 23 16:19:13 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/Sync/Sync.mpc:
+
+          Use dds_macros base project to get DDS version numbers.
+
+        * rules.dds.GNU:
+
+          Updated setting the shared library version numbers to match the
+          recent change to gnu.mpd and rules.lib.GNU in the DOC group repo.
+
 Thu Sep 23 14:09:46 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_TAO.mwc:
