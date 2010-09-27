@@ -23,6 +23,8 @@
                file="${makefile}"/>
 
     <!-- MPC features and type -->
+    <property name="mwc.arguments" value=""/>
+
     <condition property="mwc.features" value="java=1,no_platform_include=1">
         <os family="mac"/>
     </condition>

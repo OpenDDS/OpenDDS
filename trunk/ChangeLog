@@ -1,3 +1,10 @@
+Mon Sep 27 15:01:19 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/jms/native/build.xml:
+
+          Fixed the previous commit to this file, ant needs the ${foo}
+          variables to be declared in the build.xml file.
+
 Thu Sep 23 16:19:13 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/Sync/Sync.mpc:
