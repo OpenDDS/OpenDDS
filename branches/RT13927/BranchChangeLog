@@ -1,3 +1,14 @@
+Wed Sep 29 18:02:59 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/DCPS.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel:
+
+          Changed domain entity references to QoS Policies to be non-containment so that policies
+          used from policy libraries will automatically reflect changes in the library. This is in
+          preparation for allow policies to be added to the middleware library.
+
 Thu Sep  9 16:59:46 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.model.edit/plugin.properties:

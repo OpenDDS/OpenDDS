@@ -185,6 +185,7 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/resource_limits"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/topic_data"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/transport_priority"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/lifespan"/>
     </genClasses>
     <genClasses ecoreClass="Topics.ecore#//ContentFilteredTopic">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Topics.ecore#//ContentFilteredTopic/filter_expression"/>
