@@ -32,8 +32,8 @@ $common_args = "$arg_ns_ref -DCPSInfoRepo corbaname:rir:#InfoRepo $svc_conf";
 unlink $ns_ior;
 unlink $dcpsrepo_ior;
 
-$NS = PerlDDS::create_process ("$ENV{TAO_ROOT}/orbsvcs/Naming_Service/Naming_Service",
-                            "-o $ns_ior");
+my %orbsvcs = PerlDDS::orbsvcs();
+$NS = PerlDDS::create_process ($orbsvcs{'Naming_Service'}, "-o $ns_ior");
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                   "$repo_bit_opt -o $dcpsrepo_ior "
                                 . "-ORBEndpoint iiop://localhost:$port1");
