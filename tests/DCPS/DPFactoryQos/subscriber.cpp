@@ -44,9 +44,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         cerr << "DomainParticipantFactory get_qos failed." << endl;
         return 1;
       }
-      
+
       if (fqos.entity_factory.autoenable_created_entities == 0)
-      { 
+      {
         cerr << "The DomainParticipantFactory defaults to autoenable upon entities creation." << endl;
         return 1;
       }
@@ -186,7 +186,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // Enable every entity from factory to it's entities and it should succeed.
-      if (participant->enable () != ::DDS::RETCODE_OK 
+      if (participant->enable () != ::DDS::RETCODE_OK
         || topic->enable () != ::DDS::RETCODE_OK
         || sub->enable () != ::DDS::RETCODE_OK)
       {
@@ -217,7 +217,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       int expected = 10;
 
-      while ( listener_servant.num_reads() < expected ) { 
+      while ( listener_servant.num_reads() < expected ) {
         ACE_OS::sleep (1);
       }
 

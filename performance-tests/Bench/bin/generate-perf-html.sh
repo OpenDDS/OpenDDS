@@ -89,7 +89,7 @@ create_output_directory ()
 # Tar and gzip the test result files and place in the output directory.
 #
 ###############################################################################
-store_result_files () 
+store_result_files ()
 {
   pushd "$BASEDIR"
 

@@ -14,7 +14,6 @@
 #include "tests/DCPS/common/TestSupport.h"
 
 #include <ace/Arg_Shifter.h>
-#include <ace/OS.h>
 #include <ace/Argv_Type_Converter.h>
 #include <string>
 
@@ -181,7 +180,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
     }
 
   // Indicate that the subscriber is ready to accept connection
-  FILE* readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_LIB_TEXT("w"));
+  FILE* readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_TEXT("w"));
   if (readers_ready == 0)
   {
     ACE_ERROR ((LM_ERROR,
@@ -207,7 +206,7 @@ SubDriver::run()
   while (1)
   {
     FILE* fp
-      = ACE_OS::fopen (pub_id_fname_.c_str (), ACE_LIB_TEXT("r"));
+      = ACE_OS::fopen (pub_id_fname_.c_str (), ACE_TEXT("r"));
     if (fp == 0)
     {
       ACE_OS::sleep (1);

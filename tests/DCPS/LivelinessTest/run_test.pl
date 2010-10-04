@@ -21,10 +21,10 @@ $subscriber_ready = "subscriber_ready.txt";
 $publisher_completed = "publisher_finished.txt";
 $publisher_ready = "publisher_ready.txt";
 
-unlink $subscriber_completed; 
-unlink $subscriber_ready; 
-unlink $publisher_completed; 
-unlink $publisher_ready; 
+unlink $subscriber_completed;
+unlink $subscriber_ready;
+unlink $publisher_completed;
+unlink $publisher_ready;
 
 # single reader with single instances test
 $multiple_instance=0;
@@ -47,11 +47,11 @@ if ($ARGV[0] eq 'udp') {
   $app_bit_conf = " -DCPSBit 0 "
 }
 
-if ($ARGV[$arg_idx] eq 'take') { 
+if ($ARGV[$arg_idx] eq 'take') {
   print "use_take !!!!!\n";
   $use_take = 1;
 }
-elsif ($ARGV[$arg_idx] eq '') { 
+elsif ($ARGV[$arg_idx] eq '') {
   #default test - single datareader single instance.
 }
 else {
@@ -62,7 +62,7 @@ else {
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
-unlink $dcpsrepo_ior; 
+unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                              "$repo_bit_conf "
@@ -74,7 +74,7 @@ print $DCPSREPO->CommandLine(), "\n";
 $common_parameters = "-u $use_udp $app_bit_conf"
               . " -w $num_readers -m $multiple_instance"
               . " -l $num_unlively_periods -i $num_samples_per_reader " ;
-              
+
 # test multiple cases
 $sub_parameters = "$svc_conf $common_parameters -s $sub_addr -t $use_take ";
 
@@ -122,10 +122,10 @@ if ($ir != 0) {
 }
 
 
-unlink $subscriber_completed; 
-unlink $subscriber_ready; 
-unlink $publisher_completed; 
-unlink $publisher_ready; 
+unlink $subscriber_completed;
+unlink $subscriber_ready;
+unlink $publisher_completed;
+unlink $publisher_ready;
 
 if ($status == 0) {
   print "test PASSED.\n";

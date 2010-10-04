@@ -9,7 +9,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   int failed = false;
   bool dump_buffer = false;
- 
+
   if (argc > 1) dump_buffer = true;
 
   {
@@ -111,7 +111,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
   // Reset the chain back to the beginning.
   // This is needed when the buffer size = find_size(my_foo) because
-  // the the serialize method set current_ the next block in the chain 
+  // the the serialize method set current_ the next block in the chain
   // which is nil; so deserializing will fail.
   ss.add_chain(mb) ;
 
@@ -121,7 +121,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ACE_ERROR((LM_ERROR, "Deserializing StructOfArrayOfArrayOfShorts2 failed\n"));
       failed = true;
     }
-  else 
+  else
     {
       count = 0;
       for (int i = 0; i < 3 ; i++) {
@@ -285,12 +285,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   ACE_Message_Block *mb = new ACE_Message_Block(buff_size);
   OpenDDS::DCPS::Serializer ss(mb);
 
-  if (dump_buffer) 
+  if (dump_buffer)
     {
-      ACE::format_hexdump( mb->rd_ptr(), mb->length(), ebuffer, 
+      ACE::format_hexdump( mb->rd_ptr(), mb->length(), ebuffer,
         sizeof(ebuffer)) ;
-      ACE_DEBUG((LM_DEBUG, 
-        ACE_TEXT("BEFORE WRITING, LENGTH: %d, BUFFER:\n%s\n"), 
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("BEFORE WRITING, LENGTH: %d, BUFFER:\n%s\n"),
         mb->length(), ebuffer));
     }
 
@@ -300,18 +300,18 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       failed = true;
     }
 
-  if (dump_buffer) 
+  if (dump_buffer)
     {
-      ACE::format_hexdump( mb->rd_ptr(), mb->length(), ebuffer, 
+      ACE::format_hexdump( mb->rd_ptr(), mb->length(), ebuffer,
         sizeof(ebuffer)) ;
-      ACE_DEBUG((LM_DEBUG, 
-        ACE_TEXT("AFTER WRITING, LENGTH: %d, BUFFER:\n%s\n"), 
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("AFTER WRITING, LENGTH: %d, BUFFER:\n%s\n"),
         mb->length(), ebuffer));
     }
 
   // Reset the chain back to the beginning.
   // This is needed when the buffer size = find_size(my_foo) because
-  // the the serialize method set current_ the next block in the chain 
+  // the the serialize method set current_ the next block in the chain
   // which is nil; so deserializing will fail.
   ss.add_chain(mb) ;
 
@@ -322,33 +322,33 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       failed = true;
     }
 
-  if (dump_buffer) 
+  if (dump_buffer)
     {
-      ACE::format_hexdump( mb->rd_ptr(), mb->length(), 
+      ACE::format_hexdump( mb->rd_ptr(), mb->length(),
         ebuffer, sizeof(ebuffer)) ;
-      ACE_DEBUG((LM_DEBUG, 
-        ACE_TEXT("AFTER READING, LENGTH: %d, BUFFER:\n%s\n"), 
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("AFTER READING, LENGTH: %d, BUFFER:\n%s\n"),
         mb->length(), ebuffer));
 
-      ACE::format_hexdump( (char*)&(my_foo.key), sizeof(ACE_CDR::ULong), 
+      ACE::format_hexdump( (char*)&(my_foo.key), sizeof(ACE_CDR::ULong),
         ebuffer, sizeof(ebuffer)) ;
-      ACE::format_hexdump( (char*)&(ss_foo.key), sizeof(ACE_CDR::ULong), 
+      ACE::format_hexdump( (char*)&(ss_foo.key), sizeof(ACE_CDR::ULong),
         obuffer, sizeof(obuffer)) ;
       ACE_ERROR((LM_ERROR,
                 ACE_TEXT("key (expected:\n%s, observed:\n%s)\n"),
                 ebuffer, obuffer
               ));
-      ACE::format_hexdump( (char*)&(my_foo.x), sizeof(ACE_CDR::Float), 
+      ACE::format_hexdump( (char*)&(my_foo.x), sizeof(ACE_CDR::Float),
         ebuffer, sizeof(ebuffer)) ;
-      ACE::format_hexdump( (char*)&(ss_foo.x), sizeof(ACE_CDR::Float), 
+      ACE::format_hexdump( (char*)&(ss_foo.x), sizeof(ACE_CDR::Float),
         obuffer, sizeof(obuffer)) ;
       ACE_ERROR((LM_ERROR,
                 ACE_TEXT("x (expected:\n%s, observed:\n%s)\n"),
                 ebuffer, obuffer
               ));
-      ACE::format_hexdump( (char*)&(my_foo.y), sizeof(ACE_CDR::Float), 
+      ACE::format_hexdump( (char*)&(my_foo.y), sizeof(ACE_CDR::Float),
         ebuffer, sizeof(ebuffer)) ;
-      ACE::format_hexdump( (char*)&(ss_foo.y), sizeof(ACE_CDR::Float), 
+      ACE::format_hexdump( (char*)&(ss_foo.y), sizeof(ACE_CDR::Float),
         obuffer, sizeof(obuffer)) ;
       ACE_ERROR((LM_ERROR,
                 ACE_TEXT("y (expected:\n%s, observed:\n%s)\n"),
@@ -395,7 +395,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     }
   else if (0 != strcmp(ss_foo.theString.in (), my_foo.theString.in ()))
     {
-      ACE_ERROR((LM_ERROR, 
+      ACE_ERROR((LM_ERROR,
         ACE_TEXT("Failed to serialize theString \"%C\" => \"%C\"\n"),
         my_foo.theString.in (), ss_foo.theString.in ()));
       failed = true;

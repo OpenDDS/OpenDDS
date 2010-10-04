@@ -2,6 +2,7 @@
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_stdlib.h"
+#include "ace/OS_NS_sys_stat.h"
 #include "ace/Time_Value.h"
 #include "ace/streams.h"
 
@@ -39,7 +40,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
     // parse commmand line options
-    ACE_Get_Opt get_opts (argc, argv, ACE_LIB_TEXT("d:f:n:"));
+    ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("d:f:n:"));
     int optionIterator;
     while ((optionIterator = get_opts ()) != EOF) {
       switch (optionIterator) {
@@ -57,7 +58,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
               node_name = get_opts.opt_arg ();
               break;
 
-            case '?': 
+            case '?':
               ACE_ERROR_RETURN(
                 (LM_ERROR,
                   ACE_TEXT("usage: -d <file directory>  -n <node name>  -f <start file name>\n")),

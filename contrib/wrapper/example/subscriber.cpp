@@ -35,7 +35,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       // Create DataReaders and DataReaderListeners for the
       // Quote and ExchangeEvent
       DDS::DataReaderListener_var quote_listener (new QuoteDataReaderListenerImpl);
-  
+
       if (CORBA::is_nil (quote_listener.in ())) {
         cerr << "Quote listener is nil." << endl;
         ACE_OS::exit(1);
@@ -50,7 +50,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       DDS::DataReaderListener_var exchange_evt_listener (new ExchangeEventDataReaderListenerImpl);
       ExchangeEventDataReaderListenerImpl* listener_servant =
         dynamic_cast<ExchangeEventDataReaderListenerImpl*>(exchange_evt_listener.in());
-      
+
       if (CORBA::is_nil (exchange_evt_listener.in ())) {
         cerr << "ExchangeEvent listener is nil." << endl;
         ACE_OS::exit(1);

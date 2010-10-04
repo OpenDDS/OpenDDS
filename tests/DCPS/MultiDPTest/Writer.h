@@ -8,11 +8,11 @@
 #include "ace/Task.h"
 
 
-class Writer : public ACE_Task_Base 
+class Writer : public ACE_Task_Base
 {
 public:
 
-  Writer (::DDS::DataWriter_ptr writer, 
+  Writer (::DDS::DataWriter_ptr writer,
           int writer_id);
 
   void start ();
@@ -30,7 +30,7 @@ public:
 
 
 private:
-  
+
   ::DDS::DataWriter_var writer_;
   long writer_id_;
   ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> finished_instances_;

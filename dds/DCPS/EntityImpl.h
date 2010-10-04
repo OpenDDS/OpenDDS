@@ -7,12 +7,13 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_ENTITY_IMPL_H
-#define TAO_DDS_DCPS_ENTITY_IMPL_H
+#ifndef OPENDDS_DCPS_ENTITY_IMPL_H
+#define OPENDDS_DCPS_ENTITY_IMPL_H
 
 #include "dds/DdsDcpsInfrastructureS.h"
 #include "ace/Atomic_Op_T.h"
 #include "dds/DCPS/LocalObject.h"
+#include "Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -84,4 +85,4 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* TAO_DDS_DCPS_ENTITY_IMPL_H */
+#endif /* OPENDDS_DCPS_ENTITY_IMPL_H */

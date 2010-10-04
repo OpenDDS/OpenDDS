@@ -12,8 +12,6 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include /**/ "ace/OS.h"
-
 #include "dds/DCPS/DataCollector_T.h"
 
 #include <iosfwd>
@@ -103,7 +101,7 @@ class Options  {
   public:
     /// Types of transport implementations supported.
     enum TransportType {
-      NONE,     // Unsupported
+      TRANSPORT_NONE,     // Unsupported (NONE is a macro on VxWorks)
       TCP,      // SimpleTcp
       UDP,      // udp
       MC        // multicast

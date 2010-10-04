@@ -128,10 +128,10 @@ Writer::svc()
           timeout_writes_++;
         }
       }
-      
+
       ACE_OS::sleep (1);
     }
- 
+
     ret = this->publisher_->end_coherent_changes ();
     if (ret != ::DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
@@ -139,13 +139,13 @@ Writer::svc()
                    ACE_TEXT(" ERROR: end_coherent_changes failed!\n")));
       ACE_OS::exit(-1);
     }
-    
+
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in svc():");
   }
 
   finished_instances_ ++;
- 
+
   return 0;
 }
 
@@ -162,7 +162,7 @@ Writer::get_timeout_writes() const
 }
 
 
-int 
+int
 Writer::next_count ()
 {
   ++ count;

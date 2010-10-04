@@ -70,9 +70,9 @@ following fields:
 =for text
 
 The output includes two GNUPlot string variable definitions suitable for
-'load' or 'call' operations within GNUPlot.  Some GNUPlot data
+'load' or 'call' operations within GNUPlot.  Provided GNUPlot data
 visualization scripts use these variables to generate label information
-to place on some plots.  The variables are:
+to place on plots.  The variables are:
 
   latency_stats
   jitter_stats

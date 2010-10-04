@@ -4,6 +4,7 @@
 
 #include "ace/streams.h"
 #include "ace/OS_NS_stdlib.h"
+#include "ace/OS_NS_sys_stat.h"
 
 ApplicationLevel::ApplicationLevel(AbstractionLayer*  abstract,
                                    const ACE_TString& directory,
@@ -45,7 +46,7 @@ ApplicationLevel::receive_diff(const DistributedContent::FileDiff& diff)
     diff.change_source.in()
     ));
 
-  
+
   // Handle the case where the first file is received
   if (-1 == diff.previous_version)
   {
@@ -92,7 +93,7 @@ ApplicationLevel::generate_diff (long size)
     diff.difference[cnt] = (CORBA::Octet) (size % 256);
   }
 
-  // write the file 
+  // write the file
   ACE_TString diffname;
   generate_diff_filename(diffname, diff);
   ACE_TString full_file_name = directory_ + diffname;
@@ -131,7 +132,7 @@ ApplicationLevel::generate_new_file (const ACE_TString& filename, long size)
   file_name_ = ACE_TEXT_CHAR_TO_TCHAR(diff.filename.in());
   file_id_ = diff.file_id;
 
-  // write the file 
+  // write the file
   ACE_TString full_file_name = directory_ + file_name_;
   write_difference_file(full_file_name, diff);
 

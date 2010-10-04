@@ -33,13 +33,13 @@ namespace OpenDDS
      *
      *  This task handles request to reconnect to the remotes to avoid the
      *  the caller threads (thread to send or reactor thread) block on reconnecting.
-     *  This reconnect task has lifetime as DummyTcpConnection object. One reconnect 
+     *  This reconnect task has lifetime as DummyTcpConnection object. One reconnect
      *  task just dedicates to a single connection.
      */
     class DummyTcpReconnectTask : public QueueTaskBase <ReconnectOpType>
     {
     public:
-   
+
       /// Constructor.
       DummyTcpReconnectTask(DummyTcpConnection* con);
 

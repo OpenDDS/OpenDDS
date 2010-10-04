@@ -72,7 +72,7 @@ public:
 
   /// Is the element a "control" sample from the specified pub_id?
   virtual bool is_control(RepoId pub_id) const;
-  
+
   /// Is the listener get called ?
   bool released() const;
   void released(bool flag);
@@ -82,10 +82,10 @@ public:
   static ACE_Message_Block* clone(const ACE_Message_Block* msg,
                                   MessageBlockAllocator* mb_allocator,
                                   DataBlockAllocator* db_allocator);
-  
+
   /// Is the sample created by the transport?
   virtual bool owned_by_transport () = 0;
-  
+
 protected:
 
   /// Ctor.  The initial_count is the number of DataLinks to which
@@ -119,7 +119,7 @@ private:
 
   /// Flag flipped to true if any DataLink dropped the sample.
   bool dropped_;
-  
+
   /// If the callback to DW is made.
   bool released_;
 };

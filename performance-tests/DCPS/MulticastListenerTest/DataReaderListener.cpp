@@ -115,13 +115,13 @@ DataReaderListenerImpl::DataReaderListenerImpl (int num_publishers,
 
     samples_ = new OpenDDS::DCPS::DisjointSequence[num_publishers_];
     pub_finished_.size(stats_.num_publishers_);
-    
+
     for (unsigned j = 0; j < stats_.num_publishers_; j++)
       {
         pub_finished_[j] = false;
-        this->samples_[j] = OpenDDS::DCPS::DisjointSequence (0); 
+        this->samples_[j] = OpenDDS::DCPS::DisjointSequence (0);
       }
-      
+
   }
 
 
@@ -363,7 +363,7 @@ ACE_DEBUG((LM_DEBUG,
 
 
 void DataReaderListenerImpl::check_finished ()
-{ 
+{
   bool all_finished = true;
   for (unsigned j = 0; j < stats_.num_publishers_; j++)
     {
@@ -378,7 +378,7 @@ void DataReaderListenerImpl::check_finished ()
 
 
 bool DataReaderListenerImpl::verify_result ()
-{ 
+{
   for (unsigned j = 0; j < stats_.num_publishers_; j++)
     {
       if (this->samples_[j].disjoint()) {

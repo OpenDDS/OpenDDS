@@ -54,7 +54,7 @@ Test::DataWriterListener::on_liveliness_lost (
   ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }
-  
+
 void
 Test::DataWriterListener::on_publication_matched (
     ::DDS::DataWriter_ptr writer,

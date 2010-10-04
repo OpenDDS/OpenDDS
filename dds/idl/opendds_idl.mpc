@@ -1,4 +1,4 @@
-project: aceexe, crosscompile {
+project: aceexe, crosscompile, install {
 
   exename   = *
   exeout    = $(DDS_ROOT)/bin
@@ -18,6 +18,20 @@ project: aceexe, crosscompile {
       CPPFLAGS += -DTAO_IDL_PREPROCESSOR=\\\"$(TAO_IDL_PREPROCESSOR)\\\"
     endif
     idl_stubs: all
+  }
+
+  InstallData_Files {
+    gendir = dds/idl
+    *Template.txt
+  }
+
+  specific {
+    install_dir = dds
+  }
+
+  verbatim(gnuace, postinstall) {
+"	@$(MKDIR) $(INSTALL_PREFIX)/share/dds/bin"
+"	ln -sf $(INSTALL_PREFIX)/bin/opendds_idl $(INSTALL_PREFIX)/share/dds/bin"
   }
 
 }

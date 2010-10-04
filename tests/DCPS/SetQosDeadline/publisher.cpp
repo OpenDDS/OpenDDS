@@ -113,14 +113,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         exit(1);
       }
 
-      DDS::DataWriterQos dw_qos; 
+      DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos (dw_qos);
 
       dw_qos.deadline.period.sec     = 4;
       dw_qos.deadline.period.nanosec = 0;
 
-      // Create DataWriter with 4 second deadline period which 
-      // should be compatible with first DataReader which has 5 
+      // Create DataWriter with 4 second deadline period which
+      // should be compatible with first DataReader which has 5
       // seconds deadline period and not with second DataReader
       // which has 3 seconds deadline period.
       DDS::DataWriter_var dw =
@@ -130,7 +130,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       int const max_attempts = 20000;
-      int attempts = 1; 
+      int attempts = 1;
       {
         // Wait for both first DataReader connect and write messages.
         std::auto_ptr<Writer> writer (new Writer (dw.in ()));
@@ -154,11 +154,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 
         writer->start ();
 
-        // Now set DataWriter deadline to be 6 seconds which is not 
+        // Now set DataWriter deadline to be 6 seconds which is not
         // compatible with the existing DataReader. This QoS change
         // should not be applied and an ERROR should be returned to
         // set_qos().
-        dw_qos.deadline.period.sec = 6; 
+        dw_qos.deadline.period.sec = 6;
 
         if (dw->set_qos (dw_qos) != ::DDS::RETCODE_ERROR)
         {
@@ -175,7 +175,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         // Wait for both second DataReader connect which changed deadline period
         // from 3 seconds to 5 seconds.
         std::auto_ptr<Writer> writer (new Writer (dw.in ()));
-        attempts = 1; 
+        attempts = 1;
         while (attempts != max_attempts)
         {
           ::DDS::InstanceHandleSeq handles;
@@ -192,7 +192,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
           cerr << "ERROR: subscriptions failed to match." << endl;
           exit (1);
         }
-        
+
         writer->start ();
         writer->end ();
       }

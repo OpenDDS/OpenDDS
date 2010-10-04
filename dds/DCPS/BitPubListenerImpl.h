@@ -13,6 +13,7 @@
 #ifndef DDS_HAS_MINIMUM_BIT
 
 #include "dds/DdsDcpsSubscriptionS.h"
+#include "Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -66,10 +67,10 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status)
   ACE_THROW_SPEC((CORBA::SystemException));
-  
+
 private:
   DomainParticipantImpl* partipant_;
-  
+
 };
 
 } // namespace DCPS

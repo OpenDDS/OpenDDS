@@ -34,6 +34,7 @@
 #include "ace/Auto_Ptr.h"
 
 #include <sstream>
+#include <stdexcept>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -168,7 +169,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
-  
+
   //Note: OK to _duplicate(nil).
   listener_ = DDS::DataWriterListener::_duplicate(a_listener);
 
@@ -444,7 +445,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   ReaderIdSeq rds;
   CORBA::ULong rds_len = 0;
   DDS::InstanceHandleSeq handles;
-  
+
   {
     // Ensure the same acquisition order as in wait_for_acknowledgments().
     ACE_GUARD(ACE_SYNCH_MUTEX, wfaGuard, this->wfaLock_);
@@ -555,7 +556,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
       }
     }
   }
-  
+
   if (rds_len > 0) {
     this->publisher_servant_->remove_associations(rds,
                                                   this->publication_id_);
@@ -592,7 +593,7 @@ void DataWriterImpl::remove_all_associations()
     for (IdSet::iterator it = pending_readers_.begin(); it != itEnd; ++it) {
       readers[i ++] = *it;
     }
-    
+
     if (num_pending_readers > 0) {
       ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::remove_all_associations() - ")
@@ -791,7 +792,7 @@ DataWriterImpl::create_ack_token(DDS::Duration_t max_wait) const
 DDS::ReturnCode_t
 DataWriterImpl::send_ack_requests(const DataWriterImpl::AckToken& token)
 {
-  size_t dataSize = sizeof(token.sequence_.value_); // Assume no padding.
+  size_t dataSize = sizeof(token.sequence_.getValue()); // Assume no padding.
   dataSize += gen_find_size(token.max_wait_);
 
   ACE_Message_Block* data;
@@ -803,7 +804,7 @@ DataWriterImpl::send_ack_requests(const DataWriterImpl::AckToken& token)
   Serializer serializer(
     data,
     this->get_publisher_servant()->swap_bytes());
-  serializer << token.sequence_.value_;
+  serializer << token.sequence_.getValue();
   serializer << token.max_wait_;
 
   if (DCPS_debug_level > 0) {
@@ -813,7 +814,7 @@ DataWriterImpl::send_ack_requests(const DataWriterImpl::AckToken& token)
                ACE_TEXT("%C sending REQUEST_ACK message for sequence 0x%x ")
                ACE_TEXT("to %d subscriptions.\n"),
                std::string(converter).c_str(),
-               ACE_UINT16(token.sequence_.value_),
+               token.sequence_.getValue(),
                this->readers_.size()));
   }
 
@@ -881,7 +882,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
                    ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments() - ")
                    ACE_TEXT("%C unblocking for sequence 0x%x.\n"),
                    std::string(converter).c_str(),
-                   ACE_UINT16(token.sequence_.value_)));
+                   token.sequence_.getValue()));
       }
 
       return DDS::RETCODE_OK;
@@ -895,7 +896,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
              ACE_TEXT("%C timed out waiting for sequence 0x%x to be acknowledged ")
              ACE_TEXT("from %d subscriptions.\n"),
              std::string(converter).c_str(),
-             ACE_UINT16(token.sequence_.value_),
+             token.sequence_.getValue(),
              this->readers_.size()));
   return DDS::RETCODE_TIMEOUT;
 }
@@ -1146,13 +1147,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
     (qos_.history.kind == DDS::KEEP_ALL_HISTORY_QOS
      && qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
 
-  ACE_Time_Value max_blocking_time = ACE_Time_Value::zero;
-
-  if (should_block) {
-    max_blocking_time =
-      duration_to_time_value(qos_.reliability.max_blocking_time);
-  }
-
   CORBA::Long const depth =
     get_instance_sample_list_depth(
       qos_.history.kind,
@@ -1178,7 +1172,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   data_container_ = new WriteDataContainer(this,
                                            depth,
                                            should_block,
-                                           max_blocking_time,
+                                           qos_.reliability.max_blocking_time,
                                            n_chunks_,
                                            domain_id_,
                                            get_topic_name(),
@@ -1479,7 +1473,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   if (this->coherent_) {
     ++this->coherent_samples_;
   }
-  
+
   return DDS::RETCODE_OK;
 }
 
@@ -1663,12 +1657,12 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
     ? !TAO_ENCAP_BYTE_ORDER
   : TAO_ENCAP_BYTE_ORDER;
   header_data.coherent_change_ = this->coherent_;
-  header_data.group_coherent_ 
-    = this->publisher_servant_->qos_.presentation.access_scope 
+  header_data.group_coherent_
+    = this->publisher_servant_->qos_.presentation.access_scope
       == ::DDS::GROUP_PRESENTATION_QOS;
   header_data.message_length_ = data->total_length();
   ++this->sequence_number_;
-  header_data.sequence_ = this->sequence_number_.value_;
+  header_data.sequence_ = this->sequence_number_.getValue();
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
 
@@ -1738,12 +1732,13 @@ DataWriterImpl::deliver_ack(
   const DataSampleHeader& header,
   DataSample*             data)
 {
-  SequenceNumber ack;
+  SequenceNumber::Value seqNum;
 
   Serializer serializer(
     data,
     header.byte_order_ != TAO_ENCAP_BYTE_ORDER);
-  serializer >> ack.value_;
+  serializer >> seqNum;
+  SequenceNumber ack(seqNum);
 
   if (DCPS_debug_level > 0) {
     RepoIdConverter debugConverter(this->publication_id_);
@@ -1753,7 +1748,7 @@ DataWriterImpl::deliver_ack(
                ACE_TEXT("publication %C received update for ")
                ACE_TEXT("sample %x from subscription %C.\n"),
                std::string(debugConverter).c_str(),
-               ACE_UINT16(ack.value_),
+               ack.getValue(),
                std::string(debugConverter2).c_str()));
   }
 
@@ -1801,7 +1796,7 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
             get_lock());
-  
+
   CoherentChangeControl end_msg;
   end_msg.coherent_samples_.num_samples_ = this->coherent_samples_;
   end_msg.coherent_samples_.last_sample_ = this->sequence_number_;
@@ -1811,14 +1806,14 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
     end_msg.publisher_id_ = this->publisher_servant_->publisher_id_;
     end_msg.group_coherent_samples_ = group_samples;
   }
-  
+
   ACE_Message_Block* data = 0;
   size_t max_marshaled_size = end_msg.max_marshaled_size();
-  
+
   ACE_NEW(data, ACE_Message_Block(max_marshaled_size));
 
   Serializer serializer(
-      data, 
+      data,
       this->publisher_servant_->swap_bytes());
 
   serializer << end_msg;

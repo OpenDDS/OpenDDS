@@ -31,7 +31,7 @@ Publication_Manager::Publication_Manager (const Publication_Manager & copy)
 {
 }
 
-void 
+void
 Publication_Manager::operator= (const Publication_Manager & copy)
 {
   // check for self assignment

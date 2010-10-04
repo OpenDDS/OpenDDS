@@ -54,7 +54,7 @@ Writer::svc ()
       {
         writer_->enable ();
         continue;
-      }  
+      }
 
       if (handles.length() > 0)
         break;

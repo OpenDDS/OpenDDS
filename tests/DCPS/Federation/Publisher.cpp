@@ -33,7 +33,7 @@ Publisher::Publisher( int argc, ACE_TCHAR** argv, char** envp)
 
 #if 1
     TheServiceParticipant->monitor_factory_->initialize();
-#endif  
+#endif
 
 
   //
@@ -337,7 +337,7 @@ Publisher::run()
         sample
       ));
     }
-    
+
     if (this->config_.sample_interval() > 0)
     {
       ACE_OS::sleep (this->config_.sample_interval());

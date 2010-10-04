@@ -8,7 +8,7 @@ The test does not take any parameters.
 
 Run the test by:
   idl_test3
-  
+
 Or
 
   run_test.pl

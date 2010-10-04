@@ -74,7 +74,7 @@ SPMonitorImpl::report()
     this->sp_writer_->write(report, DDS::HANDLE_NIL);
   }
 }
-  
+
 } // namespace DCPS
 } // namespace OpenDDS
 

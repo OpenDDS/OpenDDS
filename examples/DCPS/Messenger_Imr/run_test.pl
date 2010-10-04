@@ -30,8 +30,9 @@ my $dcpsrepo_ior = "repo.ior";
 my $implrepo_ior = "imr.ior";
 my $activator_ior = "activator.ior";
 my $imr_init_ref = "-ORBInitRef ImplRepoService=file://$implrepo_ior";
-my $implrepo_server = "$ENV{TAO_ROOT}/orbsvcs/ImplRepo_Service/ImplRepo_Service";
-my $imr_activator = "$ENV{TAO_ROOT}/orbsvcs/ImplRepo_Service/ImR_Activator";
+my %orbsvcs = PerlDDS::orbsvcs();
+my $implrepo_server = $orbsvcs{'ImplRepo_Service'};
+my $imr_activator = $orbsvcs{'ImR_Activator'};
 my $tao_imr = "$ENV{ACE_ROOT}/bin/tao_imr";
 my $RepoOpts = "$opts -NOBITS -o $dcpsrepo_ior $OBJ_REF_STYLE";
 if ($useImr == 1) {

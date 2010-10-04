@@ -16,13 +16,13 @@
 #include "Domain_Manager.inl"
 #endif
 
-// this factory function has to be implemented for each specific DDS 
+// this factory function has to be implemented for each specific DDS
 // implementation
 extern Domain_Manager_Impl * create_domain_manager (int & argc,
                                                     ACE_TCHAR * argv[],
                                                     DDS::DomainId_t domain_id);
 
-// this factory function has to be implemented for each specific DDS 
+// this factory function has to be implemented for each specific DDS
 // implementation
 extern Domain_Manager_Impl * create_domain_manager (int & argc,
                                                     ACE_TCHAR * argv[],
@@ -39,14 +39,14 @@ Domain_Manager::Domain_Manager ()
 {
 }
 
-Domain_Manager::Domain_Manager (int & argc, 
+Domain_Manager::Domain_Manager (int & argc,
                                 ACE_TCHAR *argv[],
                                 DDS::DomainId_t domain_id)
   : manager_impl_ (create_domain_manager (argc, argv, domain_id))
 {
 }
 
-Domain_Manager::Domain_Manager (int & argc, 
+Domain_Manager::Domain_Manager (int & argc,
                                 ACE_TCHAR *argv[],
                                 DDS::DomainId_t domain_id,
                                 const DDS::DomainParticipantQos & qos)

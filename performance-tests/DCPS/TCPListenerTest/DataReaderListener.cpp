@@ -14,7 +14,7 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
   // Since our listener is on the DataReader we always know
   // that the "reader" parameter will be the one associated
   // with this listener so we could keep the R_var value
-  // instead of narrowing it for each call but the 
+  // instead of narrowing it for each call but the
   // performance gain would be very minimal.
   R_var var_dr
     = R::_narrow(reader);

@@ -11,6 +11,7 @@
 #define OPENDDS_DCPS_QOS_HELPER_H
 
 #include "dds/DdsDcpsC.h"
+#include "ace/OS_NS_sys_time.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -37,6 +38,10 @@ DDS::Time_t time_value_to_time(const ACE_Time_Value& tv);
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t);
+
+EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
+ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
+                                               const ACE_Time_Value now = ACE_OS::gettimeofday());
 
 EXTERN_OR_INLINE_HELPER_METHOD OpenDDS_Dcps_Export
 DDS::Duration_t time_value_to_duration(const ACE_Time_Value& tv);

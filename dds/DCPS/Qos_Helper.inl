@@ -460,12 +460,38 @@ DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
   return t;
 }
 
+
 ACE_INLINE
 ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t)
 {
-  ACE_Time_Value tv(t.sec, t.nanosec / 1000);
-  return tv;
+  CORBA::LongLong sec = t.sec + t.nanosec/1000/ACE_ONE_SECOND_IN_USECS;
+  CORBA::ULong usec = t.nanosec/1000 % ACE_ONE_SECOND_IN_USECS;
+
+  if (sec > ACE_Time_Value::max_time.sec()) {
+    return ACE_Time_Value::max_time;
+  }
+  else {
+    return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
+  }
 }
+
+
+ACE_INLINE
+ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
+                                               const ACE_Time_Value now)
+{
+  CORBA::LongLong sec
+    = t.sec + now.sec() + (t.nanosec/1000 + now.usec())/ACE_ONE_SECOND_IN_USECS;
+  CORBA::ULong usec = (t.nanosec/1000 + now.usec()) % ACE_ONE_SECOND_IN_USECS;
+
+  if (sec > ACE_Time_Value::max_time.sec()) {
+    return ACE_Time_Value::max_time;
+  }
+  else {
+    return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
+  }
+}
+
 
 ACE_INLINE
 DDS::Duration_t time_value_to_duration(const ACE_Time_Value& tv)
@@ -733,7 +759,7 @@ ACE_INLINE
 bool Qos_Helper::valid(const DDS::OwnershipQosPolicy& qos)
 {
   return
-    qos.kind == DDS::SHARED_OWNERSHIP_QOS 
+    qos.kind == DDS::SHARED_OWNERSHIP_QOS
     || qos.kind == DDS::EXCLUSIVE_OWNERSHIP_QOS;
 }
 

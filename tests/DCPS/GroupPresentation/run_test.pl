@@ -21,12 +21,22 @@ $debuglevel = 0;
 
 $pub_opts = "$opts -ORBDebugLevel $debuglevel -DCPSConfigFile pub.ini -DCPSDebugLevel $debuglevel -DCPSBits 0";
 $sub_opts = "$opts -DCPSTransportDebugLevel $debuglevel -ORBDebugLevel $debuglevel -DCPSConfigFile sub.ini -DCPSDebugLevel $debuglevel -DCPSBits 0";
-$testcase = 0;
+$testcase = "";
 
-if ($ARGV[0] ne '') {
-    print STDERR "ERROR: invalid test case\n";
-    exit 1;
+if ($ARGV[0] eq 'group') {
+  $testcase = "-q 2"; #default
 }
+elsif ($ARGV[0] eq 'topic') {
+  $testcase = "-q 1";
+}
+elsif ($ARGV[0] eq 'instance') {
+  $testcase = "-q 0";
+}
+elsif ($ARGV[0] ne '') {
+  print STDERR "ERROR: invalid parameter $ARGV[0] \n";
+  exit 1;
+}
+
 
 $dcpsrepo_ior = "repo.ior";
 
@@ -36,7 +46,7 @@ unlink <*.log>;
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                   "-ORBDebugLevel 10 -ORBVerboseLogging 1 -DCPSDebugLevel $debuglevel -ORBLogFile DCPSInfoRepo.log $repo_bit_opt -o $dcpsrepo_ior -NOBITS");
 
-$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts -DCPSDebugLevel $debuglevel -ORBVerboseLogging 1");
+$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts -ORBVerboseLogging 1 $testcase");
 
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 

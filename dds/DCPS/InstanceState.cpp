@@ -126,7 +126,7 @@ OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& write
     is_owner = this->reader_->owner_manager_->remove_writer (
                  this->handle_, writer_id);
   }
-  
+
   if (writers_.empty() && (this->instance_state_ & DDS::ALIVE_INSTANCE_STATE)) {
     this->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
     schedule_release();
@@ -235,38 +235,45 @@ OpenDDS::DCPS::InstanceState::release()
   this->reader_->release_instance(this->handle_);
 }
 
-void 
+void
 OpenDDS::DCPS::InstanceState::set_owner (const PublicationId& owner)
 {
-  this->owner_ = owner; 
+  this->owner_ = owner;
 }
 
-OpenDDS::DCPS::PublicationId& 
+OpenDDS::DCPS::PublicationId&
 OpenDDS::DCPS::InstanceState::get_owner ()
 {
-  return this->owner_; 
+  return this->owner_;
 }
 
-bool 
+bool
 OpenDDS::DCPS::InstanceState::is_exclusive () const
 {
   return this->exclusive_;
 }
 
-bool 
-OpenDDS::DCPS::InstanceState::registered() 
+bool
+OpenDDS::DCPS::InstanceState::registered()
 {
   bool ret = this->registered_;
   this->registered_ = true;
   return ret;
 }
 
-void 
+void
 OpenDDS::DCPS::InstanceState::registered (bool flag)
 {
   this->registered_ = flag;
 }
-  
 
-  
-  
+void
+OpenDDS::DCPS::InstanceState::reset_ownership (::DDS::InstanceHandle_t instance)
+{
+  this->owner_ = GUID_UNKNOWN;
+  this->registered_ = false;
+
+  this->reader_->reset_ownership(instance);
+}
+
+

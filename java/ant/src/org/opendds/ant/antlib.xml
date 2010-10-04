@@ -15,7 +15,7 @@
     <macrodef name="init" uri="antlib:org.opendds.ant">
         <attribute name="environment"/>
         <sequential>
-            <property environment="@{environment}"/> 
+            <property environment="@{environment}"/>
 
             <fail message="ACE_ROOT is a required environment variable!" unless="@{environment}.ACE_ROOT"/>
             <fail message="DDS_ROOT is a required environment variable!" unless="@{environment}.DDS_ROOT"/>

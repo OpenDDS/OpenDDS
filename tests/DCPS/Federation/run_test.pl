@@ -6,8 +6,10 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # -*- perl -*-
 
 use Env (ACE_ROOT);
+use Env (DDS_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use lib "$DDS_ROOT/bin";
+use PerlDDS::Run_Test;
 
 PerlACE::add_lib_path('../FooType5');
 
@@ -128,15 +130,9 @@ for my $index ( 1 .. $repoCount) {
   $repoArgs[ $index - 1] .= "-FederateWith " .  $repo_manager[ $index - 2] . " " if $index > 1;
   $repoArgs[ $index - 1] .= "-o " . $repo_ior[ $index - 1] . " ";
 
-  if (PerlACE::is_vxworks_test()) {
-    $REPO[ $index - 1] = new PerlACE::ProcessVX(
-                               "$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $repoArgs[ $index - 1]
-                             );
-  } else {
-    $REPO[ $index - 1] = new PerlACE::Process(
-                               "$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $repoArgs[ $index - 1]
-                             );
-  }
+  $REPO[ $index - 1] = PerlDDS::create_process(
+                             "$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $repoArgs[ $index - 1]
+                       );
   print "Established repository $index.\n" if $debug;
 }
 
@@ -162,11 +158,7 @@ for my $index ( 1 .. $subCount) {
   $pubArgs[ $index - 1] .= "$appOpts -Samples $samples -SampleInterval $sample_interval ";
   $pubArgs[ $index - 1] .= "-DCPSInfoRepo file://$repo_ior[ $repoIndex] ";
 
-  if (PerlACE::is_vxworks_test()) {
-    $PUB[ $index - 1]  = new PerlACE::ProcessVX ("publisher", $pubArgs[ $index - 1]);
-  } else {
-    $PUB[ $index - 1]  = new PerlACE::Process ("publisher", $pubArgs[ $index - 1]);
-  }
+  $PUB[ $index - 1]  = PerlDDS::create_process ("publisher", $pubArgs[ $index - 1]);
 }
 
 my @subArgs;
@@ -175,11 +167,7 @@ for my $index ( 1 .. $subCount) {
   $subArgs[ $index - 1] .= "$appOpts -Samples $samples ";
   $subArgs[ $index - 1] .= "-DCPSInfoRepo file://$repo_ior[ $repoIndex] ";
 
-  if (PerlACE::is_vxworks_test()) {
-    $SUB[ $index - 1]  = new PerlACE::ProcessVX ("subscriber", $subArgs[ $index - 1]);
-  } else {
-    $SUB[ $index - 1]  = new PerlACE::Process ("subscriber", $subArgs[ $index - 1]);
-  }
+  $SUB[ $index - 1]  = PerlDDS::create_process ("subscriber", $subArgs[ $index - 1]);
 }
 
 # Fire up the repositories.

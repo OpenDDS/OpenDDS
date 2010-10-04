@@ -105,7 +105,7 @@ public:
 
   virtual int visit_valuebox(AST_ValueBox* node);
 
-#if (TAO_MAJOR_VERSION > 2 || (TAO_MAJOR_VERSION == 1 && \
+#if (TAO_MAJOR_VERSION > 1 || (TAO_MAJOR_VERSION == 1 && \
   (TAO_MINOR_VERSION >= 7)))
 
   virtual int visit_template_module (AST_Template_Module* node);

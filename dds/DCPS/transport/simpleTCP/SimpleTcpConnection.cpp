@@ -17,6 +17,7 @@
 #include "SimpleTcpReconnectTask.h"
 #include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
 #include "ace/os_include/netinet/os_tcp.h"
+#include "ace/OS_NS_arpa_inet.h"
 
 #if !defined (__ACE_INLINE__)
 #include "SimpleTcpConnection.inl"
@@ -133,7 +134,7 @@ OpenDDS::DCPS::SimpleTcpConnection::open(void* arg)
   // The passed-in arg is really the acceptor object that created this
   // SimpleTcpConnection object, and is also the caller of this open()
   // method.  We need to cast the arg to the SimpleTcpAcceptor* type.
-  SimpleTcpAcceptor* acceptor = ACE_static_cast(SimpleTcpAcceptor*,arg);
+  SimpleTcpAcceptor* acceptor = static_cast<SimpleTcpAcceptor*>(arg);
 
   if (acceptor == 0) {
     // The cast failed.
@@ -275,12 +276,12 @@ OpenDDS::DCPS::SimpleTcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
     this->send_strategy_->terminate_send();
 
   this->disconnect();
-  
+
   if (!this->receive_strategy_.is_nil() && this->receive_strategy_->gracefully_disconnected())
   {
     this->link_->notify (DataLink::DISCONNECTED);
   }
-    
+
   return 0;
 }
 

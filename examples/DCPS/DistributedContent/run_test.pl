@@ -27,9 +27,9 @@ my $RepoOpts = "-ORBSvcConf simple_tcp.conf -ORBEndpoint iiop://:$dcpsrepo_port"
 #  transport.
 my $opts = "-ORBSvcConf simple_tcp.conf";
 
-my $node_1_opts = "$opts -n node_1 -d files1 -DCPSInfoRepo corbaloc:iiop:127.0.0.1:2007/DCPSInfoRepo ";
-my $node_2_opts = "$opts -n node_2 -d files2 -DCPSInfoRepo corbaloc:iiop:127.0.0.1:2007/DCPSInfoRepo";
-my $node_3_opts = "$opts -n node_3 -d files3 -f starter.bin -DCPSInfoRepo corbaloc:iiop:127.0.0.1:2007/DCPSInfoRepo";
+my $node_1_opts = "$opts -n node_1 -d files1 -DCPSInfoRepo corbaloc:iiop:localhost:$dcpsrepo_port/DCPSInfoRepo ";
+my $node_2_opts = "$opts -n node_2 -d files2 -DCPSInfoRepo corbaloc:iiop:localhost:$dcpsrepo_port/DCPSInfoRepo";
+my $node_3_opts = "$opts -n node_3 -d files3 -f starter.bin -DCPSInfoRepo corbaloc:iiop:localhost:$dcpsrepo_port/DCPSInfoRepo";
 
 my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $RepoOpts);
 

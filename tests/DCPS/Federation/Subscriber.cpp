@@ -32,7 +32,7 @@ Subscriber::Subscriber( int argc, ACE_TCHAR** argv, char** envp)
 
 #if 1
     TheServiceParticipant->monitor_factory_->initialize();
-#endif  
+#endif
 
   //
   // Establish DomainParticipant

@@ -23,7 +23,7 @@ class Domain_Manager_Impl;
 
 /// this defines a reference counted pointer for a domain manager
 /// implementation
-typedef class ACE_Refcounted_Auto_Ptr <Domain_Manager_Impl, 
+typedef class ACE_Refcounted_Auto_Ptr <Domain_Manager_Impl,
                                        ACE_Null_Mutex> Domain_Manager_Ptr;
 
 /**
@@ -31,7 +31,7 @@ typedef class ACE_Refcounted_Auto_Ptr <Domain_Manager_Impl,
  * @author Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  * @brief interface for all dds implementation specific domain manager classes
  */
-class Domain_Manager_Impl 
+class Domain_Manager_Impl
 {
  public:
   /// destructor

@@ -35,24 +35,3 @@ OpenDDS::DCPS::TransportReplacedElement::release_element(bool dropped_by_transpo
   }
 }
 
-OpenDDS::DCPS::RepoId
-OpenDDS::DCPS::TransportReplacedElement::publication_id() const
-{
-  DBG_ENTRY_LVL("TransportReplacedElement","publication_id",6);
-  return this->publisher_id_;
-}
-
-const ACE_Message_Block*
-OpenDDS::DCPS::TransportReplacedElement::msg() const
-{
-  DBG_ENTRY_LVL("TransportReplacedElement","msg",6);
-  return this->msg_;
-}
-
-ACE_INLINE
-bool 
-OpenDDS::DCPS::TransportReplacedElement::owned_by_transport ()
-{
-  return true;
-}
-

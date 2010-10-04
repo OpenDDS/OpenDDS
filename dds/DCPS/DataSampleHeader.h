@@ -83,7 +83,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// This flag indicates the sample header contains non-default
   /// LIFESPAN duration fields.
   bool lifespan_duration_ : 1;
-  
+
   bool group_coherent_ : 1;
 
   /// reservered bits
@@ -97,7 +97,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// The sequence number is obtained from the Publisher
   /// associated with the DataWriter based on the PRESENTATION
   /// requirement for the sequence value (access_scope == GROUP).
-  ACE_INT16   sequence_;
+  SequenceNumber::Value sequence_;
 
   /// The SOURCE_TIMESTAMP field is generated from the DataWriter
   /// or supplied by the application at the time of the write.
@@ -122,10 +122,10 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// Identify the DataWriter that produced the sample data being
   /// sent.
   PublicationId  publication_id_;
-  
+
   /// Id represent coherent group.
   RepoId         publisher_id_;
-  
+
   static long mask_flag(DataSampleHeaderFlag flag);
 
   static void clear_flag(DataSampleHeaderFlag flag,

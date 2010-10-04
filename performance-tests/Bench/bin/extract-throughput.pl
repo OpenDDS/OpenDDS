@@ -29,31 +29,150 @@ The input files are expected to be in logfile format as produced by the
 testprocess C<-v> option.  Logfiles produced by the subscription end of
 the testing contain the data required to produce plottable data sets.
 
-Each index set in the output represents one transport type with each
-entry within the index representing a single size/rate test result.
+The supported tests that can be reduced from the pre-configured throughput
+tests:
 
-The data within an index is formatted as a CSV, with the following
-fields:
+=begin html
+
+<table border>
+  <tr><th>Test Type</th></tr>
+  <tr><td>Bidirectional Throughput</td></tr>
+  <tr><td>Publication Bound</td></tr>
+  <tr><td>Subscription Bound</td></tr>
+</table>
+
+=end html
+
+=begin text
+
+      Bidirectional Throughput
+      Publication Bound
+      Subscription Bound
+
+=end text
+
+=begin man
+
+      Bidirectional Throughput
+      Publication Bound
+      Subscription Bound
+
+=end man
+
+Each of these test types has a pre-configured set of test conditions that
+can be executed.  The sets of test conditions are grouped into three
+different categories:
+
+=begin html
+
+<table border>
+  <tr><th>Test Conditions</th><th>Description</th></tr>
+  <tr><td>Steepest Ascent</td><td>A group of tests that simultaneously
+  increase both the message size and message rate resulting in a large
+  nominal throughput increase between tests.</td></tr>
+  <tr><td>Fixed Rate</td><td>A group of tests where the message rate is
+  held constant for all of the tests.</td></tr>
+  <tr><td>Fixed Size</td><td>A group of tests where the message size is
+  held constant for all of the tests.</td></tr>
+</table>
+
+=end html
+
+=begin text
+
+      Steepest Ascent: A group of tests that simultaneously increase both
+                       the message size and message rate resulting in a
+                       large nominal throughput increase between tests.
+      Fixed Rate:      A group of tests where the message rate is held
+                       constant for all of the tests.
+      Fixed Size:      A group of tests where the message size is held
+                       constant for all of the tests.
+
+=end text
+
+=begin man
+
+      Steepest Ascent: A group of tests that simultaneously increase both
+                       the message size and message rate resulting in a
+                       large nominal throughput increase between tests.
+      Fixed Rate:      A group of tests where the message rate is held
+                       constant for all of the tests.
+      Fixed Size:      A group of tests where the message size is held
+                       constant for all of the tests.
+
+=end man
+
+The transport types included in the pre-configured tests are:
+
+=begin html
+
+<table border>
+  <tr><th>Transport</th><th>Description</th></tr>
+  <tr><td>UDP</td><td>best effort datagram transport.</td></tr>
+  <tr><td>TCP</td><td>reliable stream transport.</td></tr>
+  <tr><td>Best Effort Multicast</td><td>best effort multicast datagram transport.</td></tr>
+  <tr><td>Reliable Multicast</td><td>reliable multicast datagram transport.</td></tr>
+</table>
+
+=end html
+
+=begin text
+
+      UDP:                   best effort datagram transport.
+      TCP:                   reliable stream transport.
+      Best Effort Multicast: best effort multicast datagram transport.
+      Reliable Multicast:    reliable multicast datagram transport.
+
+=end text
+
+=begin man
+
+      UDP:                   best effort datagram transport.
+      TCP:                   reliable stream transport.
+      Best Effort Multicast: best effort multicast datagram transport.
+      Reliable Multicast:    reliable multicast datagram transport.
+
+=end man
+
+Each index set in the output represents the combination of a test type,
+a set of test conditions, and a transport type with each entry within
+the index representing a single size/rate test result.
+
+The output data within an index is formatted as a comma separated value
+file (CSV), with the following fields:
 
 =begin html
 
 <table border>
   <tr><th>Field</th><th>Description</th></tr>
-  <tr><td>1</td><td>transport type</td></tr>
-  <tr><td>2</td><td>test message size</td></tr>
-  <tr><td>3</td><td>test message rate</td></tr>
-  <tr><td>4</td><td>actual (measured) bandwidth</td></tr>
-  <tr><td>5</td><td>nominal (specified) bandwidth</td></tr>
+  <tr><td>1</td><td>test message size</td></tr>
+  <tr><td>2</td><td>test message rate</td></tr>
+  <tr><td>3</td><td>actual (measured) bandwidth</td></tr>
+  <tr><td>4</td><td>test type</td></tr>
+  <tr><td>5</td><td>transport type</td></tr>
 </table>
 
 =end html
 
-=for text
-      Field  1: transport type
-      Field  2: test message size
-      Field  3: test message rate
-      Field  4: actual (measured) bandwidth
-      Field  5: nominal (specified) bandwidth
+=begin text
+
+      Field  1: test message size
+      Field  2: test message rate
+      Field  3: actual (measured) bandwidth
+      Field  4: test type
+      Field  5: transport type
+
+=end text
+
+=begin man
+
+      Field  1: test message size
+      Field  2: test message rate
+      Field  3: actual (measured) bandwidth
+      Field  4: test type
+      Field  5: transport type
+
+=end man
 
 =head1 EXAMPLE
 
@@ -75,16 +194,16 @@ BEGIN {
   # Seed the test types and the transports so that we can maintain a
   # consistent set of indices in the output for our plotting scripts.
   $data = { bidir =>    { 'SimpleTcp'             => undef,
-                          'best effort multicast' => undef, 
-                          'reliable multicast'    => undef, 
+                          'best effort multicast' => undef,
+                          'reliable multicast'    => undef,
                           'udp'                   => undef},
             pubbound => { 'SimpleTcp'             => undef,
-                          'best effort multicast' => undef, 
-                          'reliable multicast'    => undef, 
+                          'best effort multicast' => undef,
+                          'reliable multicast'    => undef,
                           'udp'                   => undef},
             subbound => { 'SimpleTcp'             => undef,
-                          'best effort multicast' => undef, 
-                          'reliable multicast'    => undef, 
+                          'best effort multicast' => undef,
+                          'reliable multicast'    => undef,
                           'udp'                   => undef}
           };
 }

@@ -32,14 +32,14 @@ namespace OpenDDS
      *  reactor thread (calling DummyTcpTransport::passive_connction()) and the orb
      *  thread (calling DummyTcpTransport::make_passive_connction()). The reactor
      *  thread will enqueue the new connection to this task and let this task dequeue
-     *  and check the connection. This task handles all connections associated with 
+     *  and check the connection. This task handles all connections associated with
      *  a TransportImpl object.
      */
     class DummyTcpConnectionReplaceTask : public QueueTaskBase <DummyTcpConnection_rch>
     {
     public:
-   
-      
+
+
 
       /// Constructor.
       DummyTcpConnectionReplaceTask(DummyTcpTransport* trans);

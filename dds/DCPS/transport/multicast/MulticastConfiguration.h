@@ -68,6 +68,15 @@ public:
   /// The default value is: 500.
   ACE_Time_Value nak_interval_;
 
+  /// The number of interval's between nak's for a sample
+  /// (after initial nak).
+  /// The default value is: 4.
+  size_t nak_delay_intervals_;
+
+  /// The maximum number of a missing sample will be nak'ed.
+  /// The default value is: 3.
+  size_t nak_max_;
+
   /// The maximum number of milliseconds to wait before giving up
   /// on a repair response (reliable only).
   /// The default value is: 30000 (30 seconds).

@@ -23,9 +23,11 @@
                file="${makefile}"/>
 
     <!-- MPC features and type -->
+    <property name="mwc.arguments" value=""/>
+
     <condition property="mwc.features" value="java=1,no_platform_include=1">
         <os family="mac"/>
-    </condition>    
+    </condition>
     <property name="mwc.features" value="java=1"/>
 
     <condition property="mwc.type" value="gnuace">
@@ -145,6 +147,7 @@
             <arg value="${env.ACE_ROOT}/bin/mwc.pl"/>
             <arg line="-type ${mwc.type}"/>
             <arg line="-features ${mwc.features}"/>
+            <arg line="${mwc.arguments}"/>
         </exec>
     </target>
 

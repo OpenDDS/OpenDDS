@@ -39,15 +39,15 @@ public:
   /// excluded (due to sorting and max_samples).
   bool insert_sample(ReceivedDataElement* sample, SubscriptionInstance* i,
                      size_t index_in_instance);
-  
+
   void get_datareaders (DDS::DataReaderSeq & readers);
 
   bool copy_to_user();
 
   void reset ();
-  
+
   RakeData get_data ();
-  
+
 private:
 
 
@@ -62,7 +62,7 @@ private:
         // then BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS is used.
         return lhs.rde_->source_timestamp_ < rhs.rde_->source_timestamp_;
       }
-      
+
       return false;
     }
 
@@ -76,7 +76,7 @@ private:
 
   // Contains data for QueryCondition/Ordered access
   SortedSet sorted_;
-  
+
   SortedSet::iterator current_sample_;
 };
 

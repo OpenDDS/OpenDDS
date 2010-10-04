@@ -30,7 +30,7 @@ public:
   int get_timeout_writes() const;
 
   int next_count ();
-  
+
 private:
   DDS::Publisher_var publisher_;
   DDS::DataWriter_var writer_;

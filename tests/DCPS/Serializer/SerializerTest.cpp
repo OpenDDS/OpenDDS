@@ -5,7 +5,7 @@
 #include "ace/Arg_Shifter.h"
 #include "ace/Get_Opt.h"
 #include "ace/Message_Block.h"
-#include "ace/OS.h"
+#include "ace/OS_NS_string.h"
 
 const size_t ARRAYSIZE = 15 ;
 

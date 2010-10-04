@@ -12,7 +12,7 @@ class AbstractionLayer;
 /**
  * @class ApplicationLevel
  *
- * @brief Provides the actual management of the differences. 
+ * @brief Provides the actual management of the differences.
  *
  */
 class ApplicationLevel
@@ -24,7 +24,7 @@ public:
    * @param abstract - porinter to the Abstraction Layer
    * @param directory - directory where the files will be stored
    * @param nodename - name of this application
-   * @return 
+   * @return
    */
   ApplicationLevel(AbstractionLayer*  abstract,
                    const ACE_TString& directory,
@@ -106,7 +106,7 @@ private:
   ACE_TString       file_name_;
   /// Id of the file that the differences are for
   ::CORBA::Long     file_id_;
-  /// The latest difference version of the file 
+  /// The latest difference version of the file
   ::CORBA::Long     current_file_version_;
   /// The current number of file writes that have occured.
   ::CORBA::Long     file_write_count_;

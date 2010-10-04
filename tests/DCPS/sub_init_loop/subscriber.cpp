@@ -211,9 +211,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
               ACE_OS::sleep (small_time);
             }
 
-          // Add sleep to let the fully_associted message arrive datawriter 
-          // before remove_associations is called upon delete_datareader, 
-          // otherwise the datawriter will encounter bit lookup timeout upon 
+          // Add sleep to let the fully_associted message arrive datawriter
+          // before remove_associations is called upon delete_datareader,
+          // otherwise the datawriter will encounter bit lookup timeout upon
           // fully associated.
           ACE_Time_Value small_time (0,250000);
                 ACE_OS::sleep (small_time);

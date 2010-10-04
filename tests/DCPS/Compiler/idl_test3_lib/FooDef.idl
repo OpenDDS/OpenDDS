@@ -167,11 +167,11 @@ module Xyz {
 
   union AUnion switch (AnEnum) {
     case redx:
-      string rv; 
+      string rv;
     case greenx:
       AStruct gv;
     default:
-      SeqOfLong bv; 
+      SeqOfLong bv;
   };
 
 
@@ -302,13 +302,13 @@ union BigUnion switch (long) {
   typedef octet OctetArray[3];
 
   struct Foo {
-    long key;  
-    octet octer; 
-    AnEnum xcolor; 
-    OctetArray ooo; 
+    long key;
+    octet octer;
+    AnEnum xcolor;
+    OctetArray ooo;
     string theString;
-    AStruct thestruct; 
-    AStructSeq theStructSeq; 
+    AStruct thestruct;
+    AStructSeq theStructSeq;
     ArrayOfAStruct structArray;
     AUnion theUnion;
     SeqOfAUnion theSeqOfUnion;

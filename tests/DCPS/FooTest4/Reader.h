@@ -7,11 +7,11 @@
 #include "dds/DdsDcpsSubscriptionC.h"
 
 
-class Reader 
+class Reader
 {
 public:
 
-  Reader (::DDS::DataReader_ptr reader, 
+  Reader (::DDS::DataReader_ptr reader,
           int use_take = 0,
           int num_reads_per_thread = 1,
           int multiple_instances = 0,
@@ -24,7 +24,7 @@ public:
   long reader_id () const;
 
 private:
-  
+
   ::DDS::DataReader_var reader_;
   int use_take_;
   int num_reads_per_thread_;

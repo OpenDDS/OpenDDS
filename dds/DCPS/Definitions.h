@@ -7,13 +7,14 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_DEFINITION_H
-#define TAO_DDS_DCPS_DEFINITION_H
+#ifndef OPENDDS_DCPS_DEFINITION_H
+#define OPENDDS_DCPS_DEFINITION_H
 
 #include "Cached_Allocator_With_Overflow_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "ace/Message_Block.h"
+#include "ace/Global_Macros.h"
 
 #include <functional>
 #include <utility>
@@ -21,6 +22,11 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+// Newer versions of ACE+TAO do not define ACE_THROW_SPEC
+#ifndef ACE_THROW_SPEC
+#define ACE_THROW_SPEC(X)
+#endif
 
 // More strict check than ACE does: if we have GNU lib C++ without support for
 // wchar_t (std::wstring, std::wostream, etc.) then we don't have DDS_HAS_WCHAR
@@ -48,11 +54,12 @@ typedef RepoId PublicationId;
 
 /// Lolipop sequencing (never wrap to negative).
 /// This helps distinguish new and old sequence numbers. (?)
-struct OpenDDS_Dcps_Export SequenceNumber {
+class OpenDDS_Dcps_Export SequenceNumber {
+public:
+  typedef ACE_INT32 Value;
   /// Construct with a value, default to negative starting point.
-  SequenceNumber(int value = SHRT_MIN) {
-    if (value > SHRT_MAX) this->value_ = ACE_INT16(value % (SHRT_MAX + 1));
-    else                  this->value_ = ACE_INT16(value);
+  SequenceNumber(ACE_INT64 value = MIN_VALUE) {
+    setValue(value);
   }
 
   // N.B: Default copy constructor is sufficient.
@@ -65,7 +72,9 @@ struct OpenDDS_Dcps_Export SequenceNumber {
 
   /// Pre-increment.
   SequenceNumber& operator++() {
-    this->increment() ;
+    /// Lolipop sequencing (never wrap to negative).
+    if (this->value_ == MAX_VALUE) this->value_ = 0x0;
+    else                           ++this->value_;
     return *this ;
   }
 
@@ -76,9 +85,13 @@ struct OpenDDS_Dcps_Export SequenceNumber {
     return value ;
   }
 
-  /// Convert to integer type.
-  operator ACE_INT16() const {
-    return this->value_;
+  void setValue(ACE_INT64 value) {
+    if (value > MAX_VALUE) this->value_ = Value(value % (MAX_VALUE+1));
+    else                   this->value_ = Value(value);
+  }
+
+  Value getValue() const {
+    return value_;
   }
 
   /// This is the magic of the lollipop.
@@ -89,11 +102,12 @@ struct OpenDDS_Dcps_Export SequenceNumber {
   ///      MAX-2 to 2.  But that 2 is less than MAX/2 since the
   ///      shortest distance is from 2 to MAX/2.
   bool operator<(const SequenceNumber& rvalue) const {
-    ACE_INT16 distance = rvalue.value_ - value_;
+    // double the distance and SHRT_MAX/2, to avoid rounding error
+    const ACE_INT64 distance = (ACE_INT64(rvalue.value_) - value_)*2;
     return (distance == 0)? false:                // Equal is not less than.
        (value_ < 0 || rvalue.value_ < 0) ? (value_ < rvalue.value_): // Stem of lollipop.
-       (distance <  0)? (SHRT_MAX/2 < -distance): // Closest distance dominates.
-       (distance < (SHRT_MAX/2));
+       (distance <  0)? (MAX_VALUE+1 < -distance): // Closest distance dominates.
+       (distance < MAX_VALUE+1);
   }
 
   /// Derive a full suite of logical operations.
@@ -114,14 +128,11 @@ struct OpenDDS_Dcps_Export SequenceNumber {
            && (*this != rvalue);
   }
 
-  ACE_INT16 value_ ;
+  static const Value MAX_VALUE = ACE_INT32_MAX - 1;
+  static const Value MIN_VALUE = ACE_INT32_MIN;
 
-  /// Increment operation itself.
-  void increment() {
-    /// Lolipop sequencing (never wrap to negative).
-    if (this->value_ == 0x7fff) this->value_ = 0x0 ;
-    else                        this->value_++ ;
-  }
+private:
+  Value value_;
 };
 
 typedef std::pair<SequenceNumber, SequenceNumber> SequenceRange;
@@ -185,7 +196,7 @@ struct VarLess : public std::binary_function<V, V, bool> {
 inline OpenDDS_Dcps_Export OpenDDS::DCPS::SequenceNumber
 operator+(const OpenDDS::DCPS::SequenceNumber& lhs, int rhs)
 {
-  return OpenDDS::DCPS::SequenceNumber(lhs.value_ + rhs);
+  return OpenDDS::DCPS::SequenceNumber(lhs.getValue() + rhs);
 }
 
 inline OpenDDS_Dcps_Export OpenDDS::DCPS::SequenceNumber
@@ -194,4 +205,4 @@ operator+(int lhs, const OpenDDS::DCPS::SequenceNumber& rhs)
   return rhs + lhs;
 }
 
-#endif /* TAO_DDS_DCPS_DEFINITION_H */
+#endif /* OPENDDS_DCPS_DEFINITION_H */

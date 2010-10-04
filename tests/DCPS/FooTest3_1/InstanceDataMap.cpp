@@ -14,30 +14,30 @@ InstanceDataMap::~InstanceDataMap()
 {
 }
 
-int 
+int
 InstanceDataMap::insert (::DDS::InstanceHandle_t handle, ::Xyz::Foo& sample)
 {
-  ACE_GUARD_RETURN (ACE_Thread_Mutex, 
-                    guard, 
-                    this->lock_, 
+  ACE_GUARD_RETURN (ACE_Thread_Mutex,
+                    guard,
+                    this->lock_,
                     -1);
 
   current_sequence_number_ ++;
   sample.sample_sequence = current_sequence_number_;
-  std::pair<DataSet::iterator, bool> pair 
+  std::pair<DataSet::iterator, bool> pair
         = map_[handle].insert(DataSet::value_type(sample));
 
   return pair.second == true ? 0 : -1;
 }
 
-int 
+int
 InstanceDataMap::remove (::DDS::InstanceHandle_t handle, ::Xyz::Foo& sample)
 {
-  ACE_GUARD_RETURN (ACE_Thread_Mutex, 
-                    guard, 
-                    this->lock_, 
+  ACE_GUARD_RETURN (ACE_Thread_Mutex,
+                    guard,
+                    this->lock_,
                     -1);
-  
+
   DataMap::iterator it = map_.find (handle);
   if (it == map_.end ())
   {
@@ -58,22 +58,22 @@ InstanceDataMap::remove (::DDS::InstanceHandle_t handle, ::Xyz::Foo& sample)
 }
 
 ssize_t
-InstanceDataMap::num_instances() 
+InstanceDataMap::num_instances()
 {
-  ACE_GUARD_RETURN (ACE_Thread_Mutex, 
-                    guard, 
-                    this->lock_, 
+  ACE_GUARD_RETURN (ACE_Thread_Mutex,
+                    guard,
+                    this->lock_,
                     -1);
 
   return this->map_.size();
 }
 
 ssize_t
-InstanceDataMap::num_samples() 
+InstanceDataMap::num_samples()
 {
-  ACE_GUARD_RETURN (ACE_Thread_Mutex, 
-                    guard, 
-                    this->lock_, 
+  ACE_GUARD_RETURN (ACE_Thread_Mutex,
+                    guard,
+                    this->lock_,
                     -1);
   ssize_t num_samples = 0;
   DataMap::iterator it;
@@ -84,7 +84,7 @@ InstanceDataMap::num_samples()
   return num_samples;
 }
 
-bool    
+bool
 InstanceDataMap::is_empty ()
 {
   return map_.empty ();

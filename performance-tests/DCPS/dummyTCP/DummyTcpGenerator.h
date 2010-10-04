@@ -30,7 +30,7 @@ namespace OpenDDS
 
         /// Provide a new DummyTcpConfiguration instance.
         virtual TransportConfiguration* new_configuration(const TransportIdType id);
-        
+
         /// Provide a list of default transport id.
         virtual void default_transport_ids (TransportIdList & ids);
     };

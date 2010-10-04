@@ -211,7 +211,7 @@ Subscriber::Subscriber( const Options& options)
       readerQos.reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
       break;
 
-    case Options::NONE:
+    case Options::TRANSPORT_NONE:
     default:
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")

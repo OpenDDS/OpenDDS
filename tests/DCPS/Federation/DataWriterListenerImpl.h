@@ -2,6 +2,7 @@
 #define DATAWRITER_LISTENER_IMPL
 
 #include "dds/DdsDcpsPublicationS.h"
+#include "dds/DCPS/Definitions.h"
 #include "ace/Condition_T.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -43,7 +44,7 @@ public:
     ACE_THROW_SPEC ((
       ::CORBA::SystemException
     ));
-  
+
   virtual void on_publication_matched (
       ::DDS::DataWriter_ptr writer,
       const ::DDS::PublicationMatchedStatus & status
@@ -67,7 +68,7 @@ public:
     ACE_THROW_SPEC ((
       ::CORBA::SystemException
     ));
-    
+
   virtual void on_publication_lost (
       ::DDS::DataWriter_ptr writer,
       const ::OpenDDS::DCPS::PublicationLostStatus & status
@@ -75,8 +76,8 @@ public:
     ACE_THROW_SPEC ((
       ::CORBA::SystemException
     ));
-  
-  
+
+
   virtual void on_connection_deleted (
       ::DDS::DataWriter_ptr writer
     )

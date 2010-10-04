@@ -36,7 +36,7 @@ void ExchangeEventDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr 
   throw (CORBA::SystemException)
 {
   try {
-    StockQuoter::ExchangeEventDataReader_var exchange_evt_dr 
+    StockQuoter::ExchangeEventDataReader_var exchange_evt_dr
       = StockQuoter::ExchangeEventDataReader::_narrow(reader);
     if (CORBA::is_nil (exchange_evt_dr.in ())) {
       cerr << "ExchangeEventDataReaderListenerImpl::on_data_available: _narrow failed." << endl;

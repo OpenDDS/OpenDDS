@@ -15,20 +15,31 @@ $status = 0;
 
 $svc_conf = '';
 $repo_bit_opt = '';
+$corbaloc_prefix = 'corbaloc:iiop:';
+$corbaloc_suffix = '/DCPSInfoRepo';
+$pub_ini = '-DCPSConfigFile pub.ini';
+$sub_ini = '-DCPSConfigFile sub.ini';
 if (!new PerlACE::ConfigList->check_config ('STATIC')) {
   $repo_bit_opt = "-ORBSvcConf tcp.conf";
-  if ($ARGV[0] eq 'udp') {
+  if ($ARGV[0] eq 'udp' || $ARGV[1] eq 'udp') {
     $svc_conf = " -ORBSvcConf udp.conf ";
+    $pub_ini = '-t udp -DCPSConfigFile pub_udp.ini';
+    $sub_ini = '-t udp -DCPSConfigFile sub_udp.ini';
   }
   else {
     $svc_conf = " -ORBSvcConf tcp.conf";
+  }
+
+  if ($ARGV[0] eq 'host_port_only' || $ARGV[1] eq 'host_port_only') {
+    $corbaloc_prefix = '';
+    $corbaloc_suffix = '';
   }
 }
 
 my($port1) = PerlACE::random_port();
 $dcpsrepo_ior = "repo.ior";
-$common_args = "-DCPSInfoRepo corbaloc:iiop:localhost:$port1/DCPSInfoRepo"
-    . " $svc_conf";
+$common_args = "-DCPSInfoRepo " . "$corbaloc_prefix" . "localhost:$port1"
+    . "$corbaloc_suffix". " $svc_conf";
 
 unlink $dcpsrepo_ior;
 
@@ -36,9 +47,9 @@ $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                   "$repo_bit_opt -o $dcpsrepo_ior "
                                 . "-ORBEndpoint iiop://localhost:$port1");
 $Subscriber = PerlDDS::create_process ("subscriber",
-                                    "-DCPSConfigFile sub.ini $common_args");
+                                       "$sub_ini $common_args");
 $Publisher = PerlDDS::create_process ("publisher",
-                                   "-DCPSConfigFile pub.ini $common_args");
+                                      "$pub_ini $common_args");
 
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {

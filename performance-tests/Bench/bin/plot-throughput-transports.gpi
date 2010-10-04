@@ -7,6 +7,7 @@ set datafile separator ","
 set grid
 set autoscale
 set key below
+set timestamp
 
 set format x2 "%.1s%c"
 set format x  "%.1s%c"

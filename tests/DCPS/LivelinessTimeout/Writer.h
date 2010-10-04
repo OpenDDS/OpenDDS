@@ -8,7 +8,7 @@
 #include "ace/Task.h"
 
 
-class Writer 
+class Writer
 {
 public:
 
@@ -21,7 +21,7 @@ public:
   int run_test (const ACE_Time_Value& duration);
 
 private:
-  
+
   ::DDS::DataWriter_var writer_;
 };
 

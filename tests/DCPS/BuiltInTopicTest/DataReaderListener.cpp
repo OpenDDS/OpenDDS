@@ -40,7 +40,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
       if (si.valid_data)
       {
-        if (si.publication_handle == ::DDS::HANDLE_NIL 
+        if (si.publication_handle == ::DDS::HANDLE_NIL
           || si.publication_handle != this->publication_handle_)
         {
           cerr << "DataReaderListener: ERROR: publication_handle validate failed." << endl;
@@ -104,7 +104,7 @@ void DataReaderListenerImpl::on_subscription_matched (
   throw (CORBA::SystemException)
 {
   this->publication_handle_ = status.last_publication_handle;
-  cerr << "DataReaderListenerImpl::on_subscription_matched handle=" 
+  cerr << "DataReaderListenerImpl::on_subscription_matched handle="
     << publication_handle_ << endl;
 }
 

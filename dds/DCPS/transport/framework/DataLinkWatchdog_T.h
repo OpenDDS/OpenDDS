@@ -53,13 +53,13 @@ public:
               this->lock_);
 
     if (this->timer_id_ == -1) return;
-      
+
     long timer_id = this->timer_id_;
     ACE_Reactor* reactor = this->reactor_;
     this->timer_id_ = -1;
     this->reactor_ = 0;
     this->cancelled_ = true;
-    
+
     {
       ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
       reactor->cancel_timer(timer_id);
@@ -108,7 +108,7 @@ private:
   ACE_LOCK lock_;
   typedef ACE_Reverse_Lock<ACE_LOCK> Reverse_Lock_t;
   Reverse_Lock_t reverse_lock_;
-  
+
   ACE_Reactor* reactor_;
   long timer_id_;
 
@@ -135,11 +135,11 @@ private:
         ACE_ERROR_RETURN ((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: ")
                   ACE_TEXT("DataLinkWatchdog::schedule_i: ")
-                  ACE_TEXT("failed to register timer %p!\n"), 
+                  ACE_TEXT("failed to register timer %p!\n"),
                   "schedule_timer"), false);
       }
     }
-    
+
     if (this->cancelled_) {
       reactor->cancel_timer(timer_id);
       return true;
@@ -148,7 +148,7 @@ private:
       this->timer_id_ = timer_id;
       this->reactor_ = reactor;
     }
-    
+
     return this->timer_id_ != -1;
   }
 };

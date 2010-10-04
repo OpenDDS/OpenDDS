@@ -58,7 +58,7 @@ class OpenDDS_Subscription_Manager : public Subscription_Manager_Impl
   virtual DDS::DataReaderQos get_default_datareader_qos ();
 
   /// returns the underlying subsriber instance
-  /// memory management of the returned subscriber reference is done by the 
+  /// memory management of the returned subscriber reference is done by the
   /// OpenDDS_Subscription_Manager itself
   virtual DDS::Subscriber_ptr subscriber () const;
 

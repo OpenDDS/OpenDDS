@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_SUBSCRIBER_H
-#define TAO_DDS_DCPS_SUBSCRIBER_H
+#ifndef OPENDDS_DCPS_SUBSCRIBER_H
+#define OPENDDS_DCPS_SUBSCRIBER_H
 
 #include "dds/DdsDcpsSubscriptionExtS.h"
 #include "dds/DdsDcpsDataReaderRemoteC.h"
@@ -37,6 +37,9 @@ class DomainParticipantImpl;
 //class DataReaderImpl;
 class Monitor;
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+class MultiTopicImpl;
+#endif
 
 // Keep track of all the DataReaders attached to this
 // Subscriber
@@ -189,6 +192,10 @@ public:
     RepoId topic_id)
   ACE_THROW_SPEC((CORBA::SystemException));
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  DDS::ReturnCode_t multitopic_reader_enabled(DDS::DataReader_ptr reader);
+#endif
+
   //void cleanup();
 
   DDS::SubscriberListener* listener_for(DDS::StatusKind kind);
@@ -211,12 +218,13 @@ public:
 
   void update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength);
-  
-  void coherent_change_received(RepoId& publisher_id, 
-                                DataReaderImpl* reader, 
+
+  void coherent_change_received(RepoId& publisher_id,
+                                DataReaderImpl* reader,
                                 Coherent_State& group_state);
 
 private:
+
   DDS::InstanceHandle_t        handle_;
 
   DDS::SubscriberQos           qos_;
@@ -228,6 +236,10 @@ private:
 
   DataReaderMap                datareader_map_ ;
   DataReaderSet                datareader_set_ ;
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  std::map<std::string, DDS::DataReader_var> multitopic_reader_map_;
+#endif
 
   DomainParticipantImpl*       participant_;
   DDS::DomainParticipant_var   participant_objref_;
@@ -247,11 +259,11 @@ private:
 
   /// Monitor object for this entity
   Monitor* monitor_;
-  
+
   int access_depth_;
 };
 
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* TAO_DDS_DCPS_SUBSCRIBER_H  */
+#endif /* OPENDDS_DCPS_SUBSCRIBER_H  */

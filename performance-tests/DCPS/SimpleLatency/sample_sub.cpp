@@ -80,7 +80,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        std::setbuf (stdout, NULL);
 #endif
 
-       ACE_Get_Opt get_opts (argc, argv, ACE_LIB_TEXT("ut"));
+       ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("ut"));
 
        int ich;
        while ((ich = get_opts ()) != EOF) {

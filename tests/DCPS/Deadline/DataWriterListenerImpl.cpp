@@ -21,9 +21,10 @@ DataWriterListenerImpl::on_offered_deadline_missed (
     ::DDS::OfferedDeadlineMissedStatus const & status)
   ACE_THROW_SPEC ((::CORBA::SystemException))
 {
-  ACE_DEBUG ((LM_DEBUG, "(%P|%t)%T DataWriterListenerImpl::on_offered_deadline_missed \n"));//rm
-  ACE_DEBUG ((LM_DEBUG, "(%P|%t)%T total_count=%d total_count_change=%d last_instance_handle=%d \n",
-    status.total_count, status.total_count_change, status.last_instance_handle));//rm
+  ACE_DEBUG ((LM_DEBUG,
+    ACE_TEXT("(%P|%t)DataWriterListenerImpl::on_offered_deadline_missed:")
+    ACE_TEXT("total_count=%d total_count_change=%d last_instance_handle=%d \n"),
+    status.total_count, status.total_count_change, status.last_instance_handle));
   //cerr << "DataWriterListenerImpl::on_offered_deadline_missed" << endl
   //     << "  total_count        = " << status.total_count << endl
   //     << "  total_count_change = " << status.total_count_change << endl;
@@ -44,7 +45,7 @@ DataWriterListenerImpl::on_liveliness_lost (
   ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }
-  
+
 void
 DataWriterListenerImpl::on_publication_matched (
     ::DDS::DataWriter_ptr /* writer */,

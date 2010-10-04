@@ -54,7 +54,7 @@ class Sub : public OpenDDS::DCPS::TransportInterface
       ACE_INET_Addr     pub_addr_;
       ACE_TString       pub_addr_str_;
 
-      PubInfo(OpenDDS::DCPS::RepoId pub_id, 
+      PubInfo(OpenDDS::DCPS::RepoId pub_id,
               const ACE_INET_Addr& pub_addr,
               const ACE_TString&   pub_addr_str)
         : pub_id_(pub_id), pub_addr_(pub_addr), pub_addr_str_(pub_addr_str)

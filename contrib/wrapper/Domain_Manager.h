@@ -40,7 +40,7 @@ class DDSWrapper_Export Manager_Exception {
  *
  * This class plays the role of an Abstraction in the Bridge pattern.
  */
-class DDSWrapper_Export Domain_Manager 
+class DDSWrapper_Export Domain_Manager
 {
  public:
   /// default ctor
@@ -50,7 +50,7 @@ class DDSWrapper_Export Domain_Manager
   /// @param argc number of command line arguments
   /// @param argv commandline arguments used for initialization
   /// @param domain_id in which domain participant should be registered
-  Domain_Manager (int & argc, 
+  Domain_Manager (int & argc,
                   ACE_TCHAR *argv[],
                   DDS::DomainId_t domain_id);
 
@@ -59,7 +59,7 @@ class DDSWrapper_Export Domain_Manager
   /// @param argv commandline arguments used for initialization
   /// @param domain_id in which domain participant should be registered
   /// @param qos for the domain participant
-  Domain_Manager (int & argc, 
+  Domain_Manager (int & argc,
                   ACE_TCHAR *argv[],
                   DDS::DomainId_t domain_id,
                   const DDS::DomainParticipantQos & qos);
@@ -71,7 +71,7 @@ class DDSWrapper_Export Domain_Manager
   Domain_Manager (const Domain_Manager & copy);
 
   /// assignment operator
-  void operator= (const Domain_Manager& copy);  
+  void operator= (const Domain_Manager& copy);
 
   /// checks for null reference
   bool null () const;
@@ -99,7 +99,7 @@ class DDSWrapper_Export Domain_Manager
 
  private:
   /// reference counted auto pointer containing the impl pointer
-  Domain_Manager_Ptr manager_impl_;  
+  Domain_Manager_Ptr manager_impl_;
 };
 
 #if defined (__ACE_INLINE__)

@@ -41,7 +41,7 @@ class TestStats
       // The first thing that needs to be done is to make sure that
       // we record the start time the first time this method is invoked
       // (and only the first time it is invoked).
-      if (!received_first_packet_) 
+      if (!received_first_packet_)
         {
           start_time_ = ACE_OS::gettimeofday();
           received_first_packet_ = true;
@@ -49,9 +49,9 @@ class TestStats
 
       packet_count_ += num_received;
 
-      if (all_packets_received()) 
-        { 
-          stop_time_  = ACE_OS::gettimeofday(); 
+      if (all_packets_received())
+        {
+          stop_time_  = ACE_OS::gettimeofday();
         }
     }
 

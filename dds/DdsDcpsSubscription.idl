@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_SUBSCRIPTION_IDL
-#define TAO_DDS_DCPS_SUBSCRIPTION_IDL
+#ifndef OPENDDS_DCPS_SUBSCRIPTION_IDL
+#define OPENDDS_DCPS_SUBSCRIPTION_IDL
 
 #include "dds/DdsDcpsInfrastructure.idl"
 
@@ -77,96 +77,96 @@ module DDS {
 
     local interface DataReader : Entity {
     // ReturnCode_t read(
-    // 		inout DataSeq received_data,
-    // 		inout SampleInfoSeq info_seq,
-    // 		in long max_samples,
-    //		in SampleStateMask sample_states,
-    //		in ViewStateMask view_states,
-    //		in InstanceStateMask instance_states);
+    //          inout DataSeq received_data,
+    //          inout SampleInfoSeq info_seq,
+    //          in long max_samples,
+    //          in SampleStateMask sample_states,
+    //          in ViewStateMask view_states,
+    //          in InstanceStateMask instance_states);
     // ReturnCode_t take(
-    //		inout DataSeq received_data,
-    //		inout SampleInfoSeq info_seq,
-    //		in long max_samples,
-    //		in SampleStateMask sample_states,
-    //		in ViewStateMask view_states,
-    //		in InstanceStateMask instance_states);
+    //          inout DataSeq received_data,
+    //          inout SampleInfoSeq info_seq,
+    //          in long max_samples,
+    //          in SampleStateMask sample_states,
+    //          in ViewStateMask view_states,
+    //          in InstanceStateMask instance_states);
     // ReturnCode_t read_w_condition(
-    //		inout DataSeq received_data,
-    //		inout SampleInfoSeq info_seq,
-    //		in long max_samples,
-    //		in ReadCondition a_condition);
+    //          inout DataSeq received_data,
+    //          inout SampleInfoSeq info_seq,
+    //          in long max_samples,
+    //          in ReadCondition a_condition);
     // ReturnCode_t take_w_condition(
-    //		inout DataSeq received_data,
-    //		inout SampleInfoSeq info_seq,
-    //		in long max_samples,
-    //		in ReadCondition a_condition);
+    //          inout DataSeq received_data,
+    //          inout SampleInfoSeq info_seq,
+    //          in long max_samples,
+    //          in ReadCondition a_condition);
     // ReturnCode_t read_next_sample(
-    //		inout Data received_data,
-    //		inout SampleInfo sample_info);
+    //          inout Data received_data,
+    //          inout SampleInfo sample_info);
     // ReturnCode_t take_next_sample(
-    //		inout Data received_data,
-    //		inout SampleInfo sample_info);
+    //          inout Data received_data,
+    //          inout SampleInfo sample_info);
     // ReturnCode_t read_instance(
-    //		inout DataSeq received_data,
-    //		inout SampleInfoSeq info_seq,
-    //		in long max_samples,
-    //		in InstanceHandle_t a_handle,
-    //		in SampleStateMask sample_states,
-    //		in ViewStateMask view_states,
-    //		in InstanceStateMask instance_states);
+    //          inout DataSeq received_data,
+    //          inout SampleInfoSeq info_seq,
+    //          in long max_samples,
+    //          in InstanceHandle_t a_handle,
+    //          in SampleStateMask sample_states,
+    //          in ViewStateMask view_states,
+    //          in InstanceStateMask instance_states);
     // ReturnCode_t take_instance(
-    //		inout DataSeq received_data,
-    //		inout SampleInfoSeq info_seq,
-    //		in long max_samples,
-    //		in InstanceHandle_t a_handle,
-    //		in SampleStateMask sample_states,
-    //		in ViewStateMask view_states,
-    //		in InstanceStateMask instance_states);
+    //          inout DataSeq received_data,
+    //          inout SampleInfoSeq info_seq,
+    //          in long max_samples,
+    //          in InstanceHandle_t a_handle,
+    //          in SampleStateMask sample_states,
+    //          in ViewStateMask view_states,
+    //          in InstanceStateMask instance_states);
     // ReturnCode_t read_next_instance(
-    //		inout DataSeq received_data,
-    //		inout SampleInfoSeq info_seq,
-    //		in long max_samples,
-    //		in InstanceHandle_t a_handle,
-    //		in SampleStateMask sample_states,
-    //		in ViewStateMask view_states,
-    //		in InstanceStateMask instance_states);
+    //          inout DataSeq received_data,
+    //          inout SampleInfoSeq info_seq,
+    //          in long max_samples,
+    //          in InstanceHandle_t a_handle,
+    //          in SampleStateMask sample_states,
+    //          in ViewStateMask view_states,
+    //          in InstanceStateMask instance_states);
     // ReturnCode_t take_next_instance(
-    //		inout DataSeq received_data,
-    //		inout SampleInfoSeq info_seq,
-    //		in long max_samples,
-    //		in InstanceHandle_t a_handle,
-    //		in SampleStateMask sample_states,
-    //		in ViewStateMask view_states,
-    //		in InstanceStateMask instance_states);
+    //          inout DataSeq received_data,
+    //          inout SampleInfoSeq info_seq,
+    //          in long max_samples,
+    //          in InstanceHandle_t a_handle,
+    //          in SampleStateMask sample_states,
+    //          in ViewStateMask view_states,
+    //          in InstanceStateMask instance_states);
     // ReturnCode_t read_next_instance_w_condition(
-    //		inout DataSeq received_data,
-    //		inout SampleInfoSeq info_seq,
-    //		in long max_samples,
-    //		in InstanceHandle_t a_handle,
-    //		in ReadCondition a_condition);
+    //          inout DataSeq received_data,
+    //          inout SampleInfoSeq info_seq,
+    //          in long max_samples,
+    //          in InstanceHandle_t a_handle,
+    //          in ReadCondition a_condition);
     // ReturnCode_t take_next_instance_w_condition(
-    //		inout DataSeq received_data,
-    //		inout SampleInfoSeq info_seq,
-    //		in long max_samples,
-    //		in InstanceHandle_t a_handle,
-    //		in ReadCondition a_condition);
+    //          inout DataSeq received_data,
+    //          inout SampleInfoSeq info_seq,
+    //          in long max_samples,
+    //          in InstanceHandle_t a_handle,
+    //          in ReadCondition a_condition);
     // ReturnCode_t return_loan(
-    //		inout DataSeq received_data,
-    //		inout SampleInfoSeq info_seq);
+    //          inout DataSeq received_data,
+    //          inout SampleInfoSeq info_seq);
     // ReturnCode_t get_key_value(
-    //		inout Data key_holder,
-    //		in InstanceHandle_t handle);
+    //          inout Data key_holder,
+    //          in InstanceHandle_t handle);
 
     //  InstanceHandle_t lookup_instance(
     //      in Data instance_data);
     ReadCondition create_readcondition(
-      in SampleStateMask sample_states, 
+      in SampleStateMask sample_states,
       in ViewStateMask view_states,
       in InstanceStateMask instance_states);
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
     QueryCondition create_querycondition(
-      in SampleStateMask sample_states, 
+      in SampleStateMask sample_states,
       in ViewStateMask view_states,
       in InstanceStateMask instance_states,
       in string query_expression,
@@ -204,7 +204,7 @@ module DDS {
     ReturnCode_t get_subscription_matched_status(
         inout SubscriptionMatchedStatus status);
     ReturnCode_t get_sample_lost_status(
-        inout SampleLostStatus status); 
+        inout SampleLostStatus status);
 
     ReturnCode_t wait_for_historical_data(
       in Duration_t max_wait);
@@ -274,4 +274,4 @@ module DDS {
 
 };
 
-#endif /* TAO_DDS_DCPS_SUBSCRIPTION_IDL */
+#endif /* OPENDDS_DCPS_SUBSCRIPTION_IDL */

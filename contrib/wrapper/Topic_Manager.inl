@@ -5,7 +5,7 @@
  *  @file    Topic_Manager.inl
  *
  *  $Id$
- * 
+ *
  *  @author  Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  */
 //=============================================================================
@@ -44,7 +44,7 @@ Topic_Manager::datareader (const Subscription_Manager & sm,
   return manager_impl_->datareader (sm, qos);
 }
 
-ACE_INLINE DDS::DataWriter_ptr 
+ACE_INLINE DDS::DataWriter_ptr
 Topic_Manager::datawriter (const Publication_Manager & pm,
                            const DDS::DataWriterQos & qos)
 {

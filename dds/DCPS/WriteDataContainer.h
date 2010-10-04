@@ -7,15 +7,15 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_WRITE_DATA_CONTAINER_H
-#define TAO_DDS_DCPS_WRITE_DATA_CONTAINER_H
+#ifndef OPENDDS_DCPS_WRITE_DATA_CONTAINER_H
+#define OPENDDS_DCPS_WRITE_DATA_CONTAINER_H
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsDataWriterRemoteC.h"
 #include "DataSampleList.h"
 #include "OfferedDeadlineWatchdog.h"
 
-#include "ace/Synch_T.h"
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 
 #include <map>
 #include <set>
@@ -113,7 +113,7 @@ public:
     /// Should the write wait for available space?
     bool             should_block ,
     /// The timeout for write.
-    ACE_Time_Value   max_blocking_time,
+    ::DDS::Duration_t max_blocking_time,
     /// The number of chunks that the DataSampleListElementAllocator
     /// needs allocate.
     size_t           n_chunks,
@@ -347,6 +347,9 @@ private:
     DataSampleList& instance_list,
     bool& released);
 
+  void wakeup_blocking_writers (DataSampleListElement* stale,
+                               PublicationInstance* instance);
+
 private:
 
   /// List of data that has not been sent yet.
@@ -398,7 +401,7 @@ private:
 
   /// The maximum time to block on write operation.
   /// This comes from DataWriter's QoS HISTORY.max_blocking_time
-  ACE_Time_Value                  max_blocking_time_;
+  ::DDS::Duration_t               max_blocking_time_;
 
   /// The block waiting flag.
   bool                            waiting_on_release_;
@@ -459,4 +462,4 @@ private:
 } /// namespace OpenDDS
 } /// namespace DCPS
 
-#endif /* TAO_DDS_DCPS_WRITE_DATA_CONTAINER_H */
+#endif /* OPENDDS_DCPS_WRITE_DATA_CONTAINER_H */

@@ -38,7 +38,7 @@ public:
                            bool  owner = true);
 
   virtual ~TransportControlElement();
-  
+
   virtual bool owned_by_transport ();
 
 protected:
@@ -67,5 +67,9 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+#if defined (__ACE_INLINE__)
+#include "TransportControlElement.inl"
+#endif /* __ACE_INLINE__ */
 
 #endif  /* OPENDDS_DCPS_TRANSPORTGDCONTROLELEMENT_H */

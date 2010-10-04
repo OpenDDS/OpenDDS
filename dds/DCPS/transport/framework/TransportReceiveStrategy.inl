@@ -8,7 +8,6 @@
  */
 
 #include "EntryExit.h"
-#include "ace/OS.h"
 
 ACE_INLINE int
 OpenDDS::DCPS::TransportReceiveStrategy::start()
@@ -40,6 +39,6 @@ OpenDDS::DCPS::TransportReceiveStrategy::successor_index(size_t index) const
 ACE_INLINE void
 OpenDDS::DCPS::TransportReceiveStrategy::relink(bool)
 {
-  // The subsclass needs implement this function for re-establishing
+  // The subclass needs implement this function for re-establishing
   // the link upon recv failure.
 }

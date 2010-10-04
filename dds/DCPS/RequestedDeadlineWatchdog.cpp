@@ -15,7 +15,6 @@
 #include "Qos_Helper.h"
 
 #include "ace/Recursive_Thread_Mutex.h"
-#include "ace/OS.h"
 
 OpenDDS::DCPS::RequestedDeadlineWatchdog::RequestedDeadlineWatchdog(
   ACE_Reactor * reactor,
@@ -81,36 +80,40 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(void const * act, bool timer_c
 
     if (missed) {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, monitor, this->status_lock_);
+      // Only update the status upon timer is called and not
+      // when receiving a sample after the interval.
+      // Otherwise the counter is doubled.
+      if (timer_called) {
+        ++this->status_.total_count;
+        this->status_.total_count_change =
+          this->status_.total_count - this->last_total_count_;
+        this->status_.last_instance_handle = instance->instance_handle_;
 
-      ++this->status_.total_count;
-      this->status_.total_count_change =
-        this->status_.total_count - this->last_total_count_;
-      this->status_.last_instance_handle = instance->instance_handle_;
+        this->reader_impl_->set_status_changed_flag(
+          DDS::REQUESTED_DEADLINE_MISSED_STATUS, true);
 
-      this->reader_impl_->set_status_changed_flag(
-        DDS::REQUESTED_DEADLINE_MISSED_STATUS, true);
+        DDS::DataReaderListener * const listener =
+          this->reader_impl_->listener_for(
+            DDS::REQUESTED_DEADLINE_MISSED_STATUS);
 
-      DDS::DataReaderListener * const listener =
-        this->reader_impl_->listener_for(
-          DDS::REQUESTED_DEADLINE_MISSED_STATUS);
+        if (instance->instance_state_.is_exclusive()) {
+          reader_impl_->owner_manager_->remove_writers (instance->instance_handle_);
+        }
 
-      if (instance->instance_state_.is_exclusive()) {
-        reader_impl_->owner_manager_->remove_writers (instance->instance_handle_);
+        if (listener != 0) {
+          // Copy before releasing the lock.
+          DDS::RequestedDeadlineMissedStatus const status = this->status_;
+
+          // Release the lock during the upcall.
+          ACE_GUARD(reverse_lock_type, reverse_monitor, this->reverse_status_lock_);
+          // @todo Will this operation ever throw?  If so we may want to
+          //       catch all exceptions, and act accordingly.
+          listener->on_requested_deadline_missed(this->reader_.in(),
+                                                status);
+        }
+
+        this->reader_impl_->notify_status_condition();
       }
-      
-      if (listener != 0) {
-        // Copy before releasing the lock.
-        DDS::RequestedDeadlineMissedStatus const status = this->status_;
-
-        // Release the lock during the upcall.
-        ACE_GUARD(reverse_lock_type, reverse_monitor, this->reverse_status_lock_);
-        // @todo Will this operation ever throw?  If so we may want to
-        //       catch all exceptions, and act accordingly.
-        listener->on_requested_deadline_missed(this->reader_.in(),
-                                               status);
-      }
-
-      this->reader_impl_->notify_status_condition();
 
       if (!timer_called) {
         this->cancel_timer(instance);

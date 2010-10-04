@@ -26,13 +26,14 @@
 #define DCPSDATAWRITERI_H_
 
 #include "dds/DdsDcpsDataWriterRemoteS.h"
+#include "dds/DCPS/Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 //Class TAO_DDS_DCPSDataWriter_i
-class TAO_DDS_DCPSDataWriter_i 
+class TAO_DDS_DCPSDataWriter_i
   : public virtual POA_OpenDDS::DCPS::DataWriterRemote
 {
 public:

@@ -6,7 +6,7 @@ module Xyz {
 
   // Example user defined "Foo" structure
   struct Foo {
-    long  a_long_value;  
+    long  a_long_value;
     long  handle_value;
     long  sample_sequence;
     long  writer_id;

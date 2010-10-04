@@ -29,7 +29,7 @@ module Messenger {
     long   count;
     CORBA::BooleanSeq    bool_seq;
     CORBA::LongDoubleSeq longdouble_seq;
-    CORBA::ShortSeq      short_seq; 
+    CORBA::ShortSeq      short_seq;
     CORBA::UShortSeq     ushort_seq;
     CORBA::CharSeq       char_seq;
     CORBA::LongLongSeq   longlong_seq;

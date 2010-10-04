@@ -82,11 +82,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       dpf->get_default_participant_qos(partQos);
 
       // set up user data in DP qos
-      CORBA::ULong part_user_data_len 
+      CORBA::ULong part_user_data_len
         = static_cast<CORBA::ULong>(ACE_OS::strlen (PART_USER_DATA));
       partQos.user_data.value.length (part_user_data_len);
-      partQos.user_data.value.replace (part_user_data_len, 
-                                       part_user_data_len, 
+      partQos.user_data.value.replace (part_user_data_len,
+                                       part_user_data_len,
                                        reinterpret_cast<CORBA::Octet*>(PART_USER_DATA));
 
       participant = dpf->create_participant(411,
@@ -126,8 +126,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       // Initialize the transport
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl = 
-        TheTransportFactory->create_transport_impl (transport_impl_id, 
+      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
+        TheTransportFactory->create_transport_impl (transport_impl_id,
                                                     ::OpenDDS::DCPS::AUTO_CONFIG);
 
       // Create the subscriber and attach to the corresponding
@@ -197,8 +197,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // set up user data in DR qos
       CORBA::ULong dr_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (DR_USER_DATA));
       dr_qos.user_data.value.length (dr_user_data_len);
-      dr_qos.user_data.value.replace (dr_user_data_len, 
-                                      dr_user_data_len, 
+      dr_qos.user_data.value.replace (dr_user_data_len,
+                                      dr_user_data_len,
                                       reinterpret_cast<CORBA::Octet*>(DR_USER_DATA));
 
       DDS::DataReader_var dr = sub->create_datareader(topic.in (),
@@ -211,15 +211,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       // Wait for Monitor 1 done.
-      FILE* fp = ACE_OS::fopen (synch_fname, ACE_LIB_TEXT("r"));
+      FILE* fp = ACE_OS::fopen (synch_fname, ACE_TEXT("r"));
       int i = 0;
       while (fp == 0 &&  i < 15)
       {
         ACE_DEBUG ((LM_DEBUG,
-          ACE_LIB_TEXT("(%P|%t)waiting monitor1 done ...\n")));
+          ACE_TEXT("(%P|%t)waiting monitor1 done ...\n")));
         ACE_OS::sleep (1);
         ++i;
-        fp = ACE_OS::fopen (synch_fname, ACE_LIB_TEXT("r"));
+        fp = ACE_OS::fopen (synch_fname, ACE_TEXT("r"));
       }
       if (fp != 0)
         ACE_OS::fclose (fp);
@@ -227,29 +227,29 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Now change the changeable qos. The second monitor should get the updated qos from BIT.
       part_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (UPDATED_PART_USER_DATA));
       partQos.user_data.value.length (part_user_data_len);
-      partQos.user_data.value.replace (part_user_data_len, 
-                                       part_user_data_len, 
+      partQos.user_data.value.replace (part_user_data_len,
+                                       part_user_data_len,
                                        reinterpret_cast<CORBA::Octet*>(UPDATED_PART_USER_DATA));
       participant->set_qos (partQos);
 
       dr_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (UPDATED_DR_USER_DATA));
       dr_qos.user_data.value.length (dr_user_data_len);
-      dr_qos.user_data.value.replace (dr_user_data_len, 
-                                      dr_user_data_len, 
+      dr_qos.user_data.value.replace (dr_user_data_len,
+                                      dr_user_data_len,
                                       reinterpret_cast<CORBA::Octet*>(UPDATED_DR_USER_DATA));
       dr->set_qos (dr_qos);
 
       group_data_len = static_cast<CORBA::ULong> (ACE_OS::strlen (UPDATED_GROUP_DATA));
       sub_qos.group_data.value.length (group_data_len);
-      sub_qos.group_data.value.replace (group_data_len, 
-                                        group_data_len, 
+      sub_qos.group_data.value.replace (group_data_len,
+                                        group_data_len,
                                         reinterpret_cast<CORBA::Octet*>(UPDATED_GROUP_DATA));
       sub->set_qos (sub_qos);
 
       topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (UPDATED_TOPIC_DATA));
       topic_qos.topic_data.value.length (topic_data_len);
-      topic_qos.topic_data.value.replace (topic_data_len, 
-                                          topic_data_len, 
+      topic_qos.topic_data.value.replace (topic_data_len,
+                                          topic_data_len,
                                           reinterpret_cast<CORBA::Octet*>(UPDATED_TOPIC_DATA));
       topic->set_qos (topic_qos);
 

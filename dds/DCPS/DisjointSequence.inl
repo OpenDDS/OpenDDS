@@ -26,23 +26,6 @@ DisjointSequence::range_iterator::range_iterator(SequenceSet::iterator begin,
   ++*this;
 }
 
-ACE_INLINE DisjointSequence::range_iterator&
-DisjointSequence::range_iterator::operator++()
-{
-  if (this->pos_ != this->end_) {
-    SequenceSet::iterator prev(this->pos_++);
-
-    if (this->pos_ != this->end_) {
-      this->value_ = SequenceRange(SequenceNumber(prev->value_ + 1),
-                                   SequenceNumber(this->pos_->value_ - 1));
-      if (this->value_.first > this->value_.second) {
-        operator++();
-      }
-    }
-  }
-  return *this;
-}
-
 ACE_INLINE DisjointSequence::range_iterator
 DisjointSequence::range_iterator::operator++(int)
 {
@@ -88,15 +71,6 @@ ACE_INLINE SequenceNumber
 DisjointSequence::high() const
 {
   return *(this->sequences_.rbegin());
-}
-
-ACE_INLINE size_t
-DisjointSequence::depth() const
-{
-  ACE_UINT16 u_low(low());
-  ACE_UINT16 u_high(high());
-
-  return std::max(u_low, u_high) - std::min(u_low, u_high);
 }
 
 ACE_INLINE bool

@@ -145,6 +145,7 @@ tests/DCPS/Messenger/run_test.pl default_multicast: !DCPS_MIN !QNX
 tests/DCPS/Messenger/run_test.pl nobits: !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl stack: !DCPS_MIN
 tests/DCPS/Messenger/run_corbaloc_test.pl: !DCPS_MIN
+tests/DCPS/Messenger/run_corbaloc_test.pl host_port_only: !DCPS_MIN
 tests/DCPS/Messenger/run_ns_test.pl: !DCPS_MIN !DDS_NO_ORBSVCS
 tests/DCPS/Messenger/run_test.pl ipv6: IPV6 !DCPS_MIN
 
@@ -175,6 +176,9 @@ tests/DCPS/ReadCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/FilterExpression/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
 tests/DCPS/QueryCondition/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
 tests/DCPS/ContentFilteredTopic/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
+tests/DCPS/TopicExpression/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
+tests/DCPS/MultiTopic/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
+tests/DCPS/MetaStruct/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
 
 tests/DCPS/Federation/run_test.pl: !DCPS_MIN
 tests/DCPS/FileSystemStorage/run_test.pl: !DCPS_MIN
@@ -200,3 +204,6 @@ tests/DCPS/Ownership/run_test.pl update_strength: !DCPS_MIN !NO_BUILT_IN_TOPICS
 tests/DCPS/Ownership/run_test.pl liveliness_change: !DCPS_MIN
 tests/DCPS/Ownership/run_test.pl miss_deadline: !DCPS_MIN
 tests/DCPS/GroupPresentation/run_test.pl: !DCPS_MIN
+tests/DCPS/GroupPresentation/run_test.pl topic: !DCPS_MIN
+tests/DCPS/GroupPresentation/run_test.pl instance: !DCPS_MIN
+tests/DCPS/LargeSample/run_test.pl: !DCPS_MIN

@@ -87,8 +87,8 @@ parse_args(int argc, ACE_TCHAR *argv[])
 
     case 'z':
       dont_verify_sample_count_sleep_sec = ACE_OS::atoi(get_opts.opt_arg());
-      std::cout << "Don't wait for all samples; sleep " 
-                << dont_verify_sample_count_sleep_sec 
+      std::cout << "Don't wait for all samples; sleep "
+                << dont_verify_sample_count_sleep_sec
                 << " seconds instead" << std::endl;
       break;
 
@@ -147,7 +147,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     for (int i = 0; i < num_topics; ++i) {
       std::stringstream s;
       s << "Movie Discussion List " << i << std::ends;
-      
+
       topic[i] = participant->create_topic(s.str().c_str(),
                                            mts->get_type_name(),
                                            TOPIC_QOS_DEFAULT,
@@ -194,8 +194,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create DataWriter
     DDS::DataWriterQos dw_qos;
     pub->get_default_datawriter_qos (dw_qos);
-    dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;                            
-    
+    dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+
     DDS::DataWriter_var* dw = new DDS::DataWriter_var[num_topics];
     for (int i = 0; i < num_topics; ++i) {
       dw[i] = pub->create_datawriter(topic[i].in(),
@@ -241,7 +241,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Create DataReader
-    DDS::DataReaderListener_var* listener = 
+    DDS::DataReaderListener_var* listener =
       new DDS::DataReaderListener_var[num_topics];
     DDS::DataReader_var* reader = new DDS::DataReader_var[num_topics];
 
@@ -251,7 +251,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     for (int i = 0; i < num_topics; ++i) {
       listener[i] = new DataReaderListenerImpl;
-   
+
       reader[i] =
         sub->create_datareader(topic[i].in(),
                                dr_qos,
@@ -282,7 +282,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("%N:%l main()")
                             ACE_TEXT(" ERROR: wait() failed!\n")), -1);
         }
-        
+
         if (reader[i]->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("%N:%l main()")
@@ -308,20 +308,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       for (int i = 0; i < num_topics; ++i) {
         DataReaderListenerImpl* listener_impl =
           dynamic_cast<DataReaderListenerImpl*>(listener[i].in());
-        
+
         while (listener_impl->num_reads() != expected_num_reads) {
           ACE_Time_Value small_time(0, 1000000);
           ACE_OS::sleep(small_time);
           std::cout << i << ") Pid " << ACE_OS::getpid() << " received "
-                    << listener_impl->num_reads() << " of " 
+                    << listener_impl->num_reads() << " of "
                     << expected_num_reads << std::endl;
         }
         std::cout << i << ") Pid " << ACE_OS::getpid() << " received "
-                  << listener_impl->num_reads() << " of " 
+                  << listener_impl->num_reads() << " of "
                   << expected_num_reads << std::endl;
       }
     } else {
-      std::cout << "Sleeping " << dont_verify_sample_count_sleep_sec 
+      std::cout << "Sleeping " << dont_verify_sample_count_sleep_sec
                 << std::endl;
       for (int i = 0; i < dont_verify_sample_count_sleep_sec; ++i) {
         std::cout << "." << std::flush;

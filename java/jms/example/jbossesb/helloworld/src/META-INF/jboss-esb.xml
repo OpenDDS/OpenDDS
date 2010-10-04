@@ -16,7 +16,7 @@
             </jms-bus>
         </jms-provider>
     </providers>
-    
+
     <services>
         <service category="OpenDDS"
                  name="HelloWorld"

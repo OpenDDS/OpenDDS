@@ -47,7 +47,7 @@ class OpenDDS_Publication_Manager : public Publication_Manager_Impl
   virtual DDS::DataWriterQos get_default_datawriter_qos ();
 
   /// returns the underlying subsriber instance
-  /// memory management of the returned publisher reference is done by the 
+  /// memory management of the returned publisher reference is done by the
   /// OpenDDS_Publication_Manager itself
   virtual DDS::Publisher_ptr publisher () const;
 

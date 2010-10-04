@@ -8,11 +8,11 @@ in the $DDS_ROOT directory and the FAQ at <http://www.opendds.org/faq.html>.
 
 ======================================================================
 * Frequently Asked Questions (FAQ)
-  
+
   - Why does my program fail with a java.lang.UnsatisfiedLinkError?
 
     Because the Java bindings make use of JNI, the native OpenDDS
-    libraries and its dependencies must be available for the JVM to 
+    libraries and its dependencies must be available for the JVM to
     load at runtime. Please refer to the JVM documentation on how to
     configure the JVM library path.
 
@@ -22,7 +22,7 @@ in the $DDS_ROOT directory and the FAQ at <http://www.opendds.org/faq.html>.
     always reference TheParticipantFactory before referencing any other
     Java binding classes.
 
-  - Why does my program fail when attaching both a Publisher and a 
+  - Why does my program fail when attaching both a Publisher and a
     Subscriber to the same TransportImpl instance?
 
     This problem is not specific to Java applications.  See the known issues
@@ -31,9 +31,9 @@ in the $DDS_ROOT directory and the FAQ at <http://www.opendds.org/faq.html>.
 
   - Why do my DataReaderListener and DataWriterListener implementations
     fail with the following log message?
-    
+
       ERROR: TransportReactorTask::svc caught exception.
-  
+
     If a Throwable is thrown from one of the DataWriterListener or
     DataReaderListener methods, the above error will be logged and the thread
     will no longer be available to handle OpenDDS events (the system may

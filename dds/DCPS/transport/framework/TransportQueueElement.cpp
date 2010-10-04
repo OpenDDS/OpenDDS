@@ -74,7 +74,7 @@ OpenDDS::DCPS::TransportQueueElement::clone(const ACE_Message_Block* msg,
     }
 
     prev_copy = cur_copy;
-    
+
     cur_block = cur_block->cont();
   }
 

@@ -22,7 +22,7 @@ void FileInfoListener::on_data_available (::DDS::DataReader_ptr reader)
 {
 
   try {
-    DistributedContent::FileDiffDataReader_var fileinfo_dr = 
+    DistributedContent::FileDiffDataReader_var fileinfo_dr =
       DistributedContent::FileDiffDataReader::_narrow(reader);
     if (CORBA::is_nil (fileinfo_dr.in ())) {
       ACE_ERROR((LM_ERROR, "ERROR: FileInfoListener::on_data_available() _narrow failed.\n"));

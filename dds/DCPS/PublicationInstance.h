@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_PUBLICATION_INSTANCE_H
-#define TAO_DDS_DCPS_PUBLICATION_INSTANCE_H
+#ifndef OPENDDS_DCPS_PUBLICATION_INSTANCE_H
+#define OPENDDS_DCPS_PUBLICATION_INSTANCE_H
 
 #include "dcps_export.h"
 #include "DataSampleList.h"
@@ -78,4 +78,4 @@ struct OpenDDS_Dcps_Export PublicationInstance {
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* TAO_DDS_DCPS_PUBLICATION_INSTANCE_H */
+#endif /* OPENDDS_DCPS_PUBLICATION_INSTANCE_H */

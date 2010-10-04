@@ -31,7 +31,7 @@ add_stats (
     )
 {
   data = data / (ACE_hrtime_t) 1000;
-    std::cout << static_cast<double> (ACE_UINT64_DBLCAST_ADAPTER (data)) 
+    std::cout << static_cast<double> (ACE_UINT64_DBLCAST_ADAPTER (data))
               << std::endl;
 
     stats.average = (stats.count * stats.average + data)/(stats.count + 1);
@@ -63,7 +63,7 @@ std_dev (stats_type& stats)
   if (stats.count >=2)
   {
     return sqrt ((static_cast<double>(stats.count) * ACE_UINT64_DBLCAST_ADAPTER (stats.sum2) -
-                  ACE_UINT64_DBLCAST_ADAPTER (stats.sum) * ACE_UINT64_DBLCAST_ADAPTER (stats.sum)) / 
+                  ACE_UINT64_DBLCAST_ADAPTER (stats.sum) * ACE_UINT64_DBLCAST_ADAPTER (stats.sum)) /
                 (static_cast<double>(stats.count) * static_cast<double>(stats.count - 1)));
   }
   return 0.0;

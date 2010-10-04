@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_SUBSCRIPTION_INSTANCE_H
-#define TAO_DDS_DCPS_SUBSCRIPTION_INSTANCE_H
+#ifndef OPENDDS_DCPS_SUBSCRIPTION_INSTANCE_H
+#define OPENDDS_DCPS_SUBSCRIPTION_INSTANCE_H
 
 #include "ace/OS_Memory.h"
 
@@ -77,7 +77,7 @@ public:
   InstanceState instance_state_ ;
 
   /// sequence number of the move recect data sample received
-  ACE_INT16 last_sequence_ ;
+  SequenceNumber::Value last_sequence_ ;
 
   /// Data sample(s) in this instance
   ReceivedDataElementList rcvd_samples_ ;
@@ -100,4 +100,4 @@ public:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* TAO_DDS_DCPS_SUBSCRIPTION_INSTANCE_H */
+#endif /* OPENDDS_DCPS_SUBSCRIPTION_INSTANCE_H */

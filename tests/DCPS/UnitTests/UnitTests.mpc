@@ -18,3 +18,18 @@ project(*LivelinessCompatibility): dcpsexe {
   }
 }
 
+project(*SequenceNumber): dcpsexe {
+  exename   = *
+
+  Source_Files {
+    SequenceNumber.cpp
+  }
+}
+
+project(*DurationToTimeValue): dcpsexe {
+  exename   = *
+
+  Source_Files {
+    DurationToTimeValue.cpp
+  }
+}
