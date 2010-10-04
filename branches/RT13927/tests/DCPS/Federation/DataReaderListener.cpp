@@ -205,7 +205,7 @@ ACE_THROW_SPEC ((
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_data_available read failed.\n")
     ));
-  
+
   } else {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_data_available sample %d\n"),

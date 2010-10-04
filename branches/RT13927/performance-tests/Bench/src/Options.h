@@ -12,8 +12,6 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include /**/ "ace/OS.h"
-
 #include "dds/DCPS/DataCollector_T.h"
 
 #include <iosfwd>

@@ -2,6 +2,7 @@
 #define FILEINFOLISTENER_H_
 
 #include <dds/DdsDcpsSubscriptionC.h>
+#include <dds/DCPS/Definitions.h>
 
 class AbstractionLayer;
 

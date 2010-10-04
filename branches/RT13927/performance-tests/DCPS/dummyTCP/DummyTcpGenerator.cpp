@@ -15,29 +15,29 @@ OpenDDS::DCPS::DummyTcpGenerator::~DummyTcpGenerator()
 {
 }
 
-OpenDDS::DCPS::TransportImplFactory* 
-OpenDDS::DCPS::DummyTcpGenerator::new_factory() 
+OpenDDS::DCPS::TransportImplFactory*
+OpenDDS::DCPS::DummyTcpGenerator::new_factory()
 {
   DummyTcpFactory* factory = 0;
-  ACE_NEW_RETURN(factory, 
-                 DummyTcpFactory(), 
+  ACE_NEW_RETURN(factory,
+                 DummyTcpFactory(),
                  0);
   return factory;
 }
 
-OpenDDS::DCPS::TransportConfiguration* 
+OpenDDS::DCPS::TransportConfiguration*
 OpenDDS::DCPS::DummyTcpGenerator::new_configuration(const TransportIdType id)
 {
   ACE_UNUSED_ARG (id);
 
   DummyTcpConfiguration* trans_config = 0;
-  ACE_NEW_RETURN(trans_config, 
-                 DummyTcpConfiguration(), 
+  ACE_NEW_RETURN(trans_config,
+                 DummyTcpConfiguration(),
                  0);
   return trans_config;
 }
 
-void 
+void
 OpenDDS::DCPS::DummyTcpGenerator::default_transport_ids (TransportIdList & ids)
 {
   ids.clear ();

@@ -12,9 +12,9 @@
 
 #include "ParticipantTask.h"
 
-#ifdef ACE_AS_STATIC_LIBS                                                   
-# include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>                         
-#endif            
+#ifdef ACE_AS_STATIC_LIBS
+# include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#endif
 
 namespace
 {
@@ -25,7 +25,7 @@ namespace
   parse_args(int& argc, ACE_TCHAR** argv)
   {
     ACE_Arg_Shifter shifter(argc, argv);
-   
+
     while (shifter.is_anything_left())
     {
       const ACE_TCHAR* arg;
@@ -47,14 +47,14 @@ namespace
     }
   }
 } // namespace
-  
+
 int
 ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   parse_args(argc, argv);
-  
+
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> PUBLISHER STARTED\n")));
-  
+
   try
   {
     TheParticipantFactoryWithArgs(argc, argv);
@@ -64,18 +64,18 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     task.activate(DEFAULT_FLAGS, num_threads);
     task.wait();
-  
-    // Clean-up!    
+
+    // Clean-up!
     TheTransportFactory->release();
     TheServiceParticipant->shutdown();
   }
   catch (const CORBA::Exception& e)
   {
-    e._tao_print_exception("caught in main()"); 
+    e._tao_print_exception("caught in main()");
     return 1;
   }
-  
+
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- PUBLISHER FINISHED\n")));
-             
+
   return 0;
 }

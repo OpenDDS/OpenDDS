@@ -7,10 +7,11 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_DATAWRITERREMOTE_H
-#define TAO_DDS_DCPS_DATAWRITERREMOTE_H
+#ifndef OPENDDS_DCPS_DATAWRITERREMOTE_H
+#define OPENDDS_DCPS_DATAWRITERREMOTE_H
 
 #include "dds/DdsDcpsDataWriterRemoteS.h"
+#include "Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -28,8 +29,7 @@ class DataWriterImpl;
 *
 */
 class OpenDDS_Dcps_Export DataWriterRemoteImpl
-  : public virtual POA_OpenDDS::DCPS::DataWriterRemote
-  , public virtual PortableServer::RefCountServantBase {
+  : public virtual POA_OpenDDS::DCPS::DataWriterRemote {
 public:
   ///Constructor
   DataWriterRemoteImpl(DataWriterImpl* parent);
@@ -58,4 +58,4 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* DDSDCPSPUBLICATION_DATAWRITER_H_  */
+#endif

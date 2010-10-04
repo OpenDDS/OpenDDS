@@ -63,7 +63,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
       {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)instance is unregistered\n")));
-      } 
+      }
     } else if (status == DDS::RETCODE_NO_DATA) {
       cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
     } else {
@@ -84,8 +84,8 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
       {
         if (ACE_OS::strcmp (message.bounded_wchar_seq.get_buffer (), wcharseq))
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
-                      "(%P|%t)ERROR: wchar_seq(%d) - unexpected bounded_wchar_seq %W\n", message.count, 
+          ACE_ERROR_RETURN ((LM_ERROR,
+                      "(%P|%t)ERROR: wchar_seq(%d) - unexpected bounded_wchar_seq %W\n", message.count,
                       message.bounded_wchar_seq.get_buffer ()),
                       false);
         }
@@ -94,8 +94,8 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
       {
         if (ACE_OS::strcmp (message.bounded_char_seq.get_buffer (), charseq))
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
-                      "(%P|%t)ERROR: wchar_seq(%d) - unexpected bounded_char_seq %s\n", message.count, 
+          ACE_ERROR_RETURN ((LM_ERROR,
+                      "(%P|%t)ERROR: wchar_seq(%d) - unexpected bounded_char_seq %s\n", message.count,
                       message.bounded_char_seq.get_buffer ()),
                       false);
         }
@@ -104,23 +104,23 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
       {
         if (message.wstring_seq.length () != 5)
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
-                              "(%P|%t)ERROR: wstring_seq(%d) - unexpected len %d \n", message.count, 
+          ACE_ERROR_RETURN ((LM_ERROR,
+                              "(%P|%t)ERROR: wstring_seq(%d) - unexpected len %d \n", message.count,
                               message.wstring_seq.length ()),
                               false);
         }
         for (int i = 0; i < 4; ++i)
         {
           if (! message.wstring_seq[i].in ())
-            ACE_ERROR_RETURN ((LM_ERROR, 
-                              "(%P|%t)ERROR: wstring_seq(%d) - unexpected seq[%d] \n", message.count, 
+            ACE_ERROR_RETURN ((LM_ERROR,
+                              "(%P|%t)ERROR: wstring_seq(%d) - unexpected seq[%d] \n", message.count,
                               i),
                               false);
         }
 
         if (ACE_OS::strcmp (message.wstring_seq[4], wstrseq))
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                       "(%P|%t)ERROR: wstring_seq(%d) - unexpected wstring_seq[4]=%W \n", message.count,
                       message.wstring_seq[4].in ()),
                       false);
@@ -129,21 +129,21 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
     case 6:
       {
         if (message.string_seq.length () != 5)
-          ACE_ERROR_RETURN ((LM_ERROR, 
-                            "(%P|%t)ERROR: string_seq(%d) - unexpected len %d \n", message.count, 
+          ACE_ERROR_RETURN ((LM_ERROR,
+                            "(%P|%t)ERROR: string_seq(%d) - unexpected len %d \n", message.count,
                             message.string_seq.length ()),
                             false);
         for (int i = 0; i < 4; ++i)
         {
           if (! message.string_seq[i].in ())
-            ACE_ERROR_RETURN ((LM_ERROR, 
-                              "(%P|%t)ERROR: string_seq(%d) - unexpected seq[%d] \n", message.count, 
+            ACE_ERROR_RETURN ((LM_ERROR,
+                              "(%P|%t)ERROR: string_seq(%d) - unexpected seq[%d] \n", message.count,
                               i),
                               false);
         }
         if (ACE_OS::strcmp (message.string_seq[4], strseq))
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                       "(%P|%t)ERROR: string_seq(%d) - unexpected string_seq[4]=%s \n", message.count,
                       message.string_seq[4].in ()),
                       false);
@@ -153,8 +153,8 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
       {
         if (ACE_OS::strcmp (message.wchar_seq.get_buffer (), wcharseq))
         {
-          ACE_ERROR_RETURN ((LM_ERROR, 
-                      "(%P|%t)ERROR: wchar_seq(%d) - unexpected wchar_seq %W\n", message.count, 
+          ACE_ERROR_RETURN ((LM_ERROR,
+                      "(%P|%t)ERROR: wchar_seq(%d) - unexpected wchar_seq %W\n", message.count,
                       message.wchar_seq.get_buffer ()),
                       false);
         }
@@ -162,47 +162,47 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
     case 4:
       {
         if (ACE_OS::strcmp (message.char_seq.get_buffer (), charseq))
-          ACE_ERROR_RETURN ((LM_ERROR, 
-                      "(%P|%t)ERROR: char_seq(%d) - unexpected char_seq %s\n", message.count, 
+          ACE_ERROR_RETURN ((LM_ERROR,
+                      "(%P|%t)ERROR: char_seq(%d) - unexpected char_seq %s\n", message.count,
                       message.char_seq.get_buffer ()),
                       false);
       }
     case 3:
       {
         if (!message.wstr.in()) {
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                       "(%P|%t)ERROR: wstring(%d) - expected non-empty wstring.\n", message.count),
                       false);
         }
         if (ACE_OS::strcmp (message.wstr.in (), wstr))
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                       "(%P|%t)ERROR: wstring(%d) - unexpected wstring %W\n", message.count, message.wstr.in ()),
                       false);
       }
     case 2:
       {
         if (ACE_OS::strcmp (message.str.in (), str))
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                       "(%P|%t)ERROR: string(%d) - unexpected string %s\n", message.count, message.str.in ()),
                       false);
       }
     case 1:
       {
         if (message.wch != L'B')
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                       "(%P|%t)ERROR: wchar(%d) - unexpected wchar \n", message.count),
                       false);
       }
     case 0:
       {
         if (message.ch != 'A')
-          ACE_ERROR_RETURN ((LM_ERROR, 
+          ACE_ERROR_RETURN ((LM_ERROR,
                       "(%P|%t)ERROR: char(%d) - unexpected char \n", message.count),
                       false);
       }
       break;
     default:
-      ACE_ERROR_RETURN ((LM_ERROR, 
+      ACE_ERROR_RETURN ((LM_ERROR,
                   "(%P|%t)ERROR: unexpected message(%d)\n", message.count),
                   false);
       break;

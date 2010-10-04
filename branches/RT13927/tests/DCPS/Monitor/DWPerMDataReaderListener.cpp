@@ -65,7 +65,7 @@ throw(CORBA::SystemException)
           cout << "    dr_id = " << dwperr.associations[i].dr_id << endl
                << "      sequence_number = " << dwperr.associations[i].sequence_number << endl;
         }
-        
+
 
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));

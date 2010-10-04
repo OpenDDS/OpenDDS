@@ -10,6 +10,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "debug.h"
 #include "Service_Participant.h"
+#include "InfoRepoUtils.h"
 #include "BuiltInTopicUtils.h"
 #include "DataDurabilityCache.h"
 #include "RepoIdConverter.h"
@@ -291,7 +292,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
           // Load configuration only if the configuration
           // file exists.
           FILE* in = ACE_OS::fopen(config_fname.c_str(),
-                                   ACE_LIB_TEXT("r"));
+                                   ACE_TEXT("r"));
 
           if (!in) {
             ACE_DEBUG((LM_INFO,
@@ -463,11 +464,11 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPendingTimeout"))) != 0) {
       this->pending_timeout_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
-    
+
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationRecoveryDuration"))) != 0) {
       this->federation_recovery_duration_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
-    
+
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationInitialBackoffSeconds"))) != 0) {
       this->federation_initial_backoff_seconds_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
@@ -537,7 +538,6 @@ Service_Participant::initialize()
   initial_TimeBasedFilterQosPolicy_.minimum_separation.nanosec = DDS::DURATION_ZERO_NSEC;
 
   initial_ReliabilityQosPolicy_.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-  // The spec does not provide the default max_blocking_time.
   initial_ReliabilityQosPolicy_.max_blocking_time.sec = DDS::DURATION_INFINITE_SEC;
   initial_ReliabilityQosPolicy_.max_blocking_time.nanosec = DDS::DURATION_INFINITE_NSEC;
 
@@ -584,6 +584,8 @@ Service_Participant::initialize()
   initial_DataWriterQos_.liveliness = initial_LivelinessQosPolicy_;
   initial_DataWriterQos_.reliability = initial_ReliabilityQosPolicy_;
   initial_DataWriterQos_.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  initial_DataWriterQos_.reliability.max_blocking_time.sec = 0;
+  initial_DataWriterQos_.reliability.max_blocking_time.nanosec = 100000000;
   initial_DataWriterQos_.destination_order = initial_DestinationOrderQosPolicy_;
   initial_DataWriterQos_.history = initial_HistoryQosPolicy_;
   initial_DataWriterQos_.resource_limits = initial_ResourceLimitsQosPolicy_;
@@ -705,8 +707,8 @@ Service_Participant::initializeScheduling()
 
 #ifdef DDS_HAS_WCHAR
 void
-Service_Participant::set_repo_ior(const wchar_t* ior, 
-                                  const RepoKey key, 
+Service_Participant::set_repo_ior(const wchar_t* ior,
+                                  const RepoKey key,
                                   bool  attach_participant)
 {
   set_repo_ior(ACE_Wide_To_Ascii(ior).char_rep(), key, attach_participant);
@@ -730,9 +732,7 @@ Service_Participant::set_repo_ior(const char* ior, const RepoKey key, bool attac
   DCPSInfo_var repo;
 
   try {
-    CORBA::Object_var obj = orb_->string_to_object(ior);
-
-    repo = DCPSInfo::_narrow(obj.in());
+    repo = InfoRepoUtils::get_repo(ior,orb_.in());
 
     if (CORBA::is_nil(repo.in())) {
       ACE_ERROR((LM_ERROR,
@@ -778,7 +778,7 @@ Service_Participant::set_repo(DCPSInfo_ptr repo, const RepoKey key, bool attach_
 }
 
 void
-Service_Participant::remap_domains(const RepoKey oldKey, 
+Service_Participant::remap_domains(const RepoKey oldKey,
                                    const RepoKey newKey,
                                    bool attach_participant)
 {
@@ -805,7 +805,7 @@ Service_Participant::remap_domains(const RepoKey oldKey,
 }
 
 void
-Service_Participant::set_repo_domain(const DDS::DomainId_t domain, 
+Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
                                      const RepoKey key,
                                      bool attach_participant)
 {
@@ -893,7 +893,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
                  std::string(converter).c_str(),
                  key));
     }
-    
+
     if (attach_participant)
     {
       repoList[ index].first->attach_participant(domain, repoList[ index].second);
@@ -1141,7 +1141,7 @@ Service_Participant::init_bit_transport_impl(DDS::DomainId_t domain)
   = static_cast <SimpleTcpConfiguration*>(config.in());
 
   tcp_config->datalink_release_delay_ = 0;
-  
+
   if (0 == this->bitTransportIpMap_[ repo].length()) {
     tcp_config->local_address_.set_port_number(this->bitTransportPortMap_[ repo]);
 

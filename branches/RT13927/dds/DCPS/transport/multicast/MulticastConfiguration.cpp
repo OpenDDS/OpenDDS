@@ -30,6 +30,8 @@ const long DEFAULT_SYN_TIMEOUT(30000);
 
 const size_t DEFAULT_NAK_DEPTH(32);
 const long DEFAULT_NAK_INTERVAL(500);
+const long DEFAULT_NAK_DELAY_INTERVALS(4);
+const long DEFAULT_NAK_MAX(3);
 const long DEFAULT_NAK_TIMEOUT(30000);
 
 const char DEFAULT_TTL(1);
@@ -46,12 +48,14 @@ MulticastConfiguration::MulticastConfiguration()
     reliable_(DEFAULT_RELIABLE),
     syn_backoff_(DEFAULT_SYN_BACKOFF),
     nak_depth_(DEFAULT_NAK_DEPTH),
+    nak_delay_intervals_(DEFAULT_NAK_DELAY_INTERVALS),
+    nak_max_(DEFAULT_NAK_MAX),
     ttl_(DEFAULT_TTL),
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
     rcv_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
 #else
     // Use system default values.
-    rcv_buffer_size_(0) 
+    rcv_buffer_size_(0)
 #endif
 {
   default_group_address(this->group_address_, DEFAULT_MULTICAST_ID);
@@ -119,6 +123,12 @@ MulticastConfiguration::load(const TransportIdType& id,
   GET_CONFIG_TIME_VALUE(config, transport_key, ACE_TEXT("nak_interval"),
                         this->nak_interval_)
 
+  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_delay_intervals"),
+                        this->nak_delay_intervals_, size_t)
+
+  GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("nak_max"),
+                        this->nak_max_, size_t)
+
   GET_CONFIG_TIME_VALUE(config, transport_key, ACE_TEXT("nak_timeout"),
                         this->nak_timeout_)
 
@@ -127,7 +137,7 @@ MulticastConfiguration::load(const TransportIdType& id,
 
   GET_CONFIG_VALUE(config, transport_key, ACE_TEXT("rcv_buffer_size"),
                    this->rcv_buffer_size_, size_t)
-  
+
    return 0;
 }
 

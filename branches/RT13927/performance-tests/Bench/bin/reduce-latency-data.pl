@@ -225,13 +225,13 @@ END {
   print "#\n";
   print "# Index 3 - Latency Quantile data.\n";
   print "#\n";
-  map print "$_\n", sort { $a <=> $b; } @{$data->{latency}};
+  map { print "$_\n" } sort { $a <=> $b; } @{$data->{latency}};
 
   print "\n\n";
   print "#\n";
   print "# Index 4 - Jitter Quantile data.\n";
   print "#\n";
-  map print "$_\n", sort { $a <=> $b; } @{$data->{jitter}};
+  map { print "$_\n" } sort { $a <=> $b; } @{$data->{jitter}};
 }
 
 # Bin data into histogram format.

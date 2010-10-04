@@ -8,7 +8,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 use Env qw( DDS_ROOT ACE_ROOT);
 use lib "$DDS_ROOT/bin";
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use PerlDDS::Run_Test;
 
 use Getopt::Long qw( :config bundling) ;
 use Pod::Usage ;
@@ -120,26 +120,16 @@ $appOpts .= "-ORBLogFile $debugFile " if ($appDebug or $transportDebug) and $deb
 # Define the processes.
 
 my $repoArgs = "$repoOpts -o $repo_ior ";
-if( PerlACE::is_vxworks_test()) {
-  $REPO = new PerlACE::ProcessVX(
-                "$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $repoArgs
-              );
-} else {
-  $REPO = new PerlACE::Process(
-                "$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $repoArgs
-              );
-}
+$REPO = PerlDDS::create_process(
+            "$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $repoArgs
+          );
 
 my $subArgs = "$appOpts ";
 $subArgs .= "-DCPSInfoRepo file://$repo_ior ";
 $subArgs .= "-t $transportType ";
 $subArgs .= "-r $rawData " if $rawData;
 $subArgs .= "-i 0 ";
-if( PerlACE::is_vxworks_test()) {
-  $SUB = new PerlACE::ProcessVX( "subscriber", $subArgs);
-} else {
-  $SUB = new PerlACE::Process( "subscriber", $subArgs);
-}
+$SUB = PerlDDS::create_process( "subscriber", $subArgs);
 
 for my $index ( 1 .. $pubCount) {
   my $pubArgs = "$appOpts ";
@@ -148,11 +138,7 @@ for my $index ( 1 .. $pubCount) {
   $pubArgs .= "-t $transportType ";
   $pubArgs .= "-c $duration ";
   $pubArgs .= "-i $index ";
-  if( PerlACE::is_vxworks_test()) {
-    $PUB[ $index - 1] = new PerlACE::ProcessVX( "publisher", $pubArgs);
-  } else {
-    $PUB[ $index - 1] = new PerlACE::Process( "publisher", $pubArgs);
-  }
+  $PUB[ $index - 1] = PerlDDS::create_process( "publisher", $pubArgs);
 }
 
 # Be verbose.

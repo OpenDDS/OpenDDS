@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_RECEIVEDDATAELEMENTLIST_H
-#define TAO_DDS_DCPS_RECEIVEDDATAELEMENTLIST_H
+#ifndef OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H
+#define OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H
 
 #include "ace/Atomic_Op_T.h"
 #include "ace/Thread_Mutex.h"
@@ -20,7 +20,6 @@
 #include "Qos_Helper.h"
 
 #include "dds/DdsDcpsInfrastructureC.h"
-#include "ace/OS.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -48,7 +47,7 @@ public:
       next_data_sample_(0),
       ref_count_(1)
   {
-  
+
     this->destination_timestamp_ = time_value_to_time(ACE_OS::gettimeofday());
 
     this->source_timestamp_.sec = header.source_timestamp_sec_;
@@ -84,10 +83,10 @@ public:
 
   /// Sample belongs to an active coherent change set
   bool coherent_change_;
-  
+
   /// Sample belongs to a group coherent changes.
   bool group_coherent_;
-  
+
   /// Publisher id represent group identifier.
   RepoId publisher_id_;
 
@@ -104,7 +103,7 @@ public:
   ACE_Atomic_Op<ACE_Thread_Mutex, long> zero_copy_cnt_;
 
   /// The data sample's sequence number
-  ACE_INT16 sequence_ ;
+  SequenceNumber::Value sequence_ ;
 
   /// the previous data sample in the ReceivedDataElementList
   ReceivedDataElement *previous_data_sample_ ;
@@ -173,4 +172,4 @@ private:
 # include "ReceivedDataElementList.inl"
 #endif  /* __ACE_INLINE__ */
 
-#endif /* TAO_DDS_DCPS_RECEIVEDDATAELEMENTLIST_H  */
+#endif /* OPENDDS_DCPS_RECEIVEDDATAELEMENTLIST_H  */

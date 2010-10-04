@@ -10,6 +10,8 @@
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
 
+#include <stdexcept>
+
 // Implementation skeleton constructor
 MyTypeSupportImpl::MyTypeSupportImpl (void)
   {
@@ -81,3 +83,44 @@ MyTypeSupportImpl::get_type_name (
   }
 
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+::DDS::DataReader_ptr
+MyTypeSupportImpl::create_multitopic_datareader()
+  ACE_THROW_SPEC ((CORBA::SystemException))
+{
+  return NULL;
+}
+
+const OpenDDS::DCPS::MetaStruct&
+MyTypeSupportImpl::getMetaStructForType()
+{
+  throw std::runtime_error("unimplemented");
+}
+
+DDS::ReturnCode_t MyDataReaderImpl::read_generic(
+  OpenDDS::DCPS::DataReaderImpl::GenericBundle&, DDS::SampleStateMask,
+  DDS::ViewStateMask, DDS::InstanceStateMask)
+{
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::InstanceHandle_t MyDataReaderImpl::lookup_instance_generic(const void*)
+{
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t MyDataReaderImpl::read_instance_generic(void*&,
+  DDS::SampleInfo&, DDS::InstanceHandle_t, DDS::SampleStateMask,
+  DDS::ViewStateMask, DDS::InstanceStateMask)
+{
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t MyDataReaderImpl::read_next_instance_generic(void*&,
+  DDS::SampleInfo&, DDS::InstanceHandle_t, DDS::SampleStateMask,
+  DDS::ViewStateMask, DDS::InstanceStateMask)
+{
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+#endif

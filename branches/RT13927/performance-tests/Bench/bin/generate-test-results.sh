@@ -12,12 +12,10 @@
 ###############################################################################
 usage ()
 {
-  echo "Usage: `basename $0` <bench_directory> <destination_directory>"
+  echo "Usage: `basename $0` <bench_directory>"
   echo ""
   echo "bench_directory         This is the location of the Bench performance"
   echo "                        tests directory."
-  echo ""
-  echo "Options must be specified in the order shown above."
   echo ""
   echo "Examples:"
   echo "`basename $0` $DDS_ROOT/performance-tests/Bench"

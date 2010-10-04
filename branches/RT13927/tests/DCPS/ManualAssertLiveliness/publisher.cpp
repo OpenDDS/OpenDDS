@@ -227,11 +227,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       if (liveliness_lost_test
         && dwl_servant->num_liveliness_lost_callbacks () != num_liveliness_lost_callbacks)
       {
-        cerr << "ERROR: did not receive expected liveliness lost callbacks. " 
-          << dwl_servant->num_liveliness_lost_callbacks () << "/" << 
-          num_liveliness_lost_callbacks << endl; 
+        cerr << "ERROR: did not receive expected liveliness lost callbacks. "
+          << dwl_servant->num_liveliness_lost_callbacks () << "/" <<
+          num_liveliness_lost_callbacks << endl;
       }
-      
+
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in ());
       TheTransportFactory->release();

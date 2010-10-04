@@ -22,6 +22,7 @@ ContentFilteredTopicImpl::ContentFilteredTopicImpl(const char* name,
   : TopicDescriptionImpl(name, related_topic->get_type_name(),
       dynamic_cast<TopicDescriptionImpl*>(related_topic)->get_type_support(),
       participant)
+  , filter_expression_(filter_expression)
   , filter_eval_(filter_expression, false /*allowOrderBy*/)
   , expression_parameters_(expression_parameters)
   , related_topic_(DDS::Topic::_duplicate(related_topic))
@@ -30,7 +31,7 @@ ContentFilteredTopicImpl::ContentFilteredTopicImpl(const char* name,
 char* ContentFilteredTopicImpl::get_filter_expression()
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  return CORBA::string_dup(filter_eval_.getFilterString());
+  return CORBA::string_dup(filter_expression_.c_str());
 }
 
 DDS::ReturnCode_t

@@ -34,7 +34,7 @@ class SimplePublisher : public OpenDDS::DCPS::TransportInterface
     void remove_associations(ssize_t size,
                              const OpenDDS::DCPS::RepoId* remote_ids,
                              const OpenDDS::DCPS::RepoId pub_id);
-  
+
   protected:
 
     /// Only called if the TransportImpl is shutdown() when this

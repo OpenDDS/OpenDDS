@@ -3,7 +3,7 @@
 module Xyz {
 
 
-//  typedef long TheKeyType; 
+//  typedef long TheKeyType;
 
   typedef short ArrayOfShorts[5];
 
@@ -41,7 +41,7 @@ module Xyz {
   union AUnion switch (ColorX) {
     case redx:
       //long rlv;
-      string rsv; 
+      string rsv;
     case greenx:
       //short gsv;
       AStruct gsv;

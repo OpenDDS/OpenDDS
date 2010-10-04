@@ -66,6 +66,13 @@ public:
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  virtual ::DDS::DataReader_ptr create_multitopic_datareader()
+    ACE_THROW_SPEC ((CORBA::SystemException));
+
+  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
+#endif
 };
 
 class MyDataReaderImpl :  public virtual OpenDDS::DCPS::DataReaderImpl
@@ -96,6 +103,25 @@ public:
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample&,
                                OpenDDS::DCPS::SubscriptionInstance*&) {}
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  DDS::ReturnCode_t read_generic(
+    OpenDDS::DCPS::DataReaderImpl::GenericBundle&, DDS::SampleStateMask,
+    DDS::ViewStateMask, DDS::InstanceStateMask);
+
+  DDS::InstanceHandle_t lookup_instance_generic(const void* data);
+
+  DDS::ReturnCode_t read_instance_generic(void*& data,
+    DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
+    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+    DDS::InstanceStateMask instance_states);
+
+  DDS::ReturnCode_t read_next_instance_generic(void*&,
+    DDS::SampleInfo&, DDS::InstanceHandle_t, DDS::SampleStateMask,
+    DDS::ViewStateMask, DDS::InstanceStateMask);
+
+  void set_instance_state(DDS::InstanceHandle_t, DDS::InstanceStateKind)
+  {}
+#endif
 };
 
 class MyDataWriterImpl :  public virtual OpenDDS::DCPS::DataWriterImpl

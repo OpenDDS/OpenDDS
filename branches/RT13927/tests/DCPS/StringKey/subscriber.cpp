@@ -160,7 +160,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       int expected = 10;
 
-      while ( listener_servant.num_reads() < expected ) { 
+      while ( listener_servant.num_reads() < expected ) {
         ACE_OS::sleep (1);
       }
 
@@ -176,7 +176,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       if (listener_servant.from_same_instance() == false)
       {
-        cerr << "SUB: got multiple instances" << endl;        
+        cerr << "SUB: got multiple instances" << endl;
         return 1;
       }
     }

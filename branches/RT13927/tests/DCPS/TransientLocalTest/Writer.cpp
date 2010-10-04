@@ -47,8 +47,8 @@ Writer::end ()
 int
 Writer::svc ()
 {
-  // There are 2 threads writing to the same instance. The first thread 
-  // sends samples before the datareader starts and the second thread 
+  // There are 2 threads writing to the same instance. The first thread
+  // sends samples before the datareader starts and the second thread
   // wait until the datareader fully associated and then write.
   {
    ACE_GUARD_RETURN (ACE_Thread_Mutex,
@@ -143,7 +143,7 @@ Writer::get_timeout_writes () const
 
 int Writer::write (Messenger::MessageDataWriter_ptr message_dw,
                    ::DDS::InstanceHandle_t& handle,
-                   Messenger::Message& message, 
+                   Messenger::Message& message,
                    int num_messages)
 {
   for (int i = 0; i< num_messages; i ++) {

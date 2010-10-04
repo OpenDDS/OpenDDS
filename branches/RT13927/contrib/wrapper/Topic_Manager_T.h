@@ -27,11 +27,11 @@ class Topic_Manager_T : public Topic_Manager_Impl
   /// ctor
   /// @param name of the topic to be created
   /// @param type name of the registered type support for this topic
-  /// @param listener is used to create a datareader with the datareader 
+  /// @param listener is used to create a datareader with the datareader
   ///                 method.
   Topic_Manager_T (const std::string& name,
-                   DDS::DataReaderListener_ptr listener = 
-                     DDS::DataReaderListener::_nil (),		     
+                   DDS::DataReaderListener_ptr listener =
+                     DDS::DataReaderListener::_nil (),
                    bool create_new_topic = true);
 
   /// dtor

@@ -97,8 +97,8 @@ Writer::svc ()
     {
       ::DDS::InstanceHandle_t handle
         = foo_dw->register_instance(foo);
-
       foo.handle_value = handle;
+      foo.sample_sequence = i;
 
       // The sequence number will be increased after the insert.
       TEST_CHECK (data_map_.insert (handle, foo) == 0);
@@ -113,6 +113,10 @@ Writer::svc ()
         TEST_CHECK(ret == ::DDS::RETCODE_OK);
         // check for equality
         TEST_CHECK (foo.a_long_value == key_holder.a_long_value); // It is the instance key.
+      }
+
+      if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG ((LM_DEBUG, "(%P|%t)write sample: %d \n", foo.sample_sequence));
       }
 
       ret = foo_dw->write(foo,

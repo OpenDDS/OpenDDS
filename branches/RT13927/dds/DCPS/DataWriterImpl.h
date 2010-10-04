@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_DATAWRITER_H
-#define TAO_DDS_DCPS_DATAWRITER_H
+#ifndef OPENDDS_DCPS_DATAWRITER_H
+#define OPENDDS_DCPS_DATAWRITER_H
 
 #include "dds/DdsDcpsPublicationS.h"
 #include "dds/DdsDcpsDataWriterRemoteS.h"
@@ -27,6 +27,8 @@
 
 #include "ace/Event_Handler.h"
 #include "ace/OS_NS_sys_time.h"
+#include "ace/Condition_T.h"
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 
 #include <map>
 #include <memory>
@@ -94,7 +96,7 @@ public:
     ~AckToken() {}
 
     ACE_Time_Value deadline() const {
-      return this->tstamp_ + duration_to_time_value(this->max_wait_);
+      return duration_to_absolute_time_value(this->max_wait_, this->tstamp_);
     }
 
     DDS::Time_t timestamp() const {
@@ -477,13 +479,13 @@ protected:
    */
   PublicationInstance* get_handle_instance(
     DDS::InstanceHandle_t handle);
-    
+
   /// The type name of associated topic.
   CORBA::String_var               type_name_;
 
   /// The qos policy list of this datawriter.
   DDS::DataWriterQos              qos_;
-  
+
   /// The participant servant which creats the publisher that
   /// creates this datawriter.
   DomainParticipantImpl*          participant_servant_;
@@ -520,7 +522,7 @@ private:
   DDS::Topic_var                  topic_objref_;
   /// The topic servant.
   TopicImpl*                      topic_servant_;
-  
+
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.
   DDS::StatusMask                 listener_mask_;
@@ -633,4 +635,4 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* DDSDCPSPUBLICATION_DATAWRITER_H_  */
+#endif

@@ -19,15 +19,15 @@ public class MulticastConfiguration extends TransportConfiguration {
     native void loadSpecificConfig(long cfg);
 
     public String getType() { return "multicast"; }
-    
+
     private boolean defaultToIPv6;
     public boolean getDefaultToIPv6() { return defaultToIPv6; }
     public void setDefaultToIPv6(boolean dtip6) { defaultToIPv6 = dtip6; }
-    
+
     private short portOffset;
     public short getPortOffset() { return portOffset; }
     public void setPortOffset(short po) { portOffset = po; }
-    
+
     private String groupAddress;
     public String getGroupAddress() { return groupAddress; }
     public void setGroupAddress(String ga) { groupAddress = ga; }

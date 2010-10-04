@@ -25,7 +25,7 @@ $svc_conf = $use_svc_conf ? " -ORBSvcConf ../../tcp.conf " : '';
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_conf = $use_svc_conf ? "-ORBSvcConf ../../tcp.conf" : '';
 
-unlink $dcpsrepo_ior; 
+unlink $dcpsrepo_ior;
 
 sub run_compatibility_tests {
   # test multiple cases

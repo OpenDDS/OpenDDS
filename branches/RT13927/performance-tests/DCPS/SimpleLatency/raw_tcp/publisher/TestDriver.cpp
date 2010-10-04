@@ -7,7 +7,7 @@
 
 /* void set_rt() */
 /*      Attempt to set the real time priority and lock memory */
-void set_rt() 
+void set_rt()
 {
   ACE_Sched_Params params(ACE_SCHED_FIFO,
                           ACE_DEFAULT_THREAD_PRIORITY,

@@ -7,7 +7,7 @@
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-class Writer 
+class Writer
 {
 public:
 

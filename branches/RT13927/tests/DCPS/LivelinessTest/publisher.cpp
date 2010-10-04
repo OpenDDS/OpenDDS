@@ -372,7 +372,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(2);  //TBD remove this kludge when the transport is fixed.
 
       // Indicate that the publisher is ready
-      FILE* writers_ready = ACE_OS::fopen (pub_ready_filename.c_str (), ACE_LIB_TEXT("w"));
+      FILE* writers_ready = ACE_OS::fopen (pub_ready_filename.c_str (), ACE_TEXT("w"));
       if (writers_ready == 0)
         {
           ACE_ERROR ((LM_ERROR,
@@ -385,7 +385,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         {
           ACE_Time_Value small_time(0,250000);
           ACE_OS::sleep (small_time);
-          readers_ready = ACE_OS::fopen (sub_ready_filename.c_str (), ACE_LIB_TEXT("r"));
+          readers_ready = ACE_OS::fopen (sub_ready_filename.c_str (), ACE_TEXT("r"));
         } while (0 == readers_ready);
 
       ACE_OS::fclose(writers_ready);
@@ -427,7 +427,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_DEBUG((LM_DEBUG,ACE_TEXT("(%P|%t) %T Writers are finished\n") ));
 
       // Indicate that the publisher is done
-      FILE* writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_LIB_TEXT("w"));
+      FILE* writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("w"));
       if (writers_completed == 0)
         {
           ACE_ERROR ((LM_ERROR,
@@ -443,7 +443,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         {
           ACE_Time_Value small_time(0,250000);
           ACE_OS::sleep (small_time);
-          readers_completed = ACE_OS::fopen (sub_finished_filename.c_str (), ACE_LIB_TEXT("r"));
+          readers_completed = ACE_OS::fopen (sub_finished_filename.c_str (), ACE_TEXT("r"));
         } while (0 == readers_completed);
 
       ACE_OS::fclose(writers_completed);

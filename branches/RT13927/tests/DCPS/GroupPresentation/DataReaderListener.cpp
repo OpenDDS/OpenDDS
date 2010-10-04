@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-extern int testcase;
+extern int acess_scope;
 
 DataReaderListenerImpl::DataReaderListenerImpl(const char* reader_id)
   : num_reads_(0), reader_id_ (reader_id), verify_result_ (true)
@@ -34,7 +34,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 throw(CORBA::SystemException)
 {
   num_reads_ ++;
-  
+
   try {
     Messenger::MessageDataReader_var message_dr =
       Messenger::MessageDataReader::_narrow(reader);
@@ -53,7 +53,16 @@ throw(CORBA::SystemException)
 
     if (status == DDS::RETCODE_OK) {
       if (si.valid_data) {
-         this->verify_result_ = false;        
+         if (acess_scope != ::DDS::INSTANCE_PRESENTATION_QOS) {
+           this->verify_result_ = false;
+         }
+         else {
+            std::cout << "Message: subject    = " << message.subject.in() << std::endl
+            << "         subject_id = " << message.subject_id   << std::endl
+            << "         from       = " << message.from.in()    << std::endl
+            << "         count      = " << message.count        << std::endl
+            << "         text       = " << message.text.in()    << std::endl;
+         }
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
 
@@ -65,7 +74,7 @@ throw(CORBA::SystemException)
                    ACE_TEXT("%N:%l: on_data_available()")
                    ACE_TEXT(" ERROR: unknown instance state: %d\n"),
                    si.instance_state));
-        this->verify_result_ = false; 
+        this->verify_result_ = false;
       }
 
     } else {
@@ -73,7 +82,7 @@ throw(CORBA::SystemException)
                  ACE_TEXT("%N:%l: on_data_available()")
                  ACE_TEXT(" ERROR: unexpected status: %d\n"),
                  status));
-      this->verify_result_ = false; 
+      this->verify_result_ = false;
     }
 
   } catch (const CORBA::Exception& e) {

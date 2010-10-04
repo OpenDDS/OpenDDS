@@ -41,7 +41,7 @@ extern DomainParticipantFactory_var participant_factory;
 
 enum Ignore_Kind
 {
-  DONT_IGNORE,         
+  DONT_IGNORE,
   IGNORE_PARTICIPANT,
   IGNORE_TOPIC,
   IGNORE_PUBLICATION,

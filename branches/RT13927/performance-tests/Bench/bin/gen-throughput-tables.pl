@@ -56,8 +56,8 @@ die "Unable to open output: $thru_filename - $!"
 
   foreach my $type (sort keys %$data) {
     print THROUT "<div class=\"data_tables\">\n" .
-                 "<h2 class=\"data_tables\">" . typeName($type) . 
-                 " Throughput Data<a name=\"" . $type . "_tables" . 
+                 "<h2 class=\"data_tables\">" . typeName($type) .
+                 " Throughput Data<a name=\"" . $type . "_tables" .
                  "\">&nbsp;</a></h2>\n" .
                  "<hr class=\"data_tables\" />\n";
 
@@ -65,10 +65,10 @@ die "Unable to open output: $thru_filename - $!"
     foreach my $transport (sort keys %{$data->{$type}}) {
       print THROUT "<h3 class=\"data_tables\">" . transportName($transport) . "</h3>\n";
       print THROUT "<table class=\"data_tables\">\n";
-      print THROUT "<tr class=\"data_tables\">" . 
-                   "<th class=\"data_tables\">Message Size</th>" . 
-                   "<th class=\"data_tables\">Message Rate</th>" . 
-                   "<th class=\"data_tables\">Throughput</th>" . 
+      print THROUT "<tr class=\"data_tables\">" .
+                   "<th class=\"data_tables\">Message Size</th>" .
+                   "<th class=\"data_tables\">Message Rate</th>" .
+                   "<th class=\"data_tables\">Throughput</th>" .
                    "<th class=\"data_tables\">Percent Possible</th></tr>\n";
 
       foreach my $size (sort { $a <=> $b; } keys %{$data->{$type}->{$transport}}) {

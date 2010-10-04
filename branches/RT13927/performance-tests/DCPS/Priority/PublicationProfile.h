@@ -44,7 +44,7 @@ class PublicationProfile  {
 
     /**
      * @brief Message size for the next message.
-     * 
+     *
      *  This is a Gaussian distribution of message sizes.  These sizes
      *  are clamped to the specified maximum and minimum values.  This
      *  action will result in all of the deviates generated beyond these
@@ -55,7 +55,7 @@ class PublicationProfile  {
 
     /**
      * @brief Interval in microseconds until next message.
-     * 
+     *
      *  This is an exponential random variate at the interval rate.  This
      *  will generate a stream of intervals with a Poisson distribution.
      */

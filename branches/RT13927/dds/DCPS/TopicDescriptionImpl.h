@@ -7,11 +7,12 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_TOPIC_DESCRIPTION_IMPL_H
-#define TAO_DDS_DCPS_TOPIC_DESCRIPTION_IMPL_H
+#ifndef OPENDDS_DCPS_TOPIC_DESCRIPTION_IMPL_H
+#define OPENDDS_DCPS_TOPIC_DESCRIPTION_IMPL_H
 
 #include "dds/DdsDcpsTopicS.h"
 #include "dds/DdsDcpsTypeSupportExtS.h"
+#include "Definitions.h"
 #include "ace/SString.h"
 #include "ace/Atomic_Op.h"
 
@@ -96,4 +97,4 @@ protected:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* TAO_DDS_DCPS_TOPIC_DESCRIPTION_IMPL_H  */
+#endif /* OPENDDS_DCPS_TOPIC_DESCRIPTION_IMPL_H  */

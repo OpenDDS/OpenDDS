@@ -6,7 +6,8 @@
 #include "dds/DCPS/GuardCondition.h"
 #include "dds/DCPS/WaitSet.h"
 
-#include "ace/Synch_T.h"
+#include "ace/Synch.h"
+#include "ace/Condition_T.h"
 
 #include <string>
 #include <map>

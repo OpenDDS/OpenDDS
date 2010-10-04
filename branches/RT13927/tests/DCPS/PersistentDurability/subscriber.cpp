@@ -142,7 +142,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       OpenDDS::DCPS::DataReaderQosExt dr_qos_ext;
       sub_ext->get_default_datareader_qos_ext (dr_qos_ext);
       dr_qos_ext.durability.always_get_history = true;
-      
+
       DDS::DataReader_var dr =
         sub_ext->create_opendds_datareader (topic.in (),
                                             dr_qos, dr_qos_ext,

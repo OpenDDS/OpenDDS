@@ -15,8 +15,8 @@ $status = 0;
 
 $opts = new PerlACE::ConfigList->check_config ('STATIC') ? ''
     : "-ORBSvcConf tcp.conf";
-$pub_opts = "$opts -DCPSConfigFile pub.ini";
-$sub_opts = "$opts -DCPSConfigFile sub.ini";
+$pub_opts = "$opts -DCPSConfigFile pub.ini -ORBVerboseLogging 1";
+$sub_opts = "$opts -DCPSConfigFile sub.ini -ORBVerboseLogging 1";
 
 $dcpsrepo_ior = "repo.ior";
 $repo_bit_opt = $opts;

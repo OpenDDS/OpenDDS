@@ -80,14 +80,14 @@ public:
 
   bool& is_active();
   bool  is_active() const;
-  
+
 private:
   // Priority value of key.
   CORBA::Long priority_;
 
   // Address value of key.
   ACE_INET_Addr address_;
-  
+
   bool is_loopback_;
   bool is_active_;
 };

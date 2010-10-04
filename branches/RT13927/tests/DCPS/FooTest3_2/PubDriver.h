@@ -11,8 +11,7 @@
 #include <string>
 
 class PubDriver
-  : public virtual POA_Test::TestPubDriver,
-    public virtual PortableServer::RefCountServantBase
+  : public virtual POA_Test::TestPubDriver
 {
   public:
 

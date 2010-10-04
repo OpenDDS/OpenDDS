@@ -9,7 +9,8 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "Serializer.h"
-#include <ace/OS.h>
+#include <ace/OS_NS_string.h>
+#include <ace/OS_Memory.h>
 
 #if !defined (__ACE_INLINE__)
 # include "Serializer.inl"

@@ -5,6 +5,7 @@
 #define DATAREADER_LISTENER_IMPL
 
 #include <dds/DdsDcpsPublicationS.h>
+#include <dds/DCPS/Definitions.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -12,7 +13,7 @@
 
 
 //Class DataWriterListenerImpl
-class DataWriterListenerImpl 
+class DataWriterListenerImpl
   // note: TAO specific extensions
   : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataWriterListener>
 {

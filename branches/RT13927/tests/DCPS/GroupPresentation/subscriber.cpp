@@ -28,19 +28,23 @@
 #include "MessengerTypeSupportImpl.h"
 
 unsigned int num_messages = 5;
+int acess_scope = ::DDS::GROUP_PRESENTATION_QOS;
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
 
 int
 parse_args(int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("n:"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("n:q:"));
 
   int c;
   while ((c = get_opts()) != -1) {
     switch (c) {
     case 'n':
       num_messages = ACE_OS::atoi (get_opts.opt_arg());
+      break;
+    case 'q':
+      acess_scope = ACE_OS::atoi (get_opts.opt_arg());
       break;
     case '?':
     default:
@@ -107,13 +111,14 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     ::DDS::SubscriberQos subscriber_qos;
     participant->get_default_subscriber_qos (subscriber_qos);
-    subscriber_qos.presentation.access_scope = DDS::GROUP_PRESENTATION_QOS;
+    subscriber_qos.presentation.access_scope
+      = (::DDS::PresentationQosPolicyAccessScopeKind)acess_scope;
     subscriber_qos.presentation.coherent_access = true;
     subscriber_qos.presentation.ordered_access = true;
-    
+
     SubscriberListenerImpl* subscriber_listener_svt = new SubscriberListenerImpl();
     DDS::SubscriberListener_var subscriber_listener(subscriber_listener_svt);
-    
+
     // Create Subscriber
     DDS::Subscriber_var sub =
       participant->create_subscriber(subscriber_qos,
@@ -125,7 +130,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_subscriber() failed!\n")), -1);
     }
-    
+
     // Initialize Transport
     OpenDDS::DCPS::TransportImpl_rch transport_impl =
       TheTransportFactory->create_transport_impl(transport_impl_id,
@@ -142,7 +147,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create DataReader
     DataReaderListenerImpl* listener_svt1 = new DataReaderListenerImpl("DataReader1");
     DataReaderListenerImpl* listener_svt2 = new DataReaderListenerImpl("DataReader2");
-    
+
     DDS::DataReaderListener_var listener1(listener_svt1);
     DDS::DataReaderListener_var listener2(listener_svt2);
 
@@ -163,7 +168,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
     }
-    
+
     DDS::DataReader_var reader2 =
       sub->create_datareader(topic.in(),
                              readerQos,
@@ -210,7 +215,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
       }
-      
+
       if (reader2->get_subscription_matched_status(matches2) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
@@ -219,8 +224,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     } while (matches1.current_count > 0 && matches2.current_count > 0);
 
 
-    if (! subscriber_listener_svt->verify_result () 
-        || ! listener_svt1->verify_result() 
+    if (! subscriber_listener_svt->verify_result ()
+        || ! listener_svt1->verify_result()
         || ! listener_svt2->verify_result()) {
       ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")

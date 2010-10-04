@@ -10,6 +10,20 @@ use Cwd;
 
 package PerlDDS;
 
+sub orbsvcs {
+  my $o = "$ENV{'TAO_ROOT'}/orbsvcs";
+  my $n = -r "$o/Naming_Service/tao_cosnaming" || # using new names?
+          -r "$o/Naming_Service/tao_cosnaming.exe";
+  return (
+    'Naming_Service' => "$o/Naming_Service/" . ($n ? 'tao_cosnaming'
+                                                   : 'Naming_Service'),
+    'ImplRepo_Service' => "$o/ImplRepo_Service/" . ($n ? 'tao_imr_locator'
+                                                       : 'ImplRepo_Service'),
+    'ImR_Activator' => "$o/ImplRepo_Service/" . ($n ? 'tao_imr_activator'
+                                                    : 'ImR_Activator'),
+    );
+}
+
 # load gcov helpers in case this is a coverage build
 my $config = new PerlACE::ConfigList;
 $PerlDDS::Coverage_Test = $config->check_config("Coverage");

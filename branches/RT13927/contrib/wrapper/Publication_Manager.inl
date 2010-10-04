@@ -5,7 +5,7 @@
  *  @file    Publication_Manager.inl
  *
  *  $Id$
- * 
+ *
  *  @author  Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  */
 //=============================================================================
@@ -28,13 +28,13 @@ Publication_Manager::access_topic (const Topic_Manager & topic,
                                       manager_impl_);
 }
 
-ACE_INLINE void 
+ACE_INLINE void
 Publication_Manager::remove_topic (const Topic_Manager & topic)
 {
   return manager_impl_->remove_topic (topic);
 }
 
-ACE_INLINE DDS::DataWriterQos 
+ACE_INLINE DDS::DataWriterQos
 Publication_Manager::get_default_datawriter_qos ()
 {
   return manager_impl_->get_default_datawriter_qos ();

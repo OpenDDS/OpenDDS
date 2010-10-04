@@ -7,11 +7,12 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_DATAREADERREMOTE_H
-#define TAO_DDS_DCPS_DATAREADERREMOTE_H
+#ifndef OPENDDS_DCPS_DATAREADERREMOTE_H
+#define OPENDDS_DCPS_DATAREADERREMOTE_H
 
 #include "dcps_export.h"
 #include "DdsDcpsDataReaderRemoteS.h"
+#include "Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -30,8 +31,7 @@ class DataReaderImpl;
 *
 */
 class OpenDDS_Dcps_Export DataReaderRemoteImpl
-  : public virtual POA_OpenDDS::DCPS::DataReaderRemote
-  , public virtual PortableServer::RefCountServantBase {
+  : public virtual POA_OpenDDS::DCPS::DataReaderRemote {
 public:
 
   //Constructor
@@ -61,4 +61,4 @@ private:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif /* TAO_DDS_DCPS_DATAREADERREMOTE_H  */
+#endif /* OPENDDS_DCPS_DATAREADERREMOTE_H  */

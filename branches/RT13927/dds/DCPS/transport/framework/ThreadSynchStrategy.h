@@ -12,6 +12,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
+#include "ace/Synch_Traits.h"
 #include "ace/Synch.h"
 
 namespace OpenDDS {

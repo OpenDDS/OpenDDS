@@ -135,14 +135,14 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
 
   if (reader.good_bit() != true) return ;
   this->marshaled_size_ += gen_find_size(this->publication_id_);
-  
-  
+
+
   if (this->group_coherent_) {
     reader >> this->publisher_id_;
     if (reader.good_bit() != true) return ;
     this->marshaled_size_ += gen_find_size(this->publisher_id_);
   }
- 
+
 }
 
 ACE_CDR::Boolean
@@ -179,7 +179,7 @@ operator<< (ACE_Message_Block*& buffer, DataSampleHeader& value)
   if (value.group_coherent_) {
     writer << value.publisher_id_;
   }
-  
+
   return writer.good_bit() ;
 }
 
@@ -260,8 +260,8 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     if (value.historic_sample_ == 1) str << "Historic, ";
     if (value.lifespan_duration_ == 1) str << "Lifespan, ";
 
-    str << "Sequence: 0x" << std::hex << std::setw(2) << std::setfill('0')
-        << ACE_UINT16(value.sequence_) << ", ";
+    str << "Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
+        << value.sequence_ << ", ";
 
     str << "Timestamp: " << std::dec << value.source_timestamp_sec_ << "."
         << std::dec << value.source_timestamp_nanosec_ << ", ";

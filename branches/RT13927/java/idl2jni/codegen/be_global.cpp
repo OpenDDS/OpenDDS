@@ -8,6 +8,7 @@
  */
 
 #include "be_global.h"
+#include "be_util.h"
 #include "ast_generator.h"
 #include "global_extern.h"
 #include "idl_defines.h"
@@ -240,57 +241,12 @@ BE_GlobalData::parse_args(long &i, char **av)
   }
 }
 
+#if ACE_MAJOR_VERSION < 6 && ACE_MINOR_VERSION < 8
+
 void
 BE_GlobalData::prep_be_arg(char *arg)
 {
-  static const char WB_STUB_EXPORT_MACRO[] = "stub_export_macro=";
-  static const size_t SZ_WB_STUB_EXPORT_MACRO =
-    sizeof(WB_STUB_EXPORT_MACRO) - 1;
-  static const char WB_STUB_EXPORT_INCLUDE[] = "stub_export_include=";
-  static const size_t SZ_WB_STUB_EXPORT_INCLUDE =
-    sizeof(WB_STUB_EXPORT_INCLUDE) - 1;
-  static const char WB_SKEL_EXPORT_MACRO[] = "skel_export_macro=";
-  static const size_t SZ_WB_SKEL_EXPORT_MACRO =
-    sizeof(WB_SKEL_EXPORT_MACRO) - 1;
-  static const char WB_SKEL_EXPORT_INCLUDE[] = "skel_export_include=";
-  static const size_t SZ_WB_SKEL_EXPORT_INCLUDE =
-    sizeof(WB_SKEL_EXPORT_INCLUDE) - 1;
-  static const char WB_NATIVE_LIB_NAME[] = "native_lib_name=";
-  static const size_t SZ_WB_NATIVE_LIB_NAME =
-    sizeof(WB_NATIVE_LIB_NAME) - 1;
-  static const char WB_STUB_EXTRA_INCLUDE[] = "stub_extra_include=";
-  static const size_t SZ_WB_STUB_EXTRA_INCLUDE =
-    sizeof(WB_STUB_EXTRA_INCLUDE) - 1;
-  static const char WB_TAO_INC_PRE[] = "tao_include_prefix=";
-  static const size_t SZ_WB_TAO_INC_PRE = sizeof(WB_TAO_INC_PRE) - 1;
-
-  if (0 == ACE_OS::strncasecmp(arg, WB_STUB_EXPORT_MACRO,
-                               SZ_WB_STUB_EXPORT_MACRO)) {
-    this->stub_export_macro(arg + SZ_WB_STUB_EXPORT_MACRO);
-
-  } else if (0 == ACE_OS::strncasecmp(arg, WB_STUB_EXPORT_INCLUDE,
-                                      SZ_WB_STUB_EXPORT_INCLUDE)) {
-    this->stub_export_include(arg + SZ_WB_STUB_EXPORT_INCLUDE);
-
-  } else if (0 == ACE_OS::strncasecmp(arg, WB_SKEL_EXPORT_MACRO,
-                                      SZ_WB_SKEL_EXPORT_MACRO)) {
-    this->skel_export_macro(arg + SZ_WB_SKEL_EXPORT_MACRO);
-
-  } else if (0 == ACE_OS::strncasecmp(arg, WB_SKEL_EXPORT_INCLUDE,
-                                      SZ_WB_SKEL_EXPORT_INCLUDE)) {
-    this->skel_export_include(arg + SZ_WB_SKEL_EXPORT_INCLUDE);
-
-  } else if (0 == ACE_OS::strncasecmp(arg, WB_NATIVE_LIB_NAME,
-                                      SZ_WB_NATIVE_LIB_NAME)) {
-    this->native_lib_name(arg + SZ_WB_NATIVE_LIB_NAME);
-
-  } else if (0 == ACE_OS::strncasecmp(arg, WB_STUB_EXTRA_INCLUDE,
-                                      SZ_WB_STUB_EXTRA_INCLUDE)) {
-    this->add_include(arg + SZ_WB_STUB_EXTRA_INCLUDE, STUB_CPP);
-
-  } else if (0 == ACE_OS::strncasecmp(arg, WB_TAO_INC_PRE, SZ_WB_TAO_INC_PRE)) {
-    this->tao_inc_pre_ = arg + SZ_WB_TAO_INC_PRE;
-  }
+  be_util::prep_be_arg(arg);
 }
 
 // Does nothing in this backend.
@@ -302,20 +258,16 @@ BE_GlobalData::arg_post_proc()
 void
 BE_GlobalData::usage() const
 {
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT(" -SS\t\t\tSuppress generation of server-side (skeleton) ")
-             ACE_TEXT("files\n")));
+  be_util::usage();
 }
 
 AST_Generator *
 BE_GlobalData::generator_init()
 {
-  AST_Generator *gen = 0;
-  ACE_NEW_RETURN(gen,
-                 AST_Generator,
-                 0);
-  return gen;
+  return be_util::generator_init();
 }
+
+#endif
 
 bool
 BE_GlobalData::writeFile(const char *fileName, const string &content)

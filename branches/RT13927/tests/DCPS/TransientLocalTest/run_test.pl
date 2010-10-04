@@ -46,7 +46,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 }
 
 $Publisher->Spawn ();
-    
+
 if (PerlACE::waitforfile_timed ($data_file, 30) == -1) {
     print STDERR "ERROR: waiting for Publisher file\n";
     $Publisher->Kill ();
@@ -62,7 +62,7 @@ if (PerlACE::waitforfileoutput_timed ($data_file, "Done writing", 90) == -1) {
 }
 
 #Sleep for 2 seconds after publisher send all samples to avoid the timing issue
-#that the subscriber may start and finish in 1 second while the publisher is waiting 
+#that the subscriber may start and finish in 1 second while the publisher is waiting
 #for it to start.
 sleep (2);
 

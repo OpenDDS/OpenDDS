@@ -122,7 +122,7 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) TransportSendBuffer::insert() - ")
         ACE_TEXT("aging off PDU: 0x%x as buffer(0x%x,0x%x)\n"),
-        static_cast<const ACE_INT16>(it->first),
+        it->first.getValue(),
         it->second.first, it->second.second
       ));
     }
@@ -141,23 +141,23 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
   TransportSendStrategy::QueueType*& elems = buffer.first;
   ACE_NEW(elems, TransportSendStrategy::QueueType(value.first->size(), 1));
 
-  CopyChainVisitor visitor(*elems, 
-                           &this->retained_allocator_, 
-                           &this->retained_mb_allocator_, 
+  CopyChainVisitor visitor(*elems,
+                           &this->retained_allocator_,
+                           &this->retained_mb_allocator_,
                            &this->retained_db_allocator_);
   value.first->accept_visitor(visitor);
 
   // Copy sample's message/data block descriptors:
   ACE_Message_Block*& data = buffer.second;
-  data = TransportQueueElement::clone(value.second, 
-                                      &this->retained_mb_allocator_, 
+  data = TransportQueueElement::clone(value.second,
+                                      &this->retained_mb_allocator_,
                                       &this->retained_db_allocator_);
 
   if ( OpenDDS::DCPS::Transport_debug_level >= 10) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) TransportSendBuffer::insert() - ")
       ACE_TEXT("saved PDU: 0x%x as buffer(0x%x,0x%x)\n"),
-      static_cast<const ACE_INT16>(sequence),
+      sequence.getValue(),
       buffer.first, buffer.second
     ));
   }
@@ -181,7 +181,7 @@ TransportSendBuffer::resend(const SequenceRange& range)
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) TransportSendBuffer::resend() - ")
                    ACE_TEXT("resending PDU: 0x%x, (0x%x,0x%x)\n"),
-                   static_cast<const ACE_INT16>(sequence),
+                   sequence.getValue(),
                    it->second.first,
                    it->second.second));
       }

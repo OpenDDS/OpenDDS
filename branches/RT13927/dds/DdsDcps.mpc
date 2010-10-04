@@ -1,6 +1,6 @@
 // $Id$
 
-project: taolib, portableserver, core, dcps_bits, coverage_optional, dcps_optional_features, dds4ccm_opendds, dcps_ts_defaults, dds_macros {
+project: taolib, portableserver, core, dcps_bits, coverage_optional, dcps_optional_features, dds4ccm_opendds, dcps_ts_defaults, dds_macros, install {
 
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
@@ -24,6 +24,7 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, dcps_option
   }
 
   Header_Files {
+    Version.h
     DCPS
     DCPS/transport/framework
     DCPS/yard
@@ -63,6 +64,28 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, dcps_option
   TypeSupport_Files {
     dcps_ts_flags += -SI
     DdsDcpsGuid.idl
+  }
+
+  InstallData_Files {
+    gendir = .
+    ../MPC
+    ../AUTHORS
+    ../README
+    ../VERSION
+    ../LICENSE
+    ../NEWS
+    ../rules.dds.GNU
+  }
+
+  InstallData_Files {
+    gendir = bin
+    ../bin/PerlDDS
+  }
+
+  verbatim(gnuace, postinstall) {
+"	echo export DDS_ROOT=$(INSTALL_PREFIX)/share/dds> $(INSTALL_PREFIX)/share/dds/dds-devel.sh"
+"	@$(MKDIR) $(INSTALL_PREFIX)/share/dds/dds"
+"	ln -sf $(INSTALL_PREFIX)/include/dds/Version.h $(INSTALL_PREFIX)/share/dds/dds"
   }
 }
 

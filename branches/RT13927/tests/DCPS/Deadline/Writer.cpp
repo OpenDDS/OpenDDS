@@ -16,7 +16,7 @@ static int const num_messages = 10;
 static ACE_Time_Value write_interval(0, 500000);
 extern ACE_Time_Value SLEPP_DURATION;
 
-Writer::Writer(::DDS::DataWriter_ptr writer, 
+Writer::Writer(::DDS::DataWriter_ptr writer,
                CORBA::Long key,
                ACE_Time_Value sleep_duration)
 : writer_ (::DDS::DataWriter::_duplicate (writer)),
@@ -35,7 +35,7 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
 void
 Writer::start ()
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)%T Writer::start \n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start \n")));
   // Launch threads.
   if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1)
   {
@@ -58,7 +58,7 @@ Writer::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
-  
+
   try
   {
     while (1)
@@ -92,9 +92,9 @@ Writer::svc ()
     message.subject    = CORBA::string_dup("Review");
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
     message.count      = 0;
-    
+
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t)%T Writer::svc sleep for %d seconds.\n"), 
+              ACE_TEXT("(%P|%t)Writer::svc sleep for %d seconds.\n"),
               this->sleep_duration_.sec()));
 
     ACE_OS::sleep (this->sleep_duration_);
@@ -102,6 +102,10 @@ Writer::svc ()
     for (int i = 0; i< num_messages; i ++)
     {
       ++message.count;
+
+      ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t)Writer::svc write sample %d to instance %d.\n"),
+              message.count, this->instance_handle_));
 
       ::DDS::ReturnCode_t const ret = message_dw->write (message, this->instance_handle_);
 
@@ -127,13 +131,13 @@ Writer::svc ()
          << e << endl;
   }
 
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)%T Writer::svc finished.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)Writer::svc finished.\n")));
 
   return 0;
 }
 
 
-::DDS::InstanceHandle_t 
+::DDS::InstanceHandle_t
 Writer::get_instance_handle()
 {
   return this->instance_handle_;

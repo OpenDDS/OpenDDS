@@ -128,7 +128,7 @@ class TestConfig {
 
     /// Interval in seconds between sample sending.
     int sample_interval_;
-    
+
     /// Data type name.
     std::string typeName_;
 

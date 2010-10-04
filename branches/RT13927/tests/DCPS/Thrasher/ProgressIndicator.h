@@ -22,8 +22,8 @@ private:
   const char* format_;
   const std::size_t max_;
   const std::size_t grad_;
-  
-  std::size_t last_; 
+
+  std::size_t last_;
   std::size_t curr_;
 };
 

@@ -30,7 +30,7 @@
 using namespace Messenger;
 
 const char PARTITION_A[] = "ZiggieStardust";
-const char PARTITION_B[] = "Amadeus"; 
+const char PARTITION_B[] = "Amadeus";
 
 
 OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
@@ -80,7 +80,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 
       DDS::PublisherQos pub_qos;
       participant->get_default_publisher_qos (pub_qos);
-      
+
       pub_qos.partition.name.length (1);
       pub_qos.partition.name[0] = PARTITION_A;
 
@@ -132,7 +132,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       int const max_attempts = 15;
-      int attempts = 1; 
+      int attempts = 1;
 
       // ----------------------------------------------
       // Wait for first DataReader that belongs to PARTITION_A too,
@@ -162,7 +162,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
           cerr << "ERROR: failed to wait for first DataReader." << endl;
           exit (1);
         }
-     
+
         writer->start ();
         writer->end ();
       }
@@ -183,12 +183,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 
 
       // ----------------------------------------------
-      // Now DataWriter is in PARTITION B, the second DataReader in PARTITION B 
+      // Now DataWriter is in PARTITION B, the second DataReader in PARTITION B
       // should receive the messages.
       {
         std::auto_ptr<Writer> writer (new Writer (dw.in ()));
 
-        attempts = 1; 
+        attempts = 1;
         while (attempts != max_attempts)
         {
           ::DDS::InstanceHandleSeq handles;
@@ -216,7 +216,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       {
         std::auto_ptr<Writer> writer (new Writer (dw.in ()));
 
-        attempts = 1; 
+        attempts = 1;
         while (attempts != max_attempts)
         {
           ::DDS::InstanceHandleSeq handles;
@@ -243,7 +243,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       // ----------------------------------------------
       // Now wait for subscriber exit.
       {
-        attempts = 1; 
+        attempts = 1;
         while (attempts != max_attempts)
         {
           ::DDS::InstanceHandleSeq handles;

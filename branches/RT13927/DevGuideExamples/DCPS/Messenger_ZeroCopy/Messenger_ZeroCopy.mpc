@@ -6,14 +6,14 @@ project(*idl): dcps {
   TypeSupport_Files {
     Messenger.idl
   }
-  
+
   custom_only = 1
 }
 
 project(*publisher) : dcpsexe_with_tcp {
   exename   = publisher
   after    += *idl
-  
+
   TypeSupport_Files {
     Messenger.idl
   }

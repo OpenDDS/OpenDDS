@@ -1,4 +1,4 @@
-project(*idl) : taoidldefaults {
+project(*idl) : taoidldefaults, dds_macros {
   idlflags    += -Wb,export_macro=Sync_Export -Wb,export_include=Sync_export.h
 
   IDL_Files {
@@ -8,7 +8,7 @@ project(*idl) : taoidldefaults {
   custom_only = 1
 }
 
-project(*ServerLib) : taolib_with_idl, portableserver, iortable {
+project(*ServerLib) : taolib_with_idl, portableserver, iortable, dds_macros {
   sharedname   = SyncServer
   libout       = $(DDS_ROOT)/lib
   after       += *idl
@@ -25,7 +25,7 @@ project(*ServerLib) : taolib_with_idl, portableserver, iortable {
   }
 }
 
-project(*ClientLib) : taolib_with_idl, portableserver {
+project(*ClientLib) : taolib_with_idl, portableserver, dds_macros {
   sharedname   = SyncClient
   libout       = $(DDS_ROOT)/lib
   after       += *idl
@@ -41,7 +41,7 @@ project(*ClientLib) : taolib_with_idl, portableserver {
   }
 }
 
-project(*Server) : taoexe, taoidldefaults, portableserver, iortable {
+project(*Server) : taoexe, taoidldefaults, portableserver, iortable, dds_macros {
   exename = syncServer
   libs   += SyncServer
   libpaths += $(DDS_ROOT)/lib

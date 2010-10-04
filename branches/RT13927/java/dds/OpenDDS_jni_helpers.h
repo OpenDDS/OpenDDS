@@ -205,7 +205,7 @@ struct InetAddrField : Field<C, ACE_TString, jvmSig::STRING> {
     } else {
       ACE_TCHAR buf[64];
       (cxx.*addr_).addr_to_string(buf, sizeof(buf));
-      str = jni->NewStringUTF(buf);
+      str = jni->NewStringUTF(ACE_TEXT_ALWAYS_CHAR(buf));
     }
     jni->SetObjectField(obj, fid, str);
     jni->DeleteLocalRef(str);

@@ -293,35 +293,26 @@ const ACE_TCHAR *svcConfDir =
   ACE_TEXT("dynamic OpenDDS_DCPS_Multicast_Service Service_Object *")
   ACE_TEXT(" OpenDDS_Multicast:_make_MulticastLoader()");
 
-BoolField<config> default_to_ipv6("defaultToIPv6",
-                                  &config::default_to_ipv6_);
+BoolField<config> default_to_ipv6("defaultToIPv6", &config::default_to_ipv6_);
 
-UshortField<config> port_offset("portOffset",
-                                &config::port_offset_);
+UshortField<config> port_offset("portOffset", &config::port_offset_);
 
 InetAddrField<config> group_address("groupAddress",
                                     0 /*UNUSED*/, &config::group_address_);
 
-BoolField<config> reliable("reliable",
-                           &config::reliable_);
+BoolField<config> reliable("reliable", &config::reliable_);
 
-DoubleField<config> syn_backoff("synBackoff",
-                                &config::syn_backoff_);
+DoubleField<config> syn_backoff("synBackoff", &config::syn_backoff_);
 
-TimeField<config> syn_interval("synInterval",
-                               &config::syn_interval_);
+TimeField<config> syn_interval("synInterval", &config::syn_interval_);
 
-TimeField<config> syn_timeout("synTimeout",
-                              &config::syn_timeout_);
+TimeField<config> syn_timeout("synTimeout", &config::syn_timeout_);
 
-SizetField<config> nak_depth("nakDepth",
-			     &config::nak_depth_);
+SizetField<config> nak_depth("nakDepth", &config::nak_depth_);
 
-TimeField<config> nak_interval("nakInterval",
-                               &config::nak_interval_);
+TimeField<config> nak_interval("nakInterval", &config::nak_interval_);
 
-TimeField<config> nak_timeout("nakTimeout",
-                              &config::nak_timeout_);
+TimeField<config> nak_timeout("nakTimeout", &config::nak_timeout_);
 
 BaseField<config> *fields[] = {
   &default_to_ipv6,

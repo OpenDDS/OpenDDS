@@ -353,7 +353,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
 
-      // Sleep for 2 seconds to wait for all built in datareaders to receive the  
+      // Sleep for 2 seconds to wait for all built in datareaders to receive the
       // add_associations from InfoRepo before delete the subscriber. Otherwise
       // the add_associations will not add the remote_id to the transport mapping
       // and the remove_associations will fail to find the remote id.

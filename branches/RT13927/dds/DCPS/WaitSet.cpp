@@ -132,8 +132,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   if (timeout.sec != DURATION_INFINITE_SEC ||
       timeout.nanosec != DURATION_INFINITE_NSEC) {
-    deadline = ACE_OS::gettimeofday()
-               + OpenDDS::DCPS::duration_to_time_value(timeout);
+    deadline = OpenDDS::DCPS::duration_to_absolute_time_value(timeout);
     p_deadline = &deadline;
   }
 

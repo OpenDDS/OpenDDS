@@ -7,8 +7,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TAO_DDS_DCPS_TRANSIENT_KLUDGE_H
-#define TAO_DDS_DCPS_TRANSIENT_KLUDGE_H
+#ifndef OPENDDS_DCPS_TRANSIENT_KLUDGE_H
+#define OPENDDS_DCPS_TRANSIENT_KLUDGE_H
 
 #include "dcps_export.h"
 
@@ -64,4 +64,4 @@ private:
 #include "Transient_Kludge.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif /* TAO_DDS_DCPS_TRANSIENT_KLUDGE_H */
+#endif /* OPENDDS_DCPS_TRANSIENT_KLUDGE_H */

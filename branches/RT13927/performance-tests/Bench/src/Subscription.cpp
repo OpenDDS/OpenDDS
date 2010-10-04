@@ -153,7 +153,7 @@ Subscription::enable(
         this->profile_->transport
       ));
       throw BadTransportException();
-  
+
     } else if( this->verbose_) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")

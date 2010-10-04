@@ -7,7 +7,7 @@
 #include "DummyTcpSendStrategy.h"
 #include "DummyTcpTransport.h"
 #include "DummyTcpDataLink.h"
-#include "performance-tests/DCPS/dummyTCP/PerformanceTest.h"
+#include "PerformanceTest.h"
 
 
 #if !defined (__ACE_INLINE__)

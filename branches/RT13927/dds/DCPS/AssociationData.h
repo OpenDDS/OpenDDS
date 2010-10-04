@@ -24,7 +24,7 @@ struct AssociationData {
   TransportInterfaceInfo  remote_data_;
   ACE_INET_Addr        remote_addess_;
   NetworkAddress       network_order_address_;
-  ACE_INET_Addr& get_remote_address () 
+  ACE_INET_Addr& get_remote_address ()
   {
     if (this->remote_addess_ == ACE_INET_Addr()) {
       // Get the remote address from the "blob" in the remote_info struct.
@@ -38,9 +38,9 @@ struct AssociationData {
         this->network_order_address_.to_addr(remote_addess_);
       }
     }
-    
+
     return this->remote_addess_;
-  } 
+  }
 };
 
 struct AssociationInfo {

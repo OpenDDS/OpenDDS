@@ -6,7 +6,7 @@ module profilingTest {
 
   typedef sequence<octet> OctetSeq;
   struct testMsg {
-    unsigned long         msgID; 
+    unsigned long         msgID;
     unsigned long         count;
     OctetSeq       contents;
   };

@@ -93,9 +93,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // Initialize the transport
-      OpenDDS::DCPS::TransportImpl_rch tcp_impl = 
+      OpenDDS::DCPS::TransportImpl_rch tcp_impl =
         TheTransportFactory->create_transport_impl (
-          transport_impl_id, 
+          transport_impl_id,
           ::OpenDDS::DCPS::AUTO_CONFIG);
 
       // Create the subscriber and attach to the corresponding
@@ -148,7 +148,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // incompatible QoS.
         DDS::DataReaderQos bogus_qos;
         sub->get_default_datareader_qos (bogus_qos);
-      
+
         // Set up a 2 second recurring deadline.  DataReader creation
         // should fail with this QoS since the requested deadline period
         // will be less than the test configured offered deadline
@@ -247,13 +247,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dr_qos.deadline.period.nanosec = DEADLINE_PERIOD.nanosec;
 
       // Reset qos to have deadline. The watch dog now starts.
-      if (dr1->set_qos (dr_qos) != ::DDS::RETCODE_OK 
+      if (dr1->set_qos (dr_qos) != ::DDS::RETCODE_OK
         || dr2->set_qos (dr_qos) != ::DDS::RETCODE_OK)
       {
         cerr << "ERROR: set deadline qos failed." << endl;
         exit(1);
       }
-      
+
       Messenger::MessageDataReader_var message_dr1 =
         Messenger::MessageDataReader::_narrow(dr1.in());
 
@@ -276,7 +276,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           ++ attempts;
           ACE_OS::sleep (1);
         }
-        else 
+        else
         {
           cerr << "ERROR: Failed to get subscription matched status" << endl;
           exit (1);
@@ -290,8 +290,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
       // ----------------------------------------------
 
-      // Wait for deadline periods to expire. 
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: sleep for %d milliseconds\n"),
+                            SLEEP_DURATION.msec()));
+
+      // Wait for deadline periods to expire.
       ACE_OS::sleep (SLEEP_DURATION);
+
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: now verify missed ")
+                            ACE_TEXT ("deadline status \n")));
 
       DDS::RequestedDeadlineMissedStatus deadline_status1;
       if (dr1->get_requested_deadline_missed_status(deadline_status1) != ::DDS::RETCODE_OK)
@@ -307,6 +313,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: got missed")
+                            ACE_TEXT ("deadline status \n")));
+
       Messenger::Message message;
       message.subject_id = 99;
       ::DDS::InstanceHandle_t dr1_hd1 = message_dr1->lookup_instance (message);
@@ -315,7 +324,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::InstanceHandle_t dr1_hd2 = message_dr1->lookup_instance (message);
       ::DDS::InstanceHandle_t dr2_hd2 = message_dr2->lookup_instance (message);
 
-      if (deadline_status1.last_instance_handle != dr1_hd1 
+      if (deadline_status1.last_instance_handle != dr1_hd1
         && deadline_status1.last_instance_handle != dr1_hd2)
       {
         cerr << "ERROR: Expected DR1 last instance handle ("
@@ -325,7 +334,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status2.last_instance_handle != dr2_hd1 
+      if (deadline_status2.last_instance_handle != dr2_hd1
         && deadline_status2.last_instance_handle != dr2_hd2)
       {
         cerr << "ERROR: Expected DR2 last instance handle ("
@@ -335,11 +344,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status1.total_count != NUM_EXPIRATIONS * NUM_INSTANCE
-          || deadline_status2.total_count != NUM_EXPIRATIONS * NUM_INSTANCE)
+      //The reader deadline period is 5 seconds and writer writes
+      //each instance every 9 seconds, so after SLEEP_DURATION(11secs),
+      //the deadline missed should be 1 per instance
+      if (deadline_status1.total_count != NUM_INSTANCE
+          || deadline_status2.total_count != NUM_INSTANCE)
       {
         cerr << "ERROR: Expected number of missed requested "
-             << "deadlines (" << NUM_EXPIRATIONS * NUM_INSTANCE << ") " << "did " << endl
+             << "deadlines (" << NUM_INSTANCE << ") " << "did " << endl
              << "       not occur ("
              << deadline_status1.total_count << " and/or "
              << deadline_status2.total_count << ")." << endl;
@@ -347,8 +359,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status1.total_count_change != NUM_EXPIRATIONS * NUM_INSTANCE
-          || deadline_status2.total_count_change != NUM_EXPIRATIONS * NUM_INSTANCE)
+      if (deadline_status1.total_count_change != NUM_INSTANCE
+          || deadline_status2.total_count_change != NUM_INSTANCE)
       {
         cerr << "ERROR: Incorrect missed requested "
              << "deadline count change" << endl
@@ -362,11 +374,20 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
+      // Here the writers should continue writes all samples with
+      // .5 second interval.
       ACE_Time_Value no_miss_period = num_messages * write_interval;
 
-      // Wait for another set of deadline periods to expire after
-      // writing/receiving period.
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: sleep for %d msec\n"),
+                            (SLEEP_DURATION + no_miss_period).msec()));
+
+      // Wait for another set of deadline periods(5 + 11 secs).
+      // During this period, the writers continue write all samples with
+      // .5 second interval.
       ACE_OS::sleep (SLEEP_DURATION + no_miss_period);
+
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: now verify missed ")
+                            ACE_TEXT ("deadline status \n")));
 
       if ((dr1->get_requested_deadline_missed_status(deadline_status1) != ::DDS::RETCODE_OK)
         || (dr2->get_requested_deadline_missed_status(deadline_status2) != ::DDS::RETCODE_OK))
@@ -375,7 +396,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status1.last_instance_handle != dr1_hd1 
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: got missed")
+                            ACE_TEXT ("deadline status \n")));
+
+      if (deadline_status1.last_instance_handle != dr1_hd1
         && deadline_status1.last_instance_handle != dr1_hd2)
       {
         cerr << "ERROR: Expected DR1 last instance handle ("
@@ -385,7 +409,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status2.last_instance_handle != dr2_hd1 
+      if (deadline_status2.last_instance_handle != dr2_hd1
         && deadline_status2.last_instance_handle != dr2_hd2)
       {
         cerr << "ERROR: Expected DR2 last instance handle ("
@@ -395,11 +419,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status1.total_count != 2 * NUM_EXPIRATIONS * NUM_INSTANCE
-          || deadline_status2.total_count != 2 * NUM_EXPIRATIONS * NUM_INSTANCE)
+      if (deadline_status1.total_count != 3 * NUM_INSTANCE
+          || deadline_status2.total_count != 3 * NUM_INSTANCE)
       {
         cerr << "ERROR: Another expected number of missed requested "
-             << "deadlines (" << 2 * NUM_EXPIRATIONS * NUM_INSTANCE << ")" << endl
+             << "deadlines (" << NUM_INSTANCE << ")" << endl
              << "       did not occur ("
              << deadline_status1.total_count << " and/or "
              << deadline_status2.total_count << ")." << endl;
@@ -407,8 +431,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      if (deadline_status1.total_count_change != NUM_EXPIRATIONS * NUM_INSTANCE
-          || deadline_status2.total_count_change != NUM_EXPIRATIONS * NUM_INSTANCE)
+      if (deadline_status1.total_count_change != 2 * NUM_INSTANCE
+          || deadline_status2.total_count_change != 2 * NUM_INSTANCE)
       {
         cerr << "ERROR: Incorrect missed requested "
              << "deadline count" << endl

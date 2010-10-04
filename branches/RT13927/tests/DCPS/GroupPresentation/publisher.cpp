@@ -46,7 +46,7 @@ parse_args(int argc, ACE_TCHAR *argv[])
                         -1);
     }
   }
-  
+
   return 0;
 }
 
@@ -137,7 +137,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     pub->get_default_datawriter_qos (dw_qos);
     dw_qos.history.kind                             = ::DDS::KEEP_ALL_HISTORY_QOS;
     dw_qos.resource_limits.max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
-    
+
     // Create DataWriter
     DDS::DataWriter_var dw1 =
       pub->create_datawriter(topic.in(),
@@ -151,7 +151,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datawriter failed!\n")),
                        -1);
     }
-    
+
     DDS::DataWriter_var dw2 =
       pub->create_datawriter(topic.in(),
                              dw_qos,
@@ -164,7 +164,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datawriter failed!\n")),
                        -1);
     }
-    
+
     // Start writing threads
     Writer* writer1 = new Writer(pub.in(), dw1.in());
     writer1->start();

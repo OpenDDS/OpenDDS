@@ -11,12 +11,13 @@ use strict;
 use Env qw(ANT_HOME DDS_ROOT ACE_ROOT);
 use Cwd;
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use lib "$DDS_ROOT/bin";
+use PerlDDS::Run_Test;
 
 chdir $DDS_ROOT;
 my $opt_d = 'java/jms';
 my $operation = shift;
-my @targets = (); #each element is a list-ref with [directory, ant target]
+my @targets = (); # each element is a list-ref with [directory, ant target]
 
 if ($operation eq 'build') {
     @targets = (['.', 'rar'], ['compat', 'ear']);
@@ -34,12 +35,14 @@ if (!chdir $opt_d) {
     exit $!;
 }
 
-# This seems to only impact ant on Windows, it's confused by -Dfoo=bar when 
+# This seems to only impact ant on Windows, it's confused by -Dfoo=bar when
 # bar also contains an =
 if ($^O eq 'MSWin32') {
     map s/-D([\w.]+)=(\S+)=(\S+)/-D$1=\\"$2=$3\\"/, @ARGV;
 }
- 
+
+map {$_ = '"' . $_ . '"' if $_ =~ / /} @ARGV;
+
 my $overall_status = 0;
 
 for my $tgt (@targets) {
@@ -52,13 +55,13 @@ for my $tgt (@targets) {
     if ($tgt->[1] eq 'jboss42x') {
       my $PROC;
       if ($^O eq 'MSWin32') {
-        $PROC = new PerlACE::Process("$ENV{windir}\\system32\\cmd",
-                                     "/c $ANT_HOME/bin/ant @ARGV $extra " .
-                                     "$tgt->[1]");
+        $PROC = PerlDDS::create_process("$ENV{windir}\\system32\\cmd",
+                                        "/c $ANT_HOME/bin/ant @ARGV $extra " .
+                                        "$tgt->[1]");
       }
       else {
-        $PROC = new PerlACE::Process("$ANT_HOME/bin/ant",
-                                     "@ARGV $extra $tgt->[1]");
+        $PROC = PerlDDS::create_process("$ANT_HOME/bin/ant",
+                                        "@ARGV $extra $tgt->[1]");
       }
       $status = $PROC->SpawnWaitKill(600);
     }
@@ -83,7 +86,7 @@ for my $tgt (@targets) {
                     $overall_status += $r;
                     if ($r == 0) {
                       s/Errors:/Errs:/;
-                      #we don't want this to get parsed as an 'error' line
+                      # we don't want this to get parsed as an 'error' line
                     } else {
                       $testfailed = 1;
                     }
@@ -98,9 +101,9 @@ for my $tgt (@targets) {
         close LOG;
     }
     if ($status > 0) {
-        #If we've had a test failure, the scoreboard will pick that up as 
-        #an 'error' line and we don't need an extra one for the ant invocation
-        #returning non-zero.
+        # If we've had a test failure, the scoreboard will pick that up as
+        # an 'error' line and we don't need an extra one for the ant invocation
+        # returning non-zero.
         if ($testfailed == 0) {
             print "ERROR: ";
         }

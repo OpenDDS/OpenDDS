@@ -24,7 +24,7 @@ class Subscription_Manager_Impl;
 
 /// this defines a reference counted pointer for a subscription manager
 /// implementation
-typedef class ACE_Refcounted_Auto_Ptr <Subscription_Manager_Impl, 
+typedef class ACE_Refcounted_Auto_Ptr <Subscription_Manager_Impl,
                                        ACE_Null_Mutex> Subscription_Manager_Ptr;
 
 /**
@@ -32,7 +32,7 @@ typedef class ACE_Refcounted_Auto_Ptr <Subscription_Manager_Impl,
  * @author Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  * @brief interface for all subscription manager implementations
  */
-class Subscription_Manager_Impl 
+class Subscription_Manager_Impl
 {
  public:
   /// destructor
@@ -56,7 +56,7 @@ class Subscription_Manager_Impl
   virtual DDS::DataReaderQos get_default_datareader_qos () = 0;
 
   /// returns the underlying subsriber instance
-  /// memory management of the returned publisher reference is done by the 
+  /// memory management of the returned publisher reference is done by the
   /// Subscription_Manager_Impl itself
   virtual DDS::Subscriber_ptr subscriber () const = 0;
 };

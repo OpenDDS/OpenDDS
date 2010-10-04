@@ -675,7 +675,7 @@ scenario configuration file.
 The default is not specified.  This will result in no test processes
 being started if the B<-P> argument is given.
 
-=item B<-r FILE> | B<--rawdatafile=FILE>
+=item B<-r FILE> | B<--rawdatafile=FILE>  [DEPRECATED]
 
 Raw data output filename.  This file is where any raw latency data
 collected during the test will be written.

@@ -27,7 +27,7 @@ $kill_subscriber = 0;
 $expected_deleted_connections = 1;
 $verify_lost_sub_notification = 1;
 $pub_port = PerlACE::random_port();
-$sub_port = PerlACE::random_port(); 
+$sub_port = PerlACE::random_port();
 $pub_local_address = "localhost:$pub_port";
 $sub_local_address = "localhost:$sub_port";
 
@@ -37,8 +37,8 @@ if ($ARGV[0] eq 'restart_sub') {
   $num_writes = 20;
   $restart_delay = 10;
   $num_reads_before_crash = 2;
-  
-  #The number of lost message depends on the period between sub crash and 
+
+  #The number of lost message depends on the period between sub crash and
   #restart.
   #$num_lost_messages_estimate = $restart_delay * 1000/$write_delay_ms;
   #$num_expected_reads_restart_sub
@@ -169,9 +169,9 @@ if ($num_reads_before_crash > 0)
   # We will not check the status returned from WaitKill() since it returns
   # different status on windows and linux.
   print "Subscriber crashed and returned $SubscriberResult. \n";
-  
+
   sleep($restart_delay);
-  
+
   #get time before restart so we can calculate the lost messages during sub
   #crash and restart.
   my $now = time();

@@ -112,7 +112,8 @@
                deprecation="${compile.deprecation}"
                optimize="${compile.optimize}"
                source="${project.source}"
-               classpathref="project.classpath">
+               classpathref="project.classpath"
+               includeAntRuntime="no">
         </javac>
     </target>
 

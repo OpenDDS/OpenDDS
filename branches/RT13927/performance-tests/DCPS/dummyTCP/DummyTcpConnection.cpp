@@ -106,9 +106,9 @@ OpenDDS::DCPS::DummyTcpConnection::open(void* arg)
   // defaults to true and open() is called after the ACE_Aceptor
   // creates this new svc handler.
   if (this->is_connector_ == false)
-  	{
-  	  return -1;
-  	}
+    {
+      return -1;
+    }
 
   // This connection object represents the acceptor side.
   this->is_connector_ = false;
@@ -116,7 +116,7 @@ OpenDDS::DCPS::DummyTcpConnection::open(void* arg)
   // The passed-in arg is really the acceptor object that created this
   // DummyTcpConnection object, and is also the caller of this open()
   // method.  We need to cast the arg to the DummyTcpAcceptor* type.
-  DummyTcpAcceptor* acceptor = ACE_static_cast(DummyTcpAcceptor*,arg);
+  DummyTcpAcceptor* acceptor = static_cast<DummyTcpAcceptor*>(arg);
 
   if (acceptor == 0)
     {

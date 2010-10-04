@@ -26,13 +26,14 @@
 #define DCPSDATAREADERI_H_
 
 #include "dds/DdsDcpsDataReaderRemoteS.h"
+#include "dds/DCPS/Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 //Class TAO_DDS_DCPSDataReader_i
-class TAO_DDS_DCPSDataReader_i   
+class TAO_DDS_DCPSDataReader_i
   : public virtual POA_OpenDDS::DCPS::DataReaderRemote
 {
 public:

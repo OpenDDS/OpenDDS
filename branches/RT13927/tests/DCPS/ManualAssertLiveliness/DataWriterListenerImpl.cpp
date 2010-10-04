@@ -50,13 +50,13 @@ void DataWriterListenerImpl::on_liveliness_lost (
 {
   ++ num_liveliness_lost_callbacks_;
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_liveliness_lost %X %d\n"), 
+    ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_liveliness_lost %X %d\n"),
     writer, num_liveliness_lost_callbacks_));
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t)    total_count=%d total_count_change=%d \n"),
     status.total_count, status.total_count_change));
 }
-  
+
 void DataWriterListenerImpl::on_publication_matched (
       ::DDS::DataWriter_ptr writer,
       const ::DDS::PublicationMatchedStatus & status

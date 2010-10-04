@@ -46,7 +46,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       cerr << "register_type failed." << endl;
       exit(1);
     }
-  
+
     CORBA::String_var type_name = servant->get_type_name ();
 
     DDS::TopicQos topic_qos;
@@ -63,7 +63,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     }
 
     OpenDDS::DCPS::TransportImpl_rch tcp_impl =
-      TheTransportFactory->create_transport_impl (TCP_IMPL_ID, 
+      TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
                                                   ::OpenDDS::DCPS::AUTO_CONFIG);
 
     DDS::Publisher_var pub =

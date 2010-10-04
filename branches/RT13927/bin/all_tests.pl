@@ -47,7 +47,7 @@ sub usageAndExit {
   my($initial) = length($str);
   my($length)  = $initial;
   my($maxLine) = 78;
-  
+
   print $str;
 
   foreach my $key (sort keys %$options) {
@@ -131,7 +131,7 @@ sub checkSkip {
 }
 
 
-sub getTestScripts {    
+sub getTestScripts {
   my($dir)     = shift;
   my(@scripts) = ();
   my($dh)      = new FileHandle();
@@ -140,12 +140,12 @@ sub getTestScripts {
       my($full) = "$dir/$file";
       if (-d $full) {
         push(@scripts, getTestScripts($full));
-      } 
-      else {  
+      }
+      else {
         if ($file =~ /^run.*\.pl$/) {
           push(@scripts, $full);
         }
-      }  
+      }
     }
     closedir($dh);
   }
@@ -280,7 +280,7 @@ do {
     my($skip) = 0;
     my($status) = 0;
     my($nodir)  = $script;
-    $nodir =~ s/$startDirRegexp\///;  
+    $nodir =~ s/$startDirRegexp\///;
 
     my($starttime) = time();
     print "$nodir: ";
@@ -293,7 +293,7 @@ do {
         ## Run the perl script and redirect the output
         chdir($dname);
         if (open($fh, "$^X $bname " . ($debug ? "--debug " : "") .
-                                              ($winDebug ? "--winDebug " : "") .         
+                                              ($winDebug ? "--winDebug " : "") .
                                       ($verbose ? "--verbose " : "") . "2>&1 |")) {
           my($logFile) = $nodir . ".txt";
           $logFile =~ s/\//_/g;
@@ -351,14 +351,14 @@ do {
   print "All tests completed: " . scalar(localtime(time())) . "\n" .
         "$totalpassed tests passed\n" .
         "$totalfailed tests failed\n" .
-        "$totalskipped tests skipped\n\n"; 
+        "$totalskipped tests skipped\n\n";
         if ($totalfailed > 0) {
           print "Tests that failed are:\n";
           print " @failedTests";
         }
-                
+
   if ($loop) {
-    print "Finished $loopCount sequence" . (($loopCount != 1) ? "s" : "") . 
+    print "Finished $loopCount sequence" . (($loopCount != 1) ? "s" : "") .
           " of tests\n";
   }
 } while(($count > 0 && $loopCount < $count) || ($loop && $totalfailed == 0));

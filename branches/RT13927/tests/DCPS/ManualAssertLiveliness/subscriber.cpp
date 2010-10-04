@@ -179,7 +179,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
 
-      while ( listener_servant.num_reads() < total_num_messages ) { 
+      while ( listener_servant.num_reads() < total_num_messages ) {
         ACE_OS::sleep (1);
       }
 
@@ -197,7 +197,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (listener_servant.num_liveliness_change_callbacks () != num_liveliness_change_callbacks)
       {
          cerr << "did not receive liveliness change callbacks as expected.(" <<
-           listener_servant.num_liveliness_change_callbacks () << "/" 
+           listener_servant.num_liveliness_change_callbacks () << "/"
            << num_liveliness_change_callbacks << ")" << endl;
          return 1;
       }

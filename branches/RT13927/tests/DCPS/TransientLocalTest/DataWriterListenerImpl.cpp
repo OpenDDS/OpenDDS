@@ -51,7 +51,7 @@ void DataWriterListenerImpl::on_liveliness_lost (
   ACE_UNUSED_ARG(writer) ;
   ACE_UNUSED_ARG(status) ;
 }
-  
+
 void DataWriterListenerImpl::on_publication_matched (
       ::DDS::DataWriter_ptr writer,
       const ::DDS::PublicationMatchedStatus & status

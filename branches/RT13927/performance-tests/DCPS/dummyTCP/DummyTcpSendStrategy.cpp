@@ -10,7 +10,7 @@
 #include "DummyTcpSynchResource.h"
 #include "DummyTcpDataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
-#include "performance-tests/DCPS/dummyTCP/PerformanceTest.h"
+#include "PerformanceTest.h"
 
 OpenDDS::DCPS::DummyTcpSendStrategy::DummyTcpSendStrategy
                                      (DummyTcpDataLink*      link,

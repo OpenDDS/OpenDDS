@@ -35,7 +35,7 @@ DataWriterListenerImpl::on_liveliness_lost (
   ACE_THROW_SPEC ((::CORBA::SystemException))
 {
 }
-  
+
 void
 DataWriterListenerImpl::on_publication_matched (
     ::DDS::DataWriter_ptr /* writer */,

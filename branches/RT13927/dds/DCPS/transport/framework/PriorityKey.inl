@@ -76,7 +76,7 @@ OpenDDS::DCPS::PriorityKey::address() const
 
 
 ACE_INLINE
-bool& OpenDDS::DCPS::PriorityKey::is_loopback() 
+bool& OpenDDS::DCPS::PriorityKey::is_loopback()
 {
   return this->is_loopback_;
 }

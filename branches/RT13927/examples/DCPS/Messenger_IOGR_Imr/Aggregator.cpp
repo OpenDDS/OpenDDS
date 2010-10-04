@@ -72,7 +72,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
   catch (const CORBA::Exception& e)
     {
-      ACE_PRINT_EXCEPTION (e, ACE_TEXT("Caught"));
+      e._tao_print_exception(ACE_TEXT("Caught"));
       return -1;
     }
 

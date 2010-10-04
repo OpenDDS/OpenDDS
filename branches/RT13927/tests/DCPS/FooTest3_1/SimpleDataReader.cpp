@@ -6,6 +6,7 @@
 #include  "tests/DCPS/FooType3/FooDefTypeSupportImpl.h"
 #include  "ace/Log_Msg.h"
 #include  "dds/DCPS/DataSampleHeader.h"
+#include "dds/DCPS/debug.h"
 
 #include "dds/DCPS/Serializer.h"
 
@@ -34,12 +35,13 @@ SimpleDataReader::init(OpenDDS::DCPS::RepoId sub_id,
 void
 SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
 {
-  // Shouldn't be printing this all the time.
-  //ACE_DEBUG((LM_DEBUG, "(%P|%t) Data has been received:\n"));
-
   ::OpenDDS::DCPS::Serializer serializer (sample.sample_);
   ::Xyz::Foo foo;
   serializer >> foo;
+
+  if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t)Received sample: %d\n", foo.sample_sequence));
+  }
 
   // Shouldn't be printing this all the time.
   //ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: a_long_value=%d handle_value=%d "

@@ -11,7 +11,7 @@ use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 
-#Clean the Foo.txt file which is used as a storage of the 
+#Clean the Foo.txt file which is used as a storage of the
 #data written.
 
 unlink "Foo.txt";
@@ -23,7 +23,7 @@ PerlDDS::add_lib_path('../FooType2');
 $num_threads_to_write=5;
 $dcpsrepo_ior = "dcps_ir.ior";
 
-unlink $dcpsrepo_ior; 
+unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("../../../../DDS/DCPSInfoRepo",
                                "-o $dcpsrepo_ior"
@@ -34,7 +34,7 @@ $FooTest_1 = PerlDDS::create_process ("FooTest2",
                               "-DCPSInfoRepo file://$dcpsrepo_ior "
                               ."-t $num_threads_to_write");
 
-#Test write block waiting for available space with RELIABLE and 
+#Test write block waiting for available space with RELIABLE and
 #KEEP_ALL qos.
 $FooTest_2 = PerlDDS::create_process ("FooTest2",
                               "-DCPSInfoRepo file://$dcpsrepo_ior "

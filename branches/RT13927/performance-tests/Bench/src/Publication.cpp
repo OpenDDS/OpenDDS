@@ -425,7 +425,7 @@ Publication::svc ()
 
   OpenDDS::DCPS::DataWriterImpl* servant
     = dynamic_cast< OpenDDS::DCPS::DataWriterImpl*>( this->writer_.in());
- 
+
   OpenDDS::DCPS::RepoIdConverter converter(servant->get_publication_id());
   int pid = converter.checksum();
 

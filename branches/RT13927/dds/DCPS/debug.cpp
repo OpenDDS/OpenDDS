@@ -21,5 +21,5 @@ OpenDDS_Dcps_Export void set_DCPS_debug_level(unsigned int lvl)
   OpenDDS::DCPS::DCPS_debug_level = lvl;
 }
 
-}; // namespace DCPS
-}; // namespace TAO
+}
+}
