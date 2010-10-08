@@ -1,0 +1,252 @@
+Mon Oct  4 14:19:06 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Whitespace cleanup.
+
+Fri Oct  1 14:32:52 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Common Perl function for finding TAO's orbsvcs executables using
+          either the old (Naming_Service) or new (tao_cosnaming) names.
+
+        * examples/DCPS/Messenger_IOGR_Imr/run_test.pl:
+        * examples/DCPS/Messenger_Imr/run_test.pl:
+        * performance-tests/DCPS/TransportLatency/run_ns_test.pl:
+        * tests/DCPS/Messenger/run_ns_test.pl:
+
+          Use the function above to locate orbsvcs.
+
+Mon Sep 27 15:01:19 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/jms/native/build.xml:
+
+          Fixed the previous commit to this file, ant needs the ${foo}
+          variables to be declared in the build.xml file.
+
+Thu Sep 23 16:19:13 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/Sync/Sync.mpc:
+
+          Use dds_macros base project to get DDS version numbers.
+
+        * rules.dds.GNU:
+
+          Updated setting the shared library version numbers to match the
+          recent change to gnu.mpd and rules.lib.GNU in the DOC group repo.
+
+Thu Sep 23 14:09:46 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_TAO.mwc:
+        * DDS_docgroup_TAO.mwc:
+
+          Reverted the previous change to DDS_TAO.mwc.  This file needs to
+          stay compatible with TAO 1.5a and 1.6a.
+          Added the new DDS_docgroup_TAO.mwc with Jeff's changes.
+
+Wed Sep 22 20:49:30 UTC 2010  Jeff Parsons <j.parsons@vanderbilt.edu>
+
+        * DDS_TAO.mwc:
+
+          Changes reflecting the recent relocation of TAO MPC files.
+
+Tue Sep 21 20:21:09 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/dds/OpenDDS_jni_helpers.h:
+        * tools/monitor/MonitorTask.cpp:
+
+          wchar compatibility for projects requiring java or qt
+
+Tue Sep 21 18:34:45 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          Add quotes around arguments with spaces when invoking ant.
+
+        * java/jms/native/build.xml:
+
+          Allow arbitrary extra args to mwc.pl with -Dmwc.arguments=...
+
+Fri Sep 17 14:29:04 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * examples/DCPS/DistributedContent/ApplicationLevel.cpp:
+        * examples/DCPS/DistributedContent/main.cpp:
+
+          Updated #includes for latest DOC group changes to ACE.
+
+Thu Sep 16 00:13:51 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Moved the delete_datawriter call out of pi_lock_
+          guard. This intended to fix a deadlock due to reverse
+          locking with pi_lock and TransportImpl lock. The deadlock
+          happend when the delete_contained_entities is called
+          which acquire pi_lock and then transport lock to unregister
+          writer from transport. It's possible another thread (e.g.
+          reactor thread) handling imcoming fully association message
+          which hold TransportImpl lock and then wait on pi_lock due
+          to TRANSIENT_LOCAL support.
+
+Tue Sep 14 15:48:17 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Serializer.cpp:
+        * dds/DCPS/transport/framework/BasicQueueLinkAllocator_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * performance-tests/Bench/src/Options.h:
+        * performance-tests/DCPS/MulticastListenerTest/TestStats.h:
+        * performance-tests/DCPS/Priority/Options.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/common/TestData.h:
+        * performance-tests/DCPS/TCPListenerTest/TestStats.h:
+        * performance-tests/DCPS/TCPProfilingTest/TestStats.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/common/TestData.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestStats.h:
+        * performance-tests/DCPS/UDPListenerTest/TestStats.h:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/LargeSample/Writer.cpp:
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+        * tests/DCPS/UnitTests/DurationToTimeValue.cpp:
+        * tests/DCPS/common/SampleInfo.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple_bp/SimpleDataReader.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataReader.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_n/SimpleDataWriter.cpp:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tools/monitor/MonitorTask.cpp:
+        * tools/monitor/Options.h:
+
+          Updated #includes for latest DOC group changes to ACE.
+
+Mon Sep 13 17:30:50 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/transport/framework/QueueTaskBase_T.h:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
+        * dds/DCPS/transport/framework/ThreadSynchStrategy.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * performance-tests/Bench/src/Process.h:
+        * performance-tests/DCPS/MulticastListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.h:
+        * tests/DCPS/Deadline/Writer.h:
+        * tests/DCPS/FooTest5/InstanceDataMap.h:
+
+          Updated #includes for latest DOC group changes to ACE.
+
+Mon Sep 13 16:25:28 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/FooTest3/FooTest3.mpc:
+        * tests/DCPS/FooTest3/InstanceDataMap.h:
+        * tests/DCPS/FooTest3/InstanceDataMap.cpp:
+        * tests/DCPS/FooTest3/README:
+        * tests/DCPS/FooTest3/TestException.h:
+        * tests/DCPS/FooTest3/Writer.h:
+        * tests/DCPS/FooTest3/Writer.cpp:
+        * tests/DCPS/FooTest3/main.cpp:
+        * tests/DCPS/FooTest3/special_build_test.pl:
+        * tests/DCPS/FooTest3NoKey/FooTest3NoKey.mpc:
+        * tests/DCPS/FooTest3NoKey/InstanceDataMap.h:
+        * tests/DCPS/FooTest3NoKey/InstanceDataMap.cpp:
+        * tests/DCPS/FooTest3NoKey/README:
+        * tests/DCPS/FooTest3NoKey/TestException.h:
+        * tests/DCPS/FooTest3NoKey/Writer.h:
+        * tests/DCPS/FooTest3NoKey/Writer.cpp:
+        * tests/DCPS/FooTest3NoKey/main.cpp:
+        * tests/DCPS/FooTest3NoKey/special_build_test.pl:
+        * tests/DCPS/FooTest3NoKey/special_build_test_mw.pl:
+
+          Removed obsolete tests. These tests require PUBLISHER_TEST
+          defined in DCPS layer code which no longer exist.
+
+Fri Sep  3 19:44:20 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * configure:
+
+          Use "perl script.pl" instead of just "script.pl" to run a perl script
+          as a child process, since some Windows hosts may not have the file
+          association for .pl set up.
+
+Fri Sep  3 18:02:20 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/multicast.mpc:
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.mpc:
+        * dds/DCPS/transport/udp/udp.mpc:
+        * dds/DdsDcps.mpc:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/idl/opendds_idl.mpc:
+        * dds/monitor/monitor.mpc:
+
+          Enabled a "make install" installation of core executables and
+          libraries (those in dds/*).
+
+        * performance-tests/DCPS/dummyTCP/DummyTcpReceiveStrategy.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.cpp:
+
+          Changed some #includes to allow the test to be built against a set of
+          installed libraries and headers.
+
+Wed Sep  1 21:23:35 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * INSTALL:
+        * configure:
+
+          Improved error messages and documentation for the configure script.
+          Fixed a bug that called the wrong function in the Cwd module only
+          when generating a certain error message.
+
+Fri Aug 27 14:44:12 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Monitor/Messenger.mpc:
+
+          Fixed the MPC "after" assignments to refer to the correct projects.
+
+Thu Aug 26 21:15:53 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/dds_visitor.h:
+        * dds/idl/dds_visitor.cpp:
+
+          Added a check for use of anonymous sequence or array fields in
+          unions or structs.  These anonymous types are deprecated in OMG IDL
+          and not supported at all with opendds_idl.  Use a typedef instead.
+
+          Fixed a TAO version check off-by-one error.
+
+Mon Aug 23 20:13:06 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/LocalObject.h:
+        * java/idl2jni/runtime/idl2jni_BaseJavaPeer.h:
+
+          TAO_Local_RefCounted_Object is now removed in the DOC group repo.
+
+Tue Aug 17 19:59:28 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * NEWS:
+        * README:
+
+          Updated for next release (2.3).
+
+        * ChangeLog:
+        * docs/history/ChangeLog-2.2:
+
+          Moved ChangeLog entries from version 2.2 to their own file.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

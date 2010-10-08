@@ -1,0 +1,230 @@
+
+== Modified API ======================================================
+
+In order to allow the application to establish relationships
+supporting communication with DDS services managed by separate
+InfoRepo repositories, the following modifications to the API
+are made:
+
+======================================================================
+*** New:
+
+  //////////////////////////////////////
+  // Application methods.
+
+  // Interface changed
+  void
+  OpenDDS::DCPS::Service_Participant::set_repo_ior(
+    const ACE_TCHAR* ior,
+    const OpenDDS::DCPS::Service_Participant::RepoKey
+      repo = OpenDDS::DCPS::Service_Participant::DEFAULT_REPO
+  );
+
+  // New
+  void
+  OpenDDS::Service_Participant::set_repo_domain(
+    const ::DDS::DomainId_t                           domain,
+    const OpenDDS::DCPS::Service_Participant::RepoKey repo
+  );
+
+  // New
+  const OpenDDS::DCPS::Service_Participant::RepoKey
+  OpenDDS::Service_Participant::domain_to_repo(
+    const ::DDS::DomainId_t domain,
+  ) const;
+
+  //////////////////////////////////////
+  // Internal only methods.
+
+  // Interface changed
+  OpenDDS::DCPS::DCPSInfo_ptr
+  OpenDDS::DCPS::Service_Participant::get_repository(
+    const ::DDS::DomainId_t domain
+  ) const;
+
+  // Interface changed
+  int
+  OpenDDS::DCPS::Service_Participant::bit_transport_port(
+    const OpenDDS::DCPS::Service_Participant::RepoKey
+      repo = OpenDDS::DCPS::Service_Participant::DEFAULT_REPO
+  ) const;
+
+  // Interface changed
+  int
+  OpenDDS::DCPS::Service_Participant::bit_transport_port(
+    int port,
+    const OpenDDS::DCPS::Service_Participant::RepoKey
+      repo = OpenDDS::DCPS::Service_Participant::DEFAULT_REPO
+  );
+
+  // Interface changed
+  OpenDDS::DCPS::TransportImpl_rch
+  OpenDDS::DCPS::Service_Participant::bit_transport_impl(
+    const ::DDS::DomainId_t
+      domain = OpenDDS::DCPS::Service_Participant::ANY_DOMAIN
+  );
+
+  // Interface changed
+  int
+  OpenDDS::DCPS::Service_Participant::init_bit_transport_impl(
+    const OpenDDS::DCPS::Service_Participant::RepoKey
+      repo = OpenDDS::DCPS::Service_Participant::DEFAULT_REPO
+  );
+
+  // New
+  int
+  OpenDDS::DCPS::Service_Participant::load_domain_configuration();
+
+  // New
+  int
+  OpenDDS::DCPS::Service_Participant::load_repo_configuration();
+
+  // Action changed, interface unchanged
+  int
+  OpenDDS::DCPS::Service_Participant::load_configuration();
+    // Now calls load_domain_configuration() and
+    // load_repo_configuration().
+
+  // Action changed, interface unchanged
+  OpenDDS::DCPS::TransportImpl_rch
+  OpenDDS::DCPS::TransportFactory::obtain(
+    OpenDDS::DCPS::TransportIdType id
+  );
+    // Now returns TransportImpl_rch::nil() instead of throwing
+    // Transport:NotFound()
+
+======================================================================
+
+From inspection, any code that uses the existing API will be
+unaffected.  The two existing methods were extended by adding call
+parameters with defaults, allowing existing code to compile and
+execute without modification.
+
+The get_repository() method is used internally by the service and
+any existing application code that uses this method is in error.
+
+In the case where additional DDS services, managed by distinct
+repositories, is desired, the full API will need to be used.
+The use of these interfaces follows the pattern of:
+
+  1) Set the repository IOR values in the service using
+     set_repo_ior().
+
+  2) Bind domains to the repositories using set_repo_domain().
+
+The ability to specify these relationships statically is also
+provided through the use of subsections in the configuration file.
+These sections are arranged as:
+
+======================================================================
+
+[domain/<domainname>]
+DomainId      = <::DDS::DomainId_t value>
+DomainRepoKey = <::OpenDDS::DCPS::Service_Participant::RepoKey value>
+
+[repository/<reponame>]
+RepositoryKey = <::OpenDDS::DCPS::Service_Participant::RepoKey value>
+RepositoryIor = <CORBA IOR locating the repository>
+
+======================================================================
+
+There can be as many [domain/*] sections as desired, as long
+as the DomainId values are distinct within the application.
+The DomainRepoKey value must refer to a key value defined as a
+RepositoryKey in a [repository/*] within the same configuration.
+
+There can be as many [repository/*] sections as desired, as long
+as the RepositoryKey values are distinct within the application.
+
+The sections can appear in any order.
+
+Once an application has been configured using a configuration file,
+the application may add repositories and bind them to domains using
+the API as described above.  This may be done at any point during
+the lifetime of the application.
+
+Internal to the OpenDDS service code, the Built In Topics
+are attached to a separate transport implementation for each
+repository with which we are communicating.  The TransportId for
+these transports is derived from the BIT_ALL_TRAFFIC constant as a
+base to which the RepoKey value for the specific repository is added.
+It is the reponsibility of the application to avoid collisions with
+these key values.
+
+== Rationale =========================================================
+
+The DDS specification (07-01-01) indicates that DDS provides
+a data centric service for a "global data space" defined by the
+conceptual model.  OpenDDS implements the meta-information about the
+service and the global data space in a DCPS Information Repository
+(InfoRepo).  In the current implementation, application processes
+access the InfoRepo through CORBA IDL interfaces.  These interfaces
+are accessed by each process participating in the DDS service.
+Since this was implementing the conceptual global data space, the
+initial version did not anticipate the existence of more than one
+source for the service meta-information.
+
+As OpenDDS matures, the practicalities of implementation has resulted
+in the existence of multiple InfoRepo objects, serving independent
+segments of DDS services.  A natural extension of this is to require
+the ability to have a single application participate in more than
+one independently managed DDS service segment at a time.
+
+This can be implemented in many different ways, including:
+1) providing a single distributed InfoRepo that manages all possible
+DDS service segments; 2) providing a way for individual InfoRepo
+objects to be federated to allow coordination between them;
+3) distributing the repository functionality across all service
+participants; or, 4) requiring the application to manage any
+potential conflicts between the segments managed by different
+InfoRepo objects.
+
+The simplest mechanism is to require the application to manage
+potential conflicts.  This does not preclude future implementations
+of either fully distributed or federated service management.
+This simplest mechanism is also easily implemented by extensions
+to the DDS service API used by applications.
+
+Potential conflicts between service segments managed by separate
+repositories include: 1) Domain ID conflicts; and, 2) application
+resource conflicts.
+
+Domain ID conflicts require that the system in which more than one
+repository will be used to partition domains within the system and
+not just within any single repository.  This is necessary since all
+service related information is keyed by the DomainId.  Finding the
+same domain within two different repositories would create ambiguity
+when accessing service information for that domain.  e.g. finding
+the DomainParticipant or any of its contained entities would need
+to include the repository, which is not part of the specification
+interfaces.  This is beyond the scope of the OpenDDS implementation.
+If it is not possible for the system design to partition the domains,
+then applications desiring to participate in services having these
+conflicts will be more difficult.  e.g. requiring intermediate
+processes to translate or republish information to mitigate the
+domain ID conflicts.
+
+Application resource conflicts need to be managed by the application
+through its implicit knowledge of the different service repositories.
+The OpenDDS service API needs to provide methods to allow for
+resources used by the application to perform this management.
+Memory resources are currently local to the individual DataWriters
+and DataReaders, so these do not require active management.
+
+In addition to memory, the transport implementations attached to the
+service need to be managed.  The current transport implementations
+can only be used within the scope of a single repository, so the
+application will need to create at least one transport for each
+attached repository.  Since each InfoRepo publishes the Built In
+Topics that it manages, the OpenDDS Service_Participant manages the
+creation and attachment of a separate transport to each repository
+for these topics.  There is no requirement for the application to
+perform any of the Built In Topic transport management.
+
+The OpenDDS Service_Participant must allow individual repositories
+to be bound to specific domains.  This is a 1 (repository) to many
+(domain Id) relationship.  Since the Service_Participant currently
+manages the transport for the Built In Topics for the service,
+a transport needs to be created for each individual repository.
+This is a 1 (repository) to 1 (transport) relationship.
+
