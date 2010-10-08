@@ -360,7 +360,7 @@ DataWriterImpl::fully_associated(OpenDDS::DCPS::RepoId myid,
         ++publication_match_status_.current_count;
         ++publication_match_status_.current_count_change;
 
-        if (bind(id_to_handle_map_, rd_ids[i], handles[i]) != 0) {
+        if (OpenDDS::DCPS::bind(id_to_handle_map_, rd_ids[i], handles[i]) != 0) {
           RepoIdConverter converter(rd_ids[i]);
           ACE_DEBUG((LM_WARNING,
                      ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::fully_associated: ")

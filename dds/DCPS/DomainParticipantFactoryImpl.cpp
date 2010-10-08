@@ -144,7 +144,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
       return DDS::DomainParticipant::_nil();
     }
 
-    if (bind(participants_, domainId, set)  == -1) {
+    if (OpenDDS::DCPS::bind(participants_, domainId, set)  == -1) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")

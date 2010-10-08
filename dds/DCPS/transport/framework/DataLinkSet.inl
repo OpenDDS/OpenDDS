@@ -165,7 +165,7 @@ OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
        itr != link_set->map_.end();
        ++itr) {
     // Attempt to add the current DataLink to this set.
-    int result = bind(map_, itr->first, itr->second);
+    int result = OpenDDS::DCPS::bind(map_, itr->first, itr->second);
 
     if (result == 0) {
       // We successfully added the current DataLink to this set,
