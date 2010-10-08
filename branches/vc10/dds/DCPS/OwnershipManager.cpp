@@ -92,7 +92,7 @@ OwnershipManager::set_instance_map (const char* type_name,
                 instance_map, reader));
   }
 
-  if (0 != bind(type_instance_map_, type_name, InstanceMap (instance_map, reader))) {
+  if (0 != OpenDDS::DCPS::bind(type_instance_map_, type_name, InstanceMap (instance_map, reader))) {
     ACE_ERROR((LM_ERROR, "(%P|%t)OwnershipManager::set_instance_map failed to "
                          "bind instance for type \"%s\"\n",type_name));
   }

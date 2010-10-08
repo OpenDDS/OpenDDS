@@ -56,7 +56,7 @@ OpenDDS::DCPS::DataLinkSetMap::find_or_create_set(RepoId id)
     // It wasn't found.  Create one and insert it.
     link_set = new DataLinkSet();
 
-    if (bind(map_, id, link_set) != 0) {
+    if (OpenDDS::DCPS::bind(map_, id, link_set) != 0) {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Unable to insert new DataLinkSet into "
                  "the DataLinkSetMap.\n"));

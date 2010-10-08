@@ -53,7 +53,7 @@ project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
     DDS/WaitSet.java << DDS/_WaitSetInterfTAOPeer.java
     DDS/GuardCondition.java << DDS/_GuardConditionInterfTAOPeer.java
     OpenDDS/DCPS/transport/TransportImpl.java << DDS/Publisher.java DDS/Subscriber.java
-    OpenDDS/DCPS/transport/TheTransportFactory.java
+    OpenDDS/DCPS/transport/TheTransportFactory.java << DDS/Publisher.java DDS/Subscriber.java
     OpenDDS/DCPS/transport/AttachStatus.java
     OpenDDS/DCPS/transport/ConfigurationConflictException.java
     OpenDDS/DCPS/transport/DuplicateException.java

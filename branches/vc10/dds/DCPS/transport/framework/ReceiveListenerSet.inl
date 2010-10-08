@@ -24,7 +24,7 @@ OpenDDS::DCPS::ReceiveListenerSet::insert(RepoId                    subscriber_i
 {
   DBG_ENTRY_LVL("ReceiveListenerSet","insert",6);
   GuardType guard(this->lock_);
-  return bind(map_, subscriber_id, listener);
+  return OpenDDS::DCPS::bind(map_, subscriber_id, listener);
 }
 
 ACE_INLINE int
