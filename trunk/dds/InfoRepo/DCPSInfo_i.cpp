@@ -1981,6 +1981,17 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
   int status = 0;
 
   try {
+
+#ifndef ACE_AS_STATIC_LIBS
+    if (ACE_Service_Config::current()->find(ACE_TEXT("DCPS_SimpleTcpLoader"))
+        < 0 /* not found (-1) or suspended (-2) */) {
+      static const ACE_TCHAR directive[] =
+        ACE_TEXT("dynamic DCPS_SimpleTcpLoader Service_Object * ")
+        ACE_TEXT("SimpleTcp:_make_DCPS_SimpleTcpLoader() \"-type SimpleTcp\"");
+      ACE_Service_Config::process_directive(directive);
+    }
+#endif
+
     OpenDDS::DCPS::TransportImpl_rch trans_impl
     = TheTransportFactory->create_transport_impl(OpenDDS::DCPS::BIT_ALL_TRAFFIC,
                                                  ACE_TEXT("SimpleTcp"),
