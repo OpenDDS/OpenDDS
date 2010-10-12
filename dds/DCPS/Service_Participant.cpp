@@ -284,9 +284,11 @@ Service_Participant::get_domain_participant_factory(int &argc,
         ACE_ASSERT(!CORBA::is_nil(orb_.in()));
 
         if (config_fname == ACE_TEXT("")) {
-          ACE_DEBUG((LM_INFO,
-                     ACE_TEXT("(%P|%t)INFO: not using file configuration - no configuration ")
-                     ACE_TEXT("file specified.\n")));
+          if (DCPS_debug_level) {
+            ACE_DEBUG((LM_INFO,
+                       ACE_TEXT("(%P|%t)INFO: not using file configuration - no configuration ")
+                       ACE_TEXT("file specified.\n")));
+          }
 
         } else {
           // Load configuration only if the configuration

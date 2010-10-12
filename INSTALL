@@ -9,6 +9,7 @@ BUILDING OpenDDS
   We have built OpenDDS on number of different platforms and compilers.  See
   $DDS_ROOT/README for a complete description of supported platforms.
 
+
 * Compiling [Option A]:
 
   Starting with version 2.2, OpenDDS has a "configure" script to automate the
@@ -27,6 +28,7 @@ BUILDING OpenDDS
   If configure runs successfully it will end with a message about the next
   steps for compiling OpenDDS.  If it fails, you may need to follow the
   "Option B" steps below for manual configuration.
+
 
 * Compiling [Option B]:
 
@@ -79,6 +81,25 @@ BUILDING OpenDDS
         On Windows if you build Release mode add "-ExeSubDir Release".
         On Windows if you build static libraries add "-ExeSubDir Static_Debug"
         or "-ExeSubDir Static_Release".
+
+
+* Getting Started building your own applications:
+
+  See the OpenDDS Developer's Guide:
+      http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf
+  Run the Developer's Guide Example program:
+  Unix                                            Windows
+  ----                                            -------
+  cd $DDS_ROOT/DevGuideExamples/DCPS/Messenger    cd %DDS_ROOT%\DevGuideExam...
+  ./run_test.pl                                   perl run_test.pl
+  [ see the notes in step 5 "Test", above, for options to run_test.pl ]
+
+  The Perl script will start 3 processes, the DCPSInfoRepo, one publisher, and
+  one subscriber.  Note that the command lines used to spawn these processes
+  are echoed back to standard output.  The options and config files used here
+  are helpful starting points for developing and running your own OpenDDS
+  applcations.
+
 
 * Note:
 
