@@ -45,7 +45,11 @@
 InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
   : ior_file_(ACE_TEXT("repo.ior"))
   , listen_address_given_(0)
+#ifdef DDS_HAS_MINIMUM_BIT
+  , use_bits_(false)
+#else
   , use_bits_(true)
+#endif
   , resurrect_(true)
   , finalized_(false)
   , federator_(this->federatorConfig_)

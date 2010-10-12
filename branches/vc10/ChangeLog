@@ -1,3 +1,32 @@
+Tue Oct 12 15:03:53 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * INSTALL:
+
+          Add some "next steps" documentation to describe what a user
+          may want to do next after building OpenDDS.
+
+        * NEWS:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          DCPSInfoRepo no longer requires an -ORBSvcConf argument when using
+          Built-In Topics.  The DCPSInfoRepo process will take care of loading
+          SimpleTCP (if it's not already loaded).
+
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+
+          Test the above change by leaving out the -ORBSvcConf argument on
+          the DCPSInfoRepo command line.
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Default use_bits_ to false (as if -NOBITS was given) if
+          Built-In Topics are disabled at compile-time.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Only log the "not using file configuration" message
+          if -DCPSDebugLevel is enabled.
+
 Mon Oct  4 14:19:06 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
