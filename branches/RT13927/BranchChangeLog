@@ -1,3 +1,14 @@
+Thu Oct 14 14:28:24 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLibrary.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLibrary.genmodel:
+
+          Added policies to MiddlewareLibrary similar to what is done for PolicyLibrary to contain
+          domain entity custom policies.
+
 Mon Oct  4 21:17:40 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
           Merged trunk r3639 out to this branch.
