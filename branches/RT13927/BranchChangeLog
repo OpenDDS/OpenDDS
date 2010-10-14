@@ -1,3 +1,9 @@
+Thu Oct 14 17:34:55 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelibrary/.classpath:
+
+          If the project directory already exists apparently GMF will not define a proper .classpath.
+
 Thu Oct 14 15:33:20 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelibrary/plugin.xml:
