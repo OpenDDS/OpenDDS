@@ -648,6 +648,15 @@
       <accessors
           figure="//@figures.0/@descriptors.22/@actualFigure/@children.1"/>
     </descriptors>
+    <descriptors
+        name="CompartmentFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Rectangle"
+          name="CompartmentFigure">
+        <layout
+            xsi:type="gmfgraph:XYLayout"/>
+      </actualFigure>
+    </descriptors>
   </figures>
   <nodes
       name="DeadlineQosPolicy"
@@ -738,6 +747,13 @@
       name="max_blocking_time"
       figure="PeriodFigure"
       needsTitle="true"/>
+  <compartments
+      name="QoS Policies- Custom"
+      collapsible="true"
+      needsTitle="true">
+    <figure
+        href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#CompartmentFigure"/>
+  </compartments>
   <labels
       name="DeadlineQosPolicyStereotype"
       figure="DeadlineQosPolicyFigure"
