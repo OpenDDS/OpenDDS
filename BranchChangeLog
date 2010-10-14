@@ -1,3 +1,22 @@
+Thu Oct 14 14:50:44 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/src/com/ociweb/emf/util/ClassesFinder.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/src/com/ociweb/emf/util/ReferencesFinder.java:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/src/org/opendds/modeling/model/dcps/DomainParticipant.java:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/src/org/opendds/modeling/model/domain/DomainEntity.java:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/src/org/opendds/modeling/model/domain/impl/DomainEntityImpl.java:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/impl/publisherImpl.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/impl/subscriberImpl.java:
+
+          Additions to the generated code to allow GMF compartments to contain elements that are not owned by element behind the
+          Figure that contains the compartment.
+
 Thu Oct 14 14:28:24 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore:
