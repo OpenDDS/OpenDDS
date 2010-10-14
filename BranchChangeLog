@@ -1,3 +1,16 @@
+Thu Oct 14 15:00:55 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLibrary.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLibrary.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLibrary.trace:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/QosPolicies.gmfgraph:
+        * tools/modeling/org.opendds/org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph:
+
+          Added policy mapping to the MiddlewareLibrary and added compartments to the DomainParticipant,
+          Publisher, and Subscriber. Note that containment feature for the children that make up the
+          compartments are not set the children's parents. This results in GMF validation errors that
+          can be ignored.
+
 Thu Oct 14 14:50:44 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.model/META-INF/MANIFEST.MF:

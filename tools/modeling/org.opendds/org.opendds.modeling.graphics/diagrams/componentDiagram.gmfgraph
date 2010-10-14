@@ -12,10 +12,10 @@
         xsi:type="gmfgraph:PolylineDecoration"
         name="PortConnectionTargetDecoration"/>
     <descriptors
-        name="ComponentBodyFigure">
+        name="CompartmentFigure">
       <actualFigure
           xsi:type="gmfgraph:Rectangle"
-          name="ComponentBodyFigure">
+          name="CompartmentFigure">
         <layout
             xsi:type="gmfgraph:XYLayout"/>
       </actualFigure>
@@ -71,8 +71,8 @@
       name="PortConnection"
       figure="PortConnectionFigure"/>
   <compartments
-      name="ComponentBodyCompartment"
-      figure="ComponentBodyFigure"
+      name="DefaultCompartment"
+      figure="CompartmentFigure"
       collapsible="true"/>
   <labels
       name="ComponentName"
