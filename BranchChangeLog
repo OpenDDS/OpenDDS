@@ -14,6 +14,8 @@ Thu Oct 14 14:50:44 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/org.opendds/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/impl/publisherImpl.java:
         * tools/modeling/org.opendds/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/impl/subscriberImpl.java:
 
+        * tools/modeling/org.opendds/org.opendds.modeling.model.edit/plugin.properties
+
           Additions to the generated code to allow GMF compartments to contain elements that are not owned by element behind the
           Figure that contains the compartment.
 
