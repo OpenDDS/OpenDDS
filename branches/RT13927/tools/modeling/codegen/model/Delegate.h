@@ -76,9 +76,25 @@ namespace OpenDDS { namespace Model {
         DDS::StatusMask    mask
       );
 
+      DDS::DataWriter*
+      createWriter(
+        DDS::Publisher*    publisher,
+        DDS::Topic*        topic,
+        DDS::DataWriterQos writerQos,
+        DDS::StatusMask    mask
+      );
+
       DDS::DataReader*
       createSubscription(
         unsigned int       which,
+        DDS::Subscriber*   subscriber,
+        DDS::Topic*        topic,
+        DDS::DataReaderQos readerQos,
+        DDS::StatusMask    mask
+      );
+
+      DDS::DataReader*
+      createReader(
         DDS::Subscriber*   subscriber,
         DDS::Topic*        topic,
         DDS::DataReaderQos readerQos,

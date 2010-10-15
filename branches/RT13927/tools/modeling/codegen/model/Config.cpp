@@ -23,7 +23,6 @@ namespace { // anonymous namespace for file scope.
   enum { DEFAULT_DOMAINID =  0};
 
   // Command line argument definitions.
-  const ACE_TCHAR* VERBOSE_ARGUMENT    = ACE_TEXT("-v");
   const ACE_TCHAR* ENTITYFILE_ARGUMENT = ACE_TEXT("-DDSAppConfig");
 
   // Entity configuration file section names.
@@ -134,8 +133,7 @@ Config::~Config()
 }
 
 Config::Config()
- : verbose_(    false),
-   configured_( true)
+ : configured_( true)
 {
 }
 
@@ -144,7 +142,7 @@ Config::init( int argc, ACE_TCHAR** argv)
 {
   ACE_Arg_Shifter parser( argc, argv);
   while( parser.is_anything_left()) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::Config() - ")
         ACE_TEXT("processing argument: %s.\n"),
@@ -156,16 +154,6 @@ Config::init( int argc, ACE_TCHAR** argv)
       this->configureEntities( currentArg);
       parser.consume_arg();
 
-    } else if( 0 <= (parser.cur_arg_strncasecmp( VERBOSE_ARGUMENT))) {
-      this->verbose_ = true;
-      if( this->verbose()) {
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) Config::Config() - ")
-          ACE_TEXT("Setting VERBOSE mode.\n")
-        ));
-      }
-      parser.consume_arg();
-
     } else {
       parser.ignore_arg();
     }
@@ -175,7 +163,7 @@ Config::init( int argc, ACE_TCHAR** argv)
 void
 Config::configureEntities( const ACE_TCHAR* filename)
 {
-  if( this->verbose()) {
+  if( OpenDDS::DCPS::DCPS_debug_level>1) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Config::configureEntities() - ")
       ACE_TEXT("configuring using file: %s.\n"),
@@ -212,7 +200,7 @@ Config::configureEntities( const ACE_TCHAR* filename)
          (0 == heap.enumerate_sections( participantKey, index, sectionName));
          ++index
        ) {
-      if( this->verbose()) {
+      if( OpenDDS::DCPS::DCPS_debug_level>1) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) Config::configureEntities() - ")
           ACE_TEXT("configuring participant %s.\n"),
@@ -252,7 +240,7 @@ Config::configureEntities( const ACE_TCHAR* filename)
          (0 == heap.enumerate_sections( topicKey, index, sectionName));
          ++index
        ) {
-      if( this->verbose()) {
+      if( OpenDDS::DCPS::DCPS_debug_level>1) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) Config::configureEntities() - ")
           ACE_TEXT("configuring topic %s.\n"),
@@ -292,7 +280,7 @@ Config::configureEntities( const ACE_TCHAR* filename)
          (0 == heap.enumerate_sections( publisherKey, index, sectionName));
          ++index
        ) {
-      if( this->verbose()) {
+      if( OpenDDS::DCPS::DCPS_debug_level>1) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) Config::configureEntities() - ")
           ACE_TEXT("configuring publisher %s.\n"),
@@ -324,7 +312,7 @@ Config::configureEntities( const ACE_TCHAR* filename)
          (0 == heap.enumerate_sections( writerKey, index, sectionName));
          ++index
        ) {
-      if( this->verbose()) {
+      if( OpenDDS::DCPS::DCPS_debug_level>1) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) Config::configureEntities() - ")
           ACE_TEXT("configuring writer %s.\n"),
@@ -356,7 +344,7 @@ Config::configureEntities( const ACE_TCHAR* filename)
          (0 == heap.enumerate_sections( subscriberKey, index, sectionName));
          ++index
        ) {
-      if( this->verbose()) {
+      if( OpenDDS::DCPS::DCPS_debug_level>1) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) Config::configureEntities() - ")
           ACE_TEXT("configuring subscriber %s.\n"),
@@ -387,7 +375,7 @@ Config::configureEntities( const ACE_TCHAR* filename)
          (0 == heap.enumerate_sections( readerKey, index, sectionName));
          ++index
        ) {
-      if( this->verbose()) {
+      if( OpenDDS::DCPS::DCPS_debug_level>1) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) Config::configureEntities() - ")
           ACE_TEXT("configuring reader %s.\n"),
@@ -440,7 +428,7 @@ Config::loadParticipant(
   if( 0 == heap.get_string_value( sectionKey, DOMAINID_KEYNAME, valueString)) {
     profile->domainId = ACE_OS::atoi( valueString.c_str());
   }
-  if( this->verbose()) {
+  if( OpenDDS::DCPS::DCPS_debug_level>1) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Config::loadParticipant() - ")
       ACE_TEXT("  [participant/%s] %s == %d.\n"),
@@ -462,7 +450,7 @@ Config::loadParticipant(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
     );
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadParticipant() - ")
         ACE_TEXT("  [participant/%s] %s == %s.\n"),
@@ -478,7 +466,7 @@ Config::loadParticipant(
   if( 0 == heap.get_string_value( sectionKey, ENTITYFACTORY_KEYNAME, valueString)) {
     profile->qos.entity_factory.autoenable_created_entities
       = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadParticipant() - ")
         ACE_TEXT("  [participant/%s] %s == %d.\n"),
@@ -550,7 +538,7 @@ Config::loadTopic(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
     );
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %s.\n"),
@@ -565,7 +553,7 @@ Config::loadTopic(
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITY_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %s.\n"),
@@ -604,7 +592,7 @@ Config::loadTopic(
     profile->qos.durability_service.service_cleanup_delay.nanosec = 0;
     profile->qos.durability_service.service_cleanup_delay.sec
       = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %d.\n"),
@@ -619,7 +607,7 @@ Config::loadTopic(
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITYSERVICEHISTORYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %s.\n"),
@@ -650,7 +638,7 @@ Config::loadTopic(
   heap.get_string_value( sectionKey, DURABILITYSERVICEHISTORYDEPTH_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->qos.durability_service.history_depth = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %d.\n"),
@@ -666,7 +654,7 @@ Config::loadTopic(
   heap.get_string_value( sectionKey, DURABILITYSERVICESAMPLES_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->qos.durability_service.max_samples = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %d.\n"),
@@ -682,7 +670,7 @@ Config::loadTopic(
   heap.get_string_value( sectionKey, DURABILITYSERVICEINSTANCES_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->qos.durability_service.max_instances = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %d.\n"),
@@ -699,7 +687,7 @@ Config::loadTopic(
   if (valueString.length() > 0) {
     profile->qos.durability_service.max_samples_per_instance
       = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %s.\n"),
@@ -716,7 +704,7 @@ Config::loadTopic(
   if (valueString.length() > 0) {
     profile->qos.deadline.period.nanosec = 0;
     profile->qos.deadline.period.sec = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %d.\n"),
@@ -733,7 +721,7 @@ Config::loadTopic(
   if (valueString.length() > 0) {
     profile->qos.latency_budget.duration.nanosec = 0;
     profile->qos.latency_budget.duration.sec = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %d.\n"),
@@ -748,7 +736,7 @@ Config::loadTopic(
   valueString.clear();
   heap.get_string_value( sectionKey, LIVELINESSKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %s.\n"),
@@ -783,7 +771,7 @@ Config::loadTopic(
   if (valueString.length() > 0) {
     profile->qos.liveliness.lease_duration.nanosec = 0;
     profile->qos.liveliness.lease_duration.sec = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %d.\n"),
@@ -798,7 +786,7 @@ Config::loadTopic(
   valueString.clear();
   heap.get_string_value( sectionKey, RELIABILITYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %s.\n"),
@@ -830,7 +818,7 @@ Config::loadTopic(
   if (valueString.length() > 0) {
     profile->qos.reliability.max_blocking_time.nanosec = 0;
     profile->qos.reliability.max_blocking_time.sec = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %d.\n"),
@@ -845,7 +833,7 @@ Config::loadTopic(
   valueString.clear();
   heap.get_string_value( sectionKey, DESTINATIONORDER_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %s.\n"),
@@ -875,7 +863,7 @@ Config::loadTopic(
   valueString.clear();
   heap.get_string_value( sectionKey, HISTORYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %s.\n"),
@@ -906,7 +894,7 @@ Config::loadTopic(
   heap.get_string_value( sectionKey, HISTORYDEPTH_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->qos.history.depth = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %d.\n"),
@@ -922,7 +910,7 @@ Config::loadTopic(
   heap.get_string_value( sectionKey, RESOURCEMAXSAMPLES_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->qos.resource_limits.max_samples = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %d.\n"),
@@ -938,7 +926,7 @@ Config::loadTopic(
   heap.get_string_value( sectionKey, RESOURCEMAXINSTANCES_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->qos.resource_limits.max_instances = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %d.\n"),
@@ -954,7 +942,7 @@ Config::loadTopic(
   heap.get_string_value( sectionKey, RESOURCEMAXSAMPLESPERINSTANCE_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->qos.resource_limits.max_samples_per_instance = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %d.\n"),
@@ -970,7 +958,7 @@ Config::loadTopic(
   heap.get_string_value( sectionKey, TRANSPORTPRIORITY_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->qos.transport_priority.value = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %d.\n"),
@@ -987,7 +975,7 @@ Config::loadTopic(
   if (valueString.length() > 0) {
     profile->qos.lifespan.duration.nanosec = 0;
     profile->qos.lifespan.duration.sec = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %d.\n"),
@@ -1002,7 +990,7 @@ Config::loadTopic(
   valueString.clear();
   heap.get_string_value( sectionKey, OWNERSHIPKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %s.\n"),
@@ -1033,7 +1021,7 @@ Config::loadTopic(
   heap.get_string_value( sectionKey, PARTICIPANT_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->participant = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %s.\n"),
@@ -1049,7 +1037,7 @@ Config::loadTopic(
   heap.get_string_value( sectionKey, TYPE_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->type = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadTopic() - ")
         ACE_TEXT("  [topic/%s] %s == %s.\n"),
@@ -1097,7 +1085,7 @@ Config::loadPublisher(
   valueString.clear();
   heap.get_string_value( sectionKey, PRESENTATION_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadPublisher() - ")
         ACE_TEXT("  [publisher/%s] %s == %s.\n"),
@@ -1131,7 +1119,7 @@ Config::loadPublisher(
   if( 0 == heap.get_string_value( sectionKey, PRESENTATIONCOHERENT_KEYNAME, valueString)) {
     profile->qos.presentation.coherent_access
       = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadPublisher() - ")
         ACE_TEXT("  [publisher/%s] %s == %d.\n"),
@@ -1147,7 +1135,7 @@ Config::loadPublisher(
   if( 0 == heap.get_string_value( sectionKey, PRESENTATIONORDERED_KEYNAME, valueString)) {
     profile->qos.presentation.ordered_access
       = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadPublisher() - ")
         ACE_TEXT("  [publisher/%s] %s == %d.\n"),
@@ -1164,7 +1152,7 @@ Config::loadPublisher(
   if (valueString.length() > 0) {
     profile->qos.partition.name.length( 1);
     profile->qos.partition.name[0] = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadPublisher() - ")
         ACE_TEXT("  [publisher/%s] %s == %s.\n"),
@@ -1187,7 +1175,7 @@ Config::loadPublisher(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
     );
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadPublisher() - ")
         ACE_TEXT("  [publisher/%s] %s == %s.\n"),
@@ -1203,7 +1191,7 @@ Config::loadPublisher(
   if( 0 == heap.get_string_value( sectionKey, ENTITYFACTORY_KEYNAME, valueString)) {
     profile->qos.entity_factory.autoenable_created_entities
       = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadPublisher() - ")
         ACE_TEXT("  [publisher/%s] %s == %d.\n"),
@@ -1219,7 +1207,7 @@ Config::loadPublisher(
   heap.get_string_value( sectionKey, PARTICIPANT_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->participant = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadPublisher() - ")
         ACE_TEXT("  [publisher/%s] %s == %s.\n"),
@@ -1235,7 +1223,7 @@ Config::loadPublisher(
   heap.get_string_value( sectionKey, TRANSPORTINDEX_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->transport = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadPublisher() - ")
         ACE_TEXT("  [publisher/%s] %s == %d.\n"),
@@ -1303,7 +1291,7 @@ Config::loadWriter(
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITY_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %s.\n"),
@@ -1347,7 +1335,7 @@ Config::loadWriter(
     profile->qos.durability_service.service_cleanup_delay.sec
       = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetDurabilityServiceDurationQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1362,7 +1350,7 @@ Config::loadWriter(
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITYSERVICEHISTORYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %s.\n"),
@@ -1396,7 +1384,7 @@ Config::loadWriter(
   if (valueString.length() > 0) {
     profile->qos.durability_service.history_depth = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetDurabilityServiceHistoryDepthQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1413,7 +1401,7 @@ Config::loadWriter(
   if (valueString.length() > 0) {
     profile->qos.durability_service.max_samples = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetDurabilityServiceSamplesQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1430,7 +1418,7 @@ Config::loadWriter(
   if (valueString.length() > 0) {
     profile->qos.durability_service.max_instances = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetDurabilityServiceInstancesQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1448,7 +1436,7 @@ Config::loadWriter(
     profile->qos.durability_service.max_samples_per_instance
       = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetDurabilityServiceSamplesPerInstanceQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %s.\n"),
@@ -1466,7 +1454,7 @@ Config::loadWriter(
     profile->qos.deadline.period.nanosec = 0;
     profile->qos.deadline.period.sec = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetDeadlineQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1484,7 +1472,7 @@ Config::loadWriter(
     profile->qos.latency_budget.duration.nanosec = 0;
     profile->qos.latency_budget.duration.sec = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetLatencyBudgetQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1499,7 +1487,7 @@ Config::loadWriter(
   valueString.clear();
   heap.get_string_value( sectionKey, LIVELINESSKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %s.\n"),
@@ -1538,7 +1526,7 @@ Config::loadWriter(
     profile->qos.liveliness.lease_duration.nanosec = 0;
     profile->qos.liveliness.lease_duration.sec = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetLivelinessDurationQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1553,7 +1541,7 @@ Config::loadWriter(
   valueString.clear();
   heap.get_string_value( sectionKey, RELIABILITYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %s.\n"),
@@ -1588,7 +1576,7 @@ Config::loadWriter(
     profile->qos.reliability.max_blocking_time.nanosec = 0;
     profile->qos.reliability.max_blocking_time.sec = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetReliabilityMaxBlockingQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1603,7 +1591,7 @@ Config::loadWriter(
   valueString.clear();
   heap.get_string_value( sectionKey, DESTINATIONORDER_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %s.\n"),
@@ -1635,7 +1623,7 @@ Config::loadWriter(
   valueString.clear();
   heap.get_string_value( sectionKey, HISTORYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %s.\n"),
@@ -1669,7 +1657,7 @@ Config::loadWriter(
   if (valueString.length() > 0) {
     profile->qos.history.depth = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetHistoryDepthQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1686,7 +1674,7 @@ Config::loadWriter(
   if (valueString.length() > 0) {
     profile->qos.resource_limits.max_samples = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetResourceMaxSamplesQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1703,7 +1691,7 @@ Config::loadWriter(
   if (valueString.length() > 0) {
     profile->qos.resource_limits.max_instances = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetResourceMaxInstancesQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1720,7 +1708,7 @@ Config::loadWriter(
   if (valueString.length() > 0) {
     profile->qos.resource_limits.max_samples_per_instance = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetResourceMaxSamplesPerInstanceQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1737,7 +1725,7 @@ Config::loadWriter(
   if (valueString.length() > 0) {
     profile->qos.transport_priority.value = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetTransportPriorityQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1755,7 +1743,7 @@ Config::loadWriter(
     profile->qos.lifespan.duration.nanosec = 0;
     profile->qos.lifespan.duration.sec = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetLifespanQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1779,7 +1767,7 @@ Config::loadWriter(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
     );
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %s.\n"),
@@ -1794,7 +1782,7 @@ Config::loadWriter(
   valueString.clear();
   heap.get_string_value( sectionKey, OWNERSHIPKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [topic/%s] %s == %s.\n"),
@@ -1828,7 +1816,7 @@ Config::loadWriter(
   if (valueString.length() > 0) {
     profile->qos.ownership_strength.value = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetOwnershipStrengthQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1845,7 +1833,7 @@ Config::loadWriter(
     profile->qos.writer_data_lifecycle.autodispose_unregistered_instances
       = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetWriterDataLifecycleQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %d.\n"),
@@ -1861,7 +1849,7 @@ Config::loadWriter(
   heap.get_string_value( sectionKey, PUBLISHER_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->publisher = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %s.\n"),
@@ -1877,7 +1865,7 @@ Config::loadWriter(
   heap.get_string_value( sectionKey, TOPIC_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->topic = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadWriter() - ")
         ACE_TEXT("  [writer/%s] %s == %s.\n"),
@@ -1924,7 +1912,7 @@ Config::loadSubscriber(
   valueString.clear();
   heap.get_string_value( sectionKey, PRESENTATION_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadSubscriber() - ")
         ACE_TEXT("  [subscriber/%s] %s == %s.\n"),
@@ -1958,7 +1946,7 @@ Config::loadSubscriber(
   if( 0 == heap.get_string_value( sectionKey, PRESENTATIONCOHERENT_KEYNAME, valueString)) {
     profile->qos.presentation.coherent_access
       = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadSubscriber() - ")
         ACE_TEXT("  [subscriber/%s] %s == %d.\n"),
@@ -1974,7 +1962,7 @@ Config::loadSubscriber(
   if( 0 == heap.get_string_value( sectionKey, PRESENTATIONORDERED_KEYNAME, valueString)) {
     profile->qos.presentation.ordered_access
       = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadSubscriber() - ")
         ACE_TEXT("  [subscriber/%s] %s == %d.\n"),
@@ -1991,7 +1979,7 @@ Config::loadSubscriber(
   if (valueString.length() > 0) {
     profile->qos.partition.name.length( 1);
     profile->qos.partition.name[0] = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadSubscriber() - ")
         ACE_TEXT("  [subscriber/%s] %s == %s.\n"),
@@ -2014,7 +2002,7 @@ Config::loadSubscriber(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
     );
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadSubscriber() - ")
         ACE_TEXT("  [subscriber/%s] %s == %s.\n"),
@@ -2030,7 +2018,7 @@ Config::loadSubscriber(
   if( 0 == heap.get_string_value( sectionKey, ENTITYFACTORY_KEYNAME, valueString)) {
     profile->qos.entity_factory.autoenable_created_entities
       = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadSubscriber() - ")
         ACE_TEXT("  [subscriber/%s] %s == %d.\n"),
@@ -2046,7 +2034,7 @@ Config::loadSubscriber(
   heap.get_string_value( sectionKey, TRANSPORTINDEX_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->transport = ACE_OS::atoi( valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadSubscriber() - ")
         ACE_TEXT("  [subscriber/%s] %s == %d.\n"),
@@ -2105,7 +2093,7 @@ Config::loadReader(
   valueString.clear();
   heap.get_string_value( sectionKey, DURABILITY_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %s.\n"),
@@ -2148,7 +2136,7 @@ Config::loadReader(
     profile->qos.deadline.period.nanosec = 0;
     profile->qos.deadline.period.sec = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetDeadlineQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %d.\n"),
@@ -2166,7 +2154,7 @@ Config::loadReader(
     profile->qos.latency_budget.duration.nanosec = 0;
     profile->qos.latency_budget.duration.sec = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetLatencyBudgetQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %d.\n"),
@@ -2181,7 +2169,7 @@ Config::loadReader(
   valueString.clear();
   heap.get_string_value( sectionKey, LIVELINESSKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %s.\n"),
@@ -2220,7 +2208,7 @@ Config::loadReader(
     profile->qos.liveliness.lease_duration.nanosec = 0;
     profile->qos.liveliness.lease_duration.sec = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetLivelinessDurationQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %d.\n"),
@@ -2235,7 +2223,7 @@ Config::loadReader(
   valueString.clear();
   heap.get_string_value( sectionKey, RELIABILITYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %s.\n"),
@@ -2270,7 +2258,7 @@ Config::loadReader(
     profile->qos.reliability.max_blocking_time.nanosec = 0;
     profile->qos.reliability.max_blocking_time.sec = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetReliabilityMaxBlockingQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %d.\n"),
@@ -2285,7 +2273,7 @@ Config::loadReader(
   valueString.clear();
   heap.get_string_value( sectionKey, DESTINATIONORDER_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %s.\n"),
@@ -2317,7 +2305,7 @@ Config::loadReader(
   valueString.clear();
   heap.get_string_value( sectionKey, HISTORYKIND_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %s.\n"),
@@ -2351,7 +2339,7 @@ Config::loadReader(
   if (valueString.length() > 0) {
     profile->qos.history.depth = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetHistoryDepthQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %d.\n"),
@@ -2368,7 +2356,7 @@ Config::loadReader(
   if (valueString.length() > 0) {
     profile->qos.resource_limits.max_samples = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetResourceMaxSamplesQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %d.\n"),
@@ -2385,7 +2373,7 @@ Config::loadReader(
   if (valueString.length() > 0) {
     profile->qos.resource_limits.max_instances = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetResourceMaxInstancesQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %d.\n"),
@@ -2402,7 +2390,7 @@ Config::loadReader(
   if (valueString.length() > 0) {
     profile->qos.resource_limits.max_samples_per_instance = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetResourceMaxSamplesPerInstanceQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %d.\n"),
@@ -2426,7 +2414,7 @@ Config::loadReader(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
     );
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %s.\n"),
@@ -2445,7 +2433,7 @@ Config::loadReader(
     profile->qos.time_based_filter.minimum_separation.sec
       = ACE_OS::atoi( valueString.c_str());
     profile->mask |= SetTimeBasedFilterQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %d.\n"),
@@ -2467,7 +2455,7 @@ Config::loadReader(
     profile->qos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec
       = 0;
     profile->mask |= SetReaderDataLifecycleQos;
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %d %d.\n"),
@@ -2484,7 +2472,7 @@ Config::loadReader(
   heap.get_string_value( sectionKey, SUBSCRIBER_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->subscriber = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %s.\n"),
@@ -2500,7 +2488,7 @@ Config::loadReader(
   heap.get_string_value( sectionKey, TOPIC_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->topic = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
-    if( this->verbose()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadReader() - ")
         ACE_TEXT("  [reader/%s] %s == %s.\n"),

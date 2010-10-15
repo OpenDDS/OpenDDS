@@ -3,20 +3,6 @@
 // $Id$
 
 ACE_INLINE
-bool&
-OpenDDS::Model::Config::verbose()
-{
-  return this->verbose_;
-}
-
-ACE_INLINE
-bool
-OpenDDS::Model::Config::verbose() const
-{
-  return this->verbose_;
-}
-
-ACE_INLINE
 OpenDDS::Model::Config::operator bool() const
 {
   return this->configured_;

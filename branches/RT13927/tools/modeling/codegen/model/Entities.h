@@ -105,6 +105,9 @@ class Entities  {
     /// @}
 
   private:
+    OpenDDS::DCPS::TransportImpl_rch
+    transport( OpenDDS::DCPS::TransportIdType key);
+
     /// Deferred registration of type support for a participant.
     void registerTypes( const std::string& participant);
 
