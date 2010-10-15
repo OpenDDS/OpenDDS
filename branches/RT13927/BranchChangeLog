@@ -1,3 +1,17 @@
+Fri Oct 15 14:18:57 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/Middleware/MiddlewareTest.opendds:
+        * tools/modeling/testdata/Middleware/MiddlewareTest.opendds_diagram_middlewarelibrary:
+
+          Updated to reflect recent commits to support DomainParticipant,
+          Publisher, and Subscriber figures having compartments for policies.
+
+        * tools/modeling/testdata/Middleware/MiddlewareTest_screenshot_1.png:
+        * tools/modeling/testdata/Middleware/MiddlewareTest_screenshot_2.png:
+
+          Added screenshots showing what the middleware test data looks like in
+          the diagram editor.
+
 Fri Oct 15 03:56:20 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/codegen/model/Entities.h:
