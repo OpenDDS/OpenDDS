@@ -1,3 +1,28 @@
+Fri Oct 15 19:17:35 UTC 2010  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * tools/modeling/codegen/model/Config.h:
+        * tools/modeling/codegen/model/Config.inl:
+        * tools/modeling/codegen/model/Config.cpp:
+
+          Removed verbose argument parsing and predicated logging on the
+          DCPS_debug_level.
+
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+
+          Split createSubscription() and createPublication() into current
+          methods and additional createWriter() and createReader()
+          methods to allow the different style of QoS policy overwriting
+          from the different mechanisms to play together.
+
+        * tools/modeling/codegen/model/Entities.h:
+        * tools/modeling/codegen/model/Entities.cpp:
+
+          Added a method to find the transport for a given key value.
+          Added error messages on failure to find requested Entities.
+          Implemented the full publisher(), subscriber(), writer(), and
+          reader() methods.
+
 Fri Oct 15 14:18:57 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/testdata/Middleware/MiddlewareTest.opendds:

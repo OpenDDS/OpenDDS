@@ -37,9 +37,6 @@ struct ReaderProfile;
  *
  * Command line options extracted by this class are:
  *
- *   -v
- *      Be verbose when executing.
- *
  *   -DDSAppConfig <file>
  *
  *      Extract detailed application parameters from <file>.  The format
@@ -86,13 +83,6 @@ class Config  {
     /// Indication of configuration status.
     operator bool() const;
 
-    /// @name Test verbosity.
-    /// @{
-    protected: bool& verbose();
-    public:    bool  verbose() const;
-    /// @}
-
-  public:
     /// Participant profile container.
     const ParticipantProfileMap& participantProfileMap() const;
 
@@ -156,9 +146,6 @@ class Config  {
            ACE_Configuration_Section_Key& key,
            std::basic_string<ACE_TCHAR> name
          );
-
-    /// Chattiness.
-    bool verbose_;
 
     /// Success of configuration steps.
     bool configured_;

@@ -146,13 +146,28 @@ OpenDDS::Model::Delegate::createPublication(
   publisher->copy_from_topic_qos( writerQos, topicQos);
   this->service_->copyPublicationQos( which, writerQos);
 
-  DDS::DataWriter* writer = publisher->create_datawriter(
-                              topic,
-                              writerQos,
-                              DDS::DataWriterListener::_nil(),
-                              mask
-                            );
-  return writer;
+  return this->createWriter(
+           publisher,
+           topic,
+           writerQos,
+           mask
+         );
+}
+
+DDS::DataWriter*
+OpenDDS::Model::Delegate::createWriter(
+  DDS::Publisher*    publisher,
+  DDS::Topic*        topic,
+  DDS::DataWriterQos writerQos,
+  DDS::StatusMask    mask
+)
+{
+  return publisher->create_datawriter(
+           topic,
+           writerQos,
+           DDS::DataWriterListener::_nil(),
+           mask
+         );
 }
 
 DDS::DataReader*
@@ -174,13 +189,28 @@ OpenDDS::Model::Delegate::createSubscription(
   subscriber->copy_from_topic_qos( readerQos, topicQos);
   this->service_->copySubscriptionQos( which, readerQos);
 
-  DDS::DataReader* reader = subscriber->create_datareader(
-                              topic,
-                              readerQos,
-                              DDS::DataReaderListener::_nil(),
-                              mask
-                            );
-  return reader;
+  return this->createReader(
+           subscriber,
+           topic,
+           readerQos,
+           mask
+         );
+}
+
+DDS::DataReader*
+OpenDDS::Model::Delegate::createReader(
+  DDS::Subscriber*   subscriber,
+  DDS::Topic*        topic,
+  DDS::DataReaderQos readerQos,
+  DDS::StatusMask    mask
+)
+{
+  return subscriber->create_datareader(
+           topic,
+           readerQos,
+           DDS::DataReaderListener::_nil(),
+           mask
+         );
 }
 
 OpenDDS::DCPS::TransportImpl*
