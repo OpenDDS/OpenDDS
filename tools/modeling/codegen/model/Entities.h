@@ -30,6 +30,40 @@ namespace OpenDDS { namespace Model {
  * This class manages DDS support for an application from the command
  * line and the contents of a file.  It also allows application created
  * Entities to be stored here as well.
+ *
+ * To configure middleware from a file using this class, first
+ * instantiate the class, then add the type support, then initialize the
+ * class.  Access of the Entities will create the requested Entity and
+ * any other Entities needed for containment.
+ *
+ * Example:
+ *
+ *   File:
+ *      [participant/someParticipant]
+ *      DomainId = 1066
+ *
+ *      [topic/someTopic]
+ *      Participant = someParticipant
+ *      Type = XXX
+ *
+ *      [publisher/somePublisher]
+ *      Participant = someParticipant
+ *      TransportIndex = 1
+ *
+ *      [writer/someWriter]
+ *      Publisher = somePublisher
+ *      Topic = someTopic
+ *
+ *   Code:
+ *      #include "XXXTypeSupportImpl.h"
+ *
+ *      OpenDDS::Model::Entities middleware;
+ *
+ *      middleware.add< XXXTypeSupportImpl>( "XXX", "someParticipant");
+ *
+ *      middleware.init( argc, argv);
+ *
+ *      DDS::DataWriter_var writer = middleware.writer( "someWriter");
  */
 class Entities  {
   public:
