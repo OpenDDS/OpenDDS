@@ -35,65 +35,58 @@ namespace OpenDDS { namespace Model {
       void init( int argc, char** argv);
       void fini();
 
-      void
+      DDS::DomainParticipant*
       createParticipant(
-        DDS::DomainParticipant*&  participant,
         unsigned long             domain,
         DDS::DomainParticipantQos participantQos,
         DDS::StatusMask           mask
       );
 
-      void
+      DDS::Topic*
       createTopic(
-        DDS::Topic*&            topic,
         DDS::DomainParticipant* participant,
-        const char*             topicName,
-        const char*             typeName,
+        const std::string&      topicName,
+        const std::string&      typeName,
         DDS::TopicQos           topicQos,
         DDS::StatusMask         mask
       );
 
-      void
+      DDS::Publisher*
       createPublisher(
-        DDS::Publisher*&              publisher,
         DDS::DomainParticipant*       participant,
         DDS::PublisherQos             publisherQos,
         DDS::StatusMask               mask,
         OpenDDS::DCPS::TransportImpl* transport
       );
 
-      void
+      DDS::Subscriber*
       createSubscriber(
-        DDS::Subscriber*&             subscriber,
         DDS::DomainParticipant*       participant,
         DDS::SubscriberQos            subscriberQos,
         DDS::StatusMask               mask,
         OpenDDS::DCPS::TransportImpl* transport
       );
 
-      void
+      DDS::DataWriter*
       createPublication(
         unsigned int       which,
-        DDS::DataWriter*&  writer,
         DDS::Publisher*    publisher,
         DDS::Topic*        topic,
         DDS::DataWriterQos writerQos,
         DDS::StatusMask    mask
       );
 
-      void
+      DDS::DataReader*
       createSubscription(
         unsigned int       which,
-        DDS::DataReader*&  reader,
         DDS::Subscriber*   subscriber,
         DDS::Topic*        topic,
         DDS::DataReaderQos readerQos,
         DDS::StatusMask    mask
       );
 
-      void
+      OpenDDS::DCPS::TransportImpl*
       createTransport(
-        OpenDDS::DCPS::TransportImpl*&         transport,
         unsigned long                          key,
         const char*                            kind,
         OpenDDS::DCPS::TransportConfiguration* config

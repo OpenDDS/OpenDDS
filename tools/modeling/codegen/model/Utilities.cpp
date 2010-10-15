@@ -9,11 +9,9 @@ OpenDDS::Model::stringToByteSeq(
 )
 {
   size_t len = std::strlen( source);
-  if( len == 0) {
-    target.length( 0);
+  target.length( len);
 
-  } else {
-    target.length( len);
+  if( len) {
     std::memcpy( target.get_buffer(), source, len);
   }
 }

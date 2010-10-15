@@ -1,3 +1,34 @@
+Fri Oct 15 03:34:39 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * DDS.mwc:
+
+          Explicitly exclude the modeling code generation tests from the
+          build as these tests require special steps at this time.
+
+        * dds/DdsDcpsTopic.idl:
+        * dds/idl/IDLTemplate.txt:
+
+          Allow access to the abstract methods from the base class.
+
+        * tools/modeling/codegen/model/Config.h:
+        * tools/modeling/codegen/model/Config.inl:
+        * tools/modeling/codegen/model/Config.cpp:
+        * tools/modeling/codegen/model/CopyQos.h:
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/Entities.h:
+        * tools/modeling/codegen/model/Entities.inl:
+        * tools/modeling/codegen/model/Entities.cpp:
+        * tools/modeling/codegen/model/EntityProfiles.h:
+        * tools/modeling/codegen/model/EntityProfiles.cpp:
+        * tools/modeling/codegen/model/Model.mpc:
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+        * tools/modeling/codegen/model/Utilities.cpp:
+
+          Refactoring to allow different use cases the ability to define
+          and access the middleware.
+
 Thu Oct 14 17:34:55 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelibrary/.classpath:
