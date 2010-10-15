@@ -9,8 +9,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "Delegate.h"
 #include "CopyQos.h"
+#include "Entities.h"
 #include "dds/DdsDcpsC.h"
 #include "dds/DCPS/Service_Participant.h"
 
@@ -19,7 +19,7 @@ namespace OpenDDS { namespace Model {
   class DefaultInstanceTraits;
 
   template< typename ModelName, class InstanceTraits = DefaultInstanceTraits>
-  class Service : public CopyQos {
+  class Service : public CopyQos, public Entities {
     public:
       typedef typename ModelName::template Data< InstanceTraits> Data;
 
@@ -82,14 +82,21 @@ namespace OpenDDS { namespace Model {
                      unsigned int        which,
                      DDS::DataWriterQos& writerQos
                    );
+      virtual void copyPublicationQos(
+                     const std::string&  which,
+                     DDS::DataWriterQos& writerQos
+                   );
       virtual void copySubscriptionQos(
                      unsigned int        which,
+                     DDS::DataReaderQos& readerQos
+                   );
+      virtual void copySubscriptionQos(
+                     const std::string&  which,
                      DDS::DataReaderQos& readerQos
                    );
       ///}
 
       Data     modelData_;
-      Delegate delegate_;
 
       // Basic array containers since we only allow access using the
       // defined enumeration values.

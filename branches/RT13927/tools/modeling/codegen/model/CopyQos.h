@@ -11,6 +11,8 @@
 
 #include "dds/DdsDcpsInfrastructureC.h" // For QoS Policy types.
 
+#include <string>
+
 namespace OpenDDS { namespace Model {
 
   /// Abstract interface for dependency free callbacks to the model data.
@@ -23,8 +25,20 @@ namespace OpenDDS { namespace Model {
       ) = 0;
 
       virtual void
+      copyPublicationQos(
+        const std::string&  which,
+        DDS::DataWriterQos& writerQos
+      ) = 0;
+
+      virtual void
       copySubscriptionQos(
         unsigned int        which,
+        DDS::DataReaderQos& readerQos
+      ) = 0;
+
+      virtual void
+      copySubscriptionQos(
+        const std::string&  which,
         DDS::DataReaderQos& readerQos
       ) = 0;
   };

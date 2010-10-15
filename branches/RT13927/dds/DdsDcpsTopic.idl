@@ -66,12 +66,11 @@ module DDS {
 #endif
 
     local interface TypeSupport {
-                 //        ReturnCode_t register_type(
-                 //                in DomainParticipant domain,
-                 //                in string type_name);
-                 //
+                         ReturnCode_t register_type(
+                                 in DomainParticipant domain,
+                                 in string type_name);
 
-                 //        string get_type_name ();
+                         string get_type_name ();
                 };
 };
 

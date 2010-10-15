@@ -55,8 +55,8 @@ inline
 void
 OpenDDS::Model::Service< ModelName, InstanceTraits>::init( int argc, char** argv)
 {
-  this->delegate_.init( argc, argv);
   this->modelData_.init();
+  this->Entities::init( argc, argv);
 }
 
 template< typename ModelName, class InstanceTraits>
@@ -70,7 +70,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::fini()
       TheParticipantFactory->delete_participant( this->participants_[ index]);
     }
   }
-  this->delegate_.fini();
+  this->Entities::fini();
 }
 
 template< typename ModelName, class InstanceTraits>
@@ -144,17 +144,16 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::reader( typename DataReader
 
 template< typename ModelName, class InstanceTraits>
 inline
-void
+DDS::DomainParticipant*
 OpenDDS::Model::Service< ModelName, InstanceTraits>::createParticipant(
   typename Participants::Values participant
 )
 {
-  this->delegate_.createParticipant(
-    this->participants_[ participant],
-    this->modelData_.domain( participant),
-    this->modelData_.qos( participant),
-    this->modelData_.mask( participant)
-  );
+  return this->delegate_.createParticipant(
+           this->modelData_.domain( participant),
+           this->modelData_.qos( participant),
+           this->modelData_.mask( participant)
+         );
 }
 
 template< typename ModelName, class InstanceTraits>
