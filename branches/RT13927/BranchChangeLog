@@ -1,3 +1,18 @@
+Mon Oct 18 15:39:05 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/QosPolicies.gmfgraph:
+
+          For policy figures FlowLayout type layout, set Vertical to true to make Auto Size
+          work properly.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLibrary.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfgen:
+        * tools/modeling/testdata/Middleware/MiddlewareTest.opendds_diagram_middlewarelibrary:
+        * tools/modeling/testdata/Middleware/MiddlewareTest_screenshot_2.png
+        * tools/modeling/testdata/PolicyLibrary/NonDefaultPolicyLibraryTest.opendds_diagram_policylibrary:
+
+          Regenerated to reflect changes to QosPolicies.gmfgraph.
+
 Fri Oct 15 19:17:35 UTC 2010  Mike Martinez  <martinez_m@lab.ociweb.com>
 
         * tools/modeling/codegen/model/Config.h:
