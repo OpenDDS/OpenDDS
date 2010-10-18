@@ -1,3 +1,9 @@
+Mon Oct 18 18:06:06 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelibrary/.project:
+
+          Forgot to check in .project file along with other middleware diagram files.
+
 Mon Oct 18 15:39:05 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/QosPolicies.gmfgraph:
