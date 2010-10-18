@@ -11,7 +11,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="DeadlineQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="DeadlineQosPolicyStereotypeFigure"
@@ -32,7 +33,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="DestinationOrderQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="DestinationOrderQosPolicyStereotypeFigure"
@@ -59,7 +61,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="DsQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="DsQosPolicyStereotypeFigure"
@@ -110,7 +113,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="DurabilityQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="DurabilityQosPolicyStereotypeFigure"
@@ -137,7 +141,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="EfQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="EfQosPolicyStereotypeFigure"
@@ -164,7 +169,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="GdQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="GdQosPolicyStereotypeFigure"
@@ -191,7 +197,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="HistoryQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="HistoryQosPolicyStereotypeFigure"
@@ -224,7 +231,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="LbQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="LbQosPolicyStereotypeFigure"
@@ -245,7 +253,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="LifespanQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="LifespanQosPolicyStereotypeFigure"
@@ -266,7 +275,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="LivelinessQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="LivelinessQosPolicyStereotypeFigure"
@@ -293,7 +303,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="OsQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="OsQosPolicyStereotypeFigure"
@@ -320,7 +331,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="OwnershipQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="OwnershipQosPolicyStereotypeFigure"
@@ -347,7 +359,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="PartitionQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="PartitionQosPolicyStereotypeFigure"
@@ -368,7 +381,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="PresentationQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="PresentationQosPolicyStereotypeFigure"
@@ -407,7 +421,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="RdlQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="RdlQosPolicyStereotypeFigure"
@@ -434,7 +449,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="ReliabilityQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="ReliabilityQosPolicyStereotypeFigure"
@@ -461,7 +477,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="RlQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="RlQosPolicyStereotypeFigure"
@@ -500,7 +517,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="TbfQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="TbfQosPolicyStereotypeFigure"
@@ -527,7 +545,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="TdQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="TdQosPolicyStereotypeFigure"
@@ -554,7 +573,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="TpQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="TpQosPolicyStereotypeFigure"
@@ -581,7 +601,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="UdQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="UdQosPolicyStereotypeFigure"
@@ -608,7 +629,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="WdlQosPolicyFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="WdlQosPolicyStereotypeFigure"
@@ -635,7 +657,8 @@
           xsi:type="gmfgraph:Rectangle"
           name="PeriodFigure">
         <layout
-            xsi:type="gmfgraph:FlowLayout"/>
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"/>
         <children
             xsi:type="gmfgraph:Label"
             name="PeriodSecondFigure"/>
