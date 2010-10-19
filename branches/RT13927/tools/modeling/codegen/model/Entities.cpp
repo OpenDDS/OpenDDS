@@ -36,6 +36,14 @@ OpenDDS::Model::Entities::registerTypes( const std::string& participant)
   }
 
   while( !queue.empty()) {
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Entities::registerTypes() - ")
+        ACE_TEXT("Registering type [%C] in participant [%C].\n"),
+        queue.front()->get_type_name(),
+        participant.c_str()
+      ));
+    }
     queue.front()->register_type( p, 0);
     queue.pop();
   }
@@ -57,7 +65,7 @@ OpenDDS::Model::Entities::participant( const std::string& name)
   if( where == this->config_.participantProfileMap().end()) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::participant() - ")
-      ACE_TEXT("unable to find profile to configure participant: %C.\n"),
+      ACE_TEXT("unable to find profile to configure participant: [%C].\n"),
       name.c_str()
     ));
     return 0;
@@ -65,13 +73,19 @@ OpenDDS::Model::Entities::participant( const std::string& name)
   
   // Create it.
   ParticipantProfile* profile = where->second;
+  if( OpenDDS::DCPS::DCPS_debug_level>1) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Entities::participant() - ")
+      ACE_TEXT("Creating participant [%C].\n"),
+      name.c_str()
+    ));
+  }
   this->participantByString_[ name]
     = this->delegate_.createParticipant(
         profile->domainId,
         profile->qos,
-        OpenDDS::DCPS::DEFAULT_STATUS_MASK /// @TODO: May need to 'using' this.
+        OpenDDS::DCPS::DEFAULT_STATUS_MASK
       );
-  /// @TODO: Verify that this handles null return values correctly.
   return DDS::DomainParticipant::_duplicate(
     this->participantByString_[ name]
   );
@@ -97,7 +111,7 @@ OpenDDS::Model::Entities::topic(
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::topic() - ")
       ACE_TEXT("unable to find profile to configure ")
-      ACE_TEXT("topic: %C in participant: %C.\n"),
+      ACE_TEXT("topic: [%C] in participant: [%C].\n"),
       name.c_str(), participant.c_str()
     ));
     return 0;
@@ -109,7 +123,7 @@ OpenDDS::Model::Entities::topic(
   if( !p) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::topic() - ")
-      ACE_TEXT("unable to find participant: %C for topic %C.\n"),
+      ACE_TEXT("unable to find participant: [%C] for topic [%C].\n"),
       participant.c_str(), name.c_str()
     ));
     return 0;
@@ -120,11 +134,20 @@ OpenDDS::Model::Entities::topic(
   this->registerTypes( participant);
 
   // Create it.
+  if( OpenDDS::DCPS::DCPS_debug_level>1) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Entities::topic() - ")
+      ACE_TEXT("Creating topic [%C] in participant [%C] with type [%C].\n"),
+      name.c_str(),
+      participant.c_str(),
+      profile->type.c_str()
+    ));
+  }
   this->topicByParticipant_[ participant][ name]
     = this->delegate_.createTopic(
         p,
         name.c_str(),
-        profile->type.c_str(),
+        this->typeNameByString_[profile->type],
         profile->qos,
         OpenDDS::DCPS::DEFAULT_STATUS_MASK
       );
@@ -149,7 +172,7 @@ OpenDDS::Model::Entities::publisher( const std::string& name)
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::publisher() - ")
       ACE_TEXT("unable to find profile to configure ")
-      ACE_TEXT("publisher: %C.\n"),
+      ACE_TEXT("publisher: [%C].\n"),
       name.c_str()
     ));
     return 0;
@@ -162,7 +185,7 @@ OpenDDS::Model::Entities::publisher( const std::string& name)
   if( !participant) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::publisher() - ")
-      ACE_TEXT("unable to find participant: %C for publisher %C.\n"),
+      ACE_TEXT("unable to find participant: [%C] for publisher [%C].\n"),
       profile->participant.c_str(), name.c_str()
     ));
     return 0;
@@ -173,12 +196,20 @@ OpenDDS::Model::Entities::publisher( const std::string& name)
   if( transport.is_nil()) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::publisher() - ")
-      ACE_TEXT("unable to find transport: %d for publisher %C.\n"),
+      ACE_TEXT("unable to find transport: [%d] for publisher [%C].\n"),
       profile->transport, name.c_str()
     ));
     return 0;
   }
 
+  if( OpenDDS::DCPS::DCPS_debug_level>1) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Entities::publisher() - ")
+      ACE_TEXT("Creating publisher [%C] in participant [%C].\n"),
+      name.c_str(),
+      profile->participant.c_str()
+    ));
+  }
   this->publisherByString_[ name]
     = this->delegate_.createPublisher(
         participant,
@@ -206,7 +237,7 @@ OpenDDS::Model::Entities::subscriber( const std::string& name)
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::subscriber() - ")
       ACE_TEXT("unable to find profile to configure ")
-      ACE_TEXT("subscriber: %C.\n"),
+      ACE_TEXT("subscriber: [%C].\n"),
       name.c_str()
     ));
     return 0;
@@ -219,7 +250,7 @@ OpenDDS::Model::Entities::subscriber( const std::string& name)
   if( !participant) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::subscriber() - ")
-      ACE_TEXT("unable to find participant: %C for subscriber %C.\n"),
+      ACE_TEXT("unable to find participant: [%C] for subscriber [%C].\n"),
       profile->participant.c_str(), name.c_str()
     ));
     return 0;
@@ -230,12 +261,20 @@ OpenDDS::Model::Entities::subscriber( const std::string& name)
   if( transport.is_nil()) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::subscriber() - ")
-      ACE_TEXT("unable to find transport: %d for subscriber %C.\n"),
+      ACE_TEXT("unable to find transport: %d for subscriber [%C].\n"),
       profile->transport, name.c_str()
     ));
     return 0;
   }
 
+  if( OpenDDS::DCPS::DCPS_debug_level>1) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Entities::subscriber() - ")
+      ACE_TEXT("Creating subscriber [%C] in participant [%C].\n"),
+      name.c_str(),
+      profile->participant.c_str()
+    ));
+  }
   this->subscriberByString_[ name]
     = this->delegate_.createSubscriber(
         participant,
@@ -263,7 +302,7 @@ OpenDDS::Model::Entities::writer( const std::string& name)
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::writer() - ")
       ACE_TEXT("unable to find profile to configure ")
-      ACE_TEXT("writer: %C.\n"),
+      ACE_TEXT("writer: [%C].\n"),
       name.c_str()
     ));
     return 0;
@@ -275,7 +314,7 @@ OpenDDS::Model::Entities::writer( const std::string& name)
   if( !publisher) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::writer() - ")
-      ACE_TEXT("unable to find publisher: %C for writer %C.\n"),
+      ACE_TEXT("unable to find publisher: [%C] for writer [%C].\n"),
       profile->publisher.c_str(), name.c_str()
     ));
     return 0;
@@ -291,7 +330,7 @@ OpenDDS::Model::Entities::writer( const std::string& name)
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::writer() - ")
       ACE_TEXT("unable to find profile to configure ")
-      ACE_TEXT("publisher: %C for writer %C.\n"),
+      ACE_TEXT("publisher: [%C] for writer [%C].\n"),
       profile->publisher.c_str(), name.c_str()
     ));
     return 0;
@@ -304,8 +343,9 @@ OpenDDS::Model::Entities::writer( const std::string& name)
   if( !topic) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::writer() - ")
-      ACE_TEXT("unable to find topic: %C for writer %C.\n"),
-      profile->topic.c_str(), name.c_str()
+      ACE_TEXT("unable to find topic: [%C] for writer [%C] in participant [%C].\n"),
+      profile->topic.c_str(), name.c_str(),
+      publisherProfile->participant.c_str()
     ));
     return 0;
   }
@@ -317,6 +357,17 @@ OpenDDS::Model::Entities::writer( const std::string& name)
   publisher->copy_from_topic_qos( writerQos, topicQos);
   profile->copyToWriterQos( writerQos);
 
+  if( OpenDDS::DCPS::DCPS_debug_level>1) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Entities::writer() - ")
+      ACE_TEXT("Creating writer [%C] in publisher [%C] in participant [%C] ")
+      ACE_TEXT("with topic [%C].\n"),
+      name.c_str(),
+      profile->publisher.c_str(),
+      publisherProfile->participant.c_str(),
+      profile->topic.c_str()
+    ));
+  }
   this->writerByString_[ name]
     = this->delegate_.createWriter(
         publisher,
@@ -344,7 +395,7 @@ OpenDDS::Model::Entities::reader( const std::string& name)
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::reader() - ")
       ACE_TEXT("unable to find profile to configure ")
-      ACE_TEXT("reader: %C.\n"),
+      ACE_TEXT("reader: [%C].\n"),
       name.c_str()
     ));
     return 0;
@@ -356,7 +407,7 @@ OpenDDS::Model::Entities::reader( const std::string& name)
   if( !subscriber) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::reader() - ")
-      ACE_TEXT("unable to find subscriber: %C for reader %C.\n"),
+      ACE_TEXT("unable to find subscriber: [%C] for reader [%C].\n"),
       profile->subscriber.c_str(), name.c_str()
     ));
     return 0;
@@ -372,7 +423,7 @@ OpenDDS::Model::Entities::reader( const std::string& name)
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::reader() - ")
       ACE_TEXT("unable to find profile to configure ")
-      ACE_TEXT("subscriber: %C for reader %C.\n"),
+      ACE_TEXT("subscriber: [%C] for reader [%C].\n"),
       profile->subscriber.c_str(), name.c_str()
     ));
     return 0;
@@ -385,8 +436,9 @@ OpenDDS::Model::Entities::reader( const std::string& name)
   if( !topic) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Entities::reader() - ")
-      ACE_TEXT("unable to find topic: %C for reader %C.\n"),
-      profile->topic.c_str(), name.c_str()
+      ACE_TEXT("unable to find topic: [%C] for reader [%C] in participant [%C].\n"),
+      profile->topic.c_str(), name.c_str(),
+      subscriberProfile->participant.c_str()
     ));
     return 0;
   }
@@ -398,6 +450,17 @@ OpenDDS::Model::Entities::reader( const std::string& name)
   subscriber->copy_from_topic_qos( readerQos, topicQos);
   profile->copyToReaderQos( readerQos);
 
+  if( OpenDDS::DCPS::DCPS_debug_level>1) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Entities::reader() - ")
+      ACE_TEXT("Creating reader [%C] in subscriber [%C] in participant [%C] ")
+      ACE_TEXT("with topic [%C].\n"),
+      name.c_str(),
+      profile->subscriber.c_str(),
+      subscriberProfile->participant.c_str(),
+      profile->topic.c_str()
+    ));
+  }
   this->readerByString_[ name]
     = this->delegate_.createReader(
         subscriber,

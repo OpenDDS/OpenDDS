@@ -1,8 +1,6 @@
 
 #include "Delegate.h"
 
-#include "Exceptions.h"
-
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/udp/UdpConfiguration.h"
@@ -16,7 +14,7 @@ OpenDDS::Model::Delegate::Delegate()
 }
 
 void
-OpenDDS::Model::Delegate::init( int argc, char** argv)
+OpenDDS::Model::Delegate::init( int& argc, char** argv)
 {
   TheParticipantFactoryWithArgs( argc, argv);
 }
@@ -48,9 +46,6 @@ OpenDDS::Model::Delegate::createParticipant(
         DDS::DomainParticipantListener::_nil(),
         mask
       );
-  if( !participant) {
-    throw NoParticipantException();
-  }
   return participant;
 }
 
@@ -71,9 +66,6 @@ OpenDDS::Model::Delegate::createTopic(
         DDS::TopicListener::_nil(),
         mask
       );
-  if( !topic) {
-    throw NoTopicException();
-  }
   return topic;
 }
 
@@ -92,11 +84,12 @@ OpenDDS::Model::Delegate::createPublisher(
         mask
       );
   if( !publisher) {
-    throw NoPublisherException();
+    return 0;
   }
 
   if( OpenDDS::DCPS::ATTACH_OK != transport->attach( publisher)) {
-    throw BadAttachException();
+    participant->delete_publisher( publisher);
+    return 0;
   }
 
   return publisher;
@@ -117,11 +110,12 @@ OpenDDS::Model::Delegate::createSubscriber(
         mask
       );
   if( !subscriber) {
-    throw NoSubscriberException();
+    return 0;
   }
 
   if( OpenDDS::DCPS::ATTACH_OK != transport->attach( subscriber)) {
-    throw BadAttachException();
+    participant->delete_subscriber( subscriber);
+    return 0;
   }
 
   return subscriber;
@@ -137,7 +131,7 @@ OpenDDS::Model::Delegate::createPublication(
 )
 {
   if( !this->service_) {
-    throw NoServiceException();
+    return 0;
   }
 
   DDS::TopicQos topicQos = TheServiceParticipant->initial_TopicQos();
@@ -180,7 +174,7 @@ OpenDDS::Model::Delegate::createSubscription(
 )
 {
   if( !this->service_) {
-    throw NoServiceException();
+    return 0;
   }
 
   DDS::TopicQos topicQos = TheServiceParticipant->initial_TopicQos();
@@ -227,16 +221,14 @@ OpenDDS::Model::Delegate::createTransport(
         OpenDDS::DCPS::DONT_AUTO_CONFIG
       );
 
-  OpenDDS::DCPS::TransportImpl* transport = result._retn();
-  if( !transport) {
+  if( result.is_nil()) {
     return 0;
   }
 
-  if( 0 != transport->configure( config)) {
-    delete transport; /// @TODO: Check that this is correct.
+  if( 0 != result->configure( config)) {
     return 0;
   }
 
-  return transport;
+  return result._retn();
 }
 
