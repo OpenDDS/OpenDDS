@@ -16,6 +16,8 @@
 #include "Config.h"
 #include "Delegate.h"
 
+#include "model_export.h"
+
 #include <string>
 #include <map>
 #include <queue>
@@ -65,7 +67,7 @@ namespace OpenDDS { namespace Model {
  *
  *      DDS::DataWriter_var writer = middleware.writer( "someWriter");
  */
-class Entities  {
+class OpenDDS_Model_Export Entities  {
   public:
     Entities();
 
@@ -100,7 +102,7 @@ class Entities  {
 
     /// @name Lifetime management.
     /// @{
-    void init( int argc, ACE_TCHAR** argv);
+    void init( int& argc, ACE_TCHAR** argv);
     void fini();
     /// @}
 

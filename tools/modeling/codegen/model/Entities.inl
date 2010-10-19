@@ -4,7 +4,7 @@
 
 ACE_INLINE
 void
-OpenDDS::Model::Entities::init( int argc, ACE_TCHAR** argv)
+OpenDDS::Model::Entities::init( int& argc, ACE_TCHAR** argv)
 {
   // Start the DDS service.
   this->delegate_.init( argc, argv);

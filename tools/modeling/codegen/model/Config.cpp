@@ -138,7 +138,7 @@ Config::Config()
 }
 
 void
-Config::init( int argc, ACE_TCHAR** argv)
+Config::init( int& argc, ACE_TCHAR** argv)
 {
   ACE_Arg_Shifter parser( argc, argv);
   while( parser.is_anything_left()) {
@@ -1897,6 +1897,7 @@ Config::loadSubscriber(
    *   GroupData                     = <string>
    *   EntityFactory                 = <bool> # Boolean: numeric 0 or 1
    *
+   *   Participant                   = <string> # One of participant <name>
    *   TransportIndex                = <number> # Index into transport configurations
    */
 
@@ -2025,6 +2026,22 @@ Config::loadSubscriber(
         sectionName.c_str(),
         ENTITYFACTORY_KEYNAME,
         profile->qos.entity_factory.autoenable_created_entities
+      ));
+    }
+  }
+
+  // Participant      = <string> # One of participant <name>
+  valueString.clear();
+  heap.get_string_value( sectionKey, PARTICIPANT_KEYNAME, valueString);
+  if (valueString.length() > 0) {
+    profile->participant = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
+    if( OpenDDS::DCPS::DCPS_debug_level>1) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Config::loadSubscriber() - ")
+        ACE_TEXT("  [publisher/%s] %s == %s.\n"),
+        sectionName.c_str(),
+        PARTICIPANT_KEYNAME,
+        profile->participant.c_str()
       ));
     }
   }
@@ -2478,7 +2495,7 @@ Config::loadReader(
         ACE_TEXT("  [reader/%s] %s == %s.\n"),
         sectionName.c_str(),
         SUBSCRIBER_KEYNAME,
-        profile->topic.c_str()
+        profile->subscriber.c_str()
       ));
     }
   }

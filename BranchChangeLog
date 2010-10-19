@@ -1,3 +1,16 @@
+Tue Oct 19 17:11:23 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/modeling/codegen/model/Config.h:
+        * tools/modeling/codegen/model/Config.cpp:
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/Entities.h:
+        * tools/modeling/codegen/model/Entities.inl:
+        * tools/modeling/codegen/model/Entities.cpp:
+
+          Updates after initial debugging as a standalone wrapper
+          interface.
+
 Mon Oct 18 18:06:06 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelibrary/.project:

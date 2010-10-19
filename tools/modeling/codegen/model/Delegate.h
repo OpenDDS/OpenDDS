@@ -32,7 +32,7 @@ namespace OpenDDS { namespace Model {
     public:
       Delegate();
 
-      void init( int argc, char** argv);
+      void init( int& argc, char** argv);
       void fini();
 
       DDS::DomainParticipant*

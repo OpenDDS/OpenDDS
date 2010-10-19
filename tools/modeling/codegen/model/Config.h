@@ -12,6 +12,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "model_export.h"
+
 #include <string>
 #include <map>
 
@@ -53,7 +55,7 @@ struct ReaderProfile;
  *        [subscriber/<name>]
  *        [reader/<name>]
  */
-class Config  {
+class OpenDDS_Model_Export Config  {
   public:
     /// Container type for participant profiles.
     typedef std::map< std::string, ParticipantProfile*> ParticipantProfileMap;
@@ -78,7 +80,7 @@ class Config  {
     virtual ~Config();
 
     /// Defered initialization.
-    void init( int argc, ACE_TCHAR** argv);
+    void init( int& argc, ACE_TCHAR** argv);
 
     /// Indication of configuration status.
     operator bool() const;
