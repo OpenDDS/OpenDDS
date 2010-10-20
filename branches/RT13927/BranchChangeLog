@@ -1,3 +1,13 @@
+Wed Oct 20 16:22:58 UTC 2010  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * [r3662] 2010-10-20 16:17  martinezm
+          tools/modeling/org.opendds/org.opendds.modeling.feature/feature.xml,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/actions,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/actions/sdkActions.java,
+          tools/modeling/org.opendds/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenEditorContributor.java:
+
+          Committing work in progress to allow checkouts to build completely.
+
 Tue Oct 19 17:11:23 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/codegen/model/Config.h:
