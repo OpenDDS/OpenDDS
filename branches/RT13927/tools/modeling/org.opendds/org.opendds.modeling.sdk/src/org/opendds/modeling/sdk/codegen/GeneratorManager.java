@@ -12,12 +12,15 @@ import java.util.List;
 
 import javax.xml.bind.*;
 
+import org.eclipse.core.commands.operations.OperationStatus;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * @author martinezm
@@ -147,11 +150,17 @@ public class GeneratorManager  {
 			marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
 			marshaller.marshal(element, outputStream);
 		} catch( JAXBException jbe) {
-			ErrorDialog.openError(
-					null,
-					"Error writing XML file",
-					jbe.toString(),
-					null);
+			String msg = jbe.toString();
+			final IStatus status = new OperationStatus(IStatus.ERROR, "org.opendds.modeling.sdk", 77, msg, jbe.getCause());
+            Display.getDefault().asyncExec(new Runnable() {
+                public void run() {
+        			ErrorDialog.openError(
+        					null,
+        					"Error writing XML file",
+        					null,
+        					status);
+                }
+            });
 		}
 	}
 	
