@@ -7,9 +7,11 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.ide.IDEActionFactory;
 import org.eclipse.ui.part.MultiPageEditorActionBarContributor;
+import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
@@ -20,7 +22,14 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
  */
 public class CodeGenEditorContributor extends MultiPageEditorActionBarContributor {
 	private IEditorPart activeEditorPart;
+	private CodeGenEditor editor;
 	private Action sampleAction;
+	
+	private Action generateIdl;
+	private Action generateH;
+	private Action generateCpp;
+	private Action generateMpc;
+	
 	/**
 	 * Creates a multi-page contributor.
 	 */
@@ -35,6 +44,25 @@ public class CodeGenEditorContributor extends MultiPageEditorActionBarContributo
 	protected IAction getAction(ITextEditor editor, String actionID) {
 		return (editor == null ? null : editor.getAction(actionID));
 	}
+	
+	public void setActiveEditor(IEditorPart part) {
+		
+		if( part == null) {
+			System.out.println("The Editor Part is NULL!");
+		} else if( part instanceof CodeGenEditor) {
+			System.out.println("Its A CodeGenEditor!");
+		} else if( part instanceof FormEditor) {
+			System.out.println("Its A FormEditor!");
+		} else if( part instanceof MultiPageEditorPart) {
+			System.out.println("Its A MultiPageEditorPart!");
+		} else if( part instanceof OutputsForm) {
+			System.out.println("Its An OutputsForm!");
+		} else {
+			System.out.println("Its A " + part.toString() + "!");
+		}
+
+		super.setActiveEditor(part);
+	}
 	/* (non-JavaDoc)
 	 * Method declared in AbstractMultiPageEditorActionBarContributor.
 	 */
@@ -44,6 +72,20 @@ public class CodeGenEditorContributor extends MultiPageEditorActionBarContributo
 			return;
 
 		activeEditorPart = part;
+		
+		if( part == null) {
+			System.out.println("The Editor Part is NULL!");
+		} else if( part instanceof CodeGenEditor) {
+			System.out.println("Its A CodeGenEditor!");
+		} else if( part instanceof FormEditor) {
+			System.out.println("Its A FormEditor!");
+		} else if( part instanceof MultiPageEditorPart) {
+			System.out.println("Its A MultiPageEditorPart!");
+		} else if( part instanceof OutputsForm) {
+			System.out.println("Its An OutputsForm!");
+		} else {
+			System.out.println("Its A " + part.toString() + "!");
+		}
 
 		IActionBars actionBars = getActionBars();
 		if (actionBars != null) {
@@ -83,18 +125,20 @@ public class CodeGenEditorContributor extends MultiPageEditorActionBarContributo
 	private void createActions() {
 		sampleAction = new Action() {
 			public void run() {
-				MessageDialog.openInformation(null, "OpenDDS Modeling SDK", "Sample Action Executed");
+				MessageDialog.openInformation(null, "OpenDDS Modeling SDK", "Generating Something!");
 			}
 		};
-		sampleAction.setText("Sample Action");
-		sampleAction.setToolTipText("Sample Action tool tip");
+		sampleAction.setText("OpenDDS");
+		sampleAction.setToolTipText("Generate code from a model");
 		sampleAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
 				getImageDescriptor(IDE.SharedImages.IMG_OBJS_TASK_TSK));
+		System.out.println("Action contemplated!");
 	}
 	public void contributeToMenu(IMenuManager manager) {
 		IMenuManager menu = new MenuManager("Editor &Menu");
 		manager.prependToGroup(IWorkbenchActionConstants.MB_ADDITIONS, menu);
 		menu.add(sampleAction);
+		System.out.println("Contribution made!");
 	}
 	public void contributeToToolBar(IToolBarManager manager) {
 		manager.add(new Separator());
