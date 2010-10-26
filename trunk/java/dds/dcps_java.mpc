@@ -24,11 +24,15 @@ project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
 
   Idl2Jni_Files {
     $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl
-    $(DDS_ROOT)/dds/DdsDcpsTopic.idl << DdsDcpsInfrastructureJC.h
     $(DDS_ROOT)/dds/DdsDcpsDomain.idl << DdsDcpsTopicJC.h DdsDcpsSubscriptionJC.h DdsDcpsPublicationJC.h
     $(DDS_ROOT)/dds/DdsDcpsDomainExt.idl << DdsDcpsDomainJC.h
     $(DDS_ROOT)/dds/DdsDcpsTypeSupportExt.idl << DdsDcpsTopicJC.h DdsDcpsSubscriptionExtJC.h DdsDcpsPublicationJC.h DdsDcpsDomainJC.h
     $(DDS_ROOT)/dds/DdsDcpsGuid.idl
+  }
+
+  Idl2Jni_Files {
+    idl2jniflags += -Wb,stub_extra_include=dds/DdsDcpsDomainC.h
+    $(DDS_ROOT)/dds/DdsDcpsTopic.idl << DdsDcpsInfrastructureJC.h
   }
 
   Idl2Jni_Files {
