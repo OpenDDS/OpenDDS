@@ -1,3 +1,20 @@
+Thu Oct 28 17:06:12 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/codegen/model/NullListener.h:
+        * tools/modeling/codegen/model/NullParticipantListener.h:
+        * tools/modeling/codegen/model/NullPublisherListener.h:
+        * tools/modeling/codegen/model/NullReaderListener.h:
+        * tools/modeling/codegen/model/NullSubscriberListener.h:
+        * tools/modeling/codegen/model/NullTopicListener.h:
+        * tools/modeling/codegen/model/NullWriterListener.h:
+
+          Added an #include needed for compatibility with DOC group TAO.
+
+        * tools/modeling/org.opendds/org.opendds.modeling.sdk/.classpath:
+
+          Removed the classpath entry for org.eclipse.ui.forms.  This should
+          already be available as a plugin dependency.
+
 Wed Oct 20 16:22:58 UTC 2010  Mike Martinez  <martinez_m@lab.ociweb.com>
 
         * [r3662] 2010-10-20 16:17  martinezm
