@@ -6,6 +6,7 @@
 
 #include "model_export.h"
 #include "dds/DdsDcpsTopicS.h"
+#include "dds/DCPS/Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

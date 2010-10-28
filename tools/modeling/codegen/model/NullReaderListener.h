@@ -10,6 +10,7 @@
 
 #include "model_export.h"
 #include "dds/DdsDcpsSubscriptionS.h"
+#include "dds/DCPS/Definitions.h"
 
 namespace OpenDDS { namespace Model {
 
