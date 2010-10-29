@@ -64,6 +64,7 @@ module </xsl:text>
 };
 
 </xsl:text>
+  <xsl:apply-templates />
 </xsl:template>
 <!-- End of main processing template. -->
 
