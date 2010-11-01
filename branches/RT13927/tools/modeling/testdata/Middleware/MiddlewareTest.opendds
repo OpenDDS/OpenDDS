@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<opendds:MiddlewareLibrary xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_P4hVUKO9Ed-9KMRPTsXTAg" name="MiddlewareLibraryTest">
+<opendds:MiddlewareLib xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_P4hVUKO9Ed-9KMRPTsXTAg" name="MiddlewareLibTest">
   <domains xmi:id="_fRQZ4KO9Ed-9KMRPTsXTAg" name="MessageDomain"/>
   <participants xmi:id="_oeKOUKO9Ed-9KMRPTsXTAg" name="Participant" domain="_fRQZ4KO9Ed-9KMRPTsXTAg" entity_factory="_uJEpwNhiEd-LEcW1P4x7eA" user_data="_uJ0QoNhiEd-LEcW1P4x7eA">
     <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_86HVIKO9Ed-9KMRPTsXTAg" name="part1QosProperty">
-      <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_OEdGIKGNEd-D-tWBUFz4zw"/>
+      <type href="../PolicyLib/NonDefaultPolicyLibTest.opendds#_OEdGIKGNEd-D-tWBUFz4zw"/>
     </qosPolicy>
     <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_SxFL8KO_Ed-9KMRPTsXTAg" name="part1entityfactory">
-      <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_U5UFIKGNEd-D-tWBUFz4zw"/>
+      <type href="../PolicyLib/NonDefaultPolicyLibTest.opendds#_U5UFIKGNEd-D-tWBUFz4zw"/>
     </qosPolicy>
     <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_Zf-s4KO_Ed-9KMRPTsXTAg" name="part1userdata">
-      <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_Pw72EKGNEd-D-tWBUFz4zw"/>
+      <type href="../PolicyLib/NonDefaultPolicyLibTest.opendds#_Pw72EKGNEd-D-tWBUFz4zw"/>
     </qosPolicy>
     <publishers xsi:type="opendds:publisher" xmi:id="_YkGI4KO-Ed-9KMRPTsXTAg" name="Pub" entity_factory="_H3NUgNhmEd-LEcW1P4x7eA" group_data="_H4AlwNhmEd-LEcW1P4x7eA" presentation="_H5Fj0NhmEd-LEcW1P4x7eA" partition="_H4g8ENhmEd-LEcW1P4x7eA">
       <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_etCdEKO-Ed-9KMRPTsXTAg" name="policyFromLibrary">
-        <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_MiaroKGNEd-D-tWBUFz4zw"/>
+        <type href="../PolicyLib/NonDefaultPolicyLibTest.opendds#_MiaroKGNEd-D-tWBUFz4zw"/>
       </qosPolicy>
       <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_kiZG4KO-Ed-9KMRPTsXTAg" name="pub1presentation">
-        <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_W7gmYKGNEd-D-tWBUFz4zw"/>
+        <type href="../PolicyLib/NonDefaultPolicyLibTest.opendds#_W7gmYKGNEd-D-tWBUFz4zw"/>
       </qosPolicy>
       <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_p8pwIKO-Ed-9KMRPTsXTAg" name="pub1partition"/>
       <writers xsi:type="opendds:dataWriter" xmi:id="_x5RBYKO-Ed-9KMRPTsXTAg" name="MessageWriter">
         <ownedEntity xsi:type="opendds:dataWriter" xmi:id="_UKvzsKu5Ed-4vOAJAL5lng" writerTopic="_hRao4KO_Ed-9KMRPTsXTAg"/>
         <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_MLwBQKPAEd-9KMRPTsXTAg" name="writer1QosProperty">
-          <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_cOcfoKGNEd-D-tWBUFz4zw"/>
+          <type href="../PolicyLib/NonDefaultPolicyLibTest.opendds#_cOcfoKGNEd-D-tWBUFz4zw"/>
         </qosPolicy>
       </writers>
     </publishers>
     <subscribers xsi:type="opendds:subscriber" xmi:id="_3y_N0KO-Ed-9KMRPTsXTAg" name="Sub" entity_factory="_1bix0NhiEd-LEcW1P4x7eA" group_data="_1cUN4NhiEd-LEcW1P4x7eA" presentation="_1dTsYNhiEd-LEcW1P4x7eA" partition="_1c0kMNhiEd-LEcW1P4x7eA">
       <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_76vtYKO-Ed-9KMRPTsXTAg" name="sub1QosProperty">
-        <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_bS-V4KGNEd-D-tWBUFz4zw"/>
+        <type href="../PolicyLib/NonDefaultPolicyLibTest.opendds#_bS-V4KGNEd-D-tWBUFz4zw"/>
       </qosPolicy>
       <readers xsi:type="opendds:dataReader" xmi:id="_tG3XcKPAEd-9KMRPTsXTAg" name="MessageReader" topic="_hRao4KO_Ed-9KMRPTsXTAg">
         <ownedEntity xsi:type="opendds:dataReader" xmi:id="_TTVDgKu5Ed-4vOAJAL5lng" topicDesc="_hRao4KO_Ed-9KMRPTsXTAg"/>
         <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_1V2LEKPAEd-9KMRPTsXTAg" name="reader1QosProperty">
-          <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_LopLAKGNEd-D-tWBUFz4zw"/>
+          <type href="../PolicyLib/NonDefaultPolicyLibTest.opendds#_LopLAKGNEd-D-tWBUFz4zw"/>
         </qosPolicy>
       </readers>
     </subscribers>
   </participants>
   <topics xmi:id="_hRao4KO_Ed-9KMRPTsXTAg" name="Message">
     <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_x_g94KO_Ed-9KMRPTsXTAg" name="myDeadlineQosPolicy">
-      <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_VizHAKGNEd-D-tWBUFz4zw"/>
+      <type href="../PolicyLib/NonDefaultPolicyLibTest.opendds#_VizHAKGNEd-D-tWBUFz4zw"/>
     </qosPolicy>
     <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_3dtE4KO_Ed-9KMRPTsXTAg" name="myDestinationOrderQosPolicy">
-      <type href="../PolicyLibrary/NonDefaultPolicyLibraryTest.opendds#_cOcfoKGNEd-D-tWBUFz4zw"/>
+      <type href="../PolicyLib/NonDefaultPolicyLibTest.opendds#_cOcfoKGNEd-D-tWBUFz4zw"/>
     </qosPolicy>
-    <datatype xsi:type="types:idlStruct" href="../DataLibrary/DataLibraryTest.opendds#_Mod2oKO5Ed-9KMRPTsXTAg"/>
+    <datatype xsi:type="types:idlStruct" href="../DataLib/DataLibTest.opendds#_Mod2oKO5Ed-9KMRPTsXTAg"/>
   </topics>
   <policies xsi:type="opendds:efQosPolicy" xmi:id="_uJEpwNhiEd-LEcW1P4x7eA" name="myEfPolicy"/>
   <policies xsi:type="opendds:udQosPolicy" xmi:id="_uJ0QoNhiEd-LEcW1P4x7eA" name="myUdPolicy"/>
@@ -57,4 +57,4 @@
   <policies xsi:type="opendds:gdQosPolicy" xmi:id="_H4AlwNhmEd-LEcW1P4x7eA" name="myGdPolicy"/>
   <policies xsi:type="opendds:partitionQosPolicy" xmi:id="_H4g8ENhmEd-LEcW1P4x7eA" name="myPartitionPolicy"/>
   <policies xsi:type="opendds:presentationQosPolicy" xmi:id="_H5Fj0NhmEd-LEcW1P4x7eA" name="myPresentationPolicy"/>
-</opendds:MiddlewareLibrary>
+</opendds:MiddlewareLib>

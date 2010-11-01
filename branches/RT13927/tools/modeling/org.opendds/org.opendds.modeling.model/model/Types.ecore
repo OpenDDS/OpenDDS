@@ -3,7 +3,7 @@
     xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="types"
     nsURI="http://www.opendds.org/modeling/schemas/Types/1.0" nsPrefix="types">
-  <eClassifiers xsi:type="ecore:EClass" name="DataLibrary">
+  <eClassifiers xsi:type="ecore:EClass" name="DataLib">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="dataTypes" upperBound="-1"
         eType="#//TopicField" containment="true"/>

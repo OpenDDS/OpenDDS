@@ -1,7 +1,7 @@
 /*
  * (c) Copyright Object Computing, Incorporated. 2005,2010. All rights reserved.
  */
-package org.opendds.modeling.model.opendds.diagram.policylibrary.edit.parts;
+package org.opendds.modeling.model.opendds.diagram.policylib.edit.parts;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,10 +47,10 @@ import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
-import org.opendds.modeling.model.opendds.diagram.policylibrary.edit.policies.OpenDDSPolicyLibraryTextSelectionEditPolicy;
-import org.opendds.modeling.model.opendds.diagram.policylibrary.part.OpenDDSPolicyLibraryVisualIDRegistry;
-import org.opendds.modeling.model.opendds.diagram.policylibrary.providers.OpenDDSPolicyLibraryElementTypes;
-import org.opendds.modeling.model.opendds.diagram.policylibrary.providers.OpenDDSPolicyLibraryParserProvider;
+import org.opendds.modeling.model.opendds.diagram.policylib.edit.policies.OpenDDSPolicyLibTextSelectionEditPolicy;
+import org.opendds.modeling.model.opendds.diagram.policylib.part.OpenDDSPolicyLibVisualIDRegistry;
+import org.opendds.modeling.model.opendds.diagram.policylib.providers.OpenDDSPolicyLibElementTypes;
+import org.opendds.modeling.model.opendds.diagram.policylib.providers.OpenDDSPolicyLibParserProvider;
 
 import com.ociweb.gmf.EnumDirectEdit.EnumDirectEditManager;
 import com.ociweb.gmf.EnumDirectEdit.EnumDirectEditPolicy;
@@ -102,7 +102,7 @@ public class PresentationQosPolicyAccess_scopeEditPart extends
 	protected void createDefaultEditPolicies() {
 		super.createDefaultEditPolicies();
 		installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE,
-				new OpenDDSPolicyLibraryTextSelectionEditPolicy());
+				new OpenDDSPolicyLibTextSelectionEditPolicy());
 		installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE,
 				new EnumDirectEditPolicy(
 						PresentationQosPolicyAccessScopeKind.class));
@@ -211,7 +211,7 @@ public class PresentationQosPolicyAccess_scopeEditPart extends
 		if (parserElement == null) {
 			return null;
 		}
-		return OpenDDSPolicyLibraryElementTypes
+		return OpenDDSPolicyLibElementTypes
 				.getImage(parserElement.eClass());
 	}
 
@@ -238,13 +238,13 @@ public class PresentationQosPolicyAccess_scopeEditPart extends
 	public void setLabelText(String text) {
 		setLabelTextHelper(getFigure(), text);
 		Object pdEditPolicy = getEditPolicy(EditPolicy.PRIMARY_DRAG_ROLE);
-		if (pdEditPolicy instanceof OpenDDSPolicyLibraryTextSelectionEditPolicy) {
-			((OpenDDSPolicyLibraryTextSelectionEditPolicy) pdEditPolicy)
+		if (pdEditPolicy instanceof OpenDDSPolicyLibTextSelectionEditPolicy) {
+			((OpenDDSPolicyLibTextSelectionEditPolicy) pdEditPolicy)
 					.refreshFeedback();
 		}
 		Object sfEditPolicy = getEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE);
-		if (sfEditPolicy instanceof OpenDDSPolicyLibraryTextSelectionEditPolicy) {
-			((OpenDDSPolicyLibraryTextSelectionEditPolicy) sfEditPolicy)
+		if (sfEditPolicy instanceof OpenDDSPolicyLibTextSelectionEditPolicy) {
+			((OpenDDSPolicyLibTextSelectionEditPolicy) sfEditPolicy)
 					.refreshFeedback();
 		}
 	}
@@ -324,12 +324,12 @@ public class PresentationQosPolicyAccess_scopeEditPart extends
 	 */
 	public IParser getParser() {
 		if (parser == null) {
-			parser = OpenDDSPolicyLibraryParserProvider
+			parser = OpenDDSPolicyLibParserProvider
 					.getParser(
-							OpenDDSPolicyLibraryElementTypes.PresentationQosPolicy_2034,
+							OpenDDSPolicyLibElementTypes.PresentationQosPolicy_2034,
 							getParserElement(),
-							OpenDDSPolicyLibraryVisualIDRegistry
-									.getType(org.opendds.modeling.model.opendds.diagram.policylibrary.edit.parts.PresentationQosPolicyAccess_scopeEditPart.VISUAL_ID));
+							OpenDDSPolicyLibVisualIDRegistry
+									.getType(org.opendds.modeling.model.opendds.diagram.policylib.edit.parts.PresentationQosPolicyAccess_scopeEditPart.VISUAL_ID));
 		}
 		return parser;
 	}
@@ -434,13 +434,13 @@ public class PresentationQosPolicyAccess_scopeEditPart extends
 		setLabelTextHelper(getFigure(), getLabelText());
 		setLabelIconHelper(getFigure(), getLabelIcon());
 		Object pdEditPolicy = getEditPolicy(EditPolicy.PRIMARY_DRAG_ROLE);
-		if (pdEditPolicy instanceof OpenDDSPolicyLibraryTextSelectionEditPolicy) {
-			((OpenDDSPolicyLibraryTextSelectionEditPolicy) pdEditPolicy)
+		if (pdEditPolicy instanceof OpenDDSPolicyLibTextSelectionEditPolicy) {
+			((OpenDDSPolicyLibTextSelectionEditPolicy) pdEditPolicy)
 					.refreshFeedback();
 		}
 		Object sfEditPolicy = getEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE);
-		if (sfEditPolicy instanceof OpenDDSPolicyLibraryTextSelectionEditPolicy) {
-			((OpenDDSPolicyLibraryTextSelectionEditPolicy) sfEditPolicy)
+		if (sfEditPolicy instanceof OpenDDSPolicyLibTextSelectionEditPolicy) {
+			((OpenDDSPolicyLibTextSelectionEditPolicy) sfEditPolicy)
 					.refreshFeedback();
 		}
 	}

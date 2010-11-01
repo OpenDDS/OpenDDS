@@ -717,7 +717,7 @@ Elements::Data&lt;InstanceTraits&gt;::copySubscriptionQos(
 
   <!-- process each policy of the entity -->
   <xsl:for-each select="$entity/opendds:qosPolicy">
-    <!-- the policy library node for this policy name. -->
+    <!-- the policy lib node for this policy name. -->
     <xsl:variable name="policy" select="key( 'policies', @name)"/>
 
     <!-- lookup the field name for the current policy type. -->

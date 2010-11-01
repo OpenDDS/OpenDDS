@@ -4,7 +4,7 @@
     xmlns:trace="http://www.eclipse.org/gmf/2006/Trace">
   <nodeTraces
       visualID="2001"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'MiddlewareLibrary') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'OpenDDSModel') and _containmentMF_.name = 'middlewareLibrary')">
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'MiddlewareLib') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'OpenDDSModel') and _containmentMF_.name = 'middlewareLib')">
     <nodeLabelTraces
         visualID="5001"
         queryText="true"/>
@@ -14,7 +14,7 @@
   </nodeTraces>
   <nodeTraces
       visualID="2002"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLibrary') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'OpenDDSModel') and _containmentMF_.name = 'policyLibrary')">
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'OpenDDSModel') and _containmentMF_.name = 'policyLib')">
     <nodeLabelTraces
         visualID="5002"
         queryText="true"/>
@@ -24,7 +24,7 @@
   </nodeTraces>
   <nodeTraces
       visualID="2004"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'DataLibrary') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'OpenDDSModel') and _containmentMF_.name = 'dataLibrary')">
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'DataLib') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'OpenDDSModel') and _containmentMF_.name = 'dataLib')">
     <nodeLabelTraces
         visualID="5004"
         queryText="true"/>

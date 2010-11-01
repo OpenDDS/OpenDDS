@@ -47,19 +47,19 @@
     <eAnnotations source="GenModel">
       <details key="documentation" value="This is the container used by GMF for the objects that can reside on the main diagram."/>
     </eAnnotations>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="policyLibrary" upperBound="-1"
-        eType="#//PolicyLibrary" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="middlewareLibrary" upperBound="-1"
-        eType="#//MiddlewareLibrary" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="dataLibrary" upperBound="-1"
-        eType="ecore:EClass Types.ecore#//DataLibrary" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="policyLib" upperBound="-1"
+        eType="#//PolicyLib" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="middlewareLib" upperBound="-1"
+        eType="#//MiddlewareLib" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dataLib" upperBound="-1"
+        eType="ecore:EClass Types.ecore#//DataLib" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="PolicyLibrary">
+  <eClassifiers xsi:type="ecore:EClass" name="PolicyLib">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" ordered="false" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="policies" upperBound="-1"
         eType="#//qosPolicy" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="MiddlewareLibrary">
+  <eClassifiers xsi:type="ecore:EClass" name="MiddlewareLib">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="domains" upperBound="-1"
         eType="#//domain" containment="true"/>
@@ -70,7 +70,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="policies" upperBound="-1"
         eType="#//qosPolicy" containment="true">
       <eAnnotations source="GenModel">
-        <details key="documentation" value="This is an extension to the DDS Profile specification to allow domain entities policies to be either from a policy library or custom to the entity. If custom, then the owner of the policy is the middleware library."/>
+        <details key="documentation" value="This is an extension to the DDS Profile specification to allow domain entities policies to be either from a policy lib or custom to the entity. If custom, then the owner of the policy is the middleware lib."/>
       </eAnnotations>
     </eStructuralFeatures>
   </eClassifiers>

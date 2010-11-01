@@ -80,21 +80,21 @@ development model.
          unpack="false"/>
 
    <plugin
-         id="org.opendds.modeling.diagram.datalibrary"
+         id="org.opendds.modeling.diagram.datalib"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.opendds.modeling.diagram.policylibrary"
+         id="org.opendds.modeling.diagram.policylib"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.opendds.modeling.diagram.middlewarelibrary"
+         id="org.opendds.modeling.diagram.middlewarelib"
          download-size="0"
          install-size="0"
          version="0.0.0"

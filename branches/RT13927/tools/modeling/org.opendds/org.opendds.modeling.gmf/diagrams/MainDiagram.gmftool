@@ -10,8 +10,8 @@
         title="OpenDDS">
       <tools
           xsi:type="gmftool:CreationTool"
-          title="PolicyLibrary"
-          description="Create new PolicyLibrary">
+          title="PolicyLib"
+          description="Create new PolicyLib">
         <smallIcon
             xsi:type="gmftool:DefaultImage"/>
         <largeIcon
@@ -19,8 +19,8 @@
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
-          title="MiddlewareLibrary"
-          description="Create new MiddlewareLibrary">
+          title="MiddlewareLib"
+          description="Create new MiddlewareLib">
         <smallIcon
             xsi:type="gmftool:DefaultImage"/>
         <largeIcon
@@ -28,8 +28,8 @@
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
-          title="DataLibrary"
-          description="Create new DataLibrary">
+          title="DataLib"
+          description="Create new DataLib">
         <smallIcon
             xsi:type="gmftool:DefaultImage"/>
         <largeIcon

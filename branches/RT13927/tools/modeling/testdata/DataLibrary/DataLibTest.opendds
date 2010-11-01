@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<types:DataLibrary xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_bVL_MKO4Ed-9KMRPTsXTAg" name="DataLibraryTest">
+<types:DataLib xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_bVL_MKO4Ed-9KMRPTsXTAg" name="DataLibTest">
   <dataTypes xsi:type="types:Short" xmi:id="_5BtScKO4Ed-9KMRPTsXTAg"/>
   <dataTypes xsi:type="types:Sequence" xmi:id="_Ap0TUKO5Ed-9KMRPTsXTAg" name="ShortSequence" length="10" subtype="_5BtScKO4Ed-9KMRPTsXTAg"/>
   <dataTypes xsi:type="types:idlTypedef" xmi:id="_Iq8RIKO5Ed-9KMRPTsXTAg" name="shortseqtypedef" type="_Ap0TUKO5Ed-9KMRPTsXTAg"/>
@@ -10,4 +10,4 @@
     <members xsi:type="types:TypedefRef" xmi:id="_pBUikKO5Ed-9KMRPTsXTAg" name="bseq" reference="_Iq8RIKO5Ed-9KMRPTsXTAg"/>
     <keys xmi:id="_u9oI8KO5Ed-9KMRPTsXTAg" member="_5BtScKO4Ed-9KMRPTsXTAg"/>
   </dataTypes>
-</types:DataLibrary>
+</types:DataLib>

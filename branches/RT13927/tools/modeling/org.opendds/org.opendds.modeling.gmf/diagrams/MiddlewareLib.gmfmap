@@ -7,7 +7,7 @@
     xmlns:gmftool="http://www.eclipse.org/gmf/2005/ToolDefinition">
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/participants"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/participants"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//domainParticipant"/>
@@ -30,7 +30,7 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="MiddlewareLibrary.gmftool#//@palette/@tools.0/@tools.1"/>
+          href="MiddlewareLib.gmftool#//@palette/@tools.0/@tools.1"/>
       <diagramNode
           href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
       <children
@@ -61,7 +61,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="MiddlewareLibrary.gmftool#//@palette/@tools.0/@tools.7"/>
+              href="MiddlewareLib.gmftool#//@palette/@tools.0/@tools.7"/>
           <diagramNode
               href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#Class"/>
           <children
@@ -80,7 +80,7 @@
               </labelMappings>
               <tool
                   xsi:type="gmftool:CreationTool"
-                  href="MiddlewareLibrary.gmftool#//@palette/@tools.0/@tools.8"/>
+                  href="MiddlewareLib.gmftool#//@palette/@tools.0/@tools.8"/>
               <diagramNode
                   href="../../org.opendds.modeling.graphics/diagrams/ports.gmfgraph#Port"/>
             </ownedChild>
@@ -89,12 +89,12 @@
               compartment="//@nodes.0/@ownedChild/@children.0/@ownedChild/@compartments.0"
               referencedChild="//@nodes.0/@ownedChild/@children.2/@ownedChild">
             <containmentFeature
-                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
           </children>
           <children
               compartment="//@nodes.0/@ownedChild/@children.0/@ownedChild/@compartments.0">
             <containmentFeature
-                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
             <ownedChild>
               <domainMetaElement
                   href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//gdQosPolicy"/>
@@ -131,7 +131,7 @@
           <children
               compartment="//@nodes.0/@ownedChild/@children.0/@ownedChild/@compartments.0">
             <containmentFeature
-                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
             <ownedChild>
               <domainMetaElement
                   href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//partitionQosPolicy"/>
@@ -158,7 +158,7 @@
           <children
               compartment="//@nodes.0/@ownedChild/@children.0/@ownedChild/@compartments.0">
             <containmentFeature
-                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
             <ownedChild>
               <domainMetaElement
                   href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//presentationQosPolicy"/>
@@ -245,7 +245,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="MiddlewareLibrary.gmftool#//@palette/@tools.0/@tools.3"/>
+              href="MiddlewareLib.gmftool#//@palette/@tools.0/@tools.3"/>
           <diagramNode
               href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#Class"/>
           <children
@@ -264,7 +264,7 @@
               </labelMappings>
               <tool
                   xsi:type="gmftool:CreationTool"
-                  href="MiddlewareLibrary.gmftool#//@palette/@tools.0/@tools.4"/>
+                  href="MiddlewareLib.gmftool#//@palette/@tools.0/@tools.4"/>
               <diagramNode
                   href="../../org.opendds.modeling.graphics/diagrams/ports.gmfgraph#Port"/>
             </ownedChild>
@@ -273,25 +273,25 @@
               compartment="//@nodes.0/@ownedChild/@children.1/@ownedChild/@compartments.0"
               referencedChild="//@nodes.0/@ownedChild/@children.2/@ownedChild">
             <containmentFeature
-                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
           </children>
           <children
               compartment="//@nodes.0/@ownedChild/@children.1/@ownedChild/@compartments.0"
               referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.2/@ownedChild">
             <containmentFeature
-                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
           </children>
           <children
               compartment="//@nodes.0/@ownedChild/@children.1/@ownedChild/@compartments.0"
               referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.3/@ownedChild">
             <containmentFeature
-                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
           </children>
           <children
               compartment="//@nodes.0/@ownedChild/@children.1/@ownedChild/@compartments.0"
               referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.4/@ownedChild">
             <containmentFeature
-                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+                href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
           </children>
           <compartments
               children="//@nodes.0/@ownedChild/@children.1/@ownedChild/@children.1 //@nodes.0/@ownedChild/@children.1/@ownedChild/@children.2 //@nodes.0/@ownedChild/@children.1/@ownedChild/@children.3 //@nodes.0/@ownedChild/@children.1/@ownedChild/@children.4">
@@ -303,7 +303,7 @@
       <children
           compartment="//@nodes.0/@ownedChild/@compartments.1">
         <containmentFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
         <ownedChild>
           <domainMetaElement
               href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//efQosPolicy"/>
@@ -340,7 +340,7 @@
       <children
           compartment="//@nodes.0/@ownedChild/@compartments.1">
         <containmentFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
         <ownedChild>
           <domainMetaElement
               href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//udQosPolicy"/>
@@ -388,7 +388,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/domains"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/domains"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//domain"/>
@@ -410,14 +410,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="MiddlewareLibrary.gmftool#//@palette/@tools.0/@tools.0"/>
+          href="MiddlewareLib.gmftool#//@palette/@tools.0/@tools.0"/>
       <diagramNode
           href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#Class"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/topics"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/topics"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//topic"/>
@@ -440,14 +440,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="MiddlewareLibrary.gmftool#//@palette/@tools.0/@tools.12"/>
+          href="MiddlewareLib.gmftool#//@palette/@tools.0/@tools.12"/>
       <diagramNode
           href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#Class"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//deadlineQosPolicy"/>
@@ -536,7 +536,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//destinationOrderQosPolicy"/>
@@ -572,7 +572,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//dsQosPolicy"/>
@@ -711,7 +711,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//durabilityQosPolicy"/>
@@ -747,7 +747,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//historyQosPolicy"/>
@@ -793,7 +793,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//lbQosPolicy"/>
@@ -882,7 +882,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//lifespanQosPolicy"/>
@@ -971,7 +971,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//livelinessQosPolicy"/>
@@ -1070,7 +1070,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//osQosPolicy"/>
@@ -1106,7 +1106,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//ownershipQosPolicy"/>
@@ -1142,7 +1142,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//rdlQosPolicy"/>
@@ -1178,7 +1178,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//reliabilityQosPolicy"/>
@@ -1277,7 +1277,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//rlQosPolicy"/>
@@ -1333,7 +1333,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//tbfQosPolicy"/>
@@ -1369,7 +1369,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//tdQosPolicy"/>
@@ -1405,7 +1405,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//tpQosPolicy"/>
@@ -1441,7 +1441,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//wdlQosPolicy"/>
@@ -1482,7 +1482,7 @@
         href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/ownedEntity"/>
     <tool
         xsi:type="gmftool:CreationTool"
-        href="MiddlewareLibrary.gmftool#//@palette/@tools.0/@tools.5"/>
+        href="MiddlewareLib.gmftool#//@palette/@tools.0/@tools.5"/>
     <diagramLink
         href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassChildren"/>
     <linkMetaFeature
@@ -1496,7 +1496,7 @@
         href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/ownedEntity"/>
     <tool
         xsi:type="gmftool:CreationTool"
-        href="MiddlewareLibrary.gmftool#//@palette/@tools.0/@tools.9"/>
+        href="MiddlewareLib.gmftool#//@palette/@tools.0/@tools.9"/>
     <diagramLink
         href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassChildren"/>
     <linkMetaFeature
@@ -1509,8 +1509,8 @@
     <domainModel
         href="../../org.opendds.modeling.model/model/OpenDDS.ecore#/"/>
     <domainMetaElement
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib"/>
     <palette
-        href="MiddlewareLibrary.gmftool#//@palette"/>
+        href="MiddlewareLib.gmftool#//@palette"/>
   </diagram>
 </gmfmap:Mapping>

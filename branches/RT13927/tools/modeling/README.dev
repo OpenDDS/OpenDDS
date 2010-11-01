@@ -63,10 +63,10 @@ Generated Projects (completely generated, not in any repository):
   org.opendds.modeling.diagram.main           (generated from org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen)
     - graphical model capture for the top level packages contained in the model.
 
-  org.opendds.modeling.diagram.datalibrary    (generated from org.opendds.modeling.gmf/diagrams/DataLibrary.gmfgen)
+  org.opendds.modeling.diagram.datalib    (generated from org.opendds.modeling.gmf/diagrams/DataLib.gmfgen)
     - graphical model capture for the data definitions used in the model.
 
-  org.opendds.modeling.diagram.policylibrary  (generated from org.opendds.modeling.gmf/diagrams/PolicyLibrary.gmfgen)
+  org.opendds.modeling.diagram.policylib  (generated from org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen)
     - graphical model capture for the QoS policy values used in the model.
 
 ************************************************************************

@@ -132,7 +132,7 @@ public class CodeGenNewWizard extends Wizard implements INewWizard {
 		GeneratorManager manager = new GeneratorManager();
 		
 		// STUB - replace this with information from wizard - most likely via arguments.
-		manager.addModelFile("sometypesfilename.opendds", "datalibrary");
+		manager.addModelFile("sometypesfilename.opendds", "datalib");
 		manager.addModelFile("someqosfilename.opendds", "qoslibrary");
 		manager.addModelFile("somemodelfilename.opendds", "components");
 		manager.addTargetDir("somedirectory");

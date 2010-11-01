@@ -342,7 +342,7 @@
   </opendds:type>
 </opendds:typeLibrary>
 
-<opendds:policyLibrary>
+<opendds:policyLib>
   <!-- User Data QoS Policy is a string in the profile - and bytes in reality. -->
   <opendds:policy name="part1userdata"      type="opendds:udQosPolicy"
                   value="participant1ud"/>
@@ -880,7 +880,7 @@
     <opendds:autopurge_disposed_samples_delay sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
   </opendds:policy>
 
-</opendds:policyLibrary>
+</opendds:policyLib>
 
 <opendds:transportLibrary>
   <opendds:transport name="transport1" key="1">
