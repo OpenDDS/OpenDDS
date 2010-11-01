@@ -1,3 +1,20 @@
+Tue Oct 26 20:31:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/dds/dcps_java.mpc:
+
+          Added a command-line option to idl2jni to account for the fact that
+          since the latest change to DdsDcpsTopic.idl, the generated cpp file
+          needs to include DdsDcpsDomainC.h.
+
+Mon Oct 18 18:36:01 UTC 2010  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * dds/DdsDcpsTopic.idl:
+        * dds/idl/IDLTemplate.txt:
+        * tests/DCPS/unit/MyTypeSupport.idl:
+
+          Move the abstract methods up to the base class to allow them to
+          be called by a base class pointer.
+
 Tue Oct 12 15:03:53 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * INSTALL:
