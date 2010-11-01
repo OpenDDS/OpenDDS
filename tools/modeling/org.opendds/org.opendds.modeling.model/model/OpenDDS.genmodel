@@ -48,20 +48,20 @@
     <genClasses ecoreClass="OpenDDS.ecore#//udQosPolicy"/>
     <genClasses ecoreClass="OpenDDS.ecore#//wdlQosPolicy"/>
     <genClasses ecoreClass="OpenDDS.ecore#//OpenDDSModel">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/policyLibrary"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/middlewareLibrary"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/dataLibrary"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/policyLib"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/middlewareLib"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/dataLib"/>
     </genClasses>
-    <genClasses ecoreClass="OpenDDS.ecore#//PolicyLibrary">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//PolicyLibrary/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//PolicyLibrary/policies"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//PolicyLib">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//PolicyLib/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//PolicyLib/policies"/>
     </genClasses>
-    <genClasses ecoreClass="OpenDDS.ecore#//MiddlewareLibrary">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//MiddlewareLibrary/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//MiddlewareLibrary/domains"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//MiddlewareLibrary/participants"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//MiddlewareLibrary/topics"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//MiddlewareLibrary/policies"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//MiddlewareLib">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//MiddlewareLib/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//MiddlewareLib/domains"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//MiddlewareLib/participants"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//MiddlewareLib/topics"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//MiddlewareLib/policies"/>
     </genClasses>
   </genPackages>
   <genPackages prefix="Core" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
@@ -194,9 +194,9 @@
   </genPackages>
   <genPackages prefix="Types" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
       generateExampleClass="false" generateModelWizard="false" ecorePackage="Types.ecore#/">
-    <genClasses ecoreClass="Types.ecore#//DataLibrary">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//DataLibrary/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//DataLibrary/dataTypes"/>
+    <genClasses ecoreClass="Types.ecore#//DataLib">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//DataLib/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//DataLib/dataTypes"/>
     </genClasses>
     <genClasses ecoreClass="Types.ecore#//idlArray"/>
     <genClasses ecoreClass="Types.ecore#//idlEnum"/>

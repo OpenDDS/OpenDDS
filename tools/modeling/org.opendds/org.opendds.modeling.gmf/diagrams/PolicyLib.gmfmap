@@ -7,7 +7,7 @@
     xmlns:gmftool="http://www.eclipse.org/gmf/2005/ToolDefinition">
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//deadlineQosPolicy"/>
@@ -56,7 +56,7 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.0"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.0"/>
       <diagramNode
           href="QosPolicies.gmfgraph#DeadlineQosPolicy"/>
       <children
@@ -99,7 +99,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//destinationOrderQosPolicy"/>
@@ -131,14 +131,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.1"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.1"/>
       <diagramNode
           href="QosPolicies.gmfgraph#DestinationOrderQosPolicy"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//dsQosPolicy"/>
@@ -237,7 +237,7 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.2"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.2"/>
       <diagramNode
           href="QosPolicies.gmfgraph#DsQosPolicy"/>
       <children
@@ -280,7 +280,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//durabilityQosPolicy"/>
@@ -312,14 +312,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.3"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.3"/>
       <diagramNode
           href="QosPolicies.gmfgraph#DurabilityQosPolicy"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//efQosPolicy"/>
@@ -351,14 +351,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.4"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.4"/>
       <diagramNode
           href="QosPolicies.gmfgraph#EfQosPolicy"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//gdQosPolicy"/>
@@ -390,14 +390,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.5"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.5"/>
       <diagramNode
           href="QosPolicies.gmfgraph#GdQosPolicy"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//historyQosPolicy"/>
@@ -439,14 +439,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.6"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.6"/>
       <diagramNode
           href="QosPolicies.gmfgraph#HistoryQosPolicy"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//lbQosPolicy"/>
@@ -495,7 +495,7 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.7"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.7"/>
       <diagramNode
           href="QosPolicies.gmfgraph#LbQosPolicy"/>
       <children
@@ -538,7 +538,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//lifespanQosPolicy"/>
@@ -587,7 +587,7 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.8"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.8"/>
       <diagramNode
           href="QosPolicies.gmfgraph#LifespanQosPolicy"/>
       <children
@@ -630,7 +630,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//livelinessQosPolicy"/>
@@ -689,7 +689,7 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.9"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.9"/>
       <diagramNode
           href="QosPolicies.gmfgraph#LivelinessQosPolicy"/>
       <children
@@ -732,7 +732,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//osQosPolicy"/>
@@ -764,14 +764,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.10"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.10"/>
       <diagramNode
           href="QosPolicies.gmfgraph#OsQosPolicy"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//ownershipQosPolicy"/>
@@ -803,14 +803,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.11"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.11"/>
       <diagramNode
           href="QosPolicies.gmfgraph#OwnershipQosPolicy"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//partitionQosPolicy"/>
@@ -832,14 +832,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.12"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.12"/>
       <diagramNode
           href="QosPolicies.gmfgraph#PartitionQosPolicy"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//presentationQosPolicy"/>
@@ -891,14 +891,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.13"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.13"/>
       <diagramNode
           href="QosPolicies.gmfgraph#PresentationQosPolicy"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//rdlQosPolicy"/>
@@ -930,14 +930,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.14"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.14"/>
       <diagramNode
           href="QosPolicies.gmfgraph#RdlQosPolicy"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//reliabilityQosPolicy"/>
@@ -996,7 +996,7 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.15"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.15"/>
       <diagramNode
           href="QosPolicies.gmfgraph#ReliabilityQosPolicy"/>
       <children
@@ -1039,7 +1039,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//rlQosPolicy"/>
@@ -1091,14 +1091,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.16"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.16"/>
       <diagramNode
           href="QosPolicies.gmfgraph#RlQosPolicy"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//tbfQosPolicy"/>
@@ -1130,14 +1130,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.17"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.17"/>
       <diagramNode
           href="QosPolicies.gmfgraph#TbfQosPolicy"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//tdQosPolicy"/>
@@ -1169,14 +1169,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.18"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.18"/>
       <diagramNode
           href="QosPolicies.gmfgraph#TdQosPolicy"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//tpQosPolicy"/>
@@ -1208,14 +1208,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.19"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.19"/>
       <diagramNode
           href="QosPolicies.gmfgraph#TpQosPolicy"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//udQosPolicy"/>
@@ -1247,14 +1247,14 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.20"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.20"/>
       <diagramNode
           href="QosPolicies.gmfgraph#UdQosPolicy"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/policies"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//wdlQosPolicy"/>
@@ -1286,7 +1286,7 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="PolicyLibrary.gmftool#//@palette/@tools.0/@tools.21"/>
+          href="PolicyLib.gmftool#//@palette/@tools.0/@tools.21"/>
       <diagramNode
           href="QosPolicies.gmfgraph#WdlQosPolicy"/>
     </ownedChild>
@@ -1297,8 +1297,8 @@
     <domainModel
         href="../../org.opendds.modeling.model/model/OpenDDS.ecore#/"/>
     <domainMetaElement
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib"/>
     <palette
-        href="PolicyLibrary.gmftool#//@palette"/>
+        href="PolicyLib.gmftool#//@palette"/>
   </diagram>
 </gmfmap:Mapping>

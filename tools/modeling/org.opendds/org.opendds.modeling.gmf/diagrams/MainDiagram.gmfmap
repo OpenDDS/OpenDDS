@@ -6,16 +6,16 @@
     xmlns:gmftool="http://www.eclipse.org/gmf/2005/ToolDefinition">
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/middlewareLibrary"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/middlewareLib"/>
     <ownedChild>
       <domainMetaElement
-          href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary"/>
+          href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib"/>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
-            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/name"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/name"/>
       </labelMappings>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
@@ -24,10 +24,10 @@
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
-            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLibrary/name"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/name"/>
       </labelMappings>
       <relatedDiagrams
-          href="MiddlewareLibrary.gmfmap#//@diagram"/>
+          href="MiddlewareLib.gmfmap#//@diagram"/>
       <tool
           xsi:type="gmftool:CreationTool"
           href="MainDiagram.gmftool#//@palette/@tools.0/@tools.1"/>
@@ -37,28 +37,28 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/policyLibrary"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/policyLib"/>
     <ownedChild>
       <domainMetaElement
-          href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary"/>
+          href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib"/>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
-            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/name"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/name"/>
       </labelMappings>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"
-          viewPattern="«policyLibrary»">
+          viewPattern="«policyLib»">
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
-            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLibrary/name"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/name"/>
       </labelMappings>
       <relatedDiagrams
-          href="PolicyLibrary.gmfmap#//@diagram"/>
+          href="PolicyLib.gmfmap#//@diagram"/>
       <tool
           xsi:type="gmftool:CreationTool"
           href="MainDiagram.gmftool#//@palette/@tools.0/@tools.0"/>
@@ -68,28 +68,28 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/dataLibrary"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/dataLib"/>
     <ownedChild>
       <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//DataLibrary"/>
+          href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib"/>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
-            href="../../org.opendds.modeling.model/model/Types.ecore#//DataLibrary/name"/>
+            href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/name"/>
       </labelMappings>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"
-          viewPattern="«dataLibrary»">
+          viewPattern="«dataLib»">
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
-            href="../../org.opendds.modeling.model/model/Types.ecore#//DataLibrary/name"/>
+            href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/name"/>
       </labelMappings>
       <relatedDiagrams
-          href="DataLibrary.gmfmap#//@diagram"/>
+          href="DataLib.gmfmap#//@diagram"/>
       <tool
           xsi:type="gmftool:CreationTool"
           href="MainDiagram.gmftool#//@palette/@tools.0/@tools.2"/>

@@ -7,13 +7,13 @@
 
    <extension point="org.eclipse.team.core.fileTypes" id="repo-ftype">
       <?gmfgen generated="true"?>
-      <fileTypes type="text" extension="opendds_diagram_middlewarelibrary"/>
+      <fileTypes type="text" extension="opendds_diagram_middlewarelib"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.extension_parser" id="resource-factory">
       <?gmfgen generated="true"?>
       <parser
-         type="opendds_diagram_middlewarelibrary"
+         type="opendds_diagram_middlewarelib"
          class="org.eclipse.gmf.runtime.emf.core.resources.GMFResourceFactory">
       </parser>
    </extension>
@@ -21,14 +21,14 @@
    <extension point="org.eclipse.ui.editors" id="gmf-editor">
       <?gmfgen generated="true"?>
       <editor
-         id="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryDiagramEditorID"
+         id="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibDiagramEditorID"
          name="%editorName"
          icon="icons/obj16/OpenDDSDiagramFile.gif"
-         extensions="opendds_diagram_middlewarelibrary"
+         extensions="opendds_diagram_middlewarelib"
          default="true"
-         class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryDiagramEditor"
-         matchingStrategy="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryMatchingStrategy"
-         contributorClass="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryDiagramActionBarContributor">
+         class="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibDiagramEditor"
+         matchingStrategy="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibMatchingStrategy"
+         contributorClass="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibDiagramActionBarContributor">
       </editor>
    </extension>
    
@@ -36,7 +36,7 @@
       <?gmfgen generated="true"?>
       <context
          description="%context.description"
-         id="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.ui.diagramContext"
+         id="org.opendds.modeling.model.opendds.diagram.middlewarelib.ui.diagramContext"
          name="%context.name"
          parentId="org.eclipse.gmf.runtime.diagram.ui.diagramContext">
       </context>
@@ -48,8 +48,8 @@
   	     name="%newWizardName"
   	     icon="icons/obj16/OpenDDSDiagramFile.gif"
   	     category="org.eclipse.ui.Examples"
-  	     class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryCreationWizard"
-  	     id="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryCreationWizardID">
+  	     class="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibCreationWizard"
+  	     id="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibCreationWizardID">
   	  	 <description>%newWizardDesc</description>  
       </wizard>
    </extension>
@@ -57,15 +57,15 @@
    <extension point="org.eclipse.ui.popupMenus" id="init-diagram-action">
       <?gmfgen generated="true"?>
       <objectContribution
-            id="org.opendds.modeling.diagram.middlewarelibrary.InitDiagram"
+            id="org.opendds.modeling.diagram.middlewarelib.InitDiagram"
             nameFilter="*.opendds"
             objectClass="org.eclipse.core.resources.IFile">
          <action
                label="%initDiagramActionLabel"
-               class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryInitDiagramFileAction"
+               class="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibInitDiagramFileAction"
                menubarPath="additions"
                enablesFor="1"
-               id="org.opendds.modeling.diagram.middlewarelibrary.InitDiagramAction">
+               id="org.opendds.modeling.diagram.middlewarelib.InitDiagramAction">
          </action>
       </objectContribution>
    </extension>
@@ -74,9 +74,9 @@
       <?gmfgen generated="true"?>
       <GlobalActionHandlerProvider
          class="org.eclipse.gmf.runtime.diagram.ui.providers.DiagramGlobalActionHandlerProvider"
-         id="OpenDDS MiddlewareLibraryPresentation">
+         id="OpenDDS MiddlewareLibPresentation">
          <Priority name="Lowest"/>
-         <ViewId id="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryDiagramEditorID">
+         <ViewId id="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibDiagramEditorID">
             <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
                <GlobalActionId actionId="delete"/>
             </ElementType>
@@ -87,9 +87,9 @@
       </GlobalActionHandlerProvider>
       <GlobalActionHandlerProvider
          class="org.eclipse.gmf.runtime.diagram.ui.printing.render.providers.DiagramWithPrintGlobalActionHandlerProvider"
-         id="OpenDDS MiddlewareLibraryPresentationPrint">
+         id="OpenDDS MiddlewareLibPresentationPrint">
          <Priority name="Lowest"/>
-         <ViewId id="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryDiagramEditorID">
+         <ViewId id="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibDiagramEditorID">
             <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
                <GlobalActionId actionId="print"/>
             </ElementType>
@@ -97,9 +97,9 @@
       </GlobalActionHandlerProvider>
       <GlobalActionHandlerProvider
          class="org.eclipse.gmf.runtime.diagram.ui.providers.ide.providers.DiagramIDEGlobalActionHandlerProvider"
-         id="OpenDDS MiddlewareLibraryPresentationIDE">
+         id="OpenDDS MiddlewareLibPresentationIDE">
          <Priority name="Lowest"/>
-         <ViewId id="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryDiagramEditorID">
+         <ViewId id="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibDiagramEditorID">
             <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
                <GlobalActionId actionId="bookmark"/>
             </ElementType>
@@ -107,9 +107,9 @@
       </GlobalActionHandlerProvider>
       <GlobalActionHandlerProvider
             class="org.eclipse.gmf.runtime.diagram.ui.render.providers.DiagramUIRenderGlobalActionHandlerProvider"
-            id="OpenDDS MiddlewareLibraryRender">
+            id="OpenDDS MiddlewareLibRender">
          <Priority name="Lowest"/>
-         <ViewId id="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryDiagramEditorID">
+         <ViewId id="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibDiagramEditorID">
             <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
                <GlobalActionId actionId="cut"/>
                <GlobalActionId actionId="copy"/>
@@ -122,7 +122,7 @@
 
    <extension point="org.eclipse.core.runtime.preferences" id="prefs">
       <?gmfgen generated="true"?>
-      <initializer class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.preferences.DiagramPreferenceInitializer"/>
+      <initializer class="org.opendds.modeling.model.opendds.diagram.middlewarelib.preferences.DiagramPreferenceInitializer"/>
    </extension>
 
    <extension point="org.eclipse.ui.preferencePages" id="prefpages">
@@ -130,39 +130,39 @@
       <page
             id="org.opendds.modeling.diagram.general"
             name="%prefpage.org.opendds.modeling.diagram.general"
-            class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.preferences.DiagramGeneralPreferencePage">
+            class="org.opendds.modeling.model.opendds.diagram.middlewarelib.preferences.DiagramGeneralPreferencePage">
       </page>
       <page
             id="org.opendds.modeling.diagram.appearance"
             name="%prefpage.org.opendds.modeling.diagram.appearance"
             category="org.opendds.modeling.diagram.general"
-            class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.preferences.DiagramAppearancePreferencePage">
+            class="org.opendds.modeling.model.opendds.diagram.middlewarelib.preferences.DiagramAppearancePreferencePage">
       </page>
       <page
             id="org.opendds.modeling.diagram.connections"
             name="%prefpage.org.opendds.modeling.diagram.connections"
             category="org.opendds.modeling.diagram.general"
-            class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.preferences.DiagramConnectionsPreferencePage">
+            class="org.opendds.modeling.model.opendds.diagram.middlewarelib.preferences.DiagramConnectionsPreferencePage">
       </page>
       <page
             id="org.opendds.modeling.diagram.printing"
             name="%prefpage.org.opendds.modeling.diagram.printing"
             category="org.opendds.modeling.diagram.general"
-            class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.preferences.DiagramPrintingPreferencePage">
+            class="org.opendds.modeling.model.opendds.diagram.middlewarelib.preferences.DiagramPrintingPreferencePage">
       </page>
       <page
             id="org.opendds.modeling.diagram.rulersAndGrid"
             name="%prefpage.org.opendds.modeling.diagram.rulersAndGrid"
             category="org.opendds.modeling.diagram.general"
-            class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.preferences.DiagramRulersAndGridPreferencePage">
+            class="org.opendds.modeling.model.opendds.diagram.middlewarelib.preferences.DiagramRulersAndGridPreferencePage">
       </page>
    </extension>
 
    <extension point="org.eclipse.ui.views.properties.tabbed.propertyContributor" id="prop-contrib">
       <?gmfgen generated="true"?>
       <propertyContributor
-            contributorId="org.opendds.modeling.diagram.middlewarelibrary"
-            labelProvider="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.sheet.OpenDDSMiddlewareLibrarySheetLabelProvider">
+            contributorId="org.opendds.modeling.diagram.middlewarelib"
+            labelProvider="org.opendds.modeling.model.opendds.diagram.middlewarelib.sheet.OpenDDSMiddlewareLibSheetLabelProvider">
          <propertyCategory category="domain"/>
          <propertyCategory category="visual"/>
          <propertyCategory category="extra"/>
@@ -171,7 +171,7 @@
 
    <extension point="org.eclipse.ui.views.properties.tabbed.propertyTabs" id="proptabs">
       <?gmfgen generated="true"?>   
-      <propertyTabs contributorId="org.opendds.modeling.diagram.middlewarelibrary">
+      <propertyTabs contributorId="org.opendds.modeling.diagram.middlewarelib">
          <propertyTab
              category="visual"
              id="property.tab.AppearancePropertySection"
@@ -189,7 +189,7 @@
 
    <extension point="org.eclipse.ui.views.properties.tabbed.propertySections" id="propsections">
       <?gmfgen generated="true"?>   
-      <propertySections contributorId="org.opendds.modeling.diagram.middlewarelibrary">
+      <propertySections contributorId="org.opendds.modeling.diagram.middlewarelib">
          <propertySection id="property.section.ConnectorAppearancePropertySection" 
             filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.ConnectionEditPartPropertySectionFilter" 
             class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.appearance.ConnectionAppearancePropertySection" 
@@ -213,19 +213,19 @@
          <propertySection
             id="property.section.domain" 
             tab="property.tab.domain"
-            class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.sheet.OpenDDSMiddlewareLibraryPropertySection">
+            class="org.opendds.modeling.model.opendds.diagram.middlewarelib.sheet.OpenDDSMiddlewareLibPropertySection">
             <input type="org.eclipse.gmf.runtime.notation.View"/>
             <input type="org.eclipse.gef.EditPart"/>
-            <input type="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.navigator.OpenDDSMiddlewareLibraryAbstractNavigatorItem"/>
+            <input type="org.opendds.modeling.model.opendds.diagram.middlewarelib.navigator.OpenDDSMiddlewareLibAbstractNavigatorItem"/>
          </propertySection>
       </propertySections>
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.diagram.core.viewProviders" id="view-provider">
       <?gmfgen generated="true"?>
-      <viewProvider class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.providers.OpenDDSMiddlewareLibraryViewProvider">
+      <viewProvider class="org.opendds.modeling.model.opendds.diagram.middlewarelib.providers.OpenDDSMiddlewareLibViewProvider">
          <Priority name="Lowest"/>
-         <context viewClass="org.eclipse.gmf.runtime.notation.Diagram" semanticHints="OpenDDS MiddlewareLibrary"/>
+         <context viewClass="org.eclipse.gmf.runtime.notation.Diagram" semanticHints="OpenDDS MiddlewareLib"/>
          <context viewClass="org.eclipse.gmf.runtime.notation.Node" semanticHints="2001,2002,2003,2004,2005,2006,2007,2010,2011,2012,2013,2014,2015,2018,2019,2020,2021,2022,2023,2025,3001,3003,3012,3014,3015,3016,3002,3004,3013,3005,3006,3007,3008,3009,3010"/>
          <context viewClass="org.eclipse.gmf.runtime.notation.Edge" semanticHints="4001,4002"/>
       </viewProvider>
@@ -233,10 +233,10 @@
 
    <extension point="org.eclipse.gmf.runtime.diagram.ui.editpartProviders" id="ep-provider">
       <?gmfgen generated="true"?>
-      <editpartProvider class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.providers.OpenDDSMiddlewareLibraryEditPartProvider">
+      <editpartProvider class="org.opendds.modeling.model.opendds.diagram.middlewarelib.providers.OpenDDSMiddlewareLibEditPartProvider">
          <Priority name="Lowest"/>
          <object class="org.eclipse.gmf.runtime.notation.Diagram" id="generated-diagram">
-            <method name="getType()" value="OpenDDS MiddlewareLibrary"/>
+            <method name="getType()" value="OpenDDS MiddlewareLib"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-nodes">
             <method name="getType()" value="2001,2002,2003,2004,2005,2006,2007,2010,2011,2012,2013,2014,2015,2018,2019,2020,2021,2022,2023,2025,3001,3003,3012,3014,3015,3016,3002,3004,3013,3005,3006,3007,3008,3009,3010"/>
@@ -256,43 +256,43 @@
 
    <extension point="org.eclipse.gmf.runtime.emf.ui.modelingAssistantProviders" id="modelassist-provider">
       <?gmfgen generated="true"?>
-      <modelingAssistantProvider class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.providers.OpenDDSMiddlewareLibraryModelingAssistantProvider">
+      <modelingAssistantProvider class="org.opendds.modeling.model.opendds.diagram.middlewarelib.providers.OpenDDSMiddlewareLibModelingAssistantProvider">
          <Priority name="Lowest"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.MiddlewareLibraryEditPart" id="MiddlewareLibrary_1000"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.DomainParticipantEditPart" id="DomainParticipant_2001"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.DomainEditPart" id="Domain_2002"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.TopicEditPart" id="Topic_2003"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.DeadlineQosPolicyEditPart" id="DeadlineQosPolicy_2004"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.DestinationOrderQosPolicyEditPart" id="DestinationOrderQosPolicy_2005"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.DsQosPolicyEditPart" id="DsQosPolicy_2006"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.DurabilityQosPolicyEditPart" id="DurabilityQosPolicy_2007"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.HistoryQosPolicyEditPart" id="HistoryQosPolicy_2010"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.LbQosPolicyEditPart" id="LbQosPolicy_2011"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.LifespanQosPolicyEditPart" id="LifespanQosPolicy_2012"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.LivelinessQosPolicyEditPart" id="LivelinessQosPolicy_2013"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.OsQosPolicyEditPart" id="OsQosPolicy_2014"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.OwnershipQosPolicyEditPart" id="OwnershipQosPolicy_2015"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.RdlQosPolicyEditPart" id="RdlQosPolicy_2018"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.ReliabilityQosPolicyEditPart" id="ReliabilityQosPolicy_2019"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.RlQosPolicyEditPart" id="RlQosPolicy_2020"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.TbfQosPolicyEditPart" id="TbfQosPolicy_2021"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.TdQosPolicyEditPart" id="TdQosPolicy_2022"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.TpQosPolicyEditPart" id="TpQosPolicy_2023"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.WdlQosPolicyEditPart" id="WdlQosPolicy_2025"/>
-         <context elements="MiddlewareLibrary_1000,DomainParticipant_2001,Domain_2002,Topic_2003,DeadlineQosPolicy_2004,DestinationOrderQosPolicy_2005,DsQosPolicy_2006,DurabilityQosPolicy_2007,HistoryQosPolicy_2010,LbQosPolicy_2011,LifespanQosPolicy_2012,LivelinessQosPolicy_2013,OsQosPolicy_2014,OwnershipQosPolicy_2015,RdlQosPolicy_2018,ReliabilityQosPolicy_2019,RlQosPolicy_2020,TbfQosPolicy_2021,TdQosPolicy_2022,TpQosPolicy_2023,WdlQosPolicy_2025"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.MiddlewareLibEditPart" id="MiddlewareLib_1000"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.DomainParticipantEditPart" id="DomainParticipant_2001"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.DomainEditPart" id="Domain_2002"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.TopicEditPart" id="Topic_2003"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.DeadlineQosPolicyEditPart" id="DeadlineQosPolicy_2004"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.DestinationOrderQosPolicyEditPart" id="DestinationOrderQosPolicy_2005"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.DsQosPolicyEditPart" id="DsQosPolicy_2006"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.DurabilityQosPolicyEditPart" id="DurabilityQosPolicy_2007"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.HistoryQosPolicyEditPart" id="HistoryQosPolicy_2010"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.LbQosPolicyEditPart" id="LbQosPolicy_2011"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.LifespanQosPolicyEditPart" id="LifespanQosPolicy_2012"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.LivelinessQosPolicyEditPart" id="LivelinessQosPolicy_2013"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.OsQosPolicyEditPart" id="OsQosPolicy_2014"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.OwnershipQosPolicyEditPart" id="OwnershipQosPolicy_2015"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.RdlQosPolicyEditPart" id="RdlQosPolicy_2018"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.ReliabilityQosPolicyEditPart" id="ReliabilityQosPolicy_2019"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.RlQosPolicyEditPart" id="RlQosPolicy_2020"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.TbfQosPolicyEditPart" id="TbfQosPolicy_2021"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.TdQosPolicyEditPart" id="TdQosPolicy_2022"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.TpQosPolicyEditPart" id="TpQosPolicy_2023"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.WdlQosPolicyEditPart" id="WdlQosPolicy_2025"/>
+         <context elements="MiddlewareLib_1000,DomainParticipant_2001,Domain_2002,Topic_2003,DeadlineQosPolicy_2004,DestinationOrderQosPolicy_2005,DsQosPolicy_2006,DurabilityQosPolicy_2007,HistoryQosPolicy_2010,LbQosPolicy_2011,LifespanQosPolicy_2012,LivelinessQosPolicy_2013,OsQosPolicy_2014,OwnershipQosPolicy_2015,RdlQosPolicy_2018,ReliabilityQosPolicy_2019,RlQosPolicy_2020,TbfQosPolicy_2021,TdQosPolicy_2022,TpQosPolicy_2023,WdlQosPolicy_2025"/>
       </modelingAssistantProvider>
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.common.ui.services.iconProviders" id="icon-provider">
       <?gmfgen generated="true"?>
-      <IconProvider class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.providers.OpenDDSMiddlewareLibraryIconProvider">
+      <IconProvider class="org.opendds.modeling.model.opendds.diagram.middlewarelib.providers.OpenDDSMiddlewareLibIconProvider">
          <Priority name="Low"/>
       </IconProvider>
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.common.ui.services.parserProviders" id="parser-provider">
       <?gmfgen generated="true"?>
-      <ParserProvider class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.providers.OpenDDSMiddlewareLibraryParserProvider">
+      <ParserProvider class="org.opendds.modeling.model.opendds.diagram.middlewarelib.providers.OpenDDSMiddlewareLibParserProvider">
          <Priority name="Lowest"/>
       </ParserProvider>
    </extension>
@@ -301,374 +301,374 @@
       <?gmfgen generated="true"?>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.MiddlewareLibrary_1000"
-               name="%metatype.name.MiddlewareLibrary_1000"
+               id="org.opendds.modeling.diagram.middlewarelib.MiddlewareLib_1000"
+               name="%metatype.name.MiddlewareLib_1000"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
-               eclass="MiddlewareLibrary"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.MiddlewareLibraryEditHelper">
+               eclass="MiddlewareLib"
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.MiddlewareLibEditHelper">
             <param name="semanticHint" value="1000"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.DomainParticipant_2001"
+               id="org.opendds.modeling.diagram.middlewarelib.DomainParticipant_2001"
                name="%metatype.name.DomainParticipant_2001"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="domainParticipant"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.DomainParticipantEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.DomainParticipantEditHelper">
             <param name="semanticHint" value="2001"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.Domain_2002"
+               id="org.opendds.modeling.diagram.middlewarelib.Domain_2002"
                name="%metatype.name.Domain_2002"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="domain"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.DomainEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.DomainEditHelper">
             <param name="semanticHint" value="2002"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.Topic_2003"
+               id="org.opendds.modeling.diagram.middlewarelib.Topic_2003"
                name="%metatype.name.Topic_2003"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="topic"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.TopicEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.TopicEditHelper">
             <param name="semanticHint" value="2003"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.DeadlineQosPolicy_2004"
+               id="org.opendds.modeling.diagram.middlewarelib.DeadlineQosPolicy_2004"
                name="%metatype.name.DeadlineQosPolicy_2004"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="deadlineQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.DeadlineQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.DeadlineQosPolicyEditHelper">
             <param name="semanticHint" value="2004"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.DestinationOrderQosPolicy_2005"
+               id="org.opendds.modeling.diagram.middlewarelib.DestinationOrderQosPolicy_2005"
                name="%metatype.name.DestinationOrderQosPolicy_2005"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="destinationOrderQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.DestinationOrderQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.DestinationOrderQosPolicyEditHelper">
             <param name="semanticHint" value="2005"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.DsQosPolicy_2006"
+               id="org.opendds.modeling.diagram.middlewarelib.DsQosPolicy_2006"
                name="%metatype.name.DsQosPolicy_2006"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="dsQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.DsQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.DsQosPolicyEditHelper">
             <param name="semanticHint" value="2006"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.DurabilityQosPolicy_2007"
+               id="org.opendds.modeling.diagram.middlewarelib.DurabilityQosPolicy_2007"
                name="%metatype.name.DurabilityQosPolicy_2007"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="durabilityQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.DurabilityQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.DurabilityQosPolicyEditHelper">
             <param name="semanticHint" value="2007"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.HistoryQosPolicy_2010"
+               id="org.opendds.modeling.diagram.middlewarelib.HistoryQosPolicy_2010"
                name="%metatype.name.HistoryQosPolicy_2010"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="historyQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.HistoryQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.HistoryQosPolicyEditHelper">
             <param name="semanticHint" value="2010"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.LbQosPolicy_2011"
+               id="org.opendds.modeling.diagram.middlewarelib.LbQosPolicy_2011"
                name="%metatype.name.LbQosPolicy_2011"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="lbQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.LbQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.LbQosPolicyEditHelper">
             <param name="semanticHint" value="2011"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.LifespanQosPolicy_2012"
+               id="org.opendds.modeling.diagram.middlewarelib.LifespanQosPolicy_2012"
                name="%metatype.name.LifespanQosPolicy_2012"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="lifespanQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.LifespanQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.LifespanQosPolicyEditHelper">
             <param name="semanticHint" value="2012"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.LivelinessQosPolicy_2013"
+               id="org.opendds.modeling.diagram.middlewarelib.LivelinessQosPolicy_2013"
                name="%metatype.name.LivelinessQosPolicy_2013"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="livelinessQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.LivelinessQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.LivelinessQosPolicyEditHelper">
             <param name="semanticHint" value="2013"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.OsQosPolicy_2014"
+               id="org.opendds.modeling.diagram.middlewarelib.OsQosPolicy_2014"
                name="%metatype.name.OsQosPolicy_2014"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="osQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.OsQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.OsQosPolicyEditHelper">
             <param name="semanticHint" value="2014"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.OwnershipQosPolicy_2015"
+               id="org.opendds.modeling.diagram.middlewarelib.OwnershipQosPolicy_2015"
                name="%metatype.name.OwnershipQosPolicy_2015"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="ownershipQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.OwnershipQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.OwnershipQosPolicyEditHelper">
             <param name="semanticHint" value="2015"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.RdlQosPolicy_2018"
+               id="org.opendds.modeling.diagram.middlewarelib.RdlQosPolicy_2018"
                name="%metatype.name.RdlQosPolicy_2018"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="rdlQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.RdlQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.RdlQosPolicyEditHelper">
             <param name="semanticHint" value="2018"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.ReliabilityQosPolicy_2019"
+               id="org.opendds.modeling.diagram.middlewarelib.ReliabilityQosPolicy_2019"
                name="%metatype.name.ReliabilityQosPolicy_2019"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="reliabilityQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.ReliabilityQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.ReliabilityQosPolicyEditHelper">
             <param name="semanticHint" value="2019"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.RlQosPolicy_2020"
+               id="org.opendds.modeling.diagram.middlewarelib.RlQosPolicy_2020"
                name="%metatype.name.RlQosPolicy_2020"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="rlQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.RlQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.RlQosPolicyEditHelper">
             <param name="semanticHint" value="2020"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.TbfQosPolicy_2021"
+               id="org.opendds.modeling.diagram.middlewarelib.TbfQosPolicy_2021"
                name="%metatype.name.TbfQosPolicy_2021"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="tbfQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.TbfQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.TbfQosPolicyEditHelper">
             <param name="semanticHint" value="2021"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.TdQosPolicy_2022"
+               id="org.opendds.modeling.diagram.middlewarelib.TdQosPolicy_2022"
                name="%metatype.name.TdQosPolicy_2022"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="tdQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.TdQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.TdQosPolicyEditHelper">
             <param name="semanticHint" value="2022"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.TpQosPolicy_2023"
+               id="org.opendds.modeling.diagram.middlewarelib.TpQosPolicy_2023"
                name="%metatype.name.TpQosPolicy_2023"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="tpQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.TpQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.TpQosPolicyEditHelper">
             <param name="semanticHint" value="2023"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.WdlQosPolicy_2025"
+               id="org.opendds.modeling.diagram.middlewarelib.WdlQosPolicy_2025"
                name="%metatype.name.WdlQosPolicy_2025"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="wdlQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.WdlQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.WdlQosPolicyEditHelper">
             <param name="semanticHint" value="2025"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.Publisher_3001"
+               id="org.opendds.modeling.diagram.middlewarelib.Publisher_3001"
                name="%metatype.name.Publisher_3001"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="publisher"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.PublisherEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.PublisherEditHelper">
             <param name="semanticHint" value="3001"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.DataWriter_3003"
+               id="org.opendds.modeling.diagram.middlewarelib.DataWriter_3003"
                name="%metatype.name.DataWriter_3003"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="dataWriter"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.DataWriterEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.DataWriterEditHelper">
             <param name="semanticHint" value="3003"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.EfQosPolicy_3012"
+               id="org.opendds.modeling.diagram.middlewarelib.EfQosPolicy_3012"
                name="%metatype.name.EfQosPolicy_3012"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="efQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.EfQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.EfQosPolicyEditHelper">
             <param name="semanticHint" value="3012"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.GdQosPolicy_3014"
+               id="org.opendds.modeling.diagram.middlewarelib.GdQosPolicy_3014"
                name="%metatype.name.GdQosPolicy_3014"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="gdQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.GdQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.GdQosPolicyEditHelper">
             <param name="semanticHint" value="3014"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.PartitionQosPolicy_3015"
+               id="org.opendds.modeling.diagram.middlewarelib.PartitionQosPolicy_3015"
                name="%metatype.name.PartitionQosPolicy_3015"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="partitionQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.PartitionQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.PartitionQosPolicyEditHelper">
             <param name="semanticHint" value="3015"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.PresentationQosPolicy_3016"
+               id="org.opendds.modeling.diagram.middlewarelib.PresentationQosPolicy_3016"
                name="%metatype.name.PresentationQosPolicy_3016"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="presentationQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.PresentationQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.PresentationQosPolicyEditHelper">
             <param name="semanticHint" value="3016"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.Subscriber_3002"
+               id="org.opendds.modeling.diagram.middlewarelib.Subscriber_3002"
                name="%metatype.name.Subscriber_3002"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="subscriber"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.SubscriberEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.SubscriberEditHelper">
             <param name="semanticHint" value="3002"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.DataReader_3004"
+               id="org.opendds.modeling.diagram.middlewarelib.DataReader_3004"
                name="%metatype.name.DataReader_3004"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="dataReader"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.DataReaderEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.DataReaderEditHelper">
             <param name="semanticHint" value="3004"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.UdQosPolicy_3013"
+               id="org.opendds.modeling.diagram.middlewarelib.UdQosPolicy_3013"
                name="%metatype.name.UdQosPolicy_3013"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="udQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.UdQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.UdQosPolicyEditHelper">
             <param name="semanticHint" value="3013"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.middlewarelibrary.Period_3005"
+               id="org.opendds.modeling.diagram.middlewarelib.Period_3005"
                name="%metatype.name.Period_3005"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Period"
-               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.helpers.PeriodEditHelper">
+               edithelper="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.helpers.PeriodEditHelper">
             <param name="semanticHint" value="3005"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
          <specializationType
-               id="org.opendds.modeling.diagram.middlewarelibrary.Period_3006"
+               id="org.opendds.modeling.diagram.middlewarelib.Period_3006"
                name="%metatype.name.Period_3006"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.opendds.modeling.diagram.middlewarelibrary.Period_3005"/>
+            <specializes id="org.opendds.modeling.diagram.middlewarelib.Period_3005"/>
             <param name="semanticHint" value="3006"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
          <specializationType
-               id="org.opendds.modeling.diagram.middlewarelibrary.Period_3007"
+               id="org.opendds.modeling.diagram.middlewarelib.Period_3007"
                name="%metatype.name.Period_3007"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.opendds.modeling.diagram.middlewarelibrary.Period_3005"/>
+            <specializes id="org.opendds.modeling.diagram.middlewarelib.Period_3005"/>
             <param name="semanticHint" value="3007"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
          <specializationType
-               id="org.opendds.modeling.diagram.middlewarelibrary.Period_3008"
+               id="org.opendds.modeling.diagram.middlewarelib.Period_3008"
                name="%metatype.name.Period_3008"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.opendds.modeling.diagram.middlewarelibrary.Period_3005"/>
+            <specializes id="org.opendds.modeling.diagram.middlewarelib.Period_3005"/>
             <param name="semanticHint" value="3008"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
          <specializationType
-               id="org.opendds.modeling.diagram.middlewarelibrary.Period_3009"
+               id="org.opendds.modeling.diagram.middlewarelib.Period_3009"
                name="%metatype.name.Period_3009"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.opendds.modeling.diagram.middlewarelibrary.Period_3005"/>
+            <specializes id="org.opendds.modeling.diagram.middlewarelib.Period_3005"/>
             <param name="semanticHint" value="3009"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
          <specializationType
-               id="org.opendds.modeling.diagram.middlewarelibrary.Period_3010"
+               id="org.opendds.modeling.diagram.middlewarelib.Period_3010"
                name="%metatype.name.Period_3010"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.opendds.modeling.diagram.middlewarelibrary.Period_3005"/>
+            <specializes id="org.opendds.modeling.diagram.middlewarelib.Period_3005"/>
             <param name="semanticHint" value="3010"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <specializationType
-               id="org.opendds.modeling.diagram.middlewarelibrary.DataReader_4001"
+               id="org.opendds.modeling.diagram.middlewarelib.DataReader_4001"
                name="%metatype.name.DataReader_4001"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.opendds.modeling.diagram.middlewarelibrary.DataReader_3004"/>
+            <specializes id="org.opendds.modeling.diagram.middlewarelib.DataReader_3004"/>
             <param name="semanticHint" value="4001"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
          <specializationType
-               id="org.opendds.modeling.diagram.middlewarelibrary.DataWriter_4002"
+               id="org.opendds.modeling.diagram.middlewarelib.DataWriter_4002"
                name="%metatype.name.DataWriter_4002"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.opendds.modeling.diagram.middlewarelibrary.DataWriter_3003"/>
+            <specializes id="org.opendds.modeling.diagram.middlewarelib.DataWriter_3003"/>
             <param name="semanticHint" value="4002"/>
          </specializationType>
       </metamodel>
@@ -676,63 +676,63 @@
 
    <extension point="org.eclipse.gmf.runtime.emf.type.core.elementTypeBindings" id="element-types-bindings">
       <?gmfgen generated="true"?>
-      <clientContext id="org.opendds.modeling.diagram.middlewarelibrary.TypeContext">
+      <clientContext id="org.opendds.modeling.diagram.middlewarelib.TypeContext">
          <enablement>
             <test
                property="org.eclipse.gmf.runtime.emf.core.editingDomain"
-               value="org.opendds.modeling.diagram.middlewarelibrary.EditingDomain"/>
+               value="org.opendds.modeling.diagram.middlewarelib.EditingDomain"/>
          </enablement>
       </clientContext> 
-      <binding context="org.opendds.modeling.diagram.middlewarelibrary.TypeContext">
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.MiddlewareLibrary_1000"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.DomainParticipant_2001"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.Domain_2002"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.Topic_2003"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.DeadlineQosPolicy_2004"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.DestinationOrderQosPolicy_2005"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.DsQosPolicy_2006"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.DurabilityQosPolicy_2007"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.HistoryQosPolicy_2010"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.LbQosPolicy_2011"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.LifespanQosPolicy_2012"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.LivelinessQosPolicy_2013"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.OsQosPolicy_2014"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.OwnershipQosPolicy_2015"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.RdlQosPolicy_2018"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.ReliabilityQosPolicy_2019"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.RlQosPolicy_2020"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.TbfQosPolicy_2021"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.TdQosPolicy_2022"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.TpQosPolicy_2023"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.WdlQosPolicy_2025"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.Publisher_3001"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.DataWriter_3003"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.EfQosPolicy_3012"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.GdQosPolicy_3014"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.PartitionQosPolicy_3015"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.PresentationQosPolicy_3016"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.Subscriber_3002"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.DataReader_3004"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.UdQosPolicy_3013"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.Period_3005"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.Period_3006"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.Period_3007"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.Period_3008"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.Period_3009"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.Period_3010"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.DataReader_4001"/>
-         <elementType ref="org.opendds.modeling.diagram.middlewarelibrary.DataWriter_4002"/>
+      <binding context="org.opendds.modeling.diagram.middlewarelib.TypeContext">
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.MiddlewareLib_1000"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.DomainParticipant_2001"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.Domain_2002"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.Topic_2003"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.DeadlineQosPolicy_2004"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.DestinationOrderQosPolicy_2005"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.DsQosPolicy_2006"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.DurabilityQosPolicy_2007"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.HistoryQosPolicy_2010"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.LbQosPolicy_2011"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.LifespanQosPolicy_2012"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.LivelinessQosPolicy_2013"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.OsQosPolicy_2014"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.OwnershipQosPolicy_2015"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.RdlQosPolicy_2018"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.ReliabilityQosPolicy_2019"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.RlQosPolicy_2020"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.TbfQosPolicy_2021"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.TdQosPolicy_2022"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.TpQosPolicy_2023"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.WdlQosPolicy_2025"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.Publisher_3001"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.DataWriter_3003"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.EfQosPolicy_3012"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.GdQosPolicy_3014"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.PartitionQosPolicy_3015"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.PresentationQosPolicy_3016"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.Subscriber_3002"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.DataReader_3004"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.UdQosPolicy_3013"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.Period_3005"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.Period_3006"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.Period_3007"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.Period_3008"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.Period_3009"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.Period_3010"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.DataReader_4001"/>
+         <elementType ref="org.opendds.modeling.diagram.middlewarelib.DataWriter_4002"/>
          <advice ref="org.eclipse.gmf.runtime.diagram.core.advice.notationDepdendents"/>
       </binding>
    </extension>
 	   <extension point="org.eclipse.core.expressions.propertyTesters" id="navigator-proptest.isURIEditorInput">
       <?gmfgen generated="true"?>
        <propertyTester
-           id="org.opendds.modeling.diagram.middlewarelibrary.URIEditorInputPropertyTester"
+           id="org.opendds.modeling.diagram.middlewarelib.URIEditorInputPropertyTester"
            type="org.eclipse.emf.common.ui.URIEditorInput"
-           namespace="org.opendds.modeling.diagram.middlewarelibrary"
+           namespace="org.opendds.modeling.diagram.middlewarelib"
            properties="isURIEditorInput"
-           class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryUriEditorInputTester">
+           class="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibUriEditorInputTester">
        </propertyTester>
    </extension>
 
@@ -740,14 +740,14 @@
       <?gmfgen generated="true"?>
       <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
          <includes>
-            <contentExtension pattern="org.opendds.modeling.diagram.middlewarelibrary.resourceContent"/>
-			<contentExtension pattern="org.opendds.modeling.diagram.middlewarelibrary.domainResourceContent"/>
-            <contentExtension pattern="org.opendds.modeling.diagram.middlewarelibrary.navigatorLinkHelper"/>
+            <contentExtension pattern="org.opendds.modeling.diagram.middlewarelib.resourceContent"/>
+			<contentExtension pattern="org.opendds.modeling.diagram.middlewarelib.domainResourceContent"/>
+            <contentExtension pattern="org.opendds.modeling.diagram.middlewarelib.navigatorLinkHelper"/>
          </includes>
       </viewerContentBinding>
       <viewerActionBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
          <includes>
-            <actionExtension pattern="org.opendds.modeling.diagram.middlewarelibrary.navigatorActionProvider"/>
+            <actionExtension pattern="org.opendds.modeling.diagram.middlewarelib.navigatorActionProvider"/>
          </includes>
       </viewerActionBinding>
    </extension>
@@ -755,47 +755,47 @@
    <extension point="org.eclipse.ui.navigator.navigatorContent" id="navigator-content">
       <?gmfgen generated="true"?>
       <navigatorContent
-            id="org.opendds.modeling.diagram.middlewarelibrary.resourceContent" 
+            id="org.opendds.modeling.diagram.middlewarelib.resourceContent" 
             name="%navigatorContentName" 
             priority="normal" 
-            contentProvider="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.navigator.OpenDDSMiddlewareLibraryNavigatorContentProvider" 
-            labelProvider="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.navigator.OpenDDSMiddlewareLibraryNavigatorLabelProvider"
+            contentProvider="org.opendds.modeling.model.opendds.diagram.middlewarelib.navigator.OpenDDSMiddlewareLibNavigatorContentProvider" 
+            labelProvider="org.opendds.modeling.model.opendds.diagram.middlewarelib.navigator.OpenDDSMiddlewareLibNavigatorLabelProvider"
             icon="icons/obj16/OpenDDSDiagramFile.gif"
             activeByDefault="true">
          <triggerPoints>
             <or>
 	           <and>
     	          <instanceof value="org.eclipse.core.resources.IFile"/>
-        	      <test property="org.eclipse.core.resources.extension" value="opendds_diagram_middlewarelibrary"/>
+        	      <test property="org.eclipse.core.resources.extension" value="opendds_diagram_middlewarelib"/>
                </and>
-               <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.navigator.OpenDDSMiddlewareLibraryAbstractNavigatorItem"/>
+               <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelib.navigator.OpenDDSMiddlewareLibAbstractNavigatorItem"/>
             </or>
          </triggerPoints>
          <possibleChildren>
             <or>
-         	   <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.navigator.OpenDDSMiddlewareLibraryAbstractNavigatorItem"/>
+         	   <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelib.navigator.OpenDDSMiddlewareLibAbstractNavigatorItem"/>
             </or>
          </possibleChildren>
          <commonSorter 
-               id="org.opendds.modeling.diagram.middlewarelibrary.navigatorSorter" 
-               class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.navigator.OpenDDSMiddlewareLibraryNavigatorSorter">
+               id="org.opendds.modeling.diagram.middlewarelib.navigatorSorter" 
+               class="org.opendds.modeling.model.opendds.diagram.middlewarelib.navigator.OpenDDSMiddlewareLibNavigatorSorter">
             <parentExpression>
                <or>
 	              <and>
     	             <instanceof value="org.eclipse.core.resources.IFile"/>
-        	         <test property="org.eclipse.core.resources.extension" value="opendds_diagram_middlewarelibrary"/>
+        	         <test property="org.eclipse.core.resources.extension" value="opendds_diagram_middlewarelib"/>
                   </and>
-                  <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.navigator.OpenDDSMiddlewareLibraryAbstractNavigatorItem"/>
+                  <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelib.navigator.OpenDDSMiddlewareLibAbstractNavigatorItem"/>
                </or>
             </parentExpression>
          </commonSorter>
       </navigatorContent>
       <navigatorContent
-            id="org.opendds.modeling.diagram.middlewarelibrary.domainResourceContent" 
+            id="org.opendds.modeling.diagram.middlewarelib.domainResourceContent" 
             name="%domainNavigatorContentName" 
             priority="normal" 
-            contentProvider="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.navigator.OpenDDSMiddlewareLibraryDomainNavigatorContentProvider" 
-            labelProvider="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.navigator.OpenDDSMiddlewareLibraryDomainNavigatorLabelProvider"
+            contentProvider="org.opendds.modeling.model.opendds.diagram.middlewarelib.navigator.OpenDDSMiddlewareLibDomainNavigatorContentProvider" 
+            labelProvider="org.opendds.modeling.model.opendds.diagram.middlewarelib.navigator.OpenDDSMiddlewareLibDomainNavigatorLabelProvider"
             icon="icons/obj16/OpenDDSDiagramFile.gif"
             activeByDefault="true">
          <triggerPoints>
@@ -804,19 +804,19 @@
     	          <instanceof value="org.eclipse.core.resources.IFile"/>
         	      <test property="org.eclipse.core.resources.extension" value="opendds"/>
                </and>
-               <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.navigator.OpenDDSMiddlewareLibraryDomainNavigatorItem"/>
+               <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelib.navigator.OpenDDSMiddlewareLibDomainNavigatorItem"/>
             </or>
          </triggerPoints>
          <possibleChildren>
-            <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.navigator.OpenDDSMiddlewareLibraryDomainNavigatorItem"/>
+            <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelib.navigator.OpenDDSMiddlewareLibDomainNavigatorItem"/>
          </possibleChildren>
       </navigatorContent>
       <actionProvider
-            id="org.opendds.modeling.diagram.middlewarelibrary.navigatorActionProvider"
-            class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.navigator.OpenDDSMiddlewareLibraryNavigatorActionProvider">
+            id="org.opendds.modeling.diagram.middlewarelib.navigatorActionProvider"
+            class="org.opendds.modeling.model.opendds.diagram.middlewarelib.navigator.OpenDDSMiddlewareLibNavigatorActionProvider">
          <enablement>
             <or>
-               <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.navigator.OpenDDSMiddlewareLibraryAbstractNavigatorItem"/>
+               <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelib.navigator.OpenDDSMiddlewareLibAbstractNavigatorItem"/>
             </or>
          </enablement>
       </actionProvider>
@@ -825,16 +825,16 @@
 	   <extension point="org.eclipse.ui.navigator.linkHelper" id="navigator-linkhelper">
       <?gmfgen generated="true"?>
       <linkHelper
-            id="org.opendds.modeling.diagram.middlewarelibrary.navigatorLinkHelper"
-            class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.navigator.OpenDDSMiddlewareLibraryNavigatorLinkHelper">
+            id="org.opendds.modeling.diagram.middlewarelib.navigatorLinkHelper"
+            class="org.opendds.modeling.model.opendds.diagram.middlewarelib.navigator.OpenDDSMiddlewareLibNavigatorLinkHelper">
          <editorInputEnablement>
             <and>
                <instanceof value="org.eclipse.emf.common.ui.URIEditorInput"/>
-               <test property="org.opendds.modeling.diagram.middlewarelibrary.isURIEditorInput"/>
+               <test property="org.opendds.modeling.diagram.middlewarelib.isURIEditorInput"/>
             </and>
          </editorInputEnablement>
          <selectionEnablement>
-            <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.navigator.OpenDDSMiddlewareLibraryAbstractNavigatorItem"/>
+            <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelib.navigator.OpenDDSMiddlewareLibAbstractNavigatorItem"/>
          </selectionEnablement>
       </linkHelper>
    </extension>
@@ -842,17 +842,17 @@
       <?gmfgen generated="true"?>
       <command
          categoryId="org.eclipse.ui.category.edit"
-         defaultHandler="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryDiagramUpdateCommand"
+         defaultHandler="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibDiagramUpdateCommand"
          description="%update.diagram.description"
-         id="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.updateDiagram"
+         id="org.opendds.modeling.model.opendds.diagram.middlewarelib.updateDiagram"
          name="%update.diagram.name"/>
    </extension>
    
    <extension point="org.eclipse.ui.bindings" id="update-cmd-binding">
       <?gmfgen generated="true"?>
       <key 
-         commandId="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.updateDiagram"
-         contextId="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.ui.diagramContext"
+         commandId="org.opendds.modeling.model.opendds.diagram.middlewarelib.updateDiagram"
+         contextId="org.opendds.modeling.model.opendds.diagram.middlewarelib.ui.diagramContext"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="F5"/>
    </extension>
@@ -864,12 +864,12 @@
       <menuContribution locationURI="toolbar:org.eclipse.ui.main.toolbar?after=">
       </menuContribution -->
       <menuContribution locationURI="popup:org.eclipse.gmf.runtime.diagram.ui.DiagramEditorContextMenu">
-         <command commandId="org.opendds.modeling.diagram.middlewarelibrary.LoadResourceAction">
+         <command commandId="org.opendds.modeling.diagram.middlewarelib.LoadResourceAction">
             <visibleWhen>
                <and>
-                  <with variable="activePartId"><equals value="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryDiagramEditorID"/></with>
+                  <with variable="activePartId"><equals value="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibDiagramEditorID"/></with>
                   <with variable="selection"><iterate ifEmpty="false"> 
-                     <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.MiddlewareLibraryEditPart"/>
+                     <instanceof value="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.MiddlewareLibEditPart"/>
                   </iterate></with>
                </and>
             </visibleWhen>
@@ -879,11 +879,11 @@
 
    <extension point="org.eclipse.ui.commands" id="menu-commands">
       <?gmfgen generated="true"?>
-      <category id="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryDiagramEditorID" name="%cmdcategory.name" description="%cmdcategory.desc"/>
-      <command id="org.opendds.modeling.diagram.middlewarelibrary.LoadResourceAction"
+      <category id="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibDiagramEditorID" name="%cmdcategory.name" description="%cmdcategory.desc"/>
+      <command id="org.opendds.modeling.diagram.middlewarelib.LoadResourceAction"
          name="Load Resource"
-         categoryId="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryDiagramEditorID"
-         defaultHandler="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.LoadResourceAction"/>
+         categoryId="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibDiagramEditorID"
+         defaultHandler="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.LoadResourceAction"/>
    </extension>
 
    <extension point="org.eclipse.ui.handlers" id="menu-handlers">
@@ -899,7 +899,7 @@
       <objectContribution
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.DomainParticipantEditPart"
-            objectClass="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.DomainParticipantEditPart">
+            objectClass="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.DomainParticipantEditPart">
          <menu 
             id="DomainParticipantInsert" 
             label="&amp;Add &amp;QoS Policy" 
@@ -907,7 +907,7 @@
             <separator name="group1"/>
          </menu>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryCreateQosPolicyActionDomainParticipant"
+               class="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibCreateQosPolicyActionDomainParticipant"
                enablesFor="1"
                id="org.opendds.modeling.popup.DomainParticipantCreateFeatureActionID"
                label="Add &amp;custom QoS Policy"
@@ -919,7 +919,7 @@
       <objectContribution
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.PublisherEditPart"
-            objectClass="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.PublisherEditPart">
+            objectClass="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.PublisherEditPart">
          <menu 
             id="PublisherInsert" 
             label="&amp;Add &amp;QoS Policy" 
@@ -927,7 +927,7 @@
             <separator name="group1"/>
          </menu>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryCreateQosPolicyActionPublisher"
+               class="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibCreateQosPolicyActionPublisher"
                enablesFor="1"
                id="org.opendds.modeling.popup.PublisherCreateFeatureActionID"
                label="Add &amp;custom QoS Policy"
@@ -939,7 +939,7 @@
       <objectContribution
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.SubscriberEditPart"
-            objectClass="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.parts.SubscriberEditPart">
+            objectClass="org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts.SubscriberEditPart">
          <menu 
             id="SubscriberInsert" 
             label="&amp;Add &amp;QoS Policy" 
@@ -947,7 +947,7 @@
             <separator name="group1"/>
          </menu>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryCreateQosPolicyActionSubscriber"
+               class="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibCreateQosPolicyActionSubscriber"
                enablesFor="1"
                id="org.opendds.modeling.popup.SubscriberCreateFeatureActionID"
                label="Add &amp;custom QoS Policy"

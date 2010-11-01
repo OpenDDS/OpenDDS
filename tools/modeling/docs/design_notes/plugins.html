@@ -696,7 +696,7 @@ The starting point for these steps are the [[Diagram Partitioning wiki page|http
 
 !! Definitions
 
-The terms and definitions used here are taken from the Diagram Partitioning wiki. Replace references to &quot;My Library&quot; below with the appropriate package the diagram is based on (e.g. &quot;Policy Library&quot;) in the discussion that follows.
+The terms and definitions used here are taken from the Diagram Partitioning wiki. Replace references to &quot;My Library&quot; below with the appropriate package the diagram is based on (e.g. &quot;PolicyLib&quot;) in the discussion that follows.
 
 |!Term|!SDK Example|!Definition|h
 |Partitioning node|The package shown in the main diagram|The node that can be double-clicked on open the sub-diagram.|
@@ -720,7 +720,7 @@ Use the UML Package diagram in the project org.opendds.modeling.uml2tools.mirror
 File used: ~MyLibrary.gmftool
 
 # Bring up the Tooling Definition wizard. From the context menu select New -&gt; Other -&gt; Graphical Modeling Framework -&gt; Simple Tooling Definition Model.
-# Pick ~OpenDDS.ecore as the file containing the ecore domain model. (In the case of the ~DataLibrary, Types.ecore was specified.)
+# Pick ~OpenDDS.ecore as the file containing the ecore domain model. (In the case of the ~DataLib, Types.ecore was specified.)
 # Pick ~MyLibrary as the diagram element.
 # Unselect elements that shouldn't appear in the palette in the &quot;Domain model elements to process&quot; dialog.
 # Note that the order of tools is based on their order in the model. You may want to edit the content and sort the tools alphabetically.
@@ -853,7 +853,7 @@ Therefore, if a compartment's figure is to have XY Layout, make sure in the sett
 
 For direct editing of Ecore attributes in figures, GMF does not support providing a list of attributes from which the user can select from (see bug entry [[Support enum based labels|https://bugs.eclipse.org/bugs/show_bug.cgi?id=158116]]). Instead, the user must type out exactly what the enumeration value is. This means, for example, that when editing a ~DestinationOrderQosPolicy the user must type in (in the correct case) either ~BY_RECEPTION_TIMESTAMP or ~BY_SOURCE_TIMESTAMP to change the kind attribute. This makes modification of ~QoS Policy enumerations error prone and tedious.
 
-The source files that need modification are in project org.opendds.modeling.diagram.policylibrary's package org.opendds.modeling.model.opendds.diagram.policylibrary.edit.parts. The file are
+The source files that need modification are in project org.opendds.modeling.diagram.policylib's package org.opendds.modeling.model.opendds.diagram.policylib.edit.parts. The file are
 
 * ~DestinationOrderQosPolicyKindEditPart.java
 * ~DsQosPolicyHistory_kindEditPart
@@ -971,9 +971,9 @@ On Ubuntu 9.10, running eclipse 3.5.1 on top of GTK 2.10.0, there is a refresh p
 
 The symptoms of this problem seem similar to [[Eclipse bug 164623|https://bugs.eclipse.org/bugs/show_bug.cgi?id=164623]]. This bug was closed as it was determined to be a problem related to GTK usage and not specific to GMF. An attempt was made to get around this by disabled anti-aliasing as discussed in the bugzilla contents but the problem persisted.
 
-! Data Library Diagram Partitioning does not work with ~DataLibrary defined in ~OpenDDS package
+! DataLib Diagram Partitioning does not work with ~DataLib defined in ~OpenDDS package
 
-Unlike diagram partitioning (sub-diagram) support for the Policy Library, it was found that GMF 2.2.2 would not work properly with the ~DataLibrary class defined in the ~OpenDDS package in ~OpenDDS.ecore. The GMF wizards seemed to get confused with this arrangement, and after manually populating the GMF Tool and GMF Map file the resulting diagram code would not work properly- nodes could not be created on the canvas. The reason for this could not be determined and there is not a [[bug|https://bugs.eclipse.org/bugs/]] posted against this problem. The workaround was to move ~DataLibrary and stereotype classes that inherit from ~TopicField to the Types package in Types.ecore. Therefore there is a discrepancy between the Policy Library elements and Data Library elements in the Ecore models.
+Unlike diagram partitioning (sub-diagram) support for the PolicyLib, it was found that GMF 2.2.2 would not work properly with the ~DataLib class defined in the ~OpenDDS package in ~OpenDDS.ecore. The GMF wizards seemed to get confused with this arrangement, and after manually populating the GMF Tool and GMF Map file the resulting diagram code would not work properly- nodes could not be created on the canvas. The reason for this could not be determined and there is not a [[bug|https://bugs.eclipse.org/bugs/]] posted against this problem. The workaround was to move ~DataLib and stereotype classes that inherit from ~TopicField to the Types package in Types.ecore. Therefore there is a discrepancy between the PolicyLib elements and DataLib elements in the Ecore models.
 
 ! Unable to use Graphic Definition Models from ~UML2Tools
 
@@ -1086,8 +1086,8 @@ OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 |[[org.opendds.modeling.gmf]] |GMF graphical modeling framework for graphical model capture based on the org.opendds.modeling.model ecore model. |
 |[[org.opendds.modeling.graphics]] |GEF Graphics Figure Gallery for diagrams. |
 |[[org.opendds.modeling.diagram.main]] |Main SDK model capture diagram.  This is the component diagram to capture the ~OpenDDS artifacts. |
-|[[org.opendds.modeling.diagram.policylibrary]] |~QoS Policy library capture diagram.  This captures the non-default ~QoS policy values. |
-|[[org.opendds.modeling.diagram.datalibrary]] |Data type library capture diagram.  This captures the data types and structures used by the middleware. |
+|[[org.opendds.modeling.diagram.policylib]] |~QoS Policy lib capture diagram.  This captures the non-default ~QoS policy values. |
+|[[org.opendds.modeling.diagram.datalib]] |Data type library capture diagram.  This captures the data types and structures used by the middleware. |
 |[[org.opendds.modeling.sdk]] |Top level SDK plug-in including the code generation capability from the capture models. |
 |[[org.opendds.modeling.feature]] |Feature definition for the ~OpenDDS Modeling SDK. |
 |[[org.opendds.site]] |Plug-in distribution site.  This is where Eclipse can find the plug-ins for installation. |
@@ -1649,8 +1649,8 @@ The following plug-ins are included in this feature:
 |[[org.opendds.modeling.model.edit]] |Ecore editor support for the metamodel and profile stereotypes. |
 |[[org.opendds.modeling.model.editor]] |Ecore editors for the meta-models and Profile stereotypes. |
 |[[org.opendds.modeling.diagram.main]] |GMF generated graphical editor to capture the top level packages of an ~OpenDDS model. |
-|[[org.opendds.modeling.diagram.datalibrary]] |GMF generated graphical editor to capture the data definitions used by an ~OpenDDS model. |
-|[[org.opendds.modeling.diagram.policylibrary]] |GMF generated graphical editor to capture the ~QoS policy definitions used by an ~OpenDDS model. |
+|[[org.opendds.modeling.diagram.datalib]] |GMF generated graphical editor to capture the data definitions used by an ~OpenDDS model. |
+|[[org.opendds.modeling.diagram.policylib]] |GMF generated graphical editor to capture the ~QoS policy definitions used by an ~OpenDDS model. |
 |[[org.opendds.modeling.sdk]] |Code generation plug-in to convert an ~OpenDDS model to C++ code, DDS IDL, and MPC build files. |
 
 This plug-in specifies that branding information can be found in the [[org.opendds.modeling.sdk]] plug-in.</pre>

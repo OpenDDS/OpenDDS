@@ -1,4 +1,4 @@
-package org.opendds.modeling.model.opendds.diagram.middlewarelibrary.edit.commands;
+package org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.commands;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -11,9 +11,9 @@ import org.eclipse.gmf.runtime.emf.type.core.commands.EditElementCommand;
 import org.eclipse.gmf.runtime.emf.type.core.requests.ConfigureRequest;
 import org.eclipse.gmf.runtime.emf.type.core.requests.CreateElementRequest;
 import org.eclipse.gmf.runtime.notation.View;
-import org.opendds.modeling.model.opendds.MiddlewareLibrary;
+import org.opendds.modeling.model.opendds.MiddlewareLib;
 import org.opendds.modeling.model.opendds.OpenDDSFactory;
-import org.opendds.modeling.model.opendds.diagram.middlewarelibrary.providers.OpenDDSMiddlewareLibraryElementTypes;
+import org.opendds.modeling.model.opendds.diagram.middlewarelib.providers.OpenDDSMiddlewareLibElementTypes;
 
 /**
  * @generated

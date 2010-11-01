@@ -2,27 +2,27 @@
 <gmfgen:GenEditorGenerator xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:gmfgen="http://www.eclipse.org/gmf/2009/GenModel" packageNamePrefix="org.opendds.modeling.model.opendds.diagram.datalibrary"
-    modelID="OpenDDS DataLibrary"
-    diagramFileExtension="opendds_diagram_datalibrary"
+    xmlns:gmfgen="http://www.eclipse.org/gmf/2009/GenModel" packageNamePrefix="org.opendds.modeling.model.opendds.diagram.datalib"
+    modelID="OpenDDS DataLib"
+    diagramFileExtension="opendds_diagram_datalib"
     copyrightText="(c) Copyright Object Computing, Incorporated.  2005,2010.  All rights reserved.">
   <diagram
       visualID="1000"
-      editPartClassName="DataLibraryEditPart"
-      itemSemanticEditPolicyClassName="DataLibraryItemSemanticEditPolicy"
-      canonicalEditPolicyClassName="DataLibraryCanonicalEditPolicy"
+      editPartClassName="DataLibEditPart"
+      itemSemanticEditPolicyClassName="DataLibItemSemanticEditPolicy"
+      canonicalEditPolicyClassName="DataLibCanonicalEditPolicy"
       iconProviderPriority="Low"
       validationProviderPriority="Low">
     <diagramRunTimeClass
         href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Diagram"/>
     <elementType
         xsi:type="gmfgen:MetamodelType"
-        editHelperClassName="DataLibraryEditHelper"/>
+        editHelperClassName="DataLibEditHelper"/>
     <viewmap
         xsi:type="gmfgen:FigureViewmap"
         figureQualifiedClassName="org.eclipse.draw2d.FreeformLayer"/>
     <domainDiagramElement
-        href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib"/>
     <topLevelNodes
         visualID="2019"
         editPartClassName="ShortEditPart"
@@ -43,11 +43,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/Short"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Short"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5019"
@@ -65,7 +65,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -89,11 +89,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/UShort"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/UShort"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5016"
@@ -111,7 +111,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -135,11 +135,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/idlSequence"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/idlSequence"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5008"
@@ -157,7 +157,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -181,11 +181,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/idlUnion"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/idlUnion"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5006"
@@ -203,7 +203,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -227,11 +227,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/Octet"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Octet"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5007"
@@ -249,7 +249,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -273,11 +273,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/idlArray"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/idlArray"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5014"
@@ -295,7 +295,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -319,11 +319,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/LongLong"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/LongLong"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5002"
@@ -341,7 +341,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -365,11 +365,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/Long"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Long"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5001"
@@ -387,7 +387,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -411,11 +411,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/ULong"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/ULong"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5015"
@@ -433,7 +433,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -457,11 +457,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/Boolean"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Boolean"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5010"
@@ -479,7 +479,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -503,11 +503,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/TypedefRef"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/TypedefRef"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5021"
@@ -525,7 +525,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -549,11 +549,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/Float"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Float"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5020"
@@ -571,7 +571,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -595,11 +595,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/ULongLong"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/ULongLong"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5012"
@@ -617,7 +617,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -641,11 +641,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/Char"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Char"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5005"
@@ -663,7 +663,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -687,11 +687,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/String"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/String"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5013"
@@ -709,7 +709,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -733,11 +733,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/idlEnum"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/idlEnum"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5018"
@@ -755,7 +755,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -779,11 +779,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/idlTypedef"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/idlTypedef"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5003"
@@ -801,7 +801,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -825,11 +825,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/Integer"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Integer"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5011"
@@ -847,7 +847,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -871,11 +871,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/UInteger"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/UInteger"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5017"
@@ -893,7 +893,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -917,11 +917,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/Double"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Double"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5009"
@@ -939,7 +939,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -963,11 +963,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureClassStereotypeFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureClassNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureClassStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureClassStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureClassStereotypeFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassNameFigure() {&#xA;&#x9;&#x9;return fFigureClassNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureClassStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureClassStereotypeFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/Array"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Array"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/DataLibrary/dataTypes"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/dataTypes"/>
       </modelFacet>
       <labels
           visualID="5022"
@@ -985,9 +985,9 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//core/Entity/name"/>
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#//types/Collection/length"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Collection/length"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -1128,7 +1128,7 @@
     <preferencePages
         xsi:type="gmfgen:GenStandardPreferencePage"
         iD="org.opendds.modeling.diagram.general"
-        name="OpenDDSDataLibrary Diagram">
+        name="OpenDDSDataLib Diagram">
       <children
           xsi:type="gmfgen:GenStandardPreferencePage"
           iD="org.opendds.modeling.diagram.appearance"
@@ -1152,7 +1152,7 @@
     </preferencePages>
   </diagram>
   <plugin
-      iD="org.opendds.modeling.diagram.datalibrary"
+      iD="org.opendds.modeling.diagram.datalib"
       provider="Object Computing, Inc">
     <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
   </plugin>
@@ -1245,7 +1245,7 @@
     </tabs>
   </propertySheet>
   <domainGenModel
-      href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLibrary.genmodel#/"/>
+      href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#/"/>
   <labelParsers
       extensibleViaService="true">
     <implementations

@@ -25,17 +25,17 @@
         href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel"/>
     <topLevelNodes
         visualID="2001"
-        editPartClassName="MiddlewareLibraryEditPart"
-        itemSemanticEditPolicyClassName="MiddlewareLibraryItemSemanticEditPolicy"
-        notationViewFactoryClassName="MiddlewareLibraryViewFactory"
-        canonicalEditPolicyClassName="MiddlewareLibraryCanonicalEditPolicy"
-        graphicalNodeEditPolicyClassName="MiddlewareLibraryGraphicalNodeEditPolicy"
-        createCommandClassName="MiddlewareLibraryCreateCommand">
+        editPartClassName="MiddlewareLibEditPart"
+        itemSemanticEditPolicyClassName="MiddlewareLibItemSemanticEditPolicy"
+        notationViewFactoryClassName="MiddlewareLibViewFactory"
+        canonicalEditPolicyClassName="MiddlewareLibCanonicalEditPolicy"
+        graphicalNodeEditPolicyClassName="MiddlewareLibGraphicalNodeEditPolicy"
+        createCommandClassName="MiddlewareLibCreateCommand">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
           xsi:type="gmfgen:MetamodelType"
-          editHelperClassName="MiddlewareLibraryEditHelper"/>
+          editHelperClassName="MiddlewareLibEditHelper"/>
       <viewmap
           xsi:type="gmfgen:InnerClassViewmap"
           layoutType="TOOLBAR_LAYOUT"
@@ -43,21 +43,21 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class StereotypedElementFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedElementStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedElementNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public StereotypedElementFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureStereotypedElementStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedElementStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedElementStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureStereotypedElementNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedElementNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedElementNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedElementStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedElementStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedElementNameFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedElementNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <behaviour
           xsi:type="gmfgen:OpenDiagramBehaviour"
-          diagramKind="OpenDDS MiddlewareLibrary"
-          editorID="org.opendds.modeling.model.opendds.diagram.middlewarelibrary.part.OpenDDSMiddlewareLibraryDiagramEditorID"/>
+          diagramKind="OpenDDS MiddlewareLib"
+          editorID="org.opendds.modeling.model.opendds.diagram.middlewarelib.part.OpenDDSMiddlewareLibDiagramEditorID"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/MiddlewareLibrary"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/MiddlewareLib"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/middlewareLibrary"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/middlewareLib"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/middlewareLibrary"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/middlewareLib"/>
       </modelFacet>
       <labels
           visualID="5001"
-          editPartClassName="MiddlewareLibraryNameEditPart"
-          itemSemanticEditPolicyClassName="MiddlewareLibraryNameItemSemanticEditPolicy"
-          notationViewFactoryClassName="MiddlewareLibraryNameViewFactory"
+          editPartClassName="MiddlewareLibNameEditPart"
+          itemSemanticEditPolicyClassName="MiddlewareLibNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="MiddlewareLibNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -69,14 +69,14 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/MiddlewareLibrary/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/MiddlewareLib/name"/>
         </modelFacet>
       </labels>
       <labels
           visualID="5005"
-          editPartClassName="MiddlewareLibraryName2EditPart"
-          itemSemanticEditPolicyClassName="MiddlewareLibraryName2ItemSemanticEditPolicy"
-          notationViewFactoryClassName="MiddlewareLibraryNameViewFactory"
+          editPartClassName="MiddlewareLibName2EditPart"
+          itemSemanticEditPolicyClassName="MiddlewareLibName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="MiddlewareLibNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -89,23 +89,23 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«middleware»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/MiddlewareLibrary/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/MiddlewareLib/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
     <topLevelNodes
         visualID="2002"
-        editPartClassName="PolicyLibraryEditPart"
-        itemSemanticEditPolicyClassName="PolicyLibraryItemSemanticEditPolicy"
-        notationViewFactoryClassName="PolicyLibraryViewFactory"
-        canonicalEditPolicyClassName="PolicyLibraryCanonicalEditPolicy"
-        graphicalNodeEditPolicyClassName="PolicyLibraryGraphicalNodeEditPolicy"
-        createCommandClassName="PolicyLibraryCreateCommand">
+        editPartClassName="PolicyLibEditPart"
+        itemSemanticEditPolicyClassName="PolicyLibItemSemanticEditPolicy"
+        notationViewFactoryClassName="PolicyLibViewFactory"
+        canonicalEditPolicyClassName="PolicyLibCanonicalEditPolicy"
+        graphicalNodeEditPolicyClassName="PolicyLibGraphicalNodeEditPolicy"
+        createCommandClassName="PolicyLibCreateCommand">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
           xsi:type="gmfgen:MetamodelType"
-          editHelperClassName="PolicyLibraryEditHelper"/>
+          editHelperClassName="PolicyLibEditHelper"/>
       <viewmap
           xsi:type="gmfgen:InnerClassViewmap"
           layoutType="TOOLBAR_LAYOUT"
@@ -113,22 +113,22 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class StereotypedElementFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedElementStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedElementNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public StereotypedElementFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureStereotypedElementStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedElementStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedElementStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureStereotypedElementNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedElementNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedElementNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedElementStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedElementStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedElementNameFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedElementNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <behaviour
           xsi:type="gmfgen:OpenDiagramBehaviour"
-          editPolicyClassName="OpenDiagramEditPolicyPolicyLibrary"
-          diagramKind="OpenDDS PolicyLibrary"
-          editorID="org.opendds.modeling.model.opendds.diagram.policylibrary.part.OpenDDSPolicyLibraryDiagramEditorID"/>
+          editPolicyClassName="OpenDiagramEditPolicyPolicyLib"
+          diagramKind="OpenDDS PolicyLib"
+          editorID="org.opendds.modeling.model.opendds.diagram.policylib.part.OpenDDSPolicyLibDiagramEditorID"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/PolicyLibrary"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/PolicyLib"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/policyLibrary"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/policyLib"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/policyLibrary"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/policyLib"/>
       </modelFacet>
       <labels
           visualID="5002"
-          editPartClassName="PolicyLibraryNameEditPart"
-          itemSemanticEditPolicyClassName="PolicyLibraryNameItemSemanticEditPolicy"
-          notationViewFactoryClassName="PolicyLibraryNameViewFactory"
+          editPartClassName="PolicyLibNameEditPart"
+          itemSemanticEditPolicyClassName="PolicyLibNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="PolicyLibNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -140,14 +140,14 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/PolicyLibrary/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/PolicyLib/name"/>
         </modelFacet>
       </labels>
       <labels
           visualID="5006"
-          editPartClassName="PolicyLibraryName2EditPart"
-          itemSemanticEditPolicyClassName="PolicyLibraryName2ItemSemanticEditPolicy"
-          notationViewFactoryClassName="PolicyLibraryNameViewFactory"
+          editPartClassName="PolicyLibName2EditPart"
+          itemSemanticEditPolicyClassName="PolicyLibName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PolicyLibNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -158,25 +158,25 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0"
-            viewPattern="«policyLibrary»">
+            viewPattern="«policyLib»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/PolicyLibrary/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/PolicyLib/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
     <topLevelNodes
         visualID="2004"
-        editPartClassName="DataLibraryEditPart"
-        itemSemanticEditPolicyClassName="DataLibraryItemSemanticEditPolicy"
-        notationViewFactoryClassName="DataLibraryViewFactory"
-        canonicalEditPolicyClassName="DataLibraryCanonicalEditPolicy"
-        graphicalNodeEditPolicyClassName="DataLibraryGraphicalNodeEditPolicy"
-        createCommandClassName="DataLibraryCreateCommand">
+        editPartClassName="DataLibEditPart"
+        itemSemanticEditPolicyClassName="DataLibItemSemanticEditPolicy"
+        notationViewFactoryClassName="DataLibViewFactory"
+        canonicalEditPolicyClassName="DataLibCanonicalEditPolicy"
+        graphicalNodeEditPolicyClassName="DataLibGraphicalNodeEditPolicy"
+        createCommandClassName="DataLibCreateCommand">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
           xsi:type="gmfgen:MetamodelType"
-          editHelperClassName="DataLibraryEditHelper"/>
+          editHelperClassName="DataLibEditHelper"/>
       <viewmap
           xsi:type="gmfgen:InnerClassViewmap"
           layoutType="TOOLBAR_LAYOUT"
@@ -184,22 +184,22 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class StereotypedElementFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedElementStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedElementNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public StereotypedElementFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureStereotypedElementStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedElementStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedElementStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureStereotypedElementNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedElementNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedElementNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedElementStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedElementStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedElementNameFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedElementNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <behaviour
           xsi:type="gmfgen:OpenDiagramBehaviour"
-          editPolicyClassName="OpenDiagramEditPolicyDataLibrary"
-          diagramKind="OpenDDS DataLibrary"
-          editorID="org.opendds.modeling.model.opendds.diagram.datalibrary.part.OpenDDSDataLibraryDiagramEditorID"/>
+          editPolicyClassName="OpenDiagramEditPolicyDataLib"
+          diagramKind="OpenDDS DataLib"
+          editorID="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLibrary"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLib"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/dataLibrary"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/dataLib"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/dataLibrary"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/dataLib"/>
       </modelFacet>
       <labels
           visualID="5004"
-          editPartClassName="DataLibraryNameEditPart"
-          itemSemanticEditPolicyClassName="DataLibraryNameItemSemanticEditPolicy"
-          notationViewFactoryClassName="DataLibraryNameViewFactory"
+          editPartClassName="DataLibNameEditPart"
+          itemSemanticEditPolicyClassName="DataLibNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="DataLibNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -211,14 +211,14 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLibrary/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLib/name"/>
         </modelFacet>
       </labels>
       <labels
           visualID="5007"
-          editPartClassName="DataLibraryName2EditPart"
-          itemSemanticEditPolicyClassName="DataLibraryName2ItemSemanticEditPolicy"
-          notationViewFactoryClassName="DataLibraryNameViewFactory"
+          editPartClassName="DataLibName2EditPart"
+          itemSemanticEditPolicyClassName="DataLibName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="DataLibNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -229,9 +229,9 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0"
-            viewPattern="«dataLibrary»">
+            viewPattern="«dataLib»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLibrary/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLib/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -240,18 +240,18 @@
           title="OpenDDS">
         <entries
             xsi:type="gmfgen:ToolEntry"
-            title="PolicyLibrary"
-            description="Create new PolicyLibrary"
+            title="PolicyLib"
+            description="Create new PolicyLib"
             genNodes="//@diagram/@topLevelNodes.1"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
-            title="MiddlewareLibrary"
-            description="Create new MiddlewareLibrary"
+            title="MiddlewareLib"
+            description="Create new MiddlewareLib"
             genNodes="//@diagram/@topLevelNodes.0"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
-            title="DataLibrary"
-            description="Create new DataLibrary"
+            title="DataLib"
+            description="Create new DataLib"
             genNodes="//@diagram/@topLevelNodes.2"/>
       </groups>
     </palette>
