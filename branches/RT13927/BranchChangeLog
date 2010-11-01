@@ -1,3 +1,10 @@
+Mon Nov  1 13:45:56 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylib:
+
+          A continuation of the library to lib.
+
 Mon Nov  1 12:45:28 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelibrary/src/org/opendds/modeling/model/opendds/diagram/middlewarelib:
@@ -5,7 +12,7 @@ Mon Nov  1 12:45:28 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/testdata/DataLib:
         * tools/modeling/testdata/PolicyLib:
 
-          As continuation of the library to lib started with the previous commit. This renames directories containing "library" to "lib" that
+          A continuation of the library to lib started with the previous commit. This renames directories containing "library" to "lib" that
           do not have children directories that will also be renamed to avoid issues with subversion directory renaming in this situation.
 
 Mon Nov  1 12:27:44 UTC 2010  Byron Harris  <harrisb@ociweb.com>
