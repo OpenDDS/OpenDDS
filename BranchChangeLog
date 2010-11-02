@@ -1,7 +1,5 @@
 Tue Nov  2 12:32:25 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
-        * BranchChangeLog:
-
         * tools/modeling/codegen/model/Config.h:
         * tools/modeling/codegen/model/Entities.h:
 
@@ -83,7 +81,8 @@ Tue Nov  2 12:32:25 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/testdata/Middleware/MiddlewareTest_screenshot_1.png:
         * tools/modeling/testdata/Middleware/MiddlewareTest_screenshot_2.png:
 
-          Removed these files.
+          Continuation of name compaction- this time going from "middleware" to "DCPS". This commit only includes
+          file content changes and file name changes. Directory changes will be done in subsequent commits.
 
 Tue Nov  2 12:18:28 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
