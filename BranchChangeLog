@@ -1,3 +1,9 @@
+Tue Nov  2 14:10:49 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/Dcps/DcpsTest.opendds_diagram_dcpslib:
+
+          Continuation of renaming "middleware" to "DCPS".
+
 Tue Nov  2 13:20:24 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib:
