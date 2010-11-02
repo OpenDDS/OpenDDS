@@ -1,3 +1,10 @@
+Tue Nov  2 19:09:03 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/BitPubListenerImpl.cpp:
+
+          Made minor tweaks to formatting of error messages for
+          consistency and readability that were missed in the previous commit.
+
 Tue Nov  2 18:29:27 UTC 2010  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/AssociationData.h:
@@ -152,7 +159,7 @@ Tue Nov  2 18:29:27 UTC 2010  Don Hudson  <hudsond@ociweb.com>
         * tests/DCPS/sub_init_loop/Writer.cpp:
         * tests/DCPS/sub_init_loop/subscriber.cpp:
 
-          Made minor tweaks to formatting of error and debug messages for 
+          Made minor tweaks to formatting of error and debug messages for
           consistency and readability.
 
           Corrected a few incorrect method names in error and debug messages.
