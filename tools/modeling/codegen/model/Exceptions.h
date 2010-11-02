@@ -15,63 +15,63 @@
 
 namespace OpenDDS { namespace Model {
 
-class OpenDDS_Model_Export Exception : public virtual std::exception {
+class Exception : public std::exception {
   public: virtual const char* what() const throw() { return "OpenDDS::Model::Exception"; }
 };
 
-class OpenDDS_Model_Export NoServiceException : public virtual Exception {
+class NoServiceException : public Exception {
   public: virtual const char* what() const throw() { return "NoService"; }
 };
 
-class OpenDDS_Model_Export NoParticipantException : public virtual Exception {
+class NoParticipantException : public Exception {
   public: virtual const char* what() const throw() { return "NoParticipant"; }
 };
 
-class OpenDDS_Model_Export NoPublisherException : public virtual Exception {
+class NoPublisherException : public Exception {
   public: virtual const char* what() const throw() { return "NoPublisher"; }
 };
 
-class OpenDDS_Model_Export NoSubscriberException : public virtual Exception {
+class NoSubscriberException : public Exception {
   public: virtual const char* what() const throw() { return "NoSubscriber"; }
 };
 
-class OpenDDS_Model_Export NoWriterException : public virtual Exception {
+class NoWriterException : public Exception {
   public: virtual const char* what() const throw() { return "NoWriter"; }
 };
 
-class OpenDDS_Model_Export NoReaderException : public virtual Exception {
+class NoReaderException : public Exception {
   public: virtual const char* what() const throw() { return "NoReader"; }
 };
 
-class OpenDDS_Model_Export NoTopicException : public virtual Exception {
+class NoTopicException : public Exception {
   public: virtual const char* what() const throw() { return "NoTopic"; }
 };
 
-class OpenDDS_Model_Export NoTypeException : public virtual Exception {
+class NoTypeException : public Exception {
   public: virtual const char* what() const throw() { return "NoType"; }
 };
 
-class OpenDDS_Model_Export NoTransportException : public virtual Exception {
+class NoTransportException : public Exception {
   public: virtual const char* what() const throw() { return "NoTransport"; }
 };
 
-class OpenDDS_Model_Export BadConfigureException : public virtual Exception {
+class BadConfigureException : public Exception {
   public: virtual const char* what() const throw() { return "BadConfigure"; }
 };
 
-class OpenDDS_Model_Export BadAttachException : public virtual Exception {
+class BadAttachException : public Exception {
   public: virtual const char* what() const throw() { return "BadAttach"; }
 };
 
-class OpenDDS_Model_Export BadRegisterException : public virtual Exception {
+class BadRegisterException : public Exception {
   public: virtual const char* what() const throw() { return "BadRegister"; }
 };
 
-class OpenDDS_Model_Export BadCastException : public virtual Exception {
+class BadCastException : public Exception {
   public: virtual const char* what() const throw() { return "BadCast"; }
 };
 
-class OpenDDS_Model_Export OutOfBoundsException : public virtual Exception {
+class OutOfBoundsException : public Exception {
   public: virtual const char* what() const throw() { return "OutOfBounds"; }
 };
 

@@ -9,8 +9,7 @@
 
 #include "model/MessengerModel_T.h"
 
-int
-main( int argc, char** argv, char**)
+int main(int argc, char** argv)
 {
   try {
     MessengerModelType model;

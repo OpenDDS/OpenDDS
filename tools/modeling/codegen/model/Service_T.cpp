@@ -7,39 +7,39 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::Service()
 {
   this->delegate_.service() = this;
 
-  for( int index = 0; index < ModelName::Elements::Participants::LAST_INDEX; ++index) {
+  for( int index = 0; index < ModelName::Participants::LAST_INDEX; ++index) {
     this->participants_[ index] = 0;
   }
 
-  for( int outter = 0; outter < ModelName::Elements::Participants::LAST_INDEX; ++outter) {
-    for( int inner = 0; inner < ModelName::Elements::Types::LAST_INDEX; ++inner) {
+  for( int outter = 0; outter < ModelName::Participants::LAST_INDEX; ++outter) {
+    for( int inner = 0; inner < ModelName::Types::LAST_INDEX; ++inner) {
       this->types_[ outter][ inner] = false;
     }
   }
 
-  for( int outter = 0; outter < ModelName::Elements::Participants::LAST_INDEX; ++outter) {
-    for( int inner = 0; inner < ModelName::Elements::Topics::LAST_INDEX; ++inner) {
+  for( int outter = 0; outter < ModelName::Participants::LAST_INDEX; ++outter) {
+    for( int inner = 0; inner < ModelName::Topics::LAST_INDEX; ++inner) {
       this->topics_[ outter][ inner] = 0;
     }
   }
 
-  for( int index = 0; index < ModelName::Elements::Publishers::LAST_INDEX; ++index) {
+  for( int index = 0; index < ModelName::Publishers::LAST_INDEX; ++index) {
     this->publishers_[ index] = 0;
   }
 
-  for( int index = 0; index < ModelName::Elements::Subscribers::LAST_INDEX; ++index) {
+  for( int index = 0; index < ModelName::Subscribers::LAST_INDEX; ++index) {
     this->subscribers_[ index] = 0;
   }
 
-  for( int index = 0; index < ModelName::Elements::DataWriters::LAST_INDEX; ++index) {
+  for( int index = 0; index < ModelName::DataWriters::LAST_INDEX; ++index) {
     this->writers_[ index] = 0;
   }
 
-  for( int index = 0; index < ModelName::Elements::DataReaders::LAST_INDEX; ++index) {
+  for( int index = 0; index < ModelName::DataReaders::LAST_INDEX; ++index) {
     this->readers_[ index] = 0;
   }
 
-  for( int index = 0; index < ModelName::Elements::Transports::LAST_INDEX; ++index) {
+  for( int index = 0; index < ModelName::Transports::LAST_INDEX; ++index) {
     this->transports_[ index] = 0;
   }
 }
@@ -174,8 +174,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createTopic(
     this->types_[ participant][ type] = true;
   }
 
-  this->delegate_.createTopic(
-    this->topics_[ participant][ topic],
+  this->topics_[ participant][ topic] = this->delegate_.createTopic(
     this->participants_[ participant],
     this->modelData_.topicName( topic),
     this->modelData_.typeName( type),
@@ -201,8 +200,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createPublisher(
     this->createTransport( transport);
   }
 
-  this->delegate_.createPublisher(
-    this->publishers_[ publisher],
+  this->publishers_[ publisher] = this->delegate_.createPublisher(
     this->participants_[ participant],
     this->modelData_.qos( publisher),
     this->modelData_.mask( publisher),
@@ -227,8 +225,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscriber(
     this->createTransport( transport);
   }
 
-  this->delegate_.createSubscriber(
-    this->subscribers_[ subscriber],
+  this->subscribers_[ subscriber] = this->delegate_.createSubscriber(
     this->participants_[ participant],
     this->modelData_.qos( subscriber),
     this->modelData_.mask( subscriber),
@@ -252,9 +249,8 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createPublication( typename
     this->createTopic( participant, topic);
   }
 
-  this->delegate_.createPublication(
+  this->writers_[ writer] = this->delegate_.createPublication(
     writer,
-    this->writers_[ writer],
     this->publishers_[ publisher],
     this->topics_[ participant][ topic],
     this->modelData_.qos( writer),
@@ -278,9 +274,8 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscription( typenam
     this->createTopic( participant, topic);
   }
 
-  this->delegate_.createSubscription(
+  this->readers_[ reader] = this->delegate_.createSubscription(
     reader,
-    this->readers_[ reader],
     this->subscribers_[ subscriber],
     this->topics_[ participant][ topic],
     this->modelData_.qos( reader),
@@ -293,8 +288,7 @@ inline
 void
 OpenDDS::Model::Service< ModelName, InstanceTraits>::createTransport( typename Transports::Values transport)
 {
-  this->delegate_.createTransport(
-    this->transports_[ transport],
+  this->transports_[ transport] = this->delegate_.createTransport(
     this->modelData_.transportKey( transport),
     this->modelData_.transportKind( transport),
     this->modelData_.transportConfig( transport)
@@ -316,6 +310,15 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::copyPublicationQos(
   this->modelData_.copyPublicationQos( writer, writerQos);
 }
 
+template <typename ModelName, typename InstanceTraits>
+inline
+void
+OpenDDS::Model::Service<ModelName, InstanceTraits>::copyPublicationQos(
+  const std::string&, DDS::DataWriterQos&)
+{
+  throw std::runtime_error("not implemented");  //TODO: implement
+}
+
 template< typename ModelName, class InstanceTraits>
 inline
 void
@@ -331,3 +334,11 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::copySubscriptionQos(
   this->modelData_.copySubscriptionQos( reader, readerQos);
 }
 
+template <typename ModelName, typename InstanceTraits>
+inline
+void
+OpenDDS::Model::Service<ModelName, InstanceTraits>::copySubscriptionQos(
+  const std::string&, DDS::DataReaderQos&)
+{
+  throw std::runtime_error("not implemented");  //TODO: implement
+}

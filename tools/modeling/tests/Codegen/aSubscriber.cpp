@@ -3,7 +3,7 @@
 #include <iostream>
 
 int
-main( int argc, char** argv, char**)
+main( int argc, char** argv)
 {
   int status = 0;
 

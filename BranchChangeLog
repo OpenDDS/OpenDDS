@@ -1,3 +1,29 @@
+Tue Nov  2 21:37:57 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dds_xsl.mpb:
+
+          For the latest gnu.mpd (gnuace) in 1.6a, need to split command into
+          the actual command name (executable or script) and the commandflags.
+
+        * tools/modeling/codegen/model/Entities.h:
+        * tools/modeling/codegen/model/Exceptions.h:
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+        * tools/modeling/codegen/xsl/h.xsl:
+
+          Updated to compile with latest Delegate and Entities code on both
+          GCC and VC++.
+
+          There are still runtime problems with initializing everything in the
+          correct order.
+
+        * tools/modeling/tests/Codegen/aPublisher.cpp:
+        * tools/modeling/tests/Codegen/aSubscriber.cpp:
+        * tools/modeling/tests/Messenger/publisher.cpp:
+        * tools/modeling/tests/Messenger/subscriber.cpp:
+
+          Use a C++-standard compliant declaration for main().
+
 Tue Nov  2 18:46:00 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/build.properties:
