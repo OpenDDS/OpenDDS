@@ -6,28 +6,28 @@
     xmlns:gmftool="http://www.eclipse.org/gmf/2005/ToolDefinition">
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/middlewareLib"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/dcpsLib"/>
     <ownedChild>
       <domainMetaElement
-          href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib"/>
+          href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib"/>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
-            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/name"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/name"/>
       </labelMappings>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"
-          viewPattern="«middleware»">
+          viewPattern="«dcps»">
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
-            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//MiddlewareLib/name"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/name"/>
       </labelMappings>
       <relatedDiagrams
-          href="MiddlewareLib.gmfmap#//@diagram"/>
+          href="DcpsLib.gmfmap#//@diagram"/>
       <tool
           xsi:type="gmftool:CreationTool"
           href="MainDiagram.gmftool#//@palette/@tools.0/@tools.1"/>

@@ -841,7 +841,7 @@ Files used: ~MainDiagram.gmfgen, ~MyLibrary.gmfgen
 
 ! UML Component figures with classes arbitrarily positioned
 
-For the SDK Middleware diagram UML components for domain participants are used. Simple attempts to do this using the GMF layout XY Layout were tried without success. Elements in the component would be as small as possible and stack on top of each other. Attempts to follow the lead of the ~UML2Tools Component was not successful either. For figure ~ComponentFigure_Body used by the compartment the custom layout org.eclipse.gmf.runtime.draw2d.ui.figures.~OneLineBorder is used and attempts to reproduce this also resulted in stacked elements.
+For the SDK DCPS diagram UML components for domain participants are used. Simple attempts to do this using the GMF layout XY Layout were tried without success. Elements in the component would be as small as possible and stack on top of each other. Attempts to follow the lead of the ~UML2Tools Component was not successful either. For figure ~ComponentFigure_Body used by the compartment the custom layout org.eclipse.gmf.runtime.draw2d.ui.figures.~OneLineBorder is used and attempts to reproduce this also resulted in stacked elements.
 
 As a workaround an attempt was made to stack the elements on top of each other as is done with the DNC Package node as described in section 4.6, Developing the Color Modeling Diagram, in the Eclipse Modeling Project book. However, if side-affixed node was attached to an element (to represent a port) in the component it did not render properly nor was the label for the node visible. So this approach was not feasible.
 
@@ -1656,7 +1656,7 @@ The following plug-ins are included in this feature:
 This plug-in specifies that branding information can be found in the [[org.opendds.modeling.sdk]] plug-in.</pre>
 </div>
 <div title="org.opendds.modeling.model" modifier="MikeMartinez" created="201006152326" modified="201008101844" tags="publish" changecount="16">
-<pre>This package is where the ~OpenDDS Modeling SDK metamodels and profile are captured.  These [[EMF Models]] provide the stereotype elements that are used to capture a middleware model using ~OpenDDS.  They include the individual specification package models as well as the overall ~OpenDDS profile model.
+<pre>This package is where the ~OpenDDS Modeling SDK metamodels and profile are captured.  These [[EMF Models]] provide the stereotype elements that are used to capture a DCPS model using ~OpenDDS.  They include the individual specification package models as well as the overall ~OpenDDS profile model.
 !Code Generation
 This plug-in generates local model Java source code, the //'org.opendds.modeling.model.edit'// editor support project, the //'org.opendds.modeling.model.editor'// ecore editor project, and XML schema definitions for the ecore models.  This is done using the file:
 {{{

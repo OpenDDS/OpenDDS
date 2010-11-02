@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmi:id="_Axid4NrNEd-E4av4wTAhDQ" type="OpenDDS MiddlewareLib" measurementUnit="Pixel">
+<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmi:id="_Axid4NrNEd-E4av4wTAhDQ" type="OpenDDS DcpsLib" measurementUnit="Pixel">
   <children xmi:type="notation:Shape" xmi:id="_Ay03UNrNEd-E4av4wTAhDQ" type="2001" fontName="Sans">
     <children xmi:type="notation:DecorationNode" xmi:id="_Ay1eYNrNEd-E4av4wTAhDQ" type="5001"/>
     <children xmi:type="notation:DecorationNode" xmi:id="_Ay1eYdrNEd-E4av4wTAhDQ" type="5004"/>
@@ -70,5 +70,5 @@
     <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Ay2sg9rNEd-E4av4wTAhDQ" x="696" y="24"/>
   </children>
   <styles xmi:type="notation:DiagramStyle" xmi:id="_Axid4drNEd-E4av4wTAhDQ"/>
-  <element xmi:type="opendds:MiddlewareLib" href="MiddlewareTest.opendds#_P4hVUKO9Ed-9KMRPTsXTAg"/>
+  <element xmi:type="opendds:DcpsLib" href="MiddlewareTest.opendds#_P4hVUKO9Ed-9KMRPTsXTAg"/>
 </notation:Diagram>

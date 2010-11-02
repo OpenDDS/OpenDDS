@@ -1,3 +1,232 @@
+Tue Nov  2 12:32:25 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * BranchChangeLog:
+
+        * tools/modeling/codegen/model/Config.h:
+        * tools/modeling/codegen/model/Entities.h:
+
+        * tools/modeling/docs/design_notes/plugins.html:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/.project:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/plugin.xml:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/DeadlineQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/DestinationOrderQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/DsQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/DurabilityQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/EfQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/GdQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/HistoryQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/LbQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/LifespanQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/LivelinessQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/OsQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/OwnershipQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/PartitionQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/PresentationQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/QosPolicyCreationHelper.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/RdlQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/ReliabilityQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/RlQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/TbfQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/TpQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/UdQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/WdlQosPolicyCreateCommand.java:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSDcpsLibCreateQosPolicyAction.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSDcpsLibCreateQosPolicyActionDomainParticipant.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSDcpsLibCreateQosPolicyActionPublisher.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSDcpsLibCreateQosPolicyActionSubscriber.java:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.feature/feature.xml:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/DcpsLib.gmftool:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/DcpsLib.trace:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmftool:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.trace:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model.edit/plugin.properties:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+
+        * tools/modeling/testdata/Middleware/DcpsTest.opendds:
+        * tools/modeling/testdata/Middleware/DcpsTest.opendds_diagram_middlewarelib:
+        * tools/modeling/testdata/Middleware/DcpsTest_screenshot_1.png:
+        * tools/modeling/testdata/Middleware/DcpsTest_screenshot_2.png:
+
+        * tools/modeling/tests/Codegen/README:
+
+        * tools/modeling/tests/Messenger/README:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSMiddlewareLibCreateQosPolicyAction.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSMiddlewareLibCreateQosPolicyActionDomainParticipant.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSMiddlewareLibCreateQosPolicyActionPublisher.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSMiddlewareLibCreateQosPolicyActionSubscriber.java:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLib.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLib.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLib.gmftool:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLib.trace:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel:
+
+        * tools/modeling/testdata/Middleware/MiddlewareTest.opendds:
+        * tools/modeling/testdata/Middleware/MiddlewareTest.opendds_diagram_middlewarelib:
+        * tools/modeling/testdata/Middleware/MiddlewareTest_screenshot_1.png:
+        * tools/modeling/testdata/Middleware/MiddlewareTest_screenshot_2.png:
+
+          Removed these files.
+
+Tue Nov  2 12:18:28 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/codegen/model/Config.h:
+        * tools/modeling/codegen/model/Entities.h:
+
+        * tools/modeling/docs/design_notes/plugins.html:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/.project:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/DeadlineQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/DestinationOrderQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/DsQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/DurabilityQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/EfQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/GdQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/HistoryQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/LbQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/LifespanQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/LivelinessQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/OsQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/OwnershipQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/PartitionQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/PresentationQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/QosPolicyCreationHelper.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/RdlQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/ReliabilityQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/RlQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/TbfQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/TpQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/UdQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/WdlQosPolicyCreateCommand.java:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSDcpsLibCreateQosPolicyAction.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSDcpsLibCreateQosPolicyActionDomainParticipant.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSDcpsLibCreateQosPolicyActionPublisher.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSDcpsLibCreateQosPolicyActionSubscriber.java:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.feature/feature.xml:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/DcpsLib.gmftool:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/DcpsLib.trace:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.gmftool:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MainDiagram.trace:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model.edit/plugin.properties:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.ecore:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+
+        * tools/modeling/testdata/Middleware/DcpsTest.opendds:
+        * tools/modeling/testdata/Middleware/DcpsTest.opendds_diagram_middlewarelib:
+        * tools/modeling/testdata/Middleware/DcpsTest_screenshot_1.png:
+        * tools/modeling/testdata/Middleware/DcpsTest_screenshot_2.png:
+
+        * tools/modeling/tests/Codegen/README:
+
+        * tools/modeling/tests/Messenger/README:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSMiddlewareLibCreateQosPolicyAction.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSMiddlewareLibCreateQosPolicyActionDomainParticipant.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSMiddlewareLibCreateQosPolicyActionPublisher.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSMiddlewareLibCreateQosPolicyActionSubscriber.java:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/.classpath:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/.project:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/plugin.xml:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/DeadlineQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/DestinationOrderQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/DsQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/DurabilityQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/EfQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/GdQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/HistoryQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/LbQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/LifespanQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/LivelinessQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/OsQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/OwnershipQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/PartitionQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/PresentationQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/QosPolicyCreationHelper.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/RdlQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/ReliabilityQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/RlQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/TbfQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/TpQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/UdQosPolicyCreateCommand.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/edit/commands/WdlQosPolicyCreateCommand.java:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSMiddlewareLibCreateQosPolicyAction.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSMiddlewareLibCreateQosPolicyActionDomainParticipant.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSMiddlewareLibCreateQosPolicyActionPublisher.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.middlewarelib/src/org/opendds/modeling/model/opendds/diagram/middlewarelib/part/OpenDDSMiddlewareLibCreateQosPolicyActionSubscriber.java:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLib.gmfgen:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLib.gmfmap:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLib.gmftool:
+        * tools/modeling/org.opendds/org.opendds.modeling.gmf/diagrams/MiddlewareLib.trace:
+
+        * tools/modeling/org.opendds/org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel:
+
+        * tools/modeling/testdata/Middleware/MiddlewareTest.opendds:
+        * tools/modeling/testdata/Middleware/MiddlewareTest.opendds_diagram_middlewarelib:
+        * tools/modeling/testdata/Middleware/MiddlewareTest_screenshot_1.png:
+        * tools/modeling/testdata/Middleware/MiddlewareTest_screenshot_2.png:
+
+          Removed these files.
+
 Mon Nov  1 14:51:12 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/testdata/PolicyLib/DefaultPolicyLibTest.opendds_diagram_policylib:

@@ -7,7 +7,7 @@ the generated files should be compilable.
 
 The following files are part of this example:
   Codegen.mpc     - MPC file to create the build files for the example.
-  Codegen.opendds - XML file with the middleware model definition.
+  Codegen.opendds - XML file with the DCPS model definition.
   aPublisher.cpp  - Publisher application code.
   aSubscriber.cpp - Subscriber application code.
   svc.conf        - Service configuration directives to load the

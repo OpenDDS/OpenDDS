@@ -2,27 +2,27 @@
 <gmfgen:GenEditorGenerator xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:gmfgen="http://www.eclipse.org/gmf/2009/GenModel" packageNamePrefix="org.opendds.modeling.model.opendds.diagram.middlewarelib"
-    modelID="OpenDDS MiddlewareLib"
-    diagramFileExtension="opendds_diagram_middlewarelib"
+    xmlns:gmfgen="http://www.eclipse.org/gmf/2009/GenModel" packageNamePrefix="org.opendds.modeling.model.opendds.diagram.dcpslib"
+    modelID="OpenDDS DcpsLib"
+    diagramFileExtension="opendds_diagram_dcpslib"
     copyrightText="(c) Copyright Object Computing, Incorporated. 2005,2010. All rights reserved.">
   <diagram
       visualID="1000"
-      editPartClassName="MiddlewareLibEditPart"
-      itemSemanticEditPolicyClassName="MiddlewareLibItemSemanticEditPolicy"
-      canonicalEditPolicyClassName="MiddlewareLibCanonicalEditPolicy"
+      editPartClassName="DcpsLibEditPart"
+      itemSemanticEditPolicyClassName="DcpsLibItemSemanticEditPolicy"
+      canonicalEditPolicyClassName="DcpsLibCanonicalEditPolicy"
       iconProviderPriority="Low"
       validationProviderPriority="Low">
     <diagramRunTimeClass
         href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Diagram"/>
     <elementType
         xsi:type="gmfgen:MetamodelType"
-        editHelperClassName="MiddlewareLibEditHelper"/>
+        editHelperClassName="DcpsLibEditHelper"/>
     <viewmap
         xsi:type="gmfgen:FigureViewmap"
         figureQualifiedClassName="org.eclipse.draw2d.FreeformLayer"/>
     <domainDiagramElement
-        href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib"/>
     <childNodes
         visualID="3001"
         editPartClassName="PublisherEditPart"
@@ -45,11 +45,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class StereotypedFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public StereotypedFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureStereotypedStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureStereotypedNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedNameFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/publisher"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/publisher"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//dcps/DomainParticipant/publishers"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DomainParticipant/publishers"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//dcps/DomainParticipant/publishers"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DomainParticipant/publishers"/>
       </modelFacet>
       <labels
           visualID="5006"
@@ -66,7 +66,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -85,7 +85,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«publisher»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -117,11 +117,11 @@
       </viewmap>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/dataWriter"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/dataWriter"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//dcps/Publisher/writers"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/Publisher/writers"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//dcps/Publisher/writers"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/Publisher/writers"/>
       </modelFacet>
       <labels
           xsi:type="gmfgen:GenExternalNodeLabel"
@@ -138,7 +138,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -162,11 +162,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class EfQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureEfQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureEfQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureEfQosPolicyAutoenable_created_entitiesFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public EfQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureEfQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureEfQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureEfQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureEfQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureEfQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureEfQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureEfQosPolicyAutoenable_created_entitiesFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureEfQosPolicyAutoenable_created_entitiesFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureEfQosPolicyAutoenable_created_entitiesFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureEfQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureEfQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureEfQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureEfQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureEfQosPolicyAutoenable_created_entitiesFigure() {&#xA;&#x9;&#x9;return fFigureEfQosPolicyAutoenable_created_entitiesFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/efQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/efQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5099"
@@ -184,7 +184,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«efQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -202,7 +202,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -223,7 +223,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/EntityFactoryQosPolicy/autoenable_created_entities"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/EntityFactoryQosPolicy/autoenable_created_entities"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -247,11 +247,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class GdQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureGdQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureGdQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureGdQosPolicyDatavalueFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public GdQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureGdQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureGdQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureGdQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureGdQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureGdQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureGdQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureGdQosPolicyDatavalueFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureGdQosPolicyDatavalueFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureGdQosPolicyDatavalueFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureGdQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureGdQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureGdQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureGdQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureGdQosPolicyDatavalueFigure() {&#xA;&#x9;&#x9;return fFigureGdQosPolicyDatavalueFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/gdQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/gdQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5105"
@@ -269,7 +269,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«gdQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -287,7 +287,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -308,7 +308,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/GroupDataQosPolicy/datavalue"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/GroupDataQosPolicy/datavalue"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -332,11 +332,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PartitionQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePartitionQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePartitionQosPolicyNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PartitionQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePartitionQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePartitionQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigurePartitionQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigurePartitionQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePartitionQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigurePartitionQosPolicyNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePartitionQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigurePartitionQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePartitionQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigurePartitionQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/partitionQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/partitionQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5108"
@@ -354,7 +354,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«partitionQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -372,7 +372,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -396,11 +396,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PresentationQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePresentationQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePresentationQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePresentationQosPolicyAccess_scopeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePresentationQosPolicyCoherent_accessFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePresentationQosPolicyOrdered_accessFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PresentationQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePresentationQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePresentationQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigurePresentationQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigurePresentationQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePresentationQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigurePresentationQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigurePresentationQosPolicyAccess_scopeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePresentationQosPolicyAccess_scopeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigurePresentationQosPolicyAccess_scopeFigure);&#xA;&#xA;&#xA;&#xA;fFigurePresentationQosPolicyCoherent_accessFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePresentationQosPolicyCoherent_accessFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigurePresentationQosPolicyCoherent_accessFigure);&#xA;&#xA;&#xA;&#xA;fFigurePresentationQosPolicyOrdered_accessFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePresentationQosPolicyOrdered_accessFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigurePresentationQosPolicyOrdered_accessFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePresentationQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigurePresentationQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePresentationQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigurePresentationQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePresentationQosPolicyAccess_scopeFigure() {&#xA;&#x9;&#x9;return fFigurePresentationQosPolicyAccess_scopeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePresentationQosPolicyCoherent_accessFigure() {&#xA;&#x9;&#x9;return fFigurePresentationQosPolicyCoherent_accessFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePresentationQosPolicyOrdered_accessFigure() {&#xA;&#x9;&#x9;return fFigurePresentationQosPolicyOrdered_accessFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/presentationQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/presentationQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5110"
@@ -418,7 +418,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«presentationQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -436,7 +436,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -457,7 +457,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/PresentationQosPolicy/access_scope"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/PresentationQosPolicy/access_scope"/>
         </modelFacet>
       </labels>
       <labels
@@ -478,7 +478,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/PresentationQosPolicy/coherent_access"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/PresentationQosPolicy/coherent_access"/>
         </modelFacet>
       </labels>
       <labels
@@ -499,7 +499,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/PresentationQosPolicy/ordered_access"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/PresentationQosPolicy/ordered_access"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -525,11 +525,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class StereotypedFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public StereotypedFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureStereotypedStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureStereotypedNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedNameFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/subscriber"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/subscriber"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//dcps/DomainParticipant/subscribers"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DomainParticipant/subscribers"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//dcps/DomainParticipant/subscribers"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DomainParticipant/subscribers"/>
       </modelFacet>
       <labels
           visualID="5008"
@@ -546,7 +546,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -565,7 +565,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«subscriber»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -597,11 +597,11 @@
       </viewmap>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/dataReader"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/dataReader"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//dcps/Subscriber/readers"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/Subscriber/readers"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//dcps/Subscriber/readers"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/Subscriber/readers"/>
       </modelFacet>
       <labels
           xsi:type="gmfgen:GenExternalNodeLabel"
@@ -618,7 +618,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -642,11 +642,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class UdQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureUdQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureUdQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureUdQosPolicyValueFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public UdQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureUdQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureUdQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureUdQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureUdQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureUdQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureUdQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureUdQosPolicyValueFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureUdQosPolicyValueFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureUdQosPolicyValueFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureUdQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureUdQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureUdQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureUdQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureUdQosPolicyValueFigure() {&#xA;&#x9;&#x9;return fFigureUdQosPolicyValueFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/udQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/udQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5102"
@@ -664,7 +664,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«udQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -682,7 +682,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -703,7 +703,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/UserDataQosPolicy/value"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/UserDataQosPolicy/value"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -727,11 +727,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/DeadlineQosPolicy/period"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/DeadlineQosPolicy/period"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/DeadlineQosPolicy/period"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/DeadlineQosPolicy/period"/>
       </modelFacet>
       <labels
           visualID="5013"
@@ -750,7 +750,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/second"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
         </modelFacet>
       </labels>
       <labels
@@ -770,7 +770,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/nanosecond"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -794,11 +794,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/DurabilityServiceQosPolicy/service_cleanup_delay"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/DurabilityServiceQosPolicy/service_cleanup_delay"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/DurabilityServiceQosPolicy/service_cleanup_delay"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/DurabilityServiceQosPolicy/service_cleanup_delay"/>
       </modelFacet>
       <labels
           visualID="5020"
@@ -817,7 +817,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/second"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
         </modelFacet>
       </labels>
       <labels
@@ -837,7 +837,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/nanosecond"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -861,11 +861,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/LatencyBudgetQosPolicy/duration"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/LatencyBudgetQosPolicy/duration"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/LatencyBudgetQosPolicy/duration"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/LatencyBudgetQosPolicy/duration"/>
       </modelFacet>
       <labels
           visualID="5042"
@@ -884,7 +884,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/second"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
         </modelFacet>
       </labels>
       <labels
@@ -904,7 +904,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/nanosecond"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -928,11 +928,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/LifespanQosPolicy/duration"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/LifespanQosPolicy/duration"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/LifespanQosPolicy/duration"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/LifespanQosPolicy/duration"/>
       </modelFacet>
       <labels
           visualID="5046"
@@ -951,7 +951,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/second"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
         </modelFacet>
       </labels>
       <labels
@@ -971,7 +971,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/nanosecond"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -995,11 +995,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/LivelinessQosPolicy/lease_duration"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/LivelinessQosPolicy/lease_duration"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/LivelinessQosPolicy/lease_duration"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/LivelinessQosPolicy/lease_duration"/>
       </modelFacet>
       <labels
           visualID="5050"
@@ -1018,7 +1018,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/second"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
         </modelFacet>
       </labels>
       <labels
@@ -1038,7 +1038,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/nanosecond"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -1062,11 +1062,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/ReliabilityQosPolicy/max_blocking_time"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReliabilityQosPolicy/max_blocking_time"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/ReliabilityQosPolicy/max_blocking_time"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReliabilityQosPolicy/max_blocking_time"/>
       </modelFacet>
       <labels
           visualID="5071"
@@ -1085,7 +1085,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/second"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
         </modelFacet>
       </labels>
       <labels
@@ -1105,7 +1105,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/nanosecond"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -1129,11 +1129,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class StereotypedElementFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedElementStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedElementNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public StereotypedElementFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureStereotypedElementStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedElementStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedElementStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureStereotypedElementNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedElementNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedElementNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedElementStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedElementStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedElementNameFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedElementNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/domainParticipant"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/domainParticipant"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/participants"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/participants"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/participants"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/participants"/>
       </modelFacet>
       <labels
           visualID="5001"
@@ -1151,7 +1151,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -1170,7 +1170,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«domainParticipant»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -1193,11 +1193,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class StereotypedFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public StereotypedFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureStereotypedStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureStereotypedNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedNameFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/domain"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/domain"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/domains"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/domains"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/domains"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/domains"/>
       </modelFacet>
       <labels
           visualID="5002"
@@ -1215,7 +1215,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -1233,7 +1233,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«domain»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -1256,11 +1256,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class StereotypedFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public StereotypedFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureStereotypedStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureStereotypedNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedNameFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/topic"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/topic"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/topics"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/topics"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/topics"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/topics"/>
       </modelFacet>
       <labels
           visualID="5003"
@@ -1278,7 +1278,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -1297,7 +1297,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«topic»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -1321,29 +1321,29 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class DeadlineQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDeadlineQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDeadlineQosPolicyNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public DeadlineQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureDeadlineQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDeadlineQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDeadlineQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureDeadlineQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDeadlineQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureDeadlineQosPolicyNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDeadlineQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureDeadlineQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDeadlineQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureDeadlineQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/deadlineQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/deadlineQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <modelElementInitializer
             xsi:type="gmfgen:GenFeatureSeqInitializer">
           <initializers
               xsi:type="gmfgen:GenReferenceNewElementSpec">
             <feature
-                href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/DeadlineQosPolicy/period"/>
+                href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/DeadlineQosPolicy/period"/>
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
                   value="//@expressionProviders/@providers.0/@expressions.0">
                 <feature
-                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/second"/>
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
                   value="//@expressionProviders/@providers.0/@expressions.1">
                 <feature
-                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/nanosecond"/>
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
             </newElementInitializers>
           </initializers>
@@ -1365,7 +1365,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«deadlineQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -1383,7 +1383,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -1406,11 +1406,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class DestinationOrderQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDestinationOrderQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDestinationOrderQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDestinationOrderQosPolicyKindFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public DestinationOrderQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureDestinationOrderQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDestinationOrderQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDestinationOrderQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureDestinationOrderQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDestinationOrderQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureDestinationOrderQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureDestinationOrderQosPolicyKindFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDestinationOrderQosPolicyKindFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDestinationOrderQosPolicyKindFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDestinationOrderQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureDestinationOrderQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDestinationOrderQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureDestinationOrderQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDestinationOrderQosPolicyKindFigure() {&#xA;&#x9;&#x9;return fFigureDestinationOrderQosPolicyKindFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/destinationOrderQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/destinationOrderQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5017"
@@ -1428,7 +1428,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«destinationOrderQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -1446,7 +1446,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -1466,7 +1466,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/DestinationOrderQosPolicy/kind"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/DestinationOrderQosPolicy/kind"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -1490,29 +1490,29 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class DsQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDsQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDsQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDsQosPolicyHistory_depthFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDsQosPolicyHistory_kindFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDsQosPolicyMax_instancesFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDsQosPolicyMax_samplesFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDsQosPolicyMax_samples_per_instanceFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public DsQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureDsQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDsQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDsQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureDsQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDsQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureDsQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureDsQosPolicyHistory_depthFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDsQosPolicyHistory_depthFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDsQosPolicyHistory_depthFigure);&#xA;&#xA;&#xA;&#xA;fFigureDsQosPolicyHistory_kindFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDsQosPolicyHistory_kindFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDsQosPolicyHistory_kindFigure);&#xA;&#xA;&#xA;&#xA;fFigureDsQosPolicyMax_instancesFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDsQosPolicyMax_instancesFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDsQosPolicyMax_instancesFigure);&#xA;&#xA;&#xA;&#xA;fFigureDsQosPolicyMax_samplesFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDsQosPolicyMax_samplesFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDsQosPolicyMax_samplesFigure);&#xA;&#xA;&#xA;&#xA;fFigureDsQosPolicyMax_samples_per_instanceFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDsQosPolicyMax_samples_per_instanceFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDsQosPolicyMax_samples_per_instanceFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDsQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureDsQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDsQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureDsQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDsQosPolicyHistory_depthFigure() {&#xA;&#x9;&#x9;return fFigureDsQosPolicyHistory_depthFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDsQosPolicyHistory_kindFigure() {&#xA;&#x9;&#x9;return fFigureDsQosPolicyHistory_kindFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDsQosPolicyMax_instancesFigure() {&#xA;&#x9;&#x9;return fFigureDsQosPolicyMax_instancesFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDsQosPolicyMax_samplesFigure() {&#xA;&#x9;&#x9;return fFigureDsQosPolicyMax_samplesFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDsQosPolicyMax_samples_per_instanceFigure() {&#xA;&#x9;&#x9;return fFigureDsQosPolicyMax_samples_per_instanceFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/dsQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/dsQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <modelElementInitializer
             xsi:type="gmfgen:GenFeatureSeqInitializer">
           <initializers
               xsi:type="gmfgen:GenReferenceNewElementSpec">
             <feature
-                href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/DurabilityServiceQosPolicy/service_cleanup_delay"/>
+                href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/DurabilityServiceQosPolicy/service_cleanup_delay"/>
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
                   value="//@expressionProviders/@providers.0/@expressions.2">
                 <feature
-                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/second"/>
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
                   value="//@expressionProviders/@providers.0/@expressions.3">
                 <feature
-                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/nanosecond"/>
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
             </newElementInitializers>
           </initializers>
@@ -1534,7 +1534,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«dsQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -1552,7 +1552,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -1572,7 +1572,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/DurabilityServiceQosPolicy/history_depth"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/DurabilityServiceQosPolicy/history_depth"/>
         </modelFacet>
       </labels>
       <labels
@@ -1592,7 +1592,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/DurabilityServiceQosPolicy/history_kind"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/DurabilityServiceQosPolicy/history_kind"/>
         </modelFacet>
       </labels>
       <labels
@@ -1612,7 +1612,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/DurabilityServiceQosPolicy/max_instances"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/DurabilityServiceQosPolicy/max_instances"/>
         </modelFacet>
       </labels>
       <labels
@@ -1632,7 +1632,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/DurabilityServiceQosPolicy/max_samples"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/DurabilityServiceQosPolicy/max_samples"/>
         </modelFacet>
       </labels>
       <labels
@@ -1652,7 +1652,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/DurabilityServiceQosPolicy/max_samples_per_instance"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/DurabilityServiceQosPolicy/max_samples_per_instance"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -1675,11 +1675,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class DurabilityQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDurabilityQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDurabilityQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDurabilityQosPolicyKindFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public DurabilityQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureDurabilityQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDurabilityQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDurabilityQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureDurabilityQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDurabilityQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureDurabilityQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureDurabilityQosPolicyKindFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDurabilityQosPolicyKindFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDurabilityQosPolicyKindFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDurabilityQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureDurabilityQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDurabilityQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureDurabilityQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDurabilityQosPolicyKindFigure() {&#xA;&#x9;&#x9;return fFigureDurabilityQosPolicyKindFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/durabilityQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/durabilityQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5029"
@@ -1697,7 +1697,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«durabilityQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -1715,7 +1715,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -1736,7 +1736,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/DurabilityQosPolicy/kind"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/DurabilityQosPolicy/kind"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -1759,11 +1759,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class HistoryQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureHistoryQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureHistoryQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureHistoryQosPolicyDepthFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureHistoryQosPolicyKindFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public HistoryQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureHistoryQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureHistoryQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureHistoryQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureHistoryQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureHistoryQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureHistoryQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureHistoryQosPolicyDepthFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureHistoryQosPolicyDepthFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureHistoryQosPolicyDepthFigure);&#xA;&#xA;&#xA;&#xA;fFigureHistoryQosPolicyKindFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureHistoryQosPolicyKindFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureHistoryQosPolicyKindFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureHistoryQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureHistoryQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureHistoryQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureHistoryQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureHistoryQosPolicyDepthFigure() {&#xA;&#x9;&#x9;return fFigureHistoryQosPolicyDepthFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureHistoryQosPolicyKindFigure() {&#xA;&#x9;&#x9;return fFigureHistoryQosPolicyKindFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/historyQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/historyQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5038"
@@ -1781,7 +1781,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«historyQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -1799,7 +1799,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -1820,7 +1820,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/HistoryQosPolicy/depth"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/HistoryQosPolicy/depth"/>
         </modelFacet>
       </labels>
       <labels
@@ -1841,7 +1841,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/HistoryQosPolicy/kind"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/HistoryQosPolicy/kind"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -1865,29 +1865,29 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class LbQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureLbQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureLbQosPolicyNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public LbQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureLbQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureLbQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureLbQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureLbQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureLbQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureLbQosPolicyNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureLbQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureLbQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureLbQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureLbQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/lbQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/lbQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <modelElementInitializer
             xsi:type="gmfgen:GenFeatureSeqInitializer">
           <initializers
               xsi:type="gmfgen:GenReferenceNewElementSpec">
             <feature
-                href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/LatencyBudgetQosPolicy/duration"/>
+                href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/LatencyBudgetQosPolicy/duration"/>
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
                   value="//@expressionProviders/@providers.0/@expressions.4">
                 <feature
-                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/second"/>
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
                   value="//@expressionProviders/@providers.0/@expressions.5">
                 <feature
-                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/nanosecond"/>
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
             </newElementInitializers>
           </initializers>
@@ -1909,7 +1909,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«lbQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -1927,7 +1927,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -1952,29 +1952,29 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class LifespanQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureLifespanQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureLifespanQosPolicyNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public LifespanQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureLifespanQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureLifespanQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureLifespanQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureLifespanQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureLifespanQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureLifespanQosPolicyNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureLifespanQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureLifespanQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureLifespanQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureLifespanQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/lifespanQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/lifespanQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <modelElementInitializer
             xsi:type="gmfgen:GenFeatureSeqInitializer">
           <initializers
               xsi:type="gmfgen:GenReferenceNewElementSpec">
             <feature
-                href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/LifespanQosPolicy/duration"/>
+                href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/LifespanQosPolicy/duration"/>
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
                   value="//@expressionProviders/@providers.0/@expressions.6">
                 <feature
-                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/second"/>
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
                   value="//@expressionProviders/@providers.0/@expressions.7">
                 <feature
-                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/nanosecond"/>
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
             </newElementInitializers>
           </initializers>
@@ -1996,7 +1996,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«lifespanQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2014,7 +2014,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -2039,29 +2039,29 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class LivelinessQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureLivelinessQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureLivelinessQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureLivelinessQosPolicyKindFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public LivelinessQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureLivelinessQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureLivelinessQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureLivelinessQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureLivelinessQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureLivelinessQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureLivelinessQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureLivelinessQosPolicyKindFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureLivelinessQosPolicyKindFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureLivelinessQosPolicyKindFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureLivelinessQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureLivelinessQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureLivelinessQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureLivelinessQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureLivelinessQosPolicyKindFigure() {&#xA;&#x9;&#x9;return fFigureLivelinessQosPolicyKindFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/livelinessQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/livelinessQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <modelElementInitializer
             xsi:type="gmfgen:GenFeatureSeqInitializer">
           <initializers
               xsi:type="gmfgen:GenReferenceNewElementSpec">
             <feature
-                href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/LivelinessQosPolicy/lease_duration"/>
+                href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/LivelinessQosPolicy/lease_duration"/>
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
                   value="//@expressionProviders/@providers.0/@expressions.8">
                 <feature
-                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/second"/>
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
                   value="//@expressionProviders/@providers.0/@expressions.9">
                 <feature
-                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/nanosecond"/>
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
             </newElementInitializers>
           </initializers>
@@ -2083,7 +2083,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«livelinessQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2101,7 +2101,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2122,7 +2122,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/LivelinessQosPolicy/kind"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/LivelinessQosPolicy/kind"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -2145,11 +2145,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class OsQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureOsQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureOsQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureOsQosPolicyValueFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public OsQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureOsQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureOsQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureOsQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureOsQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureOsQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureOsQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureOsQosPolicyValueFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureOsQosPolicyValueFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureOsQosPolicyValueFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureOsQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureOsQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureOsQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureOsQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureOsQosPolicyValueFigure() {&#xA;&#x9;&#x9;return fFigureOsQosPolicyValueFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/osQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/osQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5055"
@@ -2167,7 +2167,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«osQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2185,7 +2185,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2206,7 +2206,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/OwnershipStrengthQosPolicy/value"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/OwnershipStrengthQosPolicy/value"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -2229,11 +2229,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class OwnershipQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureOwnershipQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureOwnershipQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureOwnershipQosPolicyKindFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public OwnershipQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureOwnershipQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureOwnershipQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureOwnershipQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureOwnershipQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureOwnershipQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureOwnershipQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureOwnershipQosPolicyKindFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureOwnershipQosPolicyKindFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureOwnershipQosPolicyKindFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureOwnershipQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureOwnershipQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureOwnershipQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureOwnershipQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureOwnershipQosPolicyKindFigure() {&#xA;&#x9;&#x9;return fFigureOwnershipQosPolicyKindFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/ownershipQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/ownershipQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5058"
@@ -2251,7 +2251,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«ownershipQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2269,7 +2269,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2290,7 +2290,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/OwnershipQosPolicy/kind"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/OwnershipQosPolicy/kind"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -2313,11 +2313,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class RdlQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRdlQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRdlQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public RdlQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureRdlQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRdlQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureRdlQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureRdlQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRdlQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureRdlQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRdlQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureRdlQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRdlQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureRdlQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure() {&#xA;&#x9;&#x9;return fFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/rdlQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/rdlQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5068"
@@ -2335,7 +2335,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«rdlQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2353,7 +2353,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2374,7 +2374,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/ReaderDataLifecycleQosPolicy/autopurge_nowriter_sample_delay"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReaderDataLifecycleQosPolicy/autopurge_nowriter_sample_delay"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -2398,29 +2398,29 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ReliabilityQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureReliabilityQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureReliabilityQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureReliabilityQosPolicyKindFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ReliabilityQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureReliabilityQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureReliabilityQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureReliabilityQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureReliabilityQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureReliabilityQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureReliabilityQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureReliabilityQosPolicyKindFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureReliabilityQosPolicyKindFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureReliabilityQosPolicyKindFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureReliabilityQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureReliabilityQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureReliabilityQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureReliabilityQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureReliabilityQosPolicyKindFigure() {&#xA;&#x9;&#x9;return fFigureReliabilityQosPolicyKindFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/reliabilityQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/reliabilityQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <modelElementInitializer
             xsi:type="gmfgen:GenFeatureSeqInitializer">
           <initializers
               xsi:type="gmfgen:GenReferenceNewElementSpec">
             <feature
-                href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/ReliabilityQosPolicy/max_blocking_time"/>
+                href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReliabilityQosPolicy/max_blocking_time"/>
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
                   value="//@expressionProviders/@providers.0/@expressions.10">
                 <feature
-                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/second"/>
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
                   value="//@expressionProviders/@providers.0/@expressions.11">
                 <feature
-                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//enumerations/Period/nanosecond"/>
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
             </newElementInitializers>
           </initializers>
@@ -2442,7 +2442,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«reliabilityQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2460,7 +2460,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2481,7 +2481,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/ReliabilityQosPolicy/kind"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReliabilityQosPolicy/kind"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -2504,11 +2504,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class RlQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRlQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRlQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRlQosPolicyMax_instancesFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRlQosPolicyMax_samplesFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRlQosPolicyMax_samples_per_instanceFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public RlQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureRlQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRlQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureRlQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureRlQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRlQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureRlQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureRlQosPolicyMax_instancesFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRlQosPolicyMax_instancesFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureRlQosPolicyMax_instancesFigure);&#xA;&#xA;&#xA;&#xA;fFigureRlQosPolicyMax_samplesFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRlQosPolicyMax_samplesFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureRlQosPolicyMax_samplesFigure);&#xA;&#xA;&#xA;&#xA;fFigureRlQosPolicyMax_samples_per_instanceFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRlQosPolicyMax_samples_per_instanceFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureRlQosPolicyMax_samples_per_instanceFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRlQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureRlQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRlQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureRlQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRlQosPolicyMax_instancesFigure() {&#xA;&#x9;&#x9;return fFigureRlQosPolicyMax_instancesFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRlQosPolicyMax_samplesFigure() {&#xA;&#x9;&#x9;return fFigureRlQosPolicyMax_samplesFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRlQosPolicyMax_samples_per_instanceFigure() {&#xA;&#x9;&#x9;return fFigureRlQosPolicyMax_samples_per_instanceFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/rlQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/rlQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5076"
@@ -2526,7 +2526,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«rlQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2544,7 +2544,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2565,7 +2565,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/ResourceLimitsQosPolicy/max_instances"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ResourceLimitsQosPolicy/max_instances"/>
         </modelFacet>
       </labels>
       <labels
@@ -2586,7 +2586,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/ResourceLimitsQosPolicy/max_samples_per_instance"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ResourceLimitsQosPolicy/max_samples_per_instance"/>
         </modelFacet>
       </labels>
       <labels
@@ -2607,7 +2607,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/ResourceLimitsQosPolicy/max_samples"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ResourceLimitsQosPolicy/max_samples"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -2630,11 +2630,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class TbfQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTbfQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTbfQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTbfQosPolicyMinimum_separationFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public TbfQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureTbfQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTbfQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureTbfQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureTbfQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTbfQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureTbfQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureTbfQosPolicyMinimum_separationFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTbfQosPolicyMinimum_separationFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureTbfQosPolicyMinimum_separationFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTbfQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureTbfQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTbfQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureTbfQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTbfQosPolicyMinimum_separationFigure() {&#xA;&#x9;&#x9;return fFigureTbfQosPolicyMinimum_separationFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/tbfQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/tbfQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5081"
@@ -2652,7 +2652,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«tbfQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2670,7 +2670,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2691,7 +2691,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/TimeBasedFilterQosPolicy/minimum_separation"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/TimeBasedFilterQosPolicy/minimum_separation"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -2714,11 +2714,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class TdQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTdQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTdQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTdQosPolicyValueFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public TdQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureTdQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTdQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureTdQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureTdQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTdQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureTdQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureTdQosPolicyValueFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTdQosPolicyValueFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureTdQosPolicyValueFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTdQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureTdQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTdQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureTdQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTdQosPolicyValueFigure() {&#xA;&#x9;&#x9;return fFigureTdQosPolicyValueFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/tdQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/tdQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5084"
@@ -2736,7 +2736,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«tdQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2754,7 +2754,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2775,7 +2775,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/TopicDataQosPolicy/value"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/TopicDataQosPolicy/value"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -2798,11 +2798,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class TpQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTpQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTpQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTpQosPolicyValueFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public TpQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureTpQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTpQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureTpQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureTpQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTpQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureTpQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureTpQosPolicyValueFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTpQosPolicyValueFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureTpQosPolicyValueFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTpQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureTpQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTpQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureTpQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTpQosPolicyValueFigure() {&#xA;&#x9;&#x9;return fFigureTpQosPolicyValueFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/tpQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/tpQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5087"
@@ -2820,7 +2820,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«tpQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2838,7 +2838,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2859,7 +2859,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/TransportPriorityQosPolicy/value"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/TransportPriorityQosPolicy/value"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -2882,11 +2882,11 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class WdlQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureWdlQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureWdlQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureWdlQosPolicyAutodispose_unregistered_instancesFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public WdlQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureWdlQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureWdlQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureWdlQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureWdlQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureWdlQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureWdlQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureWdlQosPolicyAutodispose_unregistered_instancesFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureWdlQosPolicyAutodispose_unregistered_instancesFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureWdlQosPolicyAutodispose_unregistered_instancesFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureWdlQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureWdlQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureWdlQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureWdlQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureWdlQosPolicyAutodispose_unregistered_instancesFigure() {&#xA;&#x9;&#x9;return fFigureWdlQosPolicyAutodispose_unregistered_instancesFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/wdlQosPolicy"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/wdlQosPolicy"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/MiddlewareLib/policies"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
       </modelFacet>
       <labels
           visualID="5093"
@@ -2904,7 +2904,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«wdlQosPolicy»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2922,7 +2922,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -2943,7 +2943,7 @@
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//qos/WriterDataLifecycleQosPolicy/autodispose_unregistered_instances"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/WriterDataLifecycleQosPolicy/autodispose_unregistered_instances"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -2965,13 +2965,13 @@
       <modelFacet
           xsi:type="gmfgen:TypeLinkModelFacet">
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/dataReader"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/dataReader"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/ownedEntity"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/ownedEntity"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/ownedEntity"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/ownedEntity"/>
         <targetMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//dcps/DataReader/topicDesc"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DataReader/topicDesc"/>
       </modelFacet>
     </links>
     <links
@@ -2992,13 +2992,13 @@
       <modelFacet
           xsi:type="gmfgen:TypeLinkModelFacet">
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//opendds/dataWriter"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/dataWriter"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/ownedEntity"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/ownedEntity"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//core/Entity/ownedEntity"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/ownedEntity"/>
         <targetMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#//dcps/DataWriter/writerTopic"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DataWriter/writerTopic"/>
       </modelFacet>
     </links>
     <compartments
@@ -3220,7 +3220,7 @@
     <preferencePages
         xsi:type="gmfgen:GenStandardPreferencePage"
         iD="org.opendds.modeling.diagram.general"
-        name="OpenDDSMiddlewareLib Diagram">
+        name="OpenDDSDcpsLib Diagram">
       <children
           xsi:type="gmfgen:GenStandardPreferencePage"
           iD="org.opendds.modeling.diagram.appearance"
@@ -3244,8 +3244,8 @@
     </preferencePages>
   </diagram>
   <plugin
-      iD="org.opendds.modeling.diagram.middlewarelib"
-      name="OpenDDS MiddlewareLib Plugin"
+      iD="org.opendds.modeling.diagram.dcpslib"
+      name="OpenDDS DcpsLib Plugin"
       provider="Object Computing, Inc."
       printingEnabled="true">
     <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
@@ -4127,7 +4127,7 @@
     </tabs>
   </propertySheet>
   <domainGenModel
-      href="../../org.opendds.modeling.model/model/OpenDDS_dup_MiddlewareLib.genmodel#/"/>
+      href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#/"/>
   <expressionProviders>
     <providers
         xsi:type="gmfgen:GenExpressionInterpreter">

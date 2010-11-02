@@ -49,19 +49,19 @@
     <genClasses ecoreClass="OpenDDS.ecore#//wdlQosPolicy"/>
     <genClasses ecoreClass="OpenDDS.ecore#//OpenDDSModel">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/policyLib"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/middlewareLib"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/dcpsLib"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/dataLib"/>
     </genClasses>
     <genClasses ecoreClass="OpenDDS.ecore#//PolicyLib">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//PolicyLib/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//PolicyLib/policies"/>
     </genClasses>
-    <genClasses ecoreClass="OpenDDS.ecore#//MiddlewareLib">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//MiddlewareLib/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//MiddlewareLib/domains"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//MiddlewareLib/participants"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//MiddlewareLib/topics"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//MiddlewareLib/policies"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//DcpsLib">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//DcpsLib/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DcpsLib/domains"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DcpsLib/participants"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DcpsLib/topics"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DcpsLib/policies"/>
     </genClasses>
   </genPackages>
   <genPackages prefix="Core" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"

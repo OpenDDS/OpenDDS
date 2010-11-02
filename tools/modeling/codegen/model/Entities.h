@@ -27,7 +27,7 @@ namespace OpenDDS { namespace Model {
 /**
  * @class Entities
  *
- * @brief manage DDS middleware Entities for an application
+ * @brief manage DDS DCPS Entities for an application
  *
  * This class manages DDS support for an application from the command
  * line and the contents of a file.  It also allows application created

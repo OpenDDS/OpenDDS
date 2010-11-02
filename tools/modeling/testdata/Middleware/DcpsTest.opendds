@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<opendds:MiddlewareLib xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_P4hVUKO9Ed-9KMRPTsXTAg" name="MiddlewareLibTest">
+<opendds:DcpsLib xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_P4hVUKO9Ed-9KMRPTsXTAg" name="DcpsLibTest">
   <domains xmi:id="_fRQZ4KO9Ed-9KMRPTsXTAg" name="MessageDomain"/>
   <participants xmi:id="_oeKOUKO9Ed-9KMRPTsXTAg" name="Participant" domain="_fRQZ4KO9Ed-9KMRPTsXTAg" entity_factory="_uJEpwNhiEd-LEcW1P4x7eA" user_data="_uJ0QoNhiEd-LEcW1P4x7eA">
     <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_86HVIKO9Ed-9KMRPTsXTAg" name="part1QosProperty">
@@ -57,4 +57,4 @@
   <policies xsi:type="opendds:gdQosPolicy" xmi:id="_H4AlwNhmEd-LEcW1P4x7eA" name="myGdPolicy"/>
   <policies xsi:type="opendds:partitionQosPolicy" xmi:id="_H4g8ENhmEd-LEcW1P4x7eA" name="myPartitionPolicy"/>
   <policies xsi:type="opendds:presentationQosPolicy" xmi:id="_H5Fj0NhmEd-LEcW1P4x7eA" name="myPresentationPolicy"/>
-</opendds:MiddlewareLib>
+</opendds:DcpsLib>
