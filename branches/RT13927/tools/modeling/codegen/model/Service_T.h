@@ -16,7 +16,7 @@
 
 namespace OpenDDS { namespace Model {
 
-  class DefaultInstanceTraits;
+  struct DefaultInstanceTraits;
 
   template< typename ModelName, class InstanceTraits = DefaultInstanceTraits>
   class Service : public CopyQos, public Entities {
@@ -53,7 +53,7 @@ namespace OpenDDS { namespace Model {
 
     private:
       ///{ @name Entity Creation.
-      void createParticipant(
+      DDS::DomainParticipant* createParticipant(
              typename Participants::Values participant
            );
       void createTopic(

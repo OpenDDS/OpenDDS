@@ -59,8 +59,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 // END OF EXISTING MESSENGER EXAMPLE LISTENER CODE
 
-int
-main( int argc, char** argv, char**)
+int main(int argc, char** argv)
 {
   try {
     MessengerModelType model;

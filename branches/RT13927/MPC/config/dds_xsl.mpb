@@ -12,7 +12,8 @@ project {
   Define_Custom(opendds2idl) {
     automatic            = 1
     inputext             = .opendds
-    command              = xsltproc $(DDS_ROOT)/tools/modeling/codegen/xsl/idl.xsl
+    command              = xsltproc
+    commandflags         = $(DDS_ROOT)/tools/modeling/codegen/xsl/idl.xsl
     output_option        = <%gt%>
     generic_outputext    = .idl
     generic_pre_dirname  = model/
@@ -23,7 +24,8 @@ project {
   Define_Custom(opendds2h) {
     automatic            = 1
     inputext             = .opendds
-    command              = xsltproc $(DDS_ROOT)/tools/modeling/codegen/xsl/h.xsl
+    command              = xsltproc
+    commandflags         = $(DDS_ROOT)/tools/modeling/codegen/xsl/h.xsl
     output_option        = <%gt%>
     generic_outputext    = _T.h
     generic_pre_dirname  = model/
@@ -35,7 +37,8 @@ project {
   Define_Custom(opendds2cpp) {
     automatic            = 1
     inputext             = .opendds
-    command              = xsltproc $(DDS_ROOT)/tools/modeling/codegen/xsl/cpp.xsl
+    command              = xsltproc
+    commandflags         = $(DDS_ROOT)/tools/modeling/codegen/xsl/cpp.xsl
     output_option        = <%gt%>
     generic_outputext    = _T.cpp
     generic_pre_dirname  = model/
@@ -46,7 +49,8 @@ project {
   Define_Custom(opendds2mpc) {
     automatic            = 1
     inputext             = .opendds
-    command              = xsltproc $(DDS_ROOT)/tools/modeling/codegen/xsl/mpc.xsl
+    command              = xsltproc
+    commandflags         = $(DDS_ROOT)/tools/modeling/codegen/xsl/mpc.xsl
     output_option        = <%gt%>
     generic_outputext    = .mpc
     generic_pre_dirname  = model/

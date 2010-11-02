@@ -116,9 +116,11 @@ class OpenDDS_Model_Export Entities  {
     /// The command line and file configuration information.
     Config config_;
 
+  protected:
     /// Delegate for performing DDS specific actions.
     Delegate delegate_;
 
+  private:
     /// Map of queues.
     typedef std::map< std::string, std::queue<DDS::TypeSupport_ptr> >
             TypeSupportByParticipantQueues;

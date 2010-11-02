@@ -190,9 +190,7 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
       };
 
       template&lt; class InstanceTraits&gt;
-      class </xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>_Export Data {
+      class Data {
         public:
           Data();
           ~Data();
