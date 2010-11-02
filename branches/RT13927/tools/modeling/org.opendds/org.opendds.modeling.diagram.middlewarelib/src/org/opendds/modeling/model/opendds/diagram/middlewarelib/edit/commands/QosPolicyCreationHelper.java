@@ -1,8 +1,8 @@
-package org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.commands;
+package org.opendds.modeling.model.opendds.diagram.dcpslib.edit.commands;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.opendds.modeling.model.opendds.MiddlewareLib;
+import org.opendds.modeling.model.opendds.DcpsLib;
 import org.opendds.modeling.model.opendds.qosPolicy;
 
 /**
@@ -12,22 +12,22 @@ class QosPolicyCreationHelper {
 
 	static <PolicyType extends qosPolicy> void addPolicy(PolicyType newElement, String policyAssociationName, EObject referrer) {
 
-		// Add to owner, which we know must be a MiddlewareLib
-		MiddlewareLib owner = null;
+		// Add to owner, which we know must be a DcpsLib
+		DcpsLib owner = null;
 
 		EObject container = referrer.eContainer();
-		if (container instanceof MiddlewareLib) {
-			owner = (MiddlewareLib) container;
+		if (container instanceof DcpsLib) {
+			owner = (DcpsLib) container;
 		}
 		else {
 			container = container.eContainer();
-			if (container instanceof MiddlewareLib) {
-				owner = (MiddlewareLib) container;
+			if (container instanceof DcpsLib) {
+				owner = (DcpsLib) container;
 			}
 			else {
 				container = container.eContainer();
-				if (container instanceof MiddlewareLib) {
-					owner = (MiddlewareLib) container;
+				if (container instanceof DcpsLib) {
+					owner = (DcpsLib) container;
 				}
 			}
 		}

@@ -8,7 +8,7 @@
 
    <description url="http://www.opendds.org/">
       This is the OpenDDS Modeling SDK.  It provides the ability to
-capture UML middleware models and generate C++ code.
+capture UML DCPS models and generate C++ code.
    </description>
 
    <copyright url="http://www.opendds.org/copyright.html">
@@ -94,7 +94,7 @@ development model.
          unpack="false"/>
 
    <plugin
-         id="org.opendds.modeling.diagram.middlewarelib"
+         id="org.opendds.modeling.diagram.dcpslib"
          download-size="0"
          install-size="0"
          version="0.0.0"

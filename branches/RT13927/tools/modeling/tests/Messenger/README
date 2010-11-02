@@ -7,7 +7,7 @@ model defined middleware and application code.
 
 The following files are part of this example:
   Messenger.mpc          - MPC file to create the build files for the example.
-  MessengerModel.opendds - XML file with the middleware model definition.
+  MessengerModel.opendds - XML file with the DCPS model definition.
   publisher.cpp          - Publisher application code.
   subscriber.cpp         - Subscriber application code.
   run_test.pl            - Perl script to execute the example.
@@ -18,7 +18,7 @@ NOTE: The run_test.pl and tcp.conf files are simply copies of the
       original DevGuideExamples/DCPS/Messenger example files.  The test
       application code in publisher.cpp and subscriber.cpp is largely
       copied directly from the original files as well, with
-      simplifications to use the generated middleware model.
+      simplifications to use the generated DCPS model.
 
 ----------------------------------------
 Quick Start:

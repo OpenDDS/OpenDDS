@@ -1,4 +1,4 @@
-package org.opendds.modeling.model.opendds.diagram.middlewarelib.part;
+package org.opendds.modeling.model.opendds.diagram.dcpslib.part;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
-import org.opendds.modeling.model.opendds.diagram.middlewarelib.providers.OpenDDSMiddlewareLibElementTypes;
+import org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibElementTypes;
 
 import com.ociweb.emf.util.ClassesFinder;
 import com.ociweb.emf.util.ReferencesFinder;
@@ -47,10 +47,10 @@ import com.ociweb.emf.util.ReferencesFinder;
  * @generated NOT
  * 
  */
-public class OpenDDSMiddlewareLibCreateQosPolicyAction<CompartmentEditPartType extends ListCompartmentEditPart>
+public class OpenDDSDcpsLibCreateQosPolicyAction<CompartmentEditPartType extends ListCompartmentEditPart>
 implements IObjectActionDelegate {
 
-	public OpenDDSMiddlewareLibCreateQosPolicyAction(Class referrerEditPart) {
+	public OpenDDSDcpsLibCreateQosPolicyAction(Class referrerEditPart) {
 		super();
 		featureReferrerEditPart = referrerEditPart;
 	}
@@ -82,7 +82,7 @@ implements IObjectActionDelegate {
 			String policyName = s.toString();
 
 			String policyNameCap = policyName.substring(0, 1).toUpperCase() + policyName.substring(1);
-			String policyEditPartClassName = "org.opendds.modeling.model.opendds.diagram.middlewarelib.edit.parts." + policyNameCap + "EditPart";
+			String policyEditPartClassName = "org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts." + policyNameCap + "EditPart";
 			try {
 
 				Class policyEditPartClass = Class.forName(policyEditPartClassName);
@@ -90,7 +90,7 @@ implements IObjectActionDelegate {
 
 				// Create policy view
 				CreateViewRequest policyCreateViewRequest = CreateViewRequestFactory.getCreateShapeRequest(
-						OpenDDSMiddlewareLibElementTypes.getElementType(policyVisualId.getInt(null)),
+						OpenDDSDcpsLibElementTypes.getElementType(policyVisualId.getInt(null)),
 						selectedElement.getDiagramPreferencesHint());
 				// Get the compartment edit part that will contain the policy
 				List children = selectedElement.getChildren();

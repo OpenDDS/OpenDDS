@@ -19,8 +19,8 @@
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
-          title="MiddlewareLib"
-          description="Create new MiddlewareLib">
+          title="DcpsLib"
+          description="Create new DcpsLib">
         <smallIcon
             xsi:type="gmftool:DefaultImage"/>
         <largeIcon

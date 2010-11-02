@@ -32,9 +32,9 @@ struct ReaderProfile;
 /**
  * @class Config
  *
- * @brief Initialize DDS Middleware from command line and configuration file.
+ * @brief Initialize DDS DCPS from command line and configuration file.
  *
- * This class configures DDS middleware from the contents of a file.  The
+ * This class configures DDS DCPS from the contents of a file.  The
  * command line is parsed for the filename and for a verbosity indication.
  *
  * Command line options extracted by this class are:
