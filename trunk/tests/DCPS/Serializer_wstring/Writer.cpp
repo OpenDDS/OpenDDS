@@ -78,14 +78,14 @@ Writer::svc ()
     ::DDS::InstanceHandle_t handle = message_dw->register_instance (message);
 
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
+              ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
     for (int i = 0; i< num_messages; i ++) {
       set_message (message, i);
       ::DDS::ReturnCode_t ret = message_dw->write(message, handle);
 
       if (ret != ::DDS::RETCODE_OK) {
         ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t)ERROR  Writer::svc, ")
+                    ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
                     ACE_TEXT ("%dth write() returned %d.\n"),
                     i, ret));
         if (ret == ::DDS::RETCODE_TIMEOUT) {
@@ -167,7 +167,7 @@ void Writer::set_message (Messenger::Message& message, const int& count)
     break;
     default:
       ACE_ERROR ((LM_ERROR,
-                  "(%P|%t)ERROR: unknown message\n"));
+                  "(%P|%t) ERROR: unknown message\n"));
     break;
   }
 }

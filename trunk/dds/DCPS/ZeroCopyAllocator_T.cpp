@@ -50,7 +50,7 @@ int
 FirstTimeFastAllocator<T, N>::remove()
 {/* no-op */
   ACE_ERROR((LM_ERROR,
-             ACE_TEXT("%T (%P|%t) not supported %a\n"))) ;
+             ACE_TEXT("(%P|%t) %T not supported %a\n"))) ;
   return -1;
 }
 
@@ -59,7 +59,7 @@ int
 FirstTimeFastAllocator<T, N>::bind(const char *name, void *pointer, int duplicates)
 {/* no-op */
   ACE_ERROR((LM_ERROR,
-             ACE_TEXT("%T (%P|%t) not supported %a\n"))) ;
+             ACE_TEXT("(%P|%t) %T not supported %a\n"))) ;
   ACE_UNUSED_ARG(name);
   ACE_UNUSED_ARG(pointer);
   ACE_UNUSED_ARG(duplicates);
@@ -71,7 +71,7 @@ int
 FirstTimeFastAllocator<T, N>::trybind(const char *name, void *&pointer)
 {/* no-op */
   ACE_ERROR((LM_ERROR,
-             ACE_TEXT("%T (%P|%t) not supported %a\n"))) ;
+             ACE_TEXT("(%P|%t) %T not supported %a\n"))) ;
   ACE_UNUSED_ARG(name);
   ACE_UNUSED_ARG(pointer);
   return -1;
@@ -82,7 +82,7 @@ int
 FirstTimeFastAllocator<T, N>::find(const char *name, void *&pointer)
 {/* no-op */
   ACE_ERROR((LM_ERROR,
-             ACE_TEXT("%T (%P|%t) not supported %a\n"))) ;
+             ACE_TEXT("(%P|%t) %T not supported %a\n"))) ;
   ACE_UNUSED_ARG(name);
   ACE_UNUSED_ARG(pointer);
   return -1;
@@ -93,7 +93,7 @@ int
 FirstTimeFastAllocator<T, N>::find(const char *name)
 {/* no-op */
   ACE_ERROR((LM_ERROR,
-             ACE_TEXT("%T (%P|%t) not supported %a\n"))) ;
+             ACE_TEXT("(%P|%t) %T not supported %a\n"))) ;
   ACE_UNUSED_ARG(name);
   return -1;
 }
@@ -103,7 +103,7 @@ int
 FirstTimeFastAllocator<T, N>::unbind(const char *name)
 {/* no-op */
   ACE_ERROR((LM_ERROR,
-             ACE_TEXT("%T (%P|%t) not supported %a\n"))) ;
+             ACE_TEXT("(%P|%t) %T not supported %a\n"))) ;
   ACE_UNUSED_ARG(name);
   return -1;
 }
@@ -113,7 +113,7 @@ int
 FirstTimeFastAllocator<T, N>::unbind(const char *name, void *&pointer)
 {/* no-op */
   ACE_ERROR((LM_ERROR,
-             ACE_TEXT("%T (%P|%t) not supported %a\n"))) ;
+             ACE_TEXT("(%P|%t) %T not supported %a\n"))) ;
   ACE_UNUSED_ARG(name);
   ACE_UNUSED_ARG(pointer);
   return -1;
@@ -124,7 +124,7 @@ int
 FirstTimeFastAllocator<T, N>::sync(ssize_t len, int flags)
 {/* no-op */
   ACE_ERROR((LM_ERROR,
-             ACE_TEXT("%T (%P|%t) not supported %a\n"))) ;
+             ACE_TEXT("(%P|%t) %T not supported %a\n"))) ;
   ACE_UNUSED_ARG(len);
   ACE_UNUSED_ARG(flags);
   return -1;
@@ -135,7 +135,7 @@ int
 FirstTimeFastAllocator<T, N>::sync(void *addr, size_t len, int flags)
 {/* no-op */
   ACE_ERROR((LM_ERROR,
-             ACE_TEXT("%T (%P|%t) not supported %a\n"))) ;
+             ACE_TEXT("(%P|%t) %T not supported %a\n"))) ;
   ACE_UNUSED_ARG(addr);
   ACE_UNUSED_ARG(len);
   ACE_UNUSED_ARG(flags);
@@ -147,7 +147,7 @@ int
 FirstTimeFastAllocator<T, N>::protect(ssize_t len, int prot)
 {/* no-op */
   ACE_ERROR((LM_ERROR,
-             ACE_TEXT("%T (%P|%t) not supported %a\n"))) ;
+             ACE_TEXT("(%P|%t) %T not supported %a\n"))) ;
   ACE_UNUSED_ARG(len);
   ACE_UNUSED_ARG(prot);
   return -1;
@@ -158,7 +158,7 @@ int
 FirstTimeFastAllocator<T, N>::protect(void *addr, size_t len, int prot)
 {/* no-op */
   ACE_ERROR((LM_ERROR,
-             ACE_TEXT("%T (%P|%t) not supported %a\n"))) ;
+             ACE_TEXT("(%P|%t) %T not supported %a\n"))) ;
   ACE_UNUSED_ARG(addr);
   ACE_UNUSED_ARG(len);
   ACE_UNUSED_ARG(prot);
@@ -172,7 +172,7 @@ void
 FirstTimeFastAllocator<T, N>::print_stats() const
 {/* no-op */
   ACE_ERROR((LM_ERROR,
-             ACE_TEXT("%T (%P|%t) not supported %a\n"))) ;
+             ACE_TEXT("(%P|%t) %T not supported %a\n"))) ;
 }
 #endif /* ACE_HAS_MALLOC_STATS */
 
@@ -181,7 +181,7 @@ void
 FirstTimeFastAllocator<T, N>::dump() const
 {/* no-op */
   ACE_ERROR((LM_ERROR,
-             ACE_TEXT("%T (%P|%t) not supported %a\n"))) ;
+             ACE_TEXT("(%P|%t) %T not supported %a\n"))) ;
 }
 
 } // namespace DCPS

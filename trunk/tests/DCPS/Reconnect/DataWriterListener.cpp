@@ -30,7 +30,7 @@ void DataWriterListenerImpl::on_offered_deadline_missed (
   ))
 {
   ACE_DEBUG ((LM_DEBUG ,
-    "(%P|%t)DataWrierListenerImpl::on_offered_deadline_missed\n"));
+    "(%P|%t) DataWrierListenerImpl::on_offered_deadline_missed\n"));
 }
 
 
@@ -43,7 +43,7 @@ void DataWriterListenerImpl::on_offered_incompatible_qos (
   ))
 {
   ACE_DEBUG ((LM_DEBUG ,
-    "(%P|%t)DataWriterListenerImpl::on_offered_incompatible_qos\n"));
+    "(%P|%t) DataWriterListenerImpl::on_offered_incompatible_qos\n"));
 }
 
 
@@ -56,7 +56,7 @@ void DataWriterListenerImpl::on_liveliness_lost (
   ))
 {
   ACE_DEBUG ((LM_DEBUG ,
-    "(%P|%t)DataWriterListenerImpl::on_liveliness_lost\n"));
+    "(%P|%t) DataWriterListenerImpl::on_liveliness_lost\n"));
 }
 
 
@@ -69,7 +69,7 @@ void DataWriterListenerImpl::on_publication_matched (
   ))
 {
   ACE_DEBUG ((LM_DEBUG ,
-    "(%P|%t)DataWriterListenerImpl::on_publication_matched\n"));
+    "(%P|%t) DataWriterListenerImpl::on_publication_matched\n"));
 }
 
 
@@ -86,7 +86,7 @@ void DataWriterListenerImpl::on_publication_disconnected (
   {
     cout << "on_publication_disconnected reader " << status.subscription_handles[i] << endl;
     //ACE_DEBUG ((LM_DEBUG ,
-    //  "(%P|%t)on_publication_disconnected reader %d \n", status.subscription_handles[i]));
+    //  "(%P|%t) on_publication_disconnected reader %d \n", status.subscription_handles[i]));
   }
 }
 
@@ -104,7 +104,7 @@ void DataWriterListenerImpl::on_publication_reconnected (
   {
     cout << "on_publication_reconnected reader " << status.subscription_handles[i] << endl;
     //ACE_DEBUG ((LM_DEBUG ,
-    //  "(%P|%t)on_publication_reconnected reader %d \n", status.subscription_handles[i]));
+    //  "(%P|%t) on_publication_reconnected reader %d \n", status.subscription_handles[i]));
   }
 }
 
@@ -124,7 +124,7 @@ void DataWriterListenerImpl::on_publication_lost (
   {
     cout << "on_publication_lost reader " << status.subscription_handles[i] << endl;
     //ACE_DEBUG ((LM_DEBUG ,
-    //  "(%P|%t)on_publication_lost reader %d \n", status.subscription_handles[i]));
+    //  "(%P|%t) on_publication_lost reader %d \n", status.subscription_handles[i]));
   }
 }
 
@@ -138,6 +138,6 @@ void DataWriterListenerImpl::on_connection_deleted (
 {
   ++ num_deleted_connections;
 
-  ACE_DEBUG ((LM_DEBUG, "(%P|%t)received on_connection_deleted  \n"));
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_connection_deleted  \n"));
 }
 

@@ -345,7 +345,7 @@ PubDriver::init(int& argc, ACE_TCHAR *argv[])
 void
 PubDriver::end()
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t)PubDriver::end \n"));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::end \n"));
 
   // Record samples been written in the Writer's data map.
   // Verify the number of instances and the number of samples

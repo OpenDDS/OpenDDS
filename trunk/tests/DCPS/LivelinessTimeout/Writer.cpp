@@ -41,7 +41,7 @@ Writer::run_test (const ACE_Time_Value& duration)
       TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
       ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("%T (%P|%t) Writer::run_test starting to write pass %d\n"),
+                ACE_TEXT("(%P|%t) %T Writer::run_test starting to write pass %d\n"),
                 pass));
 
       ::DDS::InstanceHandle_t handle
@@ -54,7 +54,7 @@ Writer::run_test (const ACE_Time_Value& duration)
                     handle);
 
       ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("%T (%P|%t) Writer::run_test done writing.\n")));
+                ACE_TEXT("(%P|%t) %T Writer::run_test done writing.\n")));
 
       ACE_OS::sleep(1);
     }

@@ -51,7 +51,7 @@ template<class DT, class DW, class DW_var>
     TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
+              ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
 
     ::DDS::InstanceHandle_t handle
         = foo_dw->register_instance(foo);
@@ -75,7 +75,7 @@ template<class DT, class DW, class DW_var>
       {
         if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
           ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t)ERROR  Writer::svc, ")
+                      ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
                       ACE_TEXT ("%dth write() returned %d.\n"),
                       i, ret));
         }

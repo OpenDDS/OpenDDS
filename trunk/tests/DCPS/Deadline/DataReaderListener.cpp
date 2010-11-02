@@ -33,7 +33,7 @@ DataReaderListenerImpl::on_requested_deadline_missed (
   throw (CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT("(%P|%t)DataReaderListenerImpl::on_requested_deadline_missed:")
+              ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed:")
               ACE_TEXT("total_count=%d total_count_change=%d last_instance_handle=%d\n"),
     status.total_count, status.total_count_change, status.last_instance_handle));
 }

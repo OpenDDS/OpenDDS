@@ -22,7 +22,7 @@ OpenDDS::DCPS::DummyTcpConfiguration::load (const TransportIdType& id,
   // The default transport can not be configured by user.
   if (id == DEFAULT_DUMMY_TCP_ID)
     {
-      ACE_ERROR ((LM_ERROR, "(%P|%t)You can not configure the default DummyTcp transport(id=%u) !!! \n",
+      ACE_ERROR ((LM_ERROR, "(%P|%t) You can not configure the default DummyTcp transport(id=%u) !!! \n",
         id));
       return -1;
     }

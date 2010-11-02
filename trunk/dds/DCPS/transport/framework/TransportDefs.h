@@ -38,7 +38,7 @@ class ACE_Data_Block;
       if (OpenDDS::DCPS::Transport_debug_level > 0)                            \
       {                                                                          \
         ACE_DEBUG ((LM_WARNING,                                                  \
-                    ACE_TEXT ("(%P|%t)\"%s\" is not defined in config ")         \
+                    ACE_TEXT ("(%P|%t) \"%s\" is not defined in config ")         \
                     ACE_TEXT ("file - using code default.\n"),                   \
                     KEY));                                                       \
       }                                                                          \
@@ -48,7 +48,7 @@ class ACE_Data_Block;
       if (OpenDDS::DCPS::Transport_debug_level > 0)                            \
       {                                                                          \
         ACE_DEBUG ((LM_WARNING,                                                  \
-                    ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config ")      \
+                    ACE_TEXT ("(%P|%t) missing VALUE for \"%s\" in config ")      \
                     ACE_TEXT ("file - using code default.\n"),                   \
                     KEY));                                                       \
       }                                                                          \
@@ -69,7 +69,7 @@ class ACE_Data_Block;
       if (OpenDDS::DCPS::Transport_debug_level > 0)                              \
       {                                                                          \
         ACE_DEBUG ((LM_WARNING,                                                  \
-                    ACE_TEXT ("(%P|%t)\"%s\" is not defined in config ")         \
+                    ACE_TEXT ("(%P|%t) \"%s\" is not defined in config ")         \
                     ACE_TEXT ("file - using code default.\n"),                   \
                     KEY));                                                       \
       }                                                                          \
@@ -79,7 +79,7 @@ class ACE_Data_Block;
       if (OpenDDS::DCPS::Transport_debug_level > 0)                            \
       {                                                                          \
         ACE_DEBUG ((LM_WARNING,                                                  \
-                    ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config ")      \
+                    ACE_TEXT ("(%P|%t) missing VALUE for \"%s\" in config ")      \
                     ACE_TEXT ("file - using code default.\n"),                   \
                     KEY));                                                       \
       }                                                                          \
@@ -98,7 +98,7 @@ class ACE_Data_Block;
       if (OpenDDS::DCPS::Transport_debug_level > 0)                            \
       {                                                                          \
         ACE_DEBUG ((LM_WARNING,                                                  \
-                    ACE_TEXT ("(%P|%t)\"%s\" is not defined in config ")         \
+                    ACE_TEXT ("(%P|%t) \"%s\" is not defined in config ")         \
                     ACE_TEXT ("file - using code default.\n"),                   \
                     KEY));                                                       \
       }                                                                          \
@@ -108,7 +108,7 @@ class ACE_Data_Block;
       if (OpenDDS::DCPS::Transport_debug_level > 0)                            \
       {                                                                          \
         ACE_DEBUG ((LM_WARNING,                                                  \
-                    ACE_TEXT ("(%P|%t)missing VALUE for \"%s\" in config ")      \
+                    ACE_TEXT ("(%P|%t) missing VALUE for \"%s\" in config ")      \
                     ACE_TEXT ("file - using code default.\n"),                   \
                     KEY));                                                       \
       }                                                                          \

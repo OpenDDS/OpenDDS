@@ -25,7 +25,7 @@ OpenDDS::DCPS::SimpleTcpConfiguration::load(const TransportIdType& id,
 {
   // The default transport can not be configured by user.
   if (id == DEFAULT_SIMPLE_TCP_ID) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t)You can not configure the default SimpleTcp transport(id=%u) !!!\n"),
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) You can not configure the default SimpleTcp transport(id=%u) !!!\n"),
                id));
     return -1;
   }

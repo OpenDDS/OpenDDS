@@ -38,7 +38,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
     if (CORBA::is_nil(bit_dr.in())) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t)BitPubListenerImpl::on_data_available ")
+                 ACE_TEXT("(%P|%t) BitPubListenerImpl::on_data_available ")
                  ACE_TEXT(" ERROR: _narrow failed!\n")));
     }
 
@@ -63,14 +63,14 @@ ACE_THROW_SPEC((CORBA::SystemException))
       else if (si.instance_state != DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE
                && si.instance_state != DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
         ACE_ERROR((LM_ERROR,
-              ACE_TEXT("(%P|%t)BitPubListenerImpl::on_data_available")
+              ACE_TEXT("(%P|%t) BitPubListenerImpl::on_data_available")
               ACE_TEXT(" ERROR: unknown instance state: %d\n"),
               si.instance_state));
       }
     }
     else {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t)BitPubListenerImpl::on_data_available")
+                 ACE_TEXT("(%P|%t) BitPubListenerImpl::on_data_available")
                  ACE_TEXT(" ERROR: unexpected status: %d\n"),
                  status));
     }

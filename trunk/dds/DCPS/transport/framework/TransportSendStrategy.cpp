@@ -96,7 +96,7 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
   this->max_header_size_ = this->header_.max_marshaled_size();
 
   if (OpenDDS::DCPS::Transport_debug_level >= 2) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportSendStrategy replaced_element_allocator %x with %d chunks\n",
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy replaced_element_allocator %x with %d chunks\n",
                &replaced_element_allocator_, NUM_REPLACED_ELEMENT_CHUNKS));
   }
 
@@ -1517,7 +1517,7 @@ OpenDDS::DCPS::TransportSendStrategy::direct_send(bool relink)
                (outcome == OUTCOME_SEND_ERROR)) {
       if (outcome == OUTCOME_SEND_ERROR) {
         ACE_ERROR((LM_WARNING,
-                   ACE_TEXT("(%P|%t) Warning: Problem detected in ")
+                   ACE_TEXT("(%P|%t) WARNING: Problem detected in ")
                    ACE_TEXT("send buffer management: %p.\n"),
                    ACE_TEXT("send_bytes")));
       } else {
