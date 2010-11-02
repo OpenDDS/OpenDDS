@@ -19,10 +19,10 @@
           <styles xmi:type="notation:DescriptionStyle" xmi:id="_Ay_2cdrNEd-E4av4wTAhDQ"/>
           <styles xmi:type="notation:FontStyle" xmi:id="_Ay_2ctrNEd-E4av4wTAhDQ" fontName="Sans"/>
           <styles xmi:type="notation:FillStyle" xmi:id="_Ay_2c9rNEd-E4av4wTAhDQ"/>
-          <element xmi:type="opendds:dataWriter" href="MiddlewareTest.opendds#_x5RBYKO-Ed-9KMRPTsXTAg"/>
+          <element xmi:type="opendds:dataWriter" href="DcpsTest.opendds#_x5RBYKO-Ed-9KMRPTsXTAg"/>
           <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Ay_2dNrNEd-E4av4wTAhDQ"/>
         </children>
-        <element xmi:type="opendds:publisher" href="MiddlewareTest.opendds#_YkGI4KO-Ed-9KMRPTsXTAg"/>
+        <element xmi:type="opendds:publisher" href="DcpsTest.opendds#_YkGI4KO-Ed-9KMRPTsXTAg"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Ay698drNEd-E4av4wTAhDQ" x="125" y="-11"/>
       </children>
       <children xmi:type="notation:Shape" xmi:id="_Ay8MENrNEd-E4av4wTAhDQ" type="3002" fontName="Sans">
@@ -40,10 +40,10 @@
           <styles xmi:type="notation:DescriptionStyle" xmi:id="_AzOf8drNEd-E4av4wTAhDQ"/>
           <styles xmi:type="notation:FontStyle" xmi:id="_AzOf8trNEd-E4av4wTAhDQ" fontName="Sans"/>
           <styles xmi:type="notation:FillStyle" xmi:id="_AzOf89rNEd-E4av4wTAhDQ"/>
-          <element xmi:type="opendds:dataReader" href="MiddlewareTest.opendds#_tG3XcKPAEd-9KMRPTsXTAg"/>
+          <element xmi:type="opendds:dataReader" href="DcpsTest.opendds#_tG3XcKPAEd-9KMRPTsXTAg"/>
           <layoutConstraint xmi:type="notation:Bounds" xmi:id="_AzOf9NrNEd-E4av4wTAhDQ"/>
         </children>
-        <element xmi:type="opendds:subscriber" href="MiddlewareTest.opendds#_3y_N0KO-Ed-9KMRPTsXTAg"/>
+        <element xmi:type="opendds:subscriber" href="DcpsTest.opendds#_3y_N0KO-Ed-9KMRPTsXTAg"/>
         <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Ay8MEdrNEd-E4av4wTAhDQ" x="535" y="1" height="361"/>
       </children>
       <layoutConstraint xmi:type="notation:Ratio" xmi:id="_Y3bf0NrNEd-E4av4wTAhDQ" value="0.6752"/>
@@ -54,21 +54,21 @@
       <styles xmi:type="notation:FilteringStyle" xmi:id="_Ay2Fc9rNEd-E4av4wTAhDQ"/>
       <layoutConstraint xmi:type="notation:Ratio" xmi:id="_Y3cG4NrNEd-E4av4wTAhDQ" value="0.1472"/>
     </children>
-    <element xmi:type="opendds:domainParticipant" href="MiddlewareTest.opendds#_oeKOUKO9Ed-9KMRPTsXTAg"/>
+    <element xmi:type="opendds:domainParticipant" href="DcpsTest.opendds#_oeKOUKO9Ed-9KMRPTsXTAg"/>
     <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Ay03UdrNEd-E4av4wTAhDQ" x="264" y="96" width="853" height="625"/>
   </children>
   <children xmi:type="notation:Shape" xmi:id="_Ay2FdNrNEd-E4av4wTAhDQ" type="2002" fontName="Sans">
     <children xmi:type="notation:DecorationNode" xmi:id="_Ay2sgNrNEd-E4av4wTAhDQ" type="5002"/>
     <children xmi:type="notation:DecorationNode" xmi:id="_Ay2sgdrNEd-E4av4wTAhDQ" type="5005"/>
-    <element xmi:type="opendds:domain" href="MiddlewareTest.opendds#_fRQZ4KO9Ed-9KMRPTsXTAg"/>
+    <element xmi:type="opendds:domain" href="DcpsTest.opendds#_fRQZ4KO9Ed-9KMRPTsXTAg"/>
     <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Ay2FddrNEd-E4av4wTAhDQ" x="480" y="24"/>
   </children>
   <children xmi:type="notation:Shape" xmi:id="_Ay2sgtrNEd-E4av4wTAhDQ" type="2003" fontName="Sans">
     <children xmi:type="notation:DecorationNode" xmi:id="_Ay3TkNrNEd-E4av4wTAhDQ" type="5003"/>
     <children xmi:type="notation:DecorationNode" xmi:id="_Ay3TkdrNEd-E4av4wTAhDQ" type="5012"/>
-    <element xmi:type="opendds:topic" href="MiddlewareTest.opendds#_hRao4KO_Ed-9KMRPTsXTAg"/>
+    <element xmi:type="opendds:topic" href="DcpsTest.opendds#_hRao4KO_Ed-9KMRPTsXTAg"/>
     <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Ay2sg9rNEd-E4av4wTAhDQ" x="696" y="24"/>
   </children>
   <styles xmi:type="notation:DiagramStyle" xmi:id="_Axid4drNEd-E4av4wTAhDQ"/>
-  <element xmi:type="opendds:DcpsLib" href="MiddlewareTest.opendds#_P4hVUKO9Ed-9KMRPTsXTAg"/>
+  <element xmi:type="opendds:DcpsLib" href="DcpsTest.opendds#_P4hVUKO9Ed-9KMRPTsXTAg"/>
 </notation:Diagram>

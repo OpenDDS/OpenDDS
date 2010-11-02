@@ -1,3 +1,11 @@
+Tue Nov  2 15:26:30 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/testdata/Dcps/DcpsTest.opendds_diagram_dcpslib:
+
+        Continuation of name compaction- changed some stray "middleware" references
+        to "DCPS".
+
 Tue Nov  2 14:58:05 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins:
