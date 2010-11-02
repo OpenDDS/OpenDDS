@@ -208,8 +208,7 @@ public class DurabilityQosPolicyKindEditPart extends CompartmentEditPart
 		if (parserElement == null) {
 			return null;
 		}
-		return OpenDDSPolicyLibElementTypes
-				.getImage(parserElement.eClass());
+		return OpenDDSPolicyLibElementTypes.getImage(parserElement.eClass());
 	}
 
 	/**
