@@ -60,7 +60,7 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::add_request(SendStrategyOpType o
 
     } else
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t)ERROR: ThreadPerConnectionSendTask::add %p\n"),
+                 ACE_TEXT("(%P|%t) ERROR: ThreadPerConnectionSendTask::add %p\n"),
                  ACE_TEXT("put")));
   }
 
@@ -150,7 +150,7 @@ int OpenDDS::DCPS::ThreadPerConnectionSendTask::svc()
         //when using thread_per_connection and the user application thread
         //send requests without interval. We just need ignore the dequeue
         //failure.
-        //ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: ThreadPerConnectionSendTask::svc  %p\n",
+        //ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: ThreadPerConnectionSendTask::svc  %p\n",
         //  ACE_TEXT("dequeue_head")));
         continue;
       }
@@ -219,7 +219,7 @@ void OpenDDS::DCPS::ThreadPerConnectionSendTask::execute(SendRequest& req)
     this->link_->send_stop_i();
     break;
   default:
-    ACE_ERROR((LM_ERROR, "(%P|%t)ERROR: ThreadPerConnectionSendTask::execute unknown command %d\n",
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ThreadPerConnectionSendTask::execute unknown command %d\n",
                req.op_));
     break;
   }

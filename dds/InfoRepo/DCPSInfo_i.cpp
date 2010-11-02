@@ -221,7 +221,7 @@ TAO_DDS_DCPSInfo_i::add_topic(const OpenDDS::DCPS::RepoId& topicId,
 
   if (where == this->domains_.end()) {
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_topic: ")
                  ACE_TEXT("invalid domain %d.\n"),
                  domainId));
@@ -237,7 +237,7 @@ TAO_DDS_DCPSInfo_i::add_topic(const OpenDDS::DCPS::RepoId& topicId,
   if (0 == participantPtr) {
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
       OpenDDS::DCPS::RepoIdConverter converter(participantId);
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_topic: ")
                  ACE_TEXT("invalid participant %C.\n"),
                  std::string(converter).c_str()));
@@ -497,7 +497,7 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
 
   if (where == this->domains_.end()) {
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_publication: ")
                  ACE_TEXT("invalid domain %d.\n"),
                  domainId));
@@ -513,7 +513,7 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
   if (0 == partPtr) {
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
       OpenDDS::DCPS::RepoIdConverter converter(pubId);
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_publication: ")
                  ACE_TEXT("invalid participant %C in domain %d.\n"),
                  std::string(converter).c_str(),
@@ -527,7 +527,7 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
 
   if (topic == 0) {
     OpenDDS::DCPS::RepoIdConverter converter(topicId);
-    ACE_DEBUG((LM_DEBUG,
+    ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_publication: ")
                ACE_TEXT("invalid topic %C in domain %d.\n"),
                std::string(converter).c_str(),
@@ -771,7 +771,7 @@ TAO_DDS_DCPSInfo_i::add_subscription(
 
   if (where == this->domains_.end()) {
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_subscription: ")
                  ACE_TEXT("invalid domain %d.\n"),
                  domainId));
@@ -787,7 +787,7 @@ TAO_DDS_DCPSInfo_i::add_subscription(
   if (0 == partPtr) {
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
       OpenDDS::DCPS::RepoIdConverter converter(participantId);
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_subscription: ")
                  ACE_TEXT("invalid participant %C in domain %d.\n"),
                  std::string(converter).c_str(),
@@ -802,7 +802,7 @@ TAO_DDS_DCPSInfo_i::add_subscription(
   if (topic == 0) {
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
       OpenDDS::DCPS::RepoIdConverter converter(topicId);
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_subscription: ")
                  ACE_TEXT("invalid topic %C in domain %d.\n"),
                  std::string(converter).c_str(),
@@ -1041,7 +1041,7 @@ TAO_DDS_DCPSInfo_i::add_domain_participant(DDS::DomainId_t domainId
 
   if (0 == domainPtr) {
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
                  ACE_TEXT("invalid domain Id: %d\n"),
                  domainId));
@@ -1089,7 +1089,7 @@ TAO_DDS_DCPSInfo_i::add_domain_participant(DDS::DomainId_t domainId
   case 1:
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: (bool)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
                  ACE_TEXT("attempt to load duplicate participant %C in domain %d.\n"),
                  std::string(converter).c_str(),

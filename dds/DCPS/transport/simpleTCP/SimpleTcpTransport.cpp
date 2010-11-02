@@ -64,7 +64,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink(
   ACE_INET_Addr& remote_address = const_cast<AssociationData*> (remote_association)->get_remote_address();
 
   bool is_loopback = remote_address == this->tcp_config_->local_address_;
-  VDBG_LVL((LM_DEBUG, "(%P|%t)SimpleTcpTransport::find_or_create_datalink remote addr str "
+  VDBG_LVL((LM_DEBUG, "(%P|%t) SimpleTcpTransport::find_or_create_datalink remote addr str "
             "\"%s\" remote_address \"%C:%d priority %d is_loopback %d active %d\"\n",
             const_cast<AssociationData*> (remote_association)->network_order_address_.addr_.c_str(),
             remote_address.get_host_name(),
@@ -260,7 +260,7 @@ OpenDDS::DCPS::SimpleTcpTransport::configure_i(TransportConfiguration* config)
                ACE_TEXT("cannot get local addr\n")));
   }
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t)SimpleTcpTransport::configure_i listening on %C:%d\n",
+  VDBG_LVL((LM_DEBUG, "(%P|%t) SimpleTcpTransport::configure_i listening on %C:%d\n",
             address.get_host_name(), address.get_port_number()), 2);
 
   unsigned short port = address.get_port_number();

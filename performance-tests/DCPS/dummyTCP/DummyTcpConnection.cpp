@@ -555,7 +555,7 @@ OpenDDS::DCPS::DummyTcpConnection::active_reconnect_i ()
         }
       else
         {
-          ACE_DEBUG ((LM_DEBUG, "(%P|%t)re-established connection to %C:%d.\n",
+          ACE_DEBUG ((LM_DEBUG, "(%P|%t) re-established connection to %C:%d.\n",
             this->remote_address_.get_host_addr (),
             this->remote_address_.get_port_number ()));
           this->reconnect_state_ = RECONNECTED_STATE;

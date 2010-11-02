@@ -524,7 +524,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (readers_ready == 0)
         {
           ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR Unable to create subscriber completed file\n")));
+                      ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
         }
 
       // Wait for the publisher to be ready
@@ -575,7 +575,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (readers_completed == 0)
         {
           ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR Unable to create subscriber completed file\n")));
+                      ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
         }
 
       // Wait for the publisher to finish

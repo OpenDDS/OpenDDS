@@ -170,7 +170,7 @@ void DataReaderListenerImpl::on_subscription_matched (
       ::CORBA::SystemException
     ))
   {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t)received on_budget_exceeded \n"));
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_budget_exceeded \n"));
   }
 
   void DataReaderListenerImpl::on_connection_deleted (
@@ -180,5 +180,5 @@ void DataReaderListenerImpl::on_subscription_matched (
     ::CORBA::SystemException
     ))
   {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t)received on_connection_deleted  \n"));
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_connection_deleted  \n"));
   }

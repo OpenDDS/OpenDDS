@@ -120,7 +120,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       FILE* readers_ready = ACE_OS::fopen (sub_ready_filename, ACE_TEXT("w"));
       if (readers_ready == 0) {
         ACE_ERROR_RETURN ((LM_ERROR,
-                           "(%P|%t) ERROR Unable to create subscriber ready file.\n")
+                           "(%P|%t) ERROR: Unable to create subscriber ready file.\n")
                           , -1);
       }
       ACE_OS::fclose(readers_ready);
@@ -244,7 +244,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       FILE* readers_completed = ACE_OS::fopen (sub_finished_filename, ACE_TEXT("w"));
       if (readers_completed == 0) {
         ACE_ERROR_RETURN ((LM_ERROR,
-                           "(%P|%t) ERROR Unable to create subscriber completed file.\n")
+                           "(%P|%t) ERROR: Unable to create subscriber completed file.\n")
                           , -1);
       }
       ACE_OS::fclose(readers_completed);

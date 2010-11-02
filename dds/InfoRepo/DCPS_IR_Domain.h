@@ -167,7 +167,7 @@ private:
   /// Find the topic description with the name and data type name
   /// Does NOT take ownership of any initial memory pointed to by desc
   /// Returns 0 if found and desc is changed,
-  ///  -1 if not found and 1 if confliciting dataTypeName
+  ///  -1 if not found and 1 if conflicting dataTypeName
   int find_topic_description(const char* name,
                              const char* dataTypeName,
                              DCPS_IR_Topic_Description*& desc);

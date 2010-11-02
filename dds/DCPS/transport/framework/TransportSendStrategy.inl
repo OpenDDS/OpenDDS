@@ -71,7 +71,7 @@ OpenDDS::DCPS::TransportSendStrategy::resume_send()
     this->mode_before_suspend_ = MODE_NOT_SET;
 
   } else {
-    ACE_ERROR((LM_ERROR, "ERROR: (%P|%t)TransportSendStrategy::resume_send  The suspend or terminate"
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportSendStrategy::resume_send  The suspend or terminate"
                " is not called previously.\n"));
   }
 }

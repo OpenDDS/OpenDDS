@@ -370,7 +370,7 @@ OpenDDS::DCPS::TransportImpl::find_publication(OpenDDS::DCPS::RepoId pub_id, boo
     if (OpenDDS::DCPS::Transport_debug_level > 8) {
       OpenDDS::DCPS::RepoIdConverter converter(pub_id);
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t)TransportImpl::find_publication: ")
+                 ACE_TEXT("(%P|%t) TransportImpl::find_publication: ")
                  ACE_TEXT("publication %C not found\n"),
                  std::string(converter).c_str()));
     }
@@ -540,7 +540,7 @@ void OpenDDS::DCPS::TransportImpl::check_fully_association()
 
   if (OpenDDS::DCPS::Transport_debug_level > 8) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("%P|%t)ack dump: \n")));
+               ACE_TEXT("(%P|%t) ack dump: \n")));
 
     acked_sub_map_.dump();
   }
@@ -619,7 +619,7 @@ bool OpenDDS::DCPS::TransportImpl::check_fully_association(const RepoId pub_id,
     std::stringstream buffer;
     buffer << " pub " << pub_id << " - sub " << associations.association_data_->remote_id_;
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t)acked but DW is not registered:  %C \n"), buffer.str().c_str()));
+               ACE_TEXT("(%P|%t) acked but DW is not registered:  %C \n"), buffer.str().c_str()));
   }
 
   return false;
@@ -640,7 +640,7 @@ OpenDDS::DCPS::TransportImpl::acked(RepoId pub_id, RepoId sub_id)
     std::stringstream buffer;
     buffer << " pub " << pub_id << " - sub " << sub_id;
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t)%C %C \n"),
+               ACE_TEXT("(%P|%t) %C %C \n"),
                ret ? "acked" : "pending", buffer.str().c_str()));
   }
 

@@ -810,7 +810,7 @@ DataWriterImpl::send_ack_requests(const DataWriterImpl::AckToken& token)
   if (DCPS_debug_level > 0) {
     RepoIdConverter converter(this->publication_id_);
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments() - ")
+               ACE_TEXT("(%P|%t) DataWriterImpl::send_ack_requests() - ")
                ACE_TEXT("%C sending REQUEST_ACK message for sequence 0x%x ")
                ACE_TEXT("to %d subscriptions.\n"),
                std::string(converter).c_str(),
@@ -832,7 +832,7 @@ DataWriterImpl::send_ack_requests(const DataWriterImpl::AckToken& token)
 
   if (status == SEND_CONTROL_ERROR) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::wait_for_acknowledgments() - ")
+               ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::send_ack_requests() - ")
                ACE_TEXT("failed to send REQUEST_ACK message. \n")));
     return DDS::RETCODE_ERROR;
   }
@@ -879,7 +879,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
       if (DCPS_debug_level > 0) {
         RepoIdConverter converter(this->publication_id_);
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments() - ")
+                   ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_ack_responses() - ")
                    ACE_TEXT("%C unblocking for sequence 0x%x.\n"),
                    std::string(converter).c_str(),
                    token.sequence_.getValue()));
@@ -892,7 +892,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
 
   RepoIdConverter converter(this->publication_id_);
   ACE_DEBUG((LM_WARNING,
-             ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::wait_for_acknowledgments() - ")
+             ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::wait_for_ack_responses() - ")
              ACE_TEXT("%C timed out waiting for sequence 0x%x to be acknowledged ")
              ACE_TEXT("from %d subscriptions.\n"),
              std::string(converter).c_str(),
@@ -2055,7 +2055,7 @@ DataWriterImpl::notify_publication_reconnected(const ReaderIdSeq& subids)
       if (this->lookup_instance_handles(subids,
                                         status.subscription_handles) == false) {
         ACE_ERROR((LM_ERROR,
-                   "(%P|%t)ERROR: DataWriterImpl::"
+                   "(%P|%t) ERROR: DataWriterImpl::"
                    "notify_publication_reconnected: "
                    "lookup_instance_handles failed\n"));
       }

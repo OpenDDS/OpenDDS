@@ -311,7 +311,7 @@ Publisher::run()
     if (error != DDS::RETCODE_OK)
     {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) ERROR Publisher::run() - ")
+        ACE_TEXT("(%P|%t) ERROR: Publisher::run() - ")
         ACE_TEXT("publisher wait failed with code: %d.\n"),
         error));
       ++this->status_;
@@ -325,7 +325,7 @@ Publisher::run()
         = this->publications_[ index]->wait_for_acks( delay);
       if( result != ::DDS::RETCODE_OK) {
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) ERROR Publisher::run() - ")
+          ACE_TEXT("(%P|%t) ERROR: Publisher::run() - ")
           ACE_TEXT("publication %d wait failed with code: %d.\n"),
           index,
           result

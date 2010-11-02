@@ -140,7 +140,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
   try
     {
-      ACE_DEBUG((LM_INFO," %P|%t %T publisher main\n"));
+      ACE_DEBUG((LM_INFO,"(%P|%t) %T publisher main\n"));
 
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
@@ -158,7 +158,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (CORBA::is_nil (dp.in() ))
       {
         ACE_ERROR ((LM_ERROR,
-                   ACE_TEXT(" %P|%t ERROR: create_participant failed.\n")));
+                   ACE_TEXT("(%P|%t) ERROR: create_participant failed.\n")));
         return 1 ;
       }
 
@@ -177,7 +177,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           if (::DDS::RETCODE_OK != pt128ts->register_type(dp.in(), TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR,
-                          ACE_TEXT (" %P|%t ERROR: Failed to register the Pt128TypeSupport.")));
+                          ACE_TEXT ("(%P|%t) ERROR: Failed to register the Pt128TypeSupport.")));
               return 1;
             }
         }
@@ -189,7 +189,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           if (::DDS::RETCODE_OK != pt512ts->register_type(dp.in(), TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR,
-                          ACE_TEXT (" %P|%t ERROR: Failed to register the Pt512TypeSupport.")));
+                          ACE_TEXT ("(%P|%t) ERROR: Failed to register the Pt512TypeSupport.")));
               return 1;
             }
         }
@@ -201,7 +201,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           if (::DDS::RETCODE_OK != pt2048ts->register_type(dp.in(), TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR,
-                          ACE_TEXT (" %P|%t ERROR: Failed to register the Pt2048TypeSupport.")));
+                          ACE_TEXT ("(%P|%t) ERROR: Failed to register the Pt2048TypeSupport.")));
               return 1;
             }
         }
@@ -213,7 +213,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           if (::DDS::RETCODE_OK != pt8192ts->register_type(dp.in(), TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR,
-                          ACE_TEXT (" %P|%t ERROR: Failed to register the Pt8192TypeSupport.")));
+                          ACE_TEXT ("(%P|%t) ERROR: Failed to register the Pt8192TypeSupport.")));
               return 1;
             }
         }
@@ -250,7 +250,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (CORBA::is_nil (pub.in() ))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT(" %P|%t ERROR: create_publisher failed.\n")),
+                          ACE_TEXT("(%P|%t) ERROR: create_publisher failed.\n")),
                           1);
       }
 
@@ -258,7 +258,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (0 != ::init_writer_tranport() )
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT(" %P|%t ERROR: init_transport failed!\n")),
+                           ACE_TEXT("(%P|%t) ERROR: init_transport failed!\n")),
                            1);
       }
 
@@ -269,7 +269,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (0 == pub_impl)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT(" %P|%t ERROR: Failed to obtain servant ::OpenDDS::DCPS::PublisherImpl\n")),
+                          ACE_TEXT("(%P|%t) ERROR: Failed to obtain servant ::OpenDDS::DCPS::PublisherImpl\n")),
                           1);
       }
 
@@ -298,7 +298,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             }
 
           ACE_ERROR_RETURN ((LM_ERROR,
-                            ACE_TEXT(" %P|%t ERROR: Failed to attach to the transport. ")
+                            ACE_TEXT("(%P|%t) ERROR: Failed to attach to the transport. ")
                             ACE_TEXT("AttachStatus == %s\n"),
                             status_str),
                             1);
@@ -323,7 +323,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         if (CORBA::is_nil (dws[k].in ()))
         {
           ACE_ERROR ((LM_ERROR,
-                     ACE_TEXT(" %P|%t ERROR: create_datawriter failed.\n")));
+                     ACE_TEXT("(%P|%t) ERROR: create_datawriter failed.\n")));
           return 1 ;
         }
       }

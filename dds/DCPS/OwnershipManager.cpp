@@ -87,13 +87,13 @@ OwnershipManager::set_instance_map (const char* type_name,
                                     DataReaderImpl* reader)
 {
   if (DCPS_debug_level >= 1) {
-    ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)OwnershipManager::set_instance_map ")
+    ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) OwnershipManager::set_instance_map ")
                           ACE_TEXT (" instance map %X is created by reader %X \n"),
                 instance_map, reader));
   }
 
   if (0 != bind(type_instance_map_, type_name, InstanceMap (instance_map, reader))) {
-    ACE_ERROR((LM_ERROR, "(%P|%t)OwnershipManager::set_instance_map failed to "
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: OwnershipManager::set_instance_map failed to "
                          "bind instance for type \"%s\"\n",type_name));
   }
 }
@@ -123,7 +123,7 @@ OwnershipManager::unregister_reader (const char* type_name,
 
   if (instance->readers_.empty ()) {
     if (DCPS_debug_level >= 1) {
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)OwnershipManager::unregister_reader ")
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) OwnershipManager::unregister_reader ")
                             ACE_TEXT (" instance map %X is deleted by reader %X \n"),
                   instance->map_, reader));
     }

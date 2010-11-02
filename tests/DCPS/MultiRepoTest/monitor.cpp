@@ -23,17 +23,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     monitor.run();
 
   } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception ("%T (%P|%t) ABORT: CORBA problem detected.\n");
+    ex._tao_print_exception ("(%P|%t) %T ABORT: CORBA problem detected.\n");
     status = -1;
 
   } catch (const std::exception& ex) {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("%T (%P|%t) ABORT: %C exception caught in main().\n"), ex.what()));
+                ACE_TEXT("(%P|%t) %T ABORT: %C exception caught in main().\n"), ex.what()));
     status = -2;
 
   } catch(...) {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("%T (%P|%t) ABORT: Unspecified exception caught in main() - panic.\n")));
+                ACE_TEXT("(%P|%t) %T ABORT: Unspecified exception caught in main() - panic.\n")));
     status = -3;
 
   }
