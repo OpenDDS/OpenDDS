@@ -1,3 +1,14 @@
+Tue Nov  2 18:46:00 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.graphics/build.properties:
+
+          Resolved Eclipse warnings in project setup.
+
+        * tools/modeling/plugins/org.opendds.modeling.graphics/plugin.xml:
+
+          Removed this file.
+
 Tue Nov  2 15:26:30 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
