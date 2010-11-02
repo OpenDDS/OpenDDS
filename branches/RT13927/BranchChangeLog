@@ -1,3 +1,10 @@
+Tue Nov  2 14:58:05 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins:
+        * tools/modeling/org.opendds:
+
+          Continuation of name compaction- renaming "org.opendds" directory to "plugins".
+
 Tue Nov  2 14:14:04 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/DurabilityQosPolicyKindEditPart.java:
