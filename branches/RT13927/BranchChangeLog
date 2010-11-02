@@ -1,3 +1,15 @@
+Tue Nov  2 14:14:04 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/DurabilityQosPolicyKindEditPart.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/HistoryQosPolicyKindEditPart.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/LivelinessQosPolicyKindEditPart.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/OwnershipQosPolicyKindEditPart.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/PresentationQosPolicyAccess_scopeEditPart.java:
+        * tools/modeling/org.opendds/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/ReliabilityQosPolicyKindEditPart.java:
+
+          Multi-line to single-line changes for auto-generated code likely caused by reduction in size of class name as part
+          of name compaction.
+
 Tue Nov  2 14:10:49 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/testdata/Dcps/DcpsTest.opendds_diagram_dcpslib:
