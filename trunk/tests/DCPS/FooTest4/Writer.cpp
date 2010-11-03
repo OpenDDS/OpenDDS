@@ -76,7 +76,7 @@ Writer::start ()
 
       builder.participantId(1);
       builder.entityKey(1);
-      builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
+      builder.entityKind(OpenDDS::DCPS::ENTITYKIND_OPENDDS_NIL_WRITER);
 
       sample.header_.source_timestamp_sec_ =
                   static_cast<ACE_INT32> (now.sec ());
