@@ -1,3 +1,51 @@
+Wed Nov  3 14:23:58 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed Messenger default UDP test because there is no
+          default UDP port. 
+
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/udp/UdpConfiguration.h:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.cpp:
+
+          Added dump() for transport configuration.
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Changed config() to dump transport configuration 
+          if transport debugging is on.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Changed send_direct() to dump transport configuration
+          if there was a send error and transport debugging is on.
+
+          Tweaked formatting of error message.
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+
+          Corrected initialization of DEFAULT_TTL.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Changed find_or_create_datalink() and passive_connection()
+          to dump transport configuration if data link couldn't be 
+          found or created and transport debugging is on.
+
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Changed configure_i() to fail with an error message
+          if the local address isn't set as there is no default
+          local address for UDP.
+
 Wed Nov  3 13:34:26 UTC 2010  Don Hudson  <hudsond@ociweb.com>
 
         * examples/DCPS/Messenger_IOGR_Imr/pub.ini:

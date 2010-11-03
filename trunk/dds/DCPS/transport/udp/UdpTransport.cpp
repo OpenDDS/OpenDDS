@@ -103,6 +103,15 @@ UdpTransport::configure_i(TransportConfiguration* config)
                       ACE_TEXT("invalid configuration!\n")),
                      -1);
   }
+
+  if (this->config_i_->local_address_ == ACE_INET_Addr()) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("UdpTransport::configure_i: ")
+                      ACE_TEXT("invalid configuration!  local_address not set.\n")),
+                     -1);
+  }
+
   this->config_i_->_add_ref();
 
   return 0;

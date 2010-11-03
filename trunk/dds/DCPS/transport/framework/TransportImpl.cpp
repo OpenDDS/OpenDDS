@@ -146,6 +146,15 @@ OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
 
   // Let our subclass take a shot at the configuration object.
   if (this->configure_i(config) == -1) {
+    if (OpenDDS::DCPS::Transport_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("\n(%P|%t) TransportImpl::configure() - ")
+                 ACE_TEXT("transport_id: 0x%x.\n"),
+                 this->get_transport_id()));
+
+      config->dump();
+    }
+ 
     // The subclass rejected the configuration attempt.
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TransportImpl configuration failed.\n"),
@@ -170,6 +179,15 @@ OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
   if (this->monitor_) {
     this->monitor_->report();
   }
+
+  if (OpenDDS::DCPS::Transport_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("\n(%P|%t) TransportImpl::configure() - ")
+               ACE_TEXT("transport_id: 0x%x.\n"),
+               this->get_transport_id()));
+    config->dump();
+  }
+
   return 0;
 }
 
