@@ -1520,6 +1520,10 @@ OpenDDS::DCPS::TransportSendStrategy::direct_send(bool relink)
                    ACE_TEXT("(%P|%t) WARNING: Problem detected in ")
                    ACE_TEXT("send buffer management: %p.\n"),
                    ACE_TEXT("send_bytes")));
+
+        if (OpenDDS::DCPS::Transport_debug_level > 0) {
+          this->config_->dump();
+        }
       } else {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "The outcome of the send_packet() was "
@@ -1885,7 +1889,7 @@ OpenDDS::DCPS::TransportSendStrategy::non_blocking_send(const iovec iov[], int n
       // try to get the application to core when "Bad Address" is returned
       // by looking at the iovec
       for (int ii = 0; ii < n; ii++) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t)send_bytes: iov[%d].iov_len = %d .iov_base =%X\n",
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) send_bytes: iov[%d].iov_len = %d .iov_base =%X\n",
                    ii, iov[ii].iov_len, iov[ii].iov_base));
       }
     }

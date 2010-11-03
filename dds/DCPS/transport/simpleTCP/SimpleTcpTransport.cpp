@@ -170,6 +170,14 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink(
     if (result != 0) {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Failed to make passive connection.\n"));
+
+      if (OpenDDS::DCPS::Transport_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) SimpleTcpTransport::find_or_create_datalink() - ")
+                   ACE_TEXT("transport_id: 0x%x.\n"),
+                   this->get_transport_id()));
+        this->get_configuration()->dump();
+      }
     }
   }
 
@@ -475,6 +483,8 @@ OpenDDS::DCPS::SimpleTcpTransport::passive_connection
                ACE_TEXT("established with %C:%d.\n"),
                remote_address.get_host_name(),
                remote_address.get_port_number()));
+
+    this->get_configuration()->dump();
   }
 
   {
