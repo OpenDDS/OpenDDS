@@ -1,3 +1,9 @@
+Wed Nov  3 20:38:00 UTC 2010  Jeff Schmitz <schmitzj@ociweb.com>
+
+	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+
+	  remove default text match override. Add back new predicate of
+	  direct-predecessors within get-dependencies. Comments
 
 Wed Nov  3 03:58:00 UTC 2010  Jeff Schmitz <schmitzj@ociweb.com>
 
@@ -7,13 +13,6 @@ Wed Nov  3 03:58:00 UTC 2010  Jeff Schmitz <schmitzj@ociweb.com>
 	  tables, don't output text nodes by default, remove predicate to
 	  direct-predecessors, make default of successors param an empty
 	  node set
-
-Wed Nov  3 20:38:00 UTC 2010  Jeff Schmitz <schmitzj@ociweb.com>
-
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
-
-	  remove default text match override. Add back new predicate of
-	  direct-predecessors within get-dependencies. Comments
 
 Tue Nov  2 21:37:57 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
