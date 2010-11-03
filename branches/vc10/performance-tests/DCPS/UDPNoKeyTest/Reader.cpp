@@ -135,7 +135,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
           if (ret != ::DDS::RETCODE_OK)
           {
             ACE_ERROR_RETURN ((LM_ERROR,
-              ACE_TEXT ("(%P|%t)ERROR: Failed get sample rejected status \n")),
+              ACE_TEXT ("(%P|%t) ERROR: Failed get sample rejected status \n")),
               ret);
           }
 
@@ -149,7 +149,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
           if (ret != ::DDS::RETCODE_OK)
           {
             ACE_ERROR_RETURN ((LM_ERROR,
-              ACE_TEXT ("(%P|%t)ERROR: Failed to get sample lost status \n")),
+              ACE_TEXT ("(%P|%t) ERROR: Failed to get sample lost status \n")),
               ret);
           }
           if (lost.total_count_change > 0)

@@ -40,7 +40,7 @@ SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
   serializer >> foo;
 
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t)Received sample: %d\n", foo.sample_sequence));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Received sample: %d\n", foo.sample_sequence));
   }
 
   // Shouldn't be printing this all the time.

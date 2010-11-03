@@ -34,7 +34,7 @@ void write (long id,
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
   ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
+            ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
 
   ::DDS::InstanceHandle_t handle
       = pt_dw->register_instance(data);
@@ -71,11 +71,11 @@ void
 Writer::start ()
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT(" %P|%t Writer::start \n")));
+    ACE_TEXT("(%P|%t) Writer::start \n")));
   if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1)
   {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT(" %P|%t Writer::start, %p.\n"),
+                ACE_TEXT("(%P|%t) Writer::start, %p.\n"),
                 ACE_TEXT("activate")));
   }
 }
@@ -84,7 +84,7 @@ void
 Writer::end ()
 {
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT(" %P|%t Writer::end \n")));
+             ACE_TEXT("(%P|%t) Writer::end \n")));
   wait ();
 }
 
@@ -93,7 +93,7 @@ int
 Writer::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT(" %P|%t Writer::svc begins samples with %d floats.\n"),
+              ACE_TEXT("(%P|%t) Writer::svc begins samples with %d floats.\n"),
               data_size_));
 
   try
@@ -191,7 +191,7 @@ Writer::svc ()
     }
 
   ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT(" %P|%t Writer::svc finished.\n")));
+              ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
   done_condition_.signal(); // tell publisher look if I am finished.
   return 0;
 }

@@ -1134,7 +1134,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     if (DCPS_debug_level >= 4) {
       RepoIdConverter converter(dp_id_);
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_participant: ")
+                 ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_participant: ")
                  ACE_TEXT("%C ignoring handle %x.\n"),
                  std::string(converter).c_str(),
                  handle));
@@ -1212,7 +1212,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     if (DCPS_debug_level >= 4) {
       RepoIdConverter converter(dp_id_);
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_topic: ")
+                 ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_topic: ")
                  ACE_TEXT("%C ignoring handle %x.\n"),
                  std::string(converter).c_str(),
                  handle));
@@ -1273,7 +1273,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     if (DCPS_debug_level >= 4) {
       RepoIdConverter converter(dp_id_);
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_publication: ")
+                 ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_publication: ")
                  ACE_TEXT("%C ignoring handle %x.\n"),
                  std::string(converter).c_str(),
                  handle));
@@ -1334,7 +1334,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     if (DCPS_debug_level >= 4) {
       RepoIdConverter converter(dp_id_);
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("%P|%t) DomainParticipantImpl::ignore_subscription: ")
+                 ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_subscription: ")
                  ACE_TEXT("%C ignoring handle %d.\n"),
                  std::string(converter).c_str(),
                  handle));
@@ -1669,7 +1669,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   DDS::DomainParticipantFactoryQos qos;
 
   if (this->factory_->get_qos(qos) != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("%P|%t)DomainParticipantImpl::enable failed to")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t)DomainParticipantImpl::enable failed to")
                ACE_TEXT(" get factory qos\n")));
     return DDS::RETCODE_ERROR;
   }

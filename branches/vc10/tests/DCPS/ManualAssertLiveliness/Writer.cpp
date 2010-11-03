@@ -77,7 +77,7 @@ Manual_By_Participant_Writer_1::svc ()
     message.count      = 0;
 
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("%T (%P|%t) Manual_By_Participant_Writer_1::svc starting to write.\n")));
+              ACE_TEXT("(%P|%t) %T Manual_By_Participant_Writer_1::svc starting to write.\n")));
     for (int i = 0; i< num_messages; i ++)
     {
       if (liveliness_lost_test &&  i > 0 && i < num_messages - 1)
@@ -90,7 +90,7 @@ Manual_By_Participant_Writer_1::svc ()
 
       if (ret != ::DDS::RETCODE_OK) {
         ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t)ERROR  Manual_By_Participant_Writer_1::svc, ")
+                    ACE_TEXT("(%P|%t) ERROR: Manual_By_Participant_Writer_1::svc, ")
                     ACE_TEXT ("%dth write() returned %d.\n"),
                     i, ret));
       }
@@ -146,7 +146,7 @@ Manual_By_Participant_Writer_2::svc ()
     }
 
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("%T (%P|%t) Manual_By_Participant_Writer_2::svc starting to send liveliness.\n")));
+              ACE_TEXT("(%P|%t) %T Manual_By_Participant_Writer_2::svc starting to send liveliness.\n")));
     for (int i = 0; i< num_messages; i ++)
     {
       if (liveliness_lost_test &&  i > 0 && i < num_messages - 1)
@@ -159,7 +159,7 @@ Manual_By_Participant_Writer_2::svc ()
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t)ERROR  Manual_By_Participant_Writer_2::svc, ")
+                    ACE_TEXT("(%P|%t) ERROR: Manual_By_Participant_Writer_2::svc, ")
                     ACE_TEXT ("%dth assert_liveliness() returned %d.\n"),
                     i, ret));
       }
@@ -227,7 +227,7 @@ Manual_By_Topic_Writer_1::svc ()
     message.count      = 0;
 
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("%T (%P|%t) Manual_By_Topic_Writer_1::svc starting to write.\n")));
+              ACE_TEXT("(%P|%t) %T Manual_By_Topic_Writer_1::svc starting to write.\n")));
     for (int i = 0; i< num_messages; i ++)
     {
       if (liveliness_lost_test &&  i > 0 && i < num_messages - 1)
@@ -240,7 +240,7 @@ Manual_By_Topic_Writer_1::svc ()
 
       if (ret != ::DDS::RETCODE_OK) {
         ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t)ERROR  Manual_By_Topic_Writer_1::svc, ")
+                    ACE_TEXT("(%P|%t) ERROR: Manual_By_Topic_Writer_1::svc, ")
                     ACE_TEXT ("%dth write() returned %d.\n"),
                     i, ret));
       }
@@ -294,7 +294,7 @@ Manual_By_Topic_Writer_2::svc ()
     }
 
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("%T (%P|%t) Manual_By_Topic_Writer_2::svc starting send liveliness.\n")));
+              ACE_TEXT("(%P|%t) %T Manual_By_Topic_Writer_2::svc starting send liveliness.\n")));
     for (int i = 0; i< num_messages; i ++) {
       if (liveliness_lost_test &&  i > 0 && i < num_messages - 1)
       {
@@ -306,7 +306,7 @@ Manual_By_Topic_Writer_2::svc ()
 
       if (ret != ::DDS::RETCODE_OK) {
         ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t)ERROR  Manual_By_Topic_Writer_2::svc, ")
+                    ACE_TEXT("(%P|%t) ERROR: Manual_By_Topic_Writer_2::svc, ")
                     ACE_TEXT ("%dth assert_liveliness() returned %d.\n"),
                     i, ret));
       }

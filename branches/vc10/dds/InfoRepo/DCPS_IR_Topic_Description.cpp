@@ -143,7 +143,7 @@ int DCPS_IR_Topic_Description::remove_subscription_reference(DCPS_IR_Subscriptio
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       OpenDDS::DCPS::RepoIdConverter converter(subscription->get_id());
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DCPS_IR_Topic_Description::remove_subscription: ")
+                 ACE_TEXT("(%P|%t) DCPS_IR_Topic_Description::remove_subscription_reference: ")
                  ACE_TEXT("topic description %C removed subscription %C.\n"),
                  this->name_.c_str(),
                  std::string(converter).c_str()));
@@ -152,7 +152,7 @@ int DCPS_IR_Topic_Description::remove_subscription_reference(DCPS_IR_Subscriptio
   } else {
     OpenDDS::DCPS::RepoIdConverter converter(subscription->get_id());
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic_Description::remove_subscription: ")
+               ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic_Description::remove_subscription_reference: ")
                ACE_TEXT("topic description %C failed to remove subscription %C.\n"),
                this->name_.c_str(),
                std::string(converter).c_str()));
@@ -183,7 +183,7 @@ int DCPS_IR_Topic_Description::add_topic(DCPS_IR_Topic* topic)
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       OpenDDS::DCPS::RepoIdConverter converter(topic->get_id());
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Topic_Description::add_topic: ")
                  ACE_TEXT("topic description %C attempt to re-add topic %C.\n"),
                  this->name_.c_str(),

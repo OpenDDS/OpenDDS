@@ -23,7 +23,7 @@ void
 PerformanceTest::start_test (const string& name, const string& start_loc)
 {
   if(debug)
-    ACE_DEBUG((LM_DEBUG,"%T (%P|%t)PerformanceTest::start_test\n"));
+    ACE_DEBUG((LM_DEBUG,"(%P|%t) %T PerformanceTest::start_test\n"));
 
   // finding or creating a performance test object
  PerformanceTest* pt = find_or_create_testobj (name, start_loc);
@@ -46,13 +46,13 @@ PerformanceTest::stop_test (const string& name,
       pt->end_ptest(stop_loc);
 
       if(debug)
-        ACE_DEBUG((LM_DEBUG,"%T (%P|%t)PerformanceTest::stop_test\n"));
+        ACE_DEBUG((LM_DEBUG,"(%P|%t) %T PerformanceTest::stop_test\n"));
     }
   }
   else
   {
     if(debug)
-      ACE_DEBUG((LM_DEBUG,"%T (%P|%t)PerformanceTest::stop_test, cannot find the test object!\n"));
+      ACE_DEBUG((LM_DEBUG,"(%P|%t) %T PerformanceTest::stop_test, cannot find the test object!\n"));
   }
 }
 
@@ -68,7 +68,7 @@ PerformanceTest::find_or_create_testobj(const string& test_name,
   else
   {
     if(debug)
-      ACE_DEBUG((LM_DEBUG,"(%P|%t), %C, Creating a new PerformanceTest object\n", test_name.c_str()));
+      ACE_DEBUG((LM_DEBUG,"(%P|%t) %C, Creating a new PerformanceTest object\n", test_name.c_str()));
     pt = new PerformanceTest(test_name,start_loc);
     pmap_.insert(make_pair(test_name,pt));
   }
@@ -94,14 +94,14 @@ PerformanceTest::calculate_transport_time ()
 {
   timer_.elapsed_time (transport_time_);
   if(debug)
-    ACE_DEBUG((LM_DEBUG,"%T (%P|%t)PerformanceTest::transport_time = %Q\n", transport_time_));
+    ACE_DEBUG((LM_DEBUG,"(%P|%t) %T PerformanceTest::transport_time = %Q\n", transport_time_));
 }
 
 void
 PerformanceTest::begin_ptest()
 {
   if(debug)
-    ACE_DEBUG((LM_DEBUG,"%T (%P|%t)PerformanceTest, start timer, count=%d\n", result_.count));
+    ACE_DEBUG((LM_DEBUG,"(%P|%t) %T PerformanceTest, start timer, count=%d\n", result_.count));
   timer_.start();
   started_ = true;
 
@@ -110,7 +110,7 @@ void
 PerformanceTest::end_ptest(const string& stop_loc)
 {
   if(debug)
-    ACE_DEBUG((LM_DEBUG,"%T (%P|%t)PerformanceTest, stop timer\n"));
+    ACE_DEBUG((LM_DEBUG,"(%P|%t) %T PerformanceTest, stop timer\n"));
   timer_.stop();
   started_ = false;
   stop_location_ = stop_loc;

@@ -152,7 +152,7 @@ ParticipantTask::svc()
       if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
-          "ERROR: failed to get publication matched status\n"));
+          "(%P|%t) ERROR: failed to get publication matched status\n"));
         ACE_OS::exit (1);
       }
     }
@@ -182,7 +182,7 @@ ParticipantTask::svc()
     DDS::Duration_t interval = { 30, 0};
     if( DDS::RETCODE_OK != writer->wait_for_acknowledgments( interval)) {
       ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("%P:%t: ERROR svc() - ")
+        ACE_TEXT("(%P:%t) ERROR: svc() - ")
         ACE_TEXT("timed out waiting for acks!\n")
       ), 1);
     }

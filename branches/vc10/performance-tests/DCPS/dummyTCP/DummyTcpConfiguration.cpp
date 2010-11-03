@@ -22,7 +22,7 @@ OpenDDS::DCPS::DummyTcpConfiguration::load (const TransportIdType& id,
   // The default transport can not be configured by user.
   if (id == DEFAULT_DUMMY_TCP_ID)
     {
-      ACE_ERROR ((LM_ERROR, "(%P|%t)You can not configure the default DummyTcp transport(id=%u) !!! \n",
+      ACE_ERROR ((LM_ERROR, "(%P|%t) You can not configure the default DummyTcp transport(id=%u) !!! \n",
         id));
       return -1;
     }
@@ -67,4 +67,49 @@ OpenDDS::DCPS::DummyTcpConfiguration::load (const TransportIdType& id,
     this->max_output_pause_period_, int)
 
   return 0;
+}
+
+void 
+OpenDDS::DCPS::DummyTcpConfiguration::dump()
+{
+  // Acquire lock on the log so the entire dump is output as a block
+  // (at least for each process).
+  ACE_Log_Msg::instance()->acquire();
+
+  TransportConfiguration::dump();
+
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
+             ACE_TEXT("local_address: %C.\n"),
+             this->local_address_str_.c_str()));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
+             ACE_TEXT("enable_nagle_algorithm: %C.\n"),
+             (this->enable_nagle_algorithm_ ? "true" : "false")));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
+             ACE_TEXT("conn_retry_initial_delay: %d.\n"),
+             this->conn_retry_initial_delay_));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
+             ACE_TEXT("conn_retry_backoff_multiplier: %d.\n"),
+             this->conn_retry_backoff_multiplier_));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
+             ACE_TEXT("conn_retry_attempts: %d.\n"),
+            this->conn_retry_attempts_));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
+             ACE_TEXT("passive_reconnect_duration: %d.\n"),
+             this->passive_reconnect_duration_));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
+             ACE_TEXT("passive_connect_duration: %d.\n"),
+             this->passive_connect_duration_));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
+             ACE_TEXT("max_output_pause_period: %d.\n\n"),
+             this->max_output_pause_period_));
+
+  ACE_Log_Msg::instance()->acquire();
 }

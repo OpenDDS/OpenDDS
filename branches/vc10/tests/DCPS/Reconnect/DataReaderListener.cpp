@@ -35,7 +35,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     Messenger::MessageDataReader_var message_dr = Messenger::MessageDataReader::_narrow(reader);
     if (CORBA::is_nil (message_dr.in ())) {
       ACE_DEBUG ((LM_DEBUG ,
-        "(%P|%t)read: _narrow failed.\n"));
+        "(%P|%t) read: _narrow failed.\n"));
       exit(1);
     }
 
@@ -62,7 +62,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
   if (num_reads_before_crash && num_reads_before_crash == this->num_reads_)
   {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t)Subscriber crash after %dth reads\n", num_reads_before_crash));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Subscriber crash after %dth reads\n", num_reads_before_crash));
     ACE_OS::abort ();
   }
 }
@@ -73,7 +73,7 @@ void DataReaderListenerImpl::on_requested_deadline_missed (
   throw (CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG ,
-    "(%P|%t)DataReaderListenerImpl::on_requested_deadline_missed\n"));
+    "(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed\n"));
 }
 
 void DataReaderListenerImpl::on_requested_incompatible_qos (
@@ -82,7 +82,7 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
   throw (CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG ,
-    "(%P|%t)DataReaderListenerImpl::on_requested_incompatible_qos\n"));
+    "(%P|%t) DataReaderListenerImpl::on_requested_incompatible_qos\n"));
 }
 
 void DataReaderListenerImpl::on_liveliness_changed (
@@ -91,7 +91,7 @@ void DataReaderListenerImpl::on_liveliness_changed (
   throw (CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG ,
-    "(%P|%t)DataReaderListenerImpl::on_liveliness_changed\n"));
+    "(%P|%t) DataReaderListenerImpl::on_liveliness_changed\n"));
 }
 
 void DataReaderListenerImpl::on_subscription_matched (
@@ -100,7 +100,7 @@ void DataReaderListenerImpl::on_subscription_matched (
   throw (CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG ,
-    "(%P|%t)DataReaderListenerImpl::on_subscription_matched\n"));
+    "(%P|%t) DataReaderListenerImpl::on_subscription_matched\n"));
 }
 
 void DataReaderListenerImpl::on_sample_rejected(
@@ -109,7 +109,7 @@ void DataReaderListenerImpl::on_sample_rejected(
   throw (CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG ,
-    "(%P|%t)DataReaderListenerImpl::on_sample_rejected\n"));
+    "(%P|%t) DataReaderListenerImpl::on_sample_rejected\n"));
 }
 
 void DataReaderListenerImpl::on_sample_lost(
@@ -118,7 +118,7 @@ void DataReaderListenerImpl::on_sample_lost(
   throw (CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG ,
-    "(%P|%t)DataReaderListenerImpl::on_sample_lost\n"));
+    "(%P|%t) DataReaderListenerImpl::on_sample_lost\n"));
 }
 
 
@@ -132,7 +132,7 @@ void DataReaderListenerImpl::on_subscription_disconnected (
   {
     cout << "on_subscription_disconnected writer " << status.publication_handles[i] << endl;
     //ACE_DEBUG ((LM_DEBUG ,
-    //  "(%P|%t)on_subscription_disconnected  writer %d \n", status.publication_handles[i]));
+    //  "(%P|%t) on_subscription_disconnected  writer %d \n", status.publication_handles[i]));
   }
 }
 
@@ -147,7 +147,7 @@ void DataReaderListenerImpl::on_subscription_reconnected (
   {
     cout << "on_subscription_reconnected writer " << status.publication_handles[i] << endl;
     //ACE_DEBUG ((LM_DEBUG ,
-    //  "(%P|%t)on_subscription_reconnected  writer %d \n", status.publication_handles[i]));
+    //  "(%P|%t) on_subscription_reconnected  writer %d \n", status.publication_handles[i]));
   }
 }
 
@@ -164,7 +164,7 @@ void DataReaderListenerImpl::on_subscription_lost (
   {
     cout << "on_subscription_lost writer " << status.publication_handles[i] << endl;
     //ACE_DEBUG ((LM_DEBUG ,
-    //  "(%P|%t)on_subscription_lost  writer %d \n", status.publication_handles[i]));
+    //  "(%P|%t) on_subscription_lost  writer %d \n", status.publication_handles[i]));
   }
 }
 
@@ -174,7 +174,7 @@ void DataReaderListenerImpl::on_budget_exceeded (
   const ::OpenDDS::DCPS::BudgetExceededStatus&)
   throw (::CORBA::SystemException)
 {
-  ACE_DEBUG ((LM_DEBUG, "(%P|%t)received on_budget_exceeded \n"));
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_budget_exceeded \n"));
 }
 
 
@@ -182,5 +182,5 @@ void DataReaderListenerImpl::on_connection_deleted (
   ::DDS::DataReader_ptr)
   throw (::CORBA::SystemException)
 {
-  ACE_DEBUG ((LM_DEBUG, "(%P|%t)received on_connection_deleted  \n"));
+  ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_connection_deleted  \n"));
 }

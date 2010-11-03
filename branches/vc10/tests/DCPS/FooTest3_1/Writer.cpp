@@ -116,7 +116,7 @@ Writer::svc ()
       }
 
       if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-        ACE_DEBUG ((LM_DEBUG, "(%P|%t)write sample: %d \n", foo.sample_sequence));
+        ACE_DEBUG ((LM_DEBUG, "(%P|%t) write sample: %d \n", foo.sample_sequence));
       }
 
       ret = foo_dw->write(foo,

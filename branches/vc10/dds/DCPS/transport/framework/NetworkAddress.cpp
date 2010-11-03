@@ -76,7 +76,7 @@ ACE_TString get_fully_qualified_hostname()
 
     if (result != 0 || addr_count < 1) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t)!!!ERROR: Unable to probe network. %p\n"),
+                 ACE_TEXT("(%P|%t) ERROR: Unable to probe network. %p\n"),
                  ACE_TEXT("ACE::get_ip_interfaces")));
 
     } else {
@@ -114,7 +114,7 @@ ACE_TString get_fully_qualified_hostname()
 
     for (OpenDDS::DCPS::HostnameInfoVector::iterator it = itBegin; it != itEnd; ++it) {
       if (addr_array[it->index_].is_loopback() == false) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t)!!!WARNING: Could not find FQDN. Using "
+        ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: Could not find FQDN. Using "
                    "\"%s\" as fully qualified hostname, please "
                    "correct system configuration.\n", it->hostname_.c_str()));
         fullname = it->hostname_;
@@ -123,7 +123,7 @@ ACE_TString get_fully_qualified_hostname()
     }
 
     if (itBegin != itEnd) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t)!!!WARNING: Could not find FQDN. Using "
+      ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: Could not find FQDN. Using "
                  "\"%s\" as fully qualified hostname, please "
                  "correct system configuration.\n", itBegin->hostname_.c_str()));
       fullname = itBegin->hostname_;
@@ -131,7 +131,7 @@ ACE_TString get_fully_qualified_hostname()
     }
 
     ACE_ERROR((LM_ERROR,
-               "(%P|%t)!!!ERROR: failed to discover the fully qualified hostname \n"));
+               "(%P|%t) ERROR: failed to discover the fully qualified hostname \n"));
   }
 
   return fullname;

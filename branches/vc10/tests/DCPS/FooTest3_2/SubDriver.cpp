@@ -184,7 +184,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
   if (readers_ready == 0)
   {
     ACE_ERROR ((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR Unable to create subscriber ready file\n")));
+      ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber ready file\n")));
   }
   else
     ACE_OS::fclose(readers_ready);

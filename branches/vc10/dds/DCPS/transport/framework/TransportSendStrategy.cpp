@@ -96,7 +96,7 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
   this->max_header_size_ = this->header_.max_marshaled_size();
 
   if (OpenDDS::DCPS::Transport_debug_level >= 2) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t)TransportSendStrategy replaced_element_allocator %x with %d chunks\n",
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy replaced_element_allocator %x with %d chunks\n",
                &replaced_element_allocator_, NUM_REPLACED_ELEMENT_CHUNKS));
   }
 
@@ -1517,9 +1517,13 @@ OpenDDS::DCPS::TransportSendStrategy::direct_send(bool relink)
                (outcome == OUTCOME_SEND_ERROR)) {
       if (outcome == OUTCOME_SEND_ERROR) {
         ACE_ERROR((LM_WARNING,
-                   ACE_TEXT("(%P|%t) Warning: Problem detected in ")
+                   ACE_TEXT("(%P|%t) WARNING: Problem detected in ")
                    ACE_TEXT("send buffer management: %p.\n"),
                    ACE_TEXT("send_bytes")));
+
+        if (OpenDDS::DCPS::Transport_debug_level > 0) {
+          this->config_->dump();
+        }
       } else {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "The outcome of the send_packet() was "
@@ -1885,7 +1889,7 @@ OpenDDS::DCPS::TransportSendStrategy::non_blocking_send(const iovec iov[], int n
       // try to get the application to core when "Bad Address" is returned
       // by looking at the iovec
       for (int ii = 0; ii < n; ii++) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t)send_bytes: iov[%d].iov_len = %d .iov_base =%X\n",
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) send_bytes: iov[%d].iov_len = %d .iov_base =%X\n",
                    ii, iov[ii].iov_len, iov[ii].iov_base));
       }
     }

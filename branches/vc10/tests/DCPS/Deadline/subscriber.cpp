@@ -290,13 +290,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
       // ----------------------------------------------
 
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: sleep for %d milliseconds\n"),
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) Subscriber: sleep for %d milliseconds\n"),
                             SLEEP_DURATION.msec()));
 
       // Wait for deadline periods to expire.
       ACE_OS::sleep (SLEEP_DURATION);
 
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: now verify missed ")
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) Subscriber: now verify missed ")
                             ACE_TEXT ("deadline status \n")));
 
       DDS::RequestedDeadlineMissedStatus deadline_status1;
@@ -313,7 +313,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: got missed")
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) Subscriber: got missed")
                             ACE_TEXT ("deadline status \n")));
 
       Messenger::Message message;
@@ -378,7 +378,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // .5 second interval.
       ACE_Time_Value no_miss_period = num_messages * write_interval;
 
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: sleep for %d msec\n"),
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) Subscriber: sleep for %d msec\n"),
                             (SLEEP_DURATION + no_miss_period).msec()));
 
       // Wait for another set of deadline periods(5 + 11 secs).
@@ -386,7 +386,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // .5 second interval.
       ACE_OS::sleep (SLEEP_DURATION + no_miss_period);
 
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: now verify missed ")
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) Subscriber: now verify missed ")
                             ACE_TEXT ("deadline status \n")));
 
       if ((dr1->get_requested_deadline_missed_status(deadline_status1) != ::DDS::RETCODE_OK)
@@ -396,7 +396,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit (1);
       }
 
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Subscriber: got missed")
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) Subscriber: got missed")
                             ACE_TEXT ("deadline status \n")));
 
       if (deadline_status1.last_instance_handle != dr1_hd1

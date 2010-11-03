@@ -120,7 +120,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
   try
     {
-      ACE_DEBUG((LM_INFO," %P|%t %T subscriber main\n"));
+      ACE_DEBUG((LM_INFO,"(%P|%t) %T subscriber main\n"));
 
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
@@ -139,7 +139,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (CORBA::is_nil (dp.in ()))
       {
         ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT(" %P|%t ERROR: create_participant failed.\n")));
+                    ACE_TEXT("(%P|%t) ERROR: create_participant failed.\n")));
         return 1 ;
       }
 
@@ -158,7 +158,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           if (::DDS::RETCODE_OK != pt128ts->register_type(dp.in (), TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR,
-                          ACE_TEXT (" %P|%t ERROR: Failed to register the Pt128TypeSupport.")));
+                          ACE_TEXT ("(%P|%t) ERROR: Failed to register the Pt128TypeSupport.")));
               return 1;
             }
         }
@@ -170,7 +170,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           if (::DDS::RETCODE_OK != pt512ts->register_type(dp.in (), TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR,
-                          ACE_TEXT (" %P|%t ERROR:Failed to register the Pt512TypeSupport.")));
+                          ACE_TEXT ("(%P|%t) ERROR:Failed to register the Pt512TypeSupport.")));
               return 1;
             }
         }
@@ -182,7 +182,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           if (::DDS::RETCODE_OK != pt2048ts->register_type(dp.in (), TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR,
-                          ACE_TEXT (" %P|%t ERROR: Failed to register the Pt2048TypeSupport.")));
+                          ACE_TEXT ("(%P|%t) ERROR: Failed to register the Pt2048TypeSupport.")));
               return 1;
             }
         }
@@ -194,7 +194,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           if (::DDS::RETCODE_OK != pt8192ts->register_type(dp.in (), TEST_TYPE))
             {
               ACE_ERROR ((LM_ERROR,
-                          ACE_TEXT (" %P|%t ERROR: Failed to register the Pt8192TypeSupport.")));
+                          ACE_TEXT ("(%P|%t) ERROR: Failed to register the Pt8192TypeSupport.")));
               return 1;
             }
         }
@@ -227,7 +227,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (CORBA::is_nil (description.in() ))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT(" %P|%t ERROR: lookup_topicdescription failed.\n")),
+                           ACE_TEXT("(%P|%t) ERROR: lookup_topicdescription failed.\n")),
                            1);
       }
 
@@ -240,7 +240,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (CORBA::is_nil (sub.in() ))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT(" %P|%t ERROR: create_subscriber failed.\n")),
+                           ACE_TEXT("(%P|%t) ERROR: create_subscriber failed.\n")),
                            1);
       }
 
@@ -248,7 +248,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (0 != ::init_reader_tranport() )
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT(" %P|%t ERROR: init_transport failed!\n")),
+                           ACE_TEXT("(%P|%t) ERROR: init_transport failed!\n")),
                            1);
       }
 
@@ -259,7 +259,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (0 == sub_impl)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT(" %P|%t ERROR: Failed to obtain servant ::OpenDDS::DCPS::SubscriberImpl\n")),
+                          ACE_TEXT("(%P|%t) ERROR: Failed to obtain servant ::OpenDDS::DCPS::SubscriberImpl\n")),
                           1);
       }
 
@@ -288,7 +288,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             }
 
           ACE_ERROR_RETURN ((LM_ERROR,
-                            ACE_TEXT(" %P|%t ERROR: Failed to attach to the transport. ")
+                            ACE_TEXT("(%P|%t) ERROR: Failed to attach to the transport. ")
                             ACE_TEXT("AttachStatus == %s\n"),
                             status_str),
                             1);
@@ -311,7 +311,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (CORBA::is_nil (dr_listener.in()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT(" %P|%t ERROR: get listener reference failed.\n")),
+                          ACE_TEXT("(%P|%t) ERROR: get listener reference failed.\n")),
                           1);
       }
 
@@ -324,7 +324,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (CORBA::is_nil (the_dr.in() ))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT(" %P|%t ERROR: create_datareader failed.\n")),
+                          ACE_TEXT("(%P|%t) ERROR: create_datareader failed.\n")),
                           1);
       }
 
@@ -335,7 +335,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       if (! listener_servant->verify_result ()) {
         ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT(" %P|%t ERROR: verify result failed.\n")),
+                          ACE_TEXT("(%P|%t) ERROR: verify result failed.\n")),
                           1);
       }
 

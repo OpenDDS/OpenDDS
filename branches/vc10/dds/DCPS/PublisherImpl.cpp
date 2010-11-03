@@ -223,7 +223,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
       RepoId id = dw_servant->get_publication_id();
       RepoIdConverter converter(id);
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) PublisherImpl::delete_datareader: ")
+                 ACE_TEXT("(%P|%t) PublisherImpl::delete_datawriter: ")
                  ACE_TEXT("the data writer %C doesn't ")
                  ACE_TEXT("belong to this subscriber \n"),
                  std::string(converter).c_str()));

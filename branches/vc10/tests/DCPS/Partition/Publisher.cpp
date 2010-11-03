@@ -180,13 +180,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
             writer->register_instance(the_data);
 
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("%T (%P|%t) PUB starting to write.\n")));
+                   ACE_TEXT("(%P|%t) %T PUB starting to write.\n")));
 
         ::DDS::ReturnCode_t const ret = writer->write (the_data, handle);;
         if (ret != ::DDS::RETCODE_OK)
         {
           ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t)ERROR  PUB ")
+                      ACE_TEXT("(%P|%t) ERROR: PUB ")
                       ACE_TEXT ("write() returned %d.\n"),
                       ret));
         }

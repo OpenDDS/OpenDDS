@@ -70,7 +70,7 @@ Writer::svc ()
       message.count      = 0;
 
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
+                 ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
 
       for (size_t sub_count = 0; sub_count < sub_cnt_; sub_count++)
         {
@@ -91,7 +91,7 @@ Writer::svc ()
 
               if (ret != ::DDS::RETCODE_OK) {
                 ACE_ERROR ((LM_ERROR,
-                            ACE_TEXT("(%P|%t)ERROR  Writer::svc, ")
+                            ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
                             ACE_TEXT ("%dth write() returned %d.\n"),
                             msg_count, ret));
                 if (ret == ::DDS::RETCODE_TIMEOUT) {

@@ -38,7 +38,7 @@ int read (::DDS::DataReader_ptr reader)
     if (CORBA::is_nil (foo_dr.in ()))
     {
       ACE_ERROR ((LM_ERROR,
-        ACE_TEXT("(%P|%t)read: _narrow failed.\n")));
+        ACE_TEXT("(%P|%t) read: _narrow failed.\n")));
       throw TestException() ;
     }
 
@@ -55,7 +55,7 @@ int read (::DDS::DataReader_ptr reader)
     if (status == ::DDS::RETCODE_OK)
     {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t)reader %X foo.x = %f foo.y = %f, foo.data_source = %d \n"),
+        ACE_TEXT("(%P|%t) reader %X foo.x = %f foo.y = %f, foo.data_source = %d \n"),
         reader, foo.x, foo.y, foo.data_source));
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) SampleInfo.sample_rank = %d \n"),
