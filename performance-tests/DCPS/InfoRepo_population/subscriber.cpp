@@ -258,7 +258,7 @@ Subscriber::run (void)
 
         if( this->transports_[ count]->configure( config.in()) != 0) {
           ACE_ERROR((LM_ERROR,
-            ACE_TEXT("%T (%P|%t) ERROR: TCP ")
+            ACE_TEXT("(%P|%t) %T ERROR: TCP ")
             ACE_TEXT("failed to configure the transport.\n")
           ));
           return false;

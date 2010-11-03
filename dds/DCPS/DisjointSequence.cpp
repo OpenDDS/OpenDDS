@@ -147,7 +147,7 @@ DisjointSequence::dump()
 {
   SequenceSet::iterator iter(this->sequences_.begin());
   while (iter != this->sequences_.end()) {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t)DisjointSequence::dump(%X) %d\n", this, iter->getValue()));
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DisjointSequence::dump(%X) %d\n", this, iter->getValue()));
     ++ iter;
   }
 }

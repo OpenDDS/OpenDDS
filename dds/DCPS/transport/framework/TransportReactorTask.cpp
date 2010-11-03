@@ -116,7 +116,10 @@ OpenDDS::DCPS::TransportReactorTask::svc()
   try {
     // Tell the reactor to handle events.
     this->reactor_->run_reactor_event_loop();
-
+  } catch (const std::exception& e) {
+    ACE_ERROR((LM_ERROR,
+               "(%P|%t) ERROR: TransportReactorTask::svc caught exception - %C.\n",
+               e.what()));
   } catch (...) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: TransportReactorTask::svc caught exception.\n"));

@@ -487,7 +487,7 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
   DBG_ENTRY_LVL("WriteDataContainer","data_delivered",6);
 
   if (DCPS_debug_level >= 2) {
-    ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t)WriteDataContainer::data_delivered")
+    ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered")
                           ACE_TEXT(" %X \n"), sample));
   }
 
@@ -573,7 +573,7 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
   DBG_ENTRY_LVL("WriteDataContainer","data_dropped",6);
 
   if (DCPS_debug_level >= 2) {
-    ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t)WriteDataContainer::data_dropped")
+    ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::data_dropped")
                           ACE_TEXT(" sample %X dropped_by_transport %d\n"),
                           sample, dropped_by_transport));
   }
@@ -823,7 +823,7 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
         waiting_on_release_ = true; // reduces broadcast to only when waiting
 
         if (DCPS_debug_level >= 2) {
-          ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)WriteDataContainer::obtain_buffer, ")
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) WriteDataContainer::obtain_buffer, ")
                                 ACE_TEXT ("wait for condition, oldest_released %d waiting %X\n"),
                                 oldest_released, instance->waiting_list_.head_));
         }
@@ -1141,7 +1141,7 @@ WriteDataContainer::wakeup_blocking_writers (DataSampleListElement* stale,
         waiting_on_release_ = false;
         // Broadcast the blocked enqueue threads.
         if (DCPS_debug_level >= 2) {
-          ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t)WriteDataContainer::wakeup_blocking_writers ")
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wakeup_blocking_writers ")
                                 ACE_TEXT("removed sample %X and broadcast to wake up ")
                                 ACE_TEXT("blocking threads for available spot \n"),
                                 stale));

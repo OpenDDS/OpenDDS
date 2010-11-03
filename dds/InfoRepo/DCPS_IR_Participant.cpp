@@ -488,7 +488,7 @@ int DCPS_IR_Participant::remove_topic_reference(OpenDDS::DCPS::RepoId topicId,
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       OpenDDS::DCPS::RepoIdConverter part_converter(id_);
       OpenDDS::DCPS::RepoIdConverter topic_converter(topicId);
-      ACE_ERROR((LM_ERROR,
+      ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Participant::remove_topic_reference: ")
                  ACE_TEXT("participant %C unable to find topic %C for removal.\n"),
                  std::string(part_converter).c_str(),

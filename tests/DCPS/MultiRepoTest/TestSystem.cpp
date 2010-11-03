@@ -22,7 +22,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   // operations - they should not get optimized away!  Note that this
   // passes the arguments to the ORB initialization first, then strips
   // the DCPS arguments.
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: initializing the service.%d\n"), this->config_.infoRepoIorSize()));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: initializing the service.%d\n"), this->config_.infoRepoIorSize()));
   ::DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs( argc, argv);
 
   // We only need to do loading and binding if we receive InfoRepo IOR
@@ -31,13 +31,13 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   if( this->config_.infoRepoIorSize() > 0) {
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: loading repository %d.\n"),
+      ACE_TEXT("(%P|%t) %T INFO: loading repository %d.\n"),
       OpenDDS::DCPS::Service_Participant::DEFAULT_REPO
     ));
     TheServiceParticipant->set_repo_ior( this->config_.infoRepoIor().c_str());
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: binding subscriber domain to repository %d.\n"),
+      ACE_TEXT("(%P|%t) %T INFO: binding subscriber domain to repository %d.\n"),
       OpenDDS::DCPS::Service_Participant::DEFAULT_REPO
     ));
     TheServiceParticipant->set_repo_domain(
@@ -46,7 +46,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
     );
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: binding publisher domain to repository %d.\n"),
+      ACE_TEXT("(%P|%t) %T INFO: binding publisher domain to repository %d.\n"),
       OpenDDS::DCPS::Service_Participant::DEFAULT_REPO
     ));
     TheServiceParticipant->set_repo_domain(
@@ -64,7 +64,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   //
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) INFO: creating subscriber participant in domain %d.\n"),
+    ACE_TEXT("(%P|%t) %T INFO: creating subscriber participant in domain %d.\n"),
     this->config_.subscriberDomain()
   ));
   this->subscriberParticipant_ =
@@ -77,7 +77,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   if (CORBA::is_nil (this->subscriberParticipant_.in ()))
     {
       ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("%T (%P|%t) ERROR: create_participant failed for subscriber.\n")));
+                ACE_TEXT("(%P|%t) %T ERROR: create_participant failed for subscriber.\n")));
       throw BadParticipantException ();
     }
 
@@ -86,7 +86,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   //
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) INFO: creating publisher participant in domain %d.\n"),
+    ACE_TEXT("(%P|%t) %T INFO: creating publisher participant in domain %d.\n"),
     this->config_.publisherDomain()
   ));
   if( this->config_.publisherDomain() == this->config_.subscriberDomain()) {
@@ -108,7 +108,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
     if (CORBA::is_nil (this->publisherParticipant_.in ()))
       {
         ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("%T (%P|%t) ERROR: create_participant failed for publisher.\n")));
+                  ACE_TEXT("(%P|%t) %T ERROR: create_participant failed for publisher.\n")));
         throw BadParticipantException ();
       }
 
@@ -126,7 +126,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   }
 
   if( TheTransportFactory->obtain( TestConfig::SubscriberTransport).is_nil()) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: creating a SimpleTCP transport.\n")));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: creating a SimpleTCP transport.\n")));
     this->transport_
       = TheTransportFactory->create_transport_impl(
           TestConfig::SubscriberTransport,
@@ -154,7 +154,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
     if( this->transport_->configure( reader_config.in()) != 0)
     {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("%T (%P|%t) ERROR: subscriber TCP ")
+        ACE_TEXT("(%P|%t) %T ERROR: subscriber TCP ")
         ACE_TEXT("failed to configure the transport.\n")));
       throw BadTransportException ();
     }
@@ -164,14 +164,14 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   // Establish a listener to install into the DataReader.
   //
 
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: creating data reader listener.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: creating data reader listener.\n")));
   this->listener_ = new ForwardingListenerImpl( 0);
   ForwardingListenerImpl* forwarder_servant =
     dynamic_cast<ForwardingListenerImpl*>(listener_.in());
 
   if (CORBA::is_nil (this->listener_.in ()))
     {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT ("%T (%P|%t) ERROR: listener is nil.\n")));
+      ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) %T ERROR: listener is nil.\n")));
       throw BadReaderListenerException ();
     }
 
@@ -182,7 +182,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   //
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) INFO: creating subscription type support for type %C.\n"),
+    ACE_TEXT("(%P|%t) %T INFO: creating subscription type support for type %C.\n"),
     this->config_.typeName().c_str()
   ));
   ::Xyz::FooNoKeyTypeSupportImpl* subscriber_data = new ::Xyz::FooNoKeyTypeSupportImpl();
@@ -192,12 +192,12 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
                           )
     ) {
     ACE_ERROR ((LM_ERROR,
-      ACE_TEXT ("%T (%P|%t) ERROR: Failed to register the subscriber FooNoKeyTypeSupport.\n")));
+      ACE_TEXT ("(%P|%t) %T ERROR: Failed to register the subscriber FooNoKeyTypeSupport.\n")));
     throw TestException ();
   }
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) INFO: creating publication type support for type %C.\n"),
+    ACE_TEXT("(%P|%t) %T INFO: creating publication type support for type %C.\n"),
     this->config_.typeName().c_str()
   ));
   ::Xyz::FooNoKeyTypeSupportImpl* publisher_data = new ::Xyz::FooNoKeyTypeSupportImpl();
@@ -207,7 +207,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
                           )
     ) {
     ACE_ERROR ((LM_ERROR,
-      ACE_TEXT ("%T (%P|%t) ERROR: Failed to register the publisher FooNoKeyTypeSupport.\n")));
+      ACE_TEXT ("(%P|%t) %T ERROR: Failed to register the publisher FooNoKeyTypeSupport.\n")));
     throw TestException ();
   }
 
@@ -216,7 +216,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   //
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) INFO: creating subscription topic: %C.\n"),
+    ACE_TEXT("(%P|%t) %T INFO: creating subscription topic: %C.\n"),
     this->config_.readerTopicName().c_str()
   ));
   this->readerTopic_
@@ -230,12 +230,12 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   if( CORBA::is_nil( this->readerTopic_.in()) )
     {
       ACE_ERROR ((LM_ERROR,
-        ACE_TEXT ("%T (%P|%t) ERROR: Failed to create_topic for subscriber.\n")));
+        ACE_TEXT ("(%P|%t) %T ERROR: Failed to create_topic for subscriber.\n")));
       throw BadTopicException ();
     }
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) INFO: creating publication topic: %C.\n"),
+    ACE_TEXT("(%P|%t) %T INFO: creating publication topic: %C.\n"),
     this->config_.writerTopicName().c_str()
   ));
   this->writerTopic_
@@ -249,7 +249,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   if( CORBA::is_nil( this->readerTopic_.in()) )
     {
       ACE_ERROR ((LM_ERROR,
-        ACE_TEXT ("%T (%P|%t) ERROR: Failed to create_topic for publisher.\n")));
+        ACE_TEXT ("(%P|%t) %T ERROR: Failed to create_topic for publisher.\n")));
       throw BadTopicException ();
     }
 
@@ -257,7 +257,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   // Establish the Subscriber.
   //
 
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: creating subscriber.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: creating subscriber.\n")));
   this->subscriber_ = this->subscriberParticipant_->create_subscriber(
                         SUBSCRIBER_QOS_DEFAULT,
                         ::DDS::SubscriberListener::_nil(),
@@ -265,7 +265,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   if (CORBA::is_nil (this->subscriber_.in ()))
     {
       ACE_ERROR ((LM_ERROR,
-        ACE_TEXT ("%T (%P|%t) ERROR: Failed to create_subscriber.\n")));
+        ACE_TEXT ("(%P|%t) %T ERROR: Failed to create_subscriber.\n")));
       throw BadSubscriberException ();
     }
 
@@ -276,13 +276,13 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   if (0 == sub_impl)
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("%T (%P|%t) ERROR: Failed to obtain subscriber servant\n")));
+                  ACE_TEXT("(%P|%t) %T ERROR: Failed to obtain subscriber servant\n")));
       throw BadSubscriberException ();
     }
 
   OpenDDS::DCPS::AttachStatus attach_status;
 
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: attaching subscriber to transport \n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: attaching subscriber to transport \n")));
   attach_status = sub_impl->attach_transport( this->transport_.in());
 
   if (attach_status != OpenDDS::DCPS::ATTACH_OK)
@@ -307,7 +307,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
         }
 
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("%T (%P|%t) ERROR: Failed to attach to the transport. ")
+                  ACE_TEXT("(%P|%t) %T ERROR: Failed to attach to the transport. ")
                   ACE_TEXT("AttachStatus == %s\n"),
                   status_str.c_str()));
       throw BadTransportException ();
@@ -317,7 +317,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   // Establish the Publisher.
   //
 
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: creating publisher.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: creating publisher.\n")));
   this->publisher_ = this->publisherParticipant_->create_publisher(
                        PUBLISHER_QOS_DEFAULT,
                        ::DDS::PublisherListener::_nil(),
@@ -325,7 +325,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   if (CORBA::is_nil (this->publisher_.in ()))
     {
       ACE_ERROR ((LM_ERROR,
-        ACE_TEXT ("%T (%P|%t) ERROR: Failed to create_publisher.\n")));
+        ACE_TEXT ("(%P|%t) %T ERROR: Failed to create_publisher.\n")));
       throw BadPublisherException ();
     }
 
@@ -336,11 +336,11 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   if (0 == pub_impl)
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("%T (%P|%t) ERROR: Failed to obtain publisher servant\n")));
+                  ACE_TEXT("(%P|%t) %T ERROR: Failed to obtain publisher servant\n")));
       throw BadPublisherException ();
     }
 
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: attaching publisher to transport \n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: attaching publisher to transport \n")));
   attach_status = pub_impl->attach_transport( this->transport_.in());
 
   if (attach_status != OpenDDS::DCPS::ATTACH_OK)
@@ -365,7 +365,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
         }
 
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("%T (%P|%t) ERROR: Failed to attach to the transport. ")
+                  ACE_TEXT("(%P|%t) %T ERROR: Failed to attach to the transport. ")
                   ACE_TEXT("AttachStatus == %s\n"),
                   status_str.c_str()));
       throw BadTransportException ();
@@ -392,7 +392,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   writerQos.reliability.max_blocking_time.sec        = 0;
   writerQos.reliability.max_blocking_time.nanosec    = 0;
 
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: creating data writer.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: creating data writer.\n")));
   this->dataWriter_ = this->publisher_->create_datawriter(
                         this->writerTopic_.in(),
                         writerQos,
@@ -402,7 +402,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   if( CORBA::is_nil( this->dataWriter_.in()) )
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("%T (%P|%t) ERROR: create_datawriter failed.\n")));
+                  ACE_TEXT("(%P|%t) %T ERROR: create_datawriter failed.\n")));
       throw BadWriterException ();
     }
 
@@ -418,14 +418,14 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   // round.
   //
 
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: looking up subscription topic.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: looking up subscription topic.\n")));
   ::DDS::TopicDescription_var description
     = this->subscriberParticipant_->lookup_topicdescription(
         this->config_.readerTopicName().c_str()
       );
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) INFO: creating data reader for topic: %C, type: %C.\n"),
+    ACE_TEXT("(%P|%t) %T INFO: creating data reader for topic: %C, type: %C.\n"),
     description->get_name(), description->get_type_name()
   ));
   this->dataReader_ = this->subscriber_->create_datareader(
@@ -437,7 +437,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   if( CORBA::is_nil( this->dataReader_.in()) )
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("%T (%P|%t) ERROR: create_datareader failed.\n")));
+                  ACE_TEXT("(%P|%t) %T ERROR: create_datareader failed.\n")));
       throw BadReaderException ();
     }
 
@@ -445,14 +445,14 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
 
 TestSystem::~TestSystem()
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: finalizing the publication apparatus.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: finalizing the publication apparatus.\n")));
 
   // Tear down the sending apparatus.
   if( ::DDS::RETCODE_PRECONDITION_NOT_MET
       == this->publisherParticipant_->delete_contained_entities()
     ) {
     ACE_ERROR ((LM_ERROR,
-      ACE_TEXT("%T (%P|%t) ERROR: Unable to release the publication.\n")));
+      ACE_TEXT("(%P|%t) %T ERROR: Unable to release the publication.\n")));
 
   } else {
     // Release publisher participant.
@@ -460,19 +460,19 @@ TestSystem::~TestSystem()
         == TheParticipantFactory->delete_participant( this->publisherParticipant_.in())
       ) {
       ACE_ERROR ((LM_ERROR,
-        ACE_TEXT("%T (%P|%t) ERROR: Unable to release the publication participant.\n")));
+        ACE_TEXT("(%P|%t) %T ERROR: Unable to release the publication participant.\n")));
     }
   }
 
   if( this->subscriberParticipant_.in() != this->publisherParticipant_.in()) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: finalizing separate subscription apparatus.\n")));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: finalizing separate subscription apparatus.\n")));
 
     // Tear down the receiving apparatus.
     if( ::DDS::RETCODE_PRECONDITION_NOT_MET
         == this->subscriberParticipant_->delete_contained_entities()
       ) {
       ACE_ERROR ((LM_ERROR,
-        ACE_TEXT("%T (%P|%t) ERROR: Unable to release the subscription.\n")));
+        ACE_TEXT("(%P|%t) %T ERROR: Unable to release the subscription.\n")));
 
     } else {
       // Release subscriber participant.
@@ -480,17 +480,17 @@ TestSystem::~TestSystem()
           == TheParticipantFactory->delete_participant( this->subscriberParticipant_.in())
         ) {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("%T (%P|%t) ERROR: Unable to release the subscription participant.\n")));
+          ACE_TEXT("(%P|%t) %T ERROR: Unable to release the subscription participant.\n")));
       }
     }
   }
 
   // Release all the transport resources.
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: finalizing transport.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: finalizing transport.\n")));
   TheTransportFactory->release();
 
   // Release any remaining resources held for the service.
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: finalizing DCPS service.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: finalizing DCPS service.\n")));
   TheServiceParticipant->shutdown ();
 }
 
@@ -500,5 +500,5 @@ TestSystem::run()
   ForwardingListenerImpl* forwarder
     = dynamic_cast< ForwardingListenerImpl*>(this->listener_.in ());
   forwarder->waitForCompletion();
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: processing complete.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: processing complete.\n")));
 }

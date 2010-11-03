@@ -93,7 +93,7 @@ void DataReaderListenerImpl::on_liveliness_changed (
       }
       else if (status.alive_count == 0 && status.not_alive_count == 0)
       {
-        ACE_DEBUG ((LM_DEBUG, "(%P|%t)DataReaderListenerImpl::on_liveliness_changed - this is the time callback\n"));
+        ACE_DEBUG ((LM_DEBUG, "(%P|%t) DataReaderListenerImpl::on_liveliness_changed - this is the time callback\n"));
       }
       else
       {
@@ -123,7 +123,7 @@ void DataReaderListenerImpl::on_liveliness_changed (
 
     last_status_ = status;
     ACE_DEBUG((LM_DEBUG,
-      "%T (%P|%t) DataReaderListenerImpl::on_liveliness_changed %d\n"
+      "(%P|%t) %T DataReaderListenerImpl::on_liveliness_changed %d\n"
       "alive_count %d not_alive_count %d alive_count_change %d not_alive_count_change %d\n",
                liveliness_changed_count_, status.alive_count, status.not_alive_count,
                status.alive_count_change, status.not_alive_count_change));
@@ -288,7 +288,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     ::CORBA::SystemException
     ))
   {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t)received on_budget_exceeded \n"));
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_budget_exceeded \n"));
   }
 
   void DataReaderListenerImpl::on_connection_deleted (
@@ -298,6 +298,6 @@ void DataReaderListenerImpl::on_subscription_matched (
     ::CORBA::SystemException
     ))
   {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t)received on_connection_deleted  \n"));
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_connection_deleted  \n"));
   }
 

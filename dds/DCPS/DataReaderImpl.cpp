@@ -1303,7 +1303,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       RepoIdConverter writer_converter(header.publication_id_);
 
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT("(%P|%t)DataReaderImpl::data_received: reader %C writer %C ")
+                  ACE_TEXT("(%P|%t) DataReaderImpl::data_received: reader %C writer %C ")
                   ACE_TEXT("instance %d is_new_instance %d filtered %d \n"),
                   std::string(reader_converter).c_str(),
                   std::string(writer_converter).c_str(),
@@ -2312,7 +2312,7 @@ DataReaderImpl::writer_became_dead(WriterInfo & info,
     RepoIdConverter writer_converter(info.writer_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_dead: ")
-               ACE_TEXT("reader %C from writer%C state %C.\n"),
+               ACE_TEXT("reader %C from writer %C state %C.\n"),
                std::string(reader_converter).c_str(),
                std::string(writer_converter).c_str(),
                buffer.str().c_str()));
@@ -2948,7 +2948,7 @@ void DataReaderImpl::reschedule_deadline()
          ++iter) {
       if (iter->second->deadline_timer_id_ != -1) {
         if (this->watchdog_->reset_timer_interval(iter->second->deadline_timer_id_) == -1) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t)DataReaderImpl::reschedule_deadline %p\n"),
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::reschedule_deadline %p\n"),
                      ACE_TEXT("reset_timer_interval")));
         }
       }
@@ -3075,7 +3075,7 @@ void DataReaderImpl::accept_coherent (PublicationId& writer_id,
     RepoIdConverter writer (writer_id);
     RepoIdConverter publisher (publisher_id);
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t)DataReaderImpl::accept_coherent()")
+      ACE_TEXT("(%P|%t) DataReaderImpl::accept_coherent()")
       ACE_TEXT(" reader %C writer %C publisher %C \n"),
       std::string(reader).c_str(),
       std::string(writer).c_str(),
@@ -3100,7 +3100,7 @@ void DataReaderImpl::reject_coherent (PublicationId& writer_id,
     RepoIdConverter writer (writer_id);
     RepoIdConverter publisher (publisher_id);
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t)DataReaderImpl::reject_coherent()")
+      ACE_TEXT("(%P|%t) DataReaderImpl::reject_coherent()")
       ACE_TEXT(" reader %C writer %C publisher %C \n"),
       std::string(reader).c_str(),
       std::string(writer).c_str(),

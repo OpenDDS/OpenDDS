@@ -26,6 +26,9 @@ namespace OpenDDS
         virtual int load (const TransportIdType& id,
                           ACE_Configuration_Heap& cf);
 
+        /// Diagnostic aid.
+        virtual void dump();
+
         /// Describes the local endpoint to be used to accept
         /// passive connections.
         ACE_INET_Addr local_address_;

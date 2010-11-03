@@ -26,12 +26,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     subscriber.run();
 
   } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception ("%T (%P|%t) FATAL: Subscriber - CORBA problem detected.\n");
+    ex._tao_print_exception ("(%P|%t) %T FATAL: Subscriber - CORBA problem detected.\n");
     status = -1;
 
   } catch (const std::exception& ex) {
     ACE_ERROR ((LM_ERROR,
-      ACE_TEXT("%T (%P|%t) FATAL: Subscriber - ")
+      ACE_TEXT("(%P|%t) %T FATAL: Subscriber - ")
       ACE_TEXT("%C exception caught in main().\n"),
       ex.what()
     ));
@@ -39,7 +39,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   } catch(...) {
     ACE_ERROR ((LM_ERROR,
-      ACE_TEXT("%T (%P|%t) FATAL: Subscriber - ")
+      ACE_TEXT("(%P|%t) %T FATAL: Subscriber - ")
       ACE_TEXT("Unspecified exception caught in main() - panic.\n")
     ));
     status = -3;

@@ -61,7 +61,7 @@ DataReaderListenerImpl::on_data_available (DDS::DataReader_ptr reader)
       }
       else
       {
-        ACE_ERROR ((LM_ERROR, "(%P|%t)DataReaderListenerImpl::on_data_available:"
+        ACE_ERROR ((LM_ERROR, "(%P|%t) DataReaderListenerImpl::on_data_available:"
                              " received unknown instance state %d\n", si.instance_state));
       }
 

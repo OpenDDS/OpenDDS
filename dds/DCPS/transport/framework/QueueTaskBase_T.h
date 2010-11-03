@@ -66,7 +66,7 @@ public:
       this->work_available_.signal();
 
     } else
-      ACE_ERROR((LM_ERROR, "(%P|%t)ERROR: QueueTaskBase::add %p\n", "enqueue_tail"));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: QueueTaskBase::add %p\n", "enqueue_tail"));
 
     return result;
   }
@@ -128,7 +128,7 @@ public:
           //when using thread_per_connection and the user application thread
           //send requests without interval. We just need ignore the dequeue
           //failure.
-          //ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: QueueTaskBase::svc  %p\n",
+          //ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: QueueTaskBase::svc  %p\n",
           //  "dequeue_head"));
           continue;
         }

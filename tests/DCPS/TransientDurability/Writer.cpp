@@ -52,7 +52,7 @@ Writer::svc ()
     message.text    = CORBA::string_dup ("Worst. Movie. Ever.");
 
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT ("%T (%P|%t) Writer::svc starting to write.\n")));
+               ACE_TEXT ("(%P|%t) %T Writer::svc starting to write.\n")));
 
     this->write (message_dw.in (), handle, message);
 
@@ -123,7 +123,7 @@ Writer::write (Messenger::MessageDataWriter_ptr message_dw,
     if (ret != ::DDS::RETCODE_OK)
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t)ERROR  Writer::svc, ")
+                  ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
                   ACE_TEXT ("%dth write() returned %d.\n"),
                   i,
                   -1));

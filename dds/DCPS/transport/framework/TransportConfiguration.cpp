@@ -58,3 +58,48 @@ OpenDDS::DCPS::TransportConfiguration::load(const TransportIdType& id
   adjust_config_value();
   return 0;
 }
+
+void 
+OpenDDS::DCPS::TransportConfiguration::dump()
+{
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
+             ACE_TEXT("swap_bytes: %C.\n"),
+             (this->swap_bytes_ ? "true" : "false")));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
+             ACE_TEXT("queue_messages_per_pool: %d.\n"),
+             this->queue_messages_per_pool_));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
+             ACE_TEXT("queue_initial_pools: %d.\n"),
+             this->queue_initial_pools_)); 
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
+             ACE_TEXT("max_packet_size: %d.\n"),
+             this->max_packet_size_));   
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
+             ACE_TEXT("max_samples_per_packet: %d.\n"),
+             this->max_samples_per_packet_));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
+             ACE_TEXT("optimum_packet_size: %d.\n"),
+             this->optimum_packet_size_));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
+             ACE_TEXT("transport_type: %C.\n"),
+             this->transport_type_.c_str()));  
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
+             ACE_TEXT("thread_per_connection: %C.\n"),
+             (this->thread_per_connection_ ? "true" : "false"))); 
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
+             ACE_TEXT("datalink_release_delay: %u.\n"),
+             this->datalink_release_delay_)); 
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
+             ACE_TEXT("datalink_control_chunks: %d.\n"),
+             this->datalink_control_chunks_));
+}

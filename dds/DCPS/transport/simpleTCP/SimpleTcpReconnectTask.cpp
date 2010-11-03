@@ -42,5 +42,5 @@ void OpenDDS::DCPS::SimpleTcpReconnectTask::execute(ReconnectOpType& op)
     }
 
   } else
-    ACE_ERROR((LM_ERROR, "(%P|%t)ERROR: SimpleTcpReconnectTask::svc unknown operation %d\n", op));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: SimpleTcpReconnectTask::svc unknown operation %d\n", op));
 }

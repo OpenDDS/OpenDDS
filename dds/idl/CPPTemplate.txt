@@ -576,7 +576,7 @@ void
   data_allocator_ = new DataAllocator(get_n_chunks ());
   if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("<%TYPE%>DataReaderImpl::")
+               ACE_TEXT("(%P|%t) <%TYPE%>DataReaderImpl::")
                ACE_TEXT("enable_specific-data")
                ACE_TEXT(" Cached_Allocator_With_Overflow ")
                ACE_TEXT("%x with %d chunks\n"),
@@ -2159,9 +2159,9 @@ DDS::ReturnCode_t
   if (received_data.length() != info_seq.length())
   {
     ACE_DEBUG((LM_DEBUG,
-               "<%TYPE%>DataReaderImpl::%C "
-               "PRECONDITION_NOT_MET sample and info input "
-               "sequences do not match.\n",
+               ACE_TEXT("(%P|%t) <%TYPE%>DataReaderImpl::%C ")
+               ACE_TEXT("PRECONDITION_NOT_MET sample and info input ")
+               ACE_TEXT("sequences do not match.\n"),
                method_name ));
     return ::DDS::RETCODE_PRECONDITION_NOT_MET;
   }
@@ -2170,9 +2170,9 @@ DDS::ReturnCode_t
   if ((received_data.maximum() > 0) && (received_data.release() == false))
   {
     ACE_DEBUG((LM_DEBUG,
-               "<%TYPE%>DataReaderImpl::%C "
-               "PRECONDITION_NOT_MET mismatch of "
-               "maximum %d and owns %d\n",
+               ACE_TEXT("(%P|%t) <%TYPE%>DataReaderImpl::%C ")
+               ACE_TEXT("PRECONDITION_NOT_MET mismatch of ")
+               ACE_TEXT("maximum %d and owns %d\n"),
                method_name,
                received_data.maximum(),
                received_data.release() ));
@@ -2201,8 +2201,8 @@ DDS::ReturnCode_t
     {
       //SPEC ref v1.2 7.1.2.5.3.8 #5c
       ACE_DEBUG((LM_DEBUG,
-                 "<%TYPE%>DataReaderImpl::%C "
-                 "PRECONDITION_NOT_MET max_samples %d > maximum %d\n",
+                 ACE_TEXT("(%P|%t) <%TYPE%>DataReaderImpl::%C ")
+                 ACE_TEXT("PRECONDITION_NOT_MET max_samples %d > maximum %d\n"),
                  method_name,
                  max_samples,
                  received_data.maximum()));

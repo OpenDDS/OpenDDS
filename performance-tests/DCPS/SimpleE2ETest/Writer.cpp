@@ -51,7 +51,7 @@ void write (long id,
   //SHH remove this kludge when the transport is fixed.
   ACE_OS::sleep(5); // ensure that the connection has been fully established
   ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
+            ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
 
   ::DDS::InstanceHandle_t handle
       = pt_dw->register_instance(data);
@@ -94,11 +94,11 @@ void
 Writer::start ()
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT(" %P|%t Writer::start \n")));
+    ACE_TEXT("(%P|%t) Writer::start \n")));
   if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1)
   {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT(" %P|%t Writer::start, %p.\n"),
+                ACE_TEXT("(%P|%t) Writer::start, %p.\n"),
                 ACE_TEXT("activate")));
     throw TestException ();
   }
@@ -108,7 +108,7 @@ void
 Writer::end ()
 {
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT(" %P|%t Writer::end \n")));
+             ACE_TEXT("(%P|%t) Writer::end \n")));
   wait ();
 }
 
@@ -117,7 +117,7 @@ int
 Writer::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT(" %P|%t Writer::svc begins samples with %d floats.\n"),
+              ACE_TEXT("(%P|%t) Writer::svc begins samples with %d floats.\n"),
                 data_size_));
 
   try
@@ -210,7 +210,7 @@ Writer::svc ()
   ACE_OS::sleep(1);
 
   ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT(" %P|%t Writer::svc finished.\n")));
+              ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
   return 0;
 }
 

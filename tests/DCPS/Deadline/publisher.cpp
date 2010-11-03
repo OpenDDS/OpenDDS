@@ -185,13 +185,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
           exit (1);
         }
 
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Publisher: sleep for %d milliseconds\n"),
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) Publisher: sleep for %d milliseconds\n"),
                               SLEEP_DURATION.msec ()));
 
         // Wait for a set of deadline periods to expire.
         ACE_OS::sleep (SLEEP_DURATION);
 
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Publisher: now verify missed ")
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) Publisher: now verify missed ")
                             ACE_TEXT ("deadline status \n")));
 
         ::DDS::InstanceHandle_t handle1 = writer1->get_instance_handle ();
@@ -204,7 +204,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
            exit (1);
         }
 
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Publisher: got missed")
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) Publisher: got missed")
                               ACE_TEXT ("deadline status \n")));
 
         if (deadline_status.total_count != NUM_EXPIRATIONS * NUM_WRITE_THREADS)
@@ -241,13 +241,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         writer1->wait ();
         writer2->wait ();
 
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Publisher: sleep for %d milliseconds\n"),
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) Publisher: sleep for %d milliseconds\n"),
                               SLEEP_DURATION.msec()));
 
         // Wait for another set of deadline periods to expire.
         ACE_OS::sleep (SLEEP_DURATION);
 
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Publisher: now verify missed ")
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) Publisher: now verify missed ")
                             ACE_TEXT ("deadline status \n")));
 
         if (dw->get_offered_deadline_missed_status(deadline_status) != ::DDS::RETCODE_OK)
@@ -256,7 +256,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
            exit (1);
         }
 
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)Publisher: got missed")
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) Publisher: got missed")
                               ACE_TEXT ("deadline status \n")));
 
         // The timer is called in fixed timer (every 4 seconds). During this last
