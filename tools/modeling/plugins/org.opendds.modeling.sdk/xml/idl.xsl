@@ -52,7 +52,7 @@ module </xsl:text>
   <xsl:variable name="non-terminals" select="$type[@name  = $type/*/@type]"/>
 
   <!-- Terminal user defined types are all user defined types minus the non-terminals. -->
-  <xsl:variable name="terminals" select="$type[count(. | $non-terminals) != count($non-terminals)]"/>
+  <xsl:variable name="terminals" select="$type[not(@name  = $type/*/@type)]"/>
 
   <!-- Process all types with no dependencies on them. -->
   <xsl:call-template name="generate-idl">
@@ -64,7 +64,6 @@ module </xsl:text>
 };
 
 </xsl:text>
-  <xsl:apply-templates />
 </xsl:template>
 <!-- End of main processing template. -->
 
@@ -107,11 +106,12 @@ module </xsl:text>
 
 <!-- Depth first search for type names of predecessors. -->
 <xsl:template name="get-dependencies">
-  <xsl:param name="successors" select=".."/>
+  <xsl:param name="successors" select="/.."/>
 
   <xsl:variable name="direct-predecessors" select="$type[@name = current()/*/@type]"/>
 
-  <xsl:for-each select="$direct-predecessors[count(. | $successors) != count($successors)]">
+  <!-- Do not slim down this node-set: on Eclipse, causes empty node set-->
+  <xsl:for-each select="$direct-predecessors">
     <xsl:call-template name="get-dependencies">
       <xsl:with-param name="successors" select=". | $successors"/>
     </xsl:call-template>
@@ -376,9 +376,27 @@ module </xsl:text>
     </xsl:call-template>
   </xsl:variable>
 
-  <xsl:for-each select="$lut"> <!-- Change context for the lookup -->
-    <xsl:value-of select="normalize-space(key('lut-type', $typename)/@corbatype)"/>
-  </xsl:for-each>
+  <xsl:choose>
+    <xsl:when test="$typename='Boolean'">boolean</xsl:when>
+    <xsl:when test="$typename='Char'">char</xsl:when>
+    <xsl:when test="$typename='Octet'">octet</xsl:when>
+    <xsl:when test="$typename='Double'">double</xsl:when>
+    <xsl:when test="$typename='Float'">float</xsl:when>
+    <xsl:when test="$typename='Short'">short</xsl:when>
+    <xsl:when test="$typename='Integer'">long</xsl:when>
+    <xsl:when test="$typename='Long'">long</xsl:when>
+    <xsl:when test="$typename='LongLong'">long long</xsl:when>
+    <xsl:when test="$typename='UShort'">unsigned short</xsl:when>
+    <xsl:when test="$typename='UInteger'">unsigned long</xsl:when>
+    <xsl:when test="$typename='ULong'">unsigned long</xsl:when>
+    <xsl:when test="$typename='ULongLong'">unsigned long long</xsl:when>
+    <xsl:when test="$typename='String'">string</xsl:when>
+    <xsl:when test="$typename='Array'">array</xsl:when>
+    <xsl:when test="$typename='Sequence'">sequence</xsl:when>
+    <xsl:when test="$typename='Union'">union</xsl:when>
+    <xsl:when test="$typename='Enum'">enum</xsl:when>
+    <xsl:when test="$typename='Struct'">struct</xsl:when>
+  </xsl:choose>
 </xsl:template>
 
 <!-- Strip any namespace qualifier from a variable. -->
@@ -420,6 +438,9 @@ module </xsl:text>
   <type type="Struct"                                 corbatype="struct"/>
 </lut:tables>
 <!-- ................... -->
+
+<!-- default override -->
+<xsl:template match="text()" />
 
 </xsl:stylesheet>
 
