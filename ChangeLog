@@ -1,3 +1,22 @@
+Wed Nov  3 19:09:13 UTC 2010  Don Hudson  <dchudson@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+
+          Restored initialization of DEFAULT_TTL to original.
+
+          Changed dump() to output ttl_ in hex.
+
+Wed Nov  3 15:58:38 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Changed guard in get_or_create_factory() to include
+          finding the transport generator and using the generator to
+          register the factory.  Instead of releasing the guard after
+          finding the generator and then getting a new guard before
+          using the generator to register the factory.
+
+
 Wed Nov  3 15:29:11 UTC 2010  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
@@ -9,7 +28,7 @@ Wed Nov  3 15:29:11 UTC 2010  Don Hudson  <hudsond@ociweb.com>
         * dds/DCPS/DataReaderImpl.cpp:
 
           Removed operator<<(ostream& str, WriterInfo::WriterState value)
-          since it didn't function as intended on some platforms 
+          since it didn't function as intended on some platforms
           because WriterState is an enum.  Replaced it with get_state_str().
 
         * dds/DCPS/GuidConverter.cpp:
