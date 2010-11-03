@@ -1,9 +1,16 @@
+Wed Nov  3 15:08:23 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+
+          Added catch block for std::exception so more detail can
+          be included in error message.
+
 Wed Nov  3 14:23:58 UTC 2010  Don Hudson  <hudsond@ociweb.com>
 
         * bin/dcps_tests.lst:
 
           Removed Messenger default UDP test because there is no
-          default UDP port. 
+          default UDP port.
 
         * dds/DCPS/transport/framework/TransportConfiguration.h:
         * dds/DCPS/transport/framework/TransportConfiguration.cpp:
@@ -20,7 +27,7 @@ Wed Nov  3 14:23:58 UTC 2010  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:
 
-          Changed config() to dump transport configuration 
+          Changed config() to dump transport configuration
           if transport debugging is on.
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
@@ -37,7 +44,7 @@ Wed Nov  3 14:23:58 UTC 2010  Don Hudson  <hudsond@ociweb.com>
         * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
 
           Changed find_or_create_datalink() and passive_connection()
-          to dump transport configuration if data link couldn't be 
+          to dump transport configuration if data link couldn't be
           found or created and transport debugging is on.
 
         * dds/DCPS/transport/udp/UdpTransport.cpp:
