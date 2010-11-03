@@ -106,15 +106,20 @@ module </xsl:text>
 
 <!-- Depth first search for type names of predecessors. -->
 <xsl:template name="get-dependencies">
+  <!-- successors is the set of nodes already represented in the get-dependencies output.
+       used to prevent duplicates. -->
   <xsl:param name="successors" select="/.."/>
 
   <xsl:variable name="direct-predecessors" select="$type[@name = current()/*/@type]"/>
 
-  <!-- Do not slim down this node-set: on Eclipse, causes empty node set-->
+  <!-- using a Kaysian intersection predicate causes issues in eclipse here -->
   <xsl:for-each select="$direct-predecessors">
-    <xsl:call-template name="get-dependencies">
-      <xsl:with-param name="successors" select=". | $successors"/>
-    </xsl:call-template>
+    <xsl:if test="not($successors[@name = current()/@name])">
+      <xsl:call-template name="get-dependencies">
+        <!-- Kaysian intersection are fine in eclipse due to no context switch -->
+        <xsl:with-param name="successors" select=". | $successors"/>
+      </xsl:call-template>
+    </xsl:if>
   </xsl:for-each>
   <xsl:text> </xsl:text>
   <xsl:value-of select="@name"/>
@@ -438,9 +443,6 @@ module </xsl:text>
   <type type="Struct"                                 corbatype="struct"/>
 </lut:tables>
 <!-- ................... -->
-
-<!-- default override -->
-<xsl:template match="text()" />
 
 </xsl:stylesheet>
 
