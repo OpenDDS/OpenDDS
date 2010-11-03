@@ -91,11 +91,13 @@ public:
   /// called when a sample or other activity is received from this writer.
   int received_activity(const ACE_Time_Value& when);
 
-  /// returns 1 if the DataWriter is lively; otherwise returns 0.
+  /// returns 1 if the DataWriter is lively; 2 if dead; otherwise returns 0.
   WriterState get_state() {
     return state_;
   };
 
+  std::string get_state_str() const;
+ 
   /// update liveliness when remove_association is called.
   void removed();
 
@@ -774,8 +776,5 @@ private:
 #if defined (__ACE_INLINE__)
 # include "DataReaderImpl.inl"
 #endif  /* __ACE_INLINE__ */
-
-// Insertion of WriterState enumeration values;
-ostream& operator<<(ostream& str, OpenDDS::DCPS::WriterInfo::WriterState value);
 
 #endif /* OPENDDS_DCPS_DATAREADER_H  */

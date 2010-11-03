@@ -1,3 +1,30 @@
+Wed Nov  3 15:29:11 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Changed data_received() to skip finding the writer
+          when ENTITYKIND_OPENDDS_NIL_WRITER is specified.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Removed operator<<(ostream& str, WriterInfo::WriterState value)
+          since it didn't function as intended on some platforms 
+          because WriterState is an enum.  Replaced it with get_state_str().
+
+        * dds/DCPS/GuidConverter.cpp:
+        * dds/DdsDcpsGuid.idl:
+
+          Added type ENTITYKIND_OPENDDS_NIL_WRITER for use
+          in infrastructure testing where there is no writer.
+
+        * tests/DCPS/FooTest4/Writer.cpp:
+
+          Changed to use ENTITYKIND_OPENDDS_NIL_WRITER since
+          the test has no writer by design.  This eliminates
+          multiple warnings "failed to find publication data for ..."
+          that are misleading for this test.
+
 Wed Nov  3 15:08:23 UTC 2010  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportReactorTask.cpp:
