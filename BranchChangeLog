@@ -1,3 +1,10 @@
+Thu Nov  4 20:25:04 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+
+          added handling of intrinsic-type sequences in IDL - Windows
+          needs an additional #include 
+
 Thu Nov  4 19:49:09 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
