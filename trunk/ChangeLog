@@ -1,3 +1,11 @@
+Thu Nov  4 19:52:05 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/WriteDataContainer.h:
+          Fixed some typos in comments
+
 Thu Nov  4 12:59:42 UTC 2010  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:

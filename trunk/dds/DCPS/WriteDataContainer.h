@@ -264,7 +264,7 @@ public:
 
   /**
    * Allocate a DataSampleListElement object and check the space
-   * avaliability in the instance list for newly allocated element.
+   * availability in the instance list for newly allocated element.
    * For the blocking write case, if the instance list size reaches
    * depth_, then the new element will be added to the waiting list
    * and is blocked until a previous sample is delivered or dropped
