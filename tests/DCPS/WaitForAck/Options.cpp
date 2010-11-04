@@ -50,6 +50,8 @@ Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
    transportKey_( DEFAULT_TRANSPORT_KEY)
 {
   ACE_Arg_Shifter parser( argc, argv);
+  parser.ignore_arg(); // Ignore the first arg, it's executable path and name.
+
   while( parser.is_anything_left()) {
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,

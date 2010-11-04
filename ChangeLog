@@ -1,3 +1,47 @@
+Thu Nov  4 19:11:05 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Changed debug message from LM_WARNING to LM_DEBUG since it's
+          a debug level 5 message.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Changed debug message in remove_associations() from LM_DEBUG
+          to LM_WARNING since it's for the case where a reader is removed
+          before fully_associated() is called.
+
+        * performance-tests/DCPS/Priority/Options.cpp:
+        * tests/DCPS/WaitForAck/Options.cpp:
+
+          Changed to skip parsing the first argument to eliminate
+          debug warning messages like:
+            WARNING: Options::Options() - ignoring argument: .\.\\subscriber.EXE.
+
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/DPFactoryQos/pub.ini:
+        * tests/DCPS/DPFactoryQos/sub.ini:
+        * tests/DCPS/Deadline/sub.ini:
+        * tests/DCPS/PersistentDurability/pub.ini:
+        * tests/DCPS/PersistentDurability/sub.ini:
+        * tests/DCPS/Serializer_wstring/pub.ini:
+        * tests/DCPS/Serializer_wstring/sub.ini:
+        * tests/DCPS/SetQosDeadline/pub.ini:
+        * tests/DCPS/SetQosDeadline/sub.ini:
+        * tests/DCPS/SetQosPartition/pub.ini:
+        * tests/DCPS/SetQosPartition/sub.ini:
+        * tests/DCPS/StringKey/pub.ini:
+        * tests/DCPS/StringKey/sub.ini:
+        * tests/DCPS/TransientDurability/pub.ini:
+        * tests/DCPS/TransientDurability/sub.ini:
+        * tests/DCPS/sub_init_loop/pub.ini:
+        * tests/DCPS/sub_init_loop/sub.ini:
+
+          Commented out configuration options that don't have values,
+          for example "swap_bytes=".  This was done to stop warnings
+          output when debug level logging is turned on that the default
+          value for the option is being used.
+
 Thu Nov  4 19:52:05 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/DataSampleHeader.h:
