@@ -59,7 +59,7 @@ OpenDDS::DCPS::TransportConfiguration::load(const TransportIdType& id
   return 0;
 }
 
-void 
+void
 OpenDDS::DCPS::TransportConfiguration::dump()
 {
   ACE_DEBUG((LM_DEBUG,
@@ -73,11 +73,11 @@ OpenDDS::DCPS::TransportConfiguration::dump()
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
              ACE_TEXT("queue_initial_pools: %d.\n"),
-             this->queue_initial_pools_)); 
+             this->queue_initial_pools_));
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
              ACE_TEXT("max_packet_size: %d.\n"),
-             this->max_packet_size_));   
+             this->max_packet_size_));
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
              ACE_TEXT("max_samples_per_packet: %d.\n"),
@@ -89,7 +89,7 @@ OpenDDS::DCPS::TransportConfiguration::dump()
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
              ACE_TEXT("transport_type: %C.\n"),
-             this->transport_type_.c_str()));  
+             this->transport_type_.c_str()));
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
              ACE_TEXT("thread_per_connection: %C.\n"),
@@ -97,7 +97,7 @@ OpenDDS::DCPS::TransportConfiguration::dump()
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
              ACE_TEXT("datalink_release_delay: %u.\n"),
-             this->datalink_release_delay_)); 
+             this->datalink_release_delay_));
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
              ACE_TEXT("datalink_control_chunks: %d.\n"),

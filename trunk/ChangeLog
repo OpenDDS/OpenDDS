@@ -1,3 +1,16 @@
+Thu Nov  4 12:59:42 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.cpp:
+
+          Removed trailing white space.
+
 Wed Nov  3 19:09:13 UTC 2010  Don Hudson  <dchudson@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:

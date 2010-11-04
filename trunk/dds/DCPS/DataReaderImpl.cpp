@@ -1315,7 +1315,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     bool verify_coherent = false;
     WriterInfo* writer = 0;
 
-    if (header.publication_id_.entityId.entityKind 
+    if (header.publication_id_.entityId.entityKind
         != OpenDDS::DCPS::ENTITYKIND_OPENDDS_NIL_WRITER) {
       ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
