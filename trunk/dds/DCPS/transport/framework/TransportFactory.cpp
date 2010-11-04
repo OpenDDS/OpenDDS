@@ -333,23 +333,20 @@ OpenDDS::DCPS::TransportFactory::get_or_create_factory(FactoryIdType factory_id)
     throw CORBA::BAD_PARAM();
   }
 
+  // Guard not just the find, but until factory is registered.
+  GuardType guard(this->lock_);
+
   TransportImplFactory_rch factory;
-  int result = 0;
-  {
-    GuardType guard(this->lock_);
-    result = find(impl_type_map_, factory_id, factory);
-  }
+  int result = find(impl_type_map_, factory_id, factory);
 
   if (result == 0)
     return factory;
 
   TransportGenerator_rch generator;
-  {
-    GuardType guard(this->lock_);
-    // The factory_id uses the transport type name, we use the factory_id
-    // to find the generator for the transport type.
-    result = find(generator_map_, factory_id.c_str(), generator);
-  }
+  
+  // The factory_id uses the transport type name, we use the factory_id
+  // to find the generator for the transport type.
+  result = find(generator_map_, factory_id.c_str(), generator);
 
   if (result == 0) {
     factory = generator->new_factory();
