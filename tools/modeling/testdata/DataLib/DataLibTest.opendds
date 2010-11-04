@@ -1,13 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<types:DataLib xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_bVL_MKO4Ed-9KMRPTsXTAg" name="DataLibTest">
-  <dataTypes xsi:type="types:Short" xmi:id="_5BtScKO4Ed-9KMRPTsXTAg"/>
-  <dataTypes xsi:type="types:Sequence" xmi:id="_Ap0TUKO5Ed-9KMRPTsXTAg" name="ShortSequence" length="10" subtype="_5BtScKO4Ed-9KMRPTsXTAg"/>
-  <dataTypes xsi:type="types:idlTypedef" xmi:id="_Iq8RIKO5Ed-9KMRPTsXTAg" name="shortseqtypedef" type="_Ap0TUKO5Ed-9KMRPTsXTAg"/>
-  <dataTypes xsi:type="types:idlStruct" xmi:id="_Mod2oKO5Ed-9KMRPTsXTAg">
-    <members xsi:type="types:String" xmi:id="_SkZpkKO5Ed-9KMRPTsXTAg" name="name"/>
-    <members xsi:type="types:ULong" xmi:id="_hrbTEKO5Ed-9KMRPTsXTAg" name="value"/>
-    <members xsi:type="types:Short" xmi:id="_j8Np8KO5Ed-9KMRPTsXTAg" name="key"/>
-    <members xsi:type="types:TypedefRef" xmi:id="_pBUikKO5Ed-9KMRPTsXTAg" name="bseq" reference="_Iq8RIKO5Ed-9KMRPTsXTAg"/>
-    <keys xmi:id="_u9oI8KO5Ed-9KMRPTsXTAg" member="_5BtScKO4Ed-9KMRPTsXTAg"/>
-  </dataTypes>
-</types:DataLib>
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_YoeJMegzEd-S8emkenrYEA">
+  <dataLib xmi:id="_aZ_xMOgzEd-S8emkenrYEA" name="dataLibTest">
+    <types xsi:type="types:String" xmi:id="_ffCYYOgzEd-S8emkenrYEA"/>
+    <types xsi:type="types:Char" xmi:id="_j6eEEOhCEd-5vPLvrJ-8PA"/>
+    <types xsi:type="types:Boolean" xmi:id="_Qe5ikOhKEd-JX5YzKdN9LA"/>
+    <types xsi:type="types:Double" xmi:id="_R2iD4OhKEd-JX5YzKdN9LA"/>
+    <types xsi:type="types:Enum" xmi:id="_k55ekOgzEd-S8emkenrYEA" name="Color">
+      <literals>RED</literals>
+      <literals>GREEN</literals>
+      <literals>BLUE</literals>
+    </types>
+    <types xsi:type="types:Float" xmi:id="_S5JXcOhKEd-JX5YzKdN9LA"/>
+    <types xsi:type="types:LongLong" xmi:id="_VDo5EOhKEd-JX5YzKdN9LA"/>
+    <types xsi:type="types:Octet" xmi:id="_VocPQOhKEd-JX5YzKdN9LA"/>
+    <types xsi:type="types:ULong" xmi:id="_Y1Z6gOhKEd-JX5YzKdN9LA"/>
+    <types xsi:type="types:ULongLong" xmi:id="_aNZBIOhKEd-JX5YzKdN9LA"/>
+    <types xsi:type="types:UShort" xmi:id="_bBA2cOhKEd-JX5YzKdN9LA"/>
+    <types xsi:type="types:WChar" xmi:id="_bv4uoOhKEd-JX5YzKdN9LA"/>
+    <types xsi:type="types:WString" xmi:id="_cOIw4OhKEd-JX5YzKdN9LA"/>
+    <types xsi:type="types:Typedef" xmi:id="_5BJgsOgzEd-S8emkenrYEA" type="_6vM98OgzEd-S8emkenrYEA" name="StringArray"/>
+    <types xsi:type="types:Array" xmi:id="_6vM98OgzEd-S8emkenrYEA" length="42" subtype="_ffCYYOgzEd-S8emkenrYEA"/>
+    <types xsi:type="types:Struct" xmi:id="_JuIbYOg0Ed-S8emkenrYEA" name="InnerStruct" isDcpsDataType="false">
+      <fields xmi:id="_fXqGkOhKEd-JX5YzKdN9LA" name="aBoolean" type="_Qe5ikOhKEd-JX5YzKdN9LA"/>
+      <fields xmi:id="_isbqAOhKEd-JX5YzKdN9LA" name="aDouble" type="_R2iD4OhKEd-JX5YzKdN9LA"/>
+      <fields xmi:id="_lbR14OhKEd-JX5YzKdN9LA" name="aFloat" type="_S5JXcOhKEd-JX5YzKdN9LA"/>
+      <fields xmi:id="_oAN30OhKEd-JX5YzKdN9LA" name="aLongLong" type="_VDo5EOhKEd-JX5YzKdN9LA"/>
+      <fields xmi:id="_qoAZcOhKEd-JX5YzKdN9LA" name="anOctet" type="_VocPQOhKEd-JX5YzKdN9LA"/>
+      <fields xmi:id="_t5FvsOhKEd-JX5YzKdN9LA" name="aULong" type="_Y1Z6gOhKEd-JX5YzKdN9LA"/>
+      <fields xmi:id="_yLjDYOhKEd-JX5YzKdN9LA" name="aULongLong" type="_aNZBIOhKEd-JX5YzKdN9LA"/>
+      <fields xmi:id="_07HA8OhKEd-JX5YzKdN9LA" name="aUShort" type="_bBA2cOhKEd-JX5YzKdN9LA"/>
+      <fields xmi:id="_8CM_cOhKEd-JX5YzKdN9LA" name="aWChar" type="_bv4uoOhKEd-JX5YzKdN9LA"/>
+      <fields xmi:id="__pJ4AOhKEd-JX5YzKdN9LA" name="aWString" type="_cOIw4OhKEd-JX5YzKdN9LA"/>
+    </types>
+    <types xsi:type="types:Struct" xmi:id="_CSS78Og0Ed-S8emkenrYEA" name="Struct1">
+      <fields xmi:id="_rKYkMeg-Ed-uqdAPvK3kOg" name="color" type="_k55ekOgzEd-S8emkenrYEA"/>
+      <fields xmi:id="_xvnLwOg-Ed-uqdAPvK3kOg" name="id" type="_enWtAOg0Ed-S8emkenrYEA"/>
+      <fields xmi:id="_AKXkIOhKEd-JX5YzKdN9LA" name="longs" type="_zq7n8OhJEd-JX5YzKdN9LA"/>
+      <fields xmi:id="_EmPTgOg_Ed-uqdAPvK3kOg" name="inner" type="_JuIbYOg0Ed-S8emkenrYEA"/>
+      <fields xmi:id="_ayCVYehBEd-8ssTn6P3iyw" name="names" type="_5BJgsOgzEd-S8emkenrYEA"/>
+      <keys xmi:id="_9NEGgOg-Ed-uqdAPvK3kOg" field="_xvnLwOg-Ed-uqdAPvK3kOg"/>
+    </types>
+    <types xsi:type="types:Sequence" xmi:id="_bkv3oOg0Ed-S8emkenrYEA" length="10" subtype="_enWtAOg0Ed-S8emkenrYEA"/>
+    <types xsi:type="types:Typedef" xmi:id="_zq7n8OhJEd-JX5YzKdN9LA" type="_bkv3oOg0Ed-S8emkenrYEA" name="LongSeq"/>
+    <types xsi:type="types:Long" xmi:id="_enWtAOg0Ed-S8emkenrYEA"/>
+    <types xsi:type="types:Union" xmi:id="_kLgSEOg0Ed-S8emkenrYEA" name="TestUnion" switch="_j6eEEOhCEd-5vPLvrJ-8PA">
+      <branches xmi:id="_wLrp8Og1Ed-S8emkenrYEA">
+        <field xmi:id="_jxfjsOhBEd-8ssTn6P3iyw" name="long_mem" type="_enWtAOg0Ed-S8emkenrYEA"/>
+        <cases xmi:id="_bor0EehCEd-5vPLvrJ-8PA" literal="'L'"/>
+      </branches>
+      <branches xmi:id="_0xfhAOhBEd-8ssTn6P3iyw">
+        <field xmi:id="_f9G2oOhCEd-5vPLvrJ-8PA" name="char_mem" type="_j6eEEOhCEd-5vPLvrJ-8PA"/>
+        <cases xmi:id="_cu6YIehJEd-JX5YzKdN9LA" literal="'c'"/>
+        <cases xmi:id="_eizXoOhJEd-JX5YzKdN9LA" literal="'C'"/>
+      </branches>
+      <default xmi:id="_lg9ckOhJEd-JX5YzKdN9LA" name="string_mem" type="_ffCYYOgzEd-S8emkenrYEA"/>
+    </types>
+  </dataLib>
+</opendds:OpenDDSModel>
