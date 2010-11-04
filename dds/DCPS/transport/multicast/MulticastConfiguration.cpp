@@ -155,7 +155,7 @@ MulticastConfiguration::default_group_address(ACE_INET_Addr& group_address,
 }
 
 
-void 
+void
 MulticastConfiguration::dump()
 {
   // Acquire lock on the log so the entire dump is output as a block
