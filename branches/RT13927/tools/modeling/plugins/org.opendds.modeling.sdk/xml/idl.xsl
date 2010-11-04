@@ -35,6 +35,9 @@
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
 
+  <!-- required to build on windows -->
+  <xsl:call-template name="processIntrinsicSequences"/>
+
   <xsl:text>
 // Some header information should be generated here.
 module </xsl:text>
@@ -443,6 +446,67 @@ module </xsl:text>
   <type type="Struct"                                 corbatype="struct"/>
 </lut:tables>
 <!-- ................... -->
+
+<xsl:template name="processIntrinsicSequences">
+
+  <!-- pull tests to output each include only once -->
+  <xsl:variable name="sequences" select="$type[@type = 'opendds:idlSequence']/opendds:member"/>
+  <xsl:if test="$sequences[@type = 'opendds:Boolean']">
+    <xsl:text>#include &lt;tao/BooleanSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:Char']">
+    <xsl:text>#include &lt;tao/CharSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:Octet']">
+    <xsl:text>#include &lt;tao/Octet.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:Double']">
+    <xsl:text>#include &lt;tao/DoubleSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:Float']">
+    <xsl:text>#include &lt;tao/FloatSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:Short']">
+    <xsl:text>#include &lt;tao/ShortSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:Long']">
+    <xsl:text>#include &lt;tao/LongSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:LongLong']">
+    <xsl:text>#include &lt;tao/LongLongSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:UShort']">
+    <xsl:text>#include &lt;tao/UShortSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:ULong']">
+    <xsl:text>#include &lt;tao/ULongSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:ULongLong']">
+    <xsl:text>#include &lt;tao/ULongLongSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:String']">
+    <xsl:text>#include &lt;tao/StringSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+
+  <!-- ecore don't know
+    Enum FloatingPoint Int Integer SignedInt UInteger UnsignedInt
+       where from?
+    LongDoubleSeq.pidl WCharSeq.pidl WStringSeq.pidl
+  -->
+    
+</xsl:template>
 
 </xsl:stylesheet>
 
