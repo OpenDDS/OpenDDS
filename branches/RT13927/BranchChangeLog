@@ -1,18 +1,36 @@
+Thu Nov  4 19:49:09 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Topics.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Types.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Types.ecore_diagram:
+
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds:
+
+          Updates to reflect the refactored Types package. Note that changes at
+          the GMF level still need to be committed.
+
 Wed Nov  3 20:38:00 UTC 2010  Jeff Schmitz <schmitzj@ociweb.com>
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
 
-	  remove default text match override. Add back new predicate of
-	  direct-predecessors within get-dependencies. Comments
+          remove default text match override. Add back new predicate of
+          direct-predecessors within get-dependencies. Comments
 
 Wed Nov  3 03:58:00 UTC 2010  Jeff Schmitz <schmitzj@ociweb.com>
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
 
-	  remove previous apply-templates addition, don't use lookup
-	  tables, don't output text nodes by default, remove predicate to
-	  direct-predecessors, make default of successors param an empty
-	  node set
+          remove previous apply-templates addition, don't use lookup
+          tables, don't output text nodes by default, remove predicate to
+          direct-predecessors, make default of successors param an empty
+          node set
 
 Tue Nov  2 21:37:57 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
