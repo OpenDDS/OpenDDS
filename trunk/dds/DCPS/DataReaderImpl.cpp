@@ -449,7 +449,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
         if (DCPS_debug_level > 4) {
           RepoIdConverter converter(wr_ids[index]);
-          ACE_DEBUG((LM_WARNING,
+          ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
                      ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
                      std::string(converter).c_str(),
