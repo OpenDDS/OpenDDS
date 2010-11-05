@@ -1,3 +1,22 @@
+Fri Nov  5 17:36:02 UTC 2010  Jeff Schmitz <schmitzj@ociweb.com>
+
+	* tools/modeling/tests/Sequences,
+	  tools/modeling/tests/Sequences/aModel.opendds: Sequence test
+
+          New test case for sequences
+
+Fri Nov  5 17:36:00 UTC 2010  Jeff Schmitz <schmitzj@ociweb.com>
+
+	* tools/modeling/tests/Codegen/aModel.opendds: Add WChar and
+
+	  WString to Codegen model
+
+Fri Nov  5 17:32:00 UTC 2010  Jeff Schmitz <schmitzj@ociweb.com>
+
+	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+
+	  Handle WChar and WString
+
 Thu Nov  4 20:25:04 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
