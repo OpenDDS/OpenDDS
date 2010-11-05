@@ -1,3 +1,11 @@
+Fri Nov  5 13:10:47 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Reverted changes in get_or_create_factory() locking
+          that where committed yesterday as they appear to be 
+          causing test failures on some platforms.
+
 Thu Nov  4 19:28:02 UTC 2010  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportFactory.cpp:
