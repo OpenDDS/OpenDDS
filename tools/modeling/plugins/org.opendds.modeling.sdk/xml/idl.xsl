@@ -387,6 +387,7 @@ module </xsl:text>
   <xsl:choose>
     <xsl:when test="$typename='Boolean'">boolean</xsl:when>
     <xsl:when test="$typename='Char'">char</xsl:when>
+    <xsl:when test="$typename='WChar'">wchar</xsl:when>
     <xsl:when test="$typename='Octet'">octet</xsl:when>
     <xsl:when test="$typename='Double'">double</xsl:when>
     <xsl:when test="$typename='Float'">float</xsl:when>
@@ -399,6 +400,7 @@ module </xsl:text>
     <xsl:when test="$typename='ULong'">unsigned long</xsl:when>
     <xsl:when test="$typename='ULongLong'">unsigned long long</xsl:when>
     <xsl:when test="$typename='String'">string</xsl:when>
+    <xsl:when test="$typename='WString'">wstring</xsl:when>
     <xsl:when test="$typename='Array'">array</xsl:when>
     <xsl:when test="$typename='Sequence'">sequence</xsl:when>
     <xsl:when test="$typename='Union'">union</xsl:when>
@@ -444,6 +446,8 @@ module </xsl:text>
   <type type="Union"                                  corbatype="union"/>
   <type type="Enum"                                   corbatype="enum"/>
   <type type="Struct"                                 corbatype="struct"/>
+  <type type="WChar"                                  corbatype="wchar"/>
+  <type type="WString"                                corbatype="wstring"/>
 </lut:tables>
 <!-- ................... -->
 
@@ -457,6 +461,10 @@ module </xsl:text>
   </xsl:if>
   <xsl:if test="$sequences[@type = 'opendds:Char']">
     <xsl:text>#include &lt;tao/CharSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:WChar']">
+    <xsl:text>#include &lt;tao/WCharSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
   <xsl:if test="$sequences[@type = 'opendds:Octet']">
@@ -475,7 +483,7 @@ module </xsl:text>
     <xsl:text>#include &lt;tao/ShortSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
-  <xsl:if test="$sequences[@type = 'opendds:Long']">
+  <xsl:if test="$sequences[@type = 'opendds:Long' or @type = 'opendds:Integer']">
     <xsl:text>#include &lt;tao/LongSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
@@ -487,7 +495,7 @@ module </xsl:text>
     <xsl:text>#include &lt;tao/UShortSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
-  <xsl:if test="$sequences[@type = 'opendds:ULong']">
+  <xsl:if test="$sequences[@type = 'opendds:ULong' or @type = 'opendds:UInteger']">
     <xsl:text>#include &lt;tao/ULongSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
@@ -499,11 +507,13 @@ module </xsl:text>
     <xsl:text>#include &lt;tao/StringSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:WString']">
+    <xsl:text>#include &lt;tao/WStringSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
 
-  <!-- ecore don't know
-    Enum FloatingPoint Int Integer SignedInt UInteger UnsignedInt
-       where from?
-    LongDoubleSeq.pidl WCharSeq.pidl WStringSeq.pidl
+  <!-- ecore don't know how to translate Enum 
+       where from?  LongDoubleSeq.pidl 
   -->
     
 </xsl:template>
