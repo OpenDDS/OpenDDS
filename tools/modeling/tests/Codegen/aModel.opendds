@@ -290,6 +290,8 @@
   <opendds:type name="type1" type="opendds:idlStruct">
     <opendds:member name="key"   type="opendds:Short"/>
     <opendds:member name="name"  type="opendds:String"/>
+    <opendds:member name="code"  type="opendds:WChar"/>
+    <opendds:member name="trans"  type="opendds:WString"/>
     <opendds:member name="value" type="opendds:ULong"/>
     <opendds:member name="bseq"  type="shortseq"/>
     <opendds:member name="aarr"  type="shortarray"/>
