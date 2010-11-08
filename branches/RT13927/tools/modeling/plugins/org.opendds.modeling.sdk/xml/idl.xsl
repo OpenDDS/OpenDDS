@@ -18,12 +18,12 @@
 </xsl:variable>
 
 <!-- Documents -->
-<xsl:variable name="lut" select="document('')/*/lut:tables"/>
+<xsl:variable name="lut" select="document('lut.xml')/*/lut:types"/>
 
 <!-- Node sets -->
 <xsl:variable name="type"     select="//opendds:type"/>
 
-<!-- Index (lookup table is at the bottom of this document) -->
+<!-- Index (lookup table is in lut variable) -->
 <xsl:key
      name  = "lut-type"
      match = "type"
@@ -384,6 +384,11 @@ module </xsl:text>
     </xsl:call-template>
   </xsl:variable>
 
+  <xsl:for-each select="$lut"> <!-- Change context for the lookup -->
+    <xsl:value-of select="normalize-space(key('lut-type', $typename)/@corbatype)"/>
+  </xsl:for-each>
+
+<!--
   <xsl:choose>
     <xsl:when test="$typename='Boolean'">boolean</xsl:when>
     <xsl:when test="$typename='Char'">char</xsl:when>
@@ -407,6 +412,7 @@ module </xsl:text>
     <xsl:when test="$typename='Enum'">enum</xsl:when>
     <xsl:when test="$typename='Struct'">struct</xsl:when>
   </xsl:choose>
+-->
 </xsl:template>
 
 <!-- Strip any namespace qualifier from a variable. -->

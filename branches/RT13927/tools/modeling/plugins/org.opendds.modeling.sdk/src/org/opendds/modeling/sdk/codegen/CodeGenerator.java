@@ -1,6 +1,7 @@
 package org.opendds.modeling.sdk.codegen;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -17,6 +18,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
@@ -39,6 +41,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -246,7 +250,8 @@ public class CodeGenerator {
 	}
 	
 	public void generate( TransformType which, String sourceName, String targetName) {
-		if( which.getTransformer() == null) {
+		boolean shouldReloadXSL = System.getProperty("reloadxsl").equals("true");
+		if( shouldReloadXSL || which.getTransformer() == null) {
 			URL url = FileLocator.find(Platform.getBundle(PLUGINNAME), new Path(which.xslFilename()), null);
 			try {
 				TransformerFactory factory = getTransformerFactory();
@@ -259,7 +264,20 @@ public class CodeGenerator {
 					return;
 				}
 				Source converter = new StreamSource( url.openStream());
-				which.setTransformer( factory.newTransformer(converter));
+				final String dir = which.xslFilename().substring(0, which.xslFilename().lastIndexOf("/"));
+				Transformer transformer = factory.newTransformer(converter);
+				transformer.setURIResolver(new URIResolver() {
+					public javax.xml.transform.Source resolve(String fname, String arg1) throws TransformerException {
+						String resourcePath = dir + "/" + fname;
+						URL resourceUrl = FileLocator.find(Platform.getBundle(PLUGINNAME), new Path(resourcePath), null);
+						try {
+							return new StreamSource(resourceUrl.openStream());
+						} catch (IOException ioe) {
+							throw new TransformerException("could not open " + fname);
+						}
+					}
+				});
+				which.setTransformer(transformer);
 			} catch (TransformerConfigurationException e) {
 				ErrorDialog.openError(
 						parent.getShell(),		// XXX
