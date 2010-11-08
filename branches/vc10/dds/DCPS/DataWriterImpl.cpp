@@ -492,8 +492,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
         rds [rds_len - 1] = readers[i];
 
         RepoIdConverter converter(readers[i]);
-        ACE_DEBUG((LM_DEBUG,
-                  ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
+        ACE_DEBUG((LM_WARNING,
+                  ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::remove_associations: ")
                   ACE_TEXT("removing reader %C before fully_associated() call.\n"),
                   std::string(converter).c_str()));
       }
@@ -597,7 +597,7 @@ void DataWriterImpl::remove_all_associations()
     if (num_pending_readers > 0) {
       ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::remove_all_associations() - ")
-                 ACE_TEXT("%d subscribers were pending and never fully associated"),
+                 ACE_TEXT("%d subscribers were pending and never fully associated.\n"),
                  num_pending_readers));
     }
   }

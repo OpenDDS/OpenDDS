@@ -73,7 +73,7 @@ OpenDDS::DCPS::SimpleTcpConfiguration::load(const TransportIdType& id,
   return 0;
 }
 
-void 
+void
 OpenDDS::DCPS::SimpleTcpConfiguration::dump()
 {
   // Acquire lock on the log so the entire dump is output as a block

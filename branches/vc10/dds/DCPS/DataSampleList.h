@@ -69,7 +69,7 @@ typedef ACE_Message_Block DataSample ;
 *       concatentating the data in the order in which it was written.
 *
 * We thread this single element rather than having multiple smaller
-* lists in order to allow us to allocat once and have the element
+* lists in order to allow us to allocate once and have the element
 * contained in all of the lists in which it will be held during its
 * lifetime.  These three threads will at times hold the element in
 * three separate lists simultaneously.  The next_sample_ thread will be
