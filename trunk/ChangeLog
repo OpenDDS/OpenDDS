@@ -1,9 +1,15 @@
+Mon Nov  8 14:08:39 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+
+          Removed trailing white space.
+
 Fri Nov  5 13:10:47 UTC 2010  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportFactory.cpp:
 
           Reverted changes in get_or_create_factory() locking
-          that where committed yesterday as they appear to be 
+          that where committed yesterday as they appear to be
           causing test failures on some platforms.
 
 Thu Nov  4 19:28:02 UTC 2010  Don Hudson  <hudsond@ociweb.com>
@@ -11,7 +17,7 @@ Thu Nov  4 19:28:02 UTC 2010  Don Hudson  <hudsond@ociweb.com>
         * dds/DCPS/transport/framework/TransportFactory.cpp:
 
           Changed locking in get_or_create_factory() to guard
-          find, generate new factory, and register instead of releasing 
+          find, generate new factory, and register instead of releasing
           lock after find and getting a new lock before generating
           a new factory.
 

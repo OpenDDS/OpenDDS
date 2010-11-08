@@ -93,7 +93,7 @@ OpenDDS::DCPS::TransportConfiguration::dump()
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
              ACE_TEXT("thread_per_connection: %C.\n"),
-             (this->thread_per_connection_ ? "true" : "false"))); 
+             (this->thread_per_connection_ ? "true" : "false")));
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
              ACE_TEXT("datalink_release_delay: %u.\n"),
