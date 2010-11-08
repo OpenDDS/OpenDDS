@@ -75,12 +75,9 @@ class OpenDDS_Model_Export Config  {
     /// Container type for reader profiles.
     typedef std::map< std::string, ReaderProfile*> ReaderProfileMap;
 
-    Config();
+    Config(int& argc, ACE_TCHAR** argv);
 
     virtual ~Config();
-
-    /// Defered initialization.
-    void init( int& argc, ACE_TCHAR** argv);
 
     /// Indication of configuration status.
     operator bool() const;

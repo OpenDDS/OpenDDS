@@ -32,7 +32,7 @@ namespace OpenDDS { namespace Model {
       typedef typename ModelName::DataReaders  DataReaders;
       typedef typename ModelName::Transports   Transports;
 
-      Service();
+      Service(int& argc, char** argv);
       ~Service();
 
       ///{ @name DDS API Entity accessors.
@@ -44,11 +44,6 @@ namespace OpenDDS { namespace Model {
       DDS::Subscriber_var subscriber( typename Subscribers::Values subscriber);
       DDS::DataWriter_var writer( typename DataWriters::Values writer);
       DDS::DataReader_var reader( typename DataReaders::Values reader);
-      ///}
-
-      ///( @name Lifetime management.
-      void init( int argc = 0, char** argv = 0);
-      void fini();
       ///}
 
     private:
@@ -82,16 +77,8 @@ namespace OpenDDS { namespace Model {
                      unsigned int        which,
                      DDS::DataWriterQos& writerQos
                    );
-      virtual void copyPublicationQos(
-                     const std::string&  which,
-                     DDS::DataWriterQos& writerQos
-                   );
       virtual void copySubscriptionQos(
                      unsigned int        which,
-                     DDS::DataReaderQos& readerQos
-                   );
-      virtual void copySubscriptionQos(
-                     const std::string&  which,
                      DDS::DataReaderQos& readerQos
                    );
       ///}

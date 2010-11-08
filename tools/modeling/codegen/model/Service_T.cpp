@@ -3,7 +3,8 @@
 
 template< typename ModelName, class InstanceTraits>
 inline
-OpenDDS::Model::Service< ModelName, InstanceTraits>::Service()
+OpenDDS::Model::Service<ModelName, InstanceTraits>::Service(int& argc, char** argv)
+  : Entities(argc, argv)
 {
   this->delegate_.service() = this;
 
@@ -48,29 +49,12 @@ template< typename ModelName, class InstanceTraits>
 inline
 OpenDDS::Model::Service< ModelName, InstanceTraits>::~Service()
 {
-}
-
-template< typename ModelName, class InstanceTraits>
-inline
-void
-OpenDDS::Model::Service< ModelName, InstanceTraits>::init( int argc, char** argv)
-{
-  this->modelData_.init();
-  this->Entities::init( argc, argv);
-}
-
-template< typename ModelName, class InstanceTraits>
-inline
-void
-OpenDDS::Model::Service< ModelName, InstanceTraits>::fini()
-{
   for( int index = 0; index < Participants::LAST_INDEX; ++index) {
     if( this->participants_[ index]) {
       this->participants_[ index]->delete_contained_entities();
       TheParticipantFactory->delete_participant( this->participants_[ index]);
     }
   }
-  this->Entities::fini();
 }
 
 template< typename ModelName, class InstanceTraits>
@@ -149,7 +133,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createParticipant(
   typename Participants::Values participant
 )
 {
-  return this->delegate_.createParticipant(
+  return this->participants_[participant] = this->delegate_.createParticipant(
            this->modelData_.domain( participant),
            this->modelData_.qos( participant),
            this->modelData_.mask( participant)
@@ -310,15 +294,6 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::copyPublicationQos(
   this->modelData_.copyPublicationQos( writer, writerQos);
 }
 
-template <typename ModelName, typename InstanceTraits>
-inline
-void
-OpenDDS::Model::Service<ModelName, InstanceTraits>::copyPublicationQos(
-  const std::string&, DDS::DataWriterQos&)
-{
-  throw std::runtime_error("not implemented");  //TODO: implement
-}
-
 template< typename ModelName, class InstanceTraits>
 inline
 void
@@ -332,13 +307,4 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::copySubscriptionQos(
     throw OutOfBoundsException();
   }
   this->modelData_.copySubscriptionQos( reader, readerQos);
-}
-
-template <typename ModelName, typename InstanceTraits>
-inline
-void
-OpenDDS::Model::Service<ModelName, InstanceTraits>::copySubscriptionQos(
-  const std::string&, DDS::DataReaderQos&)
-{
-  throw std::runtime_error("not implemented");  //TODO: implement
 }

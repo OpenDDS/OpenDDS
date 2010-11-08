@@ -30,10 +30,8 @@ namespace OpenDDS { namespace Model {
 
   class OpenDDS_Model_Export Delegate {
     public:
-      Delegate();
-
-      void init( int& argc, char** argv);
-      void fini();
+      Delegate(int& argc, char** argv);
+      ~Delegate();
 
       DDS::DomainParticipant*
       createParticipant(

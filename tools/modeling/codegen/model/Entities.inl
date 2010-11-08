@@ -2,23 +2,6 @@
 //
 // $Id$
 
-ACE_INLINE
-void
-OpenDDS::Model::Entities::init( int& argc, ACE_TCHAR** argv)
-{
-  // Start the DDS service.
-  this->delegate_.init( argc, argv);
-
-  // Initialize from the command line and any file(s).
-  this->config_.init( argc, argv);
-}
-
-ACE_INLINE
-void
-OpenDDS::Model::Entities::fini()
-{
-  this->delegate_.fini();
-}
 
 ACE_INLINE
 void

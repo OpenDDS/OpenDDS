@@ -132,13 +132,8 @@ Config::~Config()
   this->readerProfileMap_.clear();
 }
 
-Config::Config()
- : configured_( true)
-{
-}
-
-void
-Config::init( int& argc, ACE_TCHAR** argv)
+Config::Config(int& argc, ACE_TCHAR** argv)
+  : configured_(true)
 {
   ACE_Arg_Shifter parser( argc, argv);
   while( parser.is_anything_left()) {

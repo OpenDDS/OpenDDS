@@ -195,9 +195,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
           Data();
           ~Data();
 
-          /// Delayed initialization.
-          void init();
-
           ///{ @name Qos Policy values
           DDS::DomainParticipantQos qos( Participants::Values which);
           DDS::TopicQos             qos( Topics::Values which);
@@ -256,8 +253,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
           void buildPublicationsQos();
           void buildSubscriptionsQos();
 
-          void buildTransportsConfig();
-
           // Basic array containers since we only allow access using the
           // defined enumeration values.
 
@@ -297,16 +292,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 } } } // End of namespace OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text>
-
-template&lt; class InstanceTraits&gt;
-inline
-void
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::init()
-{
-  this->buildTransportsConfig();
-}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -527,19 +512,6 @@ OpenDDS::Model::</xsl:text>
     throw OutOfBoundsException();
   }
   return this->transportKeys_[ which];
-}
-
-template&lt; class InstanceTraits&gt;
-inline
-OpenDDS::DCPS::TransportConfiguration*
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::transportConfig( Transports::Values which)
-{
-  if( which &lt; 0 || which >= Transports::LAST_INDEX) {
-    throw OutOfBoundsException();
-  }
-  return this->transportConfigs_[ which];
 }
 
 template&lt; class InstanceTraits&gt;

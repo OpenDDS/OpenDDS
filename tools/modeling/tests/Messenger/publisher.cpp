@@ -12,11 +12,10 @@
 int main(int argc, char** argv)
 {
   try {
-    MessengerModelType model;
+    MessengerModelType model(argc, argv);
 
     using OpenDDS::Model::MessengerModel::Elements;
 
-    model.init(argc, argv);
     DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
@@ -90,9 +89,6 @@ int main(int argc, char** argv)
     }
 
     // END OF EXISTING MESSENGER EXAMPLE CODE
-
-    model.fini();
-
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
     return -1;

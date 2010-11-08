@@ -69,7 +69,7 @@ namespace OpenDDS { namespace Model {
  */
 class OpenDDS_Model_Export Entities  {
   public:
-    Entities();
+    Entities(int& argc, ACE_TCHAR** argv);
 
     virtual ~Entities();
 
@@ -100,11 +100,10 @@ class OpenDDS_Model_Export Entities  {
               const std::string& participant);
     /// @}
 
-    /// @name Lifetime management.
-    /// @{
-    void init( int& argc, ACE_TCHAR** argv);
-    void fini();
-    /// @}
+
+  protected:
+    /// Delegate for performing DDS specific actions.
+    Delegate delegate_;
 
   private:
     OpenDDS::DCPS::TransportImpl_rch
@@ -115,10 +114,6 @@ class OpenDDS_Model_Export Entities  {
 
     /// The command line and file configuration information.
     Config config_;
-
-  protected:
-    /// Delegate for performing DDS specific actions.
-    Delegate delegate_;
 
   private:
     /// Map of queues.
