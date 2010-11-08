@@ -1,28 +1,64 @@
+Mon Nov  8 22:24:55 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/codegen/model/Utilities.cpp:
+
+          Added a cast to silence a warning when size_t is 64 bits.
+
+        * tools/modeling/codegen/model/Config.h:
+        * tools/modeling/codegen/model/Config.cpp:
+        * tools/modeling/codegen/model/CopyQos.h:
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/Entities.h:
+        * tools/modeling/codegen/model/Entities.inl:
+        * tools/modeling/codegen/model/Entities.cpp:
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+        * tools/modeling/codegen/xsl/cpp.xsl:
+        * tools/modeling/codegen/xsl/h.xsl:
+
+          Removed string-based overloads for copy{Subscription,Publication}Qos.
+          Removed init() and fini() in favor of the constructor and destructor.
+          Fixed a bug where the created participant was not saved.
+          Create transport configs in a lazy manner like everything else, which
+          fixes a runtime crash where transport configs were created before
+          initializing OpenDDS.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+          Copied from tools/modeling/codegen/xsl.
+
+        * tools/modeling/tests/Messenger/publisher.cpp:
+        * tools/modeling/tests/Messenger/subscriber.cpp:
+
+          Updated to not call init() and fini() on the model.
+
 Fri Nov  5 17:36:02 UTC 2010  Jeff Schmitz <schmitzj@ociweb.com>
 
-	* tools/modeling/tests/Sequences,
-	  tools/modeling/tests/Sequences/aModel.opendds: Sequence test
+        * tools/modeling/tests/Sequences,
+          tools/modeling/tests/Sequences/aModel.opendds: Sequence test
 
           New test case for sequences
 
 Fri Nov  5 17:36:00 UTC 2010  Jeff Schmitz <schmitzj@ociweb.com>
 
-	* tools/modeling/tests/Codegen/aModel.opendds: Add WChar and
+        * tools/modeling/tests/Codegen/aModel.opendds: Add WChar and
 
-	  WString to Codegen model
+          WString to Codegen model
 
 Fri Nov  5 17:32:00 UTC 2010  Jeff Schmitz <schmitzj@ociweb.com>
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
 
-	  Handle WChar and WString
+          Handle WChar and WString
 
 Thu Nov  4 20:25:04 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
 
           added handling of intrinsic-type sequences in IDL - Windows
-          needs an additional #include 
+          needs an additional #include
 
 Thu Nov  4 19:49:09 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 

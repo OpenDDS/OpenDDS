@@ -100,6 +100,14 @@ Elements::Data&lt;InstanceTraits&gt;::Data()
     this->typeNames_[ index] = 0;
   }
 
+  for (int index = 0;
+       index &lt; OpenDDS::Model::</xsl:text>
+  <xsl:value-of select="$modelname"/>
+  <xsl:text>::Elements::Transports::LAST_INDEX;
+       ++index) {
+    this->transportConfigs_[index] = 0;
+  }
+
   this->loadMasks();
   this->loadDomains();
   this->loadTopics();
@@ -581,12 +589,17 @@ Elements::Data&lt;InstanceTraits&gt;::buildSubscriptionsQos()
 
 template&lt; class InstanceTraits&gt;
 inline
-void
-Elements::Data&lt;InstanceTraits&gt;::buildTransportsConfig()
+OpenDDS::DCPS::TransportConfiguration*
+Elements::Data&lt;InstanceTraits&gt;::transportConfig(Transports::Values which)
 {
-  Transports::Values transport;
-  unsigned long      key;
-  const char*        kind;
+  if (which &lt; 0 || which &gt;= Transports::LAST_INDEX) {
+    throw OutOfBoundsException();
+  }
+  if (this->transportConfigs_[which]) {
+    return this->transportConfigs_[which];
+  }
+
+  switch (which) {
 </xsl:text>
   <xsl:for-each select="$transport">
     <!-- Lookup the configuration data type for this transport. -->
@@ -597,44 +610,44 @@ Elements::Data&lt;InstanceTraits&gt;::buildTransportsConfig()
       </xsl:for-each>
     </xsl:variable>
 
-    <xsl:value-of select="$newline"/>
-    <xsl:text>  transport = Transports::</xsl:text>
+    <xsl:text>  case Transports::</xsl:text>
     <xsl:value-of select="@name"/>
-    <xsl:text>;
-  key  = this->transportKey( transport);
-  kind = this->transportKind( transport);
-
-  { // For local scope.
-    typedef </xsl:text>
+    <xsl:text>:
+    {
+      unsigned long key = this->transportKey(which);
+      const char* kind = this->transportKind(which);
+      typedef </xsl:text>
     <xsl:value-of select="$config-type"/>
     <xsl:text> ConfigType;
-    TransportConfiguration_rch baseconfig
-      = TheTransportFactory->create_configuration( key, kind);
-    ConfigType* config = static_cast&lt; ConfigType*&gt;( baseconfig.in());
-    if( !config) {
-      throw BadCastException();
-    }
+      TransportConfiguration_rch baseconfig =
+        TheTransportFactory->create_configuration(key, kind);
+      ConfigType* config = static_cast&lt;ConfigType*&gt;(baseconfig.in());
+      if (!config) {
+        throw BadCastException();
+      }
 </xsl:text>
     <xsl:for-each select="./*">
       <xsl:value-of select="$newline"/>
-      <xsl:text>    // </xsl:text>
+      <xsl:text>      // </xsl:text>
       <xsl:value-of select="substring-after( name(), ':')"/>
       <xsl:value-of select="$newline"/>
 
       <!-- '  config->(configfield) = (value);\n' -->
       <xsl:call-template name="process-transports">
         <xsl:with-param name="config" select="."/>
-        <xsl:with-param name="indent" select="'    '"/>
+        <xsl:with-param name="indent" select="'      '"/>
       </xsl:call-template>
     </xsl:for-each>
 
 <xsl:text>
-    this->transportConfigs_[ transport] = baseconfig._retn();
-
-  } // End local scope.
+      return this->transportConfigs_[which] = baseconfig._retn();
+    }
 </xsl:text>
   </xsl:for-each>
-  <xsl:text>}
+  <xsl:text>  default:
+    return 0;
+  }
+}
 
 template&lt; class InstanceTraits&gt;
 inline

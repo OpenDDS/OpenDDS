@@ -14,7 +14,9 @@
 # include "Entities.inl"
 #endif /* ! __ACE_INLINE__ */
 
-OpenDDS::Model::Entities::Entities()
+OpenDDS::Model::Entities::Entities(int& argc, ACE_TCHAR** argv)
+  : delegate_(argc, argv)
+  , config_(argc, argv)
 {
 }
 

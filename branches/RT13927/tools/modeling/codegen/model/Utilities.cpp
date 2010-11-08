@@ -9,7 +9,7 @@ OpenDDS::Model::stringToByteSeq(
 )
 {
   size_t len = std::strlen( source);
-  target.length( len);
+  target.length(static_cast<CORBA::ULong>(len));
 
   if( len) {
     std::memcpy( target.get_buffer(), source, len);

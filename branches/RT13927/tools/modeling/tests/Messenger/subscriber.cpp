@@ -62,11 +62,10 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    MessengerModelType model;
+    MessengerModelType model(argc, argv);
 
     using OpenDDS::Model::MessengerModel::Elements;
 
-    model.init( argc, argv);
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
 
     DDS::DataReaderListener_var listener(new ReaderListener);
@@ -113,8 +112,6 @@ int main(int argc, char** argv)
 
     // END OF EXISTING MESSENGER EXAMPLE CODE
 
-    model.fini();
-
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
     return -1;
@@ -129,4 +126,3 @@ int main(int argc, char** argv)
 
   return 0;
 }
-
