@@ -1,3 +1,137 @@
+Mon Nov  8 14:08:39 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+
+          Removed trailing white space.
+
+Fri Nov  5 13:10:47 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Reverted changes in get_or_create_factory() locking
+          that where committed yesterday as they appear to be
+          causing test failures on some platforms.
+
+Thu Nov  4 19:28:02 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Changed locking in get_or_create_factory() to guard
+          find, generate new factory, and register instead of releasing
+          lock after find and getting a new lock before generating
+          a new factory.
+
+Thu Nov  4 19:11:05 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Changed debug message from LM_WARNING to LM_DEBUG since it's
+          a debug level 5 message.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Changed debug message in remove_associations() from LM_DEBUG
+          to LM_WARNING since it's for the case where a reader is removed
+          before fully_associated() is called.
+
+        * performance-tests/DCPS/Priority/Options.cpp:
+        * tests/DCPS/WaitForAck/Options.cpp:
+
+          Changed to skip parsing the first argument to eliminate
+          debug warning messages like:
+            WARNING: Options::Options() - ignoring argument: .\.\\subscriber.EXE.
+
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/DPFactoryQos/pub.ini:
+        * tests/DCPS/DPFactoryQos/sub.ini:
+        * tests/DCPS/Deadline/sub.ini:
+        * tests/DCPS/PersistentDurability/pub.ini:
+        * tests/DCPS/PersistentDurability/sub.ini:
+        * tests/DCPS/Serializer_wstring/pub.ini:
+        * tests/DCPS/Serializer_wstring/sub.ini:
+        * tests/DCPS/SetQosDeadline/pub.ini:
+        * tests/DCPS/SetQosDeadline/sub.ini:
+        * tests/DCPS/SetQosPartition/pub.ini:
+        * tests/DCPS/SetQosPartition/sub.ini:
+        * tests/DCPS/StringKey/pub.ini:
+        * tests/DCPS/StringKey/sub.ini:
+        * tests/DCPS/TransientDurability/pub.ini:
+        * tests/DCPS/TransientDurability/sub.ini:
+        * tests/DCPS/sub_init_loop/pub.ini:
+        * tests/DCPS/sub_init_loop/sub.ini:
+
+          Commented out configuration options that don't have values,
+          for example "swap_bytes=".  This was done to stop warnings
+          output when debug level logging is turned on that the default
+          value for the option is being used.
+
+Thu Nov  4 19:52:05 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/WriteDataContainer.h:
+          Fixed some typos in comments
+
+Thu Nov  4 12:59:42 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.cpp:
+
+          Removed trailing white space.
+
+Wed Nov  3 19:09:13 UTC 2010  Don Hudson  <dchudson@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+
+          Restored initialization of DEFAULT_TTL to original.
+
+          Changed dump() to output ttl_ in hex.
+
+Wed Nov  3 15:58:38 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Changed guard in get_or_create_factory() to include
+          finding the transport generator and using the generator to
+          register the factory.  Instead of releasing the guard after
+          finding the generator and then getting a new guard before
+          using the generator to register the factory.
+
+
+Wed Nov  3 15:29:11 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Changed data_received() to skip finding the writer
+          when ENTITYKIND_OPENDDS_NIL_WRITER is specified.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Removed operator<<(ostream& str, WriterInfo::WriterState value)
+          since it didn't function as intended on some platforms
+          because WriterState is an enum.  Replaced it with get_state_str().
+
+        * dds/DCPS/GuidConverter.cpp:
+        * dds/DdsDcpsGuid.idl:
+
+          Added type ENTITYKIND_OPENDDS_NIL_WRITER for use
+          in infrastructure testing where there is no writer.
+
+        * tests/DCPS/FooTest4/Writer.cpp:
+
+          Changed to use ENTITYKIND_OPENDDS_NIL_WRITER since
+          the test has no writer by design.  This eliminates
+          multiple warnings "failed to find publication data for ..."
+          that are misleading for this test.
+
 Wed Nov  3 15:08:23 UTC 2010  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportReactorTask.cpp:

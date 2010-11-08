@@ -154,7 +154,7 @@ OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
 
       config->dump();
     }
- 
+
     // The subclass rejected the configuration attempt.
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TransportImpl configuration failed.\n"),

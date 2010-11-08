@@ -262,7 +262,7 @@ public:
                                 size_t&               size);
 
   /**
-   * Retreive the unsent data from the WriteDataContainer.
+   * Retrieve the unsent data from the WriteDataContainer.
    */
   DataSampleList get_unsent_data();
   DataSampleList get_resend_data();

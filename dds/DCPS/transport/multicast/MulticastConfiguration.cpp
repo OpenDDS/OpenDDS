@@ -34,7 +34,7 @@ const long DEFAULT_NAK_DELAY_INTERVALS(4);
 const long DEFAULT_NAK_MAX(3);
 const long DEFAULT_NAK_TIMEOUT(30000);
 
-const char DEFAULT_TTL('1');
+const char DEFAULT_TTL(1);
 
 } // namespace
 
@@ -155,7 +155,7 @@ MulticastConfiguration::default_group_address(ACE_INET_Addr& group_address,
 }
 
 
-void 
+void
 MulticastConfiguration::dump()
 {
   // Acquire lock on the log so the entire dump is output as a block
@@ -215,7 +215,7 @@ MulticastConfiguration::dump()
              this->nak_timeout_.msec()));
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
-             ACE_TEXT("ttl: %c.\n"),
+             ACE_TEXT("ttl: 0x%x.\n"),
              this->ttl_));
 
   if (this->rcv_buffer_size_ == 0) {
