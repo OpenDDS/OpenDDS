@@ -1,3 +1,11 @@
+Tue Nov  9 17:40:47 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds:
+
+          Made the data a little more interesting by adding Typedef, Array,
+          and Sequence types that point to both simple and user-defined types and
+          added Fields to a struct that reference these.
+
 Mon Nov  8 22:24:55 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/codegen/model/Utilities.cpp:
