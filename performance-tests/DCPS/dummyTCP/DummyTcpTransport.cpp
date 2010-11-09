@@ -368,7 +368,7 @@ OpenDDS::DCPS::DummyTcpTransport::connection_info_i
 (TransportInterfaceInfo& local_info) const
 {
   DBG_ENTRY_LVL("DummyTcpTransport","connection_info_i",5);
-  VDBG_LVL ((LM_DEBUG, "(%P|%t)DummyTcpTransport::connection_info_i %C:%d\n",
+  VDBG_LVL ((LM_DEBUG, "(%P|%t) DummyTcpTransport::connection_info_i %C:%d\n",
              this->tcp_config_->local_address_.get_host_addr (),
              this->tcp_config_->local_address_.get_port_number ()), 2);
 

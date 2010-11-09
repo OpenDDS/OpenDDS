@@ -139,7 +139,7 @@ DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl: !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl: !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl default_tcp: !DCPS_MIN
 tests/DCPS/Messenger/run_test.pl udp: !DCPS_MIN
-tests/DCPS/Messenger/run_test.pl default_udp: !DCPS_MIN
+#tests/DCPS/Messenger/run_test.pl default_udp: !DCPS_MIN  ## There is no default for udp
 tests/DCPS/Messenger/run_test.pl multicast: !DCPS_MIN !QNX
 tests/DCPS/Messenger/run_test.pl default_multicast: !DCPS_MIN !QNX
 tests/DCPS/Messenger/run_test.pl nobits: !DCPS_MIN

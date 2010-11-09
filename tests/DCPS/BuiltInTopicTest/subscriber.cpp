@@ -216,7 +216,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       while (fp == 0 &&  i < 15)
       {
         ACE_DEBUG ((LM_DEBUG,
-          ACE_TEXT("(%P|%t)waiting monitor1 done ...\n")));
+          ACE_TEXT("(%P|%t) waiting monitor1 done ...\n")));
         ACE_OS::sleep (1);
         ++i;
         fp = ACE_OS::fopen (synch_fname, ACE_TEXT("r"));

@@ -97,6 +97,9 @@ public:
   virtual int load(const TransportIdType& id,
                    ACE_Configuration_Heap& config);
 
+  /// Diagnostic aid.
+  virtual void dump();
+
 private:
   void default_group_address(ACE_INET_Addr& group_address,
                              const TransportIdType& id);

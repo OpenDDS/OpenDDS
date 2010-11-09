@@ -284,9 +284,11 @@ Service_Participant::get_domain_participant_factory(int &argc,
         ACE_ASSERT(!CORBA::is_nil(orb_.in()));
 
         if (config_fname == ACE_TEXT("")) {
-          ACE_DEBUG((LM_INFO,
-                     ACE_TEXT("(%P|%t)INFO: not using file configuration - no configuration ")
-                     ACE_TEXT("file specified.\n")));
+          if (DCPS_debug_level) {
+            ACE_DEBUG((LM_INFO,
+                       ACE_TEXT("(%P|%t) INFO: not using file configuration - no configuration ")
+                       ACE_TEXT("file specified.\n")));
+          }
 
         } else {
           // Load configuration only if the configuration
@@ -296,7 +298,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
           if (!in) {
             ACE_DEBUG((LM_INFO,
-                       ACE_TEXT("(%P|%t)INFO: not using file configuration - ")
+                       ACE_TEXT("(%P|%t) INFO: not using file configuration - ")
                        ACE_TEXT("can not open \"%s\" for reading. %p\n"),
                        config_fname.c_str(), ACE_TEXT("fopen")));
 
@@ -305,7 +307,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
             if (this->load_configuration() != 0) {
               ACE_ERROR((LM_ERROR,
-                         ACE_TEXT("(%P|%t)Service_Participant::get_domain_participant_factory: ")
+                         ACE_TEXT("(%P|%t) Service_Participant::get_domain_participant_factory: ")
                          ACE_TEXT("load_configuration() failed.\n")));
               return DDS::DomainParticipantFactory::_nil();
             }
@@ -909,7 +911,7 @@ Service_Participant::repository_lost(const RepoKey key)
   RepoMap::iterator current         = initialLocation;
 
   if (current == this->repoMap_.end()) {
-    ACE_DEBUG((LM_DEBUG,
+    ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
                ACE_TEXT("lost repository %d was not present, ")
                ACE_TEXT("finding another anyway.\n"),
@@ -989,7 +991,7 @@ Service_Participant::repository_lost(const RepoKey key)
       }
 
     } catch (const CORBA::Exception&) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
                  ACE_TEXT("repository %d was not available to replace %d, ")
                  ACE_TEXT("looking for another.\n"),
@@ -1253,7 +1255,7 @@ Service_Participant::load_configuration()
 
   if ((status = this->cf_.open()) != 0)
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t)Service_Participant::load_configuration ")
+                      ACE_TEXT("(%P|%t) Service_Participant::load_configuration ")
                       ACE_TEXT("open() returned %d\n"),
                       status),
                      -1);
@@ -1273,7 +1275,7 @@ Service_Participant::load_configuration()
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t)Service_Participant::load_configuration ")
+                      ACE_TEXT("(%P|%t) Service_Participant::load_configuration ")
                       ACE_TEXT("load_common_configuration () returned %d\n"),
                       status),
                      -1);
@@ -1303,7 +1305,7 @@ Service_Participant::load_configuration()
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t)Service_Participant::load_configuration ")
+                      ACE_TEXT("(%P|%t) Service_Participant::load_configuration ")
                       ACE_TEXT("load_transport_configuration () returned %d\n"),
                       status),
                      -1);
@@ -1333,7 +1335,7 @@ Service_Participant::load_common_configuration()
   } else {
     if (got_debug_level) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t)ignore DCPSDebugLevel config value, use command option.\n")));
+                 ACE_TEXT("(%P|%t) ignore DCPSDebugLevel config value, use command option.\n")));
 
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSDebugLevel"), DCPS_debug_level, int)
@@ -1341,7 +1343,7 @@ Service_Participant::load_common_configuration()
 
     if (got_info) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t)ignore DCPSInfoRepo config value, use command option.\n")));
+                 ACE_TEXT("(%P|%t) ignore DCPSInfoRepo config value, use command option.\n")));
 
     } else {
       ACE_TString value;
@@ -1351,7 +1353,7 @@ Service_Participant::load_common_configuration()
 
     if (got_chunks) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t)ignore DCPSChunks config value, use command option.\n")));
+                 ACE_TEXT("(%P|%t) ignore DCPSChunks config value, use command option.\n")));
 
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSChunks"), this->n_chunks_, size_t)
@@ -1359,7 +1361,7 @@ Service_Participant::load_common_configuration()
 
     if (got_chunk_association_multiplier) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t)ignore DCPSChunkAssociationMutltiplier config value, use command option.\n")));
+                 ACE_TEXT("(%P|%t) ignore DCPSChunkAssociationMutltiplier config value, use command option.\n")));
 
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSChunkAssociationMutltiplier"), this->association_chunk_multiplier_, size_t)
@@ -1367,7 +1369,7 @@ Service_Participant::load_common_configuration()
 
     if (got_bit_transport_port) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t)ignore DCPSBitTransportPort config value, use command option.\n")));
+                 ACE_TEXT("(%P|%t) ignore DCPSBitTransportPort config value, use command option.\n")));
 
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSBitTransportPort"), this->bitTransportPortMap_[ DEFAULT_REPO], int)
@@ -1375,7 +1377,7 @@ Service_Participant::load_common_configuration()
 
     if (got_bit_transport_ip) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t)ignore DCPSBitTransportIPAddress config value, use command option.\n")));
+                 ACE_TEXT("(%P|%t) ignore DCPSBitTransportIPAddress config value, use command option.\n")));
 
     } else {
       GET_CONFIG_STRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSBitTransportIPAddress"), this->bitTransportIpMap_[ DEFAULT_REPO])
@@ -1383,7 +1385,7 @@ Service_Participant::load_common_configuration()
 
     if (got_liveliness_factor) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t)ignore DCPSLivelinessFactor config value, use command option.\n")));
+                 ACE_TEXT("(%P|%t) ignore DCPSLivelinessFactor config value, use command option.\n")));
 
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSLivelinessFactor"), this->liveliness_factor_, int)
@@ -1391,7 +1393,7 @@ Service_Participant::load_common_configuration()
 
     if (got_bit_lookup_duration_msec) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t)ignore DCPSBitLookupDurationMsec config value, use command option.\n")));
+                 ACE_TEXT("(%P|%t) ignore DCPSBitLookupDurationMsec config value, use command option.\n")));
 
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSBitLookupDurationMsec"), this->bit_lookup_duration_msec_, int)
@@ -1399,7 +1401,7 @@ Service_Participant::load_common_configuration()
 
     if (got_bit_flag) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t)ignore DCPSBit config value, use command option.\n")));
+                 ACE_TEXT("(%P|%t) ignore DCPSBit config value, use command option.\n")));
 
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSBit"), this->bit_enabled_, int)

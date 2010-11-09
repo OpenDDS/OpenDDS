@@ -38,7 +38,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   // operations - they should not get optimized away!  Note that this
   // passes the arguments to the ORB initialization first, then strips
   // the DCPS arguments.
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: initializing the monitor.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: initializing the monitor.\n")));
   ::DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs( argc, argv);
 
   this->subscriberParticipant_.resize(
@@ -58,10 +58,10 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
 
   if( signed(OpenDDS::DCPS::DCPS_debug_level) >= 0) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) COMMANDLINE:              Verbose == %C\n")
-      ACE_TEXT("%T (%P|%t) COMMANDLINE:              Samples == %d\n")
-      ACE_TEXT("%T (%P|%t) COMMANDLINE:                 Type == %C\n")
-      ACE_TEXT("%T (%P|%t) COMMANDLINE:    Transport Address == %s\n"),
+      ACE_TEXT("(%P|%t) %T COMMANDLINE:              Verbose == %C\n")
+      ACE_TEXT("(%P|%t) %T COMMANDLINE:              Samples == %d\n")
+      ACE_TEXT("(%P|%t) %T COMMANDLINE:                 Type == %C\n")
+      ACE_TEXT("(%P|%t) %T COMMANDLINE:    Transport Address == %s\n"),
       (this->config_.verbose()? "true": "false"),
       this->config_.samples(),
       this->config_.typeName().c_str(),
@@ -69,34 +69,34 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     ));
     for( int index = 0; index < this->config_.infoRepoIorSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) COMMANDLINE:     InforRepoIOR[ %d] == %C\n"),
+        ACE_TEXT("(%P|%t) %T COMMANDLINE:     InforRepoIOR[ %d] == %C\n"),
         index, this->config_.infoRepoIor( index).c_str()
       ));
     }
     for( int index = 0; index < this->config_.readerTopicNameSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) COMMANDLINE:  readerTopicName[ %d] == %C\n"),
+        ACE_TEXT("(%P|%t) %T COMMANDLINE:  readerTopicName[ %d] == %C\n"),
         index, this->config_.readerTopicName( index).c_str()
       ));
     }
     for( int index = 0; index < this->config_.writerTopicNameSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) COMMANDLINE:  writerTopicName[ %d] == %C\n"),
+        ACE_TEXT("(%P|%t) %T COMMANDLINE:  writerTopicName[ %d] == %C\n"),
         index, this->config_.writerTopicName( index).c_str()
       ));
     }
     for( int index = 0; index < this->config_.subscriberDomainSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) COMMANDLINE: subscriberDomain[ %d] == %d\n")
-        ACE_TEXT("%T (%P|%t) COMMANDLINE:    using repository key %d\n"),
+        ACE_TEXT("(%P|%t) %T COMMANDLINE: subscriberDomain[ %d] == %d\n")
+        ACE_TEXT("(%P|%t) %T COMMANDLINE:    using repository key %d\n"),
         index, this->config_.subscriberDomain( index),
         this->config_.domainToRepo( this->config_.subscriberDomain( index))
       ));
     }
     for( int index = 0; index < this->config_.publisherDomainSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) COMMANDLINE:  publisherDomain[ %d] == %d\n")
-        ACE_TEXT("%T (%P|%t) COMMANDLINE:    using repository key %d\n"),
+        ACE_TEXT("(%P|%t) %T COMMANDLINE:  publisherDomain[ %d] == %d\n")
+        ACE_TEXT("(%P|%t) %T COMMANDLINE:    using repository key %d\n"),
         index, this->config_.publisherDomain( index),
         this->config_.domainToRepo( this->config_.publisherDomain( index))
       ));
@@ -105,7 +105,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
 
   for( int index = 0; index < this->config_.infoRepoIorSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: loading repository %d.\n"),
+      ACE_TEXT("(%P|%t) %T INFO: loading repository %d.\n"),
       index
     ));
     TheServiceParticipant->set_repo_ior(
@@ -120,7 +120,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   if( this->config_.infoRepoIorSize() > 0) {
     for( int index = 0; index < this->config_.subscriberDomainSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) INFO: binding subscriber domain %d to repository %d.\n"),
+        ACE_TEXT("(%P|%t) %T INFO: binding subscriber domain %d to repository %d.\n"),
         this->config_.subscriberDomain( index),
         this->config_.domainToRepo( this->config_.subscriberDomain( index))
       ));
@@ -132,7 +132,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
 
     for( int index = 0; index < this->config_.publisherDomainSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) INFO: binding publisher domain %d to repository %d.\n"),
+        ACE_TEXT("(%P|%t) %T INFO: binding publisher domain %d to repository %d.\n"),
         this->config_.publisherDomain( index),
         this->config_.domainToRepo( this->config_.publisherDomain( index))
       ));
@@ -148,7 +148,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   //
   for( int index = 0; index < this->config_.subscriberDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: creating subscriber participant in domain %d.\n"),
+      ACE_TEXT("(%P|%t) %T INFO: creating subscriber participant in domain %d.\n"),
       this->config_.subscriberDomain( index)
     ));
     ParticipantMap::iterator where
@@ -164,7 +164,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
       if (CORBA::is_nil (this->participants_[ this->config_.subscriberDomain( index)].in ()))
         {
           ACE_ERROR ((LM_ERROR,
-            ACE_TEXT("%T (%P|%t) ERROR: create_participant failed for ")
+            ACE_TEXT("(%P|%t) %T ERROR: create_participant failed for ")
             ACE_TEXT("subscriber[ %d] in domain %d.\n"),
             index, this->config_.subscriberDomain( index)
           ));
@@ -181,7 +181,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   //
   for( int index = 0; index < this->config_.publisherDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: creating publisher participant in domain %d.\n"),
+      ACE_TEXT("(%P|%t) %T INFO: creating publisher participant in domain %d.\n"),
       this->config_.publisherDomain( index)
     ));
     ParticipantMap::iterator where
@@ -197,7 +197,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
       if (CORBA::is_nil (this->participants_[ this->config_.publisherDomain( index)].in ()))
         {
           ACE_ERROR ((LM_ERROR,
-            ACE_TEXT("%T (%P|%t) ERROR: create_participant failed for ")
+            ACE_TEXT("(%P|%t) %T ERROR: create_participant failed for ")
             ACE_TEXT("publisher[ %d] in domain %d.\n"),
             index, this->config_.publisherDomain( index)
           ));
@@ -235,7 +235,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     keylist.insert( TheServiceParticipant->domain_to_repo( this->config_.publisherDomain( index)));
   }
 
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: creating transports for repositories.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: creating transports for repositories.\n")));
   ACE_UINT32 transportKey = 0;
   for( std::set< OpenDDS::DCPS::Service_Participant::RepoKey>::const_iterator current
          = keylist.begin();
@@ -248,7 +248,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     }
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: creating a SimpleTCP transport for repository: %d.\n"),
+      ACE_TEXT("(%P|%t) %T INFO: creating a SimpleTCP transport for repository: %d.\n"),
       *current
     ));
     this->transport_[ *current]
@@ -278,7 +278,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     if( this->transport_[ *current]->configure( reader_config.in()) != 0)
     {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("%T (%P|%t) ERROR: TCP ")
+        ACE_TEXT("(%P|%t) %T ERROR: TCP ")
         ACE_TEXT("failed to configure the transport.\n")));
       throw BadTransportException ();
     }
@@ -290,7 +290,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
 
   for( int index = 0; index < this->config_.subscriberDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: creating data reader listener for domain %d.\n"),
+      ACE_TEXT("(%P|%t) %T INFO: creating data reader listener for domain %d.\n"),
       this->config_.subscriberDomain( index)
     ));
     this->listener_[ index] =
@@ -304,7 +304,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     if (CORBA::is_nil (this->listener_[ index].in ()))
       {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT ("%T (%P|%t) ERROR: failed to obtain listener for domain %d.\n"),
+          ACE_TEXT ("(%P|%t) %T ERROR: failed to obtain listener for domain %d.\n"),
           this->config_.subscriberDomain( index)
         ));
         throw BadReaderListenerException ();
@@ -319,7 +319,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
        current != this->participants_.end();
        ++current) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: Installing type %C support into domain %d.\n"),
+      ACE_TEXT("(%P|%t) %T INFO: Installing type %C support into domain %d.\n"),
       this->config_.typeName().c_str(),
       current->first
     ));
@@ -331,7 +331,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
                               )
         ) {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("%T (%P|%t) ERROR: Unable to install type %C support for domain %d.\n"),
+          ACE_TEXT("(%P|%t) %T ERROR: Unable to install type %C support for domain %d.\n"),
           this->config_.typeName().c_str(),
           current->first
         ));
@@ -346,7 +346,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
 
   for( int index = 0; index < this->config_.readerTopicNameSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: creating subscription[ %d] topic: %C.\n"),
+      ACE_TEXT("(%P|%t) %T INFO: creating subscription[ %d] topic: %C.\n"),
       index,
       this->config_.readerTopicName( index).c_str()
     ));
@@ -361,7 +361,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     if( CORBA::is_nil( this->readerTopic_[ index].in()) )
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("%T (%P|%t) ERROR: Failed to create topic %C for subscriber[ %d].\n"),
+          ACE_TEXT ("(%P|%t) %T ERROR: Failed to create topic %C for subscriber[ %d].\n"),
           this->config_.readerTopicName( index).c_str(),
           index
         ));
@@ -375,7 +375,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
 
   for( int index = 0; index < this->config_.writerTopicNameSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: creating publication[ %d] topic: %C.\n"),
+      ACE_TEXT("(%P|%t) %T INFO: creating publication[ %d] topic: %C.\n"),
       index,
       this->config_.writerTopicName( index).c_str()
     ));
@@ -390,7 +390,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     if( CORBA::is_nil( this->writerTopic_[ index].in()) )
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("%T (%P|%t) ERROR: Failed to create topic %C for publisher[ %d].\n"),
+          ACE_TEXT ("(%P|%t) %T ERROR: Failed to create topic %C for publisher[ %d].\n"),
           this->config_.writerTopicName( index).c_str(),
           index
         ));
@@ -404,7 +404,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
 
   for( int index = 0; index < this->config_.subscriberDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: creating subscriber[ %d].\n"),
+      ACE_TEXT("(%P|%t) %T INFO: creating subscriber[ %d].\n"),
       index
     ));
     this->subscriber_[ index]
@@ -414,7 +414,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     if (CORBA::is_nil (this->subscriber_[ index].in ()))
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("%T (%P|%t) ERROR: Failed to create_subscriber[ %d].\n"),
+          ACE_TEXT ("(%P|%t) %T ERROR: Failed to create_subscriber[ %d].\n"),
           index
         ));
         throw BadSubscriberException ();
@@ -429,7 +429,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     if (0 == sub_impl)
       {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("%T (%P|%t) ERROR: Failed to obtain subscriber servant[ %d]\n"),
+          ACE_TEXT("(%P|%t) %T ERROR: Failed to obtain subscriber servant[ %d]\n"),
           index
         ));
         throw BadSubscriberException ();
@@ -438,7 +438,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     OpenDDS::DCPS::AttachStatus attach_status;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: attaching subscriber[ %d] to transport \n"),
+      ACE_TEXT("(%P|%t) %T INFO: attaching subscriber[ %d] to transport \n"),
       index
     ));
     attach_status
@@ -470,7 +470,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
           }
 
         ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("%T (%P|%t) ERROR: Failed to attach to the transport. ")
+                    ACE_TEXT("(%P|%t) %T ERROR: Failed to attach to the transport. ")
                     ACE_TEXT("AttachStatus == %s\n"),
                     status_str.c_str()));
         throw BadTransportException ();
@@ -483,7 +483,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
 
   for( int index = 0; index < this->config_.publisherDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: creating publisher[ %d].\n"),
+      ACE_TEXT("(%P|%t) %T INFO: creating publisher[ %d].\n"),
       index
     ));
     this->publisher_[ index]
@@ -493,7 +493,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     if (CORBA::is_nil (this->publisher_[ index].in ()))
       {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("%T (%P|%t) ERROR: Failed to create_publisher[ %d].\n"),
+          ACE_TEXT ("(%P|%t) %T ERROR: Failed to create_publisher[ %d].\n"),
           index
         ));
         throw BadSubscriberException ();
@@ -508,7 +508,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     if (0 == pub_impl)
       {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("%T (%P|%t) ERROR: Failed to obtain publisher servant[ %d]\n"),
+          ACE_TEXT("(%P|%t) %T ERROR: Failed to obtain publisher servant[ %d]\n"),
           index
         ));
         throw BadSubscriberException ();
@@ -517,7 +517,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     OpenDDS::DCPS::AttachStatus attach_status;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: attaching publisher[ %d] to transport \n"),
+      ACE_TEXT("(%P|%t) %T INFO: attaching publisher[ %d] to transport \n"),
       index
     ));
     attach_status
@@ -549,7 +549,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
           }
 
         ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("%T (%P|%t) ERROR: Failed to attach to the transport. ")
+                    ACE_TEXT("(%P|%t) %T ERROR: Failed to attach to the transport. ")
                     ACE_TEXT("AttachStatus == %s\n"),
                     status_str.c_str()));
         throw BadTransportException ();
@@ -562,7 +562,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
 
   for( int index = 0; index < this->config_.publisherDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: creating datawriter[ %d].\n"),
+      ACE_TEXT("(%P|%t) %T INFO: creating datawriter[ %d].\n"),
       index
     ));
     ::DDS::DataWriterListener_var listener (
@@ -593,7 +593,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     if( CORBA::is_nil( this->dataWriter_[ index].in()) )
       {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("%T (%P|%t) ERROR: create datawriter[ %d] failed.\n"),
+          ACE_TEXT("(%P|%t) %T ERROR: create datawriter[ %d] failed.\n"),
           index
         ));
         throw BadWriterException ();
@@ -621,7 +621,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
 
   for( int index = 0; index < this->config_.subscriberDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: creating data reader[ %d].\n"),
+      ACE_TEXT("(%P|%t) %T INFO: creating data reader[ %d].\n"),
       index
     ));
     ::DDS::TopicDescription_var description
@@ -639,7 +639,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     if( CORBA::is_nil( this->dataReader_[ index].in()) )
       {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("%T (%P|%t) ERROR: create datareader[ %d] failed.\n"),
+          ACE_TEXT("(%P|%t) %T ERROR: create datareader[ %d] failed.\n"),
           index
         ));
         throw BadReaderException ();
@@ -650,14 +650,14 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
 
 TestMonitor::~TestMonitor()
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: finalizing the test monitor.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: finalizing the test monitor.\n")));
 
   // Release the participants.
   for( ParticipantMap::const_iterator current = this->participants_.begin();
        current != this->participants_.end();
        ++current) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) INFO: releasing resources for domain %d.\n"),
+      ACE_TEXT("(%P|%t) %T INFO: releasing resources for domain %d.\n"),
       current->first
     ));
     if( 0 == CORBA::is_nil( current->second.in())) {
@@ -665,7 +665,7 @@ TestMonitor::~TestMonitor()
            == current->second->delete_contained_entities()
         ) {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("%T (%P|%t) ERROR: Unable to release resources for domain %d.\n"),
+          ACE_TEXT("(%P|%t) %T ERROR: Unable to release resources for domain %d.\n"),
           current->first
         ));
 
@@ -673,18 +673,18 @@ TestMonitor::~TestMonitor()
                  == TheParticipantFactory->delete_participant( current->second)
                ) {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("%T (%P|%t) ERROR: Unable to release the participant for domain %d.\n"),
+          ACE_TEXT("(%P|%t) %T ERROR: Unable to release the participant for domain %d.\n"),
           current->first));
       }
     }
   }
 
   // Release all the transport resources.
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: finalizing transport.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: finalizing transport.\n")));
   TheTransportFactory->release();
 
   // Release any remaining resources held for the service.
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) INFO: finalizing DCPS service.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: finalizing DCPS service.\n")));
   TheServiceParticipant->shutdown ();
 }
 
@@ -700,7 +700,7 @@ TestMonitor::run()
     = ::Xyz::FooNoKeyDataWriter::_narrow( this->dataWriter_[ 0].in());
   if( CORBA::is_nil( fooWriter.in())) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("%T (%P|%t) TestMonitor failed to narrow writer.\n")
+      ACE_TEXT("(%P|%t) %T TestMonitor failed to narrow writer.\n")
     ));
     throw BadWriterException();
   }
@@ -711,7 +711,7 @@ TestMonitor::run()
   ACE_OS::sleep(5);
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) TestMonitor::run starting to write.\n")
+    ACE_TEXT("(%P|%t) %T TestMonitor::run starting to write.\n")
   ));
 
   // Write the requested number of samples.
@@ -727,7 +727,7 @@ TestMonitor::run()
     // Go ahead and forward the data.
     if( ::DDS::RETCODE_OK != fooWriter->write( foo, ::DDS::HANDLE_NIL)) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("%T (%P|%t) TestMonitor::run ")
+        ACE_TEXT("(%P|%t) %T TestMonitor::run ")
         ACE_TEXT("failed to forward sample %d.\n"),
         sample
       ));
@@ -744,7 +744,7 @@ TestMonitor::run()
   // Wait until we receive the final message at the last receiver, then
   // we are done.
   //
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) TestMonitor::run about to wait.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T TestMonitor::run about to wait.\n")));
   this->forwarder_[ this->forwarder_.size() - 1]->waitForCompletion();
 
   // This is now a termination message.
@@ -753,10 +753,10 @@ TestMonitor::run()
   // The first data writer is already narrowed, terminate it.
   foo.x = 0.0;
   foo.y = 355.0f / 113.0f;
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) TestMonitor::run terminating %d.\n"),0));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T TestMonitor::run terminating %d.\n"),0));
   if( ::DDS::RETCODE_OK != fooWriter->write( foo, ::DDS::HANDLE_NIL)) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("%T (%P|%t) TestMonitor::run ")
+      ACE_TEXT("(%P|%t) %T TestMonitor::run ")
       ACE_TEXT("failed to send termination message %d.\n"),
       (this->dataWriter_.size() - 1)
     ));
@@ -771,14 +771,14 @@ TestMonitor::run()
       = ::Xyz::FooNoKeyDataWriter::_narrow( this->dataWriter_[ index].in());
     if( CORBA::is_nil( writer.in())) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("%T (%P|%t) TestMonitor failed to narrow writer.\n")
+        ACE_TEXT("(%P|%t) %T TestMonitor failed to narrow writer.\n")
       ));
       throw BadWriterException();
     }
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) TestMonitor::run terminating %d.\n"),index));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T TestMonitor::run terminating %d.\n"),index));
     if( ::DDS::RETCODE_OK != writer->write( foo, ::DDS::HANDLE_NIL)) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("%T (%P|%t) TestMonitor::run ")
+        ACE_TEXT("(%P|%t) %T TestMonitor::run ")
         ACE_TEXT("failed to send termination message %d.\n"),
         index
       ));

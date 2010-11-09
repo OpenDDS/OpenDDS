@@ -150,7 +150,7 @@ OpenDDS::DCPS::DataLinkSetMap::release_reservations
     if (link_set->empty()) {
       if (unbind(map_, remote_ids[i]) != 0) {
         RepoIdConverter converter(remote_ids[i]);
-        VDBG((LM_DEBUG,
+        VDBG((LM_WARNING,
               ACE_TEXT("(%P|%t) WARNING: DataLinkSetMap::release_reservations: ")
               ACE_TEXT("failed to unbind remote_id %C ")
               ACE_TEXT("from map. Skipping this remote_id.\n"),

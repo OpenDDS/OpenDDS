@@ -154,5 +154,84 @@ MulticastConfiguration::default_group_address(ACE_INET_Addr& group_address,
   }
 }
 
+
+void
+MulticastConfiguration::dump()
+{
+  // Acquire lock on the log so the entire dump is output as a block
+  // (at least for each process).
+  ACE_Log_Msg::instance()->acquire();
+
+  TransportConfiguration::dump();
+
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
+             ACE_TEXT("default_to_ipv6: %C.\n"),
+             (this->default_to_ipv6_ ? "true" : "false")));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
+             ACE_TEXT("port_offset: %d.\n"),
+             this->port_offset_));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
+             ACE_TEXT("group_address: %C:%d.\n"),
+             this->group_address_.get_host_addr(),
+             this->group_address_.get_port_number()));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
+             ACE_TEXT("reliable: %C.\n"),
+             (this->reliable_ ? "true" : "false")));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
+             ACE_TEXT("syn_backoff: %l.\n"),
+             this->syn_backoff_));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
+             ACE_TEXT("syn_interval: %d.\n"),
+             this->syn_interval_.msec()));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
+             ACE_TEXT("syn_timeout: %d.\n"),
+             this->syn_timeout_.msec()));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
+             ACE_TEXT("nak_depth: %d.\n"),
+             this->nak_depth_));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
+             ACE_TEXT("nak_interval: %d.\n"),
+             this->nak_interval_.msec()));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
+             ACE_TEXT("nak_delay_intervals: %d.\n"),
+             this->nak_delay_intervals_));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
+             ACE_TEXT("nak_max: %d.\n"),
+             this->nak_max_));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
+             ACE_TEXT("nak_timeout: %d.\n"),
+             this->nak_timeout_.msec()));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
+             ACE_TEXT("ttl: 0x%x.\n"),
+             this->ttl_));
+
+  if (this->rcv_buffer_size_ == 0) {
+    ACE_DEBUG((LM_DEBUG,
+         ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
+         ACE_TEXT("rcv_buffer_size: %C.\n\n"),
+         "System Default Value"));
+  } else {
+    ACE_DEBUG((LM_DEBUG,
+         ACE_TEXT("(%P|%t) MulticastConfiguration::dump() - ")
+         ACE_TEXT("rcv_buffer_size: %d.\n\n"),
+         this->rcv_buffer_size_));
+  }
+
+  ACE_Log_Msg::instance()->release();
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

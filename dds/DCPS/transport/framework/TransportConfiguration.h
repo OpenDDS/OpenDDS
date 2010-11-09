@@ -72,6 +72,9 @@ public:
   virtual int  load(const TransportIdType& id,
                     ACE_Configuration_Heap& config);
 
+  /// Diagnostic aid.
+  virtual void dump();
+
   /// Flag used to marshall/demarshall bytes sent/received.
   bool swap_bytes_;
 

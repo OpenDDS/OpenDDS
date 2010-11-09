@@ -57,11 +57,11 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       }
       else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
       {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)instance is disposed\n")));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) instance is disposed\n")));
       }
       else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
       {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)instance is unregistered\n")));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) instance is unregistered\n")));
       }
     } else if (status == DDS::RETCODE_NO_DATA) {
       cerr << "DataReaderListener: ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;

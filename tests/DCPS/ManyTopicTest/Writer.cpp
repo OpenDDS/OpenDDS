@@ -86,7 +86,7 @@ Writer::svc ()
         rsleep1() ;
 
         ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
+              ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
 
         ::DDS::InstanceHandle_t handle
             = foo_dw->register_instance(foo);
@@ -115,7 +115,7 @@ Writer::svc ()
         rsleep1() ;
 
         ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
+              ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
 
         ::DDS::InstanceHandle_t handle
             = foo_dw->register_instance(foo);
@@ -146,7 +146,7 @@ Writer::svc ()
         rsleep1() ;
 
         ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
+              ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
 
         ::DDS::InstanceHandle_t handle
             = foo_dw->register_instance(foo);

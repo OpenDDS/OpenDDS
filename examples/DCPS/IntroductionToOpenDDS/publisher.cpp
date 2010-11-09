@@ -212,7 +212,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     cout << "Publishing TRADING_OPENED" << endl;
     DDS::ReturnCode_t ret = exchange_evt_dw->write(opened, exchange_handle);
     if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t)ERROR: OPEN write returned %d.\n"), ret));
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: OPEN write returned %d.\n"), ret));
     }
 
     ACE_Time_Value quarterSecond( 0, 250000 );
@@ -227,7 +227,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       cout << "Publishing SPY Quote: " << spy_quote.value << endl;
       ret = quote_dw->write(spy_quote, spy_handle);
       if (ret != DDS::RETCODE_OK) {
-        ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t)ERROR: SPY write returned %d.\n"), ret));
+        ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SPY write returned %d.\n"), ret));
       }
 
       ACE_OS::sleep( quarterSecond );
@@ -242,7 +242,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       cout << "Publishing MDY Quote: " << mdy_quote.value <<endl;
       ret = quote_dw->write(mdy_quote, mdy_handle);
       if (ret != DDS::RETCODE_OK) {
-        ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t)ERROR: MDY write returned %d.\n"), ret));
+        ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MDY write returned %d.\n"), ret));
       }
 
       ACE_OS::sleep( quarterSecond );
@@ -256,7 +256,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     cout << "Publishing TRADING_CLOSED" << endl;
     ret = exchange_evt_dw->write(closed, exchange_handle);
     if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t)ERROR: CLOSED write returned %d.\n"), ret));
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: CLOSED write returned %d.\n"), ret));
     }
 
     cout << "Exiting..." << endl;

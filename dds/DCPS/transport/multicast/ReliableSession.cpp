@@ -336,7 +336,7 @@ ReliableSession::send_naks()
   if (!this->acked_) return;
 
   if (DCPS_debug_level > 0) {
-    ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)ReliableSession::send_naks local %d ")
+    ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ReliableSession::send_naks local %d ")
                           ACE_TEXT ("remote %d nak request size %d \n"),
       this->link_->local_peer(), this->remote_peer_, this->nak_requests_.size()));
   }
@@ -429,7 +429,7 @@ ReliableSession::send_naks()
       }
 
       if (DCPS_debug_level > 0) {
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)ReliableSession::send_naks local %d ")
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ReliableSession::send_naks local %d ")
           ACE_TEXT ("remote %d ignore missing %d - %d \n"),
           this->link_->local_peer(), this->remote_peer_, low.getValue(), high.getValue()));
       }
@@ -507,7 +507,7 @@ ReliableSession::nak_received(ACE_Message_Block* control)
   for (CORBA::ULong i = 0; i < size; ++i) {
     bool ret = send_buffer->resend(ranges[i]);
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)ReliableSession::nak_received")
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ReliableSession::nak_received")
                             ACE_TEXT (" %d <- %d %d - %d resend result %d\n"),
                             this->link_->local_peer(), this->remote_peer_,
                             ranges[i].first.getValue(), ranges[i].second.getValue(), ret));
@@ -546,7 +546,7 @@ ReliableSession::send_naks (DisjointSequence& missing)
     serializer << ranges[i]->first.getValue();
     serializer << ranges[i]->second.getValue();
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t)ReliableSession::send_naks")
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ReliableSession::send_naks")
                             ACE_TEXT (" %d -> %d %d - %d \n"),
                             this->link_->local_peer(), remote_peer_,
                             ranges[i]->first.getValue(), ranges[i]->second.getValue()));

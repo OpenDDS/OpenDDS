@@ -157,7 +157,7 @@ public:
 
       if (frees_to_heap_ > allocs_from_heap_) {
         ACE_ERROR((LM_ERROR,
-                   "(%P|%t) ERROR Dynamic_Cached_Allocator_With_Overflow::free %x"
+                   "(%P|%t) ERROR: Dynamic_Cached_Allocator_With_Overflow::free %x"
                    " more deletes %d than allocs %d to the heap\n",
                    this,
                    this->frees_to_heap_,
@@ -181,7 +181,7 @@ public:
 
       if (frees_to_pool_ > allocs_from_pool_) {
         ACE_ERROR((LM_ERROR,
-                   "(%P|%t) ERROR Dynamic_Cached_Allocator_With_Overflow::free %x"
+                   "(%P|%t) ERROR: Dynamic_Cached_Allocator_With_Overflow::free %x"
                    " more deletes %d than allocs %d from the pool\n",
                    this,
                    this->frees_to_pool_,

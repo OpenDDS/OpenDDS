@@ -107,6 +107,8 @@ Options::Options(int argc, ACE_TCHAR** argv, char** /* envp */)
    raw_buffer_type_(   DEFAULT_RAW_BUFFER_TYPE)
 {
   ACE_Arg_Shifter parser( argc, argv);
+  parser.ignore_arg(); // Ignore the first arg, it's executable path and name.
+
   while( parser.is_anything_left()) {
     if( this->verbose()) {
       ACE_DEBUG((LM_DEBUG,

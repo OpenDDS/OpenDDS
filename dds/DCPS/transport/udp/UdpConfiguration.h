@@ -30,6 +30,9 @@ public:
 
   virtual int load(const TransportIdType& id,
                    ACE_Configuration_Heap& config);
+
+  /// Diagnostic aid.
+  virtual void dump();
 };
 
 } // namespace DCPS

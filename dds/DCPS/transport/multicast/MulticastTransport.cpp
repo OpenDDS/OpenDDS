@@ -77,7 +77,7 @@ MulticastTransport::find_or_create_datalink(
 
     bool is_loopback = local_peer == remote_peer;
 
-    VDBG_LVL((LM_DEBUG, "(%P|%t)MulticastTransport::find_or_create_datalink remote addr str "
+    VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::find_or_create_datalink remote addr str "
               "\"%s\" priority %d is_loopback %d active %d\"\n",
               const_cast<AssociationData*> (remote_association)->network_order_address_.addr_.c_str(),
               priority, is_loopback, active),

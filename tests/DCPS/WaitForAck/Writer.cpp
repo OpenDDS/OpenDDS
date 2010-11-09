@@ -127,7 +127,7 @@ Writer::svc ()
     = this->writer_->wait_for_acknowledgments( shutdownDelay);
   if( result != ::DDS::RETCODE_OK) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) ERROR Writer::svc() - ")
+      ACE_TEXT("(%P|%t) ERROR: Writer::svc() - ")
       ACE_TEXT("publication %d wait failed with code: %d while terminating.\n"),
       this->index_,
       result

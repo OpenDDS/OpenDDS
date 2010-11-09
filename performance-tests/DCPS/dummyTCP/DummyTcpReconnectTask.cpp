@@ -35,5 +35,5 @@ void OpenDDS::DCPS::DummyTcpReconnectTask::execute (ReconnectOpType& op)
       }
     }
   else
-    ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: DummyTcpReconnectTask::svc unknown operation %d\n", op));
+    ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: DummyTcpReconnectTask::svc unknown operation %d\n", op));
 }

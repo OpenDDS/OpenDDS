@@ -201,7 +201,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
   if (received_samples != expected_samples) {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) ERROR subscriber - ")
+      ACE_TEXT("(%P|%t) ERROR: subscriber - ")
       ACE_TEXT("received %d of expected %d samples.\n"),
       received_samples,
       expected_samples
