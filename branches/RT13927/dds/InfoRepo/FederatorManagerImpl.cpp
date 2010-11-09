@@ -401,7 +401,7 @@ ManagerImpl::initialize()
     = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dataWriter.in());
 
     if (0 == servant) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("unable to extract typed OwnerUpdate writer.\n")));
 
@@ -434,7 +434,7 @@ ManagerImpl::initialize()
     = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(dataReader.in());
 
     if (0 == servant) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("unable to extract typed OwnerUpdate reader.\n")));
 
@@ -482,7 +482,7 @@ ManagerImpl::initialize()
     = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dataWriter.in());
 
     if (0 == servant) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("unable to extract typed TopicUpdate writer.\n")));
 
@@ -515,7 +515,7 @@ ManagerImpl::initialize()
     = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(dataReader.in());
 
     if (0 == servant) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("unable to extract typed TopicUpdate reader.\n")));
 
@@ -563,7 +563,7 @@ ManagerImpl::initialize()
     = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dataWriter.in());
 
     if (0 == servant) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("unable to extract typed ParticipantUpdate writer.\n")));
 
@@ -596,7 +596,7 @@ ManagerImpl::initialize()
     = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(dataReader.in());
 
     if (0 == servant) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("unable to extract typed ParticipantUpdate reader.\n")));
 
@@ -644,7 +644,7 @@ ManagerImpl::initialize()
     = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dataWriter.in());
 
     if (0 == servant) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("unable to extract typed PublicationUpdate writer.\n")));
 
@@ -677,7 +677,7 @@ ManagerImpl::initialize()
     = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(dataReader.in());
 
     if (0 == servant) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("unable to extract typed PublicationUpdate reader.\n")));
 
@@ -725,7 +725,7 @@ ManagerImpl::initialize()
     = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dataWriter.in());
 
     if (0 == servant) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("unable to extract typed SubscriptionUpdate writer.\n")));
 
@@ -758,7 +758,7 @@ ManagerImpl::initialize()
     = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(dataReader.in());
 
     if (0 == servant) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("unable to extract typed SubscriptionUpdate reader.\n")));
 
@@ -878,7 +878,7 @@ ManagerImpl::finalize()
 
       if (where == this->peers_.end()) {
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t)Federator::Manager::finalize: ")
+                   ACE_TEXT("(%P|%t) Federator::Manager::finalize: ")
                    ACE_TEXT("repository %d - all attachment to federation left.\n"),
                    this->id()));
 

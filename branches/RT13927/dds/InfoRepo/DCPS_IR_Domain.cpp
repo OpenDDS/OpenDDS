@@ -286,7 +286,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i(OpenDDS::DCPS::RepoId& to
 
       if (OpenDDS::DCPS::DCPS_debug_level > 0) {
         OpenDDS::DCPS::RepoIdConverter converter(topicId);
-        ACE_DEBUG((LM_DEBUG,
+        ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Domain::add_topic_i: ")
                    ACE_TEXT("Domain %d declined to add duplicate topic %C at 0x%x.\n"),
                    this->id_,
@@ -473,7 +473,7 @@ DCPS_IR_Domain::find_topic_description(
 
     } else {
       if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-        ACE_DEBUG((LM_DEBUG,
+        ACE_DEBUG((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::find_topic_description: ")
                    ACE_TEXT("searching for topic description %C/%C, ")
                    ACE_TEXT("located topic description %C/%C instead in domain %d.\n"),
@@ -964,7 +964,7 @@ int DCPS_IR_Domain::add_topic_description(DCPS_IR_Topic_Description*& desc)
   default:
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::add_topic_description: ")
-               ACE_TEXT("unknonw error adding Topic Description 0x%x to domain %d.\n"),
+               ACE_TEXT("unknown error adding Topic Description 0x%x to domain %d.\n"),
                desc,
                id_));
     return 2;

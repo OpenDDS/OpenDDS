@@ -1,3 +1,447 @@
+Mon Nov  8 14:08:39 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+
+          Removed trailing white space.
+
+Fri Nov  5 13:10:47 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Reverted changes in get_or_create_factory() locking
+          that where committed yesterday as they appear to be
+          causing test failures on some platforms.
+
+Thu Nov  4 19:28:02 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Changed locking in get_or_create_factory() to guard
+          find, generate new factory, and register instead of releasing
+          lock after find and getting a new lock before generating
+          a new factory.
+
+Thu Nov  4 19:11:05 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Changed debug message from LM_WARNING to LM_DEBUG since it's
+          a debug level 5 message.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Changed debug message in remove_associations() from LM_DEBUG
+          to LM_WARNING since it's for the case where a reader is removed
+          before fully_associated() is called.
+
+        * performance-tests/DCPS/Priority/Options.cpp:
+        * tests/DCPS/WaitForAck/Options.cpp:
+
+          Changed to skip parsing the first argument to eliminate
+          debug warning messages like:
+            WARNING: Options::Options() - ignoring argument: .\.\\subscriber.EXE.
+
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/DPFactoryQos/pub.ini:
+        * tests/DCPS/DPFactoryQos/sub.ini:
+        * tests/DCPS/Deadline/sub.ini:
+        * tests/DCPS/PersistentDurability/pub.ini:
+        * tests/DCPS/PersistentDurability/sub.ini:
+        * tests/DCPS/Serializer_wstring/pub.ini:
+        * tests/DCPS/Serializer_wstring/sub.ini:
+        * tests/DCPS/SetQosDeadline/pub.ini:
+        * tests/DCPS/SetQosDeadline/sub.ini:
+        * tests/DCPS/SetQosPartition/pub.ini:
+        * tests/DCPS/SetQosPartition/sub.ini:
+        * tests/DCPS/StringKey/pub.ini:
+        * tests/DCPS/StringKey/sub.ini:
+        * tests/DCPS/TransientDurability/pub.ini:
+        * tests/DCPS/TransientDurability/sub.ini:
+        * tests/DCPS/sub_init_loop/pub.ini:
+        * tests/DCPS/sub_init_loop/sub.ini:
+
+          Commented out configuration options that don't have values,
+          for example "swap_bytes=".  This was done to stop warnings
+          output when debug level logging is turned on that the default
+          value for the option is being used.
+
+Thu Nov  4 19:52:05 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/WriteDataContainer.h:
+          Fixed some typos in comments
+
+Thu Nov  4 12:59:42 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.cpp:
+
+          Removed trailing white space.
+
+Wed Nov  3 19:09:13 UTC 2010  Don Hudson  <dchudson@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+
+          Restored initialization of DEFAULT_TTL to original.
+
+          Changed dump() to output ttl_ in hex.
+
+Wed Nov  3 15:58:38 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Changed guard in get_or_create_factory() to include
+          finding the transport generator and using the generator to
+          register the factory.  Instead of releasing the guard after
+          finding the generator and then getting a new guard before
+          using the generator to register the factory.
+
+
+Wed Nov  3 15:29:11 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Changed data_received() to skip finding the writer
+          when ENTITYKIND_OPENDDS_NIL_WRITER is specified.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Removed operator<<(ostream& str, WriterInfo::WriterState value)
+          since it didn't function as intended on some platforms
+          because WriterState is an enum.  Replaced it with get_state_str().
+
+        * dds/DCPS/GuidConverter.cpp:
+        * dds/DdsDcpsGuid.idl:
+
+          Added type ENTITYKIND_OPENDDS_NIL_WRITER for use
+          in infrastructure testing where there is no writer.
+
+        * tests/DCPS/FooTest4/Writer.cpp:
+
+          Changed to use ENTITYKIND_OPENDDS_NIL_WRITER since
+          the test has no writer by design.  This eliminates
+          multiple warnings "failed to find publication data for ..."
+          that are misleading for this test.
+
+Wed Nov  3 15:08:23 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+
+          Added catch block for std::exception so more detail can
+          be included in error message.
+
+Wed Nov  3 14:23:58 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed Messenger default UDP test because there is no
+          default UDP port.
+
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/udp/UdpConfiguration.h:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.cpp:
+
+          Added dump() for transport configuration.
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Changed config() to dump transport configuration
+          if transport debugging is on.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Changed send_direct() to dump transport configuration
+          if there was a send error and transport debugging is on.
+
+          Tweaked formatting of error message.
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+
+          Corrected initialization of DEFAULT_TTL.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Changed find_or_create_datalink() and passive_connection()
+          to dump transport configuration if data link couldn't be
+          found or created and transport debugging is on.
+
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Changed configure_i() to fail with an error message
+          if the local address isn't set as there is no default
+          local address for UDP.
+
+Wed Nov  3 13:34:26 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * examples/DCPS/Messenger_IOGR_Imr/pub.ini:
+        * examples/DCPS/Messenger_IOGR_Imr/sub.ini:
+        * examples/DCPS/Messenger_Imr/pub.ini:
+        * examples/DCPS/Messenger_Imr/sub.ini:
+
+        * performance-tests/DCPS/InfoRepo_population/pub2.ini:
+        * performance-tests/DCPS/TransportLatency/pub.ini:
+        * performance-tests/DCPS/TransportLatency/sub.ini:
+
+        * tests/DCPS/BuiltInTopicTest/pub.ini:
+        * tests/DCPS/BuiltInTopicTest/sub.ini:
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/CorbaSeq/sub.ini:
+        * tests/DCPS/DPFactoryQos/pub.ini:
+        * tests/DCPS/DPFactoryQos/sub.ini:
+        * tests/DCPS/Deadline/pub.ini:
+        * tests/DCPS/Deadline/sub.ini:
+        * tests/DCPS/LatencyBudget/pub.ini:
+        * tests/DCPS/LatencyBudget/sub.ini:
+        * tests/DCPS/Lifespan/pub.ini:
+        * tests/DCPS/Lifespan/sub.ini:
+        * tests/DCPS/ManualAssertLiveliness/pub.ini:
+        * tests/DCPS/ManualAssertLiveliness/sub.ini:
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/NotifyTest/sub.ini:
+        * tests/DCPS/Partition/pub.ini:
+        * tests/DCPS/Partition/sub.ini:
+        * tests/DCPS/Prst_delayed_subscriber/pub.ini:
+        * tests/DCPS/Prst_delayed_subscriber/sub.ini:
+        * tests/DCPS/TransientDurability/pub.ini:
+        * tests/DCPS/TransientDurability/sub.ini:
+        * tests/DCPS/TransientLocalTest/pub.ini:
+        * tests/DCPS/TransientLocalTest/sub.ini:
+
+          Commented out configuration options that don't have values,
+          for example "swap_bytes=".  This was done to stop warnings
+          output when debug level logging is turned on that the default
+          value for the option is being used.
+
+Tue Nov  2 19:09:03 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/BitPubListenerImpl.cpp:
+
+          Made minor tweaks to formatting of error messages for
+          consistency and readability that were missed in the previous commit.
+
+Tue Nov  2 18:29:27 UTC 2010  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/BitPubListenerImpl.cpp:
+        * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/NetworkAddress.inl:
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+        * dds/DCPS/transport/framework/QueueTaskBase_T.h:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReconnectTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * examples/DCPS/IntroductionToOpenDDS/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/Writer.cpp:
+        * examples/DCPS/Messenger_Imr/Writer.cpp:
+        * performance-tests/DCPS/InfoRepo_population/Writer.cpp:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/Writer.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/Writer.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/publisher.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/subscriber.cpp:
+        * performance-tests/DCPS/TransportLatency/Writer.cpp:
+        * performance-tests/DCPS/UDPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Reader.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Writer.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpReconnectTask.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.cpp:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+
+        * tests/DCPS/BuiltInTopicTest/Writer.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/CompatibilityTest/Writer.cpp:
+        * tests/DCPS/CorbaSeq/Writer.cpp:
+        * tests/DCPS/DPFactoryQos/DataReaderListener.cpp:
+        * tests/DCPS/DPFactoryQos/Writer.cpp:
+        * tests/DCPS/Deadline/DataReaderListener.cpp:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.cpp:
+        * tests/DCPS/Deadline/Writer.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/Federation/subscriber_main.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/LatencyBudget/Writer.cpp:
+        * tests/DCPS/Lifespan/Writer.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/Writer.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/Writer.cpp:
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/ManyTopicTest/Writer.cpp:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiDPTest/Writer.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiRepoTest/DataWriterListenerImpl.cpp:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/MultiRepoTest/monitor.cpp:
+        * tests/DCPS/MultiRepoTest/system.cpp:
+        * tests/DCPS/NotifyTest/DataReaderListener.cpp:
+        * tests/DCPS/NotifyTest/Writer.cpp:
+        * tests/DCPS/Ownership/DataReaderListener.cpp:
+        * tests/DCPS/Ownership/Writer.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/PersistentDurability/Writer.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/Writer.cpp:
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataWriterListener.cpp:
+        * tests/DCPS/Reconnect/Writer.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/Serializer_wstring/DataReaderListener.cpp:
+        * tests/DCPS/Serializer_wstring/Writer.cpp:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+        * tests/DCPS/SetQosDeadline/Writer.cpp:
+        * tests/DCPS/SetQosPartition/DataReaderListener.cpp:
+        * tests/DCPS/SetQosPartition/Writer.cpp:
+        * tests/DCPS/StringKey/DataReaderListener.cpp:
+        * tests/DCPS/StringKey/Writer.cpp:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+        * tests/DCPS/TransientDurability/Writer.cpp:
+        * tests/DCPS/TransientLocalTest/Writer.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Writer.cpp:
+        * tests/DCPS/sub_init_loop/Writer.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+
+          Made minor tweaks to formatting of error and debug messages for
+          consistency and readability.
+
+          Corrected a few incorrect method names in error and debug messages.
+
+          Corrected a few spelling errors.
+
+Tue Oct 26 20:31:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/dds/dcps_java.mpc:
+
+          Added a command-line option to idl2jni to account for the fact that
+          since the latest change to DdsDcpsTopic.idl, the generated cpp file
+          needs to include DdsDcpsDomainC.h.
+
+Mon Oct 18 18:36:01 UTC 2010  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * dds/DdsDcpsTopic.idl:
+        * dds/idl/IDLTemplate.txt:
+        * tests/DCPS/unit/MyTypeSupport.idl:
+
+          Move the abstract methods up to the base class to allow them to
+          be called by a base class pointer.
+
+Tue Oct 12 15:03:53 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * INSTALL:
+
+          Add some "next steps" documentation to describe what a user
+          may want to do next after building OpenDDS.
+
+        * NEWS:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          DCPSInfoRepo no longer requires an -ORBSvcConf argument when using
+          Built-In Topics.  The DCPSInfoRepo process will take care of loading
+          SimpleTCP (if it's not already loaded).
+
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+
+          Test the above change by leaving out the -ORBSvcConf argument on
+          the DCPSInfoRepo command line.
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Default use_bits_ to false (as if -NOBITS was given) if
+          Built-In Topics are disabled at compile-time.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Only log the "not using file configuration" message
+          if -DCPSDebugLevel is enabled.
+
 Mon Oct  4 14:19:06 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:

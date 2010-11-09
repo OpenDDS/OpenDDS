@@ -37,7 +37,7 @@ int read (::DDS::DataReader_ptr reader, DT& foo, bool& valid_data)
     if (CORBA::is_nil (foo_dr.in ()))
     {
       ACE_ERROR ((LM_ERROR,
-        ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::read - _narrow failed.\n")));
+        ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::read - _narrow failed.\n")));
       throw BadReaderException() ;
     }
 
@@ -56,39 +56,39 @@ int read (::DDS::DataReader_ptr reader, DT& foo, bool& valid_data)
       if (si.valid_data == 1)
       {
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::read %X foo.x = %f foo.y = %f, foo.data_source = %d\n"),
+          ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::read %X foo.x = %f foo.y = %f, foo.data_source = %d\n"),
           reader, foo.x, foo.y, foo.data_source));
       }
       else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
       {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)instance is disposed\n")));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) instance is disposed\n")));
       }
       else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
       {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)instance is unregistered\n")));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) instance is unregistered\n")));
       }
       else
       {
-        ACE_ERROR ((LM_ERROR, "(%P|%t)ForwardingListenerImpl::read:"
+        ACE_ERROR ((LM_ERROR, "(%P|%t) ForwardingListenerImpl::read:"
           " received unknown instance state %d\n", si.instance_state));
       }
     }
     else if (status == ::DDS::RETCODE_NO_DATA)
     {
       ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("%T (%P|%t) ERROR: ForwardingListenerImpl::reader received ::DDS::RETCODE_NO_DATA!\n")),
+        ACE_TEXT("(%P|%t) %T ERROR: ForwardingListenerImpl::reader received ::DDS::RETCODE_NO_DATA!\n")),
         -1);
     }
     else
     {
       ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("%T (%P|%t) ERROR: ForwardingListenerImpl::read status==%d\n"), status),
+        ACE_TEXT("(%P|%t) %T ERROR: ForwardingListenerImpl::read status==%d\n"), status),
         -1);
     }
   }
   catch (const CORBA::Exception& ex)
   {
-    ex._tao_print_exception ("%T (%P|%t) ForwardingListenerImpl::read - ");
+    ex._tao_print_exception ("(%P|%t) %T ForwardingListenerImpl::read - ");
     return -1;
   }
 
@@ -105,7 +105,7 @@ ForwardingListenerImpl::ForwardingListenerImpl(
     repo_( repo)
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::ForwardingListenerImpl Repo[ %d]\n"),
+    ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::ForwardingListenerImpl Repo[ %d]\n"),
     this->repo_
   ));
 }
@@ -114,7 +114,7 @@ ForwardingListenerImpl::ForwardingListenerImpl(
 ForwardingListenerImpl::~ForwardingListenerImpl (void)
   {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::~ForwardingListenerImpl Repo[ %d] ")
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::~ForwardingListenerImpl Repo[ %d] ")
       ACE_TEXT("after %d samples\n"),
       this->repo_,
       this->samples_
@@ -151,7 +151,7 @@ void ForwardingListenerImpl::on_requested_deadline_missed (
     ACE_UNUSED_ARG(status);
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::on_requested_deadline_missed Repo[ %d]\n"),
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_requested_deadline_missed Repo[ %d]\n"),
       this->repo_
     ));
   }
@@ -168,7 +168,7 @@ void ForwardingListenerImpl::on_requested_incompatible_qos (
     ACE_UNUSED_ARG(status);
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::on_requested_incompatible_qos Repo[ %d]\n"),
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_requested_incompatible_qos Repo[ %d]\n"),
       this->repo_
     ));
   }
@@ -185,7 +185,7 @@ void ForwardingListenerImpl::on_liveliness_changed (
     ACE_UNUSED_ARG(status);
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::on_liveliness_changed Repo[ %d]\n"),
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_liveliness_changed Repo[ %d]\n"),
       this->repo_
     ));
   }
@@ -202,7 +202,7 @@ void ForwardingListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::on_subscription_matched Repo[ %d] \n"),
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_subscription_matched Repo[ %d] \n"),
       this->repo_
     ));
   }
@@ -219,7 +219,7 @@ void ForwardingListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::on_sample_rejected Repo[ %d] \n"),
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_sample_rejected Repo[ %d] \n"),
       this->repo_
     ));
   }
@@ -232,7 +232,7 @@ void ForwardingListenerImpl::on_subscription_matched (
   ))
   {
     //ACE_DEBUG((LM_DEBUG,
-    //  ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::on_data_available %d\n"), num_reads.value ()));
+    //  ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available %d\n"), num_reads.value ()));
 
     //num_reads ++;
 
@@ -248,13 +248,13 @@ void ForwardingListenerImpl::on_subscription_matched (
     if (ret != 0)
     {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::on_data_available Repo[ %d] read failed.\n"),
+        ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available Repo[ %d] read failed.\n"),
         this->repo_
       ));
 
     } else if( CORBA::is_nil( this->dataWriter_.in())) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) ForwardingListenerImpl Repo[ %d] - bit bucket reached. \n"),
+        ACE_TEXT("(%P|%t) %T ForwardingListenerImpl Repo[ %d] - bit bucket reached. \n"),
         this->repo_
       ));
       // The bit bucket is done processing when the answer is received.
@@ -268,7 +268,7 @@ void ForwardingListenerImpl::on_subscription_matched (
       // Signal that we are done once we receive a disconnect message.
       // We use the data_source member as a command value.
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%T (%P|%t) ForwardingListenerImpl Repo[ %d] - termination command received. \n"),
+        ACE_TEXT("(%P|%t) %T ForwardingListenerImpl Repo[ %d] - termination command received. \n"),
         this->repo_
       ));
       ACE_GUARD (ACE_SYNCH_MUTEX, g, this->lock_);
@@ -283,7 +283,7 @@ void ForwardingListenerImpl::on_subscription_matched (
         = ::Xyz::FooNoKeyDataWriter::_narrow( this->dataWriter_.in());
       if( CORBA::is_nil( fooWriter.in())) {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::on_data_available Repo[ %d] ")
+          ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available Repo[ %d] ")
           ACE_TEXT("failed to narrow writer to forward a sample with.\n"),
           this->repo_
         ));
@@ -297,7 +297,7 @@ void ForwardingListenerImpl::on_subscription_matched (
         // Go ahead and forward the data.
         if( ::DDS::RETCODE_OK != fooWriter->write( foo, ::DDS::HANDLE_NIL)) {
           ACE_ERROR((LM_ERROR,
-            ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::on_data_available Repo[ %d] ")
+            ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_data_available Repo[ %d] ")
             ACE_TEXT("failed to forward a sample.\n"),
             this->repo_
           ));
@@ -318,7 +318,7 @@ void ForwardingListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) ForwardingListenerImpl::on_sample_lost Repo[ %d] \n"),
+      ACE_TEXT("(%P|%t) %T ForwardingListenerImpl::on_sample_lost Repo[ %d] \n"),
       this->repo_
     ));
   }

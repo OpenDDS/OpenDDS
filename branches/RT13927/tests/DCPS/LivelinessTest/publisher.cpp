@@ -376,7 +376,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (writers_ready == 0)
         {
           ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR Unable to create publisher ready file\n")));
+                      ACE_TEXT("(%P|%t) ERROR: Unable to create publisher ready file\n")));
         }
 
       // Wait for the subscriber to be ready.
@@ -431,7 +431,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (writers_completed == 0)
         {
           ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR Unable to create publisher completed file\n")));
+                      ACE_TEXT("(%P|%t) ERROR: Unable to create publisher completed file\n")));
         }
 
 

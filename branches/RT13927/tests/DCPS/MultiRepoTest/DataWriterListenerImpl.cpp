@@ -9,7 +9,7 @@ DataWriterListenerImpl::DataWriterListenerImpl ( OpenDDS::DCPS::Service_Particip
   : repo_( repo)
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T (%P|%t) DataWriterListenerImpl::DataWriterListenerImpl Repo[ %d]\n"),
+    ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::DataWriterListenerImpl Repo[ %d]\n"),
     this->repo_
   ));
 }
@@ -18,7 +18,7 @@ DataWriterListenerImpl::DataWriterListenerImpl ( OpenDDS::DCPS::Service_Particip
 DataWriterListenerImpl::~DataWriterListenerImpl (void)
   {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) DataWriterListenerImpl::~DataWriterListenerImpl Repo[ %d] "),
+      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::~DataWriterListenerImpl Repo[ %d] "),
       this->repo_
     ));
   }
@@ -35,7 +35,7 @@ void DataWriterListenerImpl::on_offered_deadline_missed (
     ACE_UNUSED_ARG(status);
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) DataWriterListenerImpl::on_offered_deadline_missed Repo[ %d]\n"),
+      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::on_offered_deadline_missed Repo[ %d]\n"),
       this->repo_
     ));
   }
@@ -52,7 +52,7 @@ void DataWriterListenerImpl::on_offered_incompatible_qos (
     ACE_UNUSED_ARG(status);
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) DataWriterListenerImpl::on_offered_incompatible_qos Repo[ %d]\n"),
+      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::on_offered_incompatible_qos Repo[ %d]\n"),
       this->repo_
     ));
   }
@@ -69,7 +69,7 @@ void DataWriterListenerImpl::on_liveliness_lost (
     ACE_UNUSED_ARG(status);
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) DataWriterListenerImpl::on_liveliness_changed Repo[ %d]\n"),
+      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::on_liveliness_changed Repo[ %d]\n"),
       this->repo_
     ));
   }
@@ -86,7 +86,7 @@ void DataWriterListenerImpl::on_publication_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("%T (%P|%t) DataWriterListenerImpl::on_publication_matched Repo[ %d] \n"),
+      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::on_publication_matched Repo[ %d] \n"),
       this->repo_
     ));
   }

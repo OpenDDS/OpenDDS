@@ -891,7 +891,7 @@ OpenDDS::DCPS::DataLink::notify(enum ConnectionNotice notice)
           break;
         default:
           ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t)ERROR: DataLink::notify: ")
+                     ACE_TEXT("(%P|%t) ERROR: DataLink::notify: ")
                      ACE_TEXT("unknown notice to datawriter\n")));
           break;
         }
@@ -967,7 +967,7 @@ OpenDDS::DCPS::DataLink::notify(enum ConnectionNotice notice)
         if (OpenDDS::DCPS::Transport_debug_level > 0) {
           RepoIdConverter converter(itr->first);
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t)DataLink::notify: ")
+                     ACE_TEXT("(%P|%t) DataLink::notify: ")
                      ACE_TEXT("not notify sub %C subscription lost.\n"),
                      std::string(converter).c_str()));
         }
@@ -993,7 +993,7 @@ OpenDDS::DCPS::DataLink::notify_connection_deleted()
       if (OpenDDS::DCPS::Transport_debug_level > 0) {
         RepoIdConverter converter(itr->first);
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t)DataLink:: notify_connection_deleted: ")
+                   ACE_TEXT("(%P|%t) DataLink:: notify_connection_deleted: ")
                    ACE_TEXT("notify pub %C connection deleted.\n"),
                    std::string(converter).c_str()));
       }

@@ -42,7 +42,7 @@ Writer::run_test (int pass)
     TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
 
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("%T (%P|%t) Writer::run_test starting to write pass %d\n"),
+              ACE_TEXT("(%P|%t) %T Writer::run_test starting to write pass %d\n"),
               pass));
 
     ::DDS::InstanceHandle_t handle
@@ -59,7 +59,7 @@ Writer::run_test (int pass)
     }
 
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("%T (%P|%t) Writer::run_test done writing.\n")));
+              ACE_TEXT("(%P|%t) %T Writer::run_test done writing.\n")));
 
   }
   catch (const CORBA::Exception& ex)

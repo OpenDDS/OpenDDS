@@ -316,7 +316,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   if (verify_lost_sub_notification
     && actual_lost_sub_notification != expected_lost_sub_notification)
   {
-    ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: on_subscription_lost called %d times "
+    ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: on_subscription_lost called %d times "
       "and expected %d times\n", actual_lost_sub_notification,
       expected_lost_sub_notification));
     return 1;

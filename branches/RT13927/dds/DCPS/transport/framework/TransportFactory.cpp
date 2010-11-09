@@ -172,7 +172,7 @@ OpenDDS::DCPS::TransportFactory::load_transport_configuration(ACE_Configuration_
 
       if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0)
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t)TransportFactory::load_transport_configuration: ")
+                          ACE_TEXT("(%P|%t) TransportFactory::load_transport_configuration: ")
                           ACE_TEXT("failed to open section %s\n"),
                           sect_name.c_str()),
                          -1);
@@ -184,7 +184,7 @@ OpenDDS::DCPS::TransportFactory::load_transport_configuration(ACE_Configuration_
 
         if (transport_type == ACE_TEXT("")) {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t)TransportFactory::load_transport_configuration: ")
+                            ACE_TEXT("(%P|%t) TransportFactory::load_transport_configuration: ")
                             ACE_TEXT("missing transport_type in \"%s\" section.\n"),
                             sect_name.c_str()),
                            -1);
@@ -221,7 +221,7 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl(TransportIdType transport
 {
   if (transport_type.length() == 0) {
     VDBG_LVL((LM_ERROR,
-              ACE_TEXT("(%P|%t)TransportFactory::create_transport_impl ")
+              ACE_TEXT("(%P|%t) TransportFactory::create_transport_impl ")
               ACE_TEXT("transport_type is null. \n")), 0);
     throw CORBA::BAD_PARAM();
   }
@@ -235,7 +235,7 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl(TransportIdType transport
 
     if (transport_type != config->transport_type_) {
       VDBG_LVL((LM_ERROR,
-                ACE_TEXT("(%P|%t)TransportFactory::create_transport_impl ")
+                ACE_TEXT("(%P|%t) TransportFactory::create_transport_impl ")
                 ACE_TEXT("transport_type conflict - provided %s configured %s\n")
                 , transport_type.c_str(),
                 config->transport_type_.c_str()), 0);
@@ -259,7 +259,7 @@ OpenDDS::DCPS::TransportFactory::get_configuration(TransportIdType transport_id)
   }
 
   if (result != 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t)TransportFactory::get_configuration ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TransportFactory::get_configuration ")
                ACE_TEXT("transport (id=%u) is not configured. \n"),
                transport_id));
     throw Transport::NotConfigured();
@@ -281,7 +281,7 @@ OpenDDS::DCPS::TransportFactory::create_configuration(TransportIdType transport_
 
   if (result != 0) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t)TransportFactory::create_configuration: ")
+               ACE_TEXT("(%P|%t) TransportFactory::create_configuration: ")
                ACE_TEXT("transport_type=%s is not registered.\n"),
                transport_type.c_str()));
     return TransportConfiguration_rch();
@@ -297,7 +297,7 @@ OpenDDS::DCPS::TransportFactory::get_or_create_configuration(TransportIdType tra
                                                              ACE_TString transport_type)
 {
   if (transport_type == ACE_TEXT("")) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t)TransportFactory::get_or_create_configuration transport_type")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TransportFactory::get_or_create_configuration transport_type")
                ACE_TEXT("is null. \n")));
     throw CORBA::BAD_PARAM();
   }
@@ -311,7 +311,7 @@ OpenDDS::DCPS::TransportFactory::get_or_create_configuration(TransportIdType tra
 
   if (result == 0) {
     if (transport_type != config->transport_type_) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t)TransportFactory::get_or_create_configuration transport_type ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TransportFactory::get_or_create_configuration transport_type ")
                  ACE_TEXT("conflict - provided %s configured %s\n"), transport_type.c_str(),
                  config->transport_type_.c_str()));
       throw Transport::ConfigurationConflict();
@@ -329,7 +329,7 @@ OpenDDS::DCPS::TransportFactory::get_or_create_factory(FactoryIdType factory_id)
   DBG_ENTRY_LVL("TransportFactory","get_or_create_factory",6);
 
   if (factory_id == ACE_TEXT("")) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t)TransportFactory::get_or_create_factory factory_id is null. \n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TransportFactory::get_or_create_factory factory_id is null. \n")));
     throw CORBA::BAD_PARAM();
   }
 
@@ -357,7 +357,7 @@ OpenDDS::DCPS::TransportFactory::get_or_create_factory(FactoryIdType factory_id)
 
   } else {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t)TransportFactory::get_or_create_factory: transport (type=%s) is not registered.\n "),
+               ACE_TEXT("(%P|%t) TransportFactory::get_or_create_factory: transport (type=%s) is not registered.\n "),
                factory_id.c_str()));
     throw Transport::NotFound();
   }

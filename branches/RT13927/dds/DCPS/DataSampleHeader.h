@@ -86,7 +86,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
 
   bool group_coherent_ : 1;
 
-  /// reservered bits
+  /// reserved bits
   bool reserved_2   : 1;
   bool reserved_3   : 1;
   bool reserved_4   : 1;

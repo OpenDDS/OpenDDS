@@ -1,3 +1,7 @@
+Tue Nov  9 19:05:23 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+          Merged trunk r3714 out to this branch.
+
 Tue Nov  9 17:40:47 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/testdata/DataLib/DataLibTest.opendds:

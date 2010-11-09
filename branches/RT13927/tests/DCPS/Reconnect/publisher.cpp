@@ -290,7 +290,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
   if (actual_lost_pub_notification != expected_lost_pub_notification)
   {
-    ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: on_publication_lost called %d times "
+    ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: on_publication_lost called %d times "
       "and expected %d times\n", actual_lost_pub_notification,
       expected_lost_pub_notification));
     return 1;
@@ -298,7 +298,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
   if (num_deleted_connections != expected_deleted_connections)
   {
-    ACE_ERROR ((LM_ERROR, "(%P|%t)ERROR: on_connection_deleted called %d times "
+    ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: on_connection_deleted called %d times "
       "and expected %d times\n", num_deleted_connections,
       expected_deleted_connections));
     return 1;

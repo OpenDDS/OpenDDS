@@ -73,7 +73,7 @@ Writer::svc ()
     message.count      = 0;
 
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("%T (%P|%t) Writer::svc starting to write.\n")));
+              ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
     for (int i = 0; i< num_messages; i ++) {
       ::DDS::ReturnCode_t ret = message_dw->write(message, handle);
 

@@ -449,7 +449,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
         if (DCPS_debug_level > 4) {
           RepoIdConverter converter(wr_ids[index]);
-          ACE_DEBUG((LM_WARNING,
+          ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DataReaderImpl::add_associations: ")
                      ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
                      std::string(converter).c_str(),
@@ -1303,7 +1303,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       RepoIdConverter writer_converter(header.publication_id_);
 
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT("(%P|%t)DataReaderImpl::data_received: reader %C writer %C ")
+                  ACE_TEXT("(%P|%t) DataReaderImpl::data_received: reader %C writer %C ")
                   ACE_TEXT("instance %d is_new_instance %d filtered %d \n"),
                   std::string(reader_converter).c_str(),
                   std::string(writer_converter).c_str(),
@@ -1315,7 +1315,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     bool verify_coherent = false;
     WriterInfo* writer = 0;
 
-    {
+    if (header.publication_id_.entityId.entityKind
+        != OpenDDS::DCPS::ENTITYKIND_OPENDDS_NIL_WRITER) {
       ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
       WriterMapType::iterator where
@@ -1945,6 +1946,27 @@ OpenDDS::DCPS::WriterInfo::WriterInfo(OpenDDS::DCPS::DataReaderImpl* reader,
   }
 }
 
+std::string
+OpenDDS::DCPS::WriterInfo::get_state_str() const
+{
+  std::ostringstream oss;
+
+  switch (this->state_) {
+  case OpenDDS::DCPS::WriterInfo::NOT_SET:
+    oss << "NOT_SET";
+    break;
+  case OpenDDS::DCPS::WriterInfo::ALIVE:
+    oss << "ALIVE";
+    break;
+  case OpenDDS::DCPS::WriterInfo::DEAD:
+    oss << "DEAD";
+    break;
+  default:
+    oss << "UNSPECIFIED(" << int(this->state_) << ")";
+  }
+  return oss.str();
+}
+
 void
 OpenDDS::DCPS::WriterInfo::clear_owner_evaluated ()
 {
@@ -2233,16 +2255,14 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
                                     const ACE_Time_Value& /* when */)
 {
   if (DCPS_debug_level >= 5) {
-    std::stringstream buffer;
-    buffer << info.state_;
     RepoIdConverter reader_converter(subscription_id_);
     RepoIdConverter writer_converter(info.writer_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_alive: ")
-               ACE_TEXT("reader %C from writer %C state %C.\n"),
+               ACE_TEXT("reader %C from writer %C previous state %C.\n"),
                std::string(reader_converter).c_str(),
                std::string(writer_converter).c_str(),
-               buffer.str().c_str()));
+               info.get_state_str().c_str()));
   }
 
   // caller should already have the samples_lock_ !!!
@@ -2306,16 +2326,15 @@ DataReaderImpl::writer_became_dead(WriterInfo & info,
                                    const ACE_Time_Value& when)
 {
   if (DCPS_debug_level >= 5) {
-    std::stringstream buffer;
-    buffer << info.state_;
     RepoIdConverter reader_converter(subscription_id_);
     RepoIdConverter writer_converter(info.writer_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_dead: ")
-               ACE_TEXT("reader %C from writer%C state %C.\n"),
+               ACE_TEXT("reader %C from writer %C previous state %C.\n"),
+
                std::string(reader_converter).c_str(),
                std::string(writer_converter).c_str(),
-               buffer.str().c_str()));
+               info.get_state_str().c_str()));
   }
 
   if (this->is_exclusive_ownership_) {
@@ -2919,7 +2938,7 @@ void DataReaderImpl::notify_liveliness_change()
          ++current) {
       RepoId id = current->first;
       buffer << std::endl << "\tNOTIFY: writer[ " << RepoIdConverter(id) << "] == ";
-      buffer << current->second->get_state();
+      buffer << current->second->get_state_str();
     }
 
     buffer << std::endl;
@@ -2948,7 +2967,7 @@ void DataReaderImpl::reschedule_deadline()
          ++iter) {
       if (iter->second->deadline_timer_id_ != -1) {
         if (this->watchdog_->reset_timer_interval(iter->second->deadline_timer_id_) == -1) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t)DataReaderImpl::reschedule_deadline %p\n"),
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::reschedule_deadline %p\n"),
                      ACE_TEXT("reset_timer_interval")));
         }
       }
@@ -3075,7 +3094,7 @@ void DataReaderImpl::accept_coherent (PublicationId& writer_id,
     RepoIdConverter writer (writer_id);
     RepoIdConverter publisher (publisher_id);
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t)DataReaderImpl::accept_coherent()")
+      ACE_TEXT("(%P|%t) DataReaderImpl::accept_coherent()")
       ACE_TEXT(" reader %C writer %C publisher %C \n"),
       std::string(reader).c_str(),
       std::string(writer).c_str(),
@@ -3100,7 +3119,7 @@ void DataReaderImpl::reject_coherent (PublicationId& writer_id,
     RepoIdConverter writer (writer_id);
     RepoIdConverter publisher (publisher_id);
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t)DataReaderImpl::reject_coherent()")
+      ACE_TEXT("(%P|%t) DataReaderImpl::reject_coherent()")
       ACE_TEXT(" reader %C writer %C publisher %C \n"),
       std::string(reader).c_str(),
       std::string(writer).c_str(),
@@ -3277,17 +3296,3 @@ DataReaderImpl::reset_ownership (::DDS::InstanceHandle_t instance)
 
 } // namespace DCPS
 } // namespace OpenDDS
-
-ostream& operator<<(ostream& str, OpenDDS::DCPS::WriterInfo::WriterState value)
-{
-  switch (value) {
-  case OpenDDS::DCPS::WriterInfo::NOT_SET:
-    return str << "NOT_SET";
-  case OpenDDS::DCPS::WriterInfo::ALIVE:
-    return str << "ALIVE";
-  case OpenDDS::DCPS::WriterInfo::DEAD:
-    return str << "DEAD";
-  default:
-    return str << "UNSPECIFIED(" << int(value) << ")";
-  }
-}

@@ -125,7 +125,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         while (fp == 0 &&  i < 15)
         {
           ACE_DEBUG ((LM_DEBUG,
-            ACE_TEXT("(%P|%t)waiting monitor1 done ...\n")));
+            ACE_TEXT("(%P|%t) waiting monitor1 done ...\n")));
           ACE_OS::sleep (1);
           ++ i;
           fp = ACE_OS::fopen (synch_fname, ACE_TEXT("r"));
@@ -557,9 +557,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataReader: key = %d, %x, %x \n",
           subdata[i].key.value[0], subdata[i].key.value[1], subdata[i].key.value[2]));
 
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR user data %C \n", subdata[i].user_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR topic data %C \n", subdata[i].topic_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t)DR group data %C \n", subdata[i].group_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t) DR user data %C \n", subdata[i].user_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t) DR topic data %C \n", subdata[i].topic_data.value.get_buffer()));
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t) DR group data %C \n", subdata[i].group_data.value.get_buffer()));
 
         CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_DR_USER_DATA));
         CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));
@@ -599,7 +599,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         FILE* fp = ACE_OS::fopen (synch_fname, ACE_TEXT("w"));
         if (fp != 0)
         {
-          ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t)monitor1 is done\n")));
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) monitor1 is done\n")));
           ACE_OS::fclose (fp);
         }
       }

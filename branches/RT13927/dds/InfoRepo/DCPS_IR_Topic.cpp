@@ -141,7 +141,7 @@ int DCPS_IR_Topic::add_publication_reference(DCPS_IR_Publication* publication
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       OpenDDS::DCPS::RepoIdConverter topic_converter(id_);
       OpenDDS::DCPS::RepoIdConverter pub_converter(publication->get_id());
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Topic::add_publication_reference: ")
                  ACE_TEXT("topic %C attempt to re-add publication %C.\n"),
                  std::string(topic_converter).c_str(),

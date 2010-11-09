@@ -94,7 +94,7 @@ Writer::svc ()
     message.count      = 0;
 
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t)Writer::svc sleep for %d seconds.\n"),
+              ACE_TEXT("(%P|%t) Writer::svc sleep for %d seconds.\n"),
               this->sleep_duration_.sec()));
 
     ACE_OS::sleep (this->sleep_duration_);
@@ -104,7 +104,7 @@ Writer::svc ()
       ++message.count;
 
       ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t)Writer::svc write sample %d to instance %d.\n"),
+              ACE_TEXT("(%P|%t) Writer::svc write sample %d to instance %d.\n"),
               message.count, this->instance_handle_));
 
       ::DDS::ReturnCode_t const ret = message_dw->write (message, this->instance_handle_);
@@ -112,7 +112,7 @@ Writer::svc ()
       if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t)ERROR  Writer::svc, ")
+                    ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
                     ACE_TEXT ("%dth write() returned %d.\n"),
                     i,
                     -1));
@@ -131,7 +131,7 @@ Writer::svc ()
          << e << endl;
   }
 
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)Writer::svc finished.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
 
   return 0;
 }
