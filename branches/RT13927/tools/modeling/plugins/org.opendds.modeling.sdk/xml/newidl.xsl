@@ -1,8 +1,7 @@
 <xsl:stylesheet version='1.0'
      xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
      xmlns:lut='http://www.opendds.com/modeling/schemas/Lut/1.0'
-     xmlns:opendds='http://www.opendds.com/modeling/schemas/OpenDDS/1.0'
-     xmlns:generator='http://www.opendds.com/modeling/schemas/Generator/1.0'>
+     xmlns:opendds='http://www.opendds.com/modeling/schemas/OpenDDS/1.0'>
   <!--
     ** $Id$
     **
@@ -21,7 +20,7 @@
 <xsl:variable name="lut" select="document('lut.xml')/*/lut:types"/>
 
 <!-- Node sets -->
-<xsl:variable name="type"     select="//opendds:type"/>
+<xsl:variable name="type"     select="//types"/>
 
 <!-- Index (lookup table is in lut variable) -->
 <xsl:key
@@ -30,7 +29,7 @@
      use   = "@type"/>
 
 <!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "/generator:model/@name"/>
+<xsl:variable name = "modelname" select = "//datalib/@name"/>
 
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
