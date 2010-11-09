@@ -21,7 +21,7 @@
     <types xsi:type="types:Typedef" xmi:id="_5BJgsOgzEd-S8emkenrYEA" type="_6vM98OgzEd-S8emkenrYEA" name="StringArray"/>
     <types xsi:type="types:Typedef" xmi:id="_xVC_QOwmEd-aXIfxYgSrgA" type="_enWtAOg0Ed-S8emkenrYEA" name="Size"/>
     <types xsi:type="types:Array" xmi:id="_6vM98OgzEd-S8emkenrYEA" length="42" subtype="_ffCYYOgzEd-S8emkenrYEA"/>
-    <types xsi:type="types:Array" xmi:id="_86lfAOwmEd-aXIfxYgSrgA" length="10" subtype="_CSS78Og0Ed-S8emkenrYEA"/>
+    <types xsi:type="types:Array" xmi:id="_86lfAOwmEd-aXIfxYgSrgA" length="10" subtype="_JuIbYOg0Ed-S8emkenrYEA"/>
     <types xsi:type="types:Array" xmi:id="_EUrSAOwnEd-aXIfxYgSrgA" length="20" subtype="_zq7n8OhJEd-JX5YzKdN9LA"/>
     <types xsi:type="types:Struct" xmi:id="_JuIbYOg0Ed-S8emkenrYEA" name="InnerStruct" isDcpsDataType="false">
       <fields xmi:id="_fXqGkOhKEd-JX5YzKdN9LA" name="aBoolean" type="_Qe5ikOhKEd-JX5YzKdN9LA"/>
