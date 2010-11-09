@@ -52,7 +52,7 @@ module </xsl:text>
   </xsl:apply-templates>
   <xsl:value-of select="$newline"/>
 
-  <!-- Terminal user defined types are all user defined types minus the non-terminals. -->
+  <!-- Terminal user defined types are all unreferenced user defined types -->
   <xsl:variable name="terminals" select="$type[not(@xmi:id  = $type/*/@type)]"/>
 
   <!-- Process all types with no dependencies on them. -->
@@ -90,7 +90,7 @@ module </xsl:text>
     </xsl:variable>
 
     <!-- Process new predecessor types. -->
-    <xsl:variable name="direct-predecessors" select="$type[@name = current()/*/@type]"/>
+    <xsl:variable name="direct-predecessors" select="$type[@xmi:id = current()/*/@type]"/>
     <xsl:call-template name="generate-idl">
       <xsl:with-param name="nodes"
            select="$direct-predecessors[not(contains($exclude-list,concat(' ',@name,' ')))]"/>
@@ -101,6 +101,7 @@ module </xsl:text>
       ** Actually generate the IDL for this node after its predecessors
       ** have been processed.
       -->
+<xsl:message>applying templates for <xsl:value-of select="@name"/> : <xsl:value-of select="@xsi:type"/> </xsl:message>
     <xsl:apply-templates select="."/>
   </xsl:for-each>
 </xsl:template>
@@ -111,7 +112,7 @@ module </xsl:text>
        used to prevent duplicates. -->
   <xsl:param name="successors" select="/.."/>
 
-  <xsl:variable name="direct-predecessors" select="$type[@name = current()/*/@type]"/>
+  <xsl:variable name="direct-predecessors" select="$type[@xmi:id = current()/*/@type]"/>
 
   <!-- using a Kaysian intersection predicate causes issues in eclipse here -->
   <xsl:for-each select="$direct-predecessors">
@@ -143,14 +144,15 @@ module </xsl:text>
 </xsl:template>
 
 <!-- Process enumeration definitions. -->
-<xsl:template match="opendds:type[ @type = 'opendds:idlEnum']">
+<xsl:template match="types[ @xsi:type = 'types:Enum']">
+<xsl:message>Matched enum</xsl:message>
   <xsl:value-of select="$newline"/>
   <xsl:text>  enum </xsl:text>
   <xsl:value-of select="@name"/>
   <xsl:text>  {</xsl:text>
   <xsl:value-of select="$newline"/>
 
-  <xsl:apply-templates select="./opendds:member" mode="enum"/>
+  <xsl:apply-templates select="literals" mode="enum"/>
 
   <xsl:text>  };</xsl:text>
   <xsl:value-of select="$newline"/>
@@ -296,9 +298,9 @@ module </xsl:text>
 </xsl:template>
 
 <!-- Process enumeration members. -->
-<xsl:template match="opendds:member" mode="enum">
+<xsl:template match="literals" mode="enum">
   <xsl:text>    </xsl:text>
-  <xsl:value-of select="@name"/>
+  <xsl:value-of select="."/>
   <xsl:if test="position() != last()">
     <xsl:text>,</xsl:text>
   </xsl:if>
