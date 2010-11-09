@@ -1,7 +1,9 @@
 <xsl:stylesheet version='1.0'
      xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
      xmlns:lut='http://www.opendds.com/modeling/schemas/Lut/1.0'
-     xmlns:opendds='http://www.opendds.com/modeling/schemas/OpenDDS/1.0'>
+     xmlns:opendds='http://www.opendds.com/modeling/schemas/OpenDDS/1.0'
+     xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+     xmlns:xmi='http://www.omg.org/XMI'>
   <!--
     ** $Id$
     **
@@ -50,11 +52,8 @@ module </xsl:text>
   </xsl:apply-templates>
   <xsl:value-of select="$newline"/>
 
-  <!-- Non-terminal user defined types are those that are used within other user types. -->
-  <xsl:variable name="non-terminals" select="$type[@name  = $type/*/@type]"/>
-
   <!-- Terminal user defined types are all user defined types minus the non-terminals. -->
-  <xsl:variable name="terminals" select="$type[not(@name  = $type/*/@type)]"/>
+  <xsl:variable name="terminals" select="$type[not(@xmi:id  = $type/*/@type)]"/>
 
   <!-- Process all types with no dependencies on them. -->
   <xsl:call-template name="generate-idl">
