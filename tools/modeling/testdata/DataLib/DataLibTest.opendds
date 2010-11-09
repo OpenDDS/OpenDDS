@@ -19,7 +19,10 @@
     <types xsi:type="types:WChar" xmi:id="_bv4uoOhKEd-JX5YzKdN9LA"/>
     <types xsi:type="types:WString" xmi:id="_cOIw4OhKEd-JX5YzKdN9LA"/>
     <types xsi:type="types:Typedef" xmi:id="_5BJgsOgzEd-S8emkenrYEA" type="_6vM98OgzEd-S8emkenrYEA" name="StringArray"/>
+    <types xsi:type="types:Typedef" xmi:id="_xVC_QOwmEd-aXIfxYgSrgA" type="_enWtAOg0Ed-S8emkenrYEA" name="Size"/>
     <types xsi:type="types:Array" xmi:id="_6vM98OgzEd-S8emkenrYEA" length="42" subtype="_ffCYYOgzEd-S8emkenrYEA"/>
+    <types xsi:type="types:Array" xmi:id="_86lfAOwmEd-aXIfxYgSrgA" length="10" subtype="_CSS78Og0Ed-S8emkenrYEA"/>
+    <types xsi:type="types:Array" xmi:id="_EUrSAOwnEd-aXIfxYgSrgA" length="20" subtype="_zq7n8OhJEd-JX5YzKdN9LA"/>
     <types xsi:type="types:Struct" xmi:id="_JuIbYOg0Ed-S8emkenrYEA" name="InnerStruct" isDcpsDataType="false">
       <fields xmi:id="_fXqGkOhKEd-JX5YzKdN9LA" name="aBoolean" type="_Qe5ikOhKEd-JX5YzKdN9LA"/>
       <fields xmi:id="_isbqAOhKEd-JX5YzKdN9LA" name="aDouble" type="_R2iD4OhKEd-JX5YzKdN9LA"/>
@@ -38,9 +41,16 @@
       <fields xmi:id="_AKXkIOhKEd-JX5YzKdN9LA" name="longs" type="_zq7n8OhJEd-JX5YzKdN9LA"/>
       <fields xmi:id="_EmPTgOg_Ed-uqdAPvK3kOg" name="inner" type="_JuIbYOg0Ed-S8emkenrYEA"/>
       <fields xmi:id="_ayCVYehBEd-8ssTn6P3iyw" name="names" type="_5BJgsOgzEd-S8emkenrYEA"/>
+      <fields xmi:id="_aaNlwOwnEd-aXIfxYgSrgA" name="structArray" type="_86lfAOwmEd-aXIfxYgSrgA"/>
+      <fields xmi:id="_phnpwOwnEd-aXIfxYgSrgA" name="stringArray" type="_6vM98OgzEd-S8emkenrYEA"/>
+      <fields xmi:id="_s2n2sOwnEd-aXIfxYgSrgA" name="longSeqArray" type="_EUrSAOwnEd-aXIfxYgSrgA"/>
+      <fields xmi:id="_0K_cMOwnEd-aXIfxYgSrgA" name="size" type="_xVC_QOwmEd-aXIfxYgSrgA"/>
+      <fields xmi:id="_8CBp4OwnEd-aXIfxYgSrgA" name="longSeq" type="_bkv3oOg0Ed-S8emkenrYEA"/>
+      <fields xmi:id="_BhTWAOwoEd-aXIfxYgSrgA" name="arraySeq" type="_PdARUOwnEd-aXIfxYgSrgA"/>
       <keys xmi:id="_9NEGgOg-Ed-uqdAPvK3kOg" field="_xvnLwOg-Ed-uqdAPvK3kOg"/>
     </types>
     <types xsi:type="types:Sequence" xmi:id="_bkv3oOg0Ed-S8emkenrYEA" length="10" subtype="_enWtAOg0Ed-S8emkenrYEA"/>
+    <types xsi:type="types:Sequence" xmi:id="_PdARUOwnEd-aXIfxYgSrgA" length="20" subtype="_6vM98OgzEd-S8emkenrYEA"/>
     <types xsi:type="types:Typedef" xmi:id="_zq7n8OhJEd-JX5YzKdN9LA" type="_bkv3oOg0Ed-S8emkenrYEA" name="LongSeq"/>
     <types xsi:type="types:Long" xmi:id="_enWtAOg0Ed-S8emkenrYEA"/>
     <types xsi:type="types:Union" xmi:id="_kLgSEOg0Ed-S8emkenrYEA" name="TestUnion" switch="_j6eEEOhCEd-5vPLvrJ-8PA">
