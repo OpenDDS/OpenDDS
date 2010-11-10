@@ -31,7 +31,7 @@
      use   = "@type"/>
 
 <!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "//datalib/@name"/>
+<xsl:variable name = "modelname" select = "//dataLib/@name"/>
 
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
@@ -235,7 +235,7 @@ module </xsl:text>
   <xsl:text>"</xsl:text>
   <xsl:value-of select="$newline"/>
 
-  <xsl:for-each select="./opendds:key">
+  <xsl:for-each select="keys">
     <xsl:call-template name="pragma-key">
       <xsl:with-param name="key" select="."/>
     </xsl:call-template>
@@ -311,7 +311,7 @@ module </xsl:text>
   <xsl:text>::</xsl:text>
   <xsl:value-of select="../@name"/>
   <xsl:text> </xsl:text>
-  <xsl:value-of select="@member"/>
+  <xsl:value-of select="../fields[@xmi:id = current()/@field]/@name"/>
   <xsl:text>"</xsl:text>
   <xsl:value-of select="$newline"/>
 </xsl:template>
