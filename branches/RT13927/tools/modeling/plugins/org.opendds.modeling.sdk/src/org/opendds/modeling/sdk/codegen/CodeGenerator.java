@@ -2,8 +2,10 @@ package org.opendds.modeling.sdk.codegen;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Iterator;
 
@@ -28,188 +30,164 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileStore;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Composite;
+import org.opendds.modeling.sdk.codegen.CodeGenerator.ErrorHandler.Severity;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class CodeGenerator {
-	private static final String PLUGINNAME = "org.opendds.modeling.sdk";
+	private static final String modelNameExpression = "//generator:model/@name";
+	private static final String generatorNamespace = "http://www.opendds.com/modeling/schemas/Generator/1.0";
 
-	private Composite parent;
-	
 	private static XPathFactory pathFactory;
 	private static XPath xpath;
 	private static XPathExpression nameExpr;
-	private String modelName;
-	private Document modelDocument;
-	private DocumentBuilder documentBuilder;
-
-	private String sourceName;
-
 	private static TransformerFactory tFactory;
 	private static Transformer idlTransformer;
 	private static Transformer hTransformer;
 	private static Transformer cppTransformer;
 	private static Transformer mpcTransformer;
 
-	private static final String modelNameExpression = "//generator:model/@name";
-	private static final String generatorNamespace = "http://www.opendds.com/modeling/schemas/Generator/1.0";
+	private String modelName;
+	private Document modelDocument;
+	private DocumentBuilder documentBuilder;
+	private String sourceName;
+	private ErrorHandler errorHandler;
+	private FileProvider fileProvider;
 
 	public static enum TransformType {
-		IDL { public Transformer getTransformer() { return idlTransformer; };
-		      public void setTransformer( Transformer t) { idlTransformer = t;};
-	          public void transform( Source s, Result r) throws TransformerException { idlTransformer.transform(s, r);};
-	          public String dialogTitle() { return "Generate IDL";};
-		      public String xslFilename() { return "xml/idl.xsl";};
+		IDL { public Transformer getTransformer() { return idlTransformer; }
+		      public void setTransformer(Transformer t) { idlTransformer = t; }
+	          public void transform(Source s, Result r) throws TransformerException { idlTransformer.transform(s, r); }
+	          public String dialogTitle() { return "Generate IDL"; }
+		      public String xslFilename() { return "xml/idl.xsl"; }
 			  public String suffix() { return ".idl"; }
 		    },
-		H   { public Transformer getTransformer() { return hTransformer; };
-	          public void setTransformer( Transformer t) { hTransformer = t;};
-	          public void transform( Source s, Result r) throws TransformerException { hTransformer.transform(s, r);};
-	          public String dialogTitle() { return "Generate C++ Header";};
-		      public String xslFilename() { return "xml/h.xsl";};
+		H   { public Transformer getTransformer() { return hTransformer; }
+	          public void setTransformer(Transformer t) { hTransformer = t; }
+	          public void transform(Source s, Result r) throws TransformerException { hTransformer.transform(s, r); }
+	          public String dialogTitle() { return "Generate C++ Header"; }
+		      public String xslFilename() { return "xml/h.xsl"; }
 			  public String suffix() { return ".h"; }
 		    },
-		CPP { public Transformer getTransformer() { return cppTransformer; };
-	          public void setTransformer( Transformer t) { cppTransformer = t;};
-	          public void transform( Source s, Result r) throws TransformerException { cppTransformer.transform(s, r);};
-	          public String dialogTitle() { return "Generate C++ Body";};
-		      public String xslFilename() { return "xml/cpp.xsl";};
+		CPP { public Transformer getTransformer() { return cppTransformer; }
+	          public void setTransformer(Transformer t) { cppTransformer = t; }
+	          public void transform(Source s, Result r) throws TransformerException { cppTransformer.transform(s, r); }
+	          public String dialogTitle() { return "Generate C++ Body"; }
+		      public String xslFilename() { return "xml/cpp.xsl"; }
 			  public String suffix() { return ".cpp"; }
 		    },
-		MPC { public Transformer getTransformer() { return mpcTransformer; };
-	          public void setTransformer( Transformer t) { mpcTransformer = t;};
-		      public void transform( Source s, Result r) throws TransformerException { mpcTransformer.transform(s, r);};
-		      public String dialogTitle() { return "Generate MPC";};
-		      public String xslFilename() { return "xml/mpc.xsl";};
+		MPC { public Transformer getTransformer() { return mpcTransformer; }
+	          public void setTransformer(Transformer t) { mpcTransformer = t; }
+		      public void transform(Source s, Result r) throws TransformerException { mpcTransformer.transform(s, r); }
+		      public String dialogTitle() { return "Generate MPC"; }
+		      public String xslFilename() { return "xml/mpc.xsl"; }
 		  	  public String suffix() { return ".mpc"; }
 		    };
 
 		    public abstract Transformer getTransformer();
-		    public abstract void setTransformer( Transformer t);
-		    public abstract void transform( Source s, Result r) throws TransformerException;
+		    public abstract void setTransformer(Transformer t);
+		    public abstract void transform(Source s, Result r) throws TransformerException;
 			public abstract String dialogTitle();
 		    public abstract String xslFilename();
 			public abstract String suffix();
 	};
-	
-	public CodeGenerator( Composite parent) {
-		this.parent = parent;
+
+	public static interface ErrorHandler {
+		enum Severity {ERROR, WARNING, INFO};
+		void error(Severity sev, String title, String message, Throwable exception);
 	}
 	
+	public static interface FileProvider {
+		URL fromWorkspace(String fileName) throws MalformedURLException;
+		URL fromBundle(String fileName) throws MalformedURLException;
+		void refresh(String targetFolder);
+	}
+
+	public CodeGenerator(FileProvider fp, ErrorHandler eh) {
+		fileProvider = fp;
+		errorHandler = eh;
+	}
+
 	private TransformerFactory getTransformerFactory() {
-		if( tFactory == null) {
+		if (tFactory == null) {
 			tFactory = TransformerFactory.newInstance();
 		}
 		return tFactory;
 	}
 	
 	private XPathExpression getNameExpr() {
-		if( nameExpr == null) {
+		if (nameExpr == null) {
 			pathFactory = XPathFactory.newInstance();
 			xpath = pathFactory.newXPath();
-			xpath.setNamespaceContext( new GeneratorNamespaceContext());
+			xpath.setNamespaceContext(new GeneratorNamespaceContext());
 			try {
 				nameExpr = xpath.compile(modelNameExpression);
 			} catch (XPathExpressionException e) {
-				ErrorDialog.openError(
-						parent.getShell(),
-						"getNameExpr",
-						"XPath expression not available to obtain the model name.",
-						new Status(IStatus.ERROR,PLUGINNAME,"Null pointer"));
+				errorHandler.error(Severity.ERROR, "getNameExpr",
+						"XPath expression not available to obtain the model name.", e);
 			}
 		}
 		return nameExpr;
 	}
 	
-	private Document getModelDocument( String sourceName) {
-		if( modelDocument != null) {
+	private Document getModelDocument(String sourceName) {
+		if (modelDocument != null) {
 			return modelDocument;
-		}
-		
-		IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
-		IFile modelFileResource = workspace.getFile(new Path(sourceName));
-		if(!modelFileResource.exists()) {
-			ErrorDialog.openError(
-					parent.getShell(),		// XXX
-					"getModelDocument",
-					"Model file " + sourceName + " does not exist.",
-					new Status(IStatus.ERROR,PLUGINNAME,"Resource does not exist."));
-			return null;
-		}
-		
-		// We have a good input file, now parse the XML.
-		if( documentBuilder == null) {
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-			docFactory.setNamespaceAware(true);
-			try {
-				documentBuilder = docFactory.newDocumentBuilder();
-
-			} catch (ParserConfigurationException e) {
-				ErrorDialog.openError(
-						parent.getShell(),		// XXX
-						"getModelDocument",
-						"Problem configuring the parser for file " + sourceName,
-						new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
-				return null;
-			}
 		}
 
 		try {
-			modelDocument = documentBuilder.parse(modelFileResource.getContents());
+			URL modelUrl = fileProvider.fromWorkspace(sourceName);
+			File modelFile = new File(modelUrl.toURI());
+			if (!modelFile.exists()) {
+				errorHandler.error(Severity.ERROR, "getModelDocument",
+						"Model file " + sourceName + " does not exist.", null);
+				return null;
+			}
+
+			// We have a good input file, now parse the XML.
+			if (documentBuilder == null) {
+				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+				docFactory.setNamespaceAware(true);
+				try {
+					documentBuilder = docFactory.newDocumentBuilder();
+	
+				} catch (ParserConfigurationException e) {
+					errorHandler.error(Severity.ERROR, "getModelDocument",
+							"Problem configuring the parser for file " + sourceName, e);
+					return null;
+				}
+			}
+
+			modelDocument = documentBuilder.parse(modelFile);
 
 		} catch (SAXException e) {
-			ErrorDialog.openError(
-					parent.getShell(),		// XXX
-					"getModelDocument",
-					"Problem parsing the source file " + sourceName,
-					new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+			errorHandler.error(Severity.ERROR, "getModelDocument",
+					"Problem parsing the source file " + sourceName, e);
 		} catch (IOException e) {
-			ErrorDialog.openError(
-					parent.getShell(),		// XXX
-					"getModelDocument",
-					"Problem reading the source file " + sourceName,
-					new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
-		} catch (CoreException e) {
-			ErrorDialog.openError(
-					parent.getShell(),		// XXX
-					"getModelDocument",
-					"Problem processing the source file " + sourceName,
-					new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+			errorHandler.error(Severity.ERROR, "getModelDocument",
+					"Problem reading the source file " + sourceName, e);
+		} catch (URISyntaxException e) {
+			errorHandler.error(Severity.ERROR, "getModelDocument",
+					"Problem reading the source file " + sourceName, e);
 		}
 		return modelDocument;
 	}
 
-	public String getModelName( String sourceName) {
-		if( this.sourceName == sourceName) {
+	public String getModelName(String sourceName) {
+		if (this.sourceName == sourceName) {
 			return modelName;
 		}
 		this.sourceName = sourceName;
 		this.modelDocument = null;
 
 		XPathExpression nameExpr = getNameExpr();
-		if( nameExpr == null) {
+		if (nameExpr == null) {
 			return null; // messages were generated in the get call.
 		}
 
-		Document doc = getModelDocument( sourceName);
-		if( doc == null) {
+		Document doc = getModelDocument(sourceName);
+		if (doc == null) {
 			return null; // messages were generated in the get call.
 		}
 		
@@ -222,137 +200,105 @@ public class CodeGenerator {
 				break;
 
 			case 0:
-				ErrorDialog.openError(
-						parent.getShell(),		// XXX
-						"getModelName",
+				errorHandler.error(Severity.ERROR, "getModelName",
 						"Could not find any model name in the source file " + sourceName,
-						new Status(IStatus.ERROR,PLUGINNAME,"Null pointer"));
+						null);
 				break;
 
 			default:
-				ErrorDialog.openError(
-						parent.getShell(),		// XXX
-						"getModelName",
+				errorHandler.error(Severity.ERROR, "getModelName",
 						"Found " + nodes.getLength() + " candidate model names in the source file "
-						+ sourceName + ", which is too many!",
-						new Status(IStatus.ERROR,PLUGINNAME,"Null pointer"));
+						+ sourceName + ", which is too many!", null);
 				break;
 			}
 
 		} catch (XPathExpressionException e) {
-			ErrorDialog.openError(
-					parent.getShell(),		// XXX
-					"getModelName",
-					"Problem extracting the modelname from the source file " + sourceName,
-					new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+			errorHandler.error(Severity.ERROR, "getModelName",
+					"Problem extracting the modelname from the source file " + sourceName, e);
 		}
 		return modelName;
 	}
 	
-	public void generate( TransformType which, String sourceName, String targetName) {
-		boolean shouldReloadXSL = System.getProperty("reloadxsl").equals("true");
-		if( shouldReloadXSL || which.getTransformer() == null) {
-			URL url = FileLocator.find(Platform.getBundle(PLUGINNAME), new Path(which.xslFilename()), null);
+	public void generate(TransformType which, String sourceName, String targetName) {
+		boolean shouldReloadXSL = "true".equals(System.getProperty("reloadxsl"));
+		if (shouldReloadXSL || which.getTransformer() == null) {
 			try {
+				URL xsl = fileProvider.fromBundle(which.xslFilename());
 				TransformerFactory factory = getTransformerFactory();
-				if( factory == null) {
-					ErrorDialog.openError(
-							parent.getShell(),		// XXX
-							which.dialogTitle(),
-							"Unable to obtain a transformer factory.",
-							new Status(IStatus.ERROR,PLUGINNAME,"Null pointer"));
+				if (factory == null) {
+					errorHandler.error(Severity.ERROR, which.dialogTitle(),
+							"Unable to obtain a transformer factory.", null);
 					return;
 				}
-				Source converter = new StreamSource( url.openStream());
+				Source converter = new StreamSource(xsl.openStream());
 				final String dir = which.xslFilename().substring(0, which.xslFilename().lastIndexOf("/"));
 				Transformer transformer = factory.newTransformer(converter);
 				transformer.setURIResolver(new URIResolver() {
-					public javax.xml.transform.Source resolve(String fname, String arg1) throws TransformerException {
-						String resourcePath = dir + "/" + fname;
-						URL resourceUrl = FileLocator.find(Platform.getBundle(PLUGINNAME), new Path(resourcePath), null);
+					public Source resolve(String fname, String base) throws TransformerException {
 						try {
-							return new StreamSource(resourceUrl.openStream());
-						} catch (IOException ioe) {
+							String file = fname.substring(0, 5).equals("file:")
+								? fname.substring(5) : dir + File.separatorChar + fname;
+							URL resource = fileProvider.fromBundle(file);
+							return new StreamSource(resource.openStream());
+						} catch (IOException use) {
 							throw new TransformerException("could not open " + fname);
 						}
 					}
 				});
 				which.setTransformer(transformer);
 			} catch (TransformerConfigurationException e) {
-				ErrorDialog.openError(
-						parent.getShell(),		// XXX
-						which.dialogTitle(),
-						"Failed to configure the transformer.",
-						new Status(IStatus.ERROR,PLUGINNAME,e.getMessageAndLocation()));
+				errorHandler.error(Severity.ERROR, which.dialogTitle(),
+						"Failed to configure the transformer.", e);
 			} catch (IOException e) {
-				ErrorDialog.openError(
-						parent.getShell(),		// XXX
-						which.dialogTitle(),
-						"Failed opening XSL file " + url.toString() + " for converter.",
-						new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+				errorHandler.error(Severity.ERROR, which.dialogTitle(),
+						"Failed opening XSL file " + which.xslFilename() + " for converter.", e);
 			}
 		}
 
-		IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
-		IFolder targetFolder = workspace.getFolder(new Path(targetName));
-		if(!targetFolder.exists()) {
-			ErrorDialog.openError(
-					parent.getShell(),		// XXX
-					which.dialogTitle(),
-					"Target folder " + targetName + " does not exist.",
-					new Status(IStatus.ERROR,PLUGINNAME,"Resource does not exist."));
-			return;
-		}
-
-		String modelname = getModelName( sourceName);
-		if( modelname == null) {
-			return; // messages were generated in the get call.
-		}
-
 		Result result = null;
-		URI	outputUri = targetFolder.getFile(modelname + which.suffix()).getLocationURI();
 		try {
-			IFileStore fileStore = EFS.getStore(outputUri);
-			result = new StreamResult(
-					              new BufferedOutputStream(
-					      		  fileStore.openOutputStream( EFS.OVERWRITE, null)));
-		} catch (CoreException e) {
-			ErrorDialog.openError(
-					parent.getShell(),		// XXX
-					which.dialogTitle(),
-					"Unable to open the output file for conversion: " + outputUri.toString(),
-					new Status(IStatus.ERROR,PLUGINNAME,e.getMessage()));
+			//ok to use getFile() instead of getFolder()?
+			File targetFolder = new File(fileProvider.fromWorkspace(targetName).toURI());
+			if (!targetFolder.exists()) {
+				errorHandler.error(Severity.ERROR, which.dialogTitle(),
+						"Target folder " + targetName + " does not exist.", null);
+				return;
+			}
+	
+			String modelname = getModelName(sourceName);
+			if (modelname == null) {
+				return; // messages were generated in the get call.
+			}
+	
+			File output = new File(targetFolder, modelname + which.suffix());
+			result = new StreamResult(new BufferedOutputStream(new FileOutputStream(output)));
+		} catch (Exception e) {
+			errorHandler.error(Severity.ERROR, which.dialogTitle(),
+					"Unable to open the output file for conversion: " + result, e);
 			return;
 		}
 		
 		try {
-			Document document = getModelDocument( sourceName);
-			if( document == null) {
+			Document document = getModelDocument(sourceName);
+			if (document == null) {
 				return; // messages were generated in the get call.
 			}
 			Source source = new DOMSource(document);
 			which.transform(source, result);
 		} catch (TransformerException e) {
-			ErrorDialog.openError(
-					parent.getShell(),		// XXX
-					which.dialogTitle(),
-					"Transformation failed!",
-					new Status(IStatus.ERROR,PLUGINNAME,e.getMessageAndLocation()));
+			errorHandler.error(Severity.ERROR, which.dialogTitle(),
+					"Transformation failed!", e);
 			return;
 		}
-		
+
 		try {
-			targetFolder.refreshLocal(IFile.DEPTH_ONE, null);
-		} catch (CoreException e) {
-			ErrorDialog.openError(
-					parent.getShell(),		// XXX
-					which.dialogTitle(),
-					"Unable to refresh output folder " + targetName,
-					new Status(IStatus.WARNING,PLUGINNAME,e.getMessage()));
+			fileProvider.refresh(targetName);
+		} catch (Exception e) {
+			errorHandler.error(Severity.WARNING, which.dialogTitle(),
+					"Unable to refresh output folder " + targetName, e);
 		}
 	}
 
-	// This is just annoying.
 	public class GeneratorNamespaceContext implements NamespaceContext {
 	    public String getNamespaceURI(String prefix) {
 	        if (prefix == null) throw new NullPointerException("Null prefix");
@@ -372,5 +318,36 @@ public class CodeGenerator {
 	        throw new UnsupportedOperationException();
 	    }
 
+	}
+
+	/// Allows testing of code generation outside of Eclipse, by instantiating
+	/// the code generator with arguments that only use JDK types.
+	public static void main(String[] args) {
+		if (args.length < 2) {
+			throw new IllegalArgumentException("Usage: CodeGenerator sourceFile targetDir");
+		}
+		CodeGenerator cg = new CodeGenerator(new FileProvider() {
+			@Override
+			public void refresh(String targetFolder) {
+			}
+			@Override
+			public URL fromWorkspace(String fileName) throws MalformedURLException {
+				return new File(fileName).toURI().toURL();
+			}
+			@Override
+			public URL fromBundle(String fileName) throws MalformedURLException {
+				return new File(fileName).toURI().toURL();
+			}
+		}, new ErrorHandler() {
+			@Override
+			public void error(Severity sev, String title, String message, Throwable exception) {
+				throw new RuntimeException(message, exception);
+			}
+		});
+		File outputDir = new File(args[1]);
+		if (!outputDir.exists()) outputDir.mkdir();
+		for (TransformType tt : TransformType.values()) {
+			cg.generate(tt, args[0], args[1]);
+		}
 	}
 }
