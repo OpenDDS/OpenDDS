@@ -165,34 +165,6 @@ module </xsl:text>
   </xsl:call-template>
 </xsl:template>
 
-<!-- Process array definitions. -->
-<xsl:template match="opendds:type[ @type = 'opendds:idlArray']">
-  <!-- 'typedef (member/@type) (member/@name)[ (member/@size)];\n' -->
-  <xsl:text>  typedef </xsl:text>
-  <xsl:call-template name="typespec">
-    <xsl:with-param name="spectype" select="opendds:member/@type"/>
-  </xsl:call-template>
-  <xsl:text> </xsl:text>
-  <xsl:value-of select="opendds:member/@name"/>
-  <xsl:text>[ </xsl:text>
-  <xsl:value-of select="opendds:member/@size"/>
-  <xsl:text>];</xsl:text>
-  <xsl:value-of select="$newline"/>
-</xsl:template>
-
-<!-- Process sequence definitions. -->
-<xsl:template match="opendds:type[ @type = 'opendds:idlSequence']">
-  <!-- 'typedef sequence<(member/@type)> (@member/name);\n' -->
-  <xsl:text>  typedef sequence&lt;</xsl:text>
-  <xsl:call-template name="typespec">
-    <xsl:with-param name="spectype" select="opendds:member/@type"/>
-  </xsl:call-template>
-  <xsl:text>&gt; </xsl:text>
-  <xsl:value-of select="opendds:member/@name"/>
-  <xsl:text>;</xsl:text>
-  <xsl:value-of select="$newline"/>
-</xsl:template>
-
 <!-- Process union definitions. -->
 <xsl:template match="types[@xsi:type = 'types:Union']">
   <xsl:value-of select="$newline"/>
@@ -207,17 +179,6 @@ module </xsl:text>
 
   <xsl:apply-templates select="branches"/>
   <xsl:apply-templates select="default"/>
-
-  <xsl:if test="./opendds:default">
-    <xsl:text>    default: </xsl:text>
-    <xsl:call-template name="typespec">
-      <xsl:with-param name="spectype" select="./opendds:default/@type"/>
-    </xsl:call-template>
-    <xsl:text> </xsl:text>
-    <xsl:value-of select="./opendds:default/@name"/>
-    <xsl:text>;</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:if>
 
   <xsl:text>  };</xsl:text>
   <xsl:value-of select="$newline"/>
