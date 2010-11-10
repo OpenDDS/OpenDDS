@@ -225,7 +225,7 @@ module </xsl:text>
 </xsl:template>
 
 <!-- Process data structure definitions. -->
-<xsl:template match="opendds:type[ @type = 'opendds:idlStruct']">
+<xsl:template match="types[@xsi:type = 'types:Struct']">
   <!-- '#pragma DCPS_DATA_TYPE "(modelname)::(type/@name)"\n' -->
   <xsl:value-of select="$newline"/>
   <xsl:text>#pragma DCPS_DATA_TYPE "</xsl:text>
@@ -246,7 +246,7 @@ module </xsl:text>
   <xsl:text>  {</xsl:text>
   <xsl:value-of select="$newline"/>
 
-  <xsl:apply-templates select="./opendds:member" mode="struct"/>
+  <xsl:apply-templates select="fields" mode="struct"/>
 
   <xsl:text>  };</xsl:text>
   <xsl:value-of select="$newline"/>
@@ -274,11 +274,11 @@ module </xsl:text>
 </xsl:template>
 
 <!-- Process individual structure members. -->
-<xsl:template match="opendds:member" mode="struct">
+<xsl:template match="fields" mode="struct">
   <!-- Build the output string for the type specification. -->
   <xsl:variable name="typespec">
-    <xsl:call-template name="typespec">
-      <xsl:with-param name="spectype" select="@type"/>
+    <xsl:call-template name="typename">
+      <xsl:with-param name="target" select="$type[@xmi:id = current()/@type]"/>
     </xsl:call-template>
   </xsl:variable>
 
