@@ -53,7 +53,7 @@ module </xsl:text>
   <xsl:value-of select="$newline"/>
 
   <!-- Terminal user defined types are all unreferenced user defined types -->
-  <xsl:variable name="terminals" select="$type[not(@xmi:id  = $type/*/@type)]"/>
+  <xsl:variable name="terminals" select="$type[not(@xmi:id  = $type//@type or @xmi:id=$type//@subtype or @xmi:id=$type//@switch)]"/>
 
   <!-- Process all types with no dependencies on them. -->
   <xsl:call-template name="generate-idl">
