@@ -1,7 +1,6 @@
 <xsl:stylesheet version='1.0'
      xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
      xmlns:lut='http://www.opendds.com/modeling/schemas/Lut/1.0'
-     xmlns:opendds='http://www.opendds.com/modeling/schemas/OpenDDS/1.0'
      xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
      xmlns:xmi='http://www.omg.org/XMI'>
   <!--
@@ -70,7 +69,7 @@ module </xsl:text>
 
 <!-- Depth first traversal of type nodes processing predecessors first. -->
 <xsl:template name="generate-idl">
-  <xsl:param name="nodes"/>     <!-- <opendds:type> element nodes -->
+  <xsl:param name="nodes"/>     <!-- <types> element nodes -->
   <xsl:param name="excluded"/>  <!-- Space separated string of types already processed. -->
 
   <!--
@@ -249,7 +248,7 @@ module </xsl:text>
 <!-- Process individual structure members. -->
 <xsl:template match="fields" mode="struct">
   <!-- Build the output string for the type specification. -->
-  <xsl:variable name="typespec">
+  <xsl:variable name="typename">
     <xsl:call-template name="typename">
       <xsl:with-param name="target" select="$type[@xmi:id = current()/@type]"/>
     </xsl:call-template>
@@ -257,7 +256,7 @@ module </xsl:text>
 
   <!-- '  (@type) (@name);\n' -->
   <xsl:text>    </xsl:text>
-  <xsl:value-of select="$typespec"/>
+  <xsl:value-of select="$typename"/>
   <xsl:text> </xsl:text>
   <xsl:value-of select="@name"/>
   <xsl:text>;</xsl:text>
@@ -353,58 +352,6 @@ module </xsl:text>
       <xsl:value-of select="concat('[',$target/@length,']')"/>
     </xsl:if>
   </xsl:if>
-</xsl:template>
-
-<!-- Produce a type specification string for a type. -->
-<xsl:template name="typespec">
-  <xsl:param name="spectype"/>
-
-  <!-- Extract the CORBA type if it is one. -->
-  <xsl:variable name="corbatype">
-    <xsl:call-template name="corbatype">
-      <xsl:with-param name="name" select="$spectype"/>
-    </xsl:call-template>
-  </xsl:variable>
-
-  <!-- Build the output string for the type specification. -->
-  <xsl:choose>
-    <!-- CORBA types require no additional processing. -->
-    <xsl:when test="string-length($corbatype) > 0">
-      <xsl:value-of select="$corbatype"/>
-    </xsl:when>
-
-    <!-- Process user defined types here. -->
-    <xsl:when test="$type[@name=$spectype]">
-      <xsl:choose>
-        <!-- Typedef and Sequence types use the translated (defined) type name. -->
-        <xsl:when test="$type[@name=$spectype]/@type = 'opendds:idlTypedef'
-                     or $type[@name=$spectype]/@type = 'opendds:idlArray'
-                     or $type[@name=$spectype]/@type = 'opendds:idlSequence'">
-          <xsl:value-of select="$type[@name=$spectype]/opendds:member/@name"/>
-        </xsl:when>
-
-        <!-- Structs, Unions, and Enums use the struct name. -->
-        <xsl:when test="$type[@name=$spectype]/@type = 'opendds:idlStruct'
-                     or $type[@name=$spectype]/@type = 'opendds:idlUnion'
-                     or $type[@name=$spectype]/@type = 'opendds:idlEnum'
-                       ">
-          <xsl:value-of select="$spectype"/>
-        </xsl:when>
-
-        <!-- Its an unknown user defined type. -->
-        <xsl:otherwise>
-          <xsl:text>UNKNOWN USER TYPE </xsl:text>
-          <xsl:value-of select="$spectype"/>
-        </xsl:otherwise>
-      </xsl:choose>
-    </xsl:when>
-
-    <!-- Its neither a CORBA type nor user defined type. -->
-    <xsl:otherwise>
-      <xsl:text>UNKNOWN TYPE </xsl:text>
-      <xsl:value-of select="$spectype"/>
-    </xsl:otherwise>
-  </xsl:choose>
 </xsl:template>
 
 <!-- Convert a model type to a CORBA IDL type. -->
