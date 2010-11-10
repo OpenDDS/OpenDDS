@@ -206,6 +206,7 @@ module </xsl:text>
   <xsl:value-of select="$newline"/>
 
   <xsl:apply-templates select="branches"/>
+  <xsl:apply-templates select="default"/>
 
   <xsl:if test="./opendds:default">
     <xsl:text>    default: </xsl:text>
@@ -271,6 +272,17 @@ module </xsl:text>
   </xsl:variable>
 
   <xsl:value-of select="concat($typename,' ',field/@name,';',$newline)"/>
+</xsl:template>
+
+<!-- Process union default. -->
+<xsl:template match="default">
+  <xsl:variable name="typename">
+    <xsl:call-template name="typename">
+      <xsl:with-param name="target" select="$type[@xmi:id = current()/@type]"/>
+    </xsl:call-template>
+  </xsl:variable>
+  <xsl:value-of select="concat('    default: ',$typename,' ',@name,';',$newline)"/>
+  
 </xsl:template>
 
 <!-- Process individual structure members. -->
