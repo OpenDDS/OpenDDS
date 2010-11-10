@@ -3,7 +3,7 @@
 //typedef sequence<<%SCOPED%>> <%TYPE%>Seq;
 native <%TYPE%>Seq;
 
-/** Support topic registartion for <%TYPE%> data type.
+/** Support topic registration for <%TYPE%> data type.
  *
  * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
