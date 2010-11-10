@@ -532,67 +532,68 @@ module </xsl:text>
 <xsl:template name="processIntrinsicSequences">
 
   <!-- pull tests to output each include only once -->
-  <xsl:variable name="sequences" select="$type[@type = 'opendds:idlSequence']/opendds:member"/>
-  <xsl:if test="$sequences[@type = 'opendds:Boolean']">
+  <xsl:variable name="sequence-defs" select="$type[@xsi:type = 'types:Sequence']"/>
+  <xsl:variable name="sequence-types" select="$type[@xmi:id = $sequence-defs/@subtype]"/>
+
+  <xsl:if test="$sequence-types[@xsi:type = 'types:Boolean']">
     <xsl:text>#include &lt;tao/BooleanSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
-  <xsl:if test="$sequences[@type = 'opendds:Char']">
+  <xsl:if test="$sequence-types[@xsi:type = 'types:Char']">
     <xsl:text>#include &lt;tao/CharSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
-  <xsl:if test="$sequences[@type = 'opendds:WChar']">
+  <xsl:if test="$sequence-types[@xsi:type = 'types:WChar']">
     <xsl:text>#include &lt;tao/WCharSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
-  <xsl:if test="$sequences[@type = 'opendds:Octet']">
+  <xsl:if test="$sequence-types[@xsi:type = 'types:Octet']">
     <xsl:text>#include &lt;tao/Octet.pidl&gt;
 </xsl:text>
   </xsl:if>
-  <xsl:if test="$sequences[@type = 'opendds:Double']">
+  <xsl:if test="$sequence-types[@xsi:type = 'types:Double']">
     <xsl:text>#include &lt;tao/DoubleSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
-  <xsl:if test="$sequences[@type = 'opendds:Float']">
+  <xsl:if test="$sequence-types[@xsi:type = 'types:Float']">
     <xsl:text>#include &lt;tao/FloatSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
-  <xsl:if test="$sequences[@type = 'opendds:Short']">
+  <xsl:if test="$sequence-types[@xsi:type = 'types:Short']">
     <xsl:text>#include &lt;tao/ShortSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
-  <xsl:if test="$sequences[@type = 'opendds:Long' or @type = 'opendds:Integer']">
+  <xsl:if test="$sequence-types[@xsi:type = 'types:Long' or @xsi:type = 'types:Integer']">
     <xsl:text>#include &lt;tao/LongSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
-  <xsl:if test="$sequences[@type = 'opendds:LongLong']">
+  <xsl:if test="$sequence-types[@xsi:type = 'types:LongLong']">
     <xsl:text>#include &lt;tao/LongLongSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
-  <xsl:if test="$sequences[@type = 'opendds:UShort']">
+  <xsl:if test="$sequence-types[@xsi:type = 'types:UShort']">
     <xsl:text>#include &lt;tao/UShortSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
-  <xsl:if test="$sequences[@type = 'opendds:ULong' or @type = 'opendds:UInteger']">
+  <xsl:if test="$sequence-types[@xsi:type = 'types:ULong' or @xsi:type = 'types:UInteger']">
     <xsl:text>#include &lt;tao/ULongSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
-  <xsl:if test="$sequences[@type = 'opendds:ULongLong']">
+  <xsl:if test="$sequence-types[@xsi:type = 'types:ULongLong']">
     <xsl:text>#include &lt;tao/ULongLongSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
-  <xsl:if test="$sequences[@type = 'opendds:String']">
+  <xsl:if test="$sequence-types[@xsi:type = 'types:String']">
     <xsl:text>#include &lt;tao/StringSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
-  <xsl:if test="$sequences[@type = 'opendds:WString']">
+  <xsl:if test="$sequence-types[@xsi:type = 'types:WString']">
     <xsl:text>#include &lt;tao/WStringSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
 
   <!-- ecore don't know how to translate Enum 
-       where from?  LongDoubleSeq.pidl 
-  -->
+       where from?  LongDoubleSeq.pidl -->
     
 </xsl:template>
 
