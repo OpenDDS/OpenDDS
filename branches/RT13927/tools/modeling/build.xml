@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="create.buildxml" name="build">
+    <target name="create.buildxml">
+        <eclipse.buildScript
+            elements="feature@org.opendds.modeling.feature" 
+            buildDirectory="${basedir}"
+            pluginPath="${eclipse.home}"/>
+    </target>
+</project>

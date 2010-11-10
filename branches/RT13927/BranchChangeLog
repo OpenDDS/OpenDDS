@@ -1,3 +1,19 @@
+Wed Nov 10 22:35:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/build.xml:
+
+          Initial Ant build script for generating the individual feature/plugin
+          build scripts.
+
+        * tools/modeling/features/org.opendds.modeling.feature:
+
+          Moved the feature here.  The Ant tasks included with Eclipse require
+          features to be in the "features" directory and not "plugins".
+
+        * tools/modeling/plugins/org.opendds.modeling.feature:
+
+          Removed these files.
+
 Wed Nov 10 15:43:16 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/codegen/xsl/idl.xsl:
