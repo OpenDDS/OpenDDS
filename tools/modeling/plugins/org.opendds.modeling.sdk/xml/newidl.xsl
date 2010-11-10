@@ -101,7 +101,6 @@ module </xsl:text>
       ** Actually generate the IDL for this node after its predecessors
       ** have been processed.
       -->
-<xsl:message>applying templates for <xsl:value-of select="@name"/> : <xsl:value-of select="@xsi:type"/> </xsl:message>
     <xsl:apply-templates select="."/>
   </xsl:for-each>
 </xsl:template>
@@ -128,7 +127,7 @@ module </xsl:text>
 </xsl:template>
 
 <!-- Forward declare union definitions. -->
-<xsl:template match="opendds:type[ @type = 'opendds:idlUnion']" mode="declare">
+<xsl:template match="types[@xsi:type = 'types:Union']" mode="declare">
   <xsl:text>  union </xsl:text>
   <xsl:value-of select="@name"/>
   <xsl:text>;</xsl:text>
@@ -136,7 +135,7 @@ module </xsl:text>
 </xsl:template>
 
 <!-- Forward declare data structure definitions. -->
-<xsl:template match="opendds:type[ @type = 'opendds:idlStruct']" mode="declare">
+<xsl:template match="types[@xsi:type = 'types:Struct']" mode="declare">
   <xsl:text>  struct </xsl:text>
   <xsl:value-of select="@name"/>
   <xsl:text>;</xsl:text>
@@ -145,7 +144,6 @@ module </xsl:text>
 
 <!-- Process enumeration definitions. -->
 <xsl:template match="types[ @xsi:type = 'types:Enum']">
-<xsl:message>Matched enum</xsl:message>
   <xsl:value-of select="$newline"/>
   <xsl:text>  enum </xsl:text>
   <xsl:value-of select="@name"/>
