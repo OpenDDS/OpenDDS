@@ -157,16 +157,12 @@ module </xsl:text>
 </xsl:template>
 
 <!-- Process typedef definitions. -->
-<xsl:template match="opendds:type[ @type = 'opendds:idlTypedef']">
+<xsl:template match="types[@xsi:type = 'types:Typedef']">
   <!-- 'typedef (target/@type) (@name);\n' -->
-  <xsl:text>  typedef </xsl:text>
-  <xsl:call-template name="typespec">
-    <xsl:with-param name="spectype" select="opendds:member/@type"/>
+  <xsl:call-template name="define-type">
+    <xsl:with-param name="targetid" select="@type"/>
+    <xsl:with-param name="name" select="@name"/>
   </xsl:call-template>
-  <xsl:text> </xsl:text>
-  <xsl:value-of select="opendds:member/@name"/>
-  <xsl:text>;</xsl:text>
-  <xsl:value-of select="$newline"/>
 </xsl:template>
 
 <!-- Process array definitions. -->
@@ -318,6 +314,72 @@ module </xsl:text>
   <xsl:value-of select="@member"/>
   <xsl:text>"</xsl:text>
   <xsl:value-of select="$newline"/>
+</xsl:template>
+
+<xsl:template name="define-type">
+  <xsl:param name="targetid"/>
+  <xsl:param name="name"/>
+  <xsl:text>  typedef </xsl:text>
+  <xsl:call-template name="typename">
+    <xsl:with-param name="target" select="$type[@xmi:id = $targetid]"/>
+  </xsl:call-template>
+  <xsl:value-of select="concat(' ',$name)"/>
+  <xsl:call-template name="typesize">
+    <xsl:with-param name="target" select="$type[@xmi:id = $targetid]"/>
+  </xsl:call-template>
+  <xsl:value-of select="concat(';',$newline)"/>
+</xsl:template>
+
+<xsl:template name="typename">
+  <xsl:param name="target"/>
+  <xsl:variable name="targetname" select="$target/@name"/>
+  <xsl:variable name="targettype" select="$target/@xsi:type"/>
+
+  <xsl:choose>
+    <xsl:when test="string-length($targetname) > 0">
+      <xsl:value-of select="$targetname"/>
+    </xsl:when>
+    <xsl:when test="string-length($targettype) > 0">
+      <xsl:variable name="corbatype">
+        <xsl:call-template name="corbatype">
+          <xsl:with-param name="name" select="$targettype"/>
+        </xsl:call-template>
+      </xsl:variable>
+      <xsl:choose>
+        <xsl:when test="$corbatype = 'array'">
+          <xsl:call-template name="typename">
+            <xsl:with-param name="target" select="$type[@xmi:id = $target/@subtype]"/>
+          </xsl:call-template>
+        </xsl:when>
+        <xsl:when test="$corbatype = 'sequence'">
+          <xsl:text>sequence&lt;</xsl:text>
+          <xsl:call-template name="typename">
+            <xsl:with-param name="target" select="$type[@xmi:id = $target/@subtype]"/>
+          </xsl:call-template>
+          <xsl:if test="$target/@length">
+            <xsl:value-of select="concat(', ',$target/@length)"/>
+          </xsl:if>
+          <xsl:text>&gt;</xsl:text>
+        </xsl:when>
+        <xsl:when test="$corbatype = 'string'">
+          <xsl:value-of select="$corbatype"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$corbatype"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:when>
+    <xsl:otherwise>???</xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
+
+<xsl:template name="typesize">
+  <xsl:param name="target"/>
+  <xsl:if test="$target/@xsi:type = 'types:Array'">
+    <xsl:if test="$target/@length">
+      <xsl:value-of select="concat('[',$target/@length,']')"/>
+    </xsl:if>
+  </xsl:if>
 </xsl:template>
 
 <!-- Produce a type specification string for a type. -->
