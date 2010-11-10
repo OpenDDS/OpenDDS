@@ -205,7 +205,7 @@ module </xsl:text>
   <xsl:text>) {</xsl:text>
   <xsl:value-of select="$newline"/>
 
-  <xsl:apply-templates select="./opendds:case"/>
+  <xsl:apply-templates select="branches"/>
 
   <xsl:if test="./opendds:default">
     <xsl:text>    default: </xsl:text>
@@ -254,23 +254,23 @@ module </xsl:text>
 </xsl:template>
 
 <!-- Process individual union cases. -->
-<xsl:template match="opendds:case">
-  <!-- Build the output string for the type specification. -->
-  <xsl:variable name="typespec">
-    <xsl:call-template name="typespec">
-      <xsl:with-param name="spectype" select="@type"/>
+<xsl:template match="branches">
+  <!-- handle mulitple cases... -->
+  <xsl:for-each select="cases">
+    <xsl:if test="position() > 1">
+      <xsl:value-of select="$newline"/>
+    </xsl:if>
+    <xsl:value-of select="concat('    case ',@literal,': ')"/>
+  </xsl:for-each>
+
+  <!-- output variant ... -->
+  <xsl:variable name="typename">
+    <xsl:call-template name="typename">
+      <xsl:with-param name="target" select="$type[@xmi:id = current()/field/@type]"/>
     </xsl:call-template>
   </xsl:variable>
 
-  <!-- '  (@type) (@name);\n' -->
-  <xsl:text>    case </xsl:text>
-  <xsl:value-of select="@label"/>
-  <xsl:text>: </xsl:text>
-  <xsl:value-of select="$typespec"/>
-  <xsl:text> </xsl:text>
-  <xsl:value-of select="@name"/>
-  <xsl:text>;</xsl:text>
-  <xsl:value-of select="$newline"/>
+  <xsl:value-of select="concat($typename,' ',field/@name,';',$newline)"/>
 </xsl:template>
 
 <!-- Process individual structure members. -->
