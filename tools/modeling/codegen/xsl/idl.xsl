@@ -18,12 +18,12 @@
 </xsl:variable>
 
 <!-- Documents -->
-<xsl:variable name="lut" select="document('')/*/lut:tables"/>
+<xsl:variable name="lut" select="document('lut.xml')/*/lut:types"/>
 
 <!-- Node sets -->
 <xsl:variable name="type"     select="//opendds:type"/>
 
-<!-- Index (lookup table is at the bottom of this document) -->
+<!-- Index (lookup table is in lut variable) -->
 <xsl:key
      name  = "lut-type"
      match = "type"
@@ -34,6 +34,9 @@
 
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
+
+  <!-- required to build on windows -->
+  <xsl:call-template name="processIntrinsicSequences"/>
 
   <xsl:text>
 // Some header information should be generated here.
@@ -52,7 +55,7 @@ module </xsl:text>
   <xsl:variable name="non-terminals" select="$type[@name  = $type/*/@type]"/>
 
   <!-- Terminal user defined types are all user defined types minus the non-terminals. -->
-  <xsl:variable name="terminals" select="$type[count(. | $non-terminals) != count($non-terminals)]"/>
+  <xsl:variable name="terminals" select="$type[not(@name  = $type/*/@type)]"/>
 
   <!-- Process all types with no dependencies on them. -->
   <xsl:call-template name="generate-idl">
@@ -106,14 +109,20 @@ module </xsl:text>
 
 <!-- Depth first search for type names of predecessors. -->
 <xsl:template name="get-dependencies">
-  <xsl:param name="successors" select=".."/>
+  <!-- successors is the set of nodes already represented in the get-dependencies output.
+       used to prevent duplicates. -->
+  <xsl:param name="successors" select="/.."/>
 
   <xsl:variable name="direct-predecessors" select="$type[@name = current()/*/@type]"/>
 
-  <xsl:for-each select="$direct-predecessors[count(. | $successors) != count($successors)]">
-    <xsl:call-template name="get-dependencies">
-      <xsl:with-param name="successors" select=". | $successors"/>
-    </xsl:call-template>
+  <!-- using a Kaysian intersection predicate causes issues in eclipse here -->
+  <xsl:for-each select="$direct-predecessors">
+    <xsl:if test="not($successors[@name = current()/@name])">
+      <xsl:call-template name="get-dependencies">
+        <!-- Kaysian intersection are fine in eclipse due to no context switch -->
+        <xsl:with-param name="successors" select=". | $successors"/>
+      </xsl:call-template>
+    </xsl:if>
   </xsl:for-each>
   <xsl:text> </xsl:text>
   <xsl:value-of select="@name"/>
@@ -378,6 +387,32 @@ module </xsl:text>
   <xsl:for-each select="$lut"> <!-- Change context for the lookup -->
     <xsl:value-of select="normalize-space(key('lut-type', $typename)/@corbatype)"/>
   </xsl:for-each>
+
+<!--
+  <xsl:choose>
+    <xsl:when test="$typename='Boolean'">boolean</xsl:when>
+    <xsl:when test="$typename='Char'">char</xsl:when>
+    <xsl:when test="$typename='WChar'">wchar</xsl:when>
+    <xsl:when test="$typename='Octet'">octet</xsl:when>
+    <xsl:when test="$typename='Double'">double</xsl:when>
+    <xsl:when test="$typename='Float'">float</xsl:when>
+    <xsl:when test="$typename='Short'">short</xsl:when>
+    <xsl:when test="$typename='Integer'">long</xsl:when>
+    <xsl:when test="$typename='Long'">long</xsl:when>
+    <xsl:when test="$typename='LongLong'">long long</xsl:when>
+    <xsl:when test="$typename='UShort'">unsigned short</xsl:when>
+    <xsl:when test="$typename='UInteger'">unsigned long</xsl:when>
+    <xsl:when test="$typename='ULong'">unsigned long</xsl:when>
+    <xsl:when test="$typename='ULongLong'">unsigned long long</xsl:when>
+    <xsl:when test="$typename='String'">string</xsl:when>
+    <xsl:when test="$typename='WString'">wstring</xsl:when>
+    <xsl:when test="$typename='Array'">array</xsl:when>
+    <xsl:when test="$typename='Sequence'">sequence</xsl:when>
+    <xsl:when test="$typename='Union'">union</xsl:when>
+    <xsl:when test="$typename='Enum'">enum</xsl:when>
+    <xsl:when test="$typename='Struct'">struct</xsl:when>
+  </xsl:choose>
+-->
 </xsl:template>
 
 <!-- Strip any namespace qualifier from a variable. -->
@@ -417,8 +452,77 @@ module </xsl:text>
   <type type="Union"                                  corbatype="union"/>
   <type type="Enum"                                   corbatype="enum"/>
   <type type="Struct"                                 corbatype="struct"/>
+  <type type="WChar"                                  corbatype="wchar"/>
+  <type type="WString"                                corbatype="wstring"/>
 </lut:tables>
 <!-- ................... -->
+
+<xsl:template name="processIntrinsicSequences">
+
+  <!-- pull tests to output each include only once -->
+  <xsl:variable name="sequences" select="$type[@type = 'opendds:idlSequence']/opendds:member"/>
+  <xsl:if test="$sequences[@type = 'opendds:Boolean']">
+    <xsl:text>#include &lt;tao/BooleanSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:Char']">
+    <xsl:text>#include &lt;tao/CharSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:WChar']">
+    <xsl:text>#include &lt;tao/WCharSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:Octet']">
+    <xsl:text>#include &lt;tao/Octet.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:Double']">
+    <xsl:text>#include &lt;tao/DoubleSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:Float']">
+    <xsl:text>#include &lt;tao/FloatSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:Short']">
+    <xsl:text>#include &lt;tao/ShortSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:Long' or @type = 'opendds:Integer']">
+    <xsl:text>#include &lt;tao/LongSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:LongLong']">
+    <xsl:text>#include &lt;tao/LongLongSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:UShort']">
+    <xsl:text>#include &lt;tao/UShortSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:ULong' or @type = 'opendds:UInteger']">
+    <xsl:text>#include &lt;tao/ULongSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:ULongLong']">
+    <xsl:text>#include &lt;tao/ULongLongSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:String']">
+    <xsl:text>#include &lt;tao/StringSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+  <xsl:if test="$sequences[@type = 'opendds:WString']">
+    <xsl:text>#include &lt;tao/WStringSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
+
+  <!-- ecore don't know how to translate Enum 
+       where from?  LongDoubleSeq.pidl 
+  -->
+    
+</xsl:template>
 
 </xsl:stylesheet>
 
