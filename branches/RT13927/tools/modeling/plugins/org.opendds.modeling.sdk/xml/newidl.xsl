@@ -194,15 +194,15 @@ module </xsl:text>
 </xsl:template>
 
 <!-- Process union definitions. -->
-<xsl:template match="opendds:type[ @type = 'opendds:idlUnion']">
+<xsl:template match="types[@xsi:type = 'types:Union']">
   <xsl:value-of select="$newline"/>
   <xsl:text>  union </xsl:text>
   <xsl:value-of select="@name"/>
-  <xsl:text>  switch (</xsl:text>
-  <xsl:call-template name="typespec">
-    <xsl:with-param name="spectype" select="@switch"/>
+  <xsl:text> switch (</xsl:text>
+  <xsl:call-template name="typename">
+    <xsl:with-param name="target" select="$type[@xmi:id = current()/@switch]"/>
   </xsl:call-template>
-  <xsl:text>)  {</xsl:text>
+  <xsl:text>) {</xsl:text>
   <xsl:value-of select="$newline"/>
 
   <xsl:apply-templates select="./opendds:case"/>
