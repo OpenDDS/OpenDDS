@@ -228,13 +228,7 @@
     </xsl:call-template>
   </xsl:variable>
 
-  <!-- '  (@type) (@name);\n' -->
-  <xsl:text>    </xsl:text>
-  <xsl:value-of select="$typename"/>
-  <xsl:text> </xsl:text>
-  <xsl:value-of select="@name"/>
-  <xsl:text>;</xsl:text>
-  <xsl:value-of select="$newline"/>
+  <xsl:value-of select="concat('    ',$typename,' ',@name,';',$newline)"/>
 </xsl:template>
 
 <!-- Process enumeration members. -->
