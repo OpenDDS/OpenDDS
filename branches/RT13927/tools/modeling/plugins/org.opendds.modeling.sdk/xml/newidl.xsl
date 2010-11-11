@@ -1,6 +1,7 @@
 <xsl:stylesheet version='1.0'
      xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
      xmlns:lut='http://www.opendds.com/modeling/schemas/Lut/1.0'
+     xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0"
      xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
      xmlns:xmi='http://www.omg.org/XMI'>
   <!--
@@ -17,11 +18,11 @@
 </xsl:text>
 </xsl:variable>
 
-<!-- Documents -->
+<!-- Lookup table -->
 <xsl:variable name="lut" select="document('lut.xml')/*/lut:types"/>
 
-<!-- Node sets -->
-<xsl:variable name="type"     select="//types"/>
+<!-- All types-->
+<xsl:variable name="type"     select="/opendds:OpenDDSModel/dataLib/types"/>
 
 <!-- Index (lookup table is in lut variable) -->
 <xsl:key
@@ -29,21 +30,18 @@
      match = "type"
      use   = "@type"/>
 
-<!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "//dataLib/@name"/>
+<!-- Name of the model -->
+<xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/dataLib/@name"/>
 
-<!-- process the entire model document to produce the C++ code. -->
+<!-- process the entire model document to produce the IDL. -->
 <xsl:template match="/">
 
   <!-- required to build on windows -->
   <xsl:call-template name="processIntrinsicSequences"/>
 
-  <xsl:text>
-// Some header information should be generated here.
-module </xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text> {
-</xsl:text>
+  <xsl:value-of select="concat($newline,
+                               'module ', $modelname, ' {', $newline,
+                               '  // Forward declarations', $newline)"/>
 
   <!-- Generate IDL for forward declarations. -->
   <xsl:apply-templates select="$type" mode="declare">
