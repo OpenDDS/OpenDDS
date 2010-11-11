@@ -57,11 +57,7 @@
     <xsl:with-param name="nodes" select="$terminals"/>
   </xsl:call-template>
 
-  <xsl:text>
-
-};
-
-</xsl:text>
+  <xsl:value-of select="concat($newline, $newline, '};', $newline, $newline)"/>
 </xsl:template>
 <!-- End of main processing template. -->
 
