@@ -326,32 +326,6 @@
   <xsl:for-each select="$lut"> <!-- Change context for the lookup -->
     <xsl:value-of select="normalize-space(key('lut-type', $typename)/@corbatype)"/>
   </xsl:for-each>
-
-<!--
-  <xsl:choose>
-    <xsl:when test="$typename='Boolean'">boolean</xsl:when>
-    <xsl:when test="$typename='Char'">char</xsl:when>
-    <xsl:when test="$typename='WChar'">wchar</xsl:when>
-    <xsl:when test="$typename='Octet'">octet</xsl:when>
-    <xsl:when test="$typename='Double'">double</xsl:when>
-    <xsl:when test="$typename='Float'">float</xsl:when>
-    <xsl:when test="$typename='Short'">short</xsl:when>
-    <xsl:when test="$typename='Integer'">long</xsl:when>
-    <xsl:when test="$typename='Long'">long</xsl:when>
-    <xsl:when test="$typename='LongLong'">long long</xsl:when>
-    <xsl:when test="$typename='UShort'">unsigned short</xsl:when>
-    <xsl:when test="$typename='UInteger'">unsigned long</xsl:when>
-    <xsl:when test="$typename='ULong'">unsigned long</xsl:when>
-    <xsl:when test="$typename='ULongLong'">unsigned long long</xsl:when>
-    <xsl:when test="$typename='String'">string</xsl:when>
-    <xsl:when test="$typename='WString'">wstring</xsl:when>
-    <xsl:when test="$typename='Array'">array</xsl:when>
-    <xsl:when test="$typename='Sequence'">sequence</xsl:when>
-    <xsl:when test="$typename='Union'">union</xsl:when>
-    <xsl:when test="$typename='Enum'">enum</xsl:when>
-    <xsl:when test="$typename='Struct'">struct</xsl:when>
-  </xsl:choose>
--->
 </xsl:template>
 
 <!-- Strip any namespace qualifier from a variable. -->
@@ -369,32 +343,6 @@
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>
-
-<!-- Lookup Table Magic. -->
-<lut:tables>
-  <type type="Boolean"   cpptype="bool"               corbatype="boolean"/>
-  <type type="Char"      cpptype="char"               corbatype="char"/>
-  <type type="Octet"     cpptype="unsigned char"      corbatype="octet"/>
-  <type type="Double"    cpptype="double"             corbatype="double"/>
-  <type type="Float"     cpptype="float"              corbatype="float"/>
-  <type type="Short"     cpptype="short"              corbatype="short"/>
-  <type type="Integer"   cpptype="int"                corbatype="long"/>
-  <type type="Long"      cpptype="long"               corbatype="long"/>
-  <type type="LongLong"  cpptype="long long"          corbatype="long long"/>
-  <type type="UShort"    cpptype="unsigned short"     corbatype="unsigned short"/>
-  <type type="UInteger"  cpptype="unsigned int"       corbatype="unsigned long"/>
-  <type type="ULong"     cpptype="unsigned long"      corbatype="unsigned long"/>
-  <type type="ULongLong" cpptype="unsigned long long" corbatype="unsigned long long"/>
-  <type type="String"    cpptype="char*"              corbatype="string"/>
-  <type type="Array"                                  corbatype="array"/>
-  <type type="Sequence"                               corbatype="sequence"/>
-  <type type="Union"                                  corbatype="union"/>
-  <type type="Enum"                                   corbatype="enum"/>
-  <type type="Struct"                                 corbatype="struct"/>
-  <type type="WChar"                                  corbatype="wchar"/>
-  <type type="WString"                                corbatype="wstring"/>
-</lut:tables>
-<!-- ................... -->
 
 <xsl:template name="processIntrinsicSequences">
 
