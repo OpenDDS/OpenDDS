@@ -70,7 +70,7 @@ module </xsl:text>
 <!-- Depth first traversal of type nodes processing predecessors first. -->
 <xsl:template name="generate-idl">
   <xsl:param name="nodes"/>     <!-- <types> element nodes -->
-  <xsl:param name="excluded"/>  <!-- Space separated string of types already processed. -->
+  <xsl:param name="excluded"/>  <!-- Space separated string of type ids already processed. -->
 
   <!--
     ** We can't just apply-templates here as we need to keep track of what
@@ -89,18 +89,22 @@ module </xsl:text>
     </xsl:variable>
 
     <!-- Process new predecessor types. -->
-    <xsl:variable name="direct-predecessors" select="$type[@xmi:id = current()/*/@type]"/>
+    <xsl:variable name="direct-predecessors" select="$type[@xmi:id = current()//@type or @xmi:id = current()//@subtype or @xmi:id = current()//@switch]"/>
+
     <xsl:call-template name="generate-idl">
       <xsl:with-param name="nodes"
-           select="$direct-predecessors[not(contains($exclude-list,concat(' ',@name,' ')))]"/>
+           select="$direct-predecessors[not(contains($exclude-list,concat(' ',@xmi:id,' ')))]"/>
       <xsl:with-param name="excluded" select="$exclude-list"/>
     </xsl:call-template>
 
     <!--
-      ** Actually generate the IDL for this node after its predecessors
-      ** have been processed.
+      ** Generate the IDL for this node after its predecessors
+      ** have been processed, only if its predecessors did not include
+      ** this node.
       -->
-    <xsl:apply-templates select="."/>
+    <xsl:if test="not(contains($exclude-list,concat(' ',@xmi:id,' ')))">
+      <xsl:apply-templates select="."/>
+    </xsl:if>
   </xsl:for-each>
 </xsl:template>
 
@@ -110,19 +114,19 @@ module </xsl:text>
        used to prevent duplicates. -->
   <xsl:param name="successors" select="/.."/>
 
-  <xsl:variable name="direct-predecessors" select="$type[@xmi:id = current()/*/@type]"/>
+  <xsl:variable name="direct-predecessors" select="$type[@xmi:id = current()//@type or @xmi:id = current()//@subtype or @xmi:id = current()//@switch]"/>
 
   <!-- using a Kaysian intersection predicate causes issues in eclipse here -->
   <xsl:for-each select="$direct-predecessors">
-    <xsl:if test="not($successors[@name = current()/@name])">
+    <xsl:if test="not($successors[@xmi:id = current()/@xmi:id])">
       <xsl:call-template name="get-dependencies">
-        <!-- Kaysian intersection are fine in eclipse due to no context switch -->
+        <!-- Kaysian intersection are fine in eclipse without context switch -->
         <xsl:with-param name="successors" select=". | $successors"/>
       </xsl:call-template>
     </xsl:if>
   </xsl:for-each>
   <xsl:text> </xsl:text>
-  <xsl:value-of select="@name"/>
+  <xsl:value-of select="@xmi:id"/>
 </xsl:template>
 
 <!-- Forward declare union definitions. -->
