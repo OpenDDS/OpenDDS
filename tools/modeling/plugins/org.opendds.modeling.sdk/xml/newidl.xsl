@@ -39,9 +39,11 @@
   <!-- required to build on windows -->
   <xsl:call-template name="processIntrinsicSequences"/>
 
-  <xsl:value-of select="concat($newline,
-                               'module ', $modelname, ' {', $newline,
-                               '  // Forward declarations', $newline)"/>
+  <xsl:if test="string-length($modelname) > 0">
+    <xsl:value-of select="concat($newline,
+                                 'module ', $modelname, ' {', $newline,
+                                 '  // Forward declarations', $newline)"/>
+  </xsl:if>
 
   <!-- Generate IDL for forward declarations. -->
   <xsl:apply-templates select="$type" mode="declare">
@@ -57,7 +59,9 @@
     <xsl:with-param name="nodes" select="$terminals"/>
   </xsl:call-template>
 
-  <xsl:value-of select="concat($newline, $newline, '};', $newline, $newline)"/>
+  <xsl:if test="string-length($modelname) > 0">
+    <xsl:value-of select="concat($newline, $newline, '};', $newline, $newline)"/>
+  </xsl:if>
 </xsl:template>
 <!-- End of main processing template. -->
 
@@ -172,8 +176,11 @@
 
 <!-- Process data structure definitions. -->
 <xsl:template match="types[@xsi:type = 'types:Struct']">
-  <xsl:value-of select="concat($newline,'#pragma DCPS_DATA_TYPE &quot;',
-                               $modelname,'::', @name, '&quot;', $newline)"/>
+  <xsl:value-of select="concat($newline,'#pragma DCPS_DATA_TYPE &quot;')"/>
+  <xsl:if test="string-length($modelname) > 0">
+     <xsl:value-of select="concat($modelname,'::')"/>
+  </xsl:if>
+  <xsl:value-of select="concat(@name, '&quot;', $newline)"/>
 
   <xsl:apply-templates select="keys"/>
 
@@ -238,8 +245,11 @@
 
 <!-- Create a DCPS_DATA_KEY pragma line. -->
 <xsl:template match="keys">
-  <xsl:value-of select="concat('#pragma DCPS_DATA_KEY  &quot;',$modelname,
-                        '::',../@name,' ',
+  <xsl:text>#pragma DCPS_DATA_KEY  "</xsl:text>
+  <xsl:if test="string-length($modelname) > 0">
+     <xsl:value-of select="concat($modelname,'::')"/>
+  </xsl:if>
+  <xsl:value-of select="concat(../@name,' ',
                         ../fields[@xmi:id = current()/@field]/@name,
                         '&quot;',$newline)"/>
 </xsl:template>
