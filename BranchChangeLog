@@ -1,3 +1,15 @@
+Thu Nov 11 22:08:21 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk:
+
+          set svn:ignore
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenerator.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/OutputsForm.java:
+
+          Find model name in new model format.  
+          Handle empty model name gracefully.
+
 Thu Nov 11 21:46:51 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:

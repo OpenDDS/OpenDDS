@@ -348,6 +348,13 @@ public class OutputsForm extends FormPage {
 	private String getModelName() {
 		if( modelName == null) {
 			modelName = generator.getModelName(getSourceName());
+			if (modelName.length() == 0) {
+				int dotindex = getSourceName().lastIndexOf(".opendds");
+				int slashindex = getSourceName().lastIndexOf("/");
+				if (dotindex > 0 && slashindex > 0) {
+					modelName = getSourceName().substring(slashindex + 1, dotindex);
+				}
+			}
 		}
 		return modelName;
 	}
