@@ -139,16 +139,11 @@
 
 <!-- Process enumeration definitions. -->
 <xsl:template match="types[ @xsi:type = 'types:Enum']">
-  <xsl:value-of select="$newline"/>
-  <xsl:text>  enum </xsl:text>
-  <xsl:value-of select="@name"/>
-  <xsl:text>  {</xsl:text>
-  <xsl:value-of select="$newline"/>
+  <xsl:value-of select="concat('  enum ', @name, ' {', $newline)"/>
 
   <xsl:apply-templates select="literals" mode="enum"/>
 
-  <xsl:text>  };</xsl:text>
-  <xsl:value-of select="$newline"/>
+  <xsl:value-of select="concat('  };', $newline)"/>
 </xsl:template>
 
 <!-- Process typedef definitions. -->
