@@ -1,155 +1,165 @@
+Thu Nov 11 21:46:51 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+
+          Migrated changes from newidl.xsl
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+
+          Removed this file.
+
 2010-11-11 19:49  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  handle global namespace
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          handle global namespace
 
 2010-11-11 18:35  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  remove unused parts
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          remove unused parts
 
 2010-11-11 18:32  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  simplify key handling
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          simplify key handling
 
 2010-11-11 18:00  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  less lines handling struct keys
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          less lines handling struct keys
 
 2010-11-11 17:54  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  less lines handling struct members
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          less lines handling struct members
 
 2010-11-11 17:37  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  union-handling comments
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          union-handling comments
 
 2010-11-11 17:32  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  less lines processing struct
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          less lines processing struct
 
 2010-11-11 17:17  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  shorten union definitions
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          shorten union definitions
 
 2010-11-11 16:40  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  shorten enumeration definitions
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          shorten enumeration definitions
 
 2010-11-11 16:36  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  shorten union and struct definitions
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          shorten union and struct definitions
 
 2010-11-11 16:34  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  end of module scope
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          end of module scope
 
 2010-11-11 16:32  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  explicit match of global variable xpath expressions. Fix dated
-	  comments. better module comment.
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          explicit match of global variable xpath expressions. Fix dated
+          comments. better module comment.
 
 2010-11-11 16:15  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  handle bounded string and wstring types
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          handle bounded string and wstring types
 
 2010-11-11 15:17  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  ignore enum text in delare mode
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          ignore enum text in delare mode
 
 2010-11-11 14:52  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  build exclude lists by id, rather than name. Build
-	  direct-predecessors using type, subtype and switch. Don't apply
-	  current node if dependencies have already applied.
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          build exclude lists by id, rather than name. Build
+          direct-predecessors using type, subtype and switch. Don't apply
+          current node if dependencies have already applied.
 
 2010-11-10 20:28  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  remove references to opendds namespace
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          remove references to opendds namespace
 
 2010-11-10 20:25  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  deprecated array, sequence and default handling
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          deprecated array, sequence and default handling
 
 2010-11-10 20:23  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  processIntrinsicSequences
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          processIntrinsicSequences
 
 2010-11-10 20:11  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  handle union default
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          handle union default
 
 2010-11-10 19:44  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  handle union branches
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          handle union branches
 
 2010-11-10 19:21  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  handle union shell
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          handle union shell
 
 2010-11-10 19:10  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  pragmas
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          pragmas
 
 2010-11-10 18:50  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  Handle structs
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          Handle structs
 
 2010-11-10 18:39  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  Handle typedefs
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          Handle typedefs
 
 2010-11-10 15:49  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  Forward declarations
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          Forward declarations
 
 2010-11-10 15:47  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  correct terminals
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          correct terminals
 
 2010-11-09 19:23  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  fix direct-predecessors, enums
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          fix direct-predecessors, enums
 
 2010-11-09 18:58  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  fix terminals, remove non-terminals
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          fix terminals, remove non-terminals
 
 2010-11-09 18:54  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  fix types and modelname
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          fix types and modelname
 
 2010-11-09 18:51  schmitzj
 
-	* tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
-	  new idl stylesheet
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/newidl.xsl:
+          new idl stylesheet
 
 
 Wed Nov 10 22:35:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
