@@ -172,14 +172,9 @@
 
 <!-- Process data structure definitions. -->
 <xsl:template match="types[@xsi:type = 'types:Struct']">
-  <!-- '#pragma DCPS_DATA_TYPE "(modelname)::(type/@name)"\n' -->
-  <xsl:value-of select="$newline"/>
-  <xsl:text>#pragma DCPS_DATA_TYPE "</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::</xsl:text>
-  <xsl:value-of select="@name"/>
-  <xsl:text>"</xsl:text>
-  <xsl:value-of select="$newline"/>
+  <xsl:value-of select="concat('#pragma DCPS_DATA_TYPE &quot;',$modelname,'::',
+                               @name, '&quot;', $newline
+                               )"/>
 
   <xsl:for-each select="keys">
     <xsl:call-template name="pragma-key">
@@ -187,16 +182,11 @@
     </xsl:call-template>
   </xsl:for-each>
 
-  <xsl:text>  struct </xsl:text>
-  <xsl:value-of select="@name"/>
-  <xsl:text>  {</xsl:text>
-  <xsl:value-of select="$newline"/>
+  <xsl:value-of select="concat('  struct ',@name,' {', $newline)"/>
 
   <xsl:apply-templates select="fields" mode="struct"/>
 
-  <xsl:text>  };</xsl:text>
-  <xsl:value-of select="$newline"/>
-
+  <xsl:value-of select="concat('  };', $newline)"/>
 </xsl:template>
 
 <!-- Process individual union cases. -->
