@@ -1,3 +1,9 @@
+Thu Nov 11 22:46:33 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model:
+
+          set svn:ignore
+
 Thu Nov 11 22:47:20 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/build.pl:
