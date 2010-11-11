@@ -1,3 +1,16 @@
+Thu Nov 11 23:10:08 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/dcps:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/domain:
+
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/domain/impl:
+
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds:
+
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/impl:
+
+          set svn:ignore
+
 Thu Nov 11 22:46:33 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model:
