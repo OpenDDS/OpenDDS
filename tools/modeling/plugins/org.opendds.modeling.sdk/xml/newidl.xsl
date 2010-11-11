@@ -125,18 +125,12 @@
 
 <!-- Forward declare union definitions. -->
 <xsl:template match="types[@xsi:type = 'types:Union']" mode="declare">
-  <xsl:text>  union </xsl:text>
-  <xsl:value-of select="@name"/>
-  <xsl:text>;</xsl:text>
-  <xsl:value-of select="$newline"/>
+  <xsl:value-of select="concat('  union ', @name, ';', $newline)"/>
 </xsl:template>
 
 <!-- Forward declare data structure definitions. -->
 <xsl:template match="types[@xsi:type = 'types:Struct']" mode="declare">
-  <xsl:text>  struct </xsl:text>
-  <xsl:value-of select="@name"/>
-  <xsl:text>;</xsl:text>
-  <xsl:value-of select="$newline"/>
+  <xsl:value-of select="concat('  struct ', @name, ';', $newline)"/>
 </xsl:template>
 
 <!-- Ignore text in declare mode (enums) -->
