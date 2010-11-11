@@ -36,7 +36,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class CodeGenerator {
-	private static final String modelNameExpression = "//generator:model/@name";
+	private static final String modelNameExpression = "//dataLib/@name";
 	private static final String generatorNamespace = "http://www.opendds.com/modeling/schemas/Generator/1.0";
 
 	private static XPathFactory pathFactory;
