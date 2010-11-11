@@ -341,8 +341,11 @@ module </xsl:text>
           </xsl:if>
           <xsl:text>&gt;</xsl:text>
         </xsl:when>
-        <xsl:when test="$corbatype = 'string'">
+        <xsl:when test="$corbatype = 'string' or $corbatype = 'wstring'">
           <xsl:value-of select="$corbatype"/>
+          <xsl:if test="$target/@length">
+            <xsl:value-of select="concat('&lt;',$target/@length,'&gt;')"/>
+          </xsl:if>
         </xsl:when>
         <xsl:otherwise>
           <xsl:value-of select="$corbatype"/>
