@@ -172,15 +172,10 @@
 
 <!-- Process data structure definitions. -->
 <xsl:template match="types[@xsi:type = 'types:Struct']">
-  <xsl:value-of select="concat('#pragma DCPS_DATA_TYPE &quot;',$modelname,'::',
-                               @name, '&quot;', $newline
-                               )"/>
+  <xsl:value-of select="concat($newline,'#pragma DCPS_DATA_TYPE &quot;',
+                               $modelname,'::', @name, '&quot;', $newline)"/>
 
-  <xsl:for-each select="keys">
-    <xsl:call-template name="pragma-key">
-      <xsl:with-param name="key" select="."/>
-    </xsl:call-template>
-  </xsl:for-each>
+  <xsl:apply-templates select="keys"/>
 
   <xsl:value-of select="concat('  struct ',@name,' {', $newline)"/>
 
@@ -242,8 +237,7 @@
 </xsl:template>
 
 <!-- Create a DCPS_DATA_KEY pragma line. -->
-<xsl:template name="pragma-key">
-  <xsl:param name="key"/>
+<xsl:template match="keys">
   <xsl:value-of select="concat('#pragma DCPS_DATA_KEY  &quot;',$modelname,
                         '::',../@name,' ',
                         ../fields[@xmi:id = current()/@field]/@name,
