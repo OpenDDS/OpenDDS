@@ -148,7 +148,6 @@
 
 <!-- Process typedef definitions. -->
 <xsl:template match="types[@xsi:type = 'types:Typedef']">
-  <!-- 'typedef (target/@type) (@name);\n' -->
   <xsl:call-template name="define-type">
     <xsl:with-param name="targetid" select="@type"/>
     <xsl:with-param name="name" select="@name"/>
@@ -157,23 +156,18 @@
 
 <!-- Process union definitions. -->
 <xsl:template match="types[@xsi:type = 'types:Union']">
-  <xsl:value-of select="$newline"/>
-  <xsl:text>  union </xsl:text>
-  <xsl:value-of select="@name"/>
-  <xsl:text> switch (</xsl:text>
+  <xsl:value-of select="concat('  union ',@name,' switch (')"/>
+
   <xsl:call-template name="typename">
     <xsl:with-param name="target" select="$type[@xmi:id = current()/@switch]"/>
   </xsl:call-template>
-  <xsl:text>) {</xsl:text>
-  <xsl:value-of select="$newline"/>
+
+  <xsl:value-of select="concat(') {', $newline)"/>
 
   <xsl:apply-templates select="branches"/>
   <xsl:apply-templates select="default"/>
 
-  <xsl:text>  };</xsl:text>
-  <xsl:value-of select="$newline"/>
-
-
+  <xsl:value-of select="concat('  };', $newline)"/>
 </xsl:template>
 
 <!-- Process data structure definitions. -->
