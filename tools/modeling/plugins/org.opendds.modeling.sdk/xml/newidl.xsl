@@ -244,16 +244,10 @@
 <!-- Create a DCPS_DATA_KEY pragma line. -->
 <xsl:template name="pragma-key">
   <xsl:param name="key"/>
-
-  <!-- '#pragma DCPS_DATA_KEY "(modelname)::(type/@name) (member)"\n' -->
-  <xsl:text>#pragma DCPS_DATA_KEY  "</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::</xsl:text>
-  <xsl:value-of select="../@name"/>
-  <xsl:text> </xsl:text>
-  <xsl:value-of select="../fields[@xmi:id = current()/@field]/@name"/>
-  <xsl:text>"</xsl:text>
-  <xsl:value-of select="$newline"/>
+  <xsl:value-of select="concat('#pragma DCPS_DATA_KEY  &quot;',$modelname,
+                        '::',../@name,' ',
+                        ../fields[@xmi:id = current()/@field]/@name,
+                        '&quot;',$newline)"/>
 </xsl:template>
 
 <xsl:template name="define-type">
