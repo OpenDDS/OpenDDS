@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="generate" name="build">
+    <target name="generate">
+      <emf.Ecore2Java model="model/OpenDDS.ecore"
+                      genModel="model/OpenDDS.genmodel"
+                      reconcileGenModel="keep"
+                      generateJavaCode="true"
+                      generateModelProject="true"
+                      generateEditProject="true"
+                      generateEditorProject="true"/>
+    </target>
+</project>
