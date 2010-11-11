@@ -145,6 +145,10 @@ module </xsl:text>
   <xsl:value-of select="$newline"/>
 </xsl:template>
 
+<!-- Ignore text in declare mode (enums) -->
+<xsl:template match="text()" mode="declare">
+</xsl:template>
+
 <!-- Process enumeration definitions. -->
 <xsl:template match="types[ @xsi:type = 'types:Enum']">
   <xsl:value-of select="$newline"/>
