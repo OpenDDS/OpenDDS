@@ -191,7 +191,7 @@
 
 <!-- Process individual union cases. -->
 <xsl:template match="branches">
-  <!-- handle mulitple cases... -->
+  <!-- handle mulitple cases for the variant... -->
   <xsl:for-each select="cases">
     <xsl:if test="position() > 1">
       <xsl:value-of select="$newline"/>
@@ -199,13 +199,13 @@
     <xsl:value-of select="concat('    case ',@literal,': ')"/>
   </xsl:for-each>
 
-  <!-- output variant ... -->
   <xsl:variable name="typename">
     <xsl:call-template name="typename">
       <xsl:with-param name="target" select="$type[@xmi:id = current()/field/@type]"/>
     </xsl:call-template>
   </xsl:variable>
 
+  <!-- output variant ... -->
   <xsl:value-of select="concat($typename,' ',field/@name,';',$newline)"/>
 </xsl:template>
 
@@ -217,7 +217,6 @@
     </xsl:call-template>
   </xsl:variable>
   <xsl:value-of select="concat('    default: ',$typename,' ',@name,';',$newline)"/>
-  
 </xsl:template>
 
 <!-- Process individual structure members. -->
