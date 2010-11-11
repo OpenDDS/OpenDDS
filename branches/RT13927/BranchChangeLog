@@ -1,3 +1,11 @@
+Thu Nov 11 23:13:34 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/icons/full:
+
+          set svn:ignore
+
 Thu Nov 11 23:10:08 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/dcps:
