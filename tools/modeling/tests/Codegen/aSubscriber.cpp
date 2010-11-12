@@ -8,13 +8,10 @@ main( int argc, char** argv)
   int status = 0;
 
   try {
-    aModelType modelinstance1;
-    aModelType modelinstance2;
+    aModelType modelinstance1(argc, argv);
+    //aModelType modelinstance2(argc, argv);
 
     using OpenDDS::Model::aModel::Elements;
-
-    modelinstance1.init( argc, argv);
-    // modelinstance2.init();
 
     aModel::type1 data;
     data.key  = 42;

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 
 <generator:model name='aModel'
-                 xmlns:opendds='http://www.opendds.com/modeling/schemas/OpenDDS/1.0'
-                 xmlns:generator='http://www.opendds.com/modeling/schemas/Generator/1.0'>
+                 xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'
+                 xmlns:generator='http://www.opendds.org/modeling/schemas/Generator/1.0'>
 
 <generator:typelib name="structlib"/>
 

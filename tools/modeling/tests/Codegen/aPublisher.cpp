@@ -12,13 +12,10 @@ main( int argc, char** argv)
   int status = 0;
 
   try {
-    aModelType modelinstance1;
-    OpenDDS::Model::Service< OpenDDS::Model::aModel::Elements, myTraits> modelinstance2;
+    aModelType modelinstance1(argc, argv);
+    OpenDDS::Model::Service< OpenDDS::Model::aModel::Elements, myTraits> modelinstance2(argc, argv);
 
     using OpenDDS::Model::aModel::Elements;
-
-    modelinstance1.init( argc, argv);
-    modelinstance2.init();
 
     aModel::type1 data;
     data.key  = 42;
