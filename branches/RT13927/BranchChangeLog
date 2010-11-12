@@ -1,3 +1,9 @@
+Fri Nov 12 20:47:07 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/expfile.pl:
+
+          New script to invoke generate_export_file.pl only when needed.
+
 Fri Nov 12 19:34:21 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins:
