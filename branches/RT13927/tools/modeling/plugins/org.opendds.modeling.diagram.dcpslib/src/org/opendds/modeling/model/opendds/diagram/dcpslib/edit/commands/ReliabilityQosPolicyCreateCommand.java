@@ -13,7 +13,6 @@ import org.eclipse.gmf.runtime.emf.type.core.requests.CreateElementRequest;
 import org.eclipse.gmf.runtime.notation.View;
 import org.opendds.modeling.model.opendds.DcpsLib;
 import org.opendds.modeling.model.opendds.OpenDDSFactory;
-import org.opendds.modeling.model.opendds.diagram.dcpslib.providers.ElementInitializers;
 import org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibElementTypes;
 
 /**
