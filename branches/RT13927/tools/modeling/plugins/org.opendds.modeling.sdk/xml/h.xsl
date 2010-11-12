@@ -1,8 +1,8 @@
 <xsl:stylesheet version='1.0'
      xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
-     xmlns:lut='http://www.opendds.com/modeling/schemas/Lut/1.0'
-     xmlns:opendds='http://www.opendds.com/modeling/schemas/OpenDDS/1.0'
-     xmlns:generator='http://www.opendds.com/modeling/schemas/Generator/1.0'>
+     xmlns:lut='http://www.opendds.org/modeling/schemas/Lut/1.0'
+     xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'
+     xmlns:generator='http://www.opendds.org/modeling/schemas/Generator/1.0'>
   <!--
     ** $Id$
     **

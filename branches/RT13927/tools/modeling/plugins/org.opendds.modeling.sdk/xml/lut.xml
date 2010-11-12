@@ -1,5 +1,5 @@
 <lut:tables
-     xmlns:lut='http://www.opendds.com/modeling/schemas/Lut/1.0'>
+     xmlns:lut='http://www.opendds.org/modeling/schemas/Lut/1.0'>
   <!--
     ** $Id$
     **

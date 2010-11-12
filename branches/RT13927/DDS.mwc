@@ -10,8 +10,6 @@ workspace {
 
   exclude {
     contrib/wrapper
-    tools/modeling/tests/Codegen
-    tools/modeling/tests/Messenger
   }
 }
 

@@ -1,10 +1,8 @@
-project(*model) : dds_xsl {
-}
-
 project(*xmlPublisher) : dcpsexe, dds_model {
   exename   = publisher
-  after    += *model MessengerModel
+  after    += MessengerModel
   libs     += MessengerModel
+  libpaths += model
 
   Source_Files {
     publisher.cpp
@@ -13,8 +11,9 @@ project(*xmlPublisher) : dcpsexe, dds_model {
 
 project(*xmlSubscriber) : dcpsexe, dds_model {
   exename   = subscriber
-  after    += *model MessengerModel
+  after    += MessengerModel
   libs     += MessengerModel
+  libpaths += model
 
   Source_Files {
     subscriber.cpp

@@ -1,3 +1,19 @@
-project(*model) : dds_xsl {
+project(*pub) : dcpsexe, dds_model {
+  after    += aModel
+  libs     += aModel
+  libpaths += model
+
+  Source_Files {
+    aPublisher.cpp
+  }
 }
 
+project(*sub) : dcpsexe, dds_model {
+  after    += aModel
+  libs     += aModel
+  libpaths += model
+
+  Source_Files {
+    aSubscriber.cpp
+  }
+}

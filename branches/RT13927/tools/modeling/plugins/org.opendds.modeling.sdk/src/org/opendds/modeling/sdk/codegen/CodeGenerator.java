@@ -30,7 +30,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 public class CodeGenerator {
-	private static final String generatorNamespace = "http://www.opendds.com/modeling/schemas/Generator/1.0";
+	private static final String generatorNamespace = "http://www.opendds.org/modeling/schemas/Generator/1.0";
 
 	private static TransformerFactory tFactory;
 	private static Transformer idlTransformer;
@@ -58,14 +58,14 @@ public class CodeGenerator {
 	          public void transform(Source s, Result r) throws TransformerException { hTransformer.transform(s, r); }
 	          public String dialogTitle() { return "Generate C++ Header"; }
 		      public String xslFilename() { return "xml/h.xsl"; }
-			  public String suffix() { return ".h"; }
+			  public String suffix() { return "_T.h"; }
 		    },
 		CPP { public Transformer getTransformer() { return cppTransformer; }
 	          public void setTransformer(Transformer t) { cppTransformer = t; }
 	          public void transform(Source s, Result r) throws TransformerException { cppTransformer.transform(s, r); }
 	          public String dialogTitle() { return "Generate C++ Body"; }
 		      public String xslFilename() { return "xml/cpp.xsl"; }
-			  public String suffix() { return ".cpp"; }
+			  public String suffix() { return "_T.cpp"; }
 		    },
 		MPC { public Transformer getTransformer() { return mpcTransformer; }
 	          public void setTransformer(Transformer t) { mpcTransformer = t; }
@@ -268,10 +268,20 @@ public class CodeGenerator {
 	/// Allows testing of code generation outside of Eclipse, by instantiating
 	/// the code generator with arguments that only use JDK types.
 	public static void main(String[] args) {
-		if (args.length < 2) {
-			throw new IllegalArgumentException("Usage: CodeGenerator sourceFile targetDir");
+		if (args.length < 1) {
+			throw new IllegalArgumentException("Usage: CodeGenerator [-o targetDir] sourceFile");
 		}
+		File outputDir = new File(".");
+		String inputFile = args[0];
+		if (args.length > 2 && args[0].equals("-o")) {
+			outputDir = new File(args[1]);
+			if (!outputDir.exists()) outputDir.mkdir();
+			inputFile = args[2];
+		}
+
 		CodeGenerator cg = new CodeGenerator(new FileProvider() {
+			private final String bundle = System.getenv("DDS_ROOT")
+				+ "/tools/modeling/plugins/org.opendds.modeling.sdk";
 			@Override
 			public void refresh(String targetFolder) {
 			}
@@ -281,7 +291,7 @@ public class CodeGenerator {
 			}
 			@Override
 			public URL fromBundle(String fileName) throws MalformedURLException {
-				return new File(fileName).toURI().toURL();
+				return new File(bundle, fileName).toURI().toURL();
 			}
 		}, new ErrorHandler() {
 			@Override
@@ -289,10 +299,9 @@ public class CodeGenerator {
 				throw new RuntimeException(message, exception);
 			}
 		});
-		File outputDir = new File(args[1]);
-		if (!outputDir.exists()) outputDir.mkdir();
+
 		for (TransformType tt : TransformType.values()) {
-			cg.generate(tt, args[0], args[1]);
+			cg.generate(tt, inputFile, outputDir.getPath());
 		}
 	}
 }

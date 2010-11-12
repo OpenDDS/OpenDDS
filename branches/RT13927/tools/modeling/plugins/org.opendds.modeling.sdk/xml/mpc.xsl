@@ -1,7 +1,7 @@
 <xsl:stylesheet version='1.0'
      xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
-     xmlns:opendds='http://www.opendds.com/modeling/schemas/OpenDDS/1.0'
-     xmlns:generator='http://www.opendds.com/modeling/schemas/Generator/1.0'>
+     xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'
+     xmlns:generator='http://www.opendds.org/modeling/schemas/Generator/1.0'>
   <!--
     ** $Id$
     **
@@ -27,7 +27,7 @@
   <xsl:text>project(</xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text>): dcps {
-  libout = ..
+  libout = .
   sharedname = </xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text>
@@ -44,6 +44,9 @@
   dcps_ts_flags += -Wb,export_macro=</xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text>_Export
+  prebuild      += perl $(DDS_ROOT)/bin/expfile.pl </xsl:text>
+  <xsl:value-of select="$modelname"/>
+  <xsl:text>
 
   TypeSupport_Files {
     </xsl:text>
@@ -51,37 +54,7 @@
     <xsl:text>.idl
   }
 
-  Source_Files {
-  }
 }
-</xsl:text>
-  <xsl:for-each select="$application">
-<xsl:text>
-project(</xsl:text>
-    <xsl:value-of select="$modelname"/>
-    <xsl:text>_</xsl:text>
-    <xsl:value-of select="@name"/>
-    <xsl:text>) : dcpsexe, dds_model {
-  exename = ../</xsl:text>
-    <xsl:value-of select="@name"/>
-    <xsl:text>
-  includes += $(DDS_ROOT)/tools/modeling/codegen
-  after += </xsl:text>
-    <xsl:value-of select="$modelname"/>
-    <xsl:text>
-  libs  += </xsl:text>
-    <xsl:value-of select="$modelname"/>
-    <xsl:text> OpenDDS_Model
-
-  Source_Files {
-    ../</xsl:text>
-    <xsl:value-of select="@name"/>
-    <xsl:text>.cpp
-  }
-}
-</xsl:text>
-  </xsl:for-each>
-  <xsl:text>
 </xsl:text>
 </xsl:template>
 <!-- End of main processing template. -->

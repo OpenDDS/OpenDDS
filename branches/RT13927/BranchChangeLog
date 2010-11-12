@@ -1,3 +1,50 @@
+Fri Nov 12 22:45:53 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS.mwc:
+
+          Removed excludes for tools/modeling/tests, they can now be included.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenerator.java:
+
+          Suffix for .h and .cpp files is actually _T.{h,cpp}.
+          When run from main() for command-line code generation, made the args
+          processing more flexible and locate the xsl files from to DDS_ROOT.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/lut.xml:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpc.xsl:
+
+          opendds.com is not valid, use opendds.org for XML namespaces.
+          Adjusted the mpc.xsl so that we are no longer modeling "applications"
+          and the library output directory is ".", also add the prebuild step
+          to use expfile.pl (see my prior commit).
+
+        * tools/modeling/tests/Codegen/Codegen.mpc:
+        * tools/modeling/tests/Messenger/Messenger.mpc:
+
+          Application details are no longer in the model, so they go here.
+          Updated to not use MPC to drive the initial code generation.
+
+        * tools/modeling/tests/Codegen/aModel.opendds:
+        * tools/modeling/tests/Messenger/MessengerModel.opendds:
+
+          Updated XML namespaces.
+
+        * tools/modeling/tests/Codegen/aPublisher.cpp:
+        * tools/modeling/tests/Codegen/aSubscriber.cpp:
+
+          Use new constructors that take (argc, argv).
+
+        * tools/modeling/tests/setup.pl:
+
+          New script for driving the initial code generation for tests.
+
+        * MPC/config/dds_xsl.mpb:
+
+          Removed this file.  xsltproc is no longer used.
+
 Fri Nov 12 21:38:17 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenerator.java:
