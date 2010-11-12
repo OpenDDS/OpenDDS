@@ -24,24 +24,14 @@ import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.opendds.modeling.sdk.codegen.CodeGenerator.ErrorHandler.Severity;
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class CodeGenerator {
-	private static final String modelNameExpression = "//dataLib/@name";
 	private static final String generatorNamespace = "http://www.opendds.com/modeling/schemas/Generator/1.0";
 
-	private static XPathFactory pathFactory;
-	private static XPath xpath;
-	private static XPathExpression nameExpr;
 	private static TransformerFactory tFactory;
 	private static Transformer idlTransformer;
 	private static Transformer hTransformer;
@@ -116,21 +106,6 @@ public class CodeGenerator {
 		return tFactory;
 	}
 	
-	private XPathExpression getNameExpr() {
-		if (nameExpr == null) {
-			pathFactory = XPathFactory.newInstance();
-			xpath = pathFactory.newXPath();
-			xpath.setNamespaceContext(new GeneratorNamespaceContext());
-			try {
-				nameExpr = xpath.compile(modelNameExpression);
-			} catch (XPathExpressionException e) {
-				errorHandler.error(Severity.ERROR, "getNameExpr",
-						"XPath expression not available to obtain the model name.", e);
-			}
-		}
-		return nameExpr;
-	}
-	
 	private Document getModelDocument(String sourceName) {
 		if (modelDocument != null) {
 			return modelDocument;
@@ -179,43 +154,13 @@ public class CodeGenerator {
 			return modelName;
 		}
 		this.sourceName = sourceName;
-		this.modelDocument = null;
-
-		XPathExpression nameExpr = getNameExpr();
-		if (nameExpr == null) {
-			return null; // messages were generated in the get call.
-		}
-
-		Document doc = getModelDocument(sourceName);
-		if (doc == null) {
-			return null; // messages were generated in the get call.
+		
+		this.modelName = sourceName.substring(sourceName.lastIndexOf('/') + 1);
+		int dotIndex = modelName.indexOf('.');
+		if (dotIndex > 0) {
+			this.modelName = this.modelName.substring(0, dotIndex);
 		}
 		
-		try {
-			Object result = nameExpr.evaluate(doc, XPathConstants.NODESET);
-			NodeList nodes = (NodeList) result;
-			switch(nodes.getLength()) {
-			case 1:
-				modelName = nodes.item(0).getNodeValue();
-				break;
-
-			case 0:
-				errorHandler.error(Severity.ERROR, "getModelName",
-						"Could not find any model name in the source file " + sourceName,
-						null);
-				break;
-
-			default:
-				errorHandler.error(Severity.ERROR, "getModelName",
-						"Found " + nodes.getLength() + " candidate model names in the source file "
-						+ sourceName + ", which is too many!", null);
-				break;
-			}
-
-		} catch (XPathExpressionException e) {
-			errorHandler.error(Severity.ERROR, "getModelName",
-					"Problem extracting the modelname from the source file " + sourceName, e);
-		}
 		return modelName;
 	}
 	
