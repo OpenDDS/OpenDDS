@@ -1,8 +1,7 @@
 <xsl:stylesheet version='1.0'
      xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
-     xmlns:lut='http://www.opendds.org/modeling/schemas/Lut/1.0'
-     xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'
-     xmlns:generator='http://www.opendds.org/modeling/schemas/Generator/1.0'>
+     xmlns:xmi='http://www.omg.org/XMI'
+     xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'>
   <!--
     ** $Id$
     **
@@ -22,16 +21,16 @@
 <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
 
 <!-- Node sets -->
-<xsl:variable name="participant" select="//opendds:domainParticipant"/>
-<xsl:variable name="topic"       select="//opendds:topic"/>
-<xsl:variable name="publisher"   select="//opendds:publisher"/>
-<xsl:variable name="subscriber"  select="//opendds:subscriber"/>
-<xsl:variable name="writer"      select="//opendds:dataWriter"/>
-<xsl:variable name="reader"      select="//opendds:dataReader"/>
+<xsl:variable name="participant" select="//participants"/>
+<xsl:variable name="topic"       select="//topics"/>
+<xsl:variable name="publisher"   select="//publishers"/>
+<xsl:variable name="subscriber"  select="//subscribers"/>
+<xsl:variable name="writer"      select="//writers"/>
+<xsl:variable name="reader"      select="//readers"/>
 <xsl:variable name="transport"   select="//opendds:transport"/>
 
 <!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "/generator:model/@name"/>
+<xsl:variable name = "modelname" select = "/opendds:DcpsLib/@name"/>
 <xsl:variable name = "MODELNAME" select = "translate( $modelname, $lowercase, $uppercase)"/>
 
 <!-- process the entire model document to produce the C++ code. -->
@@ -69,10 +68,16 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 
   class Elements {
     public:
-      class Participants {
+</xsl:text>
+<!--
+  <xsl:call-template name="generate-enum">
+    <xsl:with-param name="class" select="'Participants'"/>
+    <xsl:with-param name="values" select="$participant/@name"/>
+  </xsl:call-template>
+-->
+<xsl:text>      class Participants {
         public: enum Values {
 </xsl:text>
-  <!-- '          (//domainParticipant/@name),\n' -->
   <xsl:for-each select="$participant">
     <xsl:value-of select="'          '"/>
     <xsl:value-of select="@name"/>
@@ -86,17 +91,24 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
       class Types {
         public: enum Values {
 </xsl:text>
-  <!-- '          (//type/@name),\n' -->
-  <xsl:variable name="defined-types" select="$topic/opendds:datatype"/>
+  <xsl:variable name="defined-types" select="$topic/datatype"/>
   <xsl:for-each select="$defined-types">
     <!-- Don't sort this without sorting the prior list as well. -->
+
+    <!-- reference to external file -->
+    <xsl:variable name="typename">
+      <xsl:call-template name="external-type-name">
+        <xsl:with-param name="ref" select="@href"/>
+      </xsl:call-template>
+    </xsl:variable>
+<xsl:message>defined type <xsl:value-of select="$typename"/></xsl:message>
 
     <!-- Only generate type code once for each type. -->
     <xsl:variable name="curpos" select="position()"/>
     <xsl:variable name="priors" select="$defined-types[ position() &lt; $curpos]"/>
     <xsl:if test="count( $priors[@name = current()/@name]) = 0">
       <xsl:value-of select="'          '"/>
-      <xsl:value-of select="@name"/>
+      <xsl:value-of select="$typename"/>
       <xsl:text>,</xsl:text>
       <xsl:value-of select="$newline"/>
     </xsl:if>
@@ -108,7 +120,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
       class Topics {
         public: enum Values {
 </xsl:text>
-  <!-- '          (//topic/@name),\n' -->
   <xsl:for-each select="$topic">
     <xsl:value-of select="'          '"/>
     <xsl:value-of select="translate(@name,' ','_')"/>
@@ -122,7 +133,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
       class Publishers {
         public: enum Values {
 </xsl:text>
-  <!-- '          (//publisher/@name),\n' -->
   <xsl:for-each select="$publisher">
     <xsl:value-of select="'          '"/>
     <xsl:value-of select="@name"/>
@@ -136,7 +146,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
       class Subscribers {
         public: enum Values {
 </xsl:text>
-  <!-- '          (//subscriber/@name),\n' -->
   <xsl:for-each select="$subscriber">
     <xsl:value-of select="'          '"/>
     <xsl:value-of select="@name"/>
@@ -684,6 +693,26 @@ typedef OpenDDS::Model::Service&lt; OpenDDS::Model::</xsl:text>
 </xsl:text>
 </xsl:template>
 <!-- End of main processing template. -->
+
+<xsl:template name="generate-enum">
+  <xsl:param name="class" />
+  <xsl:param name="values" />
+
+  <xsl:value-of select="concat('      class ',$class, ' {', $newline)"/>
+</xsl:template>
+
+<xsl:template name="external-type-name">
+  <xsl:param name="ref"/>
+
+  <xsl:variable name="file" select="substring-before($ref, '#')"/>
+  <xsl:variable name="typeid" select="substring-after($ref, '#')"/>
+  <xsl:message>file is <xsl:value-of select="$file"/></xsl:message>
+  <xsl:variable name="doc" select="document($file)"/>
+  <xsl:message>docs loaded <xsl:value-of select="count($doc)"/></xsl:message>
+  <xsl:variable name="type" select="$doc//types[@xmi:id = $typeid]"/>
+  <xsl:message>types found<xsl:value-of select="count($type)"/></xsl:message>
+  <xsl:value-of select="$type/@name"/>
+</xsl:template>
 
 </xsl:stylesheet>
 

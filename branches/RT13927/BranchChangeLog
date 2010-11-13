@@ -1,3 +1,9 @@
+Sat Nov 13 03:00:58 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+        modify xpath selects for all but transports
+
 Fri Nov 12 22:45:53 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * DDS.mwc:
@@ -45,6 +51,7 @@ Fri Nov 12 22:45:53 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
           Removed this file.  xsltproc is no longer used.
 
+>>>>>>> .r3762
 Fri Nov 12 21:38:17 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenerator.java:
