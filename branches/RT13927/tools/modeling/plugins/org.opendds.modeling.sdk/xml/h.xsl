@@ -27,7 +27,7 @@
 <xsl:variable name="subscriber"  select="//subscribers"/>
 <xsl:variable name="writer"      select="//writers"/>
 <xsl:variable name="reader"      select="//readers"/>
-<xsl:variable name="transport"   select="//opendds:transport"/>
+<xsl:variable name="transport"   select="//transports"/>
 
 <!-- Extract the name of the model once. -->
 <xsl:variable name = "modelname" select = "/opendds:DcpsLib/@name"/>
@@ -69,26 +69,13 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
   class Elements {
     public:
 </xsl:text>
-<!--
+
   <xsl:call-template name="generate-enum">
     <xsl:with-param name="class" select="'Participants'"/>
-    <xsl:with-param name="values" select="$participant/@name"/>
+    <xsl:with-param name="values" select="$participant"/>
   </xsl:call-template>
--->
-<xsl:text>      class Participants {
-        public: enum Values {
-</xsl:text>
-  <xsl:for-each select="$participant">
-    <xsl:value-of select="'          '"/>
-    <xsl:value-of select="@name"/>
-    <xsl:text>,</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
-  <xsl:text>          LAST_INDEX
-          };
-      };
 
-      class Types {
+<xsl:text>      class Types {
         public: enum Values {
 </xsl:text>
   <xsl:variable name="defined-types" select="$topic/datatype"/>
@@ -117,88 +104,38 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
         };
       };
 
-      class Topics {
-        public: enum Values {
 </xsl:text>
-  <xsl:for-each select="$topic">
-    <xsl:value-of select="'          '"/>
-    <xsl:value-of select="translate(@name,' ','_')"/>
-    <xsl:text>,</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
-  <xsl:text>          LAST_INDEX
-        };
-      };
+  <xsl:call-template name="generate-enum">
+    <xsl:with-param name="class" select="'Topics'"/>
+    <xsl:with-param name="values" select="$topic"/>
+  </xsl:call-template>
 
-      class Publishers {
-        public: enum Values {
-</xsl:text>
-  <xsl:for-each select="$publisher">
-    <xsl:value-of select="'          '"/>
-    <xsl:value-of select="@name"/>
-    <xsl:text>,</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
-  <xsl:text>          LAST_INDEX
-        };
-      };
+  <xsl:call-template name="generate-enum">
+    <xsl:with-param name="class" select="'Publishers'"/>
+    <xsl:with-param name="values" select="$publisher"/>
+  </xsl:call-template>
 
-      class Subscribers {
-        public: enum Values {
-</xsl:text>
-  <xsl:for-each select="$subscriber">
-    <xsl:value-of select="'          '"/>
-    <xsl:value-of select="@name"/>
-    <xsl:text>,</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
-  <xsl:text>          LAST_INDEX
-        };
-      };
+  <xsl:call-template name="generate-enum">
+    <xsl:with-param name="class" select="'Subscribers'"/>
+    <xsl:with-param name="values" select="$subscriber"/>
+  </xsl:call-template>
 
-      class DataWriters {
-        public: enum Values {
-</xsl:text>
-  <!-- '          (//dataWriter/@name),\n' -->
-  <xsl:for-each select="$writer">
-    <xsl:value-of select="'          '"/>
-    <xsl:value-of select="@name"/>
-    <xsl:text>,</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
-  <xsl:text>          LAST_INDEX
-        };
-      };
+  <xsl:call-template name="generate-enum">
+    <xsl:with-param name="class" select="'DataWriters'"/>
+    <xsl:with-param name="values" select="$writer"/>
+  </xsl:call-template>
 
-      class DataReaders {
-        public: enum Values {
-</xsl:text>
-  <!-- '          (//dataReader/@name),\n' -->
-  <xsl:for-each select="$reader">
-    <xsl:value-of select="'          '"/>
-    <xsl:value-of select="@name"/>
-    <xsl:text>,</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
-  <xsl:text>          LAST_INDEX
-        };
-      };
+  <xsl:call-template name="generate-enum">
+    <xsl:with-param name="class" select="'DataReaders'"/>
+    <xsl:with-param name="values" select="$reader"/>
+  </xsl:call-template>
 
-      class Transports {
-        public: enum Values {
-</xsl:text>
-  <!-- '          (//transport/@name),\n' -->
-  <xsl:for-each select="$transport">
-    <xsl:value-of select="'          '"/>
-    <xsl:value-of select="@name"/>
-    <xsl:text>,</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
-  <xsl:text>          LAST_INDEX
-        };
-      };
+  <xsl:call-template name="generate-enum">
+    <xsl:with-param name="class" select="'Transports'"/>
+    <xsl:with-param name="values" select="$transport"/>
+  </xsl:call-template>
 
-      template&lt; class InstanceTraits&gt;
+<xsl:text>      template&lt; class InstanceTraits&gt;
       class Data {
         public:
           Data();
@@ -698,7 +635,18 @@ typedef OpenDDS::Model::Service&lt; OpenDDS::Model::</xsl:text>
   <xsl:param name="class" />
   <xsl:param name="values" />
 
-  <xsl:value-of select="concat('      class ',$class, ' {', $newline)"/>
+  <xsl:value-of select="concat('      class ',$class, ' {')"/>
+    <xsl:text>
+        public: enum Values {
+</xsl:text>
+  <xsl:for-each select="$values">
+    <xsl:value-of select="concat('          ', @name, ',', $newline)"/>
+  </xsl:for-each>
+  <xsl:text>          LAST_INDEX
+        };
+      };
+
+</xsl:text>
 </xsl:template>
 
 <xsl:template name="external-type-name">
