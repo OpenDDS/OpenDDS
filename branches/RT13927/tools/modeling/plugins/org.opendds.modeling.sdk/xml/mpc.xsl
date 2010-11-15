@@ -19,7 +19,8 @@
 <xsl:variable name="application" select="//opendds:application"/>
 
 <!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "/generator:model/@name"/>
+<xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
+
 <xsl:variable name = "MODELNAME" select = "translate( $modelname, $lowercase, $uppercase)"/>
 
 <!-- process the entire model document to produce the C++ code. -->
