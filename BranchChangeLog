@@ -1,3 +1,9 @@
+Mon Nov 15 22:51:45 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpc.xsl:
+
+        fixed xpath to model name
+
 Mon Nov 15 22:19:25 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/build.pl:
