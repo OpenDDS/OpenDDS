@@ -1,3 +1,13 @@
+Mon Nov 15 22:12:22 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/IDLTemplate.txt:
+
+          Fixed method signature of DataWriter::register_instance_w_timestamp()
+          to have two arguments per the latest spec, not 3.
+          Thanks to Johnny Willemsen for reporting that it was not updated.
+
 Wed Nov 10 11:57:40 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DdsDcps.mpc:
