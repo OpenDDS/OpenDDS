@@ -36,7 +36,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class CodeGenerator {
-	private static final String modelNameExpression = "//dataLib/@name";
+	private static final String modelNameExpression = "//opendds:OpenDDSModel/@name";
+	private static final String openDDSNamespace = "http://www.opendds.org/modeling/schemas/OpenDDS/1.0";
 	private static final String generatorNamespace = "http://www.opendds.org/modeling/schemas/Generator/1.0";
 
 	private static XPathFactory pathFactory;
@@ -120,7 +121,7 @@ public class CodeGenerator {
 		if (nameExpr == null) {
 			pathFactory = XPathFactory.newInstance();
 			xpath = pathFactory.newXPath();
-			xpath.setNamespaceContext(new GeneratorNamespaceContext());
+			xpath.setNamespaceContext(new OpenDDSNamespaceContext());
 			try {
 				nameExpr = xpath.compile(modelNameExpression);
 			} catch (XPathExpressionException e) {
@@ -299,10 +300,10 @@ public class CodeGenerator {
 		}
 	}
 
-	public class GeneratorNamespaceContext implements NamespaceContext {
+	public class OpenDDSNamespaceContext implements NamespaceContext {
 	    public String getNamespaceURI(String prefix) {
 	        if (prefix == null) throw new NullPointerException("Null prefix");
-	        else if ("generator".equals(prefix)) return generatorNamespace;
+	        else if ("opendds".equals(prefix)) return openDDSNamespace;
 	        else if ("xml".equals(prefix)) return XMLConstants.XML_NS_URI;
 	        return XMLConstants.NULL_NS_URI;
 	    }
