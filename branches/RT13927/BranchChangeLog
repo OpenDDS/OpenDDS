@@ -1,3 +1,11 @@
+Mon Nov 15 20:17:58 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/Messenger/MessengerModel.opendds:
+
+          Replaced the messenger model with a new one which was constructed
+          from the current ecore metamodel (+ one hand-edit for relating a
+          topic to its type).
+
 Mon Nov 15 19:14:14 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenerator.java:
