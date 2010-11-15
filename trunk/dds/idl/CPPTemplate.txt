@@ -101,15 +101,12 @@ DDS::InstanceHandle_t
 {
   ::DDS::Time_t const timestamp =
     ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-  return register_instance_w_timestamp (instance,
-                                        ::DDS::HANDLE_NIL,
-                                        timestamp);
+  return register_instance_w_timestamp (instance, timestamp);
 }
 
 DDS::InstanceHandle_t
 <%TYPE%>DataWriterImpl::register_instance_w_timestamp (
     const ::<%SCOPED%> & instance,
-    ::DDS::InstanceHandle_t /* handle */,
     const ::DDS::Time_t & timestamp)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {

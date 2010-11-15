@@ -22,7 +22,6 @@ local interface <%TYPE%>DataWriter : DDS::DataWriter {
 
     DDS::InstanceHandle_t register_instance_w_timestamp(
                 in <%SCOPED%> instance,
-                in DDS::InstanceHandle_t handle,
                 in DDS::Time_t timestamp);
 
     DDS::ReturnCode_t unregister_instance(

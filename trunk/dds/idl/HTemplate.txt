@@ -68,7 +68,6 @@ public:
 
   virtual DDS::InstanceHandle_t register_instance_w_timestamp (
       const ::<%SCOPED%> & instance,
-      ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & timestamp)
     ACE_THROW_SPEC ((CORBA::SystemException));
 
