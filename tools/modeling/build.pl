@@ -50,7 +50,7 @@ foreach my $s (@steps) {
 
   my $status = system("\"$ECLIPSE_HOME/eclipse$suffix\" -nosplash -data " .
                       "$ECLIPSE_WORKSPACE -application org.eclipse.ant.core." .
-                      "antRunner -l ant.log @args");
+                      "antRunner -l ant.log @args -vmargs -Xmx1g");
 
   open LOG, 'ant.log' or die "ERROR: Can't open ant.log";
   while (<LOG>) {
