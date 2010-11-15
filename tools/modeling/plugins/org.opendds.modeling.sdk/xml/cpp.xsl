@@ -25,12 +25,12 @@
 
 <!-- Node sets -->
 <xsl:variable name="typelib"     select="//generator:typelib"/>
-<xsl:variable name="reader"      select="//opendds:dataReader"/>
-<xsl:variable name="writer"      select="//opendds:dataWriter"/>
-<xsl:variable name="participant" select="//opendds:domainParticipant"/>
-<xsl:variable name="publisher"   select="//opendds:publisher"/>
-<xsl:variable name="subscriber"  select="//opendds:subscriber"/>
-<xsl:variable name="topic"       select="//opendds:topic"/>
+<xsl:variable name="reader"      select="//readers"/>
+<xsl:variable name="writer"      select="//writers"/>
+<xsl:variable name="participant" select="//participants"/>
+<xsl:variable name="publisher"   select="//publishers"/>
+<xsl:variable name="subscriber"  select="//subscribers"/>
+<xsl:variable name="topic"       select="//topics"/>
 <xsl:variable name="transport"   select="//opendds:transport"/>
 
 <!-- Indices (lookup tables are at the bottom of this document) -->
@@ -50,7 +50,7 @@
      use   = "@type"/>
 
 <!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "/generator:model/@name"/>
+<xsl:variable name = "modelname" select = "/opendds:DcpsLib/@name"/>
 
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
