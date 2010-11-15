@@ -1,5 +1,6 @@
 Mon Nov 15 22:12:22 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
+        * NEWS:
         * dds/idl/CPPTemplate.txt:
         * dds/idl/HTemplate.txt:
         * dds/idl/IDLTemplate.txt:
