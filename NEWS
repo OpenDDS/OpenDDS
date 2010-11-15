@@ -4,6 +4,9 @@ Version 2.3 of OpenDDS.
   Built-In Topics.  The DCPSInfoRepo process will take care of loading
   SimpleTCP (if it's not already loaded).
 
+-  Fixed method signature of DataWriter::register_instance_w_timestamp()
+   to have two arguments per the latest spec, not 3.
+
 
 ========================================================================
 
