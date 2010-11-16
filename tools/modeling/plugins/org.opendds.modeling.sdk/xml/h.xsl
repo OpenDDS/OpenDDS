@@ -23,6 +23,7 @@
 <!-- Node sets -->
 <xsl:variable name="participant" select="//participants"/>
 <xsl:variable name="topic"       select="//topics"/>
+<xsl:variable name="type"        select="//dataLib/types"/>
 <xsl:variable name="publisher"   select="//publishers"/>
 <xsl:variable name="subscriber"  select="//subscribers"/>
 <xsl:variable name="writer"      select="//writers"/>
@@ -30,7 +31,7 @@
 <xsl:variable name="transport"   select="//transports"/>
 
 <!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "/opendds:DcpsLib/@name"/>
+<xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
 <xsl:variable name = "MODELNAME" select = "translate( $modelname, $lowercase, $uppercase)"/>
 
 <!-- process the entire model document to produce the C++ code. -->
@@ -88,7 +89,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
         <xsl:with-param name="ref" select="@href"/>
       </xsl:call-template>
     </xsl:variable>
-<xsl:message>defined type <xsl:value-of select="$typename"/></xsl:message>
 
     <!-- Only generate type code once for each type. -->
     <xsl:variable name="curpos" select="position()"/>
@@ -639,14 +639,48 @@ typedef OpenDDS::Model::Service&lt; OpenDDS::Model::</xsl:text>
     <xsl:text>
         public: enum Values {
 </xsl:text>
-  <xsl:for-each select="$values">
-    <xsl:value-of select="concat('          ', @name, ',', $newline)"/>
+  <xsl:for-each select="$values/@name">
+    <xsl:text>          </xsl:text>
+    <xsl:call-template name="normalize-identifier"/>
+    <xsl:value-of select="concat(',', $newline)"/>
   </xsl:for-each>
   <xsl:text>          LAST_INDEX
         };
       };
 
 </xsl:text>
+</xsl:template>
+
+<xsl:template name="normalize-identifier">
+  <xsl:param name="identifier" select="."/>
+  <xsl:value-of select="translate($identifier, ' -', '__')"/>
+</xsl:template>
+
+<xsl:template name="topic-types">
+  <xsl:param name="topics"/>
+
+  <xsl:for-each select="$topics">
+    <xsl:if test="position() > 1">
+      <xsl:text> </xsl:text>
+    </xsl:if>
+    <xsl:call-template name="topic-type-name">
+      <xsl:with-param name="topic" select="."/>
+    </xsl:call-template>
+  </xsl:for-each>
+</xsl:template>
+
+<xsl:template name="topic-type-name">
+  <xsl:param name="topic"/>
+  <xsl:choose>
+    <xsl:when test="$topic/@type">
+      <xsl:value-of select="$type[@xmi:id = current()/@type]/@name"/>
+    </xsl:when>
+    <xsl:when test="$topic/datatype/@href">
+      <xsl:call-template name="external-type-name">
+        <xsl:with-param name="ref" select="$topic/datatype/@href"/>
+      </xsl:call-template>
+    </xsl:when>
+  </xsl:choose>
 </xsl:template>
 
 <xsl:template name="external-type-name">

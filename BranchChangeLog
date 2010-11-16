@@ -1,3 +1,12 @@
+Tue Nov 16 14:48:52 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+
+        fixed xpath to model name.  CPP - attributes which no longer contain 
+        names, but IDs.
+
 Mon Nov 15 22:51:45 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpc.xsl:

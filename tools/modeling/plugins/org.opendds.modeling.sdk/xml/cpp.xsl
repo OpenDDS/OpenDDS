@@ -1,4 +1,5 @@
 <xsl:stylesheet version='1.0'
+     xmlns:xmi='http://www.omg.org/XMI'
      xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
      xmlns:lut='http://www.opendds.org/modeling/schemas/Lut/1.0'
      xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'
@@ -27,10 +28,12 @@
 <xsl:variable name="typelib"     select="//generator:typelib"/>
 <xsl:variable name="reader"      select="//readers"/>
 <xsl:variable name="writer"      select="//writers"/>
+<xsl:variable name="domain"      select="//domains"/>
 <xsl:variable name="participant" select="//participants"/>
 <xsl:variable name="publisher"   select="//publishers"/>
 <xsl:variable name="subscriber"  select="//subscribers"/>
 <xsl:variable name="topic"       select="//topics"/>
+<xsl:variable name="types"       select="//types"/>
 <xsl:variable name="transport"   select="//opendds:transport"/>
 
 <!-- Indices (lookup tables are at the bottom of this document) -->
@@ -50,7 +53,7 @@
      use   = "@type"/>
 
 <!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "/opendds:DcpsLib/@name"/>
+<xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
 
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
@@ -272,7 +275,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadDomains()
     <xsl:text>  this->domains_[ Participants::</xsl:text>
     <xsl:value-of select="../@name"/>
       <xsl:text>] = </xsl:text>
-      <xsl:value-of select="."/>
+      <xsl:value-of select="$domain[@xmi:id = current()]/@domainId"/>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
@@ -358,7 +361,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
     <xsl:text>  this->types_[ Topics::</xsl:text>
     <xsl:value-of select="translate(@name,' ','_')"/>
     <xsl:text>] = Types::</xsl:text>
-    <xsl:value-of select="opendds:datatype/@name"/>
+    <xsl:value-of select="$types[@xmi:id = current()/@type]/@name"/>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
@@ -369,7 +372,9 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
     <xsl:text>  this->writerTopics_[ DataWriters::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>] = Topics::</xsl:text>
-    <xsl:value-of select="translate(@topic,' ','_')"/>
+    <xsl:call-template name="normalize-identifier">
+      <xsl:with-param name="identifier" select="$topic[@xmi:id = current()/@topic]/@name"/>
+    </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
@@ -380,7 +385,9 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
     <xsl:text>  this->readerTopics_[ DataReaders::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>] = Topics::</xsl:text>
-    <xsl:value-of select="translate(@topic,' ','_')"/>
+    <xsl:call-template name="normalize-identifier">
+      <xsl:with-param name="identifier" select="$topic[@xmi:id = current()/@topic]/@name"/>
+    </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
@@ -950,6 +957,11 @@ Elements::Data&lt;InstanceTraits&gt;::copySubscriptionQos(
       </xsl:otherwise>
     </xsl:choose>
   </xsl:for-each>
+</xsl:template>
+
+<xsl:template name="normalize-identifier">
+  <xsl:param name="identifier" select="."/>
+  <xsl:value-of select="translate($identifier, ' -', '__')"/>
 </xsl:template>
 
 <!-- Lookup Table Magic. -->
