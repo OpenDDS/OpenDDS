@@ -80,14 +80,14 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
            match="datatype"
            use="@href"/>
 
-  <!-- Not properly handling external types - must be namespaced -->
-  <xsl:variable name="internal-topic-types" select="$type[@xmi:id = $topic/@type]"/>
   <xsl:value-of select="concat('      class Types {', $newline)"/>
-  <xsl:call-template name="generate-enum">
-    <xsl:with-param name="values" select="$internal-topic-types"/>
-  </xsl:call-template>
 
   <xsl:value-of select="concat('        public enum Values {', $newline)"/>
+  <xsl:variable name="internal-topic-types" select="$type[@xmi:id = $topic/@type]"/>
+  <xsl:for-each select="$internal-topic-types">
+      <xsl:value-of select="concat('          ', @name, ',', $newline)"/>
+  </xsl:for-each>
+
   <xsl:variable name="remote-hrefs" select="$topic/datatype"/>
   <xsl:for-each select="$remote-hrefs">
     <xsl:sort select="."/>
