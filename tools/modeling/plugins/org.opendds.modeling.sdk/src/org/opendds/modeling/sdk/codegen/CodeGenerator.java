@@ -38,7 +38,6 @@ import org.xml.sax.SAXException;
 public class CodeGenerator {
 	private static final String modelNameExpression = "//opendds:OpenDDSModel/@name";
 	private static final String openDDSNamespace = "http://www.opendds.org/modeling/schemas/OpenDDS/1.0";
-	private static final String generatorNamespace = "http://www.opendds.org/modeling/schemas/Generator/1.0";
 
 	private static XPathFactory pathFactory;
 	private static XPath xpath;
