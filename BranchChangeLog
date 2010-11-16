@@ -1,3 +1,29 @@
+Tue Nov 16 23:01:28 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenerator.java:
+
+        resolve URIs using source file as base when opening another model.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+        open external models for topic type references.
+
+        * tools/modeling/tests/MessengerSplit:
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.mpc:
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.opendds:
+        * tools/modeling/tests/MessengerSplit/MessengerTypes.opendds:
+        * tools/modeling/tests/MessengerSplit/README:
+        * tools/modeling/tests/MessengerSplit/publisher.cpp:
+        * tools/modeling/tests/MessengerSplit/run_test.pl:
+        * tools/modeling/tests/MessengerSplit/subscriber.cpp:
+        * tools/modeling/tests/MessengerSplit/tcp.conf:
+
+        Test case for dataLib split into separate model.
+
+        * tools/modeling/tests/setup.pl:
+
+        Updated for new test (and omitting Codegen)
+
 Tue Nov 16 22:34:31 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * BranchChangeLog:
