@@ -76,35 +76,13 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
     <xsl:with-param name="values" select="$participant"/>
   </xsl:call-template>
 
-<xsl:text>      class Types {
-        public: enum Values {
-</xsl:text>
-  <xsl:variable name="defined-types" select="$topic/datatype"/>
-  <xsl:for-each select="$defined-types">
-    <!-- Don't sort this without sorting the prior list as well. -->
+  <!-- Not properly handling external types - must be namespaced -->
+  <xsl:variable name="internal-topic-types" select="$type[@xmi:id = $topic/@type]"/>
+  <xsl:call-template name="generate-enum">
+    <xsl:with-param name="class" select="'Types'"/>
+    <xsl:with-param name="values" select="$internal-topic-types"/>
+  </xsl:call-template>
 
-    <!-- reference to external file -->
-    <xsl:variable name="typename">
-      <xsl:call-template name="external-type-name">
-        <xsl:with-param name="ref" select="@href"/>
-      </xsl:call-template>
-    </xsl:variable>
-
-    <!-- Only generate type code once for each type. -->
-    <xsl:variable name="curpos" select="position()"/>
-    <xsl:variable name="priors" select="$defined-types[ position() &lt; $curpos]"/>
-    <xsl:if test="count( $priors[@name = current()/@name]) = 0">
-      <xsl:value-of select="'          '"/>
-      <xsl:value-of select="$typename"/>
-      <xsl:text>,</xsl:text>
-      <xsl:value-of select="$newline"/>
-    </xsl:if>
-  </xsl:for-each>
-  <xsl:text>          LAST_INDEX
-        };
-      };
-
-</xsl:text>
   <xsl:call-template name="generate-enum">
     <xsl:with-param name="class" select="'Topics'"/>
     <xsl:with-param name="values" select="$topic"/>

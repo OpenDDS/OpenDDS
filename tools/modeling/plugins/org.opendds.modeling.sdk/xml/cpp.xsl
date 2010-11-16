@@ -417,7 +417,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
 
   <!-- '  this->publisherTransports_[ Publishers::(publisher/@name)] = Transports::(publisher/@transport);\n' -->
   <xsl:for-each select="$publisher">
-    <xsl:text>  this->publisherTransports_[ Publishers::</xsl:text>
+    <xsl:text>  // this->publisherTransports_[ Publishers::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>] = Transports::</xsl:text>
     <xsl:value-of select="@transport"/>
@@ -428,7 +428,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
 
   <!-- '  this->subscriberTransports_[ Subscribers::(subscriber/@name)] = Transports::(subscriber/@transport);\n' -->
   <xsl:for-each select="$subscriber">
-    <xsl:text>  this->subscriberTransports_[ Subscribers::</xsl:text>
+    <xsl:text>  // this->subscriberTransports_[ Subscribers::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>] = Transports::</xsl:text>
     <xsl:value-of select="@transport"/>

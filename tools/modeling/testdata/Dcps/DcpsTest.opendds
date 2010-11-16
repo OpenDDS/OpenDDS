@@ -45,7 +45,7 @@
     <qosPolicy xsi:type="opendds:qosProperty" xmi:id="_3dtE4KO_Ed-9KMRPTsXTAg" name="myDestinationOrderQosPolicy">
       <type href="../PolicyLib/NonDefaultPolicyLibTest.opendds#_cOcfoKGNEd-D-tWBUFz4zw"/>
     </qosPolicy>
-    <datatype xsi:type="types:idlStruct" href="../DataLib/DataLibTest.opendds#_Mod2oKO5Ed-9KMRPTsXTAg"/>
+    <datatype xsi:type="types:idlStruct" href="../DataLib/DataLibTest.opendds#_CSS78Og0Ed-S8emkenrYEA"/>
   </topics>
   <policies xsi:type="opendds:efQosPolicy" xmi:id="_uJEpwNhiEd-LEcW1P4x7eA" name="myEfPolicy"/>
   <policies xsi:type="opendds:udQosPolicy" xmi:id="_uJ0QoNhiEd-LEcW1P4x7eA" name="myUdPolicy"/>
