@@ -232,13 +232,21 @@ public class CodeGenerator {
 				}
 				Source converter = new StreamSource(xsl.openStream());
 				final String dir = which.xslFilename().substring(0, which.xslFilename().lastIndexOf("/"));
+				final String sourceDir = sourceName.contains("/") ? sourceName.substring(0, sourceName.lastIndexOf("/")) : ".";
 				Transformer transformer = factory.newTransformer(converter);
 				transformer.setURIResolver(new URIResolver() {
 					public Source resolve(String fname, String base) throws TransformerException {
 						try {
-							String file = fname.substring(0, 5).equals("file:")
+							URL resource;
+							if (fname.endsWith(".opendds")) {
+								// This is a model reference, assume relative to the source file
+								String file = sourceDir + File.separatorChar + fname;
+								resource = fileProvider.fromWorkspace(file);
+							} else {
+								String file = fname.substring(0, 5).equals("file:")
 								? fname.substring(5) : dir + File.separatorChar + fname;
-							URL resource = fileProvider.fromBundle(file);
+								resource = fileProvider.fromBundle(file);
+							}
 							return new StreamSource(resource.openStream());
 						} catch (IOException use) {
 							throw new TransformerException("could not open " + fname);

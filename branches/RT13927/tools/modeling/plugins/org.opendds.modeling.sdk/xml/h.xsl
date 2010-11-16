@@ -76,12 +76,35 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
     <xsl:with-param name="values" select="$participant"/>
   </xsl:call-template>
 
+  <xsl:key name="remote-topic-types"
+           match="datatype"
+           use="@href"/>
+
   <!-- Not properly handling external types - must be namespaced -->
   <xsl:variable name="internal-topic-types" select="$type[@xmi:id = $topic/@type]"/>
+  <xsl:value-of select="concat('      class Types {', $newline)"/>
   <xsl:call-template name="generate-enum">
-    <xsl:with-param name="class" select="'Types'"/>
     <xsl:with-param name="values" select="$internal-topic-types"/>
   </xsl:call-template>
+
+  <xsl:value-of select="concat('        public enum Values {', $newline)"/>
+  <xsl:variable name="remote-hrefs" select="$topic/datatype"/>
+  <xsl:for-each select="$remote-hrefs">
+    <xsl:sort select="."/>
+
+    <xsl:if test="generate-id() = generate-id(key('remote-topic-types', @href)[1])">
+      <xsl:variable name="qname">
+        <xsl:call-template name="external-qualified-type-name">
+          <xsl:with-param name="ref" select="@href"/>
+        </xsl:call-template>
+      </xsl:variable>
+      <xsl:value-of select="concat('          ', $qname, ',', $newline)"/>
+    </xsl:if>
+  </xsl:for-each>
+  <xsl:value-of select="concat('          LAST_INDEX', $newline)"/>
+
+  <xsl:value-of select="concat('        };', $newline)"/>
+  <xsl:value-of select="concat('      };', $newline, $newline)"/>
 
   <xsl:call-template name="generate-enum">
     <xsl:with-param name="class" select="'Topics'"/>
@@ -613,16 +636,25 @@ typedef OpenDDS::Model::Service&lt; OpenDDS::Model::</xsl:text>
   <xsl:param name="class" />
   <xsl:param name="values" />
 
-  <xsl:value-of select="concat('      class ',$class, ' {')"/>
-    <xsl:text>
+  <xsl:if test="$values">
+    <xsl:value-of select="concat('      class ',$class, ' {')"/>
+    <xsl:call-template name="generate-enum-values">
+      <xsl:with-param name="values" select="$values"/>
+    </xsl:call-template>
+  </xsl:if>
+</xsl:template>
+
+<xsl:template name="generate-enum-values">
+  <xsl:param name="values" />
+      <xsl:text>
         public: enum Values {
 </xsl:text>
-  <xsl:for-each select="$values/@name">
-    <xsl:text>          </xsl:text>
-    <xsl:call-template name="normalize-identifier"/>
-    <xsl:value-of select="concat(',', $newline)"/>
-  </xsl:for-each>
-  <xsl:text>          LAST_INDEX
+    <xsl:for-each select="$values/@name">
+      <xsl:text>          </xsl:text>
+      <xsl:call-template name="normalize-identifier"/>
+      <xsl:value-of select="concat(',', $newline)"/>
+    </xsl:for-each>
+    <xsl:text>          LAST_INDEX
         };
       };
 
@@ -666,12 +698,19 @@ typedef OpenDDS::Model::Service&lt; OpenDDS::Model::</xsl:text>
 
   <xsl:variable name="file" select="substring-before($ref, '#')"/>
   <xsl:variable name="typeid" select="substring-after($ref, '#')"/>
-  <xsl:message>file is <xsl:value-of select="$file"/></xsl:message>
   <xsl:variable name="doc" select="document($file)"/>
-  <xsl:message>docs loaded <xsl:value-of select="count($doc)"/></xsl:message>
   <xsl:variable name="type" select="$doc//types[@xmi:id = $typeid]"/>
-  <xsl:message>types found<xsl:value-of select="count($type)"/></xsl:message>
   <xsl:value-of select="$type/@name"/>
+</xsl:template>
+
+<xsl:template name="external-qualified-type-name">
+  <xsl:param name="ref"/>
+
+  <xsl:variable name="file" select="substring-before($ref, '#')"/>
+  <xsl:variable name="typeid" select="substring-after($ref, '#')"/>
+  <xsl:variable name="doc" select="document($file)"/>
+  <xsl:variable name="type" select="$doc//types[@xmi:id = $typeid]"/>
+  <xsl:value-of select="concat($doc/opendds:OpenDDSModel/@name,'_',$type/@name)"/>
 </xsl:template>
 
 </xsl:stylesheet>
