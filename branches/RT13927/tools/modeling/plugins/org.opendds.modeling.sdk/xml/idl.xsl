@@ -31,7 +31,7 @@
      use   = "@type"/>
 
 <!-- Name of the model -->
-<xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/dataLib/@name"/>
+<xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
 
 <!-- process the entire model document to produce the IDL. -->
 <xsl:template match="/">
