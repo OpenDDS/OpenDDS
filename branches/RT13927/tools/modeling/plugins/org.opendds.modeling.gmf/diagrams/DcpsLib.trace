@@ -17,6 +17,9 @@
     <compartmentTraces
         visualID="7008"
         queryText="true"/>
+    <compartmentTraces
+        visualID="7011"
+        queryText="true"/>
   </nodeTraces>
   <nodeTraces
       visualID="2002"
@@ -38,257 +41,6 @@
         visualID="5012"
         queryText="true"/>
   </nodeTraces>
-  <nodeTraces
-      visualID="2004"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'deadlineQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5015"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5016"
-        queryText="true"/>
-    <compartmentTraces
-        visualID="7002"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2005"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'destinationOrderQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5017"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5018"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5019"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2006"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'dsQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5022"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5023"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5024"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5025"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5026"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5027"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5028"
-        queryText="true"/>
-    <compartmentTraces
-        visualID="7003"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2007"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'durabilityQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5029"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5030"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5031"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2010"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'historyQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5038"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5039"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5040"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5041"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2011"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'lbQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5044"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5045"
-        queryText="true"/>
-    <compartmentTraces
-        visualID="7004"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2012"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'lifespanQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5048"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5049"
-        queryText="true"/>
-    <compartmentTraces
-        visualID="7005"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2013"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'livelinessQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5052"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5053"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5054"
-        queryText="true"/>
-    <compartmentTraces
-        visualID="7006"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2014"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'osQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5055"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5056"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5057"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2015"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'ownershipQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5058"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5059"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5060"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2018"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'rdlQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5068"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5069"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5070"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2019"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'reliabilityQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5073"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5074"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5075"
-        queryText="true"/>
-    <compartmentTraces
-        visualID="7007"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2020"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'rlQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5076"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5077"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5078"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5079"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5080"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2021"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'tbfQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5081"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5082"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5083"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2022"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'tdQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5084"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5085"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5086"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2023"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'tpQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5087"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5088"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5089"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2025"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'wdlQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
-    <nodeLabelTraces
-        visualID="5093"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5094"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5095"
-        queryText="true"/>
-  </nodeTraces>
   <childNodeTraces
       visualID="3001"
       queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'publisher') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'DomainParticipant') and _containmentMF_.name = 'publishers')">
@@ -300,6 +52,12 @@
         queryText="true"/>
     <compartmentTraces
         visualID="7009"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7012"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7014"
         queryText="true"/>
   </childNodeTraces>
   <childNodeTraces
@@ -314,6 +72,12 @@
     <compartmentTraces
         visualID="7010"
         queryText="true"/>
+    <compartmentTraces
+        visualID="7013"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7029"
+        queryText="true"/>
   </childNodeTraces>
   <childNodeTraces
       visualID="3003"
@@ -321,12 +85,30 @@
     <nodeLabelTraces
         visualID="5010"
         queryText="true"/>
+    <nodeLabelTraces
+        visualID="5131"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7015"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7016"
+        queryText="true"/>
   </childNodeTraces>
   <childNodeTraces
       visualID="3004"
       queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'dataReader') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'Subscriber') and _containmentMF_.name = 'readers')">
     <nodeLabelTraces
         visualID="5011"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5239"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7030"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7031"
         queryText="true"/>
   </childNodeTraces>
   <childNodeTraces
@@ -457,10 +239,567 @@
         visualID="5114"
         queryText="true"/>
   </childNodeTraces>
+  <childNodeTraces
+      visualID="3017"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'efQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5115"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5116"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5117"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3018"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'gdQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5118"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5119"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5120"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3019"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'partitionQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5121"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5122"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3020"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'presentationQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5123"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5124"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5125"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5126"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5127"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3021"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'udQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5128"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5129"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5130"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3022"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'deadlineQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5132"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5133"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7017"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3023"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'destinationOrderQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5134"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5135"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5136"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3024"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'dsQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5137"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5138"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5139"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5140"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5141"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5142"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5143"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7018"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3025"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'historyQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5144"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5145"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5146"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5147"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3026"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'lbQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5148"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5149"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7019"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3027"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'lifespanQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5150"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5151"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7020"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3028"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'livelinessQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5152"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5153"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5154"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7021"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3029"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'osQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5155"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5156"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5157"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3030"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'ownershipQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5158"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5159"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5160"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3031"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'reliabilityQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5161"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5162"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5163"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7022"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3032"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'rlQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5164"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5165"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5166"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5167"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5168"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3033"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'tpQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5169"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5170"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5171"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3034"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'wdlQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5172"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5173"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5174"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3035"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'durabilityQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5175"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5176"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5177"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3036"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'deadlineQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5178"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5179"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7023"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3037"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'destinationOrderQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5180"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5181"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5182"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3038"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'dsQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5183"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5184"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5185"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5186"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5187"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5188"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5189"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7024"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3039"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'durabilityQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5190"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5191"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5192"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3040"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'historyQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5193"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5194"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5195"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5196"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3041"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'lbQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5197"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5198"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7025"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3042"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'lifespanQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5199"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5200"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7026"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3043"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'livelinessQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5201"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5202"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5203"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7027"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3044"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'osQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5204"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5205"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5206"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3045"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'ownershipQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5207"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5208"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5209"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3046"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'reliabilityQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5210"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5211"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5212"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7028"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3047"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'rlQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5213"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5214"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5215"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5216"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5217"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3048"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'tpQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5218"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5219"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5220"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3049"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'rdlQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5221"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5222"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5223"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3050"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'tbfQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5224"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5225"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5226"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3051"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'tdQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5227"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5228"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5229"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3052"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'rdlQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5230"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5231"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5232"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3053"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'tbfQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5233"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5234"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5235"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3054"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'tdQosPolicy') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and _containmentMF_.name = 'policies')">
+    <nodeLabelTraces
+        visualID="5236"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5237"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5238"
+        queryText="true"/>
+  </childNodeTraces>
   <linkTraces
-      visualID="4001"
-      queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'dataReader')"/>
+      visualID="4003"
+      queryText="modelFacet.oclIsKindOf(gmfgen::FeatureLinkModelFacet) and (let _feature_:ecore::EStructuralFeature = modelFacet.oclAsType(gmfgen::FeatureLinkModelFacet).metaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _feature_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'DataReader') and _feature_.name = 'topicDesc')"/>
   <linkTraces
-      visualID="4002"
-      queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'dataWriter')"/>
+      visualID="4004"
+      queryText="modelFacet.oclIsKindOf(gmfgen::FeatureLinkModelFacet) and (let _feature_:ecore::EStructuralFeature = modelFacet.oclAsType(gmfgen::FeatureLinkModelFacet).metaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _feature_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'DataWriter') and _feature_.name = 'writerTopic')"/>
 </trace:TraceModel>

@@ -42,13 +42,18 @@ import com.ociweb.emf.util.ReferencesFinder;
  * generic so that it can be used with different domain entity types.
  * The term "referrer" refers to the object (domain entities in this
  * case) that has a reference to the QoS Policy.
- * 
- * @author harrisb@ociweb.com
+ *
  * @generated NOT
- * 
+ *
  */
 public class OpenDDSDcpsLibCreateQosPolicyAction<CompartmentEditPartType extends ListCompartmentEditPart>
 implements IObjectActionDelegate {
+
+	/**
+	 * A unique portion of the class name for compartments used for custom policies.
+	 * Used to distinguish between compartments used for shared policies.
+	 */
+	private static final String CompartmentEditPartNameSubstring = "QoSPoliciesCustom";
 
 	public OpenDDSDcpsLibCreateQosPolicyAction(Class referrerEditPart) {
 		super();
@@ -70,7 +75,7 @@ implements IObjectActionDelegate {
 		ListSelectionDialog listDialog = new ListSelectionDialog(workbenchPart.getSite().getShell(),
 				features.toArray(),
 				new ArrayContentProvider(), new LabelProvider(),
-				"Select QoS Policies to include");      
+		"Select QoS Policies to include");
 		listDialog.open();
 		Object[] selection = listDialog.getResult();
 
@@ -96,7 +101,8 @@ implements IObjectActionDelegate {
 				List children = selectedElement.getChildren();
 				CompartmentEditPartType compartmentEditPart = null;
 				for (Object obj: children) {
-					if (obj instanceof ListCompartmentEditPart) {
+					if (obj instanceof ListCompartmentEditPart &&
+							obj.getClass().getName().contains(CompartmentEditPartNameSubstring)) {
 						compartmentEditPart = (CompartmentEditPartType) obj;
 						break;
 					}
@@ -163,7 +169,7 @@ implements IObjectActionDelegate {
 			IStructuredSelection structuredSelection = (IStructuredSelection) selection;
 			if (featureReferrerEditPart.isInstance(structuredSelection.getFirstElement())) {
 				selectedElement = (ShapeNodeEditPart) structuredSelection
-						.getFirstElement();
+				.getFirstElement();
 			}
 		}
 	}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gmfgraph:Canvas xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:gmfgraph="http://www.eclipse.org/gmf/2006/GraphicalDefinition" name="Dcps">
+  <compartments
+      name="DataWriters"
+      collapsible="true"
+      needsTitle="true">
+    <figure
+        href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#CompartmentFigure"/>
+  </compartments>
+  <compartments
+      name="DataReaders"
+      collapsible="true"
+      needsTitle="true">
+    <figure
+        href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#CompartmentFigure"/>
+  </compartments>
+</gmfgraph:Canvas>
