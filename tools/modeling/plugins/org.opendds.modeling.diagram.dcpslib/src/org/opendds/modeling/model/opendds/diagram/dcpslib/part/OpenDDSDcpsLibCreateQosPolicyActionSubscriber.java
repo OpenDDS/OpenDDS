@@ -4,7 +4,7 @@ import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.SubscriberE
 import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.SubscriberQoSPoliciesCustomEditPart;
 
 /**
- * generate NOT
+ * @generate NOT
  */
 public class OpenDDSDcpsLibCreateQosPolicyActionSubscriber extends
 OpenDDSDcpsLibCreateQosPolicyAction<SubscriberQoSPoliciesCustomEditPart>

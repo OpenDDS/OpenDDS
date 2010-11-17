@@ -675,10 +675,7 @@
         name="CompartmentFigure">
       <actualFigure
           xsi:type="gmfgraph:Rectangle"
-          name="CompartmentFigure">
-        <layout
-            xsi:type="gmfgraph:XYLayout"/>
-      </actualFigure>
+          name="CompartmentFigure"/>
     </descriptors>
   </figures>
   <nodes
@@ -772,6 +769,13 @@
       needsTitle="true"/>
   <compartments
       name="QoS Policies- Custom"
+      collapsible="true"
+      needsTitle="true">
+    <figure
+        href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#CompartmentFigure"/>
+  </compartments>
+  <compartments
+      name="QoS Policies- Shared"
       collapsible="true"
       needsTitle="true">
     <figure
