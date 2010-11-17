@@ -1,7 +1,7 @@
 project(*xmlPublisher) : dcpsexe, dds_model {
   exename   = publisher
-  after    += MessengerSplit
-  libs     += MessengerSplit
+  after    += MessengerMixed
+  libs     += MessengerMixed
   libpaths += model
 
   Source_Files {
@@ -11,8 +11,8 @@ project(*xmlPublisher) : dcpsexe, dds_model {
 
 project(*xmlSubscriber) : dcpsexe, dds_model {
   exename   = subscriber
-  after    += MessengerSplit
-  libs     += MessengerSplit
+  after    += MessengerMixed
+  libs     += MessengerMixed
   libpaths += model
 
   Source_Files {
