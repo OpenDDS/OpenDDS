@@ -1,3 +1,9 @@
+Wed Nov 17 16:45:45 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/Codegen/Codegen.mpc:
+
+          Disable these projects until we get a new .opendds file for this test.
+
 Wed Nov 17 16:25:01 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/tests/MessengerMixed/MessengerMixed.mpc:
