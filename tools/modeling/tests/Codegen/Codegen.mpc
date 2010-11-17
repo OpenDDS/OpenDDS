@@ -2,6 +2,7 @@ project(*pub) : dcpsexe, dds_model {
   after    += aModel
   libs     += aModel
   libpaths += model
+  requires += dummy_label // test is disabled
 
   Source_Files {
     aPublisher.cpp
@@ -12,6 +13,7 @@ project(*sub) : dcpsexe, dds_model {
   after    += aModel
   libs     += aModel
   libpaths += model
+  requires += dummy_label // test is disabled
 
   Source_Files {
     aSubscriber.cpp
