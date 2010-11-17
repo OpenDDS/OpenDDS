@@ -152,15 +152,14 @@ Elements::Data&lt;InstanceTraits&gt;::registerType(
 {
   switch( type) {
 </xsl:text>
-  <!-- '  case Types::(type/@name):\n ... \n  break;\n' -->
-  <xsl:variable name="defined-types" select="$topic/opendds:datatype"/>
-  <xsl:for-each select="$defined-types">
-    <!-- Don't sort this without sorting the prior list as well. -->
+  <!-- handle internal datatypes -->
+  <xsl:variable name="defined-types" select="$types[@xmi:id = $topic/@type]"/>
 
-    <!-- Only generate type code once for each type. -->
-    <xsl:variable name="curpos" select="position()"/>
-    <xsl:variable name="priors" select="$defined-types[ position() &lt; $curpos]"/>
-    <xsl:if test="count( $priors[@name = current()/@name]) = 0">
+  <!-- handle external datatypes -->
+
+  <!-- '  case Types::(type/@name):\n ... \n  break;\n' -->
+  <xsl:for-each select="$defined-types">
+
       <xsl:text>    case Types::</xsl:text>
       <xsl:value-of select="@name"/>
       <xsl:text>:
@@ -184,7 +183,6 @@ Elements::Data&lt;InstanceTraits&gt;::registerType(
       break;
 
 </xsl:text>
-    </xsl:if>
   </xsl:for-each>
   <xsl:text>    default:
       throw NoTypeException();
