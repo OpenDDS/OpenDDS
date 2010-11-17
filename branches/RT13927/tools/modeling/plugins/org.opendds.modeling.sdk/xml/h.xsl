@@ -30,6 +30,15 @@
 <xsl:variable name="reader"      select="//readers"/>
 <xsl:variable name="transport"   select="//transports"/>
 
+<!-- key table of remote data type references -->
+<xsl:key name="remote-topic-types"
+         match="datatype"
+         use="@href"/>
+
+<xsl:key name="remote-models"
+         match="datatype"
+         use="substring-before(@href,'#')"/>
+
 <!-- Extract the name of the model once. -->
 <xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
 <xsl:variable name = "MODELNAME" select = "translate( $modelname, $lowercase, $uppercase)"/>
@@ -76,31 +85,38 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
     <xsl:with-param name="values" select="$participant"/>
   </xsl:call-template>
 
-  <xsl:key name="remote-topic-types"
-           match="datatype"
-           use="@href"/>
-
   <xsl:value-of select="concat('      class Types {', $newline)"/>
 
-  <xsl:value-of select="concat('        public enum Values {', $newline)"/>
+  <xsl:value-of select="concat('        public: enum Values {', $newline)"/>
   <xsl:variable name="internal-topic-types" select="$type[@xmi:id = $topic/@type]"/>
   <xsl:for-each select="$internal-topic-types">
       <xsl:value-of select="concat('          ', @name, ',', $newline)"/>
   </xsl:for-each>
 
-  <xsl:variable name="remote-hrefs" select="$topic/datatype"/>
-  <xsl:for-each select="$remote-hrefs">
-    <xsl:sort select="."/>
+  <!-- A unique set of remote type hrefs attributes-->
+  <xsl:variable name="uniq-hrefs" select="$topic/datatype[generate-id() = generate-id(key('remote-topic-types', @href)[1])]/@href"/>
+  <!-- A unique set of remote type hrefs, containted in datatype elements -->
+  <xsl:variable name="uniq-type-refs" select="$topic/datatype[generate-id() = generate-id(key('remote-topic-types', @href)[1])]"/>
+  <!-- A unique set of remote models refs, contained in datatypr elements -->
+  <xsl:variable name="uniq-model-refs" select="$uniq-type-refs[generate-id() = generate-id(key('remote-models',substring-before(@href,'#'))[1])]"/>
 
-    <xsl:if test="generate-id() = generate-id(key('remote-topic-types', @href)[1])">
-      <xsl:variable name="qname">
-        <xsl:call-template name="external-qualified-type-name">
-          <xsl:with-param name="ref" select="@href"/>
-        </xsl:call-template>
-      </xsl:variable>
-      <xsl:value-of select="concat('          ', $qname, ',', $newline)"/>
-    </xsl:if>
+  <xsl:for-each select="$uniq-model-refs">
+    <xsl:variable name="remote-model" select="substring-before(@href, '#')"/>
+    
+    <xsl:for-each select="document($remote-model)//dataLib/types">
+      <!-- what a reference to the current type would like like -->
+      <xsl:variable name="ref-val" select="concat($remote-model,'#',@xmi:id)"/>
+      <xsl:if test="$uniq-hrefs[. = $ref-val]">
+        <xsl:variable name="qname">
+	  <xsl:call-template name="normalize-identifier">
+	    <xsl:with-param name="identifier" select="@name"/>
+	  </xsl:call-template>
+	</xsl:variable>
+        <xsl:value-of select="concat('          ', ../@name, '_', $qname, ',', $newline)"/>
+      </xsl:if>
+    </xsl:for-each>
   </xsl:for-each>
+
   <xsl:value-of select="concat('          LAST_INDEX', $newline)"/>
 
   <xsl:value-of select="concat('        };', $newline)"/>

@@ -1,3 +1,13 @@
+Wed Nov 17 22:09:16 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+        rework how remote types are accessed.  Add colon to public: in Types.
+
+        * tools/modeling/tests/MessengerSplit/publisher.cpp:
+
+        change identifiers from MessengerMode to MessengerSplit.
+
 Wed Nov 17 20:38:44 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.xml:
