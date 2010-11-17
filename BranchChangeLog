@@ -1,3 +1,18 @@
+Wed Nov 17 16:25:01 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.mpc:
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.opendds:
+        * tools/modeling/tests/MessengerMixed/MessengerTypesMixed.opendds:
+
+          Renamed the below files to the above names.  This avoids duplicate
+          mpc project names.
+
+        * tools/modeling/tests/MessengerMixed/MessengerSplit.mpc:
+        * tools/modeling/tests/MessengerMixed/MessengerSplit.opendds:
+        * tools/modeling/tests/MessengerMixed/MessengerTypes.opendds:
+
+          Removed these files.
+
 Tue Nov 16 23:30:11 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
