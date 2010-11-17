@@ -12,7 +12,7 @@
     <genClasses ecoreClass="OpenDDS.ecore#//qosProperty"/>
     <genClasses image="false" ecoreClass="OpenDDS.ecore#//qosPolicy"/>
     <genClasses ecoreClass="OpenDDS.ecore#//topic"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//topicStruct"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//struct"/>
     <genClasses image="false" ecoreClass="OpenDDS.ecore#//topicField"/>
     <genClasses ecoreClass="OpenDDS.ecore#//domainParticipant"/>
     <genClasses ecoreClass="OpenDDS.ecore#//publisher"/>
@@ -51,6 +51,7 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/policyLib"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/dcpsLib"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/dataLib"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//OpenDDSModel/name"/>
     </genClasses>
     <genClasses ecoreClass="OpenDDS.ecore#//PolicyLib">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//PolicyLib/name"/>
@@ -216,9 +217,9 @@
     <genClasses ecoreClass="Types.ecore#//Double"/>
     <genClasses ecoreClass="Types.ecore#//Enum">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Enum/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EAttribute Types.ecore#//Enum/literals"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Enum/literals"/>
     </genClasses>
-    <genClasses image="false" ecoreClass="Types.ecore#//Field">
+    <genClasses ecoreClass="Types.ecore#//Field">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Field/name"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Field/type"/>
     </genClasses>
@@ -256,7 +257,7 @@
     <genClasses ecoreClass="Types.ecore#//Union">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Union/branches"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//Union/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Union/switch"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Union/switch"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//Union/default"/>
     </genClasses>
     <genClasses image="false" ecoreClass="Types.ecore#//UnsignedInt"/>
