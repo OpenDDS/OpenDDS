@@ -1,3 +1,9 @@
+Wed Nov 17 22:27:41 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+        remove unused templates.  Always output enums.
+
 Wed Nov 17 22:09:16 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:

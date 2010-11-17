@@ -652,12 +652,10 @@ typedef OpenDDS::Model::Service&lt; OpenDDS::Model::</xsl:text>
   <xsl:param name="class" />
   <xsl:param name="values" />
 
-  <xsl:if test="$values">
-    <xsl:value-of select="concat('      class ',$class, ' {')"/>
-    <xsl:call-template name="generate-enum-values">
-      <xsl:with-param name="values" select="$values"/>
-    </xsl:call-template>
-  </xsl:if>
+  <xsl:value-of select="concat('      class ',$class, ' {')"/>
+  <xsl:call-template name="generate-enum-values">
+    <xsl:with-param name="values" select="$values"/>
+  </xsl:call-template>
 </xsl:template>
 
 <xsl:template name="generate-enum-values">
@@ -680,53 +678,6 @@ typedef OpenDDS::Model::Service&lt; OpenDDS::Model::</xsl:text>
 <xsl:template name="normalize-identifier">
   <xsl:param name="identifier" select="."/>
   <xsl:value-of select="translate($identifier, ' -', '__')"/>
-</xsl:template>
-
-<xsl:template name="topic-types">
-  <xsl:param name="topics"/>
-
-  <xsl:for-each select="$topics">
-    <xsl:if test="position() > 1">
-      <xsl:text> </xsl:text>
-    </xsl:if>
-    <xsl:call-template name="topic-type-name">
-      <xsl:with-param name="topic" select="."/>
-    </xsl:call-template>
-  </xsl:for-each>
-</xsl:template>
-
-<xsl:template name="topic-type-name">
-  <xsl:param name="topic"/>
-  <xsl:choose>
-    <xsl:when test="$topic/@type">
-      <xsl:value-of select="$type[@xmi:id = current()/@type]/@name"/>
-    </xsl:when>
-    <xsl:when test="$topic/datatype/@href">
-      <xsl:call-template name="external-type-name">
-        <xsl:with-param name="ref" select="$topic/datatype/@href"/>
-      </xsl:call-template>
-    </xsl:when>
-  </xsl:choose>
-</xsl:template>
-
-<xsl:template name="external-type-name">
-  <xsl:param name="ref"/>
-
-  <xsl:variable name="file" select="substring-before($ref, '#')"/>
-  <xsl:variable name="typeid" select="substring-after($ref, '#')"/>
-  <xsl:variable name="doc" select="document($file)"/>
-  <xsl:variable name="type" select="$doc//types[@xmi:id = $typeid]"/>
-  <xsl:value-of select="$type/@name"/>
-</xsl:template>
-
-<xsl:template name="external-qualified-type-name">
-  <xsl:param name="ref"/>
-
-  <xsl:variable name="file" select="substring-before($ref, '#')"/>
-  <xsl:variable name="typeid" select="substring-after($ref, '#')"/>
-  <xsl:variable name="doc" select="document($file)"/>
-  <xsl:variable name="type" select="$doc//types[@xmi:id = $typeid]"/>
-  <xsl:value-of select="concat($doc/opendds:OpenDDSModel/@name,'_',$type/@name)"/>
 </xsl:template>
 
 </xsl:stylesheet>
