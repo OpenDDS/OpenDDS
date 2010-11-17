@@ -1,3 +1,12 @@
+Wed Nov 17 18:14:08 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:
+
+          Added name attribute to OpenDDSModel class so that the overall model can
+          be named. (Currently, when editing in the diagram the name is only accessible
+          through the property sheet and not through a diagram direct edit means.)
+
 Wed Nov 17 16:50:07 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
