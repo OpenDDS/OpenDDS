@@ -1,3 +1,9 @@
+Wed Nov 17 18:41:58 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+
+        handle types properly in registerType
+
 Wed Nov 17 18:14:08 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
