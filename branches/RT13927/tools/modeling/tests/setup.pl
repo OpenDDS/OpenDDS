@@ -16,6 +16,21 @@ my @dirs = qw(Messenger MessengerSplit MessengerMixed);
 my $javapkg = 'org.opendds.modeling.sdk';
 my $subdir = 'model';
 my @suffixes = qw(.idl _T.h _T.cpp .mpc);
+my @xsls = glob "$DDS_ROOT/tools/modeling/plugins/$javapkg/xml/*.xsl";
+
+sub generate {
+  my $base = shift;
+  my $cwd = getcwd();
+  print "Running code generation on: $cwd/$base.opendds\n";
+  my $status = system("\"$JAVA_HOME/bin/java\" -classpath " .
+                      "$DDS_ROOT/tools/modeling/plugins/$javapkg/bin " .
+                      "$javapkg.codegen.CodeGenerator -o $subdir " .
+                      "$base.opendds");
+  if ($status > 0) {
+    print "ERROR: Java CodeGenerator invocation failed with $status\n";
+    exit($status >> 8);
+  }
+}
 
 my $cwd = getcwd();
 foreach my $dir (@dirs) {
@@ -30,19 +45,31 @@ foreach my $dir (@dirs) {
     my $mtime = (stat $base)[9];
     $base =~ s/\.opendds$//;
 
-    foreach my $genfile (map {"$subdir/$base$_"} @suffixes) {
-      next if -e $genfile && (stat _)[9] > $mtime;
+    my $generated = 0;
+    my @outputs = map {"$subdir/$base$_"} @suffixes;
+    my %modtimes;
+    foreach my $genfile (@outputs) {
+      next if -e $genfile && ($modtimes{$genfile} = (stat _)[9]) > $mtime;
       #print "\tneed to generate it because it is newer than $genfile\n";
-      my $status = system("\"$JAVA_HOME/bin/java\" -classpath " .
-                          "$DDS_ROOT/tools/modeling/plugins/$javapkg/bin " .
-                          "$javapkg.codegen.CodeGenerator -o $subdir " .
-                          "$base.opendds");
-      if ($status > 0) {
-        print "ERROR: Java CodeGenerator invocation failed with $status\n";
-        exit($status >> 8);
-      }
-
+      generate($base);
+      $generated = 1;
       last; # no need to run generator more than once on a given input
+    }
+
+    if (!$generated) {
+      foreach my $xsl (@xsls) {
+        foreach my $genfile (@outputs) {
+          my $mod = $modtimes{$genfile};
+          if (!defined $mod) {
+            $mod = (stat $genfile)[9];
+          }
+          if ((stat $xsl)[9] > $mod) {
+            #print "\t$xsl is newer than $genfile\n";
+            generate($base);
+            last;
+          }
+        }
+      }
     }
   }
 }
