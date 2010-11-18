@@ -1,3 +1,12 @@
+Thu Nov 18 18:56:57 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerNoSub:
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.mpc:
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.opendds:
+        * tools/modeling/tests/setup.pl:
+
+        new test case - no subscribers
+
 Thu Nov 18 18:51:56 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
