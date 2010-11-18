@@ -50,6 +50,7 @@ import org.opendds.modeling.model.qos.PresentationQosPolicy;
  *   <li>{@link org.opendds.modeling.model.opendds.impl.subscriberImpl#getGroup_data <em>Group data</em>}</li>
  *   <li>{@link org.opendds.modeling.model.opendds.impl.subscriberImpl#getPresentation <em>Presentation</em>}</li>
  *   <li>{@link org.opendds.modeling.model.opendds.impl.subscriberImpl#getPartition <em>Partition</em>}</li>
+ *   <li>{@link org.opendds.modeling.model.opendds.impl.subscriberImpl#getTransportId <em>Transport Id</em>}</li>
  *   <li>{@link org.opendds.modeling.model.opendds.impl.subscriberImpl#getReaders <em>Readers</em>}</li>
  * </ul>
  * </p>
@@ -106,6 +107,26 @@ public class subscriberImpl extends ddsPropertyImpl implements subscriber {
 	 * @ordered
 	 */
 	protected PartitionQosPolicy partition;
+
+	/**
+	 * The default value of the '{@link #getTransportId() <em>Transport Id</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getTransportId()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final int TRANSPORT_ID_EDEFAULT = -1;
+
+	/**
+	 * The cached value of the '{@link #getTransportId() <em>Transport Id</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getTransportId()
+	 * @generated
+	 * @ordered
+	 */
+	protected int transportId = TRANSPORT_ID_EDEFAULT;
 
 	/**
 	 * The cached value of the '{@link #getReaders() <em>Readers</em>}' containment reference list.
@@ -305,6 +326,27 @@ public class subscriberImpl extends ddsPropertyImpl implements subscriber {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public int getTransportId() {
+		return transportId;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public void setTransportId(int newTransportId) {
+		int oldTransportId = transportId;
+		transportId = newTransportId;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, OpenDDSPackage.SUBSCRIBER__TRANSPORT_ID, oldTransportId, transportId));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	public EList<DataReader> getReaders() {
 		if (readers == null) {
 			readers = new EObjectContainmentEList<DataReader>(DataReader.class, this, OpenDDSPackage.SUBSCRIBER__READERS);
@@ -350,6 +392,8 @@ public class subscriberImpl extends ddsPropertyImpl implements subscriber {
 			case OpenDDSPackage.SUBSCRIBER__PARTITION:
 				if (resolve) return getPartition();
 				return basicGetPartition();
+			case OpenDDSPackage.SUBSCRIBER__TRANSPORT_ID:
+				return getTransportId();
 			case OpenDDSPackage.SUBSCRIBER__READERS:
 				return getReaders();
 		}
@@ -380,6 +424,9 @@ public class subscriberImpl extends ddsPropertyImpl implements subscriber {
 				return;
 			case OpenDDSPackage.SUBSCRIBER__PARTITION:
 				setPartition((PartitionQosPolicy)newValue);
+				return;
+			case OpenDDSPackage.SUBSCRIBER__TRANSPORT_ID:
+				setTransportId((Integer)newValue);
 				return;
 			case OpenDDSPackage.SUBSCRIBER__READERS:
 				getReaders().clear();
@@ -412,6 +459,9 @@ public class subscriberImpl extends ddsPropertyImpl implements subscriber {
 			case OpenDDSPackage.SUBSCRIBER__PARTITION:
 				setPartition((PartitionQosPolicy)null);
 				return;
+			case OpenDDSPackage.SUBSCRIBER__TRANSPORT_ID:
+				setTransportId(TRANSPORT_ID_EDEFAULT);
+				return;
 			case OpenDDSPackage.SUBSCRIBER__READERS:
 				getReaders().clear();
 				return;
@@ -437,6 +487,8 @@ public class subscriberImpl extends ddsPropertyImpl implements subscriber {
 				return presentation != null;
 			case OpenDDSPackage.SUBSCRIBER__PARTITION:
 				return partition != null;
+			case OpenDDSPackage.SUBSCRIBER__TRANSPORT_ID:
+				return transportId != TRANSPORT_ID_EDEFAULT;
 			case OpenDDSPackage.SUBSCRIBER__READERS:
 				return readers != null && !readers.isEmpty();
 		}
@@ -462,6 +514,7 @@ public class subscriberImpl extends ddsPropertyImpl implements subscriber {
 				case OpenDDSPackage.SUBSCRIBER__GROUP_DATA: return DCPSPackage.PUBLISHER_SUBSCRIBER__GROUP_DATA;
 				case OpenDDSPackage.SUBSCRIBER__PRESENTATION: return DCPSPackage.PUBLISHER_SUBSCRIBER__PRESENTATION;
 				case OpenDDSPackage.SUBSCRIBER__PARTITION: return DCPSPackage.PUBLISHER_SUBSCRIBER__PARTITION;
+				case OpenDDSPackage.SUBSCRIBER__TRANSPORT_ID: return DCPSPackage.PUBLISHER_SUBSCRIBER__TRANSPORT_ID;
 				default: return -1;
 			}
 		}
@@ -493,6 +546,7 @@ public class subscriberImpl extends ddsPropertyImpl implements subscriber {
 				case DCPSPackage.PUBLISHER_SUBSCRIBER__GROUP_DATA: return OpenDDSPackage.SUBSCRIBER__GROUP_DATA;
 				case DCPSPackage.PUBLISHER_SUBSCRIBER__PRESENTATION: return OpenDDSPackage.SUBSCRIBER__PRESENTATION;
 				case DCPSPackage.PUBLISHER_SUBSCRIBER__PARTITION: return OpenDDSPackage.SUBSCRIBER__PARTITION;
+				case DCPSPackage.PUBLISHER_SUBSCRIBER__TRANSPORT_ID: return OpenDDSPackage.SUBSCRIBER__TRANSPORT_ID;
 				default: return -1;
 			}
 		}
@@ -503,6 +557,22 @@ public class subscriberImpl extends ddsPropertyImpl implements subscriber {
 			}
 		}
 		return super.eDerivedStructuralFeatureID(baseFeatureID, baseClass);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public String toString() {
+		if (eIsProxy()) return super.toString();
+
+		StringBuffer result = new StringBuffer(super.toString());
+		result.append(" (transportId: ");
+		result.append(transportId);
+		result.append(')');
+		return result.toString();
 	}
 
 	/**

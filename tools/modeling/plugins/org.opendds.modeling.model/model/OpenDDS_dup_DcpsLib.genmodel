@@ -281,6 +281,7 @@
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//PublisherSubscriber/group_data"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//PublisherSubscriber/presentation"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//PublisherSubscriber/partition"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute DCPS.ecore#//PublisherSubscriber/transportId"/>
     </genClasses>
     <genClasses ecoreClass="DCPS.ecore#//Subscriber">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//Subscriber/readers"/>

@@ -50,6 +50,9 @@
     <nodeLabelTraces
         visualID="5007"
         queryText="true"/>
+    <nodeLabelTraces
+        visualID="5240"
+        queryText="true"/>
     <compartmentTraces
         visualID="7009"
         queryText="true"/>
@@ -68,6 +71,9 @@
         queryText="true"/>
     <nodeLabelTraces
         visualID="5009"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5241"
         queryText="true"/>
     <compartmentTraces
         visualID="7010"

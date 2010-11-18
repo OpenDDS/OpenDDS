@@ -46,7 +46,7 @@
           <labelMappings
               xsi:type="gmfmap:FeatureLabelMapping">
             <diagramLabel
-                href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassName"/>
+                href="DcpsLib.gmfgraph#PubSubName"/>
             <features
                 href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
           </labelMappings>
@@ -55,15 +55,25 @@
               readOnly="true"
               viewPattern="«publisher»">
             <diagramLabel
-                href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassStereotype"/>
+                href="DcpsLib.gmfgraph#PubSubStereotype"/>
             <features
                 href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+          </labelMappings>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              viewPattern="transportId: {0}"
+              editorPattern="{0}"
+              editPattern="{0}">
+            <diagramLabel
+                href="DcpsLib.gmfgraph#PubSubTransportId"/>
+            <features
+                href="../../org.opendds.modeling.model/model/DCPS.ecore#//PublisherSubscriber/transportId"/>
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
               href="DcpsLib.gmftool#//@palette/@tools.0/@tools.7"/>
           <diagramNode
-              href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#Class"/>
+              href="DcpsLib.gmfgraph#PubSub"/>
           <children
               compartment="//@nodes.0/@ownedChild/@children.0/@ownedChild/@compartments.0"
               referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild">
@@ -1310,7 +1320,7 @@
           <labelMappings
               xsi:type="gmfmap:FeatureLabelMapping">
             <diagramLabel
-                href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassName"/>
+                href="DcpsLib.gmfgraph#PubSubName"/>
             <features
                 href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
           </labelMappings>
@@ -1319,15 +1329,25 @@
               readOnly="true"
               viewPattern="«subscriber»">
             <diagramLabel
-                href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassStereotype"/>
+                href="DcpsLib.gmfgraph#PubSubStereotype"/>
             <features
                 href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+          </labelMappings>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              viewPattern="transportId: {0}"
+              editorPattern="{0}"
+              editPattern="{0}">
+            <diagramLabel
+                href="DcpsLib.gmfgraph#PubSubTransportId"/>
+            <features
+                href="../../org.opendds.modeling.model/model/DCPS.ecore#//PublisherSubscriber/transportId"/>
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
               href="DcpsLib.gmftool#//@palette/@tools.0/@tools.3"/>
           <diagramNode
-              href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#Class"/>
+              href="DcpsLib.gmfgraph#PubSub"/>
           <children
               compartment="//@nodes.0/@ownedChild/@children.1/@ownedChild/@compartments.0"
               referencedChild="//@nodes.0/@ownedChild/@children.1/@ownedChild/@children.0/@ownedChild">
