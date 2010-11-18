@@ -7,7 +7,7 @@
         <writers xsi:type="opendds:dataWriter" xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </publishers>
     </participants>
-    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" type="_5STIgPDuEd-I4rwicuuPOw"/>
+    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
   </dcpsLib>
   <dataLib xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data1">
     <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw" name="Message">

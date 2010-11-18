@@ -1,3 +1,11 @@
+Thu Nov 18 21:00:25 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.opendds:
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.opendds:
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.opendds:
+
+        Change topic @type to @datatype
+
 Thu Nov 18 20:15:43 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
