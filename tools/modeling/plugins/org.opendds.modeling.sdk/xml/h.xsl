@@ -97,7 +97,7 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
   <xsl:variable name="uniq-hrefs" select="$topic/datatype[generate-id() = generate-id(key('remote-topic-types', @href)[1])]/@href"/>
   <!-- A unique set of remote type hrefs, containted in datatype elements -->
   <xsl:variable name="uniq-type-refs" select="$topic/datatype[generate-id() = generate-id(key('remote-topic-types', @href)[1])]"/>
-  <!-- A unique set of remote models refs, contained in datatypr elements -->
+  <!-- A unique set of remote model refs, contained in datatype elements -->
   <xsl:variable name="uniq-model-refs" select="$uniq-type-refs[generate-id() = generate-id(key('remote-models',substring-before(@href,'#'))[1])]"/>
 
   <xsl:for-each select="$uniq-model-refs">
