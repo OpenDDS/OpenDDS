@@ -1,9 +1,16 @@
+Thu Nov 18 17:29:31 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerSplit/publisher.cpp:
+        * tools/modeling/tests/MessengerSplit/subscriber.cpp:
+
+        Fixes to make work for Split case.
+
 Thu Nov 18 17:15:56 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
 
         handle external referenced types in registerTypes.
-        
+
         * tools/modeling/tests/Messenger:
         * tools/modeling/tests/MessengerMixed:
         * tools/modeling/tests/MessengerSplit:
