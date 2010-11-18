@@ -41,7 +41,7 @@ foreach my $dir (@dirs) {
   }
 
   foreach my $base (@ddsfiles) {
-    #print "Considering $cwd/$dir/$base\n";
+    print "Considering $cwd/$dir/$base\n";
     my $mtime = (stat $base)[9];
     $base =~ s/\.opendds$//;
 
@@ -50,7 +50,7 @@ foreach my $dir (@dirs) {
     my %modtimes;
     foreach my $genfile (@outputs) {
       next if -e $genfile && ($modtimes{$genfile} = (stat _)[9]) > $mtime;
-      #print "\tneed to generate it because it is newer than $genfile\n";
+      print "\tneed to generate it because it is newer than $genfile\n";
       generate($base);
       $generated = 1;
       last; # no need to run generator more than once on a given input
@@ -64,7 +64,7 @@ foreach my $dir (@dirs) {
             $mod = (stat $genfile)[9];
           }
           if ((stat $xsl)[9] > $mod) {
-            #print "\t$xsl is newer than $genfile\n";
+            print "\t$xsl is newer than $genfile\n";
             generate($base);
             last;
           }

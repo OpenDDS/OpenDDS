@@ -547,25 +547,35 @@ inline
 void
 Elements::Data&lt;InstanceTraits&gt;::buildSubscribersQos()
 {
-  SubscriberQos       subscriberQos;
+</xsl:text>
+  <xsl:choose>
+    <xsl:when test="$subscriber">
+
+      <xsl:text>  SubscriberQos       subscriberQos;
   Subscribers::Values subscriber;
 </xsl:text>
-  <xsl:for-each select="$subscriber">
-    <xsl:value-of select="$newline"/>
-    <xsl:text>  subscriber    = Subscribers::</xsl:text>
-    <xsl:value-of select="@name"/>
-    <xsl:text>;
+      <xsl:for-each select="$subscriber">
+        <xsl:value-of select="$newline"/>
+        <xsl:text>  subscriber    = Subscribers::</xsl:text>
+        <xsl:value-of select="@name"/>
+        <xsl:text>;
   subscriberQos = TheServiceParticipant->initial_SubscriberQos();
 </xsl:text>
-    <!-- '  subscriberQos.(policyfield) = (value);\n' -->
-    <xsl:call-template name="process-qos">
-      <xsl:with-param name="entity" select="."/>
-      <xsl:with-param name="base"   select="'  subscriberQos.'"/>
-    </xsl:call-template>
+        <!-- '  subscriberQos.(policyfield) = (value);\n' -->
+        <xsl:call-template name="process-qos">
+          <xsl:with-param name="entity" select="."/>
+          <xsl:with-param name="base"   select="'  subscriberQos.'"/>
+        </xsl:call-template>
 
-    <xsl:text>  this->subscribersQos_[ subscriber] = subscriberQos;</xsl:text>
+        <xsl:text>  this->subscribersQos_[ subscriber] = subscriberQos;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:text>  // No subscribers were defined by this model.
+</xsl:text>
+    </xsl:otherwise>
+  </xsl:choose>
   <xsl:text>}
 
 template&lt; class InstanceTraits&gt;
