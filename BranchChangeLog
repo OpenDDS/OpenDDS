@@ -1,3 +1,9 @@
+Thu Nov 18 19:41:18 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/tests/Messenger/MessengerModel.opendds:
+
+          Fix to work with "Wed Nov 17 20:08:04 UTC 2010" changes.
+
 Thu Nov 18 19:22:15 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
