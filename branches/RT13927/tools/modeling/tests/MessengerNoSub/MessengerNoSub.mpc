@@ -9,14 +9,3 @@ project(*xmlPublisher) : dcpsexe, dds_model {
   }
 }
 
-project(*xmlSubscriber) : dcpsexe, dds_model {
-  exename   = subscriber
-  after    += MessengerModel
-  libs     += MessengerModel
-  libpaths += model
-
-  Source_Files {
-    subscriber.cpp
-  }
-}
-

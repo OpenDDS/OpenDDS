@@ -7,21 +7,21 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerModel_T.h"
+#include "model/MessengerNoSub_T.h"
 
 int main(int argc, char** argv)
 {
   try {
-    MessengerModelType model(argc, argv);
+    MessengerNoSubType model(argc, argv);
 
-    using OpenDDS::Model::MessengerModel::Elements;
+    using OpenDDS::Model::MessengerNoSub::Elements;
 
     DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
-    MessengerModel::MessageDataWriter_var message_writer =
-      MessengerModel::MessageDataWriter::_narrow(writer.in());
+    MessengerNoSub::MessageDataWriter_var message_writer =
+      MessengerNoSub::MessageDataWriter::_narrow(writer.in());
 
     if (CORBA::is_nil(message_writer.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -61,7 +61,7 @@ int main(int argc, char** argv)
     ws->detach_condition(condition);
 
     // Write samples
-    MessengerModel::Message message;
+    MessengerNoSub::Message message;
     message.subject_id = 99;
 
     message.from       = CORBA::string_dup("Comic Book Guy");

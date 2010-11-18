@@ -1,3 +1,20 @@
+Thu Nov 18 19:22:15 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+
+        updates to handle no subscribers.
+
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.mpc:
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.opendds:
+        * tools/modeling/tests/MessengerNoSub/publisher.cpp:
+        * tools/modeling/tests/setup.pl:
+
+        updates to "no subscriber test case"
+
+        * tools/modeling/tests/MessengerNoSub/subscriber.cpp:
+
+          Removed this file.
+
 Thu Nov 18 18:56:57 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerNoSub:
