@@ -1,3 +1,27 @@
+Thu Nov 18 18:51:56 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+
+        do not generate empty enums
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+        handle missing publisher from DcpsLib
+
+        * tools/modeling/tests/MessengerNoPub:
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.mpc:
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.opendds:
+        * tools/modeling/tests/MessengerNoPub/subscriber.cpp:
+        * tools/modeling/tests/setup.pl:
+
+        copy Messenger for "no publisher" test case
+
+        * tools/modeling/tests/MessengerNoPub/Messenger.mpc:
+        * tools/modeling/tests/MessengerNoPub/MessengerModel.opendds:
+        * tools/modeling/tests/MessengerNoPub/publisher.cpp:
+
+          Removed these files.
+
 Thu Nov 18 18:25:00 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerMixed/MessengerMixed.mpc:
