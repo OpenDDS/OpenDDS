@@ -20,8 +20,8 @@ int main(int argc, char** argv)
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
-    MessengerSplit::MessageDataWriter_var message_writer =
-      MessengerSplit::MessageDataWriter::_narrow(writer.in());
+    MessengerTypes::MessageDataWriter_var message_writer =
+      MessengerTypes::MessageDataWriter::_narrow(writer.in());
 
     if (CORBA::is_nil(message_writer.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -61,7 +61,7 @@ int main(int argc, char** argv)
     ws->detach_condition(condition);
 
     // Write samples
-    MessengerSplit::Message message;
+    MessengerTypes::Message message;
     message.subject_id = 99;
 
     message.from       = CORBA::string_dup("Comic Book Guy");
