@@ -88,7 +88,7 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
   <xsl:value-of select="concat('      class Types {', $newline)"/>
 
   <xsl:value-of select="concat('        public: enum Values {', $newline)"/>
-  <xsl:variable name="internal-topic-types" select="$type[@xmi:id = $topic/@type]"/>
+  <xsl:variable name="internal-topic-types" select="$type[@xmi:id = $topic/@datatype]"/>
   <xsl:for-each select="$internal-topic-types">
       <xsl:value-of select="concat('          ', @name, ',', $newline)"/>
   </xsl:for-each>
