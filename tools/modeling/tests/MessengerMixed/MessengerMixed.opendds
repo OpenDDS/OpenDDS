@@ -15,11 +15,15 @@
     <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List">
       <datatype href="MessengerTypesMixed.opendds#_5STIgPDuEd-I4rwicuuPOw"/>
     </topics>
-    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw2" name="Movie Discussion Responses">
-      <datatype href="MessengerTypesMixed.opendds#_5STIgPDuEd-I4rwicuuPOw2"/>
-    </topics>
+    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw2" name="Movie Discussion Responses" type="_5STIgPDuEd-I4rwicuuPOw27"/>
     <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw2" name="Movie Discussion Replay">
       <datatype href="MessengerTypesMixed.opendds#_5STIgPDuEd-I4rwicuuPOw"/>
     </topics>
   </dcpsLib>
+  <dataLib xmi:id="_2JQwcfDtEd-I4rwicuuPOw7" name="data1">
+    <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw27" name="Response">
+      <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw28" name="text" type="_E8F2IPDvEd-I4rwicuuPOw7"/>
+    </types>
+    <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw7"/>
+  </dataLib>
 </opendds:OpenDDSModel>
