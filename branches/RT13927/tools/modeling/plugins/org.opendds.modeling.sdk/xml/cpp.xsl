@@ -512,7 +512,10 @@ inline
 void
 Elements::Data&lt;InstanceTraits&gt;::buildPublishersQos()
 {
-  PublisherQos       publisherQos;
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$publisher">
+    <xsl:text>  PublisherQos       publisherQos;
   Publishers::Values publisher;
 </xsl:text>
   <xsl:for-each select="$publisher">
@@ -531,6 +534,12 @@ Elements::Data&lt;InstanceTraits&gt;::buildPublishersQos()
     <xsl:text>  this->publishersQos_[ publisher] = publisherQos;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  // No publishers were defined by this model.
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
   <xsl:text>}
 
 template&lt; class InstanceTraits&gt;
