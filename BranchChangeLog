@@ -1,3 +1,11 @@
+Thu Nov 18 17:17:14 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/setup.pl:
+
+          Check for timestamp on the *.xsl files, if they are modified then
+          run the code generation.
+          Also, print a message when running code generation.
+
 Thu Nov 18 03:19:39 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
