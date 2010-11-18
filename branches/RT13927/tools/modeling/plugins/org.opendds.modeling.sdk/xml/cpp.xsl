@@ -52,8 +52,23 @@
      match = "transport"
      use   = "@type"/>
 
+<!-- key table of remote data type references -->
+<xsl:key name="remote-topic-types"
+         match="datatype"
+         use="@href"/>
+
+<xsl:key name="remote-models"
+         match="datatype"
+         use="substring-before(@href,'#')"/>
+
 <!-- Extract the name of the model once. -->
 <xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
+
+<!-- A unique set of remote type hrefs, containted in datatype elements -->
+<xsl:variable name="uniq-type-refs" select="$topic/datatype[generate-id() = generate-id(key('remote-topic-types', @href)[1])]"/>
+
+<!-- A unique set of remote model refs, contained in datatype elements -->
+<xsl:variable name="uniq-model-refs" select="$uniq-type-refs[generate-id() = generate-id(key('remote-models',substring-before(@href,'#'))[1])]"/>
 
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
@@ -66,6 +81,12 @@
   <xsl:value-of select="$modelname"/>
   <xsl:text>TypeSupportImpl.h"</xsl:text>
   <xsl:value-of select="$newline"/>
+
+  <xsl:for-each select="$uniq-model-refs">
+    <xsl:variable name="model-file" select="substring-before(@href, '#')"/>
+    <xsl:variable name="remote-model" select="document($model-file)/opendds:OpenDDSModel"/>
+    <xsl:value-of select="concat('#include &lt;', $remote-model/@name, 'TypeSupportImpl.h&gt;', $newline)"/>
+  </xsl:for-each>
 
   <!-- '#include "(//typelib/@name)TypeSupport.h"\n' -->
   <xsl:for-each select="$typelib">
@@ -155,8 +176,6 @@ Elements::Data&lt;InstanceTraits&gt;::registerType(
   <!-- handle internal datatypes -->
   <xsl:variable name="defined-types" select="$types[@xmi:id = $topic/@type]"/>
 
-  <!-- handle external datatypes -->
-
   <!-- '  case Types::(type/@name):\n ... \n  break;\n' -->
   <xsl:for-each select="$defined-types">
 
@@ -184,6 +203,14 @@ Elements::Data&lt;InstanceTraits&gt;::registerType(
 
 </xsl:text>
   </xsl:for-each>
+  <!-- handle external datatypes -->
+  <xsl:for-each select="$uniq-type-refs">
+    <xsl:variable name="model-file" select="substring-before(@href, '#')"/>
+    <xsl:variable name="model-id" select="substring-after(@href, '#')"/>
+    <xsl:variable name="remote-type" select="document($model-file)//dataLib/types[@xmi:id = $model-id]"/>
+    <xsl:variable name="remote-model" select="$remote-type/../.."/>
+  </xsl:for-each>
+
   <xsl:text>    default:
       throw NoTypeException();
       break;
@@ -354,12 +381,25 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
   </xsl:for-each>
   <xsl:value-of select="$newline"/>
 
-  <!-- '  this->types_[ Topics::(topic/@name)] = Types::(topic/datatype/@name);\n' -->
-  <xsl:for-each select="$topic">
+  <!-- defined types -->
+  <xsl:for-each select="$topic[@type]">
     <xsl:text>  this->types_[ Topics::</xsl:text>
     <xsl:value-of select="translate(@name,' ','_')"/>
     <xsl:text>] = Types::</xsl:text>
     <xsl:value-of select="$types[@xmi:id = current()/@type]/@name"/>
+    <xsl:text>;</xsl:text>
+    <xsl:value-of select="$newline"/>
+  </xsl:for-each>
+  <!-- referenced types -->
+  <xsl:for-each select="$topic[datatype]">
+    <xsl:variable name="model-file" select="substring-before(datatype/@href,'#')"/>
+    <xsl:variable name="model-id" select="substring-after(datatype/@href,'#')"/>
+    <xsl:variable name="referred-type" select="document($model-file)//dataLib/types[@xmi:id = $model-id]"/>
+
+    <xsl:text>  this->types_[ Topics::</xsl:text>
+    <xsl:value-of select="translate(@name,' ','_')"/>
+    <xsl:text>] = Types::</xsl:text>
+    <xsl:value-of select="concat($referred-type/../@name, '_', $referred-type/@name)"/>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
