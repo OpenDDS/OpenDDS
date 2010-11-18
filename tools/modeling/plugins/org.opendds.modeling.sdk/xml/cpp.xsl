@@ -174,7 +174,7 @@ Elements::Data&lt;InstanceTraits&gt;::registerType(
   switch( type) {
 </xsl:text>
   <!-- handle internal datatypes -->
-  <xsl:variable name="defined-types" select="$types[@xmi:id = $topic/@type]"/>
+  <xsl:variable name="defined-types" select="$types[@xmi:id = $topic/@datatype]"/>
 
   <xsl:for-each select="$defined-types">
     <xsl:call-template name="output-registerType-case"/>
@@ -361,11 +361,11 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- defined types -->
-  <xsl:for-each select="$topic[@type]">
+  <xsl:for-each select="$topic[@datatype]">
     <xsl:text>  this->types_[ Topics::</xsl:text>
     <xsl:value-of select="translate(@name,' ','_')"/>
     <xsl:text>] = Types::</xsl:text>
-    <xsl:value-of select="$types[@xmi:id = current()/@type]/@name"/>
+    <xsl:value-of select="$types[@xmi:id = current()/@datatype]/@name"/>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
