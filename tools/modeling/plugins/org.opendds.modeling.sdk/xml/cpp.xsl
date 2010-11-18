@@ -85,7 +85,7 @@
   <xsl:for-each select="$uniq-model-refs">
     <xsl:variable name="model-file" select="substring-before(@href, '#')"/>
     <xsl:variable name="remote-model" select="document($model-file)/opendds:OpenDDSModel"/>
-    <xsl:value-of select="concat('#include &lt;', $remote-model/@name, 'TypeSupportImpl.h&gt;', $newline)"/>
+    <xsl:value-of select="concat('#include &quot;', $remote-model/@name, 'TypeSupportImpl.h&quot;', $newline)"/>
   </xsl:for-each>
 
   <!-- '#include "(//typelib/@name)TypeSupport.h"\n' -->
@@ -176,39 +176,18 @@ Elements::Data&lt;InstanceTraits&gt;::registerType(
   <!-- handle internal datatypes -->
   <xsl:variable name="defined-types" select="$types[@xmi:id = $topic/@type]"/>
 
-  <!-- '  case Types::(type/@name):\n ... \n  break;\n' -->
   <xsl:for-each select="$defined-types">
-
-      <xsl:text>    case Types::</xsl:text>
-      <xsl:value-of select="@name"/>
-      <xsl:text>:
-      {
-        typedef ::</xsl:text>
-      <xsl:value-of select="$modelname"/>
-      <xsl:text>::</xsl:text>
-      <xsl:value-of select="@name"/>
-      <xsl:text>TypeSupportImpl TypeSupport;
-
-        TypeSupport* typeSupport = new TypeSupport();
-        if( RETCODE_OK != typeSupport->register_type( participant, 0)) {
-          throw BadRegisterException();
-        }
-
-        if( this->typeNames_[ type]) {
-          free( this->typeNames_[ type]); // Was created by CORBA::string_dup()
-        }
-        this->typeNames_[ type] = typeSupport->get_type_name();
-      }
-      break;
-
-</xsl:text>
+    <xsl:call-template name="output-registerType-case"/>
   </xsl:for-each>
+
   <!-- handle external datatypes -->
   <xsl:for-each select="$uniq-type-refs">
     <xsl:variable name="model-file" select="substring-before(@href, '#')"/>
     <xsl:variable name="model-id" select="substring-after(@href, '#')"/>
     <xsl:variable name="remote-type" select="document($model-file)//dataLib/types[@xmi:id = $model-id]"/>
-    <xsl:variable name="remote-model" select="$remote-type/../.."/>
+    <xsl:call-template name="output-registerType-case">
+      <xsl:with-param name="type" select="$remote-type"/>
+    </xsl:call-template>
   </xsl:for-each>
 
   <xsl:text>    default:
@@ -997,6 +976,38 @@ Elements::Data&lt;InstanceTraits&gt;::copySubscriptionQos(
   </xsl:for-each>
 </xsl:template>
 
+<xsl:template name="output-registerType-case">
+  <xsl:param name="type" select="."/>
+  <xsl:variable name="typename" select="$type/@name"/>
+  <xsl:variable name="type-modelname" select="$type/../../@name"/>
+
+  <xsl:text>    case Types::</xsl:text>
+  <xsl:if test="$type-modelname != $modelname">
+    <xsl:value-of select="concat($type/../@name, '_')"/>
+  </xsl:if>
+  <xsl:value-of select="$typename"/>
+  <xsl:text>:
+      {
+        typedef ::</xsl:text>
+  <xsl:value-of select="$type-modelname"/>
+  <xsl:text>::</xsl:text>
+  <xsl:value-of select="$type/@name"/>
+  <xsl:text>TypeSupportImpl TypeSupport;
+
+        TypeSupport* typeSupport = new TypeSupport();
+        if( RETCODE_OK != typeSupport->register_type( participant, 0)) {
+          throw BadRegisterException();
+        }
+
+        if( this->typeNames_[ type]) {
+          free( this->typeNames_[ type]); // Was created by CORBA::string_dup()
+        }
+        this->typeNames_[ type] = typeSupport->get_type_name();
+      }
+      break;
+
+</xsl:text>
+</xsl:template>
 <xsl:template name="normalize-identifier">
   <xsl:param name="identifier" select="."/>
   <xsl:value-of select="translate($identifier, ' -', '__')"/>
