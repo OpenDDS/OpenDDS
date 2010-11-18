@@ -1,7 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gmfgraph:Canvas xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:gmfgraph="http://www.eclipse.org/gmf/2006/GraphicalDefinition" name="Dcps">
+  <figures
+      name="DCPS">
+    <descriptors
+        name="PubSubFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Rectangle"
+          name="PubSubFigure">
+        <layout
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"
+            forceSingleLine="true"/>
+        <backgroundColor
+            xsi:type="gmfgraph:RGBColor"
+            red="240"
+            green="240"
+            blue="240"/>
+        <border
+            xsi:type="gmfgraph:MarginBorder">
+          <insets
+              left="5"/>
+        </border>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="PubSubStereotypeFigure"
+            text="&lt;...>"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="PubSubNameFigure"
+            text="&lt;...>"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="PubSubTransportIdFigure"
+            text="&lt;...>"/>
+      </actualFigure>
+      <accessors
+          figure="//@figures.0/@descriptors.0/@actualFigure/@children.0"/>
+      <accessors
+          figure="//@figures.0/@descriptors.0/@actualFigure/@children.1"/>
+      <accessors
+          figure="//@figures.0/@descriptors.0/@actualFigure/@children.2"/>
+    </descriptors>
+  </figures>
+  <nodes
+      name="PubSub"
+      figure="PubSubFigure"/>
   <compartments
       name="DataWriters"
       collapsible="true"
@@ -16,4 +62,17 @@
     <figure
         href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#CompartmentFigure"/>
   </compartments>
+  <labels
+      name="PubSubName"
+      figure="PubSubFigure"
+      accessor="//@figures.0/@descriptors.0/@accessors.1"/>
+  <labels
+      name="PubSubStereotype"
+      figure="PubSubFigure"
+      accessor="//@figures.0/@descriptors.0/@accessors.0"/>
+  <labels
+      name="PubSubTransportId"
+      figure="PubSubFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.0/@accessors.2"/>
 </gmfgraph:Canvas>
