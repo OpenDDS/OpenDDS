@@ -660,7 +660,6 @@ typedef OpenDDS::Model::Service&lt; OpenDDS::Model::</xsl:text>
 
 <xsl:template name="generate-enum-values">
   <xsl:param name="values" />
-  <xsl:if test="$values">
     <xsl:text>
         public: enum Values {
 </xsl:text>
@@ -674,7 +673,6 @@ typedef OpenDDS::Model::Service&lt; OpenDDS::Model::</xsl:text>
       };
 
 </xsl:text>
-  </xsl:if>
 </xsl:template>
 
 <xsl:template name="normalize-identifier">
