@@ -1,3 +1,9 @@
+Fri Nov 19 21:38:01 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+        Don't create zero-sized arrays when no types.
+
 Fri Nov 19 21:05:29 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:

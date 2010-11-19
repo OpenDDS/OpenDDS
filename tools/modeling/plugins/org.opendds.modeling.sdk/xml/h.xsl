@@ -23,7 +23,7 @@
 <!-- Node sets -->
 <xsl:variable name="participants" select="//participants"/>
 <xsl:variable name="topics"       select="//topics"/>
-<xsl:variable name="type"        select="//dataLib/types"/>
+<xsl:variable name="types"        select="//dataLib/types"/>
 <xsl:variable name="publishers"   select="//publishers"/>
 <xsl:variable name="subscribers"  select="//subscribers"/>
 <xsl:variable name="writers"      select="//writers"/>
@@ -88,7 +88,7 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
   <xsl:value-of select="concat('      class Types {', $newline)"/>
 
   <xsl:value-of select="concat('        public: enum Values {', $newline)"/>
-  <xsl:variable name="internal-topic-types" select="$type[@xmi:id = $topics/@datatype]"/>
+  <xsl:variable name="internal-topic-types" select="$types[@xmi:id = $topics/@datatype]"/>
   <xsl:for-each select="$internal-topic-types">
       <xsl:value-of select="concat('          ', @name, ',', $newline)"/>
   </xsl:for-each>
@@ -262,19 +262,16 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
           unsigned long             topicMasks_[             Topics::LAST_INDEX];
           const char*               topicNames_[             Topics::LAST_INDEX];
           DDS::TopicQos             topicsQos_[              Topics::LAST_INDEX];
+          char*                     typeNames_[              Types::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:text>
+
           Transports::Values        publisherTransports_[    Publishers::LAST_INDEX];   // To be removed/replaced
           Transports::Values        subscriberTransports_[   Subscribers::LAST_INDEX];  // To be removed/replaced
-
-
-          char*                     typeNames_[              Types::LAST_INDEX];
           const char*               transportKinds_[         Transports::LAST_INDEX];         // To be removed/replaced
           unsigned long             transportKeys_[          Transports::LAST_INDEX];         // To be removed/replaced
-
           OpenDDS::DCPS::TransportConfiguration* transportConfigs_[ Transports::LAST_INDEX];  // To be removed/replaced
-
       };
   };
 } } } // End of namespace OpenDDS::Model::</xsl:text>
@@ -302,8 +299,7 @@ OpenDDS::Model::</xsl:text>
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>
-<xsl:text>
-}
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -326,8 +322,7 @@ OpenDDS::Model::</xsl:text>
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>
-<xsl:text>
-}
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -392,7 +387,7 @@ OpenDDS::Model::</xsl:text>
 </xsl:text>
   </xsl:when>
   <xsl:otherwise>
-    <xsl:text>  return DDS::DataWriterQos(); // Not valid when no data writers defined
+    <xsl:text>  return DDS::DataWriterQos(); // not valid when no data writers defined
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>
@@ -442,8 +437,7 @@ OpenDDS::Model::</xsl:text>
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>
-<xsl:text>
-}
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -512,8 +506,7 @@ OpenDDS::Model::</xsl:text>
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>
-<xsl:text>
-}
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -582,8 +575,7 @@ OpenDDS::Model::</xsl:text>
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>
-<xsl:text>
-}
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -595,8 +587,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Types::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->typeNames_[ which];
-}
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$topics">
+    <xsl:text>  return this->typeNames_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return (const char*)NULL; // not valid when no topics defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -619,8 +621,7 @@ OpenDDS::Model::</xsl:text>
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>
-<xsl:text>
-}
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -721,8 +722,7 @@ OpenDDS::Model::</xsl:text>
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>
-<xsl:text>
-}
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -772,8 +772,7 @@ OpenDDS::Model::</xsl:text>
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>
-<xsl:text>
-}
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -823,8 +822,7 @@ OpenDDS::Model::</xsl:text>
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>
-<xsl:text>
-}
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
