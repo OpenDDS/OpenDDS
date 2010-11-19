@@ -24,9 +24,9 @@
 <xsl:variable name="participant" select="//participants"/>
 <xsl:variable name="topic"       select="//topics"/>
 <xsl:variable name="type"        select="//dataLib/types"/>
-<xsl:variable name="publisher"   select="//publishers"/>
+<xsl:variable name="publishers"   select="//publishers"/>
 <xsl:variable name="subscriber"  select="//subscribers"/>
-<xsl:variable name="writer"      select="//writers"/>
+<xsl:variable name="writers"      select="//writers"/>
 <xsl:variable name="reader"      select="//readers"/>
 <xsl:variable name="transport"   select="//transports"/>
 
@@ -129,7 +129,7 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 
   <xsl:call-template name="generate-enum">
     <xsl:with-param name="class" select="'Publishers'"/>
-    <xsl:with-param name="values" select="$publisher"/>
+    <xsl:with-param name="values" select="$publishers"/>
   </xsl:call-template>
 
   <xsl:call-template name="generate-enum">
@@ -139,7 +139,7 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 
   <xsl:call-template name="generate-enum">
     <xsl:with-param name="class" select="'DataWriters'"/>
-    <xsl:with-param name="values" select="$writer"/>
+    <xsl:with-param name="values" select="$writers"/>
   </xsl:call-template>
 
   <xsl:call-template name="generate-enum">
@@ -218,37 +218,47 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 
           // Basic array containers since we only allow access using the
           // defined enumeration values.
-
+</xsl:text>
+<xsl:if test="$publishers">
+  <xsl:text>
           Participants::Values      publisherParticipants_[  Publishers::LAST_INDEX];
-          Participants::Values      subscriberParticipants_[ Subscribers::LAST_INDEX];
+          unsigned long             publisherMasks_[         Publishers::LAST_INDEX];
+          DDS::PublisherQos         publishersQos_[          Publishers::LAST_INDEX];
+</xsl:text>
+</xsl:if>
+<xsl:text>          Participants::Values      subscriberParticipants_[ Subscribers::LAST_INDEX];
           Types::Values             types_[                  Topics::LAST_INDEX];
+</xsl:text>
+<xsl:if test="$writers">
+  <xsl:text>
           Topics::Values            writerTopics_[           DataWriters::LAST_INDEX];
-          Topics::Values            readerTopics_[           DataReaders::LAST_INDEX];
           Publishers::Values        publishers_[             DataWriters::LAST_INDEX];
+          unsigned long             writerMasks_[            DataWriters::LAST_INDEX];
+          unsigned long             writerMasks_[            DataWriters::LAST_INDEX];
+          DDS::DataWriterQos        writersQos_[             DataWriters::LAST_INDEX];
+</xsl:text>
+</xsl:if>
+<xsl:text>          Topics::Values            readerTopics_[           DataReaders::LAST_INDEX];
           Subscribers::Values       subscribers_[            DataReaders::LAST_INDEX];
-          Transports::Values        publisherTransports_[    Publishers::LAST_INDEX];
-          Transports::Values        subscriberTransports_[   Subscribers::LAST_INDEX];
+          Transports::Values        publisherTransports_[    Publishers::LAST_INDEX];   // To be removed/replaced
+          Transports::Values        subscriberTransports_[   Subscribers::LAST_INDEX];  // To be removed/replaced
 
           unsigned long             participantMasks_[       Participants::LAST_INDEX];
-          unsigned long             publisherMasks_[         Publishers::LAST_INDEX];
           unsigned long             subscriberMasks_[        Subscribers::LAST_INDEX];
           unsigned long             topicMasks_[             Topics::LAST_INDEX];
-          unsigned long             writerMasks_[            DataWriters::LAST_INDEX];
           unsigned long             readerMasks_[            DataReaders::LAST_INDEX];
 
           unsigned long             domains_[                Participants::LAST_INDEX];
           char*                     typeNames_[              Types::LAST_INDEX];
           const char*               topicNames_[             Topics::LAST_INDEX];
-          const char*               transportKinds_[         Transports::LAST_INDEX];
-          unsigned long             transportKeys_[          Transports::LAST_INDEX];
+          const char*               transportKinds_[         Transports::LAST_INDEX];         // To be removed/replaced
+          unsigned long             transportKeys_[          Transports::LAST_INDEX];         // To be removed/replaced
 
-          OpenDDS::DCPS::TransportConfiguration* transportConfigs_[ Transports::LAST_INDEX];
+          OpenDDS::DCPS::TransportConfiguration* transportConfigs_[ Transports::LAST_INDEX];  // To be removed/replaced
 
           DDS::DomainParticipantQos participantsQos_[        Participants::LAST_INDEX];
           DDS::TopicQos             topicsQos_[              Topics::LAST_INDEX];
-          DDS::PublisherQos         publishersQos_[          Publishers::LAST_INDEX];
           DDS::SubscriberQos        subscribersQos_[         Subscribers::LAST_INDEX];
-          DDS::DataWriterQos        writersQos_[             DataWriters::LAST_INDEX];
           DDS::DataReaderQos        readersQos_[             DataReaders::LAST_INDEX];
       };
   };
@@ -292,8 +302,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Publishers::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->publishersQos_[ which];
-}
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$publishers">
+    <xsl:text>  return this->publishersQos_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return PublisherQos();  // not valid when no publishers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -318,8 +338,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= DataWriters::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->writersQos_[ which];
-}
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$writers">
+    <xsl:text>  return this->writersQos_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return DDS::DataWriterQos(); // Not valid when no data writers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -357,8 +387,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Publishers::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->publisherMasks_[ which];
-}
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$publishers">
+    <xsl:text>  return this->publisherMasks_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return 0; // not valid when no publishers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -396,8 +436,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= DataWriters::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->writerMasks_[ which];
-}
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$writers">
+    <xsl:text>  return this->writerMasks_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return 0; // not valid when no data writers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -489,8 +539,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Publishers::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->publisherParticipants_[ which];
-}
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$publishers">
+    <xsl:text>  return this->publisherParticipants_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return Participants::LAST_INDEX; // not valid when no publishers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -534,8 +594,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= DataWriters::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->writerTopics_[ which];
-}
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$writers">
+    <xsl:text>  return this->writerTopics_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return Topics::LAST_INDEX; // not valid when no data writers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -564,8 +634,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= DataWriters::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->publishers_[ which];
-}
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$writers">
+    <xsl:text>  return this->publishers_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text> return Publishers::LAST_INDEX; 
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline

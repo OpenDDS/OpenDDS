@@ -1,3 +1,14 @@
+Fri Nov 19 19:07:26 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+        Don't create zero-sized arrays when no publishers.
+
+        * tools/modeling/tests/Codegen:
+
+        svn:ignore model dir.
+
 Fri Nov 19 16:28:57 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/Types.ecore_diagram:
