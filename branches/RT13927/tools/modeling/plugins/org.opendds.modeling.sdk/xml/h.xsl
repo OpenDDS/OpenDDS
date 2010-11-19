@@ -21,7 +21,7 @@
 <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
 
 <!-- Node sets -->
-<xsl:variable name="participant" select="//participants"/>
+<xsl:variable name="participants" select="//participants"/>
 <xsl:variable name="topics"       select="//topics"/>
 <xsl:variable name="type"        select="//dataLib/types"/>
 <xsl:variable name="publishers"   select="//publishers"/>
@@ -82,7 +82,7 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 
   <xsl:call-template name="generate-enum">
     <xsl:with-param name="class" select="'Participants'"/>
-    <xsl:with-param name="values" select="$participant"/>
+    <xsl:with-param name="values" select="$participants"/>
   </xsl:call-template>
 
   <xsl:value-of select="concat('      class Types {', $newline)"/>
@@ -219,6 +219,13 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
           // Basic array containers since we only allow access using the
           // defined enumeration values.
 </xsl:text>
+<xsl:if test="$participants">
+  <xsl:text>
+          unsigned long             participantMasks_[       Participants::LAST_INDEX];
+          unsigned long             domains_[                Participants::LAST_INDEX];
+          DDS::DomainParticipantQos participantsQos_[        Participants::LAST_INDEX];
+</xsl:text>
+</xsl:if>
 <xsl:if test="$publishers">
   <xsl:text>
           Participants::Values      publisherParticipants_[  Publishers::LAST_INDEX];
@@ -261,16 +268,13 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
           Transports::Values        publisherTransports_[    Publishers::LAST_INDEX];   // To be removed/replaced
           Transports::Values        subscriberTransports_[   Subscribers::LAST_INDEX];  // To be removed/replaced
 
-          unsigned long             participantMasks_[       Participants::LAST_INDEX];
 
-          unsigned long             domains_[                Participants::LAST_INDEX];
           char*                     typeNames_[              Types::LAST_INDEX];
           const char*               transportKinds_[         Transports::LAST_INDEX];         // To be removed/replaced
           unsigned long             transportKeys_[          Transports::LAST_INDEX];         // To be removed/replaced
 
           OpenDDS::DCPS::TransportConfiguration* transportConfigs_[ Transports::LAST_INDEX];  // To be removed/replaced
 
-          DDS::DomainParticipantQos participantsQos_[        Participants::LAST_INDEX];
       };
   };
 } } } // End of namespace OpenDDS::Model::</xsl:text>
@@ -287,7 +291,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Participants::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->participantsQos_[ which];
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$participants">
+    <xsl:text>  return this->participantsQos_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return DDS:DomainParticipantQos(); // not valid when no domain participants defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>
 }
 
 template&lt; class InstanceTraits&gt;
@@ -416,7 +431,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Participants::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->participantMasks_[ which];
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$participants">
+    <xsl:text>  return this->participantMasks_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return 0; // not valid when no domain participants defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>
 }
 
 template&lt; class InstanceTraits&gt;
@@ -545,7 +571,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Participants::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->domains_[ which];
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$participants">
+    <xsl:text>  return this->domains_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return 0; // not valid when no domain participants defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>
 }
 
 template&lt; class InstanceTraits&gt;
