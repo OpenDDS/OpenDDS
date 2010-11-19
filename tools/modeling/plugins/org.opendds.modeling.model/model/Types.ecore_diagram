@@ -447,7 +447,7 @@
   </children>
   <children xmi:type="notation:Shape" xmi:id="_qOzW4-LGEd-DxoVkl6zeRQ" type="2001" fontName="Sans">
     <children xmi:type="notation:DecorationNode" xmi:id="_qOz98OLGEd-DxoVkl6zeRQ" type="5001"/>
-    <children xmi:type="notation:BasicCompartment" xmi:id="_qOz98eLGEd-DxoVkl6zeRQ" type="7001" collapsed="true">
+    <children xmi:type="notation:BasicCompartment" xmi:id="_qOz98eLGEd-DxoVkl6zeRQ" type="7001">
       <styles xmi:type="notation:SortingStyle" xmi:id="_qOz98uLGEd-DxoVkl6zeRQ"/>
       <styles xmi:type="notation:FilteringStyle" xmi:id="_qOz98-LGEd-DxoVkl6zeRQ"/>
     </children>
