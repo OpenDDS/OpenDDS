@@ -25,12 +25,11 @@
 <xsl:variable name="lut" select="document('')/*/lut:tables"/>
 
 <!-- Node sets -->
-<xsl:variable name="typelib"     select="//generator:typelib"/>
 <xsl:variable name="reader"      select="//readers"/>
-<xsl:variable name="writer"      select="//writers"/>
+<xsl:variable name="writers"      select="//writers"/>
 <xsl:variable name="domain"      select="//domains"/>
 <xsl:variable name="participant" select="//participants"/>
-<xsl:variable name="publisher"   select="//publishers"/>
+<xsl:variable name="publishers"   select="//publishers"/>
 <xsl:variable name="subscriber"  select="//subscribers"/>
 <xsl:variable name="topic"       select="//topics"/>
 <xsl:variable name="types"       select="//types"/>
@@ -86,14 +85,6 @@
     <xsl:variable name="model-file" select="substring-before(@href, '#')"/>
     <xsl:variable name="remote-model" select="document($model-file)/opendds:OpenDDSModel"/>
     <xsl:value-of select="concat('#include &quot;', $remote-model/@name, 'TypeSupportImpl.h&quot;', $newline)"/>
-  </xsl:for-each>
-
-  <!-- '#include "(//typelib/@name)TypeSupport.h"\n' -->
-  <xsl:for-each select="$typelib">
-    <!-- These are commented out for now. -->
-    <xsl:text>// #include "</xsl:text>
-    <xsl:value-of select="@name"/>
-    <xsl:text>TypeSupportImpl.h"</xsl:text>
   </xsl:for-each>
 
   <xsl:text>
@@ -214,7 +205,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMasks()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->publisherMasks_[ Publishers::(publisher/@name)] = (publisher/@mask);\n' -->
-  <xsl:for-each select="$publisher/@mask">
+  <xsl:for-each select="$publishers/@mask">
     <xsl:text>  this->publisherMasks_[ Publishers::</xsl:text>
     <xsl:value-of select="../@name"/>
     <xsl:text>] = </xsl:text>
@@ -247,7 +238,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMasks()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->writerMasks_[ DataWriters::(dataWriters/@name)] = (dataWriters/@mask);\n' -->
-  <xsl:for-each select="$writer/@mask">
+  <xsl:for-each select="$writers/@mask">
     <xsl:text>  this->writerMasks_[ DataWriters::</xsl:text>
     <xsl:value-of select="../@name"/>
     <xsl:text>] = </xsl:text>
@@ -339,7 +330,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
 {
 </xsl:text>
   <!-- '  this->publisherParticipants_[ Publishers::(publisher/@name)] = Participants::(publisher/../@name);\n' -->
-  <xsl:for-each select="$publisher">
+  <xsl:for-each select="$publishers">
     <xsl:text>  this->publisherParticipants_[ Publishers::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>] = Participants::</xsl:text>
@@ -385,7 +376,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->writerTopics[ DataWriters::(dataWriter/@name)] = Topics::(dataWriter/@topic);\n' -->
-  <xsl:for-each select="$writer">
+  <xsl:for-each select="$writers">
     <xsl:text>  this->writerTopics_[ DataWriters::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>] = Topics::</xsl:text>
@@ -411,7 +402,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->publishers_[ DataWriters::(dataWriter/@name)] = Publishers::(dataWriter/../@name);\n' -->
-  <xsl:for-each select="$writer">
+  <xsl:for-each select="$writers">
     <xsl:text>  this->publishers_[ DataWriters::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>] = Publishers::</xsl:text>
@@ -433,7 +424,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->publisherTransports_[ Publishers::(publisher/@name)] = Transports::(publisher/@transport);\n' -->
-  <xsl:for-each select="$publisher">
+  <xsl:for-each select="$publishers">
     <xsl:text>  // this->publisherTransports_[ Publishers::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>] = Transports::</xsl:text>
@@ -514,11 +505,11 @@ Elements::Data&lt;InstanceTraits&gt;::buildPublishersQos()
 {
 </xsl:text>
 <xsl:choose>
-  <xsl:when test="$publisher">
+  <xsl:when test="$publishers">
     <xsl:text>  PublisherQos       publisherQos;
   Publishers::Values publisher;
 </xsl:text>
-  <xsl:for-each select="$publisher">
+  <xsl:for-each select="$publishers">
     <xsl:value-of select="$newline"/>
     <xsl:text>  publisher    = Publishers::</xsl:text>
     <xsl:value-of select="@name"/>
@@ -583,25 +574,34 @@ inline
 void
 Elements::Data&lt;InstanceTraits&gt;::buildPublicationsQos()
 {
-  DataWriters::Values  writer;
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$writers">
+    <xsl:text>  DataWriters::Values  writer;
   DataWriterQos        writerQos;
 </xsl:text>
-  <xsl:for-each select="$writer">
-    <xsl:value-of select="$newline"/>
-    <xsl:text>  writer    = DataWriters::</xsl:text>
-    <xsl:value-of select="@name"/>
-    <xsl:text>;
+    <xsl:for-each select="$writers">
+      <xsl:value-of select="$newline"/>
+      <xsl:text>  writer    = DataWriters::</xsl:text>
+      <xsl:value-of select="@name"/>
+      <xsl:text>;
   writerQos = TheServiceParticipant->initial_DataWriterQos();
 </xsl:text>
     <!-- '  writerQos.(policyfield) = (value);\n' -->
-    <xsl:call-template name="process-qos">
-      <xsl:with-param name="entity" select="."/>
-      <xsl:with-param name="base"   select="'  writerQos.'"/>
-    </xsl:call-template>
+      <xsl:call-template name="process-qos">
+        <xsl:with-param name="entity" select="."/>
+        <xsl:with-param name="base"   select="'  writerQos.'"/>
+      </xsl:call-template>
 
-    <xsl:text>  this->writersQos_[ writer] = writerQos;</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
+      <xsl:text>  this->writersQos_[ writer] = writerQos;</xsl:text>
+      <xsl:value-of select="$newline"/>
+    </xsl:for-each>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  // No data writers were defined by this model
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
   <xsl:text>}
 
 template&lt; class InstanceTraits&gt;
@@ -704,7 +704,7 @@ Elements::Data&lt;InstanceTraits&gt;::copyPublicationQos(
 
   switch( which) {
 </xsl:text>
-  <xsl:for-each select="$writer">
+  <xsl:for-each select="$writers">
     <xsl:text>    case DataWriters::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>:</xsl:text>
