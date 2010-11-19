@@ -28,10 +28,10 @@
 <xsl:variable name="readers"      select="//readers"/>
 <xsl:variable name="writers"      select="//writers"/>
 <xsl:variable name="domain"      select="//domains"/>
-<xsl:variable name="participant" select="//participants"/>
+<xsl:variable name="participants" select="//participants"/>
 <xsl:variable name="publishers"   select="//publishers"/>
 <xsl:variable name="subscribers"  select="//subscribers"/>
-<xsl:variable name="topic"       select="//topics"/>
+<xsl:variable name="topics"       select="//topics"/>
 <xsl:variable name="types"       select="//types"/>
 <xsl:variable name="transport"   select="//opendds:transport"/>
 
@@ -64,7 +64,7 @@
 <xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
 
 <!-- A unique set of remote type hrefs, containted in datatype elements -->
-<xsl:variable name="uniq-type-refs" select="$topic/datatype[generate-id() = generate-id(key('remote-topic-types', @href)[1])]"/>
+<xsl:variable name="uniq-type-refs" select="$topics/datatype[generate-id() = generate-id(key('remote-topic-types', @href)[1])]"/>
 
 <!-- A unique set of remote model refs, contained in datatype elements -->
 <xsl:variable name="uniq-model-refs" select="$uniq-type-refs[generate-id() = generate-id(key('remote-models',substring-before(@href,'#'))[1])]"/>
@@ -165,7 +165,7 @@ Elements::Data&lt;InstanceTraits&gt;::registerType(
   switch( type) {
 </xsl:text>
   <!-- handle internal datatypes -->
-  <xsl:variable name="defined-types" select="$types[@xmi:id = $topic/@datatype]"/>
+  <xsl:variable name="defined-types" select="$types[@xmi:id = $topics/@datatype]"/>
 
   <xsl:for-each select="$defined-types">
     <xsl:call-template name="output-registerType-case"/>
@@ -194,7 +194,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMasks()
 {
 </xsl:text>
   <!-- '  this->participantMasks_[ Participants::(domainParticipant/@name)] = (domainParticipant/@mask);\n' -->
-  <xsl:for-each select="$participant/@mask">
+  <xsl:for-each select="$participants/@mask">
     <xsl:text>  this->participantMasks_[ Participants::</xsl:text>
     <xsl:value-of select="../@name"/>
     <xsl:text>] = </xsl:text>
@@ -227,7 +227,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMasks()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->topicMasks_[ Topics::(topic/@name)] = (topic/@mask);\n' -->
-  <xsl:for-each select="$topic/@mask">
+  <xsl:for-each select="$topics/@mask">
     <xsl:text>  this->topicMasks_[ Topics::</xsl:text>
     <xsl:value-of select="translate(../@name,' ','_')"/>
     <xsl:text>] = </xsl:text>
@@ -266,7 +266,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadDomains()
 {
 </xsl:text>
   <!-- '  this->domains_[ Participants::(domainParticipant/@name)] = (domainParticipant/@domain);\n' -->
-  <xsl:for-each select="$participant/@domain">
+  <xsl:for-each select="$participants/@domain">
     <xsl:text>  this->domains_[ Participants::</xsl:text>
     <xsl:value-of select="../@name"/>
       <xsl:text>] = </xsl:text>
@@ -284,7 +284,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadTopics()
   /// @TODO verify how we manage the model strings.
 </xsl:text>
   <!-- '  this->topicNames_[ Topics::(topic/@name)] = "(topic/@name)";\n' -->
-  <xsl:for-each select="$topic/@name">
+  <xsl:for-each select="$topics/@name">
     <xsl:text>  this->topicNames_[ Topics::</xsl:text>
     <xsl:value-of select="translate(.,' ','_')"/>
     <xsl:text>] = "</xsl:text>
@@ -352,7 +352,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- defined types -->
-  <xsl:for-each select="$topic[@datatype]">
+  <xsl:for-each select="$topics[@datatype]">
     <xsl:text>  this->types_[ Topics::</xsl:text>
     <xsl:value-of select="translate(@name,' ','_')"/>
     <xsl:text>] = Types::</xsl:text>
@@ -361,7 +361,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
   <!-- referenced types -->
-  <xsl:for-each select="$topic[datatype]">
+  <xsl:for-each select="$topics[datatype]">
     <xsl:variable name="model-file" select="substring-before(datatype/@href,'#')"/>
     <xsl:variable name="model-id" select="substring-after(datatype/@href,'#')"/>
     <xsl:variable name="referred-type" select="document($model-file)//dataLib/types[@xmi:id = $model-id]"/>
@@ -381,7 +381,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
     <xsl:value-of select="@name"/>
     <xsl:text>] = Topics::</xsl:text>
     <xsl:call-template name="normalize-identifier">
-      <xsl:with-param name="identifier" select="$topic[@xmi:id = current()/@topic]/@name"/>
+      <xsl:with-param name="identifier" select="$topics[@xmi:id = current()/@topic]/@name"/>
     </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
@@ -394,7 +394,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
     <xsl:value-of select="@name"/>
     <xsl:text>] = Topics::</xsl:text>
     <xsl:call-template name="normalize-identifier">
-      <xsl:with-param name="identifier" select="$topic[@xmi:id = current()/@topic]/@name"/>
+      <xsl:with-param name="identifier" select="$topics[@xmi:id = current()/@topic]/@name"/>
     </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
@@ -453,7 +453,7 @@ Elements::Data&lt;InstanceTraits&gt;::buildParticipantsQos()
   DomainParticipantQos participantQos;
   Participants::Values participant;
 </xsl:text>
-  <xsl:for-each select="$participant">
+  <xsl:for-each select="$participants">
     <xsl:value-of select="$newline"/>
     <xsl:text>  participant = Participants::</xsl:text>
     <xsl:value-of select="@name"/>
@@ -479,7 +479,7 @@ Elements::Data&lt;InstanceTraits&gt;::buildTopicsQos()
   TopicQos       topicQos;
   Topics::Values topic;
 </xsl:text>
-  <xsl:for-each select="$topic">
+  <xsl:for-each select="$topics">
     <xsl:value-of select="$newline"/>
     <xsl:text>  topic    = Topics::</xsl:text>
     <xsl:value-of select="translate(@name,' ','_')"/>
