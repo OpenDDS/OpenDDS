@@ -22,7 +22,7 @@
 
 <!-- Node sets -->
 <xsl:variable name="participant" select="//participants"/>
-<xsl:variable name="topic"       select="//topics"/>
+<xsl:variable name="topics"       select="//topics"/>
 <xsl:variable name="type"        select="//dataLib/types"/>
 <xsl:variable name="publishers"   select="//publishers"/>
 <xsl:variable name="subscribers"  select="//subscribers"/>
@@ -88,15 +88,15 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
   <xsl:value-of select="concat('      class Types {', $newline)"/>
 
   <xsl:value-of select="concat('        public: enum Values {', $newline)"/>
-  <xsl:variable name="internal-topic-types" select="$type[@xmi:id = $topic/@datatype]"/>
+  <xsl:variable name="internal-topic-types" select="$type[@xmi:id = $topics/@datatype]"/>
   <xsl:for-each select="$internal-topic-types">
       <xsl:value-of select="concat('          ', @name, ',', $newline)"/>
   </xsl:for-each>
 
   <!-- A unique set of remote type hrefs attributes-->
-  <xsl:variable name="uniq-hrefs" select="$topic/datatype[generate-id() = generate-id(key('remote-topic-types', @href)[1])]/@href"/>
+  <xsl:variable name="uniq-hrefs" select="$topics/datatype[generate-id() = generate-id(key('remote-topic-types', @href)[1])]/@href"/>
   <!-- A unique set of remote type hrefs, containted in datatype elements -->
-  <xsl:variable name="uniq-type-refs" select="$topic/datatype[generate-id() = generate-id(key('remote-topic-types', @href)[1])]"/>
+  <xsl:variable name="uniq-type-refs" select="$topics/datatype[generate-id() = generate-id(key('remote-topic-types', @href)[1])]"/>
   <!-- A unique set of remote model refs, contained in datatype elements -->
   <xsl:variable name="uniq-model-refs" select="$uniq-type-refs[generate-id() = generate-id(key('remote-models',substring-before(@href,'#'))[1])]"/>
 
@@ -124,7 +124,7 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 
   <xsl:call-template name="generate-enum">
     <xsl:with-param name="class" select="'Topics'"/>
-    <xsl:with-param name="values" select="$topic"/>
+    <xsl:with-param name="values" select="$topics"/>
   </xsl:call-template>
 
   <xsl:call-template name="generate-enum">
@@ -233,9 +233,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
           DDS::SubscriberQos        subscribersQos_[         Subscribers::LAST_INDEX];
 </xsl:text>
 </xsl:if>
-<xsl:text>
-          Types::Values             types_[                  Topics::LAST_INDEX];
-</xsl:text>
 <xsl:if test="$writers">
   <xsl:text>
           Topics::Values            writerTopics_[           DataWriters::LAST_INDEX];
@@ -252,23 +249,28 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
           DDS::DataReaderQos        readersQos_[             DataReaders::LAST_INDEX];
 </xsl:text>
 </xsl:if>
+<xsl:if test="$topics">
+<xsl:text>
+          Types::Values             types_[                  Topics::LAST_INDEX];
+          unsigned long             topicMasks_[             Topics::LAST_INDEX];
+          const char*               topicNames_[             Topics::LAST_INDEX];
+          DDS::TopicQos             topicsQos_[              Topics::LAST_INDEX];
+</xsl:text>
+</xsl:if>
 <xsl:text>
           Transports::Values        publisherTransports_[    Publishers::LAST_INDEX];   // To be removed/replaced
           Transports::Values        subscriberTransports_[   Subscribers::LAST_INDEX];  // To be removed/replaced
 
           unsigned long             participantMasks_[       Participants::LAST_INDEX];
-          unsigned long             topicMasks_[             Topics::LAST_INDEX];
 
           unsigned long             domains_[                Participants::LAST_INDEX];
           char*                     typeNames_[              Types::LAST_INDEX];
-          const char*               topicNames_[             Topics::LAST_INDEX];
           const char*               transportKinds_[         Transports::LAST_INDEX];         // To be removed/replaced
           unsigned long             transportKeys_[          Transports::LAST_INDEX];         // To be removed/replaced
 
           OpenDDS::DCPS::TransportConfiguration* transportConfigs_[ Transports::LAST_INDEX];  // To be removed/replaced
 
           DDS::DomainParticipantQos participantsQos_[        Participants::LAST_INDEX];
-          DDS::TopicQos             topicsQos_[              Topics::LAST_INDEX];
       };
   };
 } } } // End of namespace OpenDDS::Model::</xsl:text>
@@ -298,7 +300,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Topics::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->topicsQos_[ which];
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$topics">
+    <xsl:text>  return this->topicsQos_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return DDS::TopicQos(); // not valid when no topics defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>
 }
 
 template&lt; class InstanceTraits&gt;
@@ -462,7 +475,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Topics::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->topicMasks_[ which];
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$topics">
+    <xsl:text>  return this->topicMasks_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return 0; // not valid when no topics defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>
 }
 
 template&lt; class InstanceTraits&gt;
@@ -547,7 +571,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Topics::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->topicNames_[ which];
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$topics">
+    <xsl:text>  return this->topicNames_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return (const char*)NULL;  // not valid when no topics defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>
 }
 
 template&lt; class InstanceTraits&gt;
@@ -638,7 +673,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Topics::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->types_[ which];
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$topics">
+    <xsl:text>  return this->types_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return Types::LAST_INDEX; // not valid when no types defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>
 }
 
 template&lt; class InstanceTraits&gt;
