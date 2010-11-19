@@ -25,9 +25,9 @@
 <xsl:variable name="topic"       select="//topics"/>
 <xsl:variable name="type"        select="//dataLib/types"/>
 <xsl:variable name="publishers"   select="//publishers"/>
-<xsl:variable name="subscriber"  select="//subscribers"/>
+<xsl:variable name="subscribers"  select="//subscribers"/>
 <xsl:variable name="writers"      select="//writers"/>
-<xsl:variable name="reader"      select="//readers"/>
+<xsl:variable name="readers"      select="//readers"/>
 <xsl:variable name="transport"   select="//transports"/>
 
 <!-- key table of remote data type references -->
@@ -134,7 +134,7 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 
   <xsl:call-template name="generate-enum">
     <xsl:with-param name="class" select="'Subscribers'"/>
-    <xsl:with-param name="values" select="$subscriber"/>
+    <xsl:with-param name="values" select="$subscribers"/>
   </xsl:call-template>
 
   <xsl:call-template name="generate-enum">
@@ -144,7 +144,7 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 
   <xsl:call-template name="generate-enum">
     <xsl:with-param name="class" select="'DataReaders'"/>
-    <xsl:with-param name="values" select="$reader"/>
+    <xsl:with-param name="values" select="$readers"/>
   </xsl:call-template>
 
   <xsl:call-template name="generate-enum">
@@ -226,7 +226,14 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
           DDS::PublisherQos         publishersQos_[          Publishers::LAST_INDEX];
 </xsl:text>
 </xsl:if>
-<xsl:text>          Participants::Values      subscriberParticipants_[ Subscribers::LAST_INDEX];
+<xsl:if test="$subscribers">
+  <xsl:text>
+          Participants::Values      subscriberParticipants_[ Subscribers::LAST_INDEX];
+          unsigned long             subscriberMasks_[        Subscribers::LAST_INDEX];
+          DDS::SubscriberQos        subscribersQos_[         Subscribers::LAST_INDEX];
+</xsl:text>
+</xsl:if>
+<xsl:text>
           Types::Values             types_[                  Topics::LAST_INDEX];
 </xsl:text>
 <xsl:if test="$writers">
@@ -234,19 +241,23 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
           Topics::Values            writerTopics_[           DataWriters::LAST_INDEX];
           Publishers::Values        publishers_[             DataWriters::LAST_INDEX];
           unsigned long             writerMasks_[            DataWriters::LAST_INDEX];
-          unsigned long             writerMasks_[            DataWriters::LAST_INDEX];
           DDS::DataWriterQos        writersQos_[             DataWriters::LAST_INDEX];
 </xsl:text>
 </xsl:if>
-<xsl:text>          Topics::Values            readerTopics_[           DataReaders::LAST_INDEX];
+<xsl:if test="$readers">
+<xsl:text>
+          Topics::Values            readerTopics_[           DataReaders::LAST_INDEX];
           Subscribers::Values       subscribers_[            DataReaders::LAST_INDEX];
+          unsigned long             readerMasks_[            DataReaders::LAST_INDEX];
+          DDS::DataReaderQos        readersQos_[             DataReaders::LAST_INDEX];
+</xsl:text>
+</xsl:if>
+<xsl:text>
           Transports::Values        publisherTransports_[    Publishers::LAST_INDEX];   // To be removed/replaced
           Transports::Values        subscriberTransports_[   Subscribers::LAST_INDEX];  // To be removed/replaced
 
           unsigned long             participantMasks_[       Participants::LAST_INDEX];
-          unsigned long             subscriberMasks_[        Subscribers::LAST_INDEX];
           unsigned long             topicMasks_[             Topics::LAST_INDEX];
-          unsigned long             readerMasks_[            DataReaders::LAST_INDEX];
 
           unsigned long             domains_[                Participants::LAST_INDEX];
           char*                     typeNames_[              Types::LAST_INDEX];
@@ -258,8 +269,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 
           DDS::DomainParticipantQos participantsQos_[        Participants::LAST_INDEX];
           DDS::TopicQos             topicsQos_[              Topics::LAST_INDEX];
-          DDS::SubscriberQos        subscribersQos_[         Subscribers::LAST_INDEX];
-          DDS::DataReaderQos        readersQos_[             DataReaders::LAST_INDEX];
       };
   };
 } } } // End of namespace OpenDDS::Model::</xsl:text>
@@ -325,8 +334,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Subscribers::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->subscribersQos_[ which];
-}
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$subscribers">
+    <xsl:text>  return this->subscribersQos_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return DDS:SubscriberQos(); // not valid when no subscribers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -361,8 +380,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= DataReaders::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->readersQos_[ which];
-}
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$readers">
+    <xsl:text>  return this->readersQos_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return DDS:DataReaderQos(); // not valid when no data readers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -410,8 +439,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Subscribers::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->subscriberMasks_[ which];
-}
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$subscribers">
+    <xsl:text>  return this->subscriberMasks_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return 0; // not valid when no subscribers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -459,8 +498,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= DataReaders::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->readerMasks_[ which];
-}
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$readers">
+    <xsl:text>  return this->readerMasks_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  retrurn 0; // not valid when no data readers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -564,8 +613,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Subscribers::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->subscriberParticipants_[ which];
-}
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$subscribers">
+    <xsl:text>  return this->subscriberParticipants_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return Participants::LAST_INDEX; // Not valid when no subscribers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -619,7 +678,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= DataReaders::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->readerTopics_[ which];
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$readers">
+    <xsl:text>  return this->readerTopics_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return Topics::LAST_INDEX; // not valid when no data readers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>
 }
 
 template&lt; class InstanceTraits&gt;
@@ -659,7 +729,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= DataReaders::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->subscribers_[ which];
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$readers">
+    <xsl:text>  return this->subscribers_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return Subscribers::LAST_INDEX; // not valid when no data readers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>
 }
 
 template&lt; class InstanceTraits&gt;

@@ -25,12 +25,12 @@
 <xsl:variable name="lut" select="document('')/*/lut:tables"/>
 
 <!-- Node sets -->
-<xsl:variable name="reader"      select="//readers"/>
+<xsl:variable name="readers"      select="//readers"/>
 <xsl:variable name="writers"      select="//writers"/>
 <xsl:variable name="domain"      select="//domains"/>
 <xsl:variable name="participant" select="//participants"/>
 <xsl:variable name="publishers"   select="//publishers"/>
-<xsl:variable name="subscriber"  select="//subscribers"/>
+<xsl:variable name="subscribers"  select="//subscribers"/>
 <xsl:variable name="topic"       select="//topics"/>
 <xsl:variable name="types"       select="//types"/>
 <xsl:variable name="transport"   select="//opendds:transport"/>
@@ -216,7 +216,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMasks()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->subscriberMasks_[ Subscribers::(subscriber/@name)] = (subscriber/@mask);\n' -->
-  <xsl:for-each select="$subscriber/@mask">
+  <xsl:for-each select="$subscribers/@mask">
     <xsl:text>  this->subscriberMasks_[ Subscribers::</xsl:text>
     <xsl:value-of select="../@name"/>
     <xsl:text>] = </xsl:text>
@@ -249,7 +249,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMasks()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->readerMasks_[ DataReaders::(dataReaders/@name)] = (dataReaders/@mask);\n' -->
-  <xsl:for-each select="$reader/@mask">
+  <xsl:for-each select="$readers/@mask">
     <xsl:text>  this->readerMasks_[ DataReaders::</xsl:text>
     <xsl:value-of select="../@name"/>
     <xsl:text>] = </xsl:text>
@@ -341,7 +341,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->subscriberParticipants_[ Subscribers::(subscriber/@name)] = Participants::(subscriber/../@name);\n' -->
-  <xsl:for-each select="$subscriber">
+  <xsl:for-each select="$subscribers">
     <xsl:text>  this->subscriberParticipants_[ Subscribers::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>] = Participants::</xsl:text>
@@ -389,7 +389,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->readerTopics[ DataReaders::(dataReader/@name)] = Topics::(dataReader/@topic);\n' -->
-  <xsl:for-each select="$reader">
+  <xsl:for-each select="$readers">
     <xsl:text>  this->readerTopics_[ DataReaders::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>] = Topics::</xsl:text>
@@ -413,7 +413,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->subscribers_[ DataReaders::(dataReader/@name)] = Subscribers::(dataReader/../@name);\n' -->
-  <xsl:for-each select="$reader">
+  <xsl:for-each select="$readers">
     <xsl:text>  this->subscribers_[ DataReaders::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>] = Subscribers::</xsl:text>
@@ -435,7 +435,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->subscriberTransports_[ Subscribers::(subscriber/@name)] = Transports::(subscriber/@transport);\n' -->
-  <xsl:for-each select="$subscriber">
+  <xsl:for-each select="$subscribers">
     <xsl:text>  // this->subscriberTransports_[ Subscribers::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>] = Transports::</xsl:text>
@@ -540,12 +540,12 @@ Elements::Data&lt;InstanceTraits&gt;::buildSubscribersQos()
 {
 </xsl:text>
   <xsl:choose>
-    <xsl:when test="$subscriber">
+    <xsl:when test="$subscribers">
 
       <xsl:text>  SubscriberQos       subscriberQos;
   Subscribers::Values subscriber;
 </xsl:text>
-      <xsl:for-each select="$subscriber">
+      <xsl:for-each select="$subscribers">
         <xsl:value-of select="$newline"/>
         <xsl:text>  subscriber    = Subscribers::</xsl:text>
         <xsl:value-of select="@name"/>
@@ -612,7 +612,7 @@ Elements::Data&lt;InstanceTraits&gt;::buildSubscriptionsQos()
   DataReaders::Values  reader;
   DataReaderQos        readerQos;
 </xsl:text>
-  <xsl:for-each select="$reader">
+  <xsl:for-each select="$readers">
     <xsl:value-of select="$newline"/>
     <xsl:text>  reader    = DataReaders::</xsl:text>
     <xsl:value-of select="@name"/>
@@ -737,7 +737,7 @@ Elements::Data&lt;InstanceTraits&gt;::copySubscriptionQos(
 
   switch( which) {
 </xsl:text>
-  <xsl:for-each select="$reader">
+  <xsl:for-each select="$readers">
     <xsl:text>    case DataReaders::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>:</xsl:text>
