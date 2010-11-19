@@ -27,12 +27,12 @@
 <!-- Node sets -->
 <xsl:variable name="readers"      select="//readers"/>
 <xsl:variable name="writers"      select="//writers"/>
-<xsl:variable name="domain"      select="//domains"/>
+<xsl:variable name="domains"      select="//domains"/>
 <xsl:variable name="participants" select="//participants"/>
 <xsl:variable name="publishers"   select="//publishers"/>
 <xsl:variable name="subscribers"  select="//subscribers"/>
 <xsl:variable name="topics"       select="//topics"/>
-<xsl:variable name="types"       select="//types"/>
+<xsl:variable name="types"        select="//types"/>
 <xsl:variable name="transport"   select="//opendds:transport"/>
 
 <!-- Indices (lookup tables are at the bottom of this document) -->
@@ -105,7 +105,9 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 template&lt; class InstanceTraits&gt;
 inline
 Elements::Data&lt;InstanceTraits&gt;::Data()
-{
+{ </xsl:text>
+<xsl:if test="$topics">
+  <xsl:text>
   for( int index = 0;
        index &lt; OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
@@ -114,7 +116,9 @@ Elements::Data&lt;InstanceTraits&gt;::Data()
   ) {
     this->typeNames_[ index] = 0;
   }
-
+</xsl:text>
+</xsl:if>
+<xsl:text>
   for (int index = 0;
        index &lt; OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
@@ -140,7 +144,9 @@ Elements::Data&lt;InstanceTraits&gt;::Data()
 template&lt; class InstanceTraits&gt;
 inline
 Elements::Data&lt;InstanceTraits&gt;::~Data()
-{
+{ </xsl:text>
+<xsl:if test="$topics">
+  <xsl:text>
   for( int index = 0;
        index &lt; OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
@@ -152,7 +158,9 @@ Elements::Data&lt;InstanceTraits&gt;::~Data()
       this->typeNames_[ index] = 0;
     }
   }
-}
+</xsl:text>
+</xsl:if>
+<xsl:text>}
 
 template&lt; class InstanceTraits&gt;
 inline
@@ -270,7 +278,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadDomains()
     <xsl:text>  this->domains_[ Participants::</xsl:text>
     <xsl:value-of select="../@name"/>
       <xsl:text>] = </xsl:text>
-      <xsl:value-of select="$domain[@xmi:id = current()]/@domainId"/>
+      <xsl:value-of select="$domains[@xmi:id = current()]/@domainId"/>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
@@ -995,6 +1003,7 @@ Elements::Data&lt;InstanceTraits&gt;::copySubscriptionQos(
   </xsl:for-each>
 </xsl:template>
 
+<!-- will only be called if topics defined -->
 <xsl:template name="output-registerType-case">
   <xsl:param name="type" select="."/>
   <xsl:variable name="typename" select="$type/@name"/>
