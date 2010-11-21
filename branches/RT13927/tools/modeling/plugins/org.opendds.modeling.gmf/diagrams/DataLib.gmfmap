@@ -2,437 +2,435 @@
 <gmfmap:Mapping xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
     xmlns:gmfmap="http://www.eclipse.org/gmf/2008/mappings"
     xmlns:gmftool="http://www.eclipse.org/gmf/2005/ToolDefinition">
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//Short"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.17"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//UShort"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.25"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//idlSequence"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.8"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//idlUnion"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.11"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//Octet"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.15"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//idlArray"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.6"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//LongLong"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.14"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Long"/>
       <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Long">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.13"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//ULong"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.23"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//Boolean"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.1"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//TypedefRef"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.21"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//Float"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+            href="DataLib.gmfgraph#SimpleTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.5"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="DataLib.gmfgraph#SimpleType"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//LongLong"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="LongLong">
+        <diagramLabel
+            href="DataLib.gmfgraph#SimpleTypeName"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.0/@tools.6"/>
+      <diagramNode
+          href="DataLib.gmfgraph#SimpleType"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Short"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Short">
+        <diagramLabel
+            href="DataLib.gmfgraph#SimpleTypeName"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.0/@tools.8"/>
+      <diagramNode
+          href="DataLib.gmfgraph#SimpleType"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//ULong"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="ULong">
+        <diagramLabel
+            href="DataLib.gmfgraph#SimpleTypeName"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.0/@tools.9"/>
+      <diagramNode
+          href="DataLib.gmfgraph#SimpleType"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//ULongLong"/>
       <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="ULongLong">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.24"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//Char"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.2"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//String"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.18"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//idlEnum"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.7"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//idlTypedef"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+            href="DataLib.gmfgraph#SimpleTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.10"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="DataLib.gmfgraph#SimpleType"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//Integer"/>
+          href="../../org.opendds.modeling.model/model/Types.ecore#//UShort"/>
       <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="UShort">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+            href="DataLib.gmfgraph#SimpleTypeName"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.0/@tools.11"/>
+      <diagramNode
+          href="DataLib.gmfgraph#SimpleType"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Double"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Double">
+        <diagramLabel
+            href="DataLib.gmfgraph#SimpleTypeName"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.0/@tools.2"/>
+      <diagramNode
+          href="DataLib.gmfgraph#SimpleType"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Float"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Float">
+        <diagramLabel
+            href="DataLib.gmfgraph#SimpleTypeName"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.0/@tools.4"/>
+      <diagramNode
+          href="DataLib.gmfgraph#SimpleType"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Char"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Char">
+        <diagramLabel
+            href="DataLib.gmfgraph#SimpleTypeName"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.0/@tools.1"/>
+      <diagramNode
+          href="DataLib.gmfgraph#SimpleType"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//WChar"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="WChar">
+        <diagramLabel
+            href="DataLib.gmfgraph#SimpleTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.12"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="DataLib.gmfgraph#SimpleType"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//UInteger"/>
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Octet"/>
       <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Octet">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+            href="DataLib.gmfgraph#SimpleTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.22"/>
+          href="DataLib.gmftool#//@palette/@tools.0/@tools.7"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="DataLib.gmfgraph#SimpleType"/>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//Double"/>
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Boolean"/>
       <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Boolean">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-      </labelMappings>
-      <tool
-          xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.0/@tools.3"/>
-      <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
-    </ownedChild>
-  </nodes>
-  <nodes>
-    <containmentFeature
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/dataTypes"/>
-    <ownedChild>
-      <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//Array"/>
-      <labelMappings
-          xsi:type="gmfmap:FeatureLabelMapping">
-        <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassName"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
-        <features
-            href="../../org.opendds.modeling.model/model/Types.ecore#//Collection/length"/>
+            href="DataLib.gmfgraph#SimpleTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.0"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#ClassNode"/>
+          href="DataLib.gmfgraph#SimpleType"/>
     </ownedChild>
   </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Array"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Array">
+        <diagramLabel
+            href="DataLib.gmfgraph#CollectionName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Collection/length"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="length: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DataLib.gmfgraph#CollectionLength"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Collection/length"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.1/@tools.0"/>
+      <diagramNode
+          href="DataLib.gmfgraph#Collection"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Sequence"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Sequence">
+        <diagramLabel
+            href="DataLib.gmfgraph#CollectionName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Collection/length"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="length: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DataLib.gmfgraph#CollectionLength"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Collection/length"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.1/@tools.2"/>
+      <diagramNode
+          href="DataLib.gmfgraph#Collection"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//String"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="String">
+        <diagramLabel
+            href="DataLib.gmfgraph#CollectionName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Collection/length"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="length: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DataLib.gmfgraph#CollectionLength"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Collection/length"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.1/@tools.4"/>
+      <diagramNode
+          href="DataLib.gmfgraph#Collection"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//WString"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="WString">
+        <diagramLabel
+            href="DataLib.gmfgraph#CollectionName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Collection/length"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="length: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DataLib.gmfgraph#CollectionLength"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Collection/length"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.0/@tools.13"/>
+      <diagramNode
+          href="DataLib.gmfgraph#Collection"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Typedef"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Typedef">
+        <diagramLabel
+            href="DataLib.gmfgraph#NamedTypeTypeName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Typedef/name"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="name: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DataLib.gmfgraph#NamedTypeName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Typedef/name"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.3/@tools.0"/>
+      <diagramNode
+          href="DataLib.gmfgraph#NamedType"/>
+    </ownedChild>
+  </nodes>
+  <links>
+    <diagramLink
+        href="DataLib.gmfgraph#Link"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="../../org.opendds.modeling.model/model/Types.ecore#//Array/subtype"/>
+  </links>
+  <links>
+    <diagramLink
+        href="DataLib.gmfgraph#Link"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="../../org.opendds.modeling.model/model/Types.ecore#//Sequence/subtype"/>
+  </links>
+  <links>
+    <diagramLink
+        href="DataLib.gmfgraph#Link"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="../../org.opendds.modeling.model/model/Types.ecore#//Typedef/type"/>
+  </links>
   <diagram>
     <diagramCanvas
-        href="../../org.opendds.modeling.graphics/diagrams/class.gmfgraph#metamodel"/>
+        href="DataLib.gmfgraph#DataLib"/>
     <domainModel
-        href="../../org.opendds.modeling.model/model/Types.ecore#/"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#/"/>
     <domainMetaElement
-        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib"/>
     <palette
         href="DataLib.gmftool#//@palette"/>
   </diagram>

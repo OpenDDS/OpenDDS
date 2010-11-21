@@ -27,7 +27,6 @@
         visualID="2001"
         editPartClassName="DcpsLibEditPart"
         itemSemanticEditPolicyClassName="DcpsLibItemSemanticEditPolicy"
-        notationViewFactoryClassName="DcpsLibViewFactory"
         canonicalEditPolicyClassName="DcpsLibCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DcpsLibGraphicalNodeEditPolicy"
         createCommandClassName="DcpsLibCreateCommand">
@@ -57,7 +56,6 @@
           visualID="5001"
           editPartClassName="DcpsLibNameEditPart"
           itemSemanticEditPolicyClassName="DcpsLibNameItemSemanticEditPolicy"
-          notationViewFactoryClassName="DcpsLibNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -76,7 +74,6 @@
           visualID="5005"
           editPartClassName="DcpsLibName2EditPart"
           itemSemanticEditPolicyClassName="DcpsLibName2ItemSemanticEditPolicy"
-          notationViewFactoryClassName="DcpsLibNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -97,7 +94,6 @@
         visualID="2002"
         editPartClassName="PolicyLibEditPart"
         itemSemanticEditPolicyClassName="PolicyLibItemSemanticEditPolicy"
-        notationViewFactoryClassName="PolicyLibViewFactory"
         canonicalEditPolicyClassName="PolicyLibCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="PolicyLibGraphicalNodeEditPolicy"
         createCommandClassName="PolicyLibCreateCommand">
@@ -128,7 +124,6 @@
           visualID="5002"
           editPartClassName="PolicyLibNameEditPart"
           itemSemanticEditPolicyClassName="PolicyLibNameItemSemanticEditPolicy"
-          notationViewFactoryClassName="PolicyLibNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -147,7 +142,6 @@
           visualID="5006"
           editPartClassName="PolicyLibName2EditPart"
           itemSemanticEditPolicyClassName="PolicyLibName2ItemSemanticEditPolicy"
-          notationViewFactoryClassName="PolicyLibNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -165,10 +159,9 @@
       </labels>
     </topLevelNodes>
     <topLevelNodes
-        visualID="2004"
+        visualID="2005"
         editPartClassName="DataLibEditPart"
         itemSemanticEditPolicyClassName="DataLibItemSemanticEditPolicy"
-        notationViewFactoryClassName="DataLibViewFactory"
         canonicalEditPolicyClassName="DataLibCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DataLibGraphicalNodeEditPolicy"
         createCommandClassName="DataLibCreateCommand">
@@ -189,17 +182,16 @@
           editorID="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLib"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/DataLib"/>
         <containmentMetaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/dataLib"/>
         <childMetaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/dataLib"/>
       </modelFacet>
       <labels
-          visualID="5004"
+          visualID="5008"
           editPartClassName="DataLibNameEditPart"
           itemSemanticEditPolicyClassName="DataLibNameItemSemanticEditPolicy"
-          notationViewFactoryClassName="DataLibNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -211,14 +203,13 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLib/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/DataLib/name"/>
         </modelFacet>
       </labels>
       <labels
-          visualID="5007"
+          visualID="5009"
           editPartClassName="DataLibName2EditPart"
           itemSemanticEditPolicyClassName="DataLibName2ItemSemanticEditPolicy"
-          notationViewFactoryClassName="DataLibNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -231,7 +222,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«dataLib»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLib/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/DataLib/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
