@@ -1,3 +1,15 @@
+Sun Nov 21 21:06:45 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Topics.ecore:
+
+          Following the DDS Profile spec, Topics owned their Qos Policies. However,
+          this doesn't allow policies from libraries to be used. Therefore, containment
+          was set to false as was done with domain entities to allow policy sharing.
+
 Sun Nov 21 20:33:37 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/plugins.html:
