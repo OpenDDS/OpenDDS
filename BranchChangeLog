@@ -1,3 +1,33 @@
+Sun Nov 21 20:33:37 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/plugins.html:
+
+          Removed section under GMF Issues about the need to define DataLib outside
+          of OpenDDS.ecore since this issue no longer applies.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmftool:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.trace:
+
+          Partial redo of the DataLib diagram based on Types packaging restructuring
+          from commit "Thu Nov  4 19:49:09 UTC 2010".
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.trace:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Types.ecore:
+
+          It is no longer necessarily to define domain element DataLib outside
+          of OpenDDS.ecore for GMF to work properly now that the Types package has
+          been restructured (the reason for GMF had issues originally is unknown).
+          Therefore, DataLib is once again defined in OpenDDS.ecore, like PolicyLib and DcspLib.
+
 Fri Nov 19 22:13:30 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:

@@ -71,13 +71,13 @@
         href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/dataLib"/>
     <ownedChild>
       <domainMetaElement
-          href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib"/>
+          href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib"/>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
         <features
-            href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/name"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/name"/>
       </labelMappings>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
@@ -86,7 +86,7 @@
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
         <features
-            href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/name"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/name"/>
       </labelMappings>
       <relatedDiagrams
           href="DataLib.gmfmap#//@diagram"/>

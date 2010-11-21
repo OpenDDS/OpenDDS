@@ -964,16 +964,12 @@ will not get overwritten the next time GMF re-generates the runtime code.
 
 </pre>
 </div>
-<div title="GMF Issues" modifier="MikeMartinez" created="201007061429" modified="201008101522" tags="issues publish" changecount="7">
+<div title="GMF Issues" modifier="Byron" created="201007061429" modified="201011212031" tags="issues publish" changecount="8">
 <pre>! Diagram refresh problem
 
 On Ubuntu 9.10, running eclipse 3.5.1 on top of GTK 2.10.0, there is a refresh problem for GMF based diagrams. When a diagram is opened, and either another editor tab is activated or another application is placed on top of the diagram, then after making the diagram visible again some of the diagram elements are partially or completely invisible. The only way to confidently make all the diagram elements visible again is to zoom and unzoom the diagram.
 
 The symptoms of this problem seem similar to [[Eclipse bug 164623|https://bugs.eclipse.org/bugs/show_bug.cgi?id=164623]]. This bug was closed as it was determined to be a problem related to GTK usage and not specific to GMF. An attempt was made to get around this by disabled anti-aliasing as discussed in the bugzilla contents but the problem persisted.
-
-! DataLib Diagram Partitioning does not work with ~DataLib defined in ~OpenDDS package
-
-Unlike diagram partitioning (sub-diagram) support for the PolicyLib, it was found that GMF 2.2.2 would not work properly with the ~DataLib class defined in the ~OpenDDS package in ~OpenDDS.ecore. The GMF wizards seemed to get confused with this arrangement, and after manually populating the GMF Tool and GMF Map file the resulting diagram code would not work properly- nodes could not be created on the canvas. The reason for this could not be determined and there is not a [[bug|https://bugs.eclipse.org/bugs/]] posted against this problem. The workaround was to move ~DataLib and stereotype classes that inherit from ~TopicField to the Types package in Types.ecore. Therefore there is a discrepancy between the PolicyLib elements and DataLib elements in the Ecore models.
 
 ! Unable to use Graphic Definition Models from ~UML2Tools
 
