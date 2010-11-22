@@ -68,7 +68,7 @@ OpenDDS::Model::Delegate::createPublisher(
   DDS::DomainParticipant*       participant,
   DDS::PublisherQos             publisherQos,
   DDS::StatusMask               mask,
-  OpenDDS::DCPS::TransportImpl* transport
+  OpenDDS::DCPS::TransportIdType transport_id
 )
 {
   DDS::Publisher* publisher
@@ -80,6 +80,9 @@ OpenDDS::Model::Delegate::createPublisher(
   if( !publisher) {
     return 0;
   }
+
+  OpenDDS::DCPS::TransportImpl_rch transport
+    = TheTransportFactory->obtain(transport_id);
 
   if( OpenDDS::DCPS::ATTACH_OK != transport->attach( publisher)) {
     participant->delete_publisher( publisher);
@@ -94,7 +97,7 @@ OpenDDS::Model::Delegate::createSubscriber(
   DDS::DomainParticipant*       participant,
   DDS::SubscriberQos            subscriberQos,
   DDS::StatusMask               mask,
-  OpenDDS::DCPS::TransportImpl* transport
+  OpenDDS::DCPS::TransportIdType transport_id
 )
 {
   DDS::Subscriber* subscriber
@@ -106,6 +109,9 @@ OpenDDS::Model::Delegate::createSubscriber(
   if( !subscriber) {
     return 0;
   }
+
+  OpenDDS::DCPS::TransportImpl_rch transport
+    = TheTransportFactory->obtain(transport_id);
 
   if( OpenDDS::DCPS::ATTACH_OK != transport->attach( subscriber)) {
     participant->delete_subscriber( subscriber);
@@ -199,30 +205,5 @@ OpenDDS::Model::Delegate::createReader(
            DDS::DataReaderListener::_nil(),
            mask
          );
-}
-
-OpenDDS::DCPS::TransportImpl*
-OpenDDS::Model::Delegate::createTransport(
-  unsigned long                          key,
-  const char*                            kind,
-  OpenDDS::DCPS::TransportConfiguration* config
-)
-{
-  OpenDDS::DCPS::TransportImpl_rch result
-    = TheTransportFactory->create_transport_impl(
-        key,
-        kind,
-        OpenDDS::DCPS::DONT_AUTO_CONFIG
-      );
-
-  if( result.is_nil()) {
-    return 0;
-  }
-
-  if( 0 != result->configure( config)) {
-    return 0;
-  }
-
-  return result._retn();
 }
 

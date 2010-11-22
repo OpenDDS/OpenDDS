@@ -11,6 +11,7 @@
 
 #include "model_export.h"
 #include "CopyQos.h"
+#include "dds/DCPS/transport/framework/TransportDefs.h"
 
 namespace DDS {
   class DomainParticipant;
@@ -54,7 +55,7 @@ namespace OpenDDS { namespace Model {
         DDS::DomainParticipant*       participant,
         DDS::PublisherQos             publisherQos,
         DDS::StatusMask               mask,
-        OpenDDS::DCPS::TransportImpl* transport
+        OpenDDS::DCPS::TransportIdType transport_id
       );
 
       DDS::Subscriber*
@@ -62,7 +63,7 @@ namespace OpenDDS { namespace Model {
         DDS::DomainParticipant*       participant,
         DDS::SubscriberQos            subscriberQos,
         DDS::StatusMask               mask,
-        OpenDDS::DCPS::TransportImpl* transport
+        OpenDDS::DCPS::TransportIdType transport_id
       );
 
       DDS::DataWriter*
@@ -97,13 +98,6 @@ namespace OpenDDS { namespace Model {
         DDS::Topic*        topic,
         DDS::DataReaderQos readerQos,
         DDS::StatusMask    mask
-      );
-
-      OpenDDS::DCPS::TransportImpl*
-      createTransport(
-        unsigned long                          key,
-        const char*                            kind,
-        OpenDDS::DCPS::TransportConfiguration* config
       );
 
       CopyQos*& service();

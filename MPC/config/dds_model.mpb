@@ -4,5 +4,5 @@
 project {
   includes  += $(DDS_ROOT)/tools/modeling/codegen
   libs      += OpenDDS_Model
-  postclean += <%rmdir%> model
+  after     += Model_Lib
 }
