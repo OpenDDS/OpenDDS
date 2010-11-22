@@ -1,3 +1,9 @@
+Mon Nov 22 23:08:14 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/DefaultInstanceTraits.h:
+
+          Include TransportTypeDefs.h where used.
+
 Mon Nov 22 22:19:36 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/codegen/model/Service_T.h:

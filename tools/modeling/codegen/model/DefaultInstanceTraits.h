@@ -1,6 +1,8 @@
 #ifndef DEFAULTINSTANCETRAITS_H
 #define DEFAULTINSTANCETRAITS_H
 
+#include "dds/DCPS/transport/framework/TransportDefs.h"
+
 namespace OpenDDS { namespace Model {
 
   /// Define default values and behaviors so instance traits only need to
