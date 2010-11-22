@@ -282,7 +282,7 @@ OpenDDS::Model::</xsl:text>
 </xsl:text>
   </xsl:when>
   <xsl:otherwise>
-    <xsl:text>  return DDS:DomainParticipantQos(); // not valid when no domain participants defined
+    <xsl:text>  return DDS::DomainParticipantQos(); // not valid when no domain participants defined
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>
@@ -348,7 +348,7 @@ OpenDDS::Model::</xsl:text>
 </xsl:text>
   </xsl:when>
   <xsl:otherwise>
-    <xsl:text>  return DDS:SubscriberQos(); // not valid when no subscribers defined
+    <xsl:text>  return DDS::SubscriberQos(); // not valid when no subscribers defined
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>
@@ -392,7 +392,7 @@ OpenDDS::Model::</xsl:text>
 </xsl:text>
   </xsl:when>
   <xsl:otherwise>
-    <xsl:text>  return DDS:DataReaderQos(); // not valid when no data readers defined
+    <xsl:text>  return DDS::DataReaderQos(); // not valid when no data readers defined
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>
@@ -524,7 +524,7 @@ OpenDDS::Model::</xsl:text>
 </xsl:text>
   </xsl:when>
   <xsl:otherwise>
-    <xsl:text>  retrurn 0; // not valid when no data readers defined
+    <xsl:text>  return 0; // not valid when no data readers defined
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>

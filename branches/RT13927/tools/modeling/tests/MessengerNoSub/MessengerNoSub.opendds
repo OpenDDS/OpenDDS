@@ -3,7 +3,7 @@
   <dcpsLib xmi:id="_XmyasPDvEd-I4rwicuuPOw">
     <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="" domainId="42"/>
     <participants xmi:id="_esFCYPDvEd-I4rwicuuPOw" name="part1" domain="_bs2RIPDvEd-I4rwicuuPOw">
-      <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub">
+      <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" transportId="4">
         <writers xsi:type="opendds:dataWriter" xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </publishers>
     </participants>
