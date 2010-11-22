@@ -384,24 +384,16 @@ Elements::Data::loadMaps()
   <!-- Assign Transport ID -->
   <!-- '  this->publisherTransports_[ Publishers::(publisher/@name)] = Transports::(publisher/@transport);\n' -->
   <xsl:for-each select="$publishers">
-    <xsl:text>  // this->publisherTransports_[ Publishers::</xsl:text>
-    <xsl:value-of select="@name"/>
-    <xsl:text>] = Transports::</xsl:text>
-    <xsl:value-of select="@transport"/>
-    <xsl:text>;</xsl:text>
-    <xsl:value-of select="$newline"/>
+    <xsl:text>  this->publisherTransports_[ Publishers::</xsl:text>
+    <xsl:value-of select="concat(@name, '] = ', @transportId, ';', $newline)"/>
   </xsl:for-each>
   <xsl:value-of select="$newline"/>
 
   <!-- Assign Transport ID -->
   <!-- '  this->subscriberTransports_[ Subscribers::(subscriber/@name)] = Transports::(subscriber/@transport);\n' -->
   <xsl:for-each select="$subscribers">
-    <xsl:text>  // this->subscriberTransports_[ Subscribers::</xsl:text>
-    <xsl:value-of select="@name"/>
-    <xsl:text>] = Transports::</xsl:text>
-    <xsl:value-of select="@transport"/>
-    <xsl:text>;</xsl:text>
-    <xsl:value-of select="$newline"/>
+    <xsl:text>  this->subscriberTransports_[ Subscribers::</xsl:text>
+    <xsl:value-of select="concat(@name, '] = ', @transportId, ';', $newline)"/>
   </xsl:for-each>
   <xsl:text>}
 

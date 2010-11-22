@@ -1,3 +1,15 @@
+Mon Nov 22 19:55:18 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+
+          Assign transport IDs as specified in model.
+
+        * tools/modeling/tests/Messenger/MessengerModel.opendds:
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.opendds:
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.opendds:
+
+          Add transport IDs to publishers and subscribers.
+
 Mon Nov 22 19:35:56 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
