@@ -217,7 +217,7 @@ OpenDDS::Model::Entities::publisher( const std::string& name)
         participant,
         profile->qos,
         OpenDDS::DCPS::DEFAULT_STATUS_MASK,
-        transport.in()
+        profile->transport //TODO: test with transpot changes
       );
 
   return this->publisherByString_[ name];
@@ -282,7 +282,7 @@ OpenDDS::Model::Entities::subscriber( const std::string& name)
         participant,
         profile->qos,
         OpenDDS::DCPS::DEFAULT_STATUS_MASK,
-        transport.in()
+        profile->transport //TODO: test with transpot changes
       );
 
   return this->subscriberByString_[ name];

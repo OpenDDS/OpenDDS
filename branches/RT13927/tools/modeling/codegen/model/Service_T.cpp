@@ -39,10 +39,6 @@ OpenDDS::Model::Service<ModelName, InstanceTraits>::Service(int& argc, char** ar
   for( int index = 0; index < ModelName::DataReaders::LAST_INDEX; ++index) {
     this->readers_[ index] = 0;
   }
-
-  for( int index = 0; index < ModelName::Transports::LAST_INDEX; ++index) {
-    this->transports_[ index] = 0;
-  }
 }
 
 template< typename ModelName, class InstanceTraits>
@@ -175,20 +171,19 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createPublisher(
 )
 {
   typename Participants::Values participant = this->modelData_.participant( publisher);
-  typename Transports::Values   transport   = this->modelData_.transport( publisher);
+  OpenDDS::DCPS::TransportIdType transport = this->modelData_.transport( publisher);
 
   if( !this->participants_[ participant]) {
     this->createParticipant( participant);
   }
-  if( !this->transports_[ transport]) {
-    this->createTransport( transport);
-  }
+
+  this->transport_config(transport);
 
   this->publishers_[ publisher] = this->delegate_.createPublisher(
     this->participants_[ participant],
     this->modelData_.qos( publisher),
     this->modelData_.mask( publisher),
-    this->transports_[ transport]
+    transport
   );
 }
 
@@ -200,20 +195,19 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscriber(
 )
 {
   typename Participants::Values participant = this->modelData_.participant( subscriber);
-  typename Transports::Values   transport   = this->modelData_.transport( subscriber);
+  OpenDDS::DCPS::TransportIdType transport = this->modelData_.transport( subscriber);
 
   if( !this->participants_[ participant]) {
     this->createParticipant( participant);
   }
-  if( !this->transports_[ transport]) {
-    this->createTransport( transport);
-  }
+
+  transport_config(transport);
 
   this->subscribers_[ subscriber] = this->delegate_.createSubscriber(
     this->participants_[ participant],
     this->modelData_.qos( subscriber),
     this->modelData_.mask( subscriber),
-    this->transports_[ transport]
+    transport
   );
 }
 
@@ -267,17 +261,6 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscription( typenam
   );
 }
 
-template< typename ModelName, class InstanceTraits>
-inline
-void
-OpenDDS::Model::Service< ModelName, InstanceTraits>::createTransport( typename Transports::Values transport)
-{
-  this->transports_[ transport] = this->delegate_.createTransport(
-    this->modelData_.transportKey( transport),
-    this->modelData_.transportKind( transport),
-    this->modelData_.transportConfig( transport)
-  );
-}
 
 template< typename ModelName, class InstanceTraits>
 inline

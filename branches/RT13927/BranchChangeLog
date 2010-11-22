@@ -1,3 +1,16 @@
+Mon Nov 22 15:59:54 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dds_model.mpb:
+        * tools/modeling/codegen/model/DefaultInstanceTraits.h:
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/Entities.cpp:
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Support library changes for moving the transport config info to the
+          instance traits.
+
 Mon Nov 22 14:38:55 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:

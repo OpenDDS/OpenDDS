@@ -11,17 +11,16 @@
 
 #include "CopyQos.h"
 #include "Entities.h"
+#include "DefaultInstanceTraits.h"
 #include "dds/DdsDcpsC.h"
 #include "dds/DCPS/Service_Participant.h"
 
 namespace OpenDDS { namespace Model {
 
-  struct DefaultInstanceTraits;
-
   template< typename ModelName, class InstanceTraits = DefaultInstanceTraits>
-  class Service : public CopyQos, public Entities {
+  class Service : public CopyQos, public Entities, public InstanceTraits {
     public:
-      typedef typename ModelName::template Data< InstanceTraits> Data;
+      typedef typename ModelName::Data Data;
 
       typedef typename ModelName::Participants Participants;
       typedef typename ModelName::Types        Types;
@@ -30,7 +29,6 @@ namespace OpenDDS { namespace Model {
       typedef typename ModelName::Subscribers  Subscribers;
       typedef typename ModelName::DataWriters  DataWriters;
       typedef typename ModelName::DataReaders  DataReaders;
-      typedef typename ModelName::Transports   Transports;
 
       Service(int& argc, char** argv);
       ~Service();
@@ -67,9 +65,6 @@ namespace OpenDDS { namespace Model {
       void createSubscription(
              typename DataReaders::Values reader
            );
-      void createTransport(
-             typename Transports::Values transport
-           );
       ///}
 
       ///( @name Delegate Callbacks
@@ -97,7 +92,6 @@ namespace OpenDDS { namespace Model {
       DDS::Subscriber*              subscribers_[  Subscribers::LAST_INDEX];
       DDS::DataWriter*              writers_[      DataWriters::LAST_INDEX];
       DDS::DataReader*              readers_[      DataReaders::LAST_INDEX];
-      OpenDDS::DCPS::TransportImpl* transports_[   Transports::LAST_INDEX];
   };
 
 } } // End namespace OpenDDS::Model
