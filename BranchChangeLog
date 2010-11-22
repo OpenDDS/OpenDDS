@@ -1,3 +1,14 @@
+Mon Nov 22 20:18:43 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+          Syntax errors for the missing elements cases.
+
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.opendds:
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.opendds:
+
+          Add transport IDs to publishers and subscribers.
+
 Mon Nov 22 19:55:18 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
