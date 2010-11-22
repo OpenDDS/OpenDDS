@@ -219,16 +219,18 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 </xsl:if>
 <xsl:if test="$publishers">
   <xsl:text>
-          Participants::Values      publisherParticipants_[  Publishers::LAST_INDEX];
-          unsigned long             publisherMasks_[         Publishers::LAST_INDEX];
-          DDS::PublisherQos         publishersQos_[          Publishers::LAST_INDEX];
+          Participants::Values      publisherParticipants_[   Publishers::LAST_INDEX];
+          unsigned long             publisherMasks_[          Publishers::LAST_INDEX];
+          DDS::PublisherQos         publishersQos_[           Publishers::LAST_INDEX];
+          OpenDDS::DCPS::TransportIdType publisherTransports_[Publishers::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:if test="$subscribers">
   <xsl:text>
-          Participants::Values      subscriberParticipants_[ Subscribers::LAST_INDEX];
-          unsigned long             subscriberMasks_[        Subscribers::LAST_INDEX];
-          DDS::SubscriberQos        subscribersQos_[         Subscribers::LAST_INDEX];
+          Participants::Values      subscriberParticipants_[   Subscribers::LAST_INDEX];
+          unsigned long             subscriberMasks_[          Subscribers::LAST_INDEX];
+          DDS::SubscriberQos        subscribersQos_[           Subscribers::LAST_INDEX];
+          OpenDDS::DCPS::TransportIdType subscriberTransports_[Subscribers::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:if test="$writers">
@@ -258,8 +260,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 </xsl:if>
 <xsl:text>
 
-          OpenDDS::DCPS::TransportIdType publisherTransports_[    Publishers::LAST_INDEX];
-          OpenDDS::DCPS::TransportIdType subscriberTransports_[   Subscribers::LAST_INDEX];
       };
   };
 } } } // End of namespace OpenDDS::Model::</xsl:text>
