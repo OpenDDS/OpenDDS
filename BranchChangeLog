@@ -1,3 +1,8 @@
+Mon Nov 22 21:56:12 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+          Don't reference zero-sized transport arrays which no longer exist.
 Mon Nov 22 20:45:24 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:

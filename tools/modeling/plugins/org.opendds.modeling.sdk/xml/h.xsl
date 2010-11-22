@@ -773,7 +773,19 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Publishers::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->publisherTransports_[ which];
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$publishers">
+    <xsl:text>  return this->publisherTransports_[ which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return 0; // not valid when no publishers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>
+
 }
 
 inline
@@ -785,7 +797,18 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Subscribers::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-  return this->subscriberTransports_[ which];
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$subscribers">  return this->subscriberTransports_[ which];
+    <xsl:text>
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return 0;  //  not valid when no subscribers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>
 }
 
 // The template implementation.
