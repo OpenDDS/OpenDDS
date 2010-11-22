@@ -1,7 +1,7 @@
 project(*xmlPublisher) : dcpsexe, dds_model {
   exename   = publisher
-  after    += MessengerModel
-  libs     += MessengerModel
+  after    += MessengerNoSub
+  libs     += MessengerNoSub
   libpaths += model
 
   Source_Files {

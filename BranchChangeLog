@@ -1,3 +1,14 @@
+Mon Nov 22 22:19:36 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Use std::vector instead of arrays when the index could be zero.
+
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.mpc:
+
+          Corrected reference to model-generated library for this test.
+
 Mon Nov 22 21:56:12 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:

@@ -15,6 +15,8 @@
 #include "dds/DdsDcpsC.h"
 #include "dds/DCPS/Service_Participant.h"
 
+#include <vector>
+
 namespace OpenDDS { namespace Model {
 
   template< typename ModelName, class InstanceTraits = DefaultInstanceTraits>
@@ -34,14 +36,13 @@ namespace OpenDDS { namespace Model {
       ~Service();
 
       ///{ @name DDS API Entity accessors.
-      DDS::DomainParticipant_var participant( typename Participants::Values participant);
-      DDS::Topic_var topic( typename Participants::Values participant,
-                            typename Topics::Values       topic
-                     );
-      DDS::Publisher_var publisher( typename Publishers::Values publisher);
-      DDS::Subscriber_var subscriber( typename Subscribers::Values subscriber);
-      DDS::DataWriter_var writer( typename DataWriters::Values writer);
-      DDS::DataReader_var reader( typename DataReaders::Values reader);
+      DDS::DomainParticipant_var participant(typename Participants::Values participant);
+      DDS::Topic_var topic(typename Participants::Values participant,
+                           typename Topics::Values       topic);
+      DDS::Publisher_var publisher(typename Publishers::Values publisher);
+      DDS::Subscriber_var subscriber(typename Subscribers::Values subscriber);
+      DDS::DataWriter_var writer(typename DataWriters::Values writer);
+      DDS::DataReader_var reader(typename DataReaders::Values reader);
       ///}
 
     private:
@@ -67,7 +68,7 @@ namespace OpenDDS { namespace Model {
            );
       ///}
 
-      ///( @name Delegate Callbacks
+      ///{ @name Delegate Callbacks
       virtual void copyPublicationQos(
                      unsigned int        which,
                      DDS::DataWriterQos& writerQos
@@ -80,18 +81,17 @@ namespace OpenDDS { namespace Model {
 
       Data     modelData_;
 
-      // Basic array containers since we only allow access using the
-      // defined enumeration values.
-
-      DDS::DomainParticipant*       participants_[ Participants::LAST_INDEX];
-      bool                          types_[        Participants::LAST_INDEX]
-                                          [        Types::LAST_INDEX];
-      DDS::Topic*                   topics_[       Participants::LAST_INDEX]
-                                           [       Topics::LAST_INDEX];
-      DDS::Publisher*               publishers_[   Publishers::LAST_INDEX];
-      DDS::Subscriber*              subscribers_[  Subscribers::LAST_INDEX];
-      DDS::DataWriter*              writers_[      DataWriters::LAST_INDEX];
-      DDS::DataReader*              readers_[      DataReaders::LAST_INDEX];
+      ///{@ The vectors are indexed by the corresponding enumeration,
+      ///   for example Participants::Values for participants_, except
+      ///   for the special cases (vectors-of-vectors) which are noted.
+      std::vector<DDS::DomainParticipant*>       participants_;
+      std::vector<std::vector<bool> >            types_;  // [part][type]
+      std::vector<std::vector<DDS::Topic*> >     topics_; // [part][topic]
+      std::vector<DDS::Publisher*>               publishers_;
+      std::vector<DDS::Subscriber*>              subscribers_;
+      std::vector<DDS::DataWriter*>              writers_;
+      std::vector<DDS::DataReader*>              readers_;
+      ///}
   };
 
 } } // End namespace OpenDDS::Model
