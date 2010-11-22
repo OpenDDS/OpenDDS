@@ -24,6 +24,8 @@
 <!-- All types-->
 <xsl:variable name="type"     select="/opendds:OpenDDSModel/dataLib/types"/>
 
+<xsl:variable name="has-module-definitions" select=""/>
+
 <!-- Index (lookup table is in lut variable) -->
 <xsl:key
      name  = "lut-type"
@@ -39,7 +41,7 @@
   <!-- required to build on windows -->
   <xsl:call-template name="processIntrinsicSequences"/>
 
-  <xsl:if test="string-length($modelname) > 0">
+  <xsl:if test="(string-length($modelname) > 0) and $type">
     <xsl:value-of select="concat($newline,
                                  'module ', $modelname, ' {', $newline,
                                  '  // Forward declarations', $newline)"/>
@@ -59,7 +61,7 @@
     <xsl:with-param name="nodes" select="$terminals"/>
   </xsl:call-template>
 
-  <xsl:if test="string-length($modelname) > 0">
+  <xsl:if test="(string-length($modelname) > 0) and $type">
     <xsl:value-of select="concat($newline, $newline, '};', $newline, $newline)"/>
   </xsl:if>
 </xsl:template>
