@@ -28,7 +28,6 @@
 <xsl:variable name="subscribers"  select="//subscribers"/>
 <xsl:variable name="writers"      select="//writers"/>
 <xsl:variable name="readers"      select="//readers"/>
-<xsl:variable name="transport"   select="//transports"/>
 
 <!-- key table of remote data type references -->
 <xsl:key name="remote-topic-types"
@@ -60,6 +59,7 @@
 #include "model/Exceptions.h"
 
 #include "dds/DdsDcpsInfrastructureC.h" // For QoS Policy types.
+#include "dds/DCPS/transport/framework/TransportDefs.h"
 
 namespace DDS {
   class DomainParticipant; // For type registration
@@ -147,12 +147,7 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
     <xsl:with-param name="values" select="$readers"/>
   </xsl:call-template>
 
-  <xsl:call-template name="generate-enum">
-    <xsl:with-param name="class" select="'Transports'"/>
-    <xsl:with-param name="values" select="$transport"/>
-  </xsl:call-template>
-
-<xsl:text>      template&lt; class InstanceTraits&gt;
+<xsl:text>
       class Data {
         public:
           Data();
@@ -180,9 +175,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
           long        domain( Participants::Values which);
           const char* typeName( Types::Values which);
           const char* topicName( Topics::Values which);
-          const char* transportKind( Transports::Values which);
-          long        transportKey( Transports::Values which);
-          OpenDDS::DCPS::TransportConfiguration* transportConfig( Transports::Values which);
           ///}
 
           /// Type registration.
@@ -196,8 +188,8 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
           Topics::Values       topic( DataReaders::Values which);
           Publishers::Values   publisher( DataWriters::Values which);
           Subscribers::Values  subscriber( DataReaders::Values which);
-          Transports::Values   transport( Publishers::Values which);
-          Transports::Values   transport( Subscribers::Values which);
+          OpenDDS::DCPS::TransportIdType transport( Publishers::Values which);
+          OpenDDS::DCPS::TransportIdType transport( Subscribers::Values which);
           ///}
 
         private:
@@ -206,7 +198,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
           void loadMasks();
           void loadDomains();
           void loadTopics();
-          void loadTransports();
           void loadMaps();
 
           void buildParticipantsQos();
@@ -267,23 +258,19 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 </xsl:if>
 <xsl:text>
 
-          Transports::Values        publisherTransports_[    Publishers::LAST_INDEX];   // To be removed/replaced
-          Transports::Values        subscriberTransports_[   Subscribers::LAST_INDEX];  // To be removed/replaced
-          const char*               transportKinds_[         Transports::LAST_INDEX];         // To be removed/replaced
-          unsigned long             transportKeys_[          Transports::LAST_INDEX];         // To be removed/replaced
-          OpenDDS::DCPS::TransportConfiguration* transportConfigs_[ Transports::LAST_INDEX];  // To be removed/replaced
+          OpenDDS::DCPS::TransportIdType publisherTransports_[    Publishers::LAST_INDEX];
+          OpenDDS::DCPS::TransportIdType subscriberTransports_[   Subscribers::LAST_INDEX];
       };
   };
 } } } // End of namespace OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text>
 
-template&lt; class InstanceTraits&gt;
 inline
 DDS::DomainParticipantQos
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::qos( Participants::Values which)
+  <xsl:text>::Elements::Data::qos( Participants::Values which)
 {
   if( which &lt; 0 || which >= Participants::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -301,12 +288,11 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 DDS::TopicQos
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::qos( Topics::Values which)
+  <xsl:text>::Elements::Data::qos( Topics::Values which)
 {
   if( which &lt; 0 || which >= Topics::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -324,12 +310,11 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 DDS::PublisherQos
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::qos( Publishers::Values which)
+  <xsl:text>::Elements::Data::qos( Publishers::Values which)
 {
   if( which &lt; 0 || which >= Publishers::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -347,12 +332,11 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 DDS::SubscriberQos
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::qos( Subscribers::Values which)
+  <xsl:text>::Elements::Data::qos( Subscribers::Values which)
 {
   if( which &lt; 0 || which >= Subscribers::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -370,12 +354,11 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 DDS::DataWriterQos
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::qos( DataWriters::Values which)
+  <xsl:text>::Elements::Data::qos( DataWriters::Values which)
 {
   if( which &lt; 0 || which >= DataWriters::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -393,12 +376,11 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 DDS::DataReaderQos
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::qos( DataReaders::Values which)
+  <xsl:text>::Elements::Data::qos( DataReaders::Values which)
 {
   if( which &lt; 0 || which >= DataReaders::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -416,12 +398,11 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 long
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::mask( Participants::Values which)
+  <xsl:text>::Elements::Data::mask( Participants::Values which)
 {
   if( which &lt; 0 || which >= Participants::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -439,12 +420,11 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 long
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::mask( Publishers::Values which)
+  <xsl:text>::Elements::Data::mask( Publishers::Values which)
 {
   if( which &lt; 0 || which >= Publishers::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -462,12 +442,11 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 long
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::mask( Subscribers::Values which)
+  <xsl:text>::Elements::Data::mask( Subscribers::Values which)
 {
   if( which &lt; 0 || which >= Subscribers::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -485,12 +464,11 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 long
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::mask( Topics::Values which)
+  <xsl:text>::Elements::Data::mask( Topics::Values which)
 {
   if( which &lt; 0 || which >= Topics::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -508,12 +486,11 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 long
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::mask( DataWriters::Values which)
+  <xsl:text>::Elements::Data::mask( DataWriters::Values which)
 {
   if( which &lt; 0 || which >= DataWriters::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -531,12 +508,11 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 long
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::mask( DataReaders::Values which)
+  <xsl:text>::Elements::Data::mask( DataReaders::Values which)
 {
   if( which &lt; 0 || which >= DataReaders::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -554,12 +530,11 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 long
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::domain( Participants::Values which)
+  <xsl:text>::Elements::Data::domain( Participants::Values which)
 {
   if( which &lt; 0 || which >= Participants::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -577,12 +552,11 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 const char*
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::typeName( Types::Values which)
+  <xsl:text>::Elements::Data::typeName( Types::Values which)
 {
   if( which &lt; 0 || which >= Types::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -600,12 +574,11 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 const char*
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::topicName( Topics::Values which)
+  <xsl:text>::Elements::Data::topicName( Topics::Values which)
 {
   if( which &lt; 0 || which >= Topics::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -623,40 +596,13 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
-inline
-const char*
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::transportKind( Transports::Values which)
-{
-  if( which &lt; 0 || which >= Transports::LAST_INDEX) {
-    throw OutOfBoundsException();
-  }
-  return this->transportKinds_[ which];
-}
-
-template&lt; class InstanceTraits&gt;
-inline
-long
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::transportKey( Transports::Values which)
-{
-  if( which &lt; 0 || which >= Transports::LAST_INDEX) {
-    throw OutOfBoundsException();
-  }
-  return this->transportKeys_[ which];
-}
-
-template&lt; class InstanceTraits&gt;
 inline
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text>::Elements::Participants::Values
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::participant( Publishers::Values which)
+  <xsl:text>::Elements::Data::participant( Publishers::Values which)
 {
   if( which &lt; 0 || which >= Publishers::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -674,14 +620,13 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text>::Elements::Participants::Values
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::participant( Subscribers::Values which)
+  <xsl:text>::Elements::Data::participant( Subscribers::Values which)
 {
   if( which &lt; 0 || which >= Subscribers::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -699,14 +644,13 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text>::Elements::Types::Values
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::type( Topics::Values which)
+  <xsl:text>::Elements::Data::type( Topics::Values which)
 {
   if( which &lt; 0 || which >= Topics::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -724,14 +668,13 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text>::Elements::Topics::Values
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::topic( DataWriters::Values which)
+  <xsl:text>::Elements::Data::topic( DataWriters::Values which)
 {
   if( which &lt; 0 || which >= DataWriters::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -749,14 +692,13 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text>::Elements::Topics::Values
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::topic( DataReaders::Values which)
+  <xsl:text>::Elements::Data::topic( DataReaders::Values which)
 {
   if( which &lt; 0 || which >= DataReaders::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -774,14 +716,13 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text>::Elements::Publishers::Values
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::publisher( DataWriters::Values which)
+  <xsl:text>::Elements::Data::publisher( DataWriters::Values which)
 {
   if( which &lt; 0 || which >= DataWriters::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -799,14 +740,13 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text>::Elements::Subscribers::Values
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::subscriber( DataReaders::Values which)
+  <xsl:text>::Elements::Data::subscriber( DataReaders::Values which)
 {
   if( which &lt; 0 || which >= DataReaders::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -824,14 +764,11 @@ OpenDDS::Model::</xsl:text>
 </xsl:choose>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
+OpenDDS::DCPS::TransportIdType
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Transports::Values
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::transport( Publishers::Values which)
+  <xsl:text>::Elements::Data::transport( Publishers::Values which)
 {
   if( which &lt; 0 || which >= Publishers::LAST_INDEX) {
     throw OutOfBoundsException();
@@ -839,14 +776,11 @@ OpenDDS::Model::</xsl:text>
   return this->publisherTransports_[ which];
 }
 
-template&lt; class InstanceTraits&gt;
 inline
+OpenDDS::DCPS::TransportIdType
 OpenDDS::Model::</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Transports::Values
-OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Data&lt;InstanceTraits&gt;::transport( Subscribers::Values which)
+  <xsl:text>::Elements::Data::transport( Subscribers::Values which)
 {
   if( which &lt; 0 || which >= Subscribers::LAST_INDEX) {
     throw OutOfBoundsException();

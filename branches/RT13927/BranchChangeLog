@@ -1,3 +1,11 @@
+Mon Nov 22 14:38:55 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+        Move transports out of model to external file.  Requires change to
+        support library (not yet checked in).
+
 Sun Nov 21 21:06:45 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:

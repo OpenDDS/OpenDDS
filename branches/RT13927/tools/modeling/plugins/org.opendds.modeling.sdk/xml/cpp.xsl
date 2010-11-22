@@ -33,7 +33,6 @@
 <xsl:variable name="subscribers"  select="//subscribers"/>
 <xsl:variable name="topics"       select="//topics"/>
 <xsl:variable name="types"        select="//types"/>
-<xsl:variable name="transport"   select="//opendds:transport"/>
 
 <!-- Indices (lookup tables are at the bottom of this document) -->
 <xsl:key
@@ -44,11 +43,6 @@
 <xsl:key
      name  = "lut-qos-field"
      match = "qos-field"
-     use   = "@type"/>
-
-<xsl:key
-     name  = "lut-transport"
-     match = "transport"
      use   = "@type"/>
 
 <!-- key table of remote data type references -->
@@ -102,9 +96,8 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
   <xsl:value-of select="$modelname"/>
   <xsl:text> {
 
-template&lt; class InstanceTraits&gt;
 inline
-Elements::Data&lt;InstanceTraits&gt;::Data()
+Elements::Data::Data()
 { </xsl:text>
 <xsl:if test="$topics">
   <xsl:text>
@@ -119,18 +112,10 @@ Elements::Data&lt;InstanceTraits&gt;::Data()
 </xsl:text>
 </xsl:if>
 <xsl:text>
-  for (int index = 0;
-       index &lt; OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Transports::LAST_INDEX;
-       ++index) {
-    this->transportConfigs_[index] = 0;
-  }
 
   this->loadMasks();
   this->loadDomains();
   this->loadTopics();
-  this->loadTransports();
   this->loadMaps(); /// MUST precede the QoS loading.
 
   this->buildParticipantsQos();
@@ -141,9 +126,8 @@ Elements::Data&lt;InstanceTraits&gt;::Data()
   this->buildSubscriptionsQos();
 }
 
-template&lt; class InstanceTraits&gt;
 inline
-Elements::Data&lt;InstanceTraits&gt;::~Data()
+Elements::Data::~Data()
 { </xsl:text>
 <xsl:if test="$topics">
   <xsl:text>
@@ -162,10 +146,9 @@ Elements::Data&lt;InstanceTraits&gt;::~Data()
 </xsl:if>
 <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 void
-Elements::Data&lt;InstanceTraits&gt;::registerType(
+Elements::Data::registerType(
   Types::Values      type,
   DomainParticipant* participant
 )
@@ -195,10 +178,9 @@ Elements::Data&lt;InstanceTraits&gt;::registerType(
   }
 }
 
-template&lt; class InstanceTraits&gt;
 inline
 void
-Elements::Data&lt;InstanceTraits&gt;::loadMasks()
+Elements::Data::loadMasks()
 {
 </xsl:text>
   <!-- '  this->participantMasks_[ Participants::(domainParticipant/@name)] = (domainParticipant/@mask);\n' -->
@@ -267,10 +249,9 @@ Elements::Data&lt;InstanceTraits&gt;::loadMasks()
   </xsl:for-each>
   <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 void
-Elements::Data&lt;InstanceTraits&gt;::loadDomains()
+Elements::Data::loadDomains()
 {
 </xsl:text>
   <!-- '  this->domains_[ Participants::(domainParticipant/@name)] = (domainParticipant/@domain);\n' -->
@@ -284,10 +265,9 @@ Elements::Data&lt;InstanceTraits&gt;::loadDomains()
   </xsl:for-each>
   <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 void
-Elements::Data&lt;InstanceTraits&gt;::loadTopics()
+Elements::Data::loadTopics()
 {
   /// @TODO verify how we manage the model strings.
 </xsl:text>
@@ -302,39 +282,9 @@ Elements::Data&lt;InstanceTraits&gt;::loadTopics()
   </xsl:for-each>
   <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 void
-Elements::Data&lt;InstanceTraits&gt;::loadTransports()
-{
-  /// @TODO verify how we manage the model strings.
-</xsl:text>
-  <!-- '  this->transportKinds_[ Transports::(transport/@name)] = "(.../transport_type/@value)";\n' -->
-  <xsl:for-each select="$transport/@key">
-    <xsl:text>  this->transportKinds_[ Transports::</xsl:text>
-    <xsl:value-of select="../@name"/>
-    <xsl:text>] = "</xsl:text>
-    <xsl:value-of select="../opendds:commonConfig/opendds:transport_type/@value"/>
-    <xsl:text>";</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
-  <xsl:value-of select="$newline"/>
-
-  <!-- '  this->transportKeys_[ Transports::(transport/@name)] = (transport/@key);\n' -->
-  <xsl:for-each select="$transport/@key">
-    <xsl:text>  this->transportKeys_[ Transports::</xsl:text>
-    <xsl:value-of select="../@name"/>
-    <xsl:text>] = InstanceTraits::transport_key_base + </xsl:text>
-    <xsl:value-of select="."/>
-    <xsl:text>;</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
-  <xsl:text>}
-
-template&lt; class InstanceTraits&gt;
-inline
-void
-Elements::Data&lt;InstanceTraits&gt;::loadMaps()
+Elements::Data::loadMaps()
 {
 </xsl:text>
   <!-- '  this->publisherParticipants_[ Publishers::(publisher/@name)] = Participants::(publisher/../@name);\n' -->
@@ -431,6 +381,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
   </xsl:for-each>
   <xsl:value-of select="$newline"/>
 
+  <!-- Assign Transport ID -->
   <!-- '  this->publisherTransports_[ Publishers::(publisher/@name)] = Transports::(publisher/@transport);\n' -->
   <xsl:for-each select="$publishers">
     <xsl:text>  // this->publisherTransports_[ Publishers::</xsl:text>
@@ -442,6 +393,7 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
   </xsl:for-each>
   <xsl:value-of select="$newline"/>
 
+  <!-- Assign Transport ID -->
   <!-- '  this->subscriberTransports_[ Subscribers::(subscriber/@name)] = Transports::(subscriber/@transport);\n' -->
   <xsl:for-each select="$subscribers">
     <xsl:text>  // this->subscriberTransports_[ Subscribers::</xsl:text>
@@ -453,10 +405,9 @@ Elements::Data&lt;InstanceTraits&gt;::loadMaps()
   </xsl:for-each>
   <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 void
-Elements::Data&lt;InstanceTraits&gt;::buildParticipantsQos()
+Elements::Data::buildParticipantsQos()
 {
   DomainParticipantQos participantQos;
   Participants::Values participant;
@@ -479,10 +430,9 @@ Elements::Data&lt;InstanceTraits&gt;::buildParticipantsQos()
   </xsl:for-each>
   <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 void
-Elements::Data&lt;InstanceTraits&gt;::buildTopicsQos()
+Elements::Data::buildTopicsQos()
 {
   TopicQos       topicQos;
   Topics::Values topic;
@@ -506,10 +456,9 @@ Elements::Data&lt;InstanceTraits&gt;::buildTopicsQos()
   </xsl:for-each>
   <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 void
-Elements::Data&lt;InstanceTraits&gt;::buildPublishersQos()
+Elements::Data::buildPublishersQos()
 {
 </xsl:text>
 <xsl:choose>
@@ -541,10 +490,9 @@ Elements::Data&lt;InstanceTraits&gt;::buildPublishersQos()
 </xsl:choose>
   <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 void
-Elements::Data&lt;InstanceTraits&gt;::buildSubscribersQos()
+Elements::Data::buildSubscribersQos()
 {
 </xsl:text>
   <xsl:choose>
@@ -577,10 +525,9 @@ Elements::Data&lt;InstanceTraits&gt;::buildSubscribersQos()
   </xsl:choose>
   <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 void
-Elements::Data&lt;InstanceTraits&gt;::buildPublicationsQos()
+Elements::Data::buildPublicationsQos()
 {
 </xsl:text>
 <xsl:choose>
@@ -612,10 +559,9 @@ Elements::Data&lt;InstanceTraits&gt;::buildPublicationsQos()
 </xsl:choose>
   <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
 inline
 void
-Elements::Data&lt;InstanceTraits&gt;::buildSubscriptionsQos()
+Elements::Data::buildSubscriptionsQos()
 {
   DataReaders::Values  reader;
   DataReaderQos        readerQos;
@@ -638,72 +584,9 @@ Elements::Data&lt;InstanceTraits&gt;::buildSubscriptionsQos()
   </xsl:for-each>
   <xsl:text>}
 
-template&lt; class InstanceTraits&gt;
-inline
-OpenDDS::DCPS::TransportConfiguration*
-Elements::Data&lt;InstanceTraits&gt;::transportConfig(Transports::Values which)
-{
-  if (which &lt; 0 || which &gt;= Transports::LAST_INDEX) {
-    throw OutOfBoundsException();
-  }
-  if (this->transportConfigs_[which]) {
-    return this->transportConfigs_[which];
-  }
-
-  switch (which) {
-</xsl:text>
-  <xsl:for-each select="$transport">
-    <!-- Lookup the configuration data type for this transport. -->
-    <xsl:variable name="type" select="opendds:commonConfig/opendds:transport_type/@value"/>
-    <xsl:variable name="config-type">
-      <xsl:for-each select="$lut"> <!-- Change context for the lookup -->
-        <xsl:value-of select="key('lut-transport', $type)/@configtype"/>
-      </xsl:for-each>
-    </xsl:variable>
-
-    <xsl:text>  case Transports::</xsl:text>
-    <xsl:value-of select="@name"/>
-    <xsl:text>:
-    {
-      unsigned long key = this->transportKey(which);
-      const char* kind = this->transportKind(which);
-      typedef </xsl:text>
-    <xsl:value-of select="$config-type"/>
-    <xsl:text> ConfigType;
-      TransportConfiguration_rch baseconfig =
-        TheTransportFactory->create_configuration(key, kind);
-      ConfigType* config = static_cast&lt;ConfigType*&gt;(baseconfig.in());
-      if (!config) {
-        throw BadCastException();
-      }
-</xsl:text>
-    <xsl:for-each select="./*">
-      <xsl:value-of select="$newline"/>
-      <xsl:text>      // </xsl:text>
-      <xsl:value-of select="substring-after( name(), ':')"/>
-      <xsl:value-of select="$newline"/>
-
-      <!-- '  config->(configfield) = (value);\n' -->
-      <xsl:call-template name="process-transports">
-        <xsl:with-param name="config" select="."/>
-        <xsl:with-param name="indent" select="'      '"/>
-      </xsl:call-template>
-    </xsl:for-each>
-
-<xsl:text>
-      return this->transportConfigs_[which] = baseconfig._retn();
-    }
-</xsl:text>
-  </xsl:for-each>
-  <xsl:text>  default:
-    return 0;
-  }
-}
-
-template&lt; class InstanceTraits&gt;
 inline
 void
-Elements::Data&lt;InstanceTraits&gt;::copyPublicationQos(
+Elements::Data::copyPublicationQos(
   DataWriters::Values which,
   DataWriterQos&amp;  writerQos
 )
@@ -733,10 +616,9 @@ Elements::Data&lt;InstanceTraits&gt;::copyPublicationQos(
   }
 }
 
-template&lt; class InstanceTraits&gt;
 inline
 void
-Elements::Data&lt;InstanceTraits&gt;::copySubscriptionQos(
+Elements::Data::copySubscriptionQos(
   DataReaders::Values which,
   DataReaderQos&amp;  readerQos
 )
