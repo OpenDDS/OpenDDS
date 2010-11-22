@@ -201,7 +201,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscriber(
     this->createParticipant( participant);
   }
 
-  transport_config(transport);
+  this->transport_config(transport);
 
   this->subscribers_[ subscriber] = this->delegate_.createSubscriber(
     this->participants_[ participant],
