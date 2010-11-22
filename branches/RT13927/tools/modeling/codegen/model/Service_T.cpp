@@ -5,39 +5,20 @@ template< typename ModelName, class InstanceTraits>
 inline
 OpenDDS::Model::Service<ModelName, InstanceTraits>::Service(int& argc, char** argv)
   : Entities(argc, argv)
+  , modelData_()
+  , participants_(Participants::LAST_INDEX)
+  , types_(Participants::LAST_INDEX)
+  , topics_(Participants::LAST_INDEX)
+  , publishers_(Publishers::LAST_INDEX)
+  , subscribers_(Subscribers::LAST_INDEX)
+  , writers_(DataWriters::LAST_INDEX)
+  , readers_(DataReaders::LAST_INDEX)
 {
   this->delegate_.service() = this;
 
-  for( int index = 0; index < ModelName::Participants::LAST_INDEX; ++index) {
-    this->participants_[ index] = 0;
-  }
-
-  for( int outter = 0; outter < ModelName::Participants::LAST_INDEX; ++outter) {
-    for( int inner = 0; inner < ModelName::Types::LAST_INDEX; ++inner) {
-      this->types_[ outter][ inner] = false;
-    }
-  }
-
-  for( int outter = 0; outter < ModelName::Participants::LAST_INDEX; ++outter) {
-    for( int inner = 0; inner < ModelName::Topics::LAST_INDEX; ++inner) {
-      this->topics_[ outter][ inner] = 0;
-    }
-  }
-
-  for( int index = 0; index < ModelName::Publishers::LAST_INDEX; ++index) {
-    this->publishers_[ index] = 0;
-  }
-
-  for( int index = 0; index < ModelName::Subscribers::LAST_INDEX; ++index) {
-    this->subscribers_[ index] = 0;
-  }
-
-  for( int index = 0; index < ModelName::DataWriters::LAST_INDEX; ++index) {
-    this->writers_[ index] = 0;
-  }
-
-  for( int index = 0; index < ModelName::DataReaders::LAST_INDEX; ++index) {
-    this->readers_[ index] = 0;
+  for (int outer = 0; outer < Participants::LAST_INDEX; ++outer) {
+    this->types_[outer].resize(Types::LAST_INDEX);
+    this->topics_[outer].resize(Topics::LAST_INDEX);
   }
 }
 
