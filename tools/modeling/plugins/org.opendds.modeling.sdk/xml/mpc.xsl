@@ -55,6 +55,23 @@
     <xsl:text>.idl
   }
 
+  IDL_Files {
+    </xsl:text>
+    <xsl:value-of select="$modelname"/>
+    <xsl:text>.idl
+  }
+
+  Header_Files {
+    </xsl:text>
+    <xsl:value-of select="$modelname"/>
+    <xsl:text>_T.h
+  }
+
+  Template_Files {
+    </xsl:text>
+    <xsl:value-of select="$modelname"/>
+    <xsl:text>_T.cpp
+  }
 }
 </xsl:text>
 </xsl:template>
