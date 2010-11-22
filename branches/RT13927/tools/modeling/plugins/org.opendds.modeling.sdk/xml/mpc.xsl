@@ -67,6 +67,9 @@
     <xsl:text>_T.h
   }
 
+  Source_Files {
+  }
+
   Template_Files {
     </xsl:text>
     <xsl:value-of select="$modelname"/>

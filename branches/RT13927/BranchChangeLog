@@ -1,3 +1,13 @@
+Mon Nov 22 20:45:24 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+          Don't create zero-sized transport arrays.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpc.xsl:
+
+          Make sure Source files is empty.
+
 Mon Nov 22 20:18:43 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
