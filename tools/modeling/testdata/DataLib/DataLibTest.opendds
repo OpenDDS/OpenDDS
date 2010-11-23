@@ -65,5 +65,6 @@
       </branches>
       <default xmi:id="_lg9ckOhJEd-JX5YzKdN9LA" name="string_mem" type="_ffCYYOgzEd-S8emkenrYEA"/>
     </types>
+    <types xsi:type="types:Enum" xmi:id="_aQn3gPdBEd-DtrB-ELEhZw"/>
   </dataLib>
 </opendds:OpenDDSModel>
