@@ -1,3 +1,10 @@
+Tue Nov 23 17:38:03 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_h.xsl:
+
+          New stylesheets for generating traits
+
 Mon Nov 22 23:08:14 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/DefaultInstanceTraits.h:
