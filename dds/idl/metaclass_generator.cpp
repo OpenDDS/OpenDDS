@@ -74,6 +74,7 @@ namespace {
         "      return getMetaStruct<" << fieldType << ">().getValue(&typed."
         << fieldName << ", field + " << n << ");\n"
         "    }\n";
+      be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     }
   }
 

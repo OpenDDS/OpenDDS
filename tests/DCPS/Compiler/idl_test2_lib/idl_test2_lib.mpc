@@ -7,5 +7,6 @@ project : dcps {
 
   TypeSupport_Files {
     FooDef.idl
+    BazDef.idl
   }
 }
