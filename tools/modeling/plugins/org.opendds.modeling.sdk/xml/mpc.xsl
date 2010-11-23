@@ -11,6 +11,11 @@
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
 
+<xsl:variable name="newline">
+  <xsl:text>
+</xsl:text>
+</xsl:variable>
+
 <!-- blech -->
 <xsl:variable name="lowercase" select="'abcdefghijklmnopqrstuvwxyz'"/>
 <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
@@ -62,13 +67,15 @@
   }
 
   Header_Files {
-    </xsl:text>
-    <xsl:value-of select="$modelname"/>
-    <xsl:text>_T.h
-  }
+</xsl:text>
+    <xsl:value-of select="concat('    ', $modelname, '_T.h', $newline)"/>
+    <xsl:value-of select="concat('    ', $modelname, 'Traits.h', $newline)"/>
+    <xsl:text>  }
 
   Source_Files {
-  }
+</xsl:text>
+    <xsl:value-of select="concat('    ', $modelname, 'Traits.cpp', $newline)"/>
+    <xsl:text>  }
 
   Template_Files {
     </xsl:text>

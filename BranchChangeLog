@@ -1,3 +1,17 @@
+Tue Nov 23 21:51:08 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpc.xsl:
+
+          Add traits files to MPC file.
+
+        * tools/modeling/tests/Messenger/MessengerModel.opendds:
+
+          Change transport IDs to those found in aModel.opendds.
+
+        * tools/modeling/tests/Messenger/run_test.pl:
+
+          Add model lib path.
+
 Tue Nov 23 21:23:20 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgraph:
