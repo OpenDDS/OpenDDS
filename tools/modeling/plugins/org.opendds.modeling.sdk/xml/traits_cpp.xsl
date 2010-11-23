@@ -36,6 +36,7 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
+#include "dds/DCPS/transport/udp/UdpConfiguration.h"
 #include &lt;stdexcept&gt;
 
 void
@@ -124,17 +125,28 @@ void
 
 <xsl:template match="opendds:tcpConfig">
   <xsl:text>        {
-          OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config =
+          OpenDDS::DCPS::SimpleTcpConfiguration* specific_config =
               (OpenDDS::DCPS::SimpleTcpConfiguration*) config.in();
 </xsl:text>
   <xsl:apply-templates/>
   <xsl:text>        }
 </xsl:text>
 </xsl:template>
+
 <xsl:template match="opendds:multicastConfig">
   <xsl:text>        {
-          OpenDDS::DCPS::MulticastConfiguration* mc_config =
+          OpenDDS::DCPS::MulticastConfiguration* specific_config =
               (OpenDDS::DCPS::MulticastConfiguration*) config.in();
+</xsl:text>
+  <xsl:apply-templates/>
+  <xsl:text>        }
+</xsl:text>
+</xsl:template>
+
+<xsl:template match="opendds:udpConfig">
+  <xsl:text>        {
+          OpenDDS::DCPS::UdpConfiguration* specific_config =
+              (OpenDDS::DCPS::UdpConfiguration*) config.in();
 </xsl:text>
   <xsl:apply-templates/>
   <xsl:text>        }
@@ -143,104 +155,104 @@ void
 
 
 <xsl:template match="opendds:local_address_str">
-  <xsl:value-of select="concat('          tcp_config->local_address_ = ',
+  <xsl:value-of select="concat('          specific_config->local_address_ = ',
                                'ACE_INET_Addr(&quot;', @value, '&quot;)',
                                ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:enable_nagle_algorithm">
-  <xsl:value-of select="concat('          tcp_config->enable_nagle_algorithm_ = ',
+  <xsl:value-of select="concat('          specific_config->enable_nagle_algorithm_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:conn_retry_initial_delay">
-  <xsl:value-of select="concat('          tcp_config->conn_retry_initial_delay_ = ',
+  <xsl:value-of select="concat('          specific_config->conn_retry_initial_delay_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:conn_retry_backoff_multiplier">
-  <xsl:value-of select="concat('          tcp_config->conn_retry_backoff_multiplier_ = ',
+  <xsl:value-of select="concat('          specific_config->conn_retry_backoff_multiplier_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:conn_retry_attempts">
-  <xsl:value-of select="concat('          tcp_config->conn_retry_attempts_ = ',
+  <xsl:value-of select="concat('          specific_config->conn_retry_attempts_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:max_output_pause_period">
-  <xsl:value-of select="concat('          tcp_config->max_output_pause_period_ = ',
+  <xsl:value-of select="concat('          specific_config->max_output_pause_period_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:passive_reconnect_duration">
-  <xsl:value-of select="concat('          tcp_config->passive_reconnect_duration_ = ',
+  <xsl:value-of select="concat('          specific_config->passive_reconnect_duration_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:passive_connect_duration">
-  <xsl:value-of select="concat('          tcp_config->passive_connect_duration_ = ',
+  <xsl:value-of select="concat('          specific_config->passive_connect_duration_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:default_to_ipv6">
-  <xsl:value-of select="concat('          mc_config->default_to_ipv6_ = ',
+  <xsl:value-of select="concat('          specific_config->default_to_ipv6_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:port_offset">
-  <xsl:value-of select="concat('          mc_config->port_offset_ = ',
+  <xsl:value-of select="concat('          specific_config->port_offset_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:group_address">
-  <xsl:value-of select="concat('          mc_config->group_address_ = ',
+  <xsl:value-of select="concat('          specific_config->group_address_ = ',
                                'ACE_INET_Addr(&quot;', @value, '&quot;)',
                                ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:reliable">
-  <xsl:value-of select="concat('          mc_config->reliable_ = ',
+  <xsl:value-of select="concat('          specific_config->reliable_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:syn_backoff">
-  <xsl:value-of select="concat('          mc_config->syn_backoff_ = ',
+  <xsl:value-of select="concat('          specific_config->syn_backoff_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:syn_interval">
-  <xsl:value-of select="concat('          mc_config->syn_interval_ = ',
+  <xsl:value-of select="concat('          specific_config->syn_interval_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:syn_timeout">
-  <xsl:value-of select="concat('          mc_config->syn_timeout_ = ',
+  <xsl:value-of select="concat('          specific_config->syn_timeout_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:nak_depth">
-  <xsl:value-of select="concat('          mc_config->nak_depth_ = ',
+  <xsl:value-of select="concat('          specific_config->nak_depth_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:ttl">
-  <xsl:value-of select="concat('          mc_config->ttl_ = ',
+  <xsl:value-of select="concat('          specific_config->ttl_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:rcv_buffer_size">
-  <xsl:value-of select="concat('          mc_config->rcv_buffer_size_ = ',
+  <xsl:value-of select="concat('          specific_config->rcv_buffer_size_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:nak_interval">
-  <xsl:value-of select="concat('          mc_config->nak_interval_ = ',
+  <xsl:value-of select="concat('          specific_config->nak_interval_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
 <xsl:template match="opendds:nak_timeout">
-  <xsl:value-of select="concat('          mc_config->nak_timeout_ = ',
+  <xsl:value-of select="concat('          specific_config->nak_timeout_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
