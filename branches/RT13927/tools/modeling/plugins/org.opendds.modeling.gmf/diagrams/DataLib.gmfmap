@@ -14,15 +14,16 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"
-          viewPattern="Long">
+          viewPattern="Long"
+          editorPattern="">
         <diagramLabel
-            href="DataLib.gmfgraph#SimpleTypeName"/>
+            href="DataLib.gmfgraph#NoAttribsTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.5"/>
       <diagramNode
-          href="DataLib.gmfgraph#SimpleType"/>
+          href="DataLib.gmfgraph#NoAttribsType"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -36,13 +37,13 @@
           readOnly="true"
           viewPattern="LongLong">
         <diagramLabel
-            href="DataLib.gmfgraph#SimpleTypeName"/>
+            href="DataLib.gmfgraph#NoAttribsTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.6"/>
       <diagramNode
-          href="DataLib.gmfgraph#SimpleType"/>
+          href="DataLib.gmfgraph#NoAttribsType"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -56,13 +57,13 @@
           readOnly="true"
           viewPattern="Short">
         <diagramLabel
-            href="DataLib.gmfgraph#SimpleTypeName"/>
+            href="DataLib.gmfgraph#NoAttribsTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.8"/>
       <diagramNode
-          href="DataLib.gmfgraph#SimpleType"/>
+          href="DataLib.gmfgraph#NoAttribsType"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -76,13 +77,13 @@
           readOnly="true"
           viewPattern="ULong">
         <diagramLabel
-            href="DataLib.gmfgraph#SimpleTypeName"/>
+            href="DataLib.gmfgraph#NoAttribsTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.9"/>
       <diagramNode
-          href="DataLib.gmfgraph#SimpleType"/>
+          href="DataLib.gmfgraph#NoAttribsType"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -96,13 +97,13 @@
           readOnly="true"
           viewPattern="ULongLong">
         <diagramLabel
-            href="DataLib.gmfgraph#SimpleTypeName"/>
+            href="DataLib.gmfgraph#NoAttribsTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.10"/>
       <diagramNode
-          href="DataLib.gmfgraph#SimpleType"/>
+          href="DataLib.gmfgraph#NoAttribsType"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -116,13 +117,13 @@
           readOnly="true"
           viewPattern="UShort">
         <diagramLabel
-            href="DataLib.gmfgraph#SimpleTypeName"/>
+            href="DataLib.gmfgraph#NoAttribsTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.11"/>
       <diagramNode
-          href="DataLib.gmfgraph#SimpleType"/>
+          href="DataLib.gmfgraph#NoAttribsType"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -136,13 +137,13 @@
           readOnly="true"
           viewPattern="Double">
         <diagramLabel
-            href="DataLib.gmfgraph#SimpleTypeName"/>
+            href="DataLib.gmfgraph#NoAttribsTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.2"/>
       <diagramNode
-          href="DataLib.gmfgraph#SimpleType"/>
+          href="DataLib.gmfgraph#NoAttribsType"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -156,13 +157,13 @@
           readOnly="true"
           viewPattern="Float">
         <diagramLabel
-            href="DataLib.gmfgraph#SimpleTypeName"/>
+            href="DataLib.gmfgraph#NoAttribsTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.4"/>
       <diagramNode
-          href="DataLib.gmfgraph#SimpleType"/>
+          href="DataLib.gmfgraph#NoAttribsType"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -176,13 +177,13 @@
           readOnly="true"
           viewPattern="Char">
         <diagramLabel
-            href="DataLib.gmfgraph#SimpleTypeName"/>
+            href="DataLib.gmfgraph#NoAttribsTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.1"/>
       <diagramNode
-          href="DataLib.gmfgraph#SimpleType"/>
+          href="DataLib.gmfgraph#NoAttribsType"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -196,13 +197,13 @@
           readOnly="true"
           viewPattern="WChar">
         <diagramLabel
-            href="DataLib.gmfgraph#SimpleTypeName"/>
+            href="DataLib.gmfgraph#NoAttribsTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.12"/>
       <diagramNode
-          href="DataLib.gmfgraph#SimpleType"/>
+          href="DataLib.gmfgraph#NoAttribsType"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -216,13 +217,13 @@
           readOnly="true"
           viewPattern="Octet">
         <diagramLabel
-            href="DataLib.gmfgraph#SimpleTypeName"/>
+            href="DataLib.gmfgraph#NoAttribsTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.7"/>
       <diagramNode
-          href="DataLib.gmfgraph#SimpleType"/>
+          href="DataLib.gmfgraph#NoAttribsType"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -236,13 +237,13 @@
           readOnly="true"
           viewPattern="Boolean">
         <diagramLabel
-            href="DataLib.gmfgraph#SimpleTypeName"/>
+            href="DataLib.gmfgraph#NoAttribsTypeName"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DataLib.gmftool#//@palette/@tools.0/@tools.0"/>
       <diagramNode
-          href="DataLib.gmfgraph#SimpleType"/>
+          href="DataLib.gmfgraph#NoAttribsType"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -282,6 +283,43 @@
         href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Enum"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Enum">
+        <diagramLabel
+            href="DataLib.gmfgraph#EnumTypeName"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="name: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DataLib.gmfgraph#EnumName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Enum/name"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping">
+        <diagramLabel
+            href="DataLib.gmfgraph#EnumLiterals"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Enum/literals"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.0/@tools.3"/>
+      <diagramNode
+          href="DataLib.gmfgraph#Enum"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+    <ownedChild>
+      <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Sequence"/>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
@@ -304,7 +342,7 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.1/@tools.2"/>
+          href="DataLib.gmftool#//@palette/@tools.1/@tools.1"/>
       <diagramNode
           href="DataLib.gmfgraph#Collection"/>
     </ownedChild>
@@ -336,7 +374,7 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.1/@tools.4"/>
+          href="DataLib.gmftool#//@palette/@tools.1/@tools.2"/>
       <diagramNode
           href="DataLib.gmfgraph#Collection"/>
     </ownedChild>
@@ -374,6 +412,8 @@
     </ownedChild>
   </nodes>
   <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Typedef"/>
@@ -398,9 +438,193 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="DataLib.gmftool#//@palette/@tools.3/@tools.0"/>
+          href="DataLib.gmftool#//@palette/@tools.4"/>
       <diagramNode
           href="DataLib.gmfgraph#NamedType"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Case"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Case"
+          editorPattern="">
+        <diagramLabel
+            href="DataLib.gmfgraph#CaseTypeName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Case/literal"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="literal: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DataLib.gmfgraph#CaseLiteralName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Case/literal"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.2/@tools.0"/>
+      <diagramNode
+          href="DataLib.gmfgraph#Case"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Branch"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Branch"
+          editPattern="">
+        <diagramLabel
+            href="DataLib.gmfgraph#NoAttribsTypeName"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.2/@tools.1"/>
+      <diagramNode
+          href="DataLib.gmfgraph#NoAttribsType"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Union"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Union">
+        <diagramLabel
+            href="DataLib.gmfgraph#NamedTypeTypeName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Union/name"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="name: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DataLib.gmfgraph#NamedTypeName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Union/name"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.2/@tools.2"/>
+      <diagramNode
+          href="DataLib.gmfgraph#NamedType"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Field"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Field">
+        <diagramLabel
+            href="DataLib.gmfgraph#NamedTypeTypeName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Field/name"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="name: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DataLib.gmfgraph#NamedTypeName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Field/name"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.5"/>
+      <diagramNode
+          href="DataLib.gmfgraph#NamedType"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Struct"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Struct">
+        <diagramLabel
+            href="DataLib.gmfgraph#StructTypeName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Struct/name"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="name: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DataLib.gmfgraph#StructName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Struct/name"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="isDcpsDataType: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DataLib.gmfgraph#StructIsDcpsDataType"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Struct/isDcpsDataType"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.3/@tools.0"/>
+      <diagramNode
+          href="DataLib.gmfgraph#Struct"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Types.ecore#//Key"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="Key">
+        <diagramLabel
+            href="DataLib.gmfgraph#KeyTypeName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Key/index"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="index: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DataLib.gmfgraph#KeyIndex"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Types.ecore#//Key/index"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DataLib.gmftool#//@palette/@tools.3/@tools.1"/>
+      <diagramNode
+          href="DataLib.gmfgraph#Key"/>
     </ownedChild>
   </nodes>
   <links>
@@ -423,6 +647,116 @@
     <linkMetaFeature
         xsi:type="ecore:EReference"
         href="../../org.opendds.modeling.model/model/Types.ecore#//Typedef/type"/>
+  </links>
+  <links>
+    <diagramLink
+        href="DataLib.gmfgraph#Link"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="../../org.opendds.modeling.model/model/Types.ecore#//Field/type"/>
+  </links>
+  <links>
+    <labelMappings
+        xsi:type="gmfmap:FeatureLabelMapping"
+        readOnly="true"
+        viewPattern="">
+      <diagramLabel
+          href="DataLib.gmfgraph#NamedConnectorCase"/>
+    </labelMappings>
+    <diagramLink
+        href="DataLib.gmfgraph#NamedLink"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="../../org.opendds.modeling.model/model/Types.ecore#//Branch/cases"/>
+  </links>
+  <links>
+    <labelMappings
+        xsi:type="gmfmap:FeatureLabelMapping"
+        readOnly="true"
+        viewPattern="">
+      <diagramLabel
+          href="DataLib.gmfgraph#NamedConnectorField"/>
+    </labelMappings>
+    <diagramLink
+        href="DataLib.gmfgraph#NamedLink"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="../../org.opendds.modeling.model/model/Types.ecore#//Branch/field"/>
+  </links>
+  <links>
+    <labelMappings
+        xsi:type="gmfmap:FeatureLabelMapping"
+        readOnly="true"
+        viewPattern="">
+      <diagramLabel
+          href="DataLib.gmfgraph#NamedConnectorBranch"/>
+    </labelMappings>
+    <diagramLink
+        href="DataLib.gmfgraph#NamedLink"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="../../org.opendds.modeling.model/model/Types.ecore#//Union/branches"/>
+  </links>
+  <links>
+    <labelMappings
+        xsi:type="gmfmap:FeatureLabelMapping"
+        readOnly="true"
+        viewPattern="">
+      <diagramLabel
+          href="DataLib.gmfgraph#NamedConnectorDefault"/>
+    </labelMappings>
+    <diagramLink
+        href="DataLib.gmfgraph#NamedLink"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="../../org.opendds.modeling.model/model/Types.ecore#//Union/default"/>
+  </links>
+  <links>
+    <labelMappings
+        xsi:type="gmfmap:FeatureLabelMapping"
+        readOnly="true"
+        viewPattern="">
+      <diagramLabel
+          href="DataLib.gmfgraph#NamedConnectorSwitch"/>
+    </labelMappings>
+    <diagramLink
+        href="DataLib.gmfgraph#NamedLink"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="../../org.opendds.modeling.model/model/Types.ecore#//Union/switch"/>
+  </links>
+  <links>
+    <labelMappings
+        xsi:type="gmfmap:FeatureLabelMapping"
+        readOnly="true">
+      <diagramLabel
+          href="DataLib.gmfgraph#NamedConnectorField"/>
+    </labelMappings>
+    <diagramLink
+        href="DataLib.gmfgraph#NamedLink"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="../../org.opendds.modeling.model/model/Types.ecore#//Struct/fields"/>
+  </links>
+  <links>
+    <labelMappings
+        xsi:type="gmfmap:FeatureLabelMapping"
+        readOnly="true">
+      <diagramLabel
+          href="DataLib.gmfgraph#NamedConnectorKey"/>
+    </labelMappings>
+    <diagramLink
+        href="DataLib.gmfgraph#NamedLink"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="../../org.opendds.modeling.model/model/Types.ecore#//Struct/keys"/>
+  </links>
+  <links>
+    <diagramLink
+        href="DataLib.gmfgraph#Link"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="../../org.opendds.modeling.model/model/Types.ecore#//Key/field"/>
   </links>
   <diagram>
     <diagramCanvas

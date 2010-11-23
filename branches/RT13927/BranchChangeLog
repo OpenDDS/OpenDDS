@@ -1,3 +1,21 @@
+Tue Nov 23 21:04:19 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmftool:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.trace:
+
+          Version of DataLib diagram using non-customized diagram code. This
+          means that Struct fields cannot be entered in the Struct figure using
+          the form "name: type". Therefore a Field figure needs to be defined
+          for every field.
+
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds:
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds_diagram_datalib:
+        * tools/modeling/testdata/DataLib/DataLibTest_screenshot_1.png:
+
+          Test data updates based on latest DataLib diagram code.
+
 Tue Nov 23 19:15:42 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl:

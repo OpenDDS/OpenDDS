@@ -151,26 +151,8 @@
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
-          title="ArraySubtype"
-          description="Create new ArraySubtype">
-        <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
-        <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
-      </tools>
-      <tools
-          xsi:type="gmftool:CreationTool"
           title="Sequence"
           description="Create new Sequence">
-        <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
-        <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
-      </tools>
-      <tools
-          xsi:type="gmftool:CreationTool"
-          title="SequenceSubtype"
-          description="Create new SequenceSubtype">
         <smallIcon
             xsi:type="gmftool:DefaultImage"/>
         <largeIcon
@@ -192,24 +174,6 @@
         collapsible="true">
       <tools
           xsi:type="gmftool:CreationTool"
-          title="Union"
-          description="Create new Union">
-        <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
-        <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
-      </tools>
-      <tools
-          xsi:type="gmftool:CreationTool"
-          title="UnionSwitch"
-          description="Create new UnionSwitch">
-        <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
-        <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
-      </tools>
-      <tools
-          xsi:type="gmftool:CreationTool"
           title="Case"
           description="Create new Case">
         <smallIcon
@@ -228,58 +192,8 @@
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
-          title="BranchField"
-          description="Create new BranchField">
-        <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
-        <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
-      </tools>
-      <tools
-          xsi:type="gmftool:CreationTool"
-          title="BranchCases"
-          description="Create new BranchCases">
-        <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
-        <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
-      </tools>
-      <tools
-          xsi:type="gmftool:CreationTool"
-          title="UnionBranches"
-          description="Create new UnionBranches">
-        <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
-        <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
-      </tools>
-      <tools
-          xsi:type="gmftool:CreationTool"
-          title="UnionDefault"
-          description="Create new UnionDefault">
-        <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
-        <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
-      </tools>
-    </tools>
-    <tools
-        xsi:type="gmftool:ToolGroup"
-        title="Typedef"
-        collapsible="true">
-      <tools
-          xsi:type="gmftool:CreationTool"
-          title="Typedef"
-          description="Create new Typedef">
-        <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
-        <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
-      </tools>
-      <tools
-          xsi:type="gmftool:CreationTool"
-          title="TypedefType"
-          description="Create new TypedefType">
+          title="Union"
+          description="Create new Union">
         <smallIcon
             xsi:type="gmftool:DefaultImage"/>
         <largeIcon
@@ -302,15 +216,6 @@
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
-          title="Struct Field"
-          description="Create new Struct Field">
-        <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
-        <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
-      </tools>
-      <tools
-          xsi:type="gmftool:CreationTool"
           title="Key"
           description="Create new Key">
         <smallIcon
@@ -318,15 +223,24 @@
         <largeIcon
             xsi:type="gmftool:DefaultImage"/>
       </tools>
-      <tools
-          xsi:type="gmftool:CreationTool"
-          title="StructKeys"
-          description="Create new StructKeys">
-        <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
-        <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
-      </tools>
+    </tools>
+    <tools
+        xsi:type="gmftool:CreationTool"
+        title="Typedef"
+        description="Create new Typedef">
+      <smallIcon
+          xsi:type="gmftool:DefaultImage"/>
+      <largeIcon
+          xsi:type="gmftool:DefaultImage"/>
+    </tools>
+    <tools
+        xsi:type="gmftool:CreationTool"
+        title="Field"
+        description="Create new Field">
+      <smallIcon
+          xsi:type="gmftool:DefaultImage"/>
+      <largeIcon
+          xsi:type="gmftool:DefaultImage"/>
     </tools>
   </palette>
 </gmftool:ToolRegistry>
