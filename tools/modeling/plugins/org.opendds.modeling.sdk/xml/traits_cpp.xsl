@@ -60,7 +60,7 @@ void
   // Create the impl
   OpenDDS::DCPS::TransportImpl_rch impl = TheTransportFactory->obtain(id);
   if (!impl.in()) {
-    impl = TheTransportFactory->create_transport_impl(id, transport_type, false);
+    impl = TheTransportFactory->create_transport_impl(id, true);
   }
 }
 </xsl:text>

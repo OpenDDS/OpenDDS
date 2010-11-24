@@ -1,3 +1,18 @@
+Wed Nov 24 03:25:07 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_h.xsl:
+
+          Export Traits struct from shared library.
+          Change hard-coded model name to MessengerModel.
+          Initialize transport impl properly (autoconfig true).
+          Instantiate service using traits with transports.
+
+        * tools/modeling/tests/Codegen/aModel.opendds:
+
+          Added udp transport.
+
 Tue Nov 23 21:51:08 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpc.xsl:

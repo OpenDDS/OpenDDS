@@ -827,18 +827,17 @@ OpenDDS::Model::</xsl:text>
 
 // Establish the model interfaces for use by the application.
 
-#include "</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>TypeSupportImpl.h"
+</xsl:text>
+  <xsl:value-of select="concat('#include &quot;', $modelname, 'TypeSupportImpl.h&quot;', $newline)"/>
+  <xsl:value-of select="concat('#include &quot;', $modelname, 'Traits.h&quot;')"/>
+<xsl:text>
 #include "model/DefaultInstanceTraits.h"
 #include "model/Service_T.h"
 
 typedef OpenDDS::Model::Service&lt; OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements&gt; </xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>Type;
+  <xsl:value-of select="concat($modelname, '::Elements, ', $modelname, 'Traits&gt; ', $modelname, 'Type;', $newline)"/>
 
+<xsl:text>
 #endif /* </xsl:text>
   <xsl:value-of select="$MODELNAME"/>
   <xsl:text>_T_H */
