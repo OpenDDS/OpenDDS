@@ -69,6 +69,7 @@
   <labels
       name="PubSubStereotype"
       figure="PubSubFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.0/@accessors.0"/>
   <labels
       name="PubSubTransportId"

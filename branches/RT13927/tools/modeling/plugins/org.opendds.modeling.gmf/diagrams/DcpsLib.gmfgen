@@ -76,8 +76,7 @@
           visualID="5007"
           editPartClassName="PublisherName2EditPart"
           itemSemanticEditPolicyClassName="PublisherName2ItemSemanticEditPolicy"
-          readOnly="true"
-          elementIcon="true">
+          readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -4260,8 +4259,7 @@
           visualID="5009"
           editPartClassName="SubscriberName2EditPart"
           itemSemanticEditPolicyClassName="SubscriberName2ItemSemanticEditPolicy"
-          readOnly="true"
-          elementIcon="true">
+          readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -5124,7 +5122,8 @@
         childNodes="//@diagram/@childNodes.0 //@diagram/@childNodes.45"
         title="DefaultCompartment"
         needsTitle="false"
-        node="//@diagram/@topLevelNodes.0">
+        node="//@diagram/@topLevelNodes.0"
+        listLayout="false">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <viewmap
@@ -5166,7 +5165,8 @@
         canonicalEditPolicyClassName="PublisherDataWritersCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.1"
         title="DataWriters"
-        node="//@diagram/@childNodes.0">
+        node="//@diagram/@childNodes.0"
+        listLayout="false">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <viewmap
@@ -5424,7 +5424,8 @@
         canonicalEditPolicyClassName="SubscriberDataReadersCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.46"
         title="DataReaders"
-        node="//@diagram/@childNodes.45">
+        node="//@diagram/@childNodes.45"
+        listLayout="false">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <viewmap
