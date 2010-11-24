@@ -21,7 +21,7 @@
 </xsl:variable>
 
 <!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "'JJS'"/>
+<xsl:variable name = "modelname" select = "'MessengerModel'"/>
 <xsl:variable name = "MODELNAME" select = "translate($modelname, 
                                            'abcdefghijklmnopqrstuvwxyz',
                                            'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>
@@ -31,12 +31,16 @@
   <xsl:message>Hard-coding model name</xsl:message>
   <xsl:value-of select="concat('#ifndef ', $MODELNAME, '_TRAITS_H', $newline)"/>
   <xsl:value-of select="concat('#define ', $MODELNAME, '_TRAITS_H', $newline)"/>
-  <xsl:variable name="classname" select="concat($modelname, 'Traits')"/>
+  <xsl:variable name="structname" select="concat($modelname, 'Traits')"/>
 
   <xsl:text>
 #include "model/DefaultInstanceTraits.h"
+#include "MessengerModel_export.h"
 
-struct </xsl:text><xsl:value-of select="$classname"/><xsl:text> : OpenDDS::Model::DefaultInstanceTraits {
+struct </xsl:text>
+  <xsl:value-of select="concat($modelname, '_Export ')"/>
+  <xsl:value-of select="$structname"/>
+  <xsl:text> : OpenDDS::Model::DefaultInstanceTraits {
   void transport_config(OpenDDS::DCPS::TransportIdType id);
 };
 

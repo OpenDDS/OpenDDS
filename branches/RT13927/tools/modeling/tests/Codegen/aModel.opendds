@@ -992,6 +992,24 @@
       <opendds:rcv_buffer_size value="0"/>
     </opendds:multicastConfig>
   </opendds:transport>
+
+  <opendds:transport name="transport5" key="5">
+    <opendds:commonConfig>
+      <opendds:swap_bytes               value="false"/>
+      <opendds:queue_messages_per_pool  value="10"/>
+      <opendds:queue_initial_pools      value="10"/>
+      <opendds:max_packet_size          value="65536"/>
+      <opendds:max_samples_per_packet   value="20"/>
+      <opendds:optimum_packet_size      value="1450"/>
+      <opendds:transport_type           value="udp"/>
+      <opendds:thread_per_connection    value="false"/>
+      <opendds:datalink_release_delay   value="10000"/>
+      <opendds:datalink_control_chunks  value="32"/>
+    </opendds:commonConfig>
+    <opendds:udpConfig>
+      <opendds:local_address_str             value="127.0.0.1"/>
+    </opendds:udpConfig>
+  </opendds:transport>
 </opendds:transportLibrary>
 
 </generator:model>
