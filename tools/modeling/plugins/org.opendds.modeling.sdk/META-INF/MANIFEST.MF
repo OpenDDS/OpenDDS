@@ -15,6 +15,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.filesystem
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .
-Export-Package: org.opendds.modeling.sdk.codegen,
+Export-Package: org.opendds.modeling.schemas.generator._1,
+ org.opendds.modeling.schemas.generator._1.util,
+ org.opendds.modeling.sdk.codegen,
  org.opendds.modeling.sdk.wizards
 Bundle-ActivationPolicy: lazy
+Import-Package: org.opendds.modeling.sdk.presentation
