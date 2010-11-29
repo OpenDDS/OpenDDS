@@ -1,3 +1,9 @@
+Mon Nov 29 22:31:29 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.ecore:
+
+          Add Transports and TransportConfig to model.
+
 Mon Nov 29 22:19:34 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model:
