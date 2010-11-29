@@ -1,7 +1,19 @@
+Mon Nov 29 22:19:34 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/bin:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src:
+
+          New InstanceTraits ecore model.
+
 Mon Nov 29 22:05:17 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/InstanceForm.java:
- 
+
           Remove reference to deleted model class.
 
 Mon Nov 29 21:36:18 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
