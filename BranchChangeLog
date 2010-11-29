@@ -1,3 +1,10 @@
+Mon Nov 29 22:36:08 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.genmodel:
+
+          Model generator for InstanceTraits.
+
 Mon Nov 29 22:31:29 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.ecore:
