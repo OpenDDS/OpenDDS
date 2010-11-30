@@ -7,8 +7,73 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="transport" upperBound="-1"
         eType="#//TransportConfig" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="TransportConfig">
+  <eClassifiers xsi:type="ecore:EClass" name="TransportConfig" abstract="true">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="transportId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
         defaultValueLiteral="-1"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="swap_bytes" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="queue_messages_per_pool"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt" defaultValueLiteral="10"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="queue_initial_pools" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="10"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="max_packet_size" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="65536"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="max_samples_per_packet"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt" defaultValueLiteral="20"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="optimum_packet_size" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="1450"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="thread_per_connection"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean" defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="datalink_release_delay"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt" defaultValueLiteral="10000"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="datalink_control_chunks"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt" defaultValueLiteral="32"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TcpConfig" eSuperTypes="#//TransportConfig">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="transport_type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        changeable="false" defaultValueLiteral="SimpleTcp"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="local_address_str" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="enable_nagle_algorithm"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean" defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="conn_retry_initial_delay"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt" defaultValueLiteral="500"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="conn_retry_backoff_multiplier"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat" defaultValueLiteral="2.0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="conn_retry_attempts" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="3"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="max_output_pause_period"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt" defaultValueLiteral="0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="passive_reconnect_duration"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt" defaultValueLiteral="2000"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="passive_connect_duration"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt" defaultValueLiteral="0"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MulticastConfig" eSuperTypes="#//TransportConfig">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="transport_type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        changeable="false" defaultValueLiteral="multicast"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="default_to_ipv6" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="port_offset" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="10000"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="group_address" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reliable" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="syn_backoff" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
+        defaultValueLiteral="2.0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="syn_interval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="250"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="syn_timeout" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="30000"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nak_depth" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="32"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nak_interval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="500"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nak_timeout" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="30000"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="ttl" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="1"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="rcv_buffer_size" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="0"/>
   </eClassifiers>
 </ecore:EPackage>

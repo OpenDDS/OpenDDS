@@ -1,3 +1,10 @@
+Tue Nov 30 16:32:14 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.genmodel:
+
+          TcpConfig and MulticastConfig in InstanceTraits ecore model.
+
 Mon Nov 29 22:36:08 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
