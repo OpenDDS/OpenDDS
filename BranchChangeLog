@@ -1,3 +1,18 @@
+Wed Dec  1 19:20:50 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/com.ociweb.emf.util/META-INF/MANIFEST.MF:
+
+	  Export package com.ociweb.emf.util.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/src/com:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/com/ociweb:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/com/ociweb/emf:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/com/ociweb/emf/util:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/com/ociweb/emf/util/ClassesFinder.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/com/ociweb/emf/util/ReferencesFinder.java:
+
+          Removed these files since they're in their own plug-in now.
+
 Wed Dec  1 18:53:12 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/.classpath:
