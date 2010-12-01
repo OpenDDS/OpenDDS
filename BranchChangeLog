@@ -1,3 +1,10 @@
+Wed Dec  1 15:17:02 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/images/gmf-pop-up-bars.png:
+        * tools/modeling/docs/design_notes/plugins.html:
+
+	  Started to add diagram TODOs.
+
 Wed Dec  1 14:41:56 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
@@ -6,9 +13,9 @@ Wed Dec  1 14:41:56 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
         * tools/modeling/plugins/org.opendds.modeling.model/model/Types.ecore:
 
-	  Because Keys can be re-ordered in the Struct Keys compartment it is no longer
-	  necessary to have an index attribute associated with Key for user to
-	  manipulate to specify order. Therefore the index attribute has been removed.
+          Because Keys can be re-ordered in the Struct Keys compartment it is no longer
+          necessary to have an index attribute associated with Key for user to
+          manipulate to specify order. Therefore the index attribute has been removed.
 
 Wed Dec  1 14:20:33 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
