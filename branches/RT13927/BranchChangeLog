@@ -1,3 +1,10 @@
+Wed Dec  1 19:55:31 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+
+	  Now needs to import from com.ociweb.emf.util plug-in.
+
 Wed Dec  1 19:52:59 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.genmodel:
