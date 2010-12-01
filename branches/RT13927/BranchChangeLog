@@ -1,17 +1,49 @@
+Wed Dec  1 14:20:33 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/.classpath:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/.project:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/edit/commands/CompartmentRepositionEObjectCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/edit/parts/StructFieldsEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/edit/parts/StructKeysEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/edit/policies/CompartmentEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/providers/FieldParserProvider.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/providers/StructKeyParserProvider.java:
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgraph:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmftool:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.trace:
+
+	  Added support for specifying Field types in Struct, Union, and Branch using
+	  the form "name: type" to figure compartment reduce diagram clutter.
+	  Similarly a Keys compartment was added to Struct where keys can be added by
+	  typing in the name of the corresponding Field within the Struct.
+	  Struct Field and Keys can be dragged and dropped within the compartment to
+	  reorder.
+
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds:
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds_diagram_datalib:
+        * tools/modeling/testdata/DataLib/DataLibTest_screenshot_1.png:
+
+	  Updates based on the latest version of the DataLib diagram code.
+
 Wed Dec  1 03:20:13 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.ecore:
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.genmodel:
 
           Converted TcpConfig attributes to optional contained class references.
-          
+
 
 Wed Dec  1 02:17:12 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.ecore:
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.genmodel:
 
-          Converted TransportConfig attributes to optional contained class 
+          Converted TransportConfig attributes to optional contained class
           references.
 
 Tue Nov 30 16:32:14 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>

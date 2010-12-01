@@ -242,6 +242,27 @@
       <accessors
           figure="//@figures.0/@descriptors.9/@actualFigure/@children.1"/>
     </descriptors>
+    <descriptors
+        name="CompartmentFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Rectangle"
+          name="CompartmentFigure">
+        <layout
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"
+            forceSingleLine="true"/>
+      </actualFigure>
+    </descriptors>
+    <descriptors
+        name="ListItemLabel">
+      <actualFigure
+          xsi:type="gmfgraph:Label"
+          name="ListItemLabel">
+        <insets
+            top="2"
+            left="5"/>
+      </actualFigure>
+    </descriptors>
   </figures>
   <nodes
       name="Type"
@@ -273,6 +294,21 @@
   <connections
       name="NamedLink"
       figure="NamedConnectorFigure"/>
+  <compartments
+      name="Fields"
+      figure="CompartmentFigure"/>
+  <compartments
+      name="Field"
+      figure="CompartmentFigure"
+      needsTitle="true"/>
+  <compartments
+      name="Default Field"
+      figure="CompartmentFigure"
+      needsTitle="true"/>
+  <compartments
+      name="Keys"
+      figure="CompartmentFigure"
+      needsTitle="true"/>
   <labels
       name="TypeName"
       figure="TypeFigure"
@@ -378,4 +414,8 @@
       figure="NamedConnectorFigure"
       elementIcon="false"
       accessor="//@figures.0/@descriptors.1/@accessors.5"/>
+  <labels
+      name="ListItem"
+      figure="ListItemLabel"
+      elementIcon="false"/>
 </gmfgraph:Canvas>
