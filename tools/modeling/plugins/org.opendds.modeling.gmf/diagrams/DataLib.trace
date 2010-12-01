@@ -145,6 +145,9 @@
     <nodeLabelTraces
         visualID="5049"
         queryText="true"/>
+    <compartmentTraces
+        visualID="7002"
+        queryText="true"/>
   </nodeTraces>
   <nodeTraces
       visualID="2043"
@@ -162,15 +165,8 @@
     <nodeLabelTraces
         visualID="5052"
         queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2045"
-      queryText="let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Field'">
-    <nodeLabelTraces
-        visualID="5053"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5054"
+    <compartmentTraces
+        visualID="7001"
         queryText="true"/>
   </nodeTraces>
   <nodeTraces
@@ -185,15 +181,11 @@
     <nodeLabelTraces
         visualID="5059"
         queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2047"
-      queryText="let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Key'">
-    <nodeLabelTraces
-        visualID="5057"
+    <compartmentTraces
+        visualID="7003"
         queryText="true"/>
-    <nodeLabelTraces
-        visualID="5058"
+    <compartmentTraces
+        visualID="7004"
         queryText="true"/>
   </nodeTraces>
   <nodeTraces
@@ -209,6 +201,18 @@
         visualID="5062"
         queryText="true"/>
   </nodeTraces>
+  <childNodeTraces
+      visualID="3001"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Field') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Branch') and _containmentMF_.name = 'field')"/>
+  <childNodeTraces
+      visualID="3002"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Field') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Union') and _containmentMF_.name = 'default')"/>
+  <childNodeTraces
+      visualID="3003"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Field') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Struct') and _containmentMF_.name = 'fields')"/>
+  <childNodeTraces
+      visualID="3004"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Key') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Struct') and _containmentMF_.name = 'keys')"/>
   <linkTraces
       visualID="4002"
       queryText="modelFacet.oclIsKindOf(gmfgen::FeatureLinkModelFacet) and (let _feature_:ecore::EStructuralFeature = modelFacet.oclAsType(gmfgen::FeatureLinkModelFacet).metaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _feature_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Array') and _feature_.name = 'subtype')"/>
@@ -226,24 +230,10 @@
         queryText="true"/>
   </linkTraces>
   <linkTraces
-      visualID="4006"
-      queryText="modelFacet.oclIsKindOf(gmfgen::FeatureLinkModelFacet) and (let _feature_:ecore::EStructuralFeature = modelFacet.oclAsType(gmfgen::FeatureLinkModelFacet).metaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _feature_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Branch') and _feature_.name = 'field')">
-    <linkLabelTraces
-        visualID="6002"
-        queryText="true"/>
-  </linkTraces>
-  <linkTraces
       visualID="4007"
       queryText="modelFacet.oclIsKindOf(gmfgen::FeatureLinkModelFacet) and (let _feature_:ecore::EStructuralFeature = modelFacet.oclAsType(gmfgen::FeatureLinkModelFacet).metaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _feature_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Union') and _feature_.name = 'branches')">
     <linkLabelTraces
         visualID="6003"
-        queryText="true"/>
-  </linkTraces>
-  <linkTraces
-      visualID="4008"
-      queryText="modelFacet.oclIsKindOf(gmfgen::FeatureLinkModelFacet) and (let _feature_:ecore::EStructuralFeature = modelFacet.oclAsType(gmfgen::FeatureLinkModelFacet).metaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _feature_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Union') and _feature_.name = 'default')">
-    <linkLabelTraces
-        visualID="6004"
         queryText="true"/>
   </linkTraces>
   <linkTraces
@@ -253,24 +243,4 @@
         visualID="6005"
         queryText="true"/>
   </linkTraces>
-  <linkTraces
-      visualID="4010"
-      queryText="modelFacet.oclIsKindOf(gmfgen::FeatureLinkModelFacet) and (let _feature_:ecore::EStructuralFeature = modelFacet.oclAsType(gmfgen::FeatureLinkModelFacet).metaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _feature_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Field') and _feature_.name = 'type')"/>
-  <linkTraces
-      visualID="4011"
-      queryText="modelFacet.oclIsKindOf(gmfgen::FeatureLinkModelFacet) and (let _feature_:ecore::EStructuralFeature = modelFacet.oclAsType(gmfgen::FeatureLinkModelFacet).metaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _feature_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Struct') and _feature_.name = 'fields')">
-    <linkLabelTraces
-        visualID="6006"
-        queryText="true"/>
-  </linkTraces>
-  <linkTraces
-      visualID="4012"
-      queryText="modelFacet.oclIsKindOf(gmfgen::FeatureLinkModelFacet) and (let _feature_:ecore::EStructuralFeature = modelFacet.oclAsType(gmfgen::FeatureLinkModelFacet).metaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _feature_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Struct') and _feature_.name = 'keys')">
-    <linkLabelTraces
-        visualID="6007"
-        queryText="true"/>
-  </linkTraces>
-  <linkTraces
-      visualID="4013"
-      queryText="modelFacet.oclIsKindOf(gmfgen::FeatureLinkModelFacet) and (let _feature_:ecore::EStructuralFeature = modelFacet.oclAsType(gmfgen::FeatureLinkModelFacet).metaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _feature_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Key') and _feature_.name = 'field')"/>
 </trace:TraceModel>
