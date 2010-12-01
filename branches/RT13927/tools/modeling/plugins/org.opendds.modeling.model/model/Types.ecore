@@ -38,7 +38,6 @@
   <eClassifiers xsi:type="ecore:EClass" name="Int" abstract="true" eSuperTypes="#//Simple"/>
   <eClassifiers xsi:type="ecore:EClass" name="Key">
     <eStructuralFeatures xsi:type="ecore:EReference" name="field" lowerBound="1" eType="#//Field"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="index" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Long" eSuperTypes="#//SignedInt"/>
   <eClassifiers xsi:type="ecore:EClass" name="LongLong" eSuperTypes="#//SignedInt"/>
