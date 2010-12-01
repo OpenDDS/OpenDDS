@@ -1003,8 +1003,43 @@ The error is
 [[GMF Issues]] contains known issues with the SDK's usage of GMF.
 [[GMF TODO]] contains skipped tasks related to GMF that still need to be done.</pre>
 </div>
-<div title="GMF TODO" modifier="MikeMartinez" created="201006211445" modified="201008101520" tags="publish todo" changecount="7">
-<pre>! --Attribution for ~UML2 Tools mirrored graphic plug-in--
+<div title="GMF TODO" modifier="Byron" created="201006211445" modified="201012011513" tags="publish todo" changecount="12">
+<pre>! Diagrams
+
+!! General
+
+!!! Excessive number of ~Pop-Up Bars
+
+Using the icons specified in the .gmftools file, GMF hovers a ~Pop-Up Bar for all the types that can be top-level nodes on the diagram (this is discussed in the Eclipse Modeling Project book in section 10.1, ~Pop-Up Bars). In our case, because of the large number of QoS policies and Simple types this can result in an excessive number of icons being popped up as shown below.
+
+[img[images/gmf-pop-up-bars.png]]
+
+Unfortunately, it appears the only way to remove these is to modify generated code as discussed
+in a [[GMF form thread|http://www.eclipse.org/forums/index.php?t=tree&amp;th=172966&amp;#page_top]].
+
+If we can't come up with icons that clearly distinguish all these types then we should consider
+making these code modifications.
+
+!! ~DataLib
+
+!!! Handling of Simple types
+
+Right now the user is required to add Simple types (Long, Char, etc.) on a ~DataLib diagram in order
+to be able to refer to it in a Struct Field. Look into ways to avoid this while at the same time making candidate Simple types easily accessible so the user doesn't have to look them up.
+
+!! Noise in top left corner of the diagram
+
+There is a small region in the top left corner of the ~DataLib diagram with overlapping text.
+Need to investigate what is causing this and remove.
+
+!! ~DcpsLib
+
+!!! Handling of ~DataWriter/~DataReader policies
+
+Look into ways to present ~DataWriter/~DataReader policies in a way that is visually clean
+and easy for the user to manipulate these policies.
+
+! --Attribution for ~UML2 Tools mirrored graphic plug-in--
 
 --As discussed in section 4.5.5 of the [[EMP book|http://www.informit.com/store/product.aspx?isbn=0321534077]], a separate plug-in needs to be generated that holds the &quot;mirrored&quot; [[UML2 Tools|http://wiki.eclipse.org/MDT-UML2Tools]] graphic definitions that are used by the SDK if we want to re-use these graphics. It's need to be determine how to properly attribute the ~UML2 Tools project in our mirrored plug-in.--
 
