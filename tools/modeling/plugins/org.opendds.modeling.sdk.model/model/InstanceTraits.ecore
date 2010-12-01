@@ -34,28 +34,22 @@
   <eClassifiers xsi:type="ecore:EClass" name="TcpConfig" eSuperTypes="#//TransportConfig">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="transport_type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         changeable="false" defaultValueLiteral="SimpleTcp"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="local_address_str" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        defaultValueLiteral="127.0.0.1" unsettable="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="enable_nagle_algorithm"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean" defaultValueLiteral="false"
-        unsettable="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="conn_retry_initial_delay"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt" defaultValueLiteral="500"
-        unsettable="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="conn_retry_backoff_multiplier"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat" defaultValueLiteral="2.0"
-        unsettable="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="conn_retry_attempts" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
-        defaultValueLiteral="3" unsettable="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="max_output_pause_period"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt" defaultValueLiteral="0"
-        unsettable="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="passive_reconnect_duration"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt" defaultValueLiteral="2000"
-        unsettable="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="passive_connect_duration"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt" defaultValueLiteral="0"
-        unsettable="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="local_address_str" eType="#//StringConfigParam"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="enable_nagle_algorithm"
+        eType="#//BooleanConfigParam" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="conn_retry_initial_delay"
+        eType="#//StringConfigParam" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="conn_retry_backoff_multiplier"
+        eType="#//FloatConfigParam" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="conn_retry_attempts" eType="#//IntegerConfigParam"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="max_output_pause_period"
+        eType="#//IntegerConfigParam" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="passive_reconnect_duration"
+        eType="#//IntegerConfigParam" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="passive_connect_duration"
+        eType="#//IntegerConfigParam" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MulticastConfig" eSuperTypes="#//TransportConfig">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="transport_type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
@@ -93,5 +87,11 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="IntegerConfigParam">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="StringConfigParam">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FloatConfigParam">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"/>
   </eClassifiers>
 </ecore:EPackage>
