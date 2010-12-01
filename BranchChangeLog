@@ -1,3 +1,15 @@
+Wed Dec  1 14:41:56 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Types.ecore:
+
+	  Because Keys can be re-ordered in the Struct Keys compartment it is no longer
+	  necessary to have an index attribute associated with Key for user to
+	  manipulate to specify order. Therefore the index attribute has been removed.
+
 Wed Dec  1 14:20:33 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/.classpath:
@@ -17,18 +29,18 @@ Wed Dec  1 14:20:33 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmftool:
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.trace:
 
-	  Added support for specifying Field types in Struct, Union, and Branch using
-	  the form "name: type" to figure compartment reduce diagram clutter.
-	  Similarly a Keys compartment was added to Struct where keys can be added by
-	  typing in the name of the corresponding Field within the Struct.
-	  Struct Field and Keys can be dragged and dropped within the compartment to
-	  reorder.
+          Added support for specifying Field types in Struct, Union, and Branch using
+          the form "name: type" to figure compartment reduce diagram clutter.
+          Similarly a Keys compartment was added to Struct where keys can be added by
+          typing in the name of the corresponding Field within the Struct.
+          Struct Field and Keys can be dragged and dropped within the compartment to
+          reorder.
 
         * tools/modeling/testdata/DataLib/DataLibTest.opendds:
         * tools/modeling/testdata/DataLib/DataLibTest.opendds_diagram_datalib:
         * tools/modeling/testdata/DataLib/DataLibTest_screenshot_1.png:
 
-	  Updates based on the latest version of the DataLib diagram code.
+          Updates based on the latest version of the DataLib diagram code.
 
 Wed Dec  1 03:20:13 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
