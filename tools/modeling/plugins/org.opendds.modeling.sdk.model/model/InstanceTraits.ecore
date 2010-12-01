@@ -54,29 +54,30 @@
   <eClassifiers xsi:type="ecore:EClass" name="MulticastConfig" eSuperTypes="#//TransportConfig">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="transport_type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         changeable="false" defaultValueLiteral="multicast"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="default_to_ipv6" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
-        defaultValueLiteral="false"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="port_offset" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
-        defaultValueLiteral="10000"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="group_address" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="reliable" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
-        defaultValueLiteral="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="syn_backoff" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EFloat"
-        defaultValueLiteral="2.0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="syn_interval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
-        defaultValueLiteral="250"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="syn_timeout" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
-        defaultValueLiteral="30000"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nak_depth" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
-        defaultValueLiteral="32"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nak_interval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
-        defaultValueLiteral="500"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nak_timeout" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
-        defaultValueLiteral="30000"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="ttl" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
-        defaultValueLiteral="1"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="rcv_buffer_size" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
-        defaultValueLiteral="0"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="default_to_ipv6" eType="#//BooleanConfigParam"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="port_offset" eType="#//IntegerConfigParam"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="group_address" eType="#//StringConfigParam"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reliable" eType="#//BooleanConfigParam"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="syn_backoff" eType="#//FloatConfigParam"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="syn_interval" eType="#//IntegerConfigParam"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="syn_timeout" eType="#//IntegerConfigParam"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="nak_depth" eType="#//IntegerConfigParam"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="nak_interval" eType="#//IntegerConfigParam"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="nak_timeout" eType="#//IntegerConfigParam"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ttl" eType="#//IntegerConfigParam"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="rcv_buffer_size" eType="#//IntegerConfigParam"
+        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="UdpConfig" eSuperTypes="#//TransportConfig">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="local_address_str" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"

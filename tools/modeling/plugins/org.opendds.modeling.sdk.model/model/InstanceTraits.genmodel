@@ -35,18 +35,18 @@
     </genClasses>
     <genClasses ecoreClass="InstanceTraits.ecore#//MulticastConfig">
       <genFeatures property="Readonly" createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/transport_type"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/default_to_ipv6"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/port_offset"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/group_address"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/reliable"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/syn_backoff"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/syn_interval"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/syn_timeout"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/nak_depth"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/nak_interval"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/nak_timeout"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/ttl"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/rcv_buffer_size"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//MulticastConfig/default_to_ipv6"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//MulticastConfig/port_offset"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//MulticastConfig/group_address"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//MulticastConfig/reliable"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//MulticastConfig/syn_backoff"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//MulticastConfig/syn_interval"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//MulticastConfig/syn_timeout"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//MulticastConfig/nak_depth"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//MulticastConfig/nak_interval"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//MulticastConfig/nak_timeout"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//MulticastConfig/ttl"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//MulticastConfig/rcv_buffer_size"/>
     </genClasses>
     <genClasses ecoreClass="InstanceTraits.ecore#//UdpConfig">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//UdpConfig/local_address_str"/>
