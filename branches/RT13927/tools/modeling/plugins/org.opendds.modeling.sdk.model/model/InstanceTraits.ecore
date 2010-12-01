@@ -80,8 +80,8 @@
         containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="UdpConfig" eSuperTypes="#//TransportConfig">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="local_address_str" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        defaultValueLiteral="127.0.0.1"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="local_address_str" eType="#//StringConfigParam"
+        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="BooleanConfigParam">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
