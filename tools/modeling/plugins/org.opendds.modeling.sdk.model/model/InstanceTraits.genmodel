@@ -49,7 +49,7 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//MulticastConfig/rcv_buffer_size"/>
     </genClasses>
     <genClasses ecoreClass="InstanceTraits.ecore#//UdpConfig">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//UdpConfig/local_address_str"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//UdpConfig/local_address_str"/>
     </genClasses>
     <genClasses ecoreClass="InstanceTraits.ecore#//BooleanConfigParam">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//BooleanConfigParam/value"/>
