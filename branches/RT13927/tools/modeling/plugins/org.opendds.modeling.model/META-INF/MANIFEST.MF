@@ -7,8 +7,7 @@ Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: com.ociweb.emf.util,
- org.opendds.modeling.model.application,
+Export-Package: org.opendds.modeling.model.application,
  org.opendds.modeling.model.application.impl,
  org.opendds.modeling.model.application.util,
  org.opendds.modeling.model.core,
@@ -37,6 +36,7 @@ Export-Package: com.ociweb.emf.util,
  org.opendds.modeling.model.types.util
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport,
- org.eclipse.core.resources
+ org.eclipse.core.resources,
+ com.ociweb.emf.util
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.emf.ecore.xmi.impl
