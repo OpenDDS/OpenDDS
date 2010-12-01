@@ -1,3 +1,10 @@
+Wed Dec  1 02:17:12 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.genmodel:
+
+          Converted TcpConfig attributes to optional contained class references.
+
 Tue Nov 30 16:32:14 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.ecore:

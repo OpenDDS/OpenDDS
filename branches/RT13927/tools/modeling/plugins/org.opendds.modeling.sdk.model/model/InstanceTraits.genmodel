@@ -12,15 +12,15 @@
     <genClasses image="false" ecoreClass="InstanceTraits.ecore#//TransportConfig">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//TransportConfig/transportId"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//TransportConfig/name"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//TransportConfig/swap_bytes"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//TransportConfig/queue_messages_per_pool"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//TransportConfig/queue_initial_pools"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//TransportConfig/max_packet_size"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//TransportConfig/max_samples_per_packet"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//TransportConfig/optimum_packet_size"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//TransportConfig/thread_per_connection"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//TransportConfig/datalink_release_delay"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//TransportConfig/datalink_control_chunks"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//TransportConfig/swap_bytes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//TransportConfig/queue_messages_per_pool"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//TransportConfig/queue_initial_pools"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//TransportConfig/max_packet_size"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//TransportConfig/max_samples_per_packet"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//TransportConfig/optimum_packet_size"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//TransportConfig/thread_per_connection"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//TransportConfig/datalink_release_delay"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//TransportConfig/datalink_control_chunks"/>
     </genClasses>
     <genClasses ecoreClass="InstanceTraits.ecore#//TcpConfig">
       <genFeatures property="Readonly" createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//TcpConfig/transport_type"/>
@@ -47,6 +47,15 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/nak_timeout"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/ttl"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//MulticastConfig/rcv_buffer_size"/>
+    </genClasses>
+    <genClasses ecoreClass="InstanceTraits.ecore#//UdpConfig">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//UdpConfig/local_address_str"/>
+    </genClasses>
+    <genClasses ecoreClass="InstanceTraits.ecore#//BooleanConfigParam">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//BooleanConfigParam/value"/>
+    </genClasses>
+    <genClasses ecoreClass="InstanceTraits.ecore#//IntegerConfigParam">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//IntegerConfigParam/value"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>
