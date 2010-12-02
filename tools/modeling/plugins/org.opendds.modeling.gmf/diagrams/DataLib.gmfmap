@@ -7,7 +7,7 @@
     xmlns:gmftool="http://www.eclipse.org/gmf/2005/ToolDefinition">
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Long"/>
@@ -28,7 +28,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//LongLong"/>
@@ -48,7 +48,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Short"/>
@@ -68,7 +68,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//ULong"/>
@@ -88,7 +88,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//ULongLong"/>
@@ -108,7 +108,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//UShort"/>
@@ -128,7 +128,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Double"/>
@@ -148,7 +148,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Float"/>
@@ -168,7 +168,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Char"/>
@@ -188,7 +188,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//WChar"/>
@@ -208,7 +208,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Octet"/>
@@ -228,7 +228,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Boolean"/>
@@ -248,7 +248,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Array"/>
@@ -280,7 +280,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Enum"/>
@@ -317,7 +317,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Sequence"/>
@@ -349,7 +349,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//String"/>
@@ -381,7 +381,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//WString"/>
@@ -413,7 +413,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Typedef"/>
@@ -506,7 +506,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Union"/>
@@ -549,7 +549,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib/types"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Struct"/>
@@ -708,7 +708,7 @@
     <domainModel
         href="../../org.opendds.modeling.model/model/OpenDDS.ecore#/"/>
     <domainMetaElement
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DataLib"/>
+        href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib"/>
     <palette
         href="DataLib.gmftool#//@palette"/>
   </diagram>

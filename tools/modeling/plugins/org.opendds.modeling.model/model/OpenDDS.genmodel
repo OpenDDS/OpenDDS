@@ -53,10 +53,6 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/dataLib"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//OpenDDSModel/name"/>
     </genClasses>
-    <genClasses ecoreClass="OpenDDS.ecore#//DataLib">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//DataLib/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DataLib/types"/>
-    </genClasses>
     <genClasses ecoreClass="OpenDDS.ecore#//PolicyLib">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//PolicyLib/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//PolicyLib/policies"/>
@@ -228,7 +224,6 @@
     <genClasses image="false" ecoreClass="Types.ecore#//Int"/>
     <genClasses ecoreClass="Types.ecore#//Key">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Key/field"/>
-      <genFeatures createChild="false"/>
     </genClasses>
     <genClasses ecoreClass="Types.ecore#//Long"/>
     <genClasses ecoreClass="Types.ecore#//LongLong"/>
@@ -263,6 +258,10 @@
     <genClasses image="false" ecoreClass="Types.ecore#//UnsignedInt"/>
     <genClasses ecoreClass="Types.ecore#//WChar"/>
     <genClasses ecoreClass="Types.ecore#//WString"/>
+    <genClasses ecoreClass="Types.ecore#//DataLib">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//DataLib/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//DataLib/types"/>
+    </genClasses>
   </genPackages>
   <genPackages prefix="DCPS" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
       generateExampleClass="false" generateModelWizard="false" ecorePackage="DCPS.ecore#/">

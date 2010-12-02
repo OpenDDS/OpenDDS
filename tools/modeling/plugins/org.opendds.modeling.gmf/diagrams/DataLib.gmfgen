@@ -22,7 +22,7 @@
         xsi:type="gmfgen:FigureViewmap"
         figureQualifiedClassName="org.eclipse.draw2d.FreeformLayer"/>
     <domainDiagramElement
-        href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib"/>
     <childNodes
         xsi:type="gmfgen:GenChildLabelNode"
         visualID="3001"
@@ -173,9 +173,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Long"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5023"
@@ -217,9 +217,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/LongLong"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5026"
@@ -260,9 +260,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Short"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5027"
@@ -303,9 +303,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/ULong"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5028"
@@ -346,9 +346,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/ULongLong"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5029"
@@ -389,9 +389,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/UShort"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5030"
@@ -432,9 +432,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Double"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5031"
@@ -475,9 +475,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Float"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5032"
@@ -518,9 +518,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Char"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5033"
@@ -561,9 +561,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/WChar"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5034"
@@ -604,9 +604,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Octet"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5035"
@@ -647,9 +647,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Boolean"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5036"
@@ -690,9 +690,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Array"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5024"
@@ -756,9 +756,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Enum"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5060"
@@ -836,9 +836,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Sequence"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5037"
@@ -902,9 +902,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/String"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5039"
@@ -968,9 +968,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/WString"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5041"
@@ -1034,9 +1034,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Typedef"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5043"
@@ -1205,9 +1205,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Union"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5048"
@@ -1272,9 +1272,9 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Struct"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//opendds/DataLib/types"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib/types"/>
       </modelFacet>
       <labels
           visualID="5055"

@@ -201,7 +201,7 @@
     <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Q963Mf1OEd-Pfd3_1AelrA" x="900" y="360"/>
   </children>
   <styles xmi:type="notation:DiagramStyle" xmi:id="_UjaCEf1MEd-Pfd3_1AelrA"/>
-  <element xmi:type="opendds:DataLib" href="DataLibTest.opendds#_UjYz8P1MEd-Pfd3_1AelrA"/>
+  <element xmi:type="types:DataLib" href="DataLibTest.opendds#_UjYz8P1MEd-Pfd3_1AelrA"/>
   <edges xmi:type="notation:Connector" xmi:id="_2QHNQP1MEd-Pfd3_1AelrA" type="4002" source="_xkS-YP1MEd-Pfd3_1AelrA" target="_gzM_wP1MEd-Pfd3_1AelrA">
     <styles xmi:type="notation:FontStyle" xmi:id="_2QHNQf1MEd-Pfd3_1AelrA" fontName="Sans"/>
     <element xsi:nil="true"/>

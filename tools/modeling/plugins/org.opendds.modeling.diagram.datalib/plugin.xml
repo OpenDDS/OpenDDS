@@ -23,7 +23,7 @@
       <editor
          id="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID"
          name="%editorName"
-         icon="icons/obj16/OpenDDSDiagramFile.gif"
+         icon="icons/obj16/TypesDiagramFile.gif"
          extensions="opendds_diagram_datalib"
          default="true"
          class="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditor"
@@ -46,7 +46,7 @@
       <?gmfgen generated="true"?>
   	  <wizard
   	     name="%newWizardName"
-  	     icon="icons/obj16/OpenDDSDiagramFile.gif"
+  	     icon="icons/obj16/TypesDiagramFile.gif"
   	     category="org.eclipse.ui.Examples"
   	     class="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibCreationWizard"
   	     id="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibCreationWizardID">
@@ -291,7 +291,7 @@
 
    <extension point="org.eclipse.gmf.runtime.emf.type.core.elementTypes" id="element-types">
       <?gmfgen generated="true"?>
-      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
                id="org.opendds.modeling.diagram.datalib.DataLib_1000"
                name="%metatype.name.DataLib_1000"
@@ -696,7 +696,7 @@
             priority="normal" 
             contentProvider="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibNavigatorContentProvider" 
             labelProvider="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibNavigatorLabelProvider"
-            icon="icons/obj16/OpenDDSDiagramFile.gif"
+            icon="icons/obj16/TypesDiagramFile.gif"
             activeByDefault="true">
          <triggerPoints>
             <or>
@@ -732,7 +732,7 @@
             priority="normal" 
             contentProvider="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorContentProvider" 
             labelProvider="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorLabelProvider"
-            icon="icons/obj16/OpenDDSDiagramFile.gif"
+            icon="icons/obj16/TypesDiagramFile.gif"
             activeByDefault="true">
          <triggerPoints>
             <or>

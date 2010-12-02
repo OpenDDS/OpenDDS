@@ -182,7 +182,7 @@
           editorID="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/DataLib"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLib"/>
         <containmentMetaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/dataLib"/>
         <childMetaFeature
@@ -203,7 +203,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/DataLib/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLib/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -222,7 +222,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«dataLib»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/DataLib/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLib/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>

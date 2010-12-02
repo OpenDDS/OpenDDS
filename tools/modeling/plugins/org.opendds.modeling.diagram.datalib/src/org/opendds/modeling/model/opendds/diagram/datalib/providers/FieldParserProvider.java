@@ -31,11 +31,11 @@ import org.eclipse.gmf.runtime.emf.commands.core.command.AbstractTransactionalCo
 import org.eclipse.gmf.runtime.emf.ui.services.parser.ISemanticParser;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 
-import org.opendds.modeling.model.opendds.DataLib;
 import org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.Field2EditPart;
 import org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.Field3EditPart;
 import org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.FieldEditPart;
 import org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibVisualIDRegistry;
+import org.opendds.modeling.model.types.DataLib;
 import org.opendds.modeling.model.types.Field;
 import org.opendds.modeling.model.types.TypesPackage;
 import org.opendds.modeling.model.types.Type;
@@ -195,22 +195,17 @@ public class FieldParserProvider extends AbstractProvider implements IParserProv
 				}
 			}
 			
-			EPackage types_protoPackage = EPackage.Registry.INSTANCE.getEPackage(TypesPackage.eNS_URI);
-
-//			// Determine if type is a Simple type. If so, use name of Simple type.
-//			EClass simpleClass = (EClass) types_protoPackage.getEClassifier("Simple");
-//			if (simpleClass.isSuperTypeOf(typeClass)) {
-//				return typeClass.getName();
-//			}
+			EPackage typesPackage = EPackage.Registry.INSTANCE.getEPackage(TypesPackage.eNS_URI);
 
 			// Determine if type is a "basic" type (does not contain a name attribute). If so, use name of type.
 			String[] basicClassNames = {"Simple", "String", "WString"};
 			for (String basicClassName: basicClassNames) {
-				EClass basicClass = (EClass) types_protoPackage.getEClassifier(basicClassName);
+				EClass basicClass = (EClass) typesPackage.getEClassifier(basicClassName);
 				if (basicClass.isSuperTypeOf(typeClass)) {
-					return basicClass.getName();
+					return typeClass.getName();
 				}
 			}
+
 			return name;
 		}
 	}
