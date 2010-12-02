@@ -1,3 +1,11 @@
+Thu Dec  2 21:52:33 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_h.xsl:
+        * tools/modeling/tests/Messenger/transports.traits:
+
+          No longer hard-code model name in traits (get from .traits file for now)
+
 Thu Dec  2 21:43:18 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
