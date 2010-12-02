@@ -1,3 +1,12 @@
+Thu Dec  2 23:11:59 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerMixed:
+
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.opendds:
+        * tools/modeling/tests/MessengerMixed/run_test.pl:
+
+          make example runnable - fix lib path, set transport Ids.
+
 Thu Dec  2 22:08:53 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerMixed/MessengerTypesMixed.opendds:
