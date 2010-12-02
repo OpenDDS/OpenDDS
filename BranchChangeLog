@@ -1,3 +1,18 @@
+Thu Dec  2 23:27:15 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Messenger:
+        * tools/modeling/tests/MessengerNoPub:
+
+          ignore log files.
+
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.opendds:
+        * tools/modeling/tests/MessengerNoPub/run_test.pl:
+        * tools/modeling/tests/MessengerNoPub/subscriber.cpp:
+        * tools/modeling/tests/MessengerNoPub/transports.traits:
+
+          make example runnable - fix lib path, remove launch of
+          publisher, set transport Ids, use library namespace.
+
 Thu Dec  2 23:11:59 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerMixed:
