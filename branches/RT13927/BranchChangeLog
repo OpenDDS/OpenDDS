@@ -1,3 +1,18 @@
+Thu Dec  2 23:53:25 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerSplit:
+
+          ignore log files.
+
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.opendds:
+        * tools/modeling/tests/MessengerSplit/publisher.cpp:
+        * tools/modeling/tests/MessengerSplit/run_test.pl:
+        * tools/modeling/tests/MessengerSplit/subscriber.cpp:
+        * tools/modeling/tests/MessengerSplit/transports.traits:
+
+          make example runnable - fix lib path, set transport Ids, 
+          use library namespace.
+
 Thu Dec  2 23:38:04 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerNoSub:
