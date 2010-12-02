@@ -7,7 +7,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerModel_T.h"
+#include "model/MessengerGlobalNsModel_T.h"
 #include <model/NullReaderListener.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
@@ -22,8 +22,8 @@ void
 ReaderListener::on_data_available(DDS::DataReader_ptr reader)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  data1::MessageDataReader_var reader_i =
-    data1::MessageDataReader::_narrow(reader);
+  MessageDataReader_var reader_i =
+    MessageDataReader::_narrow(reader);
 
   if (CORBA::is_nil(reader_i.in())) {
     ACE_ERROR((LM_ERROR,
@@ -32,7 +32,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     ACE_OS::exit(-1);
   }
 
-  data1::Message message;
+  Message message;
   DDS::SampleInfo info;
 
   DDS::ReturnCode_t error = reader_i->take_next_sample(message, info);
@@ -62,9 +62,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    MessengerModelType model(argc, argv);
+    MessengerGlobalNsModelType model(argc, argv);
 
-    using OpenDDS::Model::MessengerModel::Elements;
+    using OpenDDS::Model::MessengerGlobalNsModel::Elements;
 
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
 
@@ -73,8 +73,8 @@ int main(int argc, char** argv)
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
-    data1::MessageDataReader_var reader_i =
-      data1::MessageDataReader::_narrow(reader);
+    MessageDataReader_var reader_i =
+      MessageDataReader::_narrow(reader);
 
     if (CORBA::is_nil(reader_i.in())) {
       ACE_ERROR_RETURN((LM_ERROR,

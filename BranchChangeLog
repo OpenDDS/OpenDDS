@@ -1,3 +1,25 @@
+Thu Dec  2 21:43:18 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+        * tools/modeling/tests/Messenger/publisher.cpp:
+        * tools/modeling/tests/Messenger/subscriber.cpp:
+
+          handle global namespace datalibs.
+
+        * tools/modeling/tests/MessengerGlobalNs:
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.mpc:
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.opendds:
+        * tools/modeling/tests/MessengerGlobalNs/README:
+        * tools/modeling/tests/MessengerGlobalNs/publisher.cpp:
+        * tools/modeling/tests/MessengerGlobalNs/run_test.pl:
+        * tools/modeling/tests/MessengerGlobalNs/subscriber.cpp:
+        * tools/modeling/tests/MessengerGlobalNs/tcp.conf:
+        * tools/modeling/tests/MessengerGlobalNs/transports.traits:
+        * tools/modeling/tests/setup.pl:
+
+          New test case for global namespace.
+
 Thu Dec  2 18:11:17 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
@@ -15,10 +37,10 @@ Thu Dec  2 18:11:17 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/testdata/DataLib/DataLibTest.opendds:
         * tools/modeling/testdata/DataLib/DataLibTest.opendds_diagram_datalib:
 
-	  Moved DataLib definition to Types.ecore to get around OCL expression limitations as described
-	  in GMF newsgroup posting titled
-	  "Can't refer to elements defined in more than one Ecore file in GMF Audit Rule"
-	  (http://www.eclipse.org/forums/index.php?t=msg&goto=641777&S=82a8b15a2946ffe3094ae58601c91fb9).
+          Moved DataLib definition to Types.ecore to get around OCL expression limitations as described
+          in GMF newsgroup posting titled
+          "Can't refer to elements defined in more than one Ecore file in GMF Audit Rule"
+          (http://www.eclipse.org/forums/index.php?t=msg&goto=641777&S=82a8b15a2946ffe3094ae58601c91fb9).
 
 Wed Dec  1 21:19:51 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
