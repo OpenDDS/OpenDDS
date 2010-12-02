@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<opendds:DataLib xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_UjYz8P1MEd-Pfd3_1AelrA">
+<types:DataLib xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_UjYz8P1MEd-Pfd3_1AelrA">
   <types xsi:type="types:Boolean" xmi:id="_VILjEP1MEd-Pfd3_1AelrA"/>
   <types xsi:type="types:Char" xmi:id="_WDO2EP1MEd-Pfd3_1AelrA"/>
   <types xsi:type="types:Double" xmi:id="_Wt91IP1MEd-Pfd3_1AelrA"/>
