@@ -21,15 +21,11 @@
 </xsl:variable>
 
 <!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "'MessengerModel'"/>
-<xsl:variable name = "MODELNAME" select = "translate($modelname, 
-                                           'abcdefghijklmnopqrstuvwxyz',
-                                           'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>
+<xsl:variable name = "modelname" select = "/generator:model/@name"/>
 
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
   <xsl:variable name="classname" select="concat($modelname, 'Traits')"/>
-  <xsl:message>Hard-coding model name</xsl:message>
   <xsl:value-of select="concat('#include &quot;', $classname, '.h&quot;', $newline)"/>
   <xsl:text>
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
