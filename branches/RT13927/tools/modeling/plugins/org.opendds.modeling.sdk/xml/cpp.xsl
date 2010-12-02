@@ -882,18 +882,17 @@ Elements::Data::copySubscriptionQos(
   <xsl:param name="type" select="."/>
   <xsl:variable name="typename" select="$type/@name"/>
   <xsl:variable name="type-modelname" select="$type/../../@name"/>
+  <xsl:variable name="libname" select="$type/../@name"/>
 
   <xsl:text>    case Types::</xsl:text>
   <xsl:if test="$type-modelname != $modelname">
     <xsl:value-of select="concat($type/../@name, '_')"/>
   </xsl:if>
-  <xsl:value-of select="$typename"/>
-  <xsl:text>:
-      {
-        typedef ::</xsl:text>
-  <xsl:value-of select="$type-modelname"/>
-  <xsl:text>::</xsl:text>
-  <xsl:value-of select="$type/@name"/>
+  <xsl:value-of select="concat($typename, ':', $newline, '      {', $newline, '        typedef ')"/>
+  <xsl:if test="string-length($libname)">
+    <xsl:value-of select="concat('::', $libname)"/>
+  </xsl:if>
+  <xsl:value-of select="concat('::', $type/@name)"/>
   <xsl:text>TypeSupportImpl TypeSupport;
 
         TypeSupport* typeSupport = new TypeSupport();

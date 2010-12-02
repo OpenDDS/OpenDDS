@@ -24,26 +24,29 @@
 <!-- All types-->
 <xsl:variable name="type"     select="/opendds:OpenDDSModel/dataLib/types"/>
 
-<xsl:variable name="has-module-definitions" select=""/>
-
 <!-- Index (lookup table is in lut variable) -->
 <xsl:key
      name  = "lut-type"
      match = "type"
      use   = "@type"/>
 
-<!-- Name of the model -->
-<xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
-
 <!-- process the entire model document to produce the IDL. -->
-<xsl:template match="/">
+<xsl:template match="/opendds:OpenDDSModel">
 
   <!-- required to build on windows -->
   <xsl:call-template name="processIntrinsicSequences"/>
 
-  <xsl:if test="(string-length($modelname) > 0) and $type">
+  <xsl:apply-templates select="dataLib"/>
+
+</xsl:template>
+<!-- End of main processing template. -->
+
+<xsl:template match="dataLib">
+  <xsl:variable name="libname" select="@name"/>
+
+  <xsl:if test="(string-length($libname) > 0) and $type">
     <xsl:value-of select="concat($newline,
-                                 'module ', $modelname, ' {', $newline,
+                                 'module ', $libname, ' {', $newline,
                                  '  // Forward declarations', $newline)"/>
   </xsl:if>
 
@@ -61,7 +64,7 @@
     <xsl:with-param name="nodes" select="$terminals"/>
   </xsl:call-template>
 
-  <xsl:if test="(string-length($modelname) > 0) and $type">
+  <xsl:if test="(string-length($libname) > 0) and $type">
     <xsl:value-of select="concat($newline, $newline, '};', $newline, $newline)"/>
   </xsl:if>
 </xsl:template>
@@ -178,9 +181,12 @@
 
 <!-- Process data structure definitions. -->
 <xsl:template match="types[@xsi:type = 'types:Struct']">
+  <xsl:variable name="libname" select="../@name"/>
+
   <xsl:value-of select="concat($newline,'#pragma DCPS_DATA_TYPE &quot;')"/>
-  <xsl:if test="string-length($modelname) > 0">
-     <xsl:value-of select="concat($modelname,'::')"/>
+
+  <xsl:if test="string-length($libname) > 0">
+     <xsl:value-of select="concat($libname,'::')"/>
   </xsl:if>
   <xsl:value-of select="concat(@name, '&quot;', $newline)"/>
 
@@ -247,9 +253,10 @@
 
 <!-- Create a DCPS_DATA_KEY pragma line. -->
 <xsl:template match="keys">
+  <xsl:variable name="libname" select="../../@name"/>
   <xsl:text>#pragma DCPS_DATA_KEY  "</xsl:text>
-  <xsl:if test="string-length($modelname) > 0">
-     <xsl:value-of select="concat($modelname,'::')"/>
+  <xsl:if test="string-length($libname) > 0">
+     <xsl:value-of select="concat($libname,'::')"/>
   </xsl:if>
   <xsl:value-of select="concat(../@name,' ',
                         ../fields[@xmi:id = current()/@field]/@name,
