@@ -27,7 +27,7 @@ public class StructKeysEditPart extends ListCompartmentEditPart {
 	/**
 	 * @generated
 	 */
-	public static final int VISUAL_ID = 7004;
+	public static final int VISUAL_ID = 7007;
 
 	/**
 	 * @generated
