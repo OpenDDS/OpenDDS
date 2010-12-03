@@ -1003,7 +1003,7 @@ The error is
 [[GMF Issues]] contains known issues with the SDK's usage of GMF.
 [[GMF TODO]] contains skipped tasks related to GMF that still need to be done.</pre>
 </div>
-<div title="GMF TODO" modifier="Byron" created="201006211445" modified="201012011513" tags="publish todo" changecount="12">
+<div title="GMF TODO" modifier="Byron" created="201006211445" modified="201012031600" tags="publish todo" changecount="13">
 <pre>! Diagrams
 
 !! General
@@ -1027,10 +1027,15 @@ making these code modifications.
 Right now the user is required to add Simple types (Long, Char, etc.) on a ~DataLib diagram in order
 to be able to refer to it in a Struct Field. Look into ways to avoid this while at the same time making candidate Simple types easily accessible so the user doesn't have to look them up.
 
-!! Noise in top left corner of the diagram
+!!! Noise in top left corner of the diagram
 
 There is a small region in the top left corner of the ~DataLib diagram with overlapping text.
 Need to investigate what is causing this and remove.
+
+!!! Model validations are not exhaustive
+
+The beginning of model validations using the GMF Auditing framework is in place. Additional validations,
+such as checking that Struct Keys refer to valid types need to be added.
 
 !! ~DcpsLib
 

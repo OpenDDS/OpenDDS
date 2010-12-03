@@ -712,4 +712,177 @@
     <palette
         href="DataLib.gmftool#//@palette"/>
   </diagram>
+  <audits
+      id="org.opendds.modeling.model.types.validations"
+      name="DataLib Validations"
+      description="Detects incorrect or questionable semantic constructs for elements in a DataLib diagram.">
+    <childContainers
+        id="org.opendds.modeling.model.types.validation.errors"
+        name="DataLib Errors"
+        description="Detects modeling constructs that would result in invalid generated OpenDDS code.">
+      <audits
+          name="Struct Name Blank"
+          description="Struct names should not be empty"
+          id="org.opendds.modeling.model.types.validation.error.struct_name_blank"
+          message="Struct name is empty">
+        <rule
+            body="not self.name.oclIsUndefined() and self.name &lt;> ''"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/Types.ecore#//Struct"/>
+        </target>
+      </audits>
+      <audits
+          name="Array size not greater than zero"
+          description="Array size should be greater than zero"
+          id="org.opendds.modeling.model.types.validation.error.array_size_zero"
+          message="Array size should be greater than zero">
+        <rule
+            body="self.length > 0"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/Types.ecore#//Array"/>
+        </target>
+      </audits>
+      <audits
+          name="Array not connected to a Type"
+          description="Array should connect to a Type"
+          id="org.opendds.modeling.model.types.validation.error.array_no_type"
+          message="Array should connect to a Type">
+        <rule
+            body="not subtype.oclIsUndefined()"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/Types.ecore#//Array"/>
+        </target>
+      </audits>
+      <audits
+          name="Typedef Name Blank"
+          description="Typedef name should not be empty"
+          id="org.opendds.modeling.model.types.validation.error.typedef_name_blank"
+          message="Typedef name is empty">
+        <rule
+            body="not self.name.oclIsUndefined() and self.name &lt;> ''"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/Types.ecore#//Typedef"/>
+        </target>
+      </audits>
+      <audits
+          name="Field Name Blank"
+          description="Field names should not be empty"
+          id="org.opendds.modeling.model.types.validation.error.field_name_blank"
+          message="Field name is empty">
+        <rule
+            body="not self.name.oclIsUndefined() and self.name &lt;> ''"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/Types.ecore#//Field"/>
+        </target>
+      </audits>
+      <audits
+          name="Union Name Blank"
+          description="Union names should not be empty"
+          id="org.opendds.modeling.model.types.validation.error.union_name_blank"
+          message="Union name is empty">
+        <rule
+            body="not self.name.oclIsUndefined() and self.name &lt;> ''"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/Types.ecore#//Union"/>
+        </target>
+      </audits>
+      <audits
+          name="Union without Branches"
+          description="Union does not connect with any Branches"
+          id="org.opendds.modeling.model.types.validation.error.union_no_branches"
+          message="Union does not connect with any Branches">
+        <rule
+            body="self.branches->notEmpty()"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/Types.ecore#//Union"/>
+        </target>
+      </audits>
+      <audits
+          name="Union without correct switch Type"
+          description="Union must connect with a switch (discriminator) Type of an integral, Boolean, Char, or Enum type"
+          id="org.opendds.modeling.model.types.validation.error.union_switch_type_not_correct"
+          message="Union does not connect to the correct Type for its switch">
+        <rule
+            body="not switch.oclIsUndefined() and (&#xA;switch.oclIsTypeOf(Int) or&#xA;switch.oclIsTypeOf(Enum) or&#xA;switch.oclIsTypeOf(Boolean) or&#xA;switch.oclIsTypeOf(Char) or&#xA;switch.oclIsTypeOf(WChar)&#xA;)&#xA;"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/Types.ecore#//Union"/>
+        </target>
+      </audits>
+      <audits
+          name="Union Branch without Cases"
+          description="Union Branch does not connect to any Cases"
+          id="org.opendds.modeling.model.types.validation.error.union_branches_no_cases"
+          message="Union Branch does not connect to any Cases">
+        <rule
+            body="cases->notEmpty()"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/Types.ecore#//Branch"/>
+        </target>
+      </audits>
+      <audits
+          name="Union Case without literal"
+          description="Union Case does not have have literal defined"
+          id="org.opendds.modeling.model.types.validation.error.union_case_no_literal"
+          message="Union Case does not have have literal defined">
+        <rule
+            body="not literal.oclIsUndefined() and literal &lt;> ''"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/Types.ecore#//Case"/>
+        </target>
+      </audits>
+    </childContainers>
+    <childContainers
+        id="org.opendds.modeling.model.types.validation.warnings"
+        name="DataLib Warnings"
+        description="Detects questionable modeling constructs.">
+      <audits
+          name="No DCPS Data Type Structs defined"
+          description="At least one DCPS Data Type Struct should be defined"
+          id="org.opendds.modeling.model.types.validation.warning.no_dcps_datatype_struct_defined"
+          severity="WARNING"
+          message="At least one Struct should have isDcpsDataType = true">
+        <rule
+            body="self.types->select(oclIsTypeOf(Struct))->notEmpty()"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib"/>
+        </target>
+      </audits>
+      <audits
+          name="Non DCPS Data Type Struct not used"
+          description="A non DCPS Data Type Struct is not used elsewhere"
+          id="org.opendds.modeling.model.types.validation.warning.non_dcps_datatype_struct_not_used"
+          severity="WARNING"
+          message="A Struct with isDcpsDataType = false is not used">
+        <rule
+            body="Struct.allInstances().fields&#xA;  ->select(type = self)&#xA;    ->notEmpty()&#xA;"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/Types.ecore#//Struct"/>
+        </target>
+      </audits>
+    </childContainers>
+  </audits>
 </gmfmap:Mapping>

@@ -21,7 +21,7 @@
   <types xsi:type="types:Array" xmi:id="_pCJHQP7lEd-9W4ll_I0Ewg" length="10" subtype="_n17LwP7lEd-9W4ll_I0Ewg"/>
   <types xsi:type="types:Typedef" xmi:id="_swQXwP7lEd-9W4ll_I0Ewg" type="_pCJHQP7lEd-9W4ll_I0Ewg" name="Bytes10"/>
   <types xsi:type="types:Sequence" xmi:id="_v9GuQP7lEd-9W4ll_I0Ewg" length="42" subtype="_oW4jwP7lEd-9W4ll_I0Ewg"/>
-  <types xsi:type="types:Typedef" xmi:id="_0m4VwP7lEd-9W4ll_I0Ewg" name="UShorts42"/>
+  <types xsi:type="types:Typedef" xmi:id="_0m4VwP7lEd-9W4ll_I0Ewg" type="_v9GuQP7lEd-9W4ll_I0Ewg" name="UShorts42"/>
   <types xsi:type="types:Union" xmi:id="_MNMfwP7mEd-9W4ll_I0Ewg" name="U" switch="_UgWowP7mEd-9W4ll_I0Ewg">
     <branches xmi:id="_YIcJwP7mEd-9W4ll_I0Ewg">
       <field xmi:id="_aS_VwP7mEd-9W4ll_I0Ewg" name="long_mem" type="_f1E6wP7lEd-9W4ll_I0Ewg"/>
