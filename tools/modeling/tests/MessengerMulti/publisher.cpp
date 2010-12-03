@@ -7,14 +7,14 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerModel_T.h"
+#include "model/MessengerMulti_T.h"
 
 int main(int argc, char** argv)
 {
   try {
-    MessengerModelType model(argc, argv);
+    MessengerMultiType model(argc, argv);
 
-    using OpenDDS::Model::MessengerModel::Elements;
+    using OpenDDS::Model::MessengerMulti::Elements;
 
     DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
 
