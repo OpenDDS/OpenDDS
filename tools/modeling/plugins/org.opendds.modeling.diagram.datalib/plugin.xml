@@ -216,7 +216,7 @@
       <viewProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibViewProvider">
          <Priority name="Lowest"/>
          <context viewClass="org.eclipse.gmf.runtime.notation.Diagram" semanticHints="OpenDDS DataLib"/>
-         <context viewClass="org.eclipse.gmf.runtime.notation.Node" semanticHints="2023,2025,2026,2027,2028,2029,2030,2031,2032,2033,2034,2035,2024,2048,2036,2037,2038,2039,2043,2044,2042,2046,3001,3002,3003,3004"/>
+         <context viewClass="org.eclipse.gmf.runtime.notation.Node" semanticHints="2023,2049,2050,2051,2052,2053,2054,2055,2056,2057,2058,2059,2060,2061,2062,2063,2064,2039,2043,2044,2065,2066,3001,3002,3003,3004"/>
          <context viewClass="org.eclipse.gmf.runtime.notation.Edge" semanticHints="4002,4003,4004,4005,4007,4009"/>
       </viewProvider>
    </extension>
@@ -229,16 +229,16 @@
             <method name="getType()" value="OpenDDS DataLib"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-nodes">
-            <method name="getType()" value="2023,2025,2026,2027,2028,2029,2030,2031,2032,2033,2034,2035,2024,2048,2036,2037,2038,2039,2043,2044,2042,2046,3001,3002,3003,3004"/>
+            <method name="getType()" value="2023,2049,2050,2051,2052,2053,2054,2055,2056,2057,2058,2059,2060,2061,2062,2063,2064,2039,2043,2044,2065,2066,3001,3002,3003,3004"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Edge" id="generated-links">
             <method name="getType()" value="4002,4003,4004,4005,4007,4009"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-labels">
-            <method name="getType()" value="5023,5026,5027,5028,5029,5030,5031,5032,5033,5034,5035,5036,5024,5025,5060,5061,5062,5037,5038,5039,5040,5041,5042,5043,5044,5050,5051,5052,5048,5049,5055,5056,5059"/>
+            <method name="getType()" value="5023,5063,5064,5065,5066,5067,5068,5069,5070,5071,5072,5073,5074,5075,5076,5077,5078,5079,5080,5081,5082,5083,5084,5043,5044,5050,5051,5052,5085,5086,5087,5088,5089"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-compartments">
-            <method name="getType()" value="7001,7002,7003,7004"/>
+            <method name="getType()" value="7001,7005,7006,7007"/>
          </object>
          <context views="generated-diagram,generated-nodes,generated-links,generated-labels,generated-compartments"/>
       </editpartProvider>
@@ -250,28 +250,28 @@
          <Priority name="Lowest"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.DataLibEditPart" id="DataLib_1000"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.LongEditPart" id="Long_2023"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.LongLongEditPart" id="LongLong_2025"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.ShortEditPart" id="Short_2026"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.ULongEditPart" id="ULong_2027"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.ULongLongEditPart" id="ULongLong_2028"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.UShortEditPart" id="UShort_2029"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.DoubleEditPart" id="Double_2030"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.FloatEditPart" id="Float_2031"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.CharEditPart" id="Char_2032"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.WCharEditPart" id="WChar_2033"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.OctetEditPart" id="Octet_2034"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.BooleanEditPart" id="Boolean_2035"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.ArrayEditPart" id="Array_2024"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.EnumEditPart" id="Enum_2048"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.SequenceEditPart" id="Sequence_2036"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.StringEditPart" id="String_2037"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.WStringEditPart" id="WString_2038"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.LongLongEditPart" id="LongLong_2049"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.ShortEditPart" id="Short_2050"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.ULongEditPart" id="ULong_2051"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.ULongLongEditPart" id="ULongLong_2052"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.UShortEditPart" id="UShort_2053"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.DoubleEditPart" id="Double_2054"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.FloatEditPart" id="Float_2055"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.CharEditPart" id="Char_2056"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.WCharEditPart" id="WChar_2057"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.OctetEditPart" id="Octet_2058"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.BooleanEditPart" id="Boolean_2059"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.ArrayEditPart" id="Array_2060"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.EnumEditPart" id="Enum_2061"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.SequenceEditPart" id="Sequence_2062"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.StringEditPart" id="String_2063"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.WStringEditPart" id="WString_2064"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.TypedefEditPart" id="Typedef_2039"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.CaseEditPart" id="Case_2043"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.BranchEditPart" id="Branch_2044"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.UnionEditPart" id="Union_2042"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.StructEditPart" id="Struct_2046"/>
-         <context elements="DataLib_1000,Long_2023,LongLong_2025,Short_2026,ULong_2027,ULongLong_2028,UShort_2029,Double_2030,Float_2031,Char_2032,WChar_2033,Octet_2034,Boolean_2035,Array_2024,Enum_2048,Sequence_2036,String_2037,WString_2038,Typedef_2039,Case_2043,Branch_2044,Union_2042,Struct_2046"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.UnionEditPart" id="Union_2065"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.StructEditPart" id="Struct_2066"/>
+         <context elements="DataLib_1000,Long_2023,LongLong_2049,Short_2050,ULong_2051,ULongLong_2052,UShort_2053,Double_2054,Float_2055,Char_2056,WChar_2057,Octet_2058,Boolean_2059,Array_2060,Enum_2061,Sequence_2062,String_2063,WString_2064,Typedef_2039,Case_2043,Branch_2044,Union_2065,Struct_2066"/>
       </modelingAssistantProvider>
    </extension>
 
@@ -313,162 +313,162 @@
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.LongLong_2025"
-               name="%metatype.name.LongLong_2025"
+               id="org.opendds.modeling.diagram.datalib.LongLong_2049"
+               name="%metatype.name.LongLong_2049"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="LongLong"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.LongLongEditHelper">
-            <param name="semanticHint" value="2025"/>
+            <param name="semanticHint" value="2049"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.Short_2026"
-               name="%metatype.name.Short_2026"
+               id="org.opendds.modeling.diagram.datalib.Short_2050"
+               name="%metatype.name.Short_2050"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Short"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.ShortEditHelper">
-            <param name="semanticHint" value="2026"/>
+            <param name="semanticHint" value="2050"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.ULong_2027"
-               name="%metatype.name.ULong_2027"
+               id="org.opendds.modeling.diagram.datalib.ULong_2051"
+               name="%metatype.name.ULong_2051"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="ULong"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.ULongEditHelper">
-            <param name="semanticHint" value="2027"/>
+            <param name="semanticHint" value="2051"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.ULongLong_2028"
-               name="%metatype.name.ULongLong_2028"
+               id="org.opendds.modeling.diagram.datalib.ULongLong_2052"
+               name="%metatype.name.ULongLong_2052"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="ULongLong"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.ULongLongEditHelper">
-            <param name="semanticHint" value="2028"/>
+            <param name="semanticHint" value="2052"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.UShort_2029"
-               name="%metatype.name.UShort_2029"
+               id="org.opendds.modeling.diagram.datalib.UShort_2053"
+               name="%metatype.name.UShort_2053"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="UShort"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.UShortEditHelper">
-            <param name="semanticHint" value="2029"/>
+            <param name="semanticHint" value="2053"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.Double_2030"
-               name="%metatype.name.Double_2030"
+               id="org.opendds.modeling.diagram.datalib.Double_2054"
+               name="%metatype.name.Double_2054"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Double"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.DoubleEditHelper">
-            <param name="semanticHint" value="2030"/>
+            <param name="semanticHint" value="2054"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.Float_2031"
-               name="%metatype.name.Float_2031"
+               id="org.opendds.modeling.diagram.datalib.Float_2055"
+               name="%metatype.name.Float_2055"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Float"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.FloatEditHelper">
-            <param name="semanticHint" value="2031"/>
+            <param name="semanticHint" value="2055"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.Char_2032"
-               name="%metatype.name.Char_2032"
+               id="org.opendds.modeling.diagram.datalib.Char_2056"
+               name="%metatype.name.Char_2056"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Char"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.CharEditHelper">
-            <param name="semanticHint" value="2032"/>
+            <param name="semanticHint" value="2056"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.WChar_2033"
-               name="%metatype.name.WChar_2033"
+               id="org.opendds.modeling.diagram.datalib.WChar_2057"
+               name="%metatype.name.WChar_2057"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="WChar"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.WCharEditHelper">
-            <param name="semanticHint" value="2033"/>
+            <param name="semanticHint" value="2057"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.Octet_2034"
-               name="%metatype.name.Octet_2034"
+               id="org.opendds.modeling.diagram.datalib.Octet_2058"
+               name="%metatype.name.Octet_2058"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Octet"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.OctetEditHelper">
-            <param name="semanticHint" value="2034"/>
+            <param name="semanticHint" value="2058"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.Boolean_2035"
-               name="%metatype.name.Boolean_2035"
+               id="org.opendds.modeling.diagram.datalib.Boolean_2059"
+               name="%metatype.name.Boolean_2059"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Boolean"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.BooleanEditHelper">
-            <param name="semanticHint" value="2035"/>
+            <param name="semanticHint" value="2059"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.Array_2024"
-               name="%metatype.name.Array_2024"
+               id="org.opendds.modeling.diagram.datalib.Array_2060"
+               name="%metatype.name.Array_2060"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Array"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.ArrayEditHelper">
-            <param name="semanticHint" value="2024"/>
+            <param name="semanticHint" value="2060"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.Enum_2048"
-               name="%metatype.name.Enum_2048"
+               id="org.opendds.modeling.diagram.datalib.Enum_2061"
+               name="%metatype.name.Enum_2061"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Enum"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.EnumEditHelper">
-            <param name="semanticHint" value="2048"/>
+            <param name="semanticHint" value="2061"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.Sequence_2036"
-               name="%metatype.name.Sequence_2036"
+               id="org.opendds.modeling.diagram.datalib.Sequence_2062"
+               name="%metatype.name.Sequence_2062"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Sequence"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.SequenceEditHelper">
-            <param name="semanticHint" value="2036"/>
+            <param name="semanticHint" value="2062"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.String_2037"
-               name="%metatype.name.String_2037"
+               id="org.opendds.modeling.diagram.datalib.String_2063"
+               name="%metatype.name.String_2063"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="String"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.StringEditHelper">
-            <param name="semanticHint" value="2037"/>
+            <param name="semanticHint" value="2063"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.WString_2038"
-               name="%metatype.name.WString_2038"
+               id="org.opendds.modeling.diagram.datalib.WString_2064"
+               name="%metatype.name.WString_2064"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="WString"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.WStringEditHelper">
-            <param name="semanticHint" value="2038"/>
+            <param name="semanticHint" value="2064"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
@@ -503,22 +503,22 @@
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.Union_2042"
-               name="%metatype.name.Union_2042"
+               id="org.opendds.modeling.diagram.datalib.Union_2065"
+               name="%metatype.name.Union_2065"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Union"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.UnionEditHelper">
-            <param name="semanticHint" value="2042"/>
+            <param name="semanticHint" value="2065"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.Struct_2046"
-               name="%metatype.name.Struct_2046"
+               id="org.opendds.modeling.diagram.datalib.Struct_2066"
+               name="%metatype.name.Struct_2066"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Struct"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.StructEditHelper">
-            <param name="semanticHint" value="2046"/>
+            <param name="semanticHint" value="2066"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
@@ -627,27 +627,27 @@
       <binding context="org.opendds.modeling.diagram.datalib.TypeContext">
          <elementType ref="org.opendds.modeling.diagram.datalib.DataLib_1000"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.Long_2023"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.LongLong_2025"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.Short_2026"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.ULong_2027"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.ULongLong_2028"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.UShort_2029"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.Double_2030"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.Float_2031"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.Char_2032"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.WChar_2033"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.Octet_2034"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.Boolean_2035"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.Array_2024"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.Enum_2048"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.Sequence_2036"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.String_2037"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.WString_2038"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.LongLong_2049"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Short_2050"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.ULong_2051"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.ULongLong_2052"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.UShort_2053"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Double_2054"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Float_2055"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Char_2056"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.WChar_2057"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Octet_2058"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Boolean_2059"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Array_2060"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Enum_2061"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Sequence_2062"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.String_2063"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.WString_2064"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.Typedef_2039"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.Case_2043"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.Branch_2044"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.Union_2042"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.Struct_2046"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Union_2065"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Struct_2066"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.Field_3001"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.Field_3002"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.Field_3003"/>
@@ -841,6 +841,11 @@
 	     	<Priority name="Low"/>
 	  	</ParserProvider>
 	</extension>
+
+
+
+
+
 
    <!-- Manual edits end -->
 
