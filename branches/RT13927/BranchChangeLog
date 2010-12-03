@@ -1,3 +1,22 @@
+Fri Dec  3 16:02:13 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/plugins.html:
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfmap:
+
+        * tools/modeling/testdata/DataLib/DataLibConstraintErrorsTest1.opendds:
+        * tools/modeling/testdata/DataLib/DataLibConstraintErrorsTest1.opendds_diagram_datalib:
+        * tools/modeling/testdata/DataLib/DataLibConstraintErrorsTest1_screenshot_1.png:
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds:
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds_diagram_datalib:
+
+	  Auditing added to DataLib diagram to help user ensure that model's
+	  semantics are consistent with OpenDDS requirements. As can be seen from the
+	  screenshot and noted in the design notes, validation checks are not yet exhaustive.
+
 Fri Dec  3 14:11:58 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
@@ -8,7 +27,7 @@ Fri Dec  3 14:11:58 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/testdata/DataLib/DataLibTest.opendds_diagram_datalib:
         * tools/modeling/testdata/DataLib/DataLibTest_screenshot_1.png:
 
-	  Oops. Didn't properly regenerate DataLib.gmfgen accounting for new DataLib.trace.
+          Oops. Didn't properly regenerate DataLib.gmfgen accounting for new DataLib.trace.
 
 Fri Dec  3 13:15:15 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 

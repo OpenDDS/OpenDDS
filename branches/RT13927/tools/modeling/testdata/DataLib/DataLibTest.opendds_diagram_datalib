@@ -275,4 +275,10 @@
     <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_q50lIP7mEd-9W4ll_I0Ewg" id="(0.625,1.0)"/>
     <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_q50lIf7mEd-9W4ll_I0Ewg" id="(0.5126050420168067,0.14814814814814814)"/>
   </edges>
+  <edges xmi:type="notation:Connector" xmi:id="_XzFoAf7qEd-Hh4GOaqgTNA" type="4003" source="_0m6K8P7lEd-9W4ll_I0Ewg" target="_v9JKgP7lEd-9W4ll_I0Ewg">
+    <styles xmi:type="notation:FontStyle" xmi:id="_XzFoAv7qEd-Hh4GOaqgTNA" fontName="Sans"/>
+    <element xsi:nil="true"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_XzGPEP7qEd-Hh4GOaqgTNA" points="[0, 0, 120, 13]$[-159, -13, -39, 0]"/>
+    <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_XzOx8P7qEd-Hh4GOaqgTNA" id="(0.05660377358490566,0.6)"/>
+  </edges>
 </notation:Diagram>

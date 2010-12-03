@@ -6,13 +6,206 @@
     modelID="OpenDDS DataLib"
     diagramFileExtension="opendds_diagram_datalib"
     copyrightText="(c) Copyright Object Computing, Incorporated.  2005,2010.  All rights reserved.">
+  <audits>
+    <categories
+        id="org.opendds.modeling.model.types.validations"
+        name="DataLib Validations"
+        description="Detects incorrect or questionable semantic constructs for elements in a DataLib diagram."
+        path="//@audits/@categories.0"/>
+    <categories
+        id="org.opendds.modeling.model.types.validation.errors"
+        name="DataLib Errors"
+        description="Detects modeling constructs that would result in invalid generated OpenDDS code."
+        path="//@audits/@categories.0 //@audits/@categories.1"
+        audits="//@audits/@rules.0 //@audits/@rules.1 //@audits/@rules.2 //@audits/@rules.3 //@audits/@rules.4 //@audits/@rules.5 //@audits/@rules.6 //@audits/@rules.7 //@audits/@rules.8 //@audits/@rules.9"/>
+    <categories
+        id="org.opendds.modeling.model.types.validation.warnings"
+        name="DataLib Warnings"
+        description="Detects questionable modeling constructs."
+        path="//@audits/@categories.0 //@audits/@categories.2"
+        audits="//@audits/@rules.10 //@audits/@rules.11"/>
+    <rules
+        name="Struct Name Blank"
+        description="Struct names should not be empty"
+        id="org.opendds.modeling.model.types.validation.error.struct_name_blank"
+        rule="//@expressionProviders/@providers.0/@expressions.0"
+        message="Struct name is empty"
+        category="//@audits/@categories.1">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Struct"/>
+      </target>
+    </rules>
+    <rules
+        name="Array size not greater than zero"
+        description="Array size should be greater than zero"
+        id="org.opendds.modeling.model.types.validation.error.array_size_zero"
+        rule="//@expressionProviders/@providers.0/@expressions.1"
+        message="Array size should be greater than zero"
+        category="//@audits/@categories.1">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Array"/>
+      </target>
+    </rules>
+    <rules
+        name="Array not connected to a Type"
+        description="Array should connect to a Type"
+        id="org.opendds.modeling.model.types.validation.error.array_no_type"
+        rule="//@expressionProviders/@providers.0/@expressions.2"
+        message="Array should connect to a Type"
+        category="//@audits/@categories.1">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Array"/>
+      </target>
+    </rules>
+    <rules
+        name="Typedef Name Blank"
+        description="Typedef name should not be empty"
+        id="org.opendds.modeling.model.types.validation.error.typedef_name_blank"
+        rule="//@expressionProviders/@providers.0/@expressions.3"
+        message="Typedef name is empty"
+        category="//@audits/@categories.1">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Typedef"/>
+      </target>
+    </rules>
+    <rules
+        name="Field Name Blank"
+        description="Field names should not be empty"
+        id="org.opendds.modeling.model.types.validation.error.field_name_blank"
+        rule="//@expressionProviders/@providers.0/@expressions.4"
+        message="Field name is empty"
+        category="//@audits/@categories.1">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Field"/>
+      </target>
+    </rules>
+    <rules
+        name="Union Name Blank"
+        description="Union names should not be empty"
+        id="org.opendds.modeling.model.types.validation.error.union_name_blank"
+        rule="//@expressionProviders/@providers.0/@expressions.5"
+        message="Union name is empty"
+        category="//@audits/@categories.1">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Union"/>
+      </target>
+    </rules>
+    <rules
+        name="Union without Branches"
+        description="Union does not connect with any Branches"
+        id="org.opendds.modeling.model.types.validation.error.union_no_branches"
+        rule="//@expressionProviders/@providers.0/@expressions.6"
+        message="Union does not connect with any Branches"
+        category="//@audits/@categories.1">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Union"/>
+      </target>
+    </rules>
+    <rules
+        name="Union without correct switch Type"
+        description="Union must connect with a switch (discriminator) Type of an integral, Boolean, Char, or Enum type"
+        id="org.opendds.modeling.model.types.validation.error.union_switch_type_not_correct"
+        rule="//@expressionProviders/@providers.0/@expressions.7"
+        message="Union does not connect to the correct Type for its switch"
+        category="//@audits/@categories.1">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Union"/>
+      </target>
+    </rules>
+    <rules
+        name="Union Branch without Cases"
+        description="Union Branch does not connect to any Cases"
+        id="org.opendds.modeling.model.types.validation.error.union_branches_no_cases"
+        rule="//@expressionProviders/@providers.0/@expressions.8"
+        message="Union Branch does not connect to any Cases"
+        category="//@audits/@categories.1">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Branch"/>
+      </target>
+    </rules>
+    <rules
+        name="Union Case without literal"
+        description="Union Case does not have have literal defined"
+        id="org.opendds.modeling.model.types.validation.error.union_case_no_literal"
+        rule="//@expressionProviders/@providers.0/@expressions.9"
+        message="Union Case does not have have literal defined"
+        category="//@audits/@categories.1">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Case"/>
+      </target>
+    </rules>
+    <rules
+        name="No DCPS Data Type Structs defined"
+        description="At least one DCPS Data Type Struct should be defined"
+        id="org.opendds.modeling.model.types.validation.warning.no_dcps_datatype_struct_defined"
+        rule="//@expressionProviders/@providers.0/@expressions.10"
+        message="At least one Struct should have isDcpsDataType = true"
+        severity="WARNING"
+        category="//@audits/@categories.2">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib"/>
+      </target>
+    </rules>
+    <rules
+        name="Non DCPS Data Type Struct not used"
+        description="A non DCPS Data Type Struct is not used elsewhere"
+        id="org.opendds.modeling.model.types.validation.warning.non_dcps_datatype_struct_not_used"
+        rule="//@expressionProviders/@providers.0/@expressions.11"
+        message="A Struct with isDcpsDataType = false is not used"
+        severity="WARNING"
+        category="//@audits/@categories.2">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/Struct"/>
+      </target>
+    </rules>
+    <clientContexts
+        ruleTargets="//@audits/@rules.0/@target //@audits/@rules.1/@target //@audits/@rules.2/@target //@audits/@rules.3/@target //@audits/@rules.4/@target //@audits/@rules.5/@target //@audits/@rules.6/@target //@audits/@rules.7/@target //@audits/@rules.8/@target //@audits/@rules.9/@target //@audits/@rules.10/@target //@audits/@rules.11/@target"/>
+  </audits>
   <diagram
       visualID="1000"
       editPartClassName="DataLibEditPart"
       itemSemanticEditPolicyClassName="DataLibItemSemanticEditPolicy"
       canonicalEditPolicyClassName="DataLibCanonicalEditPolicy"
       iconProviderPriority="Low"
-      validationProviderPriority="Low">
+      validationProviderPriority="Low"
+      validationEnabled="true"
+      validationDecorators="true">
     <diagramRunTimeClass
         href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Diagram"/>
     <elementType
@@ -2948,6 +3141,47 @@
   </propertySheet>
   <domainGenModel
       href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#/"/>
+  <expressionProviders>
+    <providers
+        xsi:type="gmfgen:GenExpressionInterpreter">
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="not self.name.oclIsUndefined() and self.name &lt;> ''"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.length > 0"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="not subtype.oclIsUndefined()"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="not self.name.oclIsUndefined() and self.name &lt;> ''"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="not self.name.oclIsUndefined() and self.name &lt;> ''"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="not self.name.oclIsUndefined() and self.name &lt;> ''"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.branches->notEmpty()"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="not switch.oclIsUndefined() and (&#xA;switch.oclIsTypeOf(Int) or&#xA;switch.oclIsTypeOf(Enum) or&#xA;switch.oclIsTypeOf(Boolean) or&#xA;switch.oclIsTypeOf(Char) or&#xA;switch.oclIsTypeOf(WChar)&#xA;)&#xA;"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="cases->notEmpty()"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="not literal.oclIsUndefined() and literal &lt;> ''"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.types->select(oclIsTypeOf(Struct))->notEmpty()"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="Struct.allInstances().fields&#xA;  ->select(type = self)&#xA;    ->notEmpty()&#xA;"/>
+    </providers>
+  </expressionProviders>
   <labelParsers
       extensibleViaService="true">
     <implementations

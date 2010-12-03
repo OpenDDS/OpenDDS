@@ -110,6 +110,22 @@
    </extension>
 
 
+   <extension point="org.eclipse.gmf.runtime.common.ui.services.markerNavigationProviders" id="markers-navigation">
+      <?gmfgen generated="true"?>
+      <MarkerNavigationProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibMarkerNavigationProvider">
+         <MarkerType name="org.opendds.modeling.diagram.datalib.diagnostic"/>
+         <Priority name="Lowest"/>
+      </MarkerNavigationProvider>
+   </extension>
+
+   <extension id="diagnostic" name="OpenDDSDataLib Plugin problems" point="org.eclipse.core.resources.markers">
+      <?gmfgen generated="true"?>
+      <super type="org.eclipse.core.resources.problemmarker"/>
+      <super type="org.eclipse.gmf.runtime.common.ui.services.marker"/>
+      <persistent value="true"/>
+   </extension>   
+
+   
    <extension point="org.eclipse.core.runtime.preferences" id="prefs">
       <?gmfgen generated="true"?>
       <initializer class="org.opendds.modeling.model.opendds.diagram.datalib.preferences.DiagramPreferenceInitializer"/>
@@ -774,6 +790,181 @@
          </selectionEnablement>
       </linkHelper>
    </extension>
+   <extension point="org.eclipse.emf.validation.constraintProviders">
+      <?gmfgen generated="true"?>
+            <category id="org.opendds.modeling.model.types.validations" mandatory="false" name="DataLib Validations">
+         <![CDATA[Detects incorrect or questionable semantic constructs for elements in a DataLib diagram.]]>
+      </category>
+      <category id="org.opendds.modeling.model.types.validations/org.opendds.modeling.model.types.validation.errors" mandatory="false" name="DataLib Errors">
+         <![CDATA[Detects modeling constructs that would result in invalid generated OpenDDS code.]]>
+      </category>
+      <category id="org.opendds.modeling.model.types.validations/org.opendds.modeling.model.types.validation.warnings" mandatory="false" name="DataLib Warnings">
+         <![CDATA[Detects questionable modeling constructs.]]>
+      </category>
+      <constraintProvider cache="true">
+         <package namespaceUri="http://www.opendds.org/modeling/schemas/Types/1.0"/>
+               <constraints categories="org.opendds.modeling.model.types.validations">
+                  </constraints>
+         <constraints categories="org.opendds.modeling.model.types.validations/org.opendds.modeling.model.types.validation.errors">
+                  <constraint id="org.opendds.modeling.model.types.validation.error.struct_name_blank"
+            lang="OCL"
+            name="Struct Name Blank"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not self.name.oclIsUndefined() and self.name <> '']]>
+            <description><![CDATA[Struct names should not be empty]]></description>
+            <message><![CDATA[Struct name is empty]]></message>
+            <target class="types.Struct"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.array_size_zero"
+            lang="OCL"
+            name="Array size not greater than zero"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.length > 0]]>
+            <description><![CDATA[Array size should be greater than zero]]></description>
+            <message><![CDATA[Array size should be greater than zero]]></message>
+            <target class="types.Array"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.array_no_type"
+            lang="OCL"
+            name="Array not connected to a Type"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not subtype.oclIsUndefined()]]>
+            <description><![CDATA[Array should connect to a Type]]></description>
+            <message><![CDATA[Array should connect to a Type]]></message>
+            <target class="types.Array"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.typedef_name_blank"
+            lang="OCL"
+            name="Typedef Name Blank"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not self.name.oclIsUndefined() and self.name <> '']]>
+            <description><![CDATA[Typedef name should not be empty]]></description>
+            <message><![CDATA[Typedef name is empty]]></message>
+            <target class="types.Typedef"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.field_name_blank"
+            lang="OCL"
+            name="Field Name Blank"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not self.name.oclIsUndefined() and self.name <> '']]>
+            <description><![CDATA[Field names should not be empty]]></description>
+            <message><![CDATA[Field name is empty]]></message>
+            <target class="types.Field"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.union_name_blank"
+            lang="OCL"
+            name="Union Name Blank"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not self.name.oclIsUndefined() and self.name <> '']]>
+            <description><![CDATA[Union names should not be empty]]></description>
+            <message><![CDATA[Union name is empty]]></message>
+            <target class="types.Union"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.union_no_branches"
+            lang="OCL"
+            name="Union without Branches"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.branches->notEmpty()]]>
+            <description><![CDATA[Union does not connect with any Branches]]></description>
+            <message><![CDATA[Union does not connect with any Branches]]></message>
+            <target class="types.Union"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.union_switch_type_not_correct"
+            lang="OCL"
+            name="Union without correct switch Type"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not switch.oclIsUndefined() and (
+switch.oclIsTypeOf(Int) or
+switch.oclIsTypeOf(Enum) or
+switch.oclIsTypeOf(Boolean) or
+switch.oclIsTypeOf(Char) or
+switch.oclIsTypeOf(WChar)
+)
+]]>
+            <description><![CDATA[Union must connect with a switch (discriminator) Type of an integral, Boolean, Char, or Enum type]]></description>
+            <message><![CDATA[Union does not connect to the correct Type for its switch]]></message>
+            <target class="types.Union"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.union_branches_no_cases"
+            lang="OCL"
+            name="Union Branch without Cases"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[cases->notEmpty()]]>
+            <description><![CDATA[Union Branch does not connect to any Cases]]></description>
+            <message><![CDATA[Union Branch does not connect to any Cases]]></message>
+            <target class="types.Branch"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.union_case_no_literal"
+            lang="OCL"
+            name="Union Case without literal"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not literal.oclIsUndefined() and literal <> '']]>
+            <description><![CDATA[Union Case does not have have literal defined]]></description>
+            <message><![CDATA[Union Case does not have have literal defined]]></message>
+            <target class="types.Case"/>
+         </constraint>
+                  </constraints>
+         <constraints categories="org.opendds.modeling.model.types.validations/org.opendds.modeling.model.types.validation.warnings">
+                  <constraint id="org.opendds.modeling.model.types.validation.warning.no_dcps_datatype_struct_defined"
+            lang="OCL"
+            name="No DCPS Data Type Structs defined"
+            mode="Batch"
+            severity="WARNING" statusCode="200">
+            <![CDATA[self.types->select(oclIsTypeOf(Struct))->notEmpty()]]>
+            <description><![CDATA[At least one DCPS Data Type Struct should be defined]]></description>
+            <message><![CDATA[At least one Struct should have isDcpsDataType = true]]></message>
+            <target class="types.DataLib"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.warning.non_dcps_datatype_struct_not_used"
+            lang="OCL"
+            name="Non DCPS Data Type Struct not used"
+            mode="Batch"
+            severity="WARNING" statusCode="200">
+            <![CDATA[Struct.allInstances().fields
+  ->select(type = self)
+    ->notEmpty()
+]]>
+            <description><![CDATA[A non DCPS Data Type Struct is not used elsewhere]]></description>
+            <message><![CDATA[A Struct with isDcpsDataType = false is not used]]></message>
+            <target class="types.Struct"/>
+         </constraint>
+                  </constraints>
+      </constraintProvider>
+   </extension>
+
+   <extension point="org.eclipse.emf.validation.constraintBindings">
+      <?gmfgen generated="true"?>
+      <clientContext default="false" id="org.opendds.modeling.diagram.datalibDefaultCtx">
+         <selector class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibValidationProvider$DefaultCtx"/>
+      </clientContext>
+      <binding context="org.opendds.modeling.diagram.datalibDefaultCtx">
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.struct_name_blank"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.array_size_zero"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.array_no_type"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.typedef_name_blank"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.field_name_blank"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.union_name_blank"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.union_no_branches"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.union_switch_type_not_correct"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.union_branches_no_cases"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.union_case_no_literal"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.warning.no_dcps_datatype_struct_defined"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.warning.non_dcps_datatype_struct_not_used"/>
+               </binding>
+
+   </extension>
+
+
    <extension point="org.eclipse.ui.commands" id="update-cmd">
       <?gmfgen generated="true"?>
       <command
@@ -841,6 +1032,15 @@
 	     	<Priority name="Low"/>
 	  	</ParserProvider>
 	</extension>
+<extension id="validationDecoratorProvider" name="ValidationDecorations" point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders">
+      <?gmfgen generated="true"?>
+      <decoratorProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibValidationDecoratorProvider">
+         <Priority name="Lowest"/>
+         <object class="org.eclipse.gmf.runtime.diagram.ui.editparts.IPrimaryEditPart(org.eclipse.gmf.runtime.diagram.ui)" id="PRIMARY_VIEW"/>
+         <context decoratorTargets="PRIMARY_VIEW"/>
+      </decoratorProvider>
+   </extension>
+
 
 
 
