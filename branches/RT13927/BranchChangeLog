@@ -1,3 +1,15 @@
+Fri Dec  3 14:11:58 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/edit/parts/StructFieldsEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/edit/parts/StructKeysEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds:
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds_diagram_datalib:
+        * tools/modeling/testdata/DataLib/DataLibTest_screenshot_1.png:
+
+	  Oops. Didn't properly regenerate DataLib.gmfgen accounting for new DataLib.trace.
+
 Fri Dec  3 13:15:15 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
@@ -8,9 +20,9 @@ Fri Dec  3 13:15:15 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/testdata/DataLib/DataLibTest.opendds:
         * tools/modeling/testdata/DataLib/DataLibTest.opendds_diagram_datalib:
 
-	  VisualID attributes for figures in DataLib.trace (generated as needed at the
-	  same time DataLib.gmfgen is generated) changed for some reason. Updated to
-	  account for new IDs.
+          VisualID attributes for figures in DataLib.trace (generated as needed at the
+          same time DataLib.gmfgen is generated) changed for some reason. Updated to
+          account for new IDs.
 
 Thu Dec  2 23:59:25 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 

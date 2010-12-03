@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<types:DataLib xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_UjYz8P1MEd-Pfd3_1AelrA">
-  <types xsi:type="types:Char" xmi:id="_WDO2EP1MEd-Pfd3_1AelrA"/>
-  <types xsi:type="types:Double" xmi:id="_Wt91IP1MEd-Pfd3_1AelrA"/>
-  <types xsi:type="types:Enum" xmi:id="_XZW7gP1MEd-Pfd3_1AelrA" name="Color">
+<types:DataLib xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_W-U8gf7lEd-9W4ll_I0Ewg">
+  <types xsi:type="types:Boolean" xmi:id="_YQlOkP7lEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:Double" xmi:id="_ZGos0P7lEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:Enum" xmi:id="_Z_FXwP7lEd-9W4ll_I0Ewg" name="Color">
     <literals>RED</literals>
     <literals>GREEN</literals>
     <literals>BLUE</literals>
   </types>
-  <types xsi:type="types:Float" xmi:id="_fKeucP1MEd-Pfd3_1AelrA"/>
-  <types xsi:type="types:Long" xmi:id="_fi1kEP1MEd-Pfd3_1AelrA"/>
-  <types xsi:type="types:LongLong" xmi:id="_gKpK8P1MEd-Pfd3_1AelrA"/>
-  <types xsi:type="types:Octet" xmi:id="_gzKjgP1MEd-Pfd3_1AelrA"/>
-  <types xsi:type="types:Short" xmi:id="_hXBegP1MEd-Pfd3_1AelrA"/>
-  <types xsi:type="types:ULong" xmi:id="_iJrqgP1MEd-Pfd3_1AelrA"/>
-  <types xsi:type="types:ULongLong" xmi:id="_jAjBEP1MEd-Pfd3_1AelrA"/>
-  <types xsi:type="types:UShort" xmi:id="_joNeAP1MEd-Pfd3_1AelrA"/>
-  <types xsi:type="types:WChar" xmi:id="_kXlsgP1MEd-Pfd3_1AelrA"/>
-  <types xsi:type="types:WString" xmi:id="_lb8sgP1MEd-Pfd3_1AelrA"/>
-  <types xsi:type="types:String" xmi:id="_rjkLAP1MEd-Pfd3_1AelrA"/>
-  <types xsi:type="types:Array" xmi:id="_xkMQsP1MEd-Pfd3_1AelrA" length="10" subtype="_gzKjgP1MEd-Pfd3_1AelrA"/>
-  <types xsi:type="types:Sequence" xmi:id="_-T0lAP1MEd-Pfd3_1AelrA" length="42" subtype="_joNeAP1MEd-Pfd3_1AelrA"/>
-  <types xsi:type="types:Typedef" xmi:id="_Bzz58P1NEd-Pfd3_1AelrA" type="_xkMQsP1MEd-Pfd3_1AelrA" name="Bytes10"/>
-  <types xsi:type="types:Typedef" xmi:id="_Gzxz4P1NEd-Pfd3_1AelrA" type="_-T0lAP1MEd-Pfd3_1AelrA" name="UShorts42"/>
-  <types xsi:type="types:Union" xmi:id="_zuYa4P1NEd-Pfd3_1AelrA" name="U" switch="_WDO2EP1MEd-Pfd3_1AelrA">
-    <branches xmi:id="_dE33YP1NEd-Pfd3_1AelrA">
-      <field xmi:id="_eZx00P1NEd-Pfd3_1AelrA" name="long_mem" type="_fi1kEP1MEd-Pfd3_1AelrA"/>
-      <cases xmi:id="_Z_31UP1NEd-Pfd3_1AelrA" literal="'L'"/>
+  <types xsi:type="types:Float" xmi:id="_fDQcQP7lEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:Long" xmi:id="_f1E6wP7lEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:LongLong" xmi:id="_gez0QP7lEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:Short" xmi:id="_g88hwP7lEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:ULong" xmi:id="_hY3owP7lEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:ULongLong" xmi:id="_jaapwP7lEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:WChar" xmi:id="_kW11wP7lEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:WString" xmi:id="_lNUKwP7lEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:String" xmi:id="_lwa30P7lEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:Octet" xmi:id="_n17LwP7lEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:UShort" xmi:id="_oW4jwP7lEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:Array" xmi:id="_pCJHQP7lEd-9W4ll_I0Ewg" length="10" subtype="_n17LwP7lEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:Typedef" xmi:id="_swQXwP7lEd-9W4ll_I0Ewg" type="_pCJHQP7lEd-9W4ll_I0Ewg" name="Bytes10"/>
+  <types xsi:type="types:Sequence" xmi:id="_v9GuQP7lEd-9W4ll_I0Ewg" length="42" subtype="_oW4jwP7lEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:Typedef" xmi:id="_0m4VwP7lEd-9W4ll_I0Ewg" name="UShorts42"/>
+  <types xsi:type="types:Union" xmi:id="_MNMfwP7mEd-9W4ll_I0Ewg" name="U" switch="_UgWowP7mEd-9W4ll_I0Ewg">
+    <branches xmi:id="_YIcJwP7mEd-9W4ll_I0Ewg">
+      <field xmi:id="_aS_VwP7mEd-9W4ll_I0Ewg" name="long_mem" type="_f1E6wP7lEd-9W4ll_I0Ewg"/>
+      <cases xmi:id="_ei-kQP7mEd-9W4ll_I0Ewg" literal="'L'"/>
     </branches>
-    <branches xmi:id="_opr-YP1NEd-Pfd3_1AelrA">
-      <field xmi:id="_pckz4P1NEd-Pfd3_1AelrA" name="char_mem" type="_WDO2EP1MEd-Pfd3_1AelrA"/>
-      <cases xmi:id="_kp8yYP1NEd-Pfd3_1AelrA" literal="'c'"/>
-      <cases xmi:id="_m1HCYP1NEd-Pfd3_1AelrA" literal="'C'"/>
+    <branches xmi:id="_iBTFQP7mEd-9W4ll_I0Ewg">
+      <field xmi:id="_i4J0wP7mEd-9W4ll_I0Ewg" name="char_mem" type="_UgWowP7mEd-9W4ll_I0Ewg"/>
+      <cases xmi:id="_ldTSEP7mEd-9W4ll_I0Ewg" literal="'c'"/>
+      <cases xmi:id="_oFVEQP7mEd-9W4ll_I0Ewg" literal="'C'"/>
     </branches>
-    <default xmi:id="_56zg4P1NEd-Pfd3_1AelrA" name="string_mem" type="_rjkLAP1MEd-Pfd3_1AelrA"/>
+    <default xmi:id="_SYjOwP7mEd-9W4ll_I0Ewg" name="string_mem" type="_lwa30P7lEd-9W4ll_I0Ewg"/>
   </types>
-  <types xsi:type="types:Struct" xmi:id="_Q93z4P1OEd-Pfd3_1AelrA" name="TestStruct">
-    <fields xmi:id="_RtGRYP1OEd-Pfd3_1AelrA" name="bytes" type="_Bzz58P1NEd-Pfd3_1AelrA"/>
-    <fields xmi:id="_UfPo4P1OEd-Pfd3_1AelrA" name="shorts" type="_Gzxz4P1NEd-Pfd3_1AelrA"/>
-    <fields xmi:id="_YRLCYP1OEd-Pfd3_1AelrA" name="size" type="_fi1kEP1MEd-Pfd3_1AelrA"/>
-    <fields xmi:id="_gF0DYP1OEd-Pfd3_1AelrA" name="id" type="_rjkLAP1MEd-Pfd3_1AelrA"/>
-    <keys xmi:id="_kOoS4P1OEd-Pfd3_1AelrA" field="_YRLCYP1OEd-Pfd3_1AelrA"/>
+  <types xsi:type="types:Char" xmi:id="_UgWowP7mEd-9W4ll_I0Ewg"/>
+  <types xsi:type="types:Struct" xmi:id="_tWeNwP7mEd-9W4ll_I0Ewg" name="TestStruct">
+    <fields xmi:id="_xsB4wP7mEd-9W4ll_I0Ewg" name="bytes" type="_swQXwP7lEd-9W4ll_I0Ewg"/>
+    <fields xmi:id="_zP-XwP7mEd-9W4ll_I0Ewg" name="shorts" type="_0m4VwP7lEd-9W4ll_I0Ewg"/>
+    <fields xmi:id="_1faDwP7mEd-9W4ll_I0Ewg" name="size" type="_f1E6wP7lEd-9W4ll_I0Ewg"/>
+    <fields xmi:id="_3jFywP7mEd-9W4ll_I0Ewg" name="id" type="_lwa30P7lEd-9W4ll_I0Ewg"/>
+    <keys xmi:id="_64VQQP7mEd-9W4ll_I0Ewg" field="_3jFywP7mEd-9W4ll_I0Ewg"/>
   </types>
-  <types xsi:type="types:Boolean" xmi:id="_YzLpgP7eEd-up9NB2Jeu8A"/>
 </types:DataLib>
