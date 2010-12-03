@@ -1,3 +1,9 @@
+Fri Dec  3 20:32:29 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Topics.ecore:
+
+	  Fixed TopicDescription so that child datatype is required.
+
 Fri Dec  3 18:52:18 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerMulti/MessengerMulti.mpc:
