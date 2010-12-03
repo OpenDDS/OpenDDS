@@ -24,20 +24,42 @@
 <!-- All types-->
 <xsl:variable name="type"     select="/opendds:OpenDDSModel/dataLib/types"/>
 
+<!-- Terminal user defined types are all unreferenced user defined types -->
+<xsl:variable name="terminals" select="$type[not(@xmi:id  = $type//@type or @xmi:id=$type//@subtype or @xmi:id=$type//@switch)]"/>
+
+<!-- determine mode by checking number of datalibs defined in this model -->
+<xsl:variable name="datalib-count" select="count(opendds:OpenDDSModel/dataLib)"/> 
+
 <!-- Index (lookup table is in lut variable) -->
 <xsl:key
      name  = "lut-type"
      match = "type"
      use   = "@type"/>
 
-<!-- process the entire model document to produce the IDL. -->
+<!-- process the entire model document to produce the IDL. 
+  ** 
+  ** Strategy: determine the output order of the types. Output module wrapper
+  ** with each type if there are multiple dataLib elements.  Otherwise output
+  ** wrapper only once.
+  **
+  -->
 <xsl:template match="/opendds:OpenDDSModel">
 
   <!-- required to build on windows -->
   <xsl:call-template name="processIntrinsicSequences"/>
 
+  <!-- forward declarations -->
   <xsl:apply-templates select="dataLib"/>
 
+  <xsl:if test="$datalib-count > 1">
+    <!-- Process all types with no dependencies on them.  This will 
+      ** recursively output the depended-on types ahead of those in
+      ** the nodes param, touching all types in model.
+      -->
+    <xsl:call-template name="generate-idl">
+      <xsl:with-param name="nodes" select="$terminals"/>
+    </xsl:call-template>
+  </xsl:if>
 </xsl:template>
 <!-- End of main processing template. -->
 
@@ -45,27 +67,27 @@
   <xsl:variable name="libname" select="@name"/>
 
   <xsl:if test="(string-length($libname) > 0) and $type">
-    <xsl:value-of select="concat($newline,
-                                 'module ', $libname, ' {', $newline,
+    <xsl:value-of select="concat('module ', $libname, ' {', $newline,
                                  '  // Forward declarations', $newline)"/>
   </xsl:if>
 
   <!-- Generate IDL for forward declarations. -->
-  <xsl:apply-templates select="$type" mode="declare">
+  <xsl:apply-templates select="types" mode="declare">
     <xsl:sort select="@name"/>
   </xsl:apply-templates>
-  <xsl:value-of select="$newline"/>
 
-  <!-- Terminal user defined types are all unreferenced user defined types -->
-  <xsl:variable name="terminals" select="$type[not(@xmi:id  = $type//@type or @xmi:id=$type//@subtype or @xmi:id=$type//@switch)]"/>
-
-  <!-- Process all types with no dependencies on them. -->
-  <xsl:call-template name="generate-idl">
-    <xsl:with-param name="nodes" select="$terminals"/>
-  </xsl:call-template>
+  <xsl:if test="$datalib-count = 1">
+    <!-- Process all types with no dependencies on them.  This will 
+      ** recursively output the depended-on types ahead of those in
+      ** the nodes param, touching all types in model.
+      -->
+    <xsl:call-template name="generate-idl">
+      <xsl:with-param name="nodes" select="$terminals"/>
+    </xsl:call-template>
+  </xsl:if>
 
   <xsl:if test="(string-length($libname) > 0) and $type">
-    <xsl:value-of select="concat($newline, $newline, '};', $newline, $newline)"/>
+    <xsl:value-of select="concat('};', $newline, $newline)"/>
   </xsl:if>
 </xsl:template>
 <!-- End of main processing template. -->
@@ -106,7 +128,7 @@
       ** this node.
       -->
     <xsl:if test="not(contains($exclude-list,concat(' ',@xmi:id,' ')))">
-      <xsl:apply-templates select="."/>
+      <xsl:apply-templates select="." mode="module-wrapped"/>
     </xsl:if>
   </xsl:for-each>
 </xsl:template>
@@ -144,6 +166,25 @@
 
 <!-- Ignore text in declare mode (enums) -->
 <xsl:template match="text()" mode="declare">
+</xsl:template>
+
+<!-- Process module wrappers . -->
+<xsl:template match="types[@xsi:type = 'types:Typedef'] |  
+                     types[@xsi:type = 'types:Union'] | 
+                     types[@xsi:type = 'types:Struct'] | 
+                     types[@xsi:type = 'types:Enum']" mode="module-wrapped">
+
+  <xsl:variable name="libname" select="../@name"/>
+  <xsl:if test="($datalib-count > 1) and (string-length($libname) > 0)">
+    <xsl:value-of select="concat('module ', $libname, ' {', $newline)"/>
+  </xsl:if>
+
+  <xsl:apply-templates select="."/>
+
+  <xsl:if test="($datalib-count > 1) and (string-length($libname) > 0)">
+    <xsl:value-of select="concat('};', $newline)"/>
+  </xsl:if>
+  
 </xsl:template>
 
 <!-- Process enumeration definitions. -->

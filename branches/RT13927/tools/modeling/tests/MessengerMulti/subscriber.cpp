@@ -7,7 +7,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerModel_T.h"
+#include "model/MessengerMulti_T.h"
 #include <model/NullReaderListener.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
@@ -62,9 +62,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    MessengerModelType model(argc, argv);
+    MessengerMultiType model(argc, argv);
 
-    using OpenDDS::Model::MessengerModel::Elements;
+    using OpenDDS::Model::MessengerMulti::Elements;
 
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
 

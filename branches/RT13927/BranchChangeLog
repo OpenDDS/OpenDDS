@@ -1,3 +1,23 @@
+Fri Dec  3 18:52:18 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.mpc:
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.opendds:
+        * tools/modeling/tests/MessengerMulti/publisher.cpp:
+        * tools/modeling/tests/MessengerMulti/subscriber.cpp:
+        * tools/modeling/tests/MessengerMulti/transports.traits:
+        * tools/modeling/tests/setup.pl:
+
+          Test case for multiple datalibs in a model.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+
+          Updates for multiple datalibs in a model.
+
+        * tools/modeling/tests/MessengerMulti/Messenger.mpc:
+        * tools/modeling/tests/MessengerMulti/MessengerModel.opendds:
+
+          Removed these files.
+
 Fri Dec  3 16:02:13 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/plugins.html:
@@ -13,9 +33,9 @@ Fri Dec  3 16:02:13 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/testdata/DataLib/DataLibTest.opendds:
         * tools/modeling/testdata/DataLib/DataLibTest.opendds_diagram_datalib:
 
-	  Auditing added to DataLib diagram to help user ensure that model's
-	  semantics are consistent with OpenDDS requirements. As can be seen from the
-	  screenshot and noted in the design notes, validation checks are not yet exhaustive.
+          Auditing added to DataLib diagram to help user ensure that model's
+          semantics are consistent with OpenDDS requirements. As can be seen from the
+          screenshot and noted in the design notes, validation checks are not yet exhaustive.
 
 Fri Dec  3 14:11:58 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
