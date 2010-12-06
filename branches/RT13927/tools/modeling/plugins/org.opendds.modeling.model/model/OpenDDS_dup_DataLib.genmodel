@@ -69,7 +69,6 @@
       generateExampleClass="false" generateModelWizard="false" ecorePackage="Core.ecore#/">
     <genClasses image="false" ecoreClass="Core.ecore#//Entity">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Core.ecore#//Entity/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Core.ecore#//Entity/ownedEntity"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Core.ecore#//Entity/property"/>
     </genClasses>
     <genClasses ecoreClass="Core.ecore#//Specification"/>

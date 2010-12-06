@@ -5,8 +5,6 @@
     nsURI="http://www.opendds.org/modeling/schemas/Core/1.0" nsPrefix="core">
   <eClassifiers xsi:type="ecore:EClass" name="Entity" abstract="true">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="ownedEntity" upperBound="-1"
-        eType="#//Entity" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="property" upperBound="-1"
         eType="#//TypedEntity" containment="true"/>
   </eClassifiers>
