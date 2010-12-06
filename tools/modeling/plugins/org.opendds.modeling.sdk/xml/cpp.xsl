@@ -1,5 +1,6 @@
 <xsl:stylesheet version='1.0'
      xmlns:xmi='http://www.omg.org/XMI'
+     xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
      xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
      xmlns:lut='http://www.opendds.org/modeling/schemas/Lut/1.0'
      xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'
@@ -22,7 +23,7 @@
 </xsl:variable>
 
 <!-- Documents -->
-<xsl:variable name="lut" select="document('')/*/lut:tables"/>
+<xsl:variable name="lut-policies" select="document('lut.xml')/*/lut:policies"/>
 
 <!-- Node sets -->
 <xsl:variable name="readers"      select="//readers"/>
@@ -30,6 +31,7 @@
 <xsl:variable name="domains"      select="//domains"/>
 <xsl:variable name="participants" select="//participants"/>
 <xsl:variable name="publishers"   select="//publishers"/>
+<xsl:variable name="policies"     select="//policies"/>
 <xsl:variable name="subscribers"  select="//subscribers"/>
 <xsl:variable name="topics"       select="//topics"/>
 <xsl:variable name="types"        select="//types"/>
@@ -38,7 +40,7 @@
 <xsl:key
      name  = "policies"
      match = "//opendds:policy"
-     use   = "@name"/>
+     use   = "@xmi:id"/>
 
 <xsl:key
      name  = "lut-qos-field"
@@ -412,10 +414,18 @@ Elements::Data::buildParticipantsQos()
   participantQos = TheServiceParticipant->initial_DomainParticipantQos();
 </xsl:text>
     <!-- '  participantQos.(policyfield) = (value);\n' -->
+
+    <xsl:call-template name="process-policies">
+      <xsl:with-param name="reffed-policies" select="$policies[@xmi:id = current()/@*]"/>
+      <xsl:with-param name="base"   select="'  participantQos.'"/>
+    </xsl:call-template>
+    
+<!--
     <xsl:call-template name="process-qos">
       <xsl:with-param name="entity" select="."/>
       <xsl:with-param name="base"   select="'  participantQos.'"/>
     </xsl:call-template>
+-->
 
     <xsl:text>  this->participantsQos_[ participant] = participantQos;</xsl:text>
     <xsl:value-of select="$newline"/>
@@ -648,6 +658,93 @@ Elements::Data::copySubscriptionQos(
 </xsl:template>
 <!-- End of main processing template. -->
 
+<xsl:template name="process-policies">
+  <xsl:param name = "reffed-policies"/>
+  <xsl:param name = "base"/>
+
+  <xsl:for-each select="$reffed-policies">
+    <xsl:variable name="policy-type" select="@xsi:type"/>
+
+    <!-- lookup the field name for the current policy type. -->
+    <xsl:variable name="field">
+      <xsl:for-each select="$lut-policies"> <!-- Change context for lookup -->
+        <xsl:value-of select="key('lut-qos-field', $policy-type)/text()"/>
+      </xsl:for-each>
+    </xsl:variable>
+
+    <!-- lookup whether to quote the value. -->
+    <xsl:variable name="should-quote">
+      <xsl:for-each select="$lut-policies"> <!-- Change context for lookup -->
+        <xsl:value-of select="key('lut-qos-field', $policy-type)/@quote"/>
+      </xsl:for-each>
+    </xsl:variable>
+
+<xsl:message>
+<xsl:value-of select="concat('policy: ', @name, ' field ', $field, ' quote ', $should-quote, $newline)"/>
+</xsl:message>
+    <!-- process all of the policy attributes -->
+    <xsl:for-each select="@*">
+      <xsl:message>working here, processing attributes of policies </xsl:message>
+      <xsl:choose>
+        <!-- ignore the 'name', 'type' and 'id' attributes of the policy. -->
+        <xsl:when test="name() = 'name' or 
+                        name() = 'xsi:type' or 
+                        name() = 'xmi:id'"/>
+
+        <!-- OpenDDS::Model::stringToByteSeq( (base)(field).(name), (value)); -->
+        <xsl:when test="../@type = 'opendds:udQosPolicy'
+                     or ../@type = 'opendds:tdQosPolicy'
+                     or ../@type = 'opendds:gdQosPolicy'">
+          <xsl:text>  OpenDDS::Model::stringToByteSeq( </xsl:text>
+          <xsl:value-of select="$base"/>
+          <xsl:value-of select="$field"/>
+          <xsl:text>.</xsl:text>
+          <xsl:value-of select="name()"/>
+          <xsl:text>, </xsl:text>
+
+          <!-- quote the value if specified in the lookup table. -->
+          <xsl:choose>
+            <xsl:when test="$should-quote = 'true'">
+              <xsl:text>"</xsl:text>
+              <xsl:value-of select="."/>
+              <xsl:text>"</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="."/>
+            </xsl:otherwise>
+          </xsl:choose>
+
+          <xsl:text>);</xsl:text>
+          <xsl:value-of select="$newline"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$base"/>
+          <xsl:value-of select="$field"/>
+          <xsl:text>.</xsl:text>
+          <xsl:value-of select="name()"/>
+          <xsl:text> = </xsl:text>
+
+          <!-- quote the value if specified in the lookup table. -->
+          <xsl:choose>
+            <xsl:when test="$should-quote = 'true'">
+              <xsl:text>"</xsl:text>
+              <xsl:value-of select="."/>
+              <xsl:text>";</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="."/>
+              <xsl:text>;</xsl:text>
+            </xsl:otherwise>
+          </xsl:choose>
+
+          <xsl:value-of select="$newline"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:for-each>
+
+  </xsl:for-each>
+</xsl:template>
+
 <!-- Process QoS policy names into value assignments. -->
 <xsl:template name="process-qos">
   <xsl:param name = "entity"/>
@@ -660,14 +757,14 @@ Elements::Data::copySubscriptionQos(
 
     <!-- lookup the field name for the current policy type. -->
     <xsl:variable name="field">
-      <xsl:for-each select="$lut"> <!-- Change context for the lookup -->
+      <xsl:for-each select="$lut-policies"> <!-- Change context for the lookup -->
         <xsl:value-of select="key('lut-qos-field', $policy/@type)/text()"/>
       </xsl:for-each>
     </xsl:variable>
 
     <!-- lookup whether to quote the value. -->
     <xsl:variable name="should-quote">
-      <xsl:for-each select="$lut"> <!-- Change context for the lookup -->
+      <xsl:for-each select="$lut-policies"> <!-- Change context for the lookup -->
         <xsl:value-of select="key('lut-qos-field', $policy/@type)/@quote"/>
       </xsl:for-each>
     </xsl:variable>
@@ -818,62 +915,6 @@ Elements::Data::copySubscriptionQos(
         </xsl:otherwise>
       </xsl:choose>
     </xsl:if>
-  </xsl:for-each>
-</xsl:template>
-
-<!-- Process Transport configuration data into value assignments. -->
-<xsl:template name="process-transports">
-  <xsl:param name="config"/>
-  <xsl:param name="indent"/>
-
-  <!-- process each configuration specification in the node-set. -->
-  <xsl:for-each select="$config/*">
-    <!-- strip the namespace - this may need to be tailored if the namespace
-         is not consistently present as the substring-after() call will return
-         an empty string in the case where no namepsace is present.
-      -->
-    <xsl:variable name="configname" select="substring-after( name(), ':')"/>
-    <xsl:choose>
-      <!-- local_address is loaded in a unique fashion. -->
-      <xsl:when test="$configname = 'local_address_str'">
-        <xsl:value-of select="$indent"/>
-        <xsl:text>// config-></xsl:text>
-        <xsl:value-of select="$configname"/>
-        <xsl:text>_ = </xsl:text>
-        <xsl:value-of select="@value"/>
-        <xsl:text>;</xsl:text>
-        <xsl:value-of select="$newline"/>
-      </xsl:when>
-
-      <!-- group_address is loaded in a unique fashion. -->
-      <xsl:when test="$configname = 'group_address'">
-        <xsl:value-of select="$indent"/>
-        <xsl:text>// config-></xsl:text>
-        <xsl:value-of select="$configname"/>
-        <xsl:text>_ = </xsl:text>
-        <xsl:value-of select="@value"/>
-        <xsl:text>;</xsl:text>
-        <xsl:value-of select="$newline"/>
-      </xsl:when>
-
-      <!-- transport_type uses the already established value in the code. -->
-      <xsl:when test="$configname = 'transport_type'">
-        <xsl:value-of select="$indent"/>
-        <xsl:text>config->transport_type_ = kind;</xsl:text>
-        <xsl:value-of select="$newline"/>
-      </xsl:when>
-
-      <!-- config->(name)_ = (value); -->
-      <xsl:otherwise>
-        <xsl:value-of select="$indent"/>
-        <xsl:text>config-></xsl:text>
-        <xsl:value-of select="$configname"/>
-        <xsl:text>_ = </xsl:text>
-        <xsl:value-of select="@value"/>
-        <xsl:text>;</xsl:text>
-        <xsl:value-of select="$newline"/>
-      </xsl:otherwise>
-    </xsl:choose>
   </xsl:for-each>
 </xsl:template>
 

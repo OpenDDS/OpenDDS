@@ -1,8 +1,28 @@
+Mon Dec  6 16:38:42 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/lut.xml:
+
+          Handle participant QOS.
+
+        * tools/modeling/tests/MessengerQos:
+        * tools/modeling/tests/MessengerQos/MessengerQos.mpc:
+        * tools/modeling/tests/MessengerQos/MessengerQos.opendds:
+        * tools/modeling/tests/MessengerQos/MessengerQos.opendds_diagram:
+        * tools/modeling/tests/MessengerQos/README:
+        * tools/modeling/tests/MessengerQos/publisher.cpp:
+        * tools/modeling/tests/MessengerQos/run_test.pl:
+        * tools/modeling/tests/MessengerQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerQos/tcp.conf:
+        * tools/modeling/tests/setup.pl:
+
+          New test for Qoses.
+
 Fri Dec  3 20:32:29 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/Topics.ecore:
 
-	  Fixed TopicDescription so that child datatype is required.
+          Fixed TopicDescription so that child datatype is required.
 
 Fri Dec  3 18:52:18 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
