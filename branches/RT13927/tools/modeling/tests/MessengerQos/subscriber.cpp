@@ -7,7 +7,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerModel_T.h"
+#include "model/MessengerQos_T.h"
 #include <model/NullReaderListener.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
@@ -22,8 +22,8 @@ void
 ReaderListener::on_data_available(DDS::DataReader_ptr reader)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  MessengerModel::MessageDataReader_var reader_i =
-    MessengerModel::MessageDataReader::_narrow(reader);
+  MessengerQos_Data::MessageDataReader_var reader_i =
+    MessengerQos_Data::MessageDataReader::_narrow(reader);
 
   if (CORBA::is_nil(reader_i.in())) {
     ACE_ERROR((LM_ERROR,
@@ -32,7 +32,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     ACE_OS::exit(-1);
   }
 
-  MessengerModel::Message message;
+  MessengerQos_Data::Message message;
   DDS::SampleInfo info;
 
   DDS::ReturnCode_t error = reader_i->take_next_sample(message, info);
@@ -42,12 +42,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     std::cout << "SampleInfo.instance_state = " << info.instance_state << std::endl;
 
     if (info.valid_data) {
-      std::cout << "Message: subject    = " << message.subject.in() << std::endl
-                << "         subject_id = " << message.subject_id   << std::endl
-                << "         from       = " << message.from.in()    << std::endl
-                << "         count      = " << message.count        << std::endl
-                << "         text       = " << message.text.in()    << std::endl;
-
+      std::cout << "Message: data    = " << message.data.in() << std::endl;
     }
 
   } else {
@@ -62,19 +57,19 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    MessengerModelType model(argc, argv);
+    MessengerQosType model(argc, argv);
 
-    using OpenDDS::Model::MessengerModel::Elements;
+    using OpenDDS::Model::MessengerQos::Elements;
 
-    DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
+    DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader1);
 
     DDS::DataReaderListener_var listener(new ReaderListener);
     reader->set_listener( listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
-    MessengerModel::MessageDataReader_var reader_i =
-      MessengerModel::MessageDataReader::_narrow(reader);
+    MessengerQos_Data::MessageDataReader_var reader_i =
+      MessengerQos_Data::MessageDataReader::_narrow(reader);
 
     if (CORBA::is_nil(reader_i.in())) {
       ACE_ERROR_RETURN((LM_ERROR,

@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_f8dRIf8REd-lXd5Y3X2Vyw" name="MessengerQos">
   <dcpsLib xmi:id="_zzc0QP8SEd-lXd5Y3X2Vyw" name="MessengerQos_DCPS">
-    <domains xmi:id="_MYhaoP8VEd-lXd5Y3X2Vyw" name="Messenger"/>
+    <domains xmi:id="_MYhaoP8VEd-lXd5Y3X2Vyw" name="Messenger" domainId="0"/>
     <participants xmi:id="_D7uC4P8UEd-lXd5Y3X2Vyw" name="Participater" domain="_MYhaoP8VEd-lXd5Y3X2Vyw" entity_factory="_1y2_4P8VEd-lXd5Y3X2Vyw" user_data="_IhAncP8eEd-lXd5Y3X2Vyw">
       <publishers xsi:type="opendds:publisher" xmi:id="_jteu4P8VEd-lXd5Y3X2Vyw" name="Pub1" partition="_DdcgkP8WEd-lXd5Y3X2Vyw" transportId="1">
         <writers xsi:type="opendds:dataWriter" xmi:id="_oGwcQP8VEd-lXd5Y3X2Vyw" name="writer1" writerTopic="_U2BycP8VEd-lXd5Y3X2Vyw" topic="_U2BycP8VEd-lXd5Y3X2Vyw"/>
       </publishers>
+    </participants>
+    <participants xmi:id="_-u-M0AFmEeClcNQU00YEJA" name="Participater2" domain="_MYhaoP8VEd-lXd5Y3X2Vyw">
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_CAlHgAFnEeClcNQU00YEJA" name="subscriber1" transportId="-1">
+        <readers xsi:type="opendds:dataReader" xmi:id="_EwBwUAFnEeClcNQU00YEJA" name="reader1" topic="_U2BycP8VEd-lXd5Y3X2Vyw"/>
+      </subscribers>
     </participants>
     <topics xmi:id="_U2BycP8VEd-lXd5Y3X2Vyw" name="Movie Reviews" datatype="_PdavAP8VEd-lXd5Y3X2Vyw" durability="_KjVlMP8WEd-lXd5Y3X2Vyw"/>
     <policies xsi:type="opendds:efQosPolicy" xmi:id="_1y2_4P8VEd-lXd5Y3X2Vyw" name="autoenable_demo" autoenable_created_entities="false"/>
@@ -20,7 +25,7 @@
     <policies xsi:type="opendds:udQosPolicy" xmi:id="_IhAncP8eEd-lXd5Y3X2Vyw" name="users" value="7"/>
   </dcpsLib>
   <dataLib xmi:id="_CPzJEP8TEd-lXd5Y3X2Vyw" name="MessengerQos_Data">
-    <types xsi:type="types:Struct" xmi:id="_PdavAP8VEd-lXd5Y3X2Vyw" name="Message">
+    <types xsi:type="types:Struct" xmi:id="_PdavAP8VEd-lXd5Y3X2Vyw" name="Message" isDcpsDataType="true">
       <fields xmi:id="_IPCXMAFOEeClcNQU00YEJA" name="data" type="_M5lawAFOEeClcNQU00YEJA"/>
     </types>
     <types xsi:type="types:String" xmi:id="_M5lawAFOEeClcNQU00YEJA"/>

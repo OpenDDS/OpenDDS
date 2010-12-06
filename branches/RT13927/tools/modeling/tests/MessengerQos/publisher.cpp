@@ -7,21 +7,21 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerModel_T.h"
+#include "model/MessengerQos_T.h"
 
 int main(int argc, char** argv)
 {
   try {
-    MessengerModelType model(argc, argv);
+    MessengerQosType model(argc, argv);
 
-    using OpenDDS::Model::MessengerModel::Elements;
+    using OpenDDS::Model::MessengerQos::Elements;
 
-    DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
+    DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer1);
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
-    MessengerModel::MessageDataWriter_var message_writer =
-      MessengerModel::MessageDataWriter::_narrow(writer.in());
+    MessengerQos_Data::MessageDataWriter_var message_writer =
+      MessengerQos_Data::MessageDataWriter::_narrow(writer.in());
 
     if (CORBA::is_nil(message_writer.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -61,17 +61,12 @@ int main(int argc, char** argv)
     ws->detach_condition(condition);
 
     // Write samples
-    MessengerModel::Message message;
-    message.subject_id = 99;
+    MessengerQos_Data::Message message;
 
-    message.from       = CORBA::string_dup("Comic Book Guy");
-    message.subject    = CORBA::string_dup("Review");
-    message.text       = CORBA::string_dup("Worst. Movie. Ever.");
-    message.count      = 0;
+    message.data       = CORBA::string_dup("Hello");
 
     for (int i = 0; i < 10; i++) {
       DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
-      ++message.count;
 
       if (error != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,

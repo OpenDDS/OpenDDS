@@ -1,3 +1,13 @@
+Mon Dec  6 22:06:05 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerQos/MessengerQos.mpc:
+        * tools/modeling/tests/MessengerQos/MessengerQos.opendds:
+        * tools/modeling/tests/MessengerQos/publisher.cpp:
+        * tools/modeling/tests/MessengerQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerQos/transports.traits:
+
+          More updates to QOS test.
+
 Mon Dec  6 21:30:29 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/Core.ecore:
@@ -6,7 +16,7 @@ Mon Dec  6 21:30:29 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
 
-	  Removed ownedEntity association from Entity.
+          Removed ownedEntity association from Entity.
 
 Mon Dec  6 16:38:42 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
