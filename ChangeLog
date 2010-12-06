@@ -1,3 +1,11 @@
+Mon Dec  6 16:33:31 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/marshal_generator.cpp:
+
+          When encountering a struct/union with a field of unsupported type,
+          for example: a valuetype, issue a warning but still generate
+          code that compiles.
+
 Thu Dec  2 21:24:59 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:
