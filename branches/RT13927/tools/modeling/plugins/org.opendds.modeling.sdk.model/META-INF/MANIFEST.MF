@@ -9,7 +9,10 @@ Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: InstanceTraits,
  InstanceTraits.impl,
- InstanceTraits.util
+ InstanceTraits.util,
+ org.opendds.modeling.sdk.model.GeneratorSpecification,
+ org.opendds.modeling.sdk.model.GeneratorSpecification.Util
 Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.emf.ecore;visibility:=reexport
+ org.eclipse.emf.ecore;visibility:=reexport,
+ org.eclipse.emf.ecore.xmi
 Bundle-ActivationPolicy: lazy

@@ -2,13 +2,14 @@
 <genmodel:GenModel xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
     xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/org.opendds.modeling.sdk.model/src"
-    modelPluginID="org.opendds.modeling.sdk.model" modelName="InstanceTraits" importerID="org.eclipse.emf.importer.ecore"
-    complianceLevel="6.0" copyrightFields="false">
+    modelPluginID="org.opendds.modeling.sdk.model" modelName="Generator" generateSchema="true"
+    importerID="org.eclipse.emf.importer.ecore" complianceLevel="6.0" copyrightFields="false"
+    providerRootExtendsClass="" interfaceNamePattern="" classNamePattern="">
   <foreignModel>InstanceTraits.ecore</foreignModel>
-  <genPackages prefix="InstanceTraits" disposableProviderFactory="true" ecorePackage="InstanceTraits.ecore#/">
-    <genClasses ecoreClass="InstanceTraits.ecore#//Transports">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//Transports/transport"/>
-    </genClasses>
+  <genPackages prefix="Generator" basePackage="org.opendds.modeling.sdk.model" resource="XML"
+      disposableProviderFactory="true" classPackageSuffix="Impl" utilityPackageSuffix="Util"
+      providerPackageSuffix="Provider" presentationPackageSuffix="Presentation" testsPackageSuffix="Tests"
+      contentTypeIdentifier="" fileExtensions="codegen" ecorePackage="InstanceTraits.ecore#/">
     <genClasses image="false" ecoreClass="InstanceTraits.ecore#//TransportConfig">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//TransportConfig/transportId"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//TransportConfig/name"/>
@@ -62,6 +63,19 @@
     </genClasses>
     <genClasses ecoreClass="InstanceTraits.ecore#//FloatConfigParam">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//FloatConfigParam/value"/>
+    </genClasses>
+    <genClasses ecoreClass="InstanceTraits.ecore#//source">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//source/name"/>
+    </genClasses>
+    <genClasses ecoreClass="InstanceTraits.ecore#//target">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//target/name"/>
+    </genClasses>
+    <genClasses ecoreClass="InstanceTraits.ecore#//instances">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//instances/instance"/>
+    </genClasses>
+    <genClasses ecoreClass="InstanceTraits.ecore#//instance">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference InstanceTraits.ecore#//instance/transport"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute InstanceTraits.ecore#//instance/transportOffset"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>
