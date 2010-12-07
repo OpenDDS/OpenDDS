@@ -416,8 +416,7 @@ Elements::Data::buildParticipantsQos()
     <!-- '  participantQos.(policyfield) = (value);\n' -->
 
     <xsl:call-template name="process-policies">
-      <xsl:with-param name="reffed-policies" select="$policies[@xmi:id = current()/@*]"/>
-      <xsl:with-param name="base"   select="'  participantQos.'"/>
+      <xsl:with-param name="base"   select="'participantQos.'"/>
     </xsl:call-template>
     
 <!--
@@ -448,10 +447,15 @@ Elements::Data::buildTopicsQos()
     
 </xsl:text>
     <!-- '  topicQos.(policyfield) = (value);\n' -->
+    <xsl:call-template name="process-policies">
+      <xsl:with-param name="base"   select="'topicQos.'"/>
+    </xsl:call-template>
+<!--
     <xsl:call-template name="process-qos">
       <xsl:with-param name="entity" select="."/>
       <xsl:with-param name="base"   select="'  topicQos.'"/>
     </xsl:call-template>
+-->
 
     <xsl:text>  this->topicsQos_[ topic] = topicQos;</xsl:text>
     <xsl:value-of select="$newline"/>
@@ -476,10 +480,15 @@ Elements::Data::buildPublishersQos()
   publisherQos = TheServiceParticipant->initial_PublisherQos();
 </xsl:text>
     <!-- '  publisherQos.(policyfield) = (value);\n' -->
+    <xsl:call-template name="process-policies">
+      <xsl:with-param name="base"   select="'publisherQos.'"/>
+    </xsl:call-template>
+<!--
     <xsl:call-template name="process-qos">
       <xsl:with-param name="entity" select="."/>
       <xsl:with-param name="base"   select="'  publisherQos.'"/>
     </xsl:call-template>
+-->
 
     <xsl:text>  this->publishersQos_[ publisher] = publisherQos;</xsl:text>
     <xsl:value-of select="$newline"/>
@@ -511,10 +520,15 @@ Elements::Data::buildSubscribersQos()
   subscriberQos = TheServiceParticipant->initial_SubscriberQos();
 </xsl:text>
         <!-- '  subscriberQos.(policyfield) = (value);\n' -->
+        <xsl:call-template name="process-policies">
+          <xsl:with-param name="base"   select="'subscriberQos.'"/>
+        </xsl:call-template>
+<!--
         <xsl:call-template name="process-qos">
           <xsl:with-param name="entity" select="."/>
           <xsl:with-param name="base"   select="'  subscriberQos.'"/>
         </xsl:call-template>
+-->
 
         <xsl:text>  this->subscribersQos_[ subscriber] = subscriberQos;</xsl:text>
     <xsl:value-of select="$newline"/>
@@ -545,11 +559,15 @@ Elements::Data::buildPublicationsQos()
   writerQos = TheServiceParticipant->initial_DataWriterQos();
 </xsl:text>
     <!-- '  writerQos.(policyfield) = (value);\n' -->
+      <xsl:call-template name="process-policies">
+        <xsl:with-param name="base"   select="'writerQos.'"/>
+      </xsl:call-template>
+<!--
       <xsl:call-template name="process-qos">
         <xsl:with-param name="entity" select="."/>
         <xsl:with-param name="base"   select="'  writerQos.'"/>
       </xsl:call-template>
-
+-->
       <xsl:text>  this->writersQos_[ writer] = writerQos;</xsl:text>
       <xsl:value-of select="$newline"/>
     </xsl:for-each>
@@ -604,11 +622,15 @@ Elements::Data::copyPublicationQos(
     <xsl:value-of select="$newline"/>
 
     <!-- '  writerQos.(policyfield) = (value);\n' -->
+    <xsl:call-template name="process-policies">
+      <xsl:with-param name="base"   select="'      writerQos.'"/>
+    </xsl:call-template>
+<!--
     <xsl:call-template name="process-qos">
       <xsl:with-param name="entity" select="."/>
       <xsl:with-param name="base"   select="'      writerQos.'"/>
     </xsl:call-template>
-
+-->
     <xsl:text>      break;</xsl:text>
     <xsl:value-of select="$newline"/>
     <xsl:value-of select="$newline"/>
@@ -659,12 +681,14 @@ Elements::Data::copySubscriptionQos(
 <!-- End of main processing template. -->
 
 <xsl:template name="process-policies">
-  <xsl:param name = "reffed-policies"/>
-  <xsl:param name = "base"/>
+  <xsl:param name="reffed-policies" select="$policies[@xmi:id = current()/@*]"/>
+  <xsl:param name="base"/>
 
   <xsl:for-each select="$reffed-policies">
     <xsl:variable name="policy-type" select="@xsi:type"/>
 
+<xsl:message>reffed policy <xsl:value-of select="@name"/>
+</xsl:message>
     <!-- lookup the field name for the current policy type. -->
     <xsl:variable name="field">
       <xsl:for-each select="$lut-policies"> <!-- Change context for lookup -->
@@ -679,12 +703,8 @@ Elements::Data::copySubscriptionQos(
       </xsl:for-each>
     </xsl:variable>
 
-<xsl:message>
-<xsl:value-of select="concat('policy: ', @name, ' field ', $field, ' quote ', $should-quote, $newline)"/>
-</xsl:message>
     <!-- process all of the policy attributes -->
     <xsl:for-each select="@*">
-      <xsl:message>working here, processing attributes of policies </xsl:message>
       <xsl:choose>
         <!-- ignore the 'name', 'type' and 'id' attributes of the policy. -->
         <xsl:when test="name() = 'name' or 
@@ -692,22 +712,25 @@ Elements::Data::copySubscriptionQos(
                         name() = 'xmi:id'"/>
 
         <!-- OpenDDS::Model::stringToByteSeq( (base)(field).(name), (value)); -->
-        <xsl:when test="../@type = 'opendds:udQosPolicy'
+        <xsl:when test="../@xsi:type = 'opendds:udQosPolicy'
                      or ../@type = 'opendds:tdQosPolicy'
-                     or ../@type = 'opendds:gdQosPolicy'">
+                     or ../@xsi:type = 'opendds:gdQosPolicy'">
+          <xsl:variable name="value" select="concat($base,$field,'.',name())"/>
+          <xsl:value-of select="concat('  ', $value, '.value.replace(', $newline, 
+                                  '      this->', $value, '.length()', $newline,
+                                  '      this->', $value, '.length()', $newline,
+                                  '      (Octet*)&quot;', ., '&quot;);', $newline)"/>
+
+<!--
           <xsl:text>  OpenDDS::Model::stringToByteSeq( </xsl:text>
           <xsl:value-of select="$base"/>
           <xsl:value-of select="$field"/>
           <xsl:text>.</xsl:text>
           <xsl:value-of select="name()"/>
           <xsl:text>, </xsl:text>
-
-          <!-- quote the value if specified in the lookup table. -->
           <xsl:choose>
             <xsl:when test="$should-quote = 'true'">
-              <xsl:text>"</xsl:text>
-              <xsl:value-of select="."/>
-              <xsl:text>"</xsl:text>
+              <xsl:value-of select="concat('&quot;', ., '&quot;')"/>
             </xsl:when>
             <xsl:otherwise>
               <xsl:value-of select="."/>
@@ -716,24 +739,20 @@ Elements::Data::copySubscriptionQos(
 
           <xsl:text>);</xsl:text>
           <xsl:value-of select="$newline"/>
+-->
         </xsl:when>
         <xsl:otherwise>
-          <xsl:value-of select="$base"/>
-          <xsl:value-of select="$field"/>
-          <xsl:text>.</xsl:text>
-          <xsl:value-of select="name()"/>
-          <xsl:text> = </xsl:text>
+<xsl:message>  otherwise for qos attribute <xsl:value-of select="name()"/>
+</xsl:message>
+          <xsl:value-of select="concat('  ', $base, $field, '.', name(), ' = ')"/>
 
           <!-- quote the value if specified in the lookup table. -->
           <xsl:choose>
             <xsl:when test="$should-quote = 'true'">
-              <xsl:text>"</xsl:text>
-              <xsl:value-of select="."/>
-              <xsl:text>";</xsl:text>
+              <xsl:value-of select="concat('&quot;', ., '&quot;;')"/>
             </xsl:when>
             <xsl:otherwise>
-              <xsl:value-of select="."/>
-              <xsl:text>;</xsl:text>
+              <xsl:value-of select="concat(., ';')"/>
             </xsl:otherwise>
           </xsl:choose>
 
@@ -741,7 +760,6 @@ Elements::Data::copySubscriptionQos(
         </xsl:otherwise>
       </xsl:choose>
     </xsl:for-each>
-
   </xsl:for-each>
 </xsl:template>
 
