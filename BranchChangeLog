@@ -1,3 +1,9 @@
+Tue Dec  7 22:19:51 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+
+          Updates to last stylesheet for domain particpant QosPolicy support.
+
 Tue Dec  7 21:46:09 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
