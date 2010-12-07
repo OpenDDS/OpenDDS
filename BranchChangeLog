@@ -1,3 +1,35 @@
+Tue Dec  7 18:22:40 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+
+        * tools/modeling/plugins/com.ociweb.gmf/.classpath:
+        * tools/modeling/plugins/com.ociweb.gmf/.project:
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF:
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/com.ociweb.gmf/build.properties:
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/EnumDirectEdit/EnumDirectEditManager.java:
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/EnumDirectEdit/EnumDirectEditPolicy.java:
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/dialogs/ObjectLabeler.java:
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/dialogs/ObjectsAcrossResourcesDialog.java:
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/edit/commands/RequestToCommandConverter.java:
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/edit/parts/ModelChildrenFilter.java:
+
+	  Split out non SDK specific GMF based code similar to how non SDK specific EMF code was put
+	  into com.ociweb.emf.util plug-in.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+
+          Modified so com.ociweb.gmf plug-in would be picked up.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/com/ociweb/gmf/dialogs/ObjectLabeler.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/com/ociweb/gmf/dialogs/ObjectsAcrossResourcesDialog.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/com/ociweb/gmf/edit/commands/RequestToCommandConverter.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/com/ociweb/gmf/edit/parts/ModelChildrenFilter.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/com/ociweb/gmf/EnumDirectEdit/EnumDirectEditManager.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/com/ociweb/gmf/EnumDirectEdit/EnumDirectEditPolicy.java:
+
+          Removed these files.
+
 Tue Dec  7 15:11:21 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model.editor/src:
