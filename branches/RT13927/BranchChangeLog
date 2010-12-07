@@ -1,3 +1,8 @@
+Tue Dec  7 14:42:20 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DCPS.ecore:
+
+          Set domainID defaultValueLiteral to 0
 Mon Dec  6 22:06:05 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerQos/MessengerQos.mpc:
