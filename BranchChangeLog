@@ -1,3 +1,15 @@
+Tue Dec  7 15:11:21 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling/model:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling/model/opendds:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling/model/opendds/presentation:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling/model/opendds/presentation/OpenDDSEditor.java:
+
+          Added OpenDDSEditor.java to override generated doSave method.
 Tue Dec  7 14:42:20 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/DCPS.ecore:
