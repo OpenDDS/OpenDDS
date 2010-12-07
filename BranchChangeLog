@@ -1,11 +1,26 @@
+Tue Dec  7 21:46:09 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+
+          Updates for QosPolicy support
+
+        * tools/modeling/tests/MessengerDpQos:
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.mpc:
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.opendds:
+        * tools/modeling/tests/MessengerDpQos/publisher.cpp:
+        * tools/modeling/tests/MessengerDpQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerDpQos/transports.traits:
+
+          Test case isolating domain participant QOS policies.
+
 Tue Dec  7 20:54:35 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/edit/parts/ModelChildrenFilter.java:
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DomainParticipantQoSPoliciesSharedEditPart.java:
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/OpenDDSDcpsLibRefQosPolicyAction.java:
 
-	  Fixed problem where shared policies from policy libraries in the same Ecore file were not being
-	  presented as candidates for adding to a domain entity.
+          Fixed problem where shared policies from policy libraries in the same Ecore file were not being
+          presented as candidates for adding to a domain entity.
 
 Tue Dec  7 19:28:33 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
