@@ -12,9 +12,9 @@
 
    <extension point="org.eclipse.emf.ecore.generated_package">
       <package
-            uri="http://www.opendds.org/modeling/schemas/OpenDDS/1.0"
-            class="InstanceTraits.InstanceTraitsPackage"
-            genModel="model/InstanceTraits.genmodel"/>
+            class="org.opendds.modeling.sdk.model.GeneratorPackage"
+            uri="org.opendds.modeling.sdk.model.GeneratorPackage">
+      </package>
    </extension>
 
 </plugin>
