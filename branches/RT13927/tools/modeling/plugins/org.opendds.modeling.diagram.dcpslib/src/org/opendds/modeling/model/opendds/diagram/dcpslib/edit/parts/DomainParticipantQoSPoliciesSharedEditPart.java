@@ -4,6 +4,8 @@
 package org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts;
 
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gmf.runtime.diagram.ui.editparts.ListCompartmentEditPart;
 import org.eclipse.gmf.runtime.diagram.ui.editpolicies.CreationEditPolicy;
@@ -11,6 +13,7 @@ import org.eclipse.gmf.runtime.diagram.ui.editpolicies.DragDropEditPolicy;
 import org.eclipse.gmf.runtime.diagram.ui.editpolicies.EditPolicyRoles;
 import org.eclipse.gmf.runtime.diagram.ui.editpolicies.ResizableCompartmentEditPolicy;
 import org.eclipse.gmf.runtime.notation.View;
+import org.opendds.modeling.model.opendds.OpenDDSPackage;
 import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.policies.DomainParticipantQoSPoliciesSharedCanonicalEditPolicy;
 import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.policies.DomainParticipantQoSPoliciesSharedItemSemanticEditPolicy;
 import org.opendds.modeling.model.opendds.diagram.dcpslib.part.Messages;
@@ -78,8 +81,11 @@ public class DomainParticipantQoSPoliciesSharedEditPart extends
 	 */
 	@Override
 	protected java.util.List getModelChildren() {
+		EPackage dcpsLibsPackage = EPackage.Registry.INSTANCE.getEPackage(OpenDDSPackage.eNS_URI);
+		EClass dcpsLibClass = (EClass) dcpsLibsPackage.getEClassifier("DcpsLib");
+		
 		return com.ociweb.gmf.edit.parts.ModelChildrenFilter
-				.filterChildrenInSameResource((View) getModel(), super
+				.filterChildrenByOwner((View) getModel(), dcpsLibClass, super
 						.getModelChildren());
 	}
 

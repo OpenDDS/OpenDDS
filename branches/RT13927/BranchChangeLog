@@ -1,9 +1,18 @@
+Tue Dec  7 20:54:35 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/edit/parts/ModelChildrenFilter.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DomainParticipantQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/OpenDDSDcpsLibRefQosPolicyAction.java:
+
+	  Fixed problem where shared policies from policy libraries in the same Ecore file were not being
+	  presented as candidates for adding to a domain entity.
+
 Tue Dec  7 19:28:33 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
 
-	  Removed empty Import-Packages section which was causing package locations to not
-	  be found.
+          Removed empty Import-Packages section which was causing package locations to not
+          be found.
 
 Tue Dec  7 18:22:40 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
