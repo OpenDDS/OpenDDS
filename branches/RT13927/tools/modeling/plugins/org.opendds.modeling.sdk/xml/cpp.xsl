@@ -715,11 +715,11 @@ Elements::Data::copySubscriptionQos(
         <xsl:when test="../@xsi:type = 'opendds:udQosPolicy'
                      or ../@type = 'opendds:tdQosPolicy'
                      or ../@xsi:type = 'opendds:gdQosPolicy'">
-          <xsl:variable name="value" select="concat($base,$field,'.',name())"/>
-          <xsl:value-of select="concat('  ', $value, '.value.replace(', $newline, 
-                                  '      this->', $value, '.length()', $newline,
-                                  '      this->', $value, '.length()', $newline,
-                                  '      (Octet*)&quot;', ., '&quot;);', $newline)"/>
+          <xsl:variable name="value" select="concat($base, $field, '.value')"/>
+          <xsl:value-of select="concat('  ', $value, '.replace(', $newline, 
+                                  '      ', $value, '.length(),', $newline,
+                                  '      ', $value, '.length(),', $newline,
+                                  '      (CORBA::Octet*)&quot;', ., '&quot;);', $newline)"/>
 
 <!--
           <xsl:text>  OpenDDS::Model::stringToByteSeq( </xsl:text>
