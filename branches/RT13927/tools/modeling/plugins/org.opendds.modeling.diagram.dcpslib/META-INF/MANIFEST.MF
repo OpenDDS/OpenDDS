@@ -7,7 +7,7 @@ Bundle-ClassPath: .
 Bundle-Activator: org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Export-Package: org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts,
+Export-Package: org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts, 
  org.opendds.modeling.model.opendds.diagram.dcpslib.part,
  org.opendds.modeling.model.opendds.diagram.dcpslib.providers
 Require-Bundle: org.eclipse.core.runtime,
@@ -42,4 +42,3 @@ Require-Bundle: org.eclipse.core.runtime,
  com.ociweb.gmf,
  com.ociweb.emf.util;visibility:=reexport
 Eclipse-LazyStart: true
-Import-Package: 

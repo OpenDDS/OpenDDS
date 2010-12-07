@@ -1,3 +1,10 @@
+Tue Dec  7 19:28:33 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+
+	  Removed empty Import-Packages section which was causing package locations to not
+	  be found.
+
 Tue Dec  7 18:22:40 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
 
@@ -13,8 +20,8 @@ Tue Dec  7 18:22:40 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/edit/commands/RequestToCommandConverter.java:
         * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/edit/parts/ModelChildrenFilter.java:
 
-	  Split out non SDK specific GMF based code similar to how non SDK specific EMF code was put
-	  into com.ociweb.emf.util plug-in.
+          Split out non SDK specific GMF based code similar to how non SDK specific EMF code was put
+          into com.ociweb.emf.util plug-in.
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
         * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
