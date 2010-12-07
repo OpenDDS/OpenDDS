@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+import org.opendds.modeling.model.opendds.OpenDDSPackage;
 import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.commands.QosPolicyReferCommand;
 import org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibElementTypes;
 import org.opendds.modeling.model.qos.QoSPackage;
@@ -79,8 +80,8 @@ public class OpenDDSDcpsLibRefQosPolicyAction<CompartEditPartType extends ListCo
 		}
 
 		EObject domainElement = ((View) selectedElement.getModel()).getElement();
-		EPackage ePackage = EPackage.Registry.INSTANCE.getEPackage(QoSPackage.eNS_URI);
-		EClass policyClass = (EClass) ePackage.getEClassifier("QosPolicy");
+		EPackage qosPackage = EPackage.Registry.INSTANCE.getEPackage(QoSPackage.eNS_URI);
+		EClass policyClass = (EClass) qosPackage.getEClassifier("QosPolicy");
 		Collection<EObject> reachableObjects =
 			org.eclipse.emf.edit.provider.ItemPropertyDescriptor.getReachableObjectsOfType(domainElement, policyClass);
 
@@ -93,10 +94,14 @@ public class OpenDDSDcpsLibRefQosPolicyAction<CompartEditPartType extends ListCo
 			}
 		}
 
-		// Filter out objects in same resource as domainElement
+		// Filter out policies that are custom (owned by a DcpsLib)
+		EPackage dcpsLibsPackage = EPackage.Registry.INSTANCE.getEPackage(OpenDDSPackage.eNS_URI);
+		EClass dcpsLibClass = (EClass) dcpsLibsPackage.getEClassifier("DcpsLib");
 		List<QosPolicy> objsToRefCandidatesInOtherResources = new ArrayList<QosPolicy>();
 		for (QosPolicy obj : objsToRefCandidates) {
-			if (obj.eResource() != domainElement.eResource()) {
+			EObject policyContainer = obj.eContainer();
+			EClass policyContainerClass = policyContainer.eClass();
+			if (! policyContainerClass.isSuperTypeOf(dcpsLibClass)) {
 				objsToRefCandidatesInOtherResources.add(obj);
 			}
 		}
