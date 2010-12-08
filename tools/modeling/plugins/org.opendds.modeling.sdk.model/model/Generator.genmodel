@@ -64,18 +64,27 @@
     <genClasses ecoreClass="Generator.ecore#//FloatConfigParam">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//FloatConfigParam/value"/>
     </genClasses>
+    <genClasses ecoreClass="Generator.ecore#//FileName">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//FileName/name"/>
+    </genClasses>
+    <genClasses ecoreClass="Generator.ecore#//DirName">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//DirName/name"/>
+    </genClasses>
     <genClasses ecoreClass="Generator.ecore#//source">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//source/name"/>
     </genClasses>
     <genClasses ecoreClass="Generator.ecore#//target">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//target/name"/>
     </genClasses>
-    <genClasses ecoreClass="Generator.ecore#//instances">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Generator.ecore#//instances/instance"/>
-    </genClasses>
     <genClasses ecoreClass="Generator.ecore#//instance">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Generator.ecore#//instance/transport"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//instance/transportOffset"/>
     </genClasses>
+    <genClasses ecoreClass="Generator.ecore#//genspec">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//genspec/instances"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//genspec/source"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//genspec/target"/>
+    </genClasses>
+    <genClasses ecoreClass="Generator.ecore#//CodeGen"/>
   </genPackages>
 </genmodel:GenModel>
