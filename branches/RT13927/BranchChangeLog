@@ -1,9 +1,24 @@
+Wed Dec  8 16:00:56 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.opendds:
+
+          Changed autoenable back to true.
+
+        * tools/modeling/tests/MessengerPubQos:
+        * tools/modeling/tests/MessengerPubQos/MessengerPubQos.mpc:
+        * tools/modeling/tests/MessengerPubQos/MessengerPubQos.opendds:
+        * tools/modeling/tests/MessengerPubQos/publisher.cpp:
+        * tools/modeling/tests/MessengerPubQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerPubQos/transports.traits:
+
+          New test case for Publisher Qos.
+
 Wed Dec  8 14:40:53 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/QosPolicyLabeler.java:
 
-	  Qualify policy name by name of the PolicyLib that owns the policy in case
-	  there are several PolicyLibs in the same resource.
+          Qualify policy name by name of the PolicyLib that owns the policy in case
+          there are several PolicyLibs in the same resource.
 
 Wed Dec  8 04:00:32 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
