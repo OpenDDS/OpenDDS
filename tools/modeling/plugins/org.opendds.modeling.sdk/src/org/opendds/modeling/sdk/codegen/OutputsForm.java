@@ -6,6 +6,7 @@ package org.opendds.modeling.sdk.codegen;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -56,6 +57,8 @@ public class OutputsForm extends FormPage {
 	private String modelName;
 	private Modelfile modelFile;
 	private Targetdir targetDir;
+	private Set<Integer> transportIds;
+	private Label transportLabel;
 	private boolean inboundChange = false;
 	private CodeGenerator generator;
 
@@ -160,6 +163,8 @@ public class OutputsForm extends FormPage {
 				handleTargetBrowse();
 			}
 		});
+		
+		transportLabel = toolkit.createLabel(leftPanel, "Transports: ", SWT.LEFT);
 
 		button = toolkit.createButton(rightPanel, "Generate IDL", SWT.PUSH);
 		TableWrapData idlData = new TableWrapData(TableWrapData.FILL);
@@ -355,6 +360,14 @@ public class OutputsForm extends FormPage {
 					modelName = getSourceName().substring(slashindex + 1, dotindex);
 				}
 			}
+			transportIds = generator.getTransportIds();
+			String transportValues = "Transports: ";
+			String prefix = "";
+			for( Integer index : transportIds) {
+				transportValues += prefix + index.toString();
+				prefix = ", ";
+			}
+			transportLabel.setText(transportValues);
 		}
 		return modelName;
 	}

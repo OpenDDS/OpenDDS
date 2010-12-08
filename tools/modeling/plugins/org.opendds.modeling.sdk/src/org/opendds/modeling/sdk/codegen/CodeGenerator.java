@@ -8,6 +8,8 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
@@ -37,11 +39,13 @@ import org.xml.sax.SAXException;
 
 public class CodeGenerator {
 	private static final String modelNameExpression = "//opendds:OpenDDSModel/@name";
+	private static final String transportIndexExpression = "//@transportId";
 	private static final String openDDSNamespace = "http://www.opendds.org/modeling/schemas/OpenDDS/1.0";
 
 	private static XPathFactory pathFactory;
 	private static XPath xpath;
 	private static XPathExpression nameExpr;
+	private static XPathExpression transportIdExpr;
 	private static TransformerFactory tFactory;
 	private static Transformer idlTransformer;
 	private static Transformer hTransformer;
@@ -49,6 +53,7 @@ public class CodeGenerator {
 	private static Transformer mpcTransformer;
 
 	private String modelName;
+	private Set<Integer> transportIndices = new LinkedHashSet<Integer>();
 	private Document modelDocument;
 	private DocumentBuilder documentBuilder;
 	private String sourceName;
@@ -131,6 +136,21 @@ public class CodeGenerator {
 		return nameExpr;
 	}
 	
+	private XPathExpression getTransportIdExpr() {
+		if (transportIdExpr == null) {
+			pathFactory = XPathFactory.newInstance();
+			xpath = pathFactory.newXPath();
+			xpath.setNamespaceContext(new OpenDDSNamespaceContext());
+			try {
+				transportIdExpr = xpath.compile(transportIndexExpression);
+			} catch (XPathExpressionException e) {
+				errorHandler.error(Severity.ERROR, "getTransportIdExpr",
+						"XPath expression not available to obtain the active transport Id values.", e);
+			}
+		}
+		return transportIdExpr;
+	}
+	
 	private Document getModelDocument(String sourceName) {
 		if (modelDocument != null) {
 			return modelDocument;
@@ -180,6 +200,7 @@ public class CodeGenerator {
 		}
 		this.sourceName = sourceName;
 		this.modelDocument = null;
+		this.transportIndices.clear();
 
 		XPathExpression nameExpr = getNameExpr();
 		if (nameExpr == null) {
@@ -217,6 +238,35 @@ public class CodeGenerator {
 					"Problem extracting the modelname from the source file " + sourceName, e);
 		}
 		return modelName;
+	}
+	
+	public Set<Integer> getTransportIds() {
+		if (!this.transportIndices.isEmpty()) {
+			return transportIndices;
+		}
+
+		XPathExpression transportIdExpr = getTransportIdExpr();
+		if (transportIdExpr == null) {
+			return null; // messages were generated in the get call.
+		}
+
+		Document doc = getModelDocument(this.sourceName);
+		if (doc == null) {
+			return null; // messages were generated in the get call.
+		}
+		
+		try {
+			Object result = transportIdExpr.evaluate(doc, XPathConstants.NODESET);
+			NodeList nodes = (NodeList) result;
+			for( int index = 0; index < nodes.getLength(); ++index) {
+				transportIndices.add(Integer.valueOf(nodes.item(index).getNodeValue()));
+			}
+
+		} catch (XPathExpressionException e) {
+			errorHandler.error(Severity.ERROR, "getTransportIds",
+					"Problem extracting the transport indices from the source file " + this.sourceName, e);
+		}
+		return this.transportIndices;
 	}
 	
 	public void generate(TransformType which, String sourceName, String targetName) {
