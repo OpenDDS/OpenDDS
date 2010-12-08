@@ -1,3 +1,10 @@
+Wed Dec  8 17:57:57 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/plugins.html:
+
+	  Added entry in Plug-in Architecture section on the
+	  help plug-in.
+
 Wed Dec  8 16:00:56 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerDpQos/MessengerDpQos.opendds:

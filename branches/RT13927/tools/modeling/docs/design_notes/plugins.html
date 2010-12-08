@@ -1111,7 +1111,7 @@ OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 &lt;/div&gt;
 &lt;!--}}}--&gt;</pre>
 </div>
-<div title="Plug-in Architecture" modifier="MikeMartinez" created="201006151743" modified="201008101838" tags="publish" changecount="19">
+<div title="Plug-in Architecture" modifier="Byron" created="201006151743" modified="201012081746" tags="publish" changecount="20">
 <pre>The ~OpenDDS Modeling SDK is built from a set of Eclipse plug-in projects and distributed as a Feature that includes the set of plug-ins required.  The plug-ins include:
 
 {{centeredTable{
@@ -1126,6 +1126,7 @@ OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
 |[[org.opendds.modeling.diagram.datalib]] |Data type library capture diagram.  This captures the data types and structures used by the middleware. |
 |[[org.opendds.modeling.sdk]] |Top level SDK plug-in including the code generation capability from the capture models. |
 |[[org.opendds.modeling.feature]] |Feature definition for the ~OpenDDS Modeling SDK. |
+|[[org.opendds.modeling.help]] |Help plug-in for the SDK.|
 |[[org.opendds.site]] |Plug-in distribution site.  This is where Eclipse can find the plug-ins for installation. |
 }}}
 
@@ -1690,6 +1691,55 @@ The following plug-ins are included in this feature:
 |[[org.opendds.modeling.sdk]] |Code generation plug-in to convert an ~OpenDDS model to C++ code, DDS IDL, and MPC build files. |
 
 This plug-in specifies that branding information can be found in the [[org.opendds.modeling.sdk]] plug-in.</pre>
+</div>
+<div title="org.opendds.modeling.help" modifier="Byron" created="201012081752" modified="201012081755" changecount="3">
+<pre>This plug-in will contain the HTML based help files for the SDK.
+
+! Running Example
+The Messenger example will be used as the running example, and embellished as needed to cover concepts not present in the original example.
+
+! Structure
+The overall structure for the help content is as shown below. Note that the content will evolve over time so some details may change, but the overall structure should remain fairly intact.
+
+{{{
+Top-level (intro to the OpenDDS SDK)
+ 	Getting Started
+ 		What is OpenDDS?
+ 		Advantages of using the OpenDDS SDK.
+ 		Known Limitations
+ 	Concepts
+ 		Modeling
+ 			Main Model
+ 			Policy Model
+ 			Data Model
+ 			DCPS Model
+ 			Reusable libraries
+ 		Code generation
+			Generated Code
+			Customizations
+			Application Integration
+ 	Tasks
+ 		Modeling
+ 			Defining reusable libraries
+ 			Creating Policies libraries
+ 			Creating Data libraries
+ 			Creating DCPS libraries
+ 			Using libraries
+		Code Generation
+			Creating a generation specification
+			Customizing the generated code
+			Generating the code
+			Integrating the generated code
+ 			
+ 	Reference
+ 		QosPolicies (describe policies, map stereotypes to policies (e.g.  udQosPolicy to UserDataQosPolicy)
+ 		Data Types (describe data types that can be used)
+ 	Samples
+ 		Modeling
+ 			Sample Policy Library
+ 			Sample Data library
+ 			Sample DCPS library
+}}}</pre>
 </div>
 <div title="org.opendds.modeling.model" modifier="MikeMartinez" created="201006152326" modified="201008101844" tags="publish" changecount="16">
 <pre>This package is where the ~OpenDDS Modeling SDK metamodels and profile are captured.  These [[EMF Models]] provide the stereotype elements that are used to capture a DCPS model using ~OpenDDS.  They include the individual specification package models as well as the overall ~OpenDDS profile model.
