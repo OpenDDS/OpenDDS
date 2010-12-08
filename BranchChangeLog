@@ -1,40 +1,47 @@
+Wed Dec  8 14:40:53 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/QosPolicyLabeler.java:
+
+	  Qualify policy name by name of the PolicyLib that owns the policy in case
+	  there are several PolicyLibs in the same resource.
+
 Wed Dec  8 04:00:32 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
-	* [r3897] 2010-12-08 03:48  martinezm
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
+        * [r3897] 2010-12-08 03:48  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
 
-	  Updated model to reflect the currently known customizations.
+          Updated model to reflect the currently known customizations.
 
-	* [r3893] 2010-12-07 20:49  martinezm
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src[DEL]:
-	* [r3892] 2010-12-07 20:46  martinezm
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src[DEL]:
-	* [r3891] 2010-12-07 20:42  martinezm
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/bin[DEL]:
-	* [r3886] 2010-12-07 19:59  martinezm
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/InstanceTraits/presentation[DEL]:
+        * [r3893] 2010-12-07 20:49  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src[DEL]:
+        * [r3892] 2010-12-07 20:46  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src[DEL]:
+        * [r3891] 2010-12-07 20:42  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/bin[DEL]:
+        * [r3886] 2010-12-07 19:59  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/InstanceTraits/presentation[DEL]:
 
-	  Removed obsolete and generated files and dirs.
+          Removed obsolete and generated files and dirs.
 
-	* [r3890] 2010-12-07 20:33  martinezm
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/plugin.properties:
-	* [r3889] 2010-12-07 20:30  martinezm
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/.classpath,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/.project,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/build.properties,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/plugin.xml:
-	* [r3888] 2010-12-07 20:30  martinezm
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
-	* [r3887] 2010-12-07 20:06  martinezm
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore[CPY],
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel[CPY],
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.ecore[DEL],
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.genmodel[DEL]:
+        * [r3890] 2010-12-07 20:33  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/plugin.properties:
+        * [r3889] 2010-12-07 20:30  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/.classpath,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/.project,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/build.properties,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/plugin.xml:
+        * [r3888] 2010-12-07 20:30  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
+        * [r3887] 2010-12-07 20:06  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore[CPY],
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel[CPY],
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.ecore[DEL],
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/model/InstanceTraits.genmodel[DEL]:
 
-	  Refactoring to include the full generator information.
+          Refactoring to include the full generator information.
 
 Tue Dec  7 22:19:51 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
