@@ -512,6 +512,7 @@ Config::loadTopic(
    *
    *   Participant                         = <string> # One of participant <name>
    *   Type                                = <string> # Name for a registered datatype.
+   *   Topic                               = <string> # Name for topic
    */
 
   // Note that this requires that the Service Participant already be
