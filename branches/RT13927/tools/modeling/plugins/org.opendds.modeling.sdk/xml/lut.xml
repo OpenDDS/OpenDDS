@@ -37,20 +37,20 @@
   <qos-field type="opendds:tdQosPolicy" quote="true">topic_data</qos-field>
   <qos-field type="opendds:gdQosPolicy" quote="true">group_data</qos-field>
   <qos-field type="opendds:efQosPolicy">entity_factory</qos-field>
-  <qos-field type="opendds:durabilityQosPolicy">durability</qos-field>
+  <qos-field type="opendds:durabilityQosPolicy" kind_suffix="_DURABILITY_QOS">durability</qos-field>
   <qos-field type="opendds:dsQosPolicy">durability_service</qos-field>
   <qos-field type="opendds:deadlineQosPolicy">deadline</qos-field>
   <qos-field type="opendds:lbQosPolicy">latency_budget</qos-field>
-  <qos-field type="opendds:livelinessQosPolicy">liveliness</qos-field>
-  <qos-field type="opendds:reliabilityQosPolicy">reliability</qos-field>
-  <qos-field type="opendds:destinationOrderQosPolicy">destination_order</qos-field>
-  <qos-field type="opendds:historyQosPolicy">history</qos-field>
+  <qos-field type="opendds:livelinessQosPolicy" kind_suffix="_LIVELINESS_QOS">liveliness</qos-field>
+  <qos-field type="opendds:reliabilityQosPolicy" kind_suffix="_RELIABILITY_QOS">reliability</qos-field>
+  <qos-field type="opendds:destinationOrderQosPolicy" kind_suffix="_DESTINATIONORDER_QOS">destination_order</qos-field>
+  <qos-field type="opendds:historyQosPolicy" kind_suffix="_HISTORY_QOS">history</qos-field>
   <qos-field type="opendds:rlQosPolicy">resource_limits</qos-field>
   <qos-field type="opendds:tpQosPolicy">transport_priority</qos-field>
   <qos-field type="opendds:lifespanQosPolicy">lifespan</qos-field>
-  <qos-field type="opendds:ownershipQosPolicy">ownership</qos-field>
+  <qos-field type="opendds:ownershipQosPolicy" kind_suffix="_OWNERSHIP_QOS">ownership</qos-field>
   <qos-field type="opendds:osQosPolicy">ownership_strength</qos-field>
-  <qos-field type="opendds:presentationQosPolicy">presentation</qos-field>
+  <qos-field type="opendds:presentationQosPolicy" access_scope_suffix="_PRESENTATION_QOS">presentation</qos-field>
   <qos-field type="opendds:partitionQosPolicy" quote="true">partition</qos-field>
   <qos-field type="opendds:tbfQosPolicy">time_based_filter</qos-field>
   <qos-field type="opendds:wdlQosPolicy">writer_data_lifecycle</qos-field>
