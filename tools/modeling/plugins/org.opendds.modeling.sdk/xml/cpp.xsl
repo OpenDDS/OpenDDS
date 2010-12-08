@@ -341,7 +341,7 @@ Elements::Data::loadMaps()
     <xsl:value-of select="@name"/>
     <xsl:text>] = Topics::</xsl:text>
     <xsl:call-template name="normalize-identifier">
-      <xsl:with-param name="identifier" select="$topics[@xmi:id = current()/@topic]/@name"/>
+      <xsl:with-param name="identifier" select="$topics[@xmi:id = current()/@writerTopic]/@name"/>
     </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
@@ -711,7 +711,6 @@ Elements::Data::copySubscriptionQos(
                         name() = 'xsi:type' or 
                         name() = 'xmi:id'"/>
 
-        <!-- OpenDDS::Model::stringToByteSeq( (base)(field).(name), (value)); -->
         <xsl:when test="../@xsi:type = 'opendds:udQosPolicy'
                      or ../@type = 'opendds:tdQosPolicy'
                      or ../@xsi:type = 'opendds:gdQosPolicy'">
@@ -721,38 +720,28 @@ Elements::Data::copySubscriptionQos(
                                   '      ', $value, '.length(),', $newline,
                                   '      (CORBA::Octet*)&quot;', ., '&quot;);', $newline)"/>
 
-<!--
-          <xsl:text>  OpenDDS::Model::stringToByteSeq( </xsl:text>
-          <xsl:value-of select="$base"/>
-          <xsl:value-of select="$field"/>
-          <xsl:text>.</xsl:text>
-          <xsl:value-of select="name()"/>
-          <xsl:text>, </xsl:text>
-          <xsl:choose>
-            <xsl:when test="$should-quote = 'true'">
-              <xsl:value-of select="concat('&quot;', ., '&quot;')"/>
-            </xsl:when>
-            <xsl:otherwise>
-              <xsl:value-of select="."/>
-            </xsl:otherwise>
-          </xsl:choose>
-
-          <xsl:text>);</xsl:text>
-          <xsl:value-of select="$newline"/>
--->
         </xsl:when>
         <xsl:otherwise>
 <xsl:message>  otherwise for qos attribute <xsl:value-of select="name()"/>
 </xsl:message>
+          <xsl:variable name="suffix-attr-name" select="concat(name(), '_suffix')"/>
+          <xsl:variable name="suffix">
+            <xsl:for-each select="$lut-policies"> <!-- Change context for lookup -->
+              <xsl:value-of select="key('lut-qos-field', $policy-type)/@*[name() = $suffix-attr-name]"/>
+            </xsl:for-each>
+          </xsl:variable>
+<xsl:message>  suffix <xsl:value-of select="$suffix"/>
+</xsl:message>
+          
           <xsl:value-of select="concat('  ', $base, $field, '.', name(), ' = ')"/>
 
           <!-- quote the value if specified in the lookup table. -->
           <xsl:choose>
             <xsl:when test="$should-quote = 'true'">
-              <xsl:value-of select="concat('&quot;', ., '&quot;;')"/>
+              <xsl:value-of select="concat('&quot;', ., $suffix, '&quot;;')"/>
             </xsl:when>
             <xsl:otherwise>
-              <xsl:value-of select="concat(., ';')"/>
+              <xsl:value-of select="concat(., $suffix, ';')"/>
             </xsl:otherwise>
           </xsl:choose>
 

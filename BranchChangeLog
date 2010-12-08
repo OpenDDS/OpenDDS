@@ -1,9 +1,25 @@
+Wed Dec  8 21:32:46 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/lut.xml:
+
+          Updates for QOS policy enumerations.
+
+        * tools/modeling/tests/MessengerWriterQos:
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.mpc:
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.opendds:
+        * tools/modeling/tests/MessengerWriterQos/publisher.cpp:
+        * tools/modeling/tests/MessengerWriterQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerWriterQos/transports.traits:
+
+          New test for DataWriter Qos policies.
+
 Wed Dec  8 17:57:57 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/plugins.html:
 
-	  Added entry in Plug-in Architecture section on the
-	  help plug-in.
+          Added entry in Plug-in Architecture section on the
+          help plug-in.
 
 Wed Dec  8 16:00:56 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
