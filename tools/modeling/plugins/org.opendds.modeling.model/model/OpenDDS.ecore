@@ -14,12 +14,8 @@
   <eClassifiers xsi:type="ecore:EClass" name="publisher" eSuperTypes="#//ddsProperty DCPS.ecore#//Publisher"/>
   <eClassifiers xsi:type="ecore:EClass" name="subscriber" eSuperTypes="#//ddsProperty DCPS.ecore#//Subscriber"/>
   <eClassifiers xsi:type="ecore:EClass" name="domain" eSuperTypes="#//ddsProperty DCPS.ecore#//Domain"/>
-  <eClassifiers xsi:type="ecore:EClass" name="dataReader" eSuperTypes="DCPS.ecore#//DataReader">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="topic" eType="ecore:EClass Topics.ecore#//TopicDescription"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="dataWriter" eSuperTypes="DCPS.ecore#//DataWriter">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="topic" eType="ecore:EClass Topics.ecore#//Topic"/>
-  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="dataReader" eSuperTypes="DCPS.ecore#//DataReader"/>
+  <eClassifiers xsi:type="ecore:EClass" name="dataWriter" eSuperTypes="DCPS.ecore#//DataWriter"/>
   <eClassifiers xsi:type="ecore:EClass" name="ddsAppTarget" eSuperTypes="Application.ecore#//ApplicationTarget"/>
   <eClassifiers xsi:type="ecore:EClass" name="deadlineQosPolicy" eSuperTypes="QoS.ecore#//DeadlineQosPolicy #//qosPolicy"/>
   <eClassifiers xsi:type="ecore:EClass" name="destinationOrderQosPolicy" eSuperTypes="QoS.ecore#//DestinationOrderQosPolicy #//qosPolicy"/>

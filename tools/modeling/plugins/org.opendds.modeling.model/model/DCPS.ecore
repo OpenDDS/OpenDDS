@@ -58,8 +58,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="reader_data_lifecycle"
         eType="ecore:EClass QoS.ecore#//ReaderDataLifecycleQosPolicy"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="time_based_filter" eType="ecore:EClass QoS.ecore#//TimeBasedFilterQosPolicy"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="topicDesc" lowerBound="1"
-        eType="ecore:EClass Topics.ecore#//TopicDescription"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="topic" lowerBound="1" eType="ecore:EClass Topics.ecore#//TopicDescription"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DataWriter" eSuperTypes="#//DataReaderWriter">
     <eStructuralFeatures xsi:type="ecore:EReference" name="durability_service" eType="ecore:EClass QoS.ecore#//DurabilityServiceQosPolicy"/>
@@ -68,7 +67,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="writer_data_lifecycle"
         eType="ecore:EClass QoS.ecore#//WriterDataLifecycleQosPolicy" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="lifespan" eType="ecore:EClass QoS.ecore#//LifespanQosPolicy"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="writerTopic" lowerBound="1"
-        eType="ecore:EClass Topics.ecore#//Topic"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="topic" lowerBound="1" eType="ecore:EClass Topics.ecore#//Topic"/>
   </eClassifiers>
 </ecore:EPackage>

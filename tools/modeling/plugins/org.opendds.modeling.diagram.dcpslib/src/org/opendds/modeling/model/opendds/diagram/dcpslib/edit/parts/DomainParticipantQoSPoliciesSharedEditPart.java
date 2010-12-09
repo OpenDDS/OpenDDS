@@ -81,9 +81,11 @@ public class DomainParticipantQoSPoliciesSharedEditPart extends
 	 */
 	@Override
 	protected java.util.List getModelChildren() {
-		EPackage dcpsLibsPackage = EPackage.Registry.INSTANCE.getEPackage(OpenDDSPackage.eNS_URI);
-		EClass dcpsLibClass = (EClass) dcpsLibsPackage.getEClassifier("DcpsLib");
-		
+		EPackage dcpsLibsPackage = EPackage.Registry.INSTANCE
+				.getEPackage(OpenDDSPackage.eNS_URI);
+		EClass dcpsLibClass = (EClass) dcpsLibsPackage
+				.getEClassifier("DcpsLib");
+
 		return com.ociweb.gmf.edit.parts.ModelChildrenFilter
 				.filterChildrenByOwner((View) getModel(), dcpsLibClass, super
 						.getModelChildren());
