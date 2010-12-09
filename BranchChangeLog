@@ -1,10 +1,20 @@
+Thu Dec  9 14:38:54 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/lut.xml:
+
+          Added suffix for durability service history kind.
+
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.opendds:
+
+          Additional DataWriter QOS policies.
+
 Thu Dec  9 14:29:43 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/PublisherQoSPoliciesSharedEditPart.java:
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/SubscriberQoSPoliciesSharedEditPart.java:
 
-	  Applied fix similar to "Wed Dec  8 14:40:53 UTC 2010"
-	  commit that applies to Publisher and Subscriber.
+          Applied fix similar to "Wed Dec  8 14:40:53 UTC 2010"
+          commit that applies to Publisher and Subscriber.
 
 Thu Dec  9 13:48:43 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
