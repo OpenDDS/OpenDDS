@@ -594,9 +594,8 @@ Elements::Data::buildSubscriptionsQos()
   readerQos = TheServiceParticipant->initial_DataReaderQos();
 </xsl:text>
     <!-- '  readerQos.(policyfield) = (value);\n' -->
-    <xsl:call-template name="process-qos">
-      <xsl:with-param name="entity" select="."/>
-      <xsl:with-param name="base"   select="'  readerQos.'"/>
+    <xsl:call-template name="process-policies">
+      <xsl:with-param name="base"   select="'readerQos.'"/>
     </xsl:call-template>
 
     <xsl:text>  this->readersQos_[ reader] = readerQos;</xsl:text>
@@ -658,9 +657,8 @@ Elements::Data::copySubscriptionQos(
     <xsl:value-of select="$newline"/>
 
     <!-- '  readerQos.(policyfield) = (value);\n' -->
-    <xsl:call-template name="process-qos">
-      <xsl:with-param name="entity" select="."/>
-      <xsl:with-param name="base"   select="'      readerQos.'"/>
+    <xsl:call-template name="process-policies">
+      <xsl:with-param name="base"   select="'readerQos.'"/>
     </xsl:call-template>
 
     <xsl:text>      break;</xsl:text>
