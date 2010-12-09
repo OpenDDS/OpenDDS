@@ -1,3 +1,27 @@
+Thu Dec  9 05:03:56 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3904] 2010-12-09 04:54  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/plugin.properties,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore:
+
+          Starting to customize the generated code generation editor
+          implementation.
+
+        * [r3902] 2010-12-08 19:22  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenerator.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/OutputsForm.java:
+
+          Add experimental extraction of transport indices.
+
 Wed Dec  8 21:32:46 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
