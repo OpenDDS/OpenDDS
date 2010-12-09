@@ -4,7 +4,7 @@
     <domains xmi:id="_MYhaoP8VEd-lXd5Y3X2Vyw" name="Messenger" domainId="0"/>
     <participants xmi:id="_D7uC4P8UEd-lXd5Y3X2Vyw" name="Participater" domain="_MYhaoP8VEd-lXd5Y3X2Vyw" entity_factory="_1y2_4P8VEd-lXd5Y3X2Vyw" user_data="_IhAncP8eEd-lXd5Y3X2Vyw">
       <publishers xsi:type="opendds:publisher" xmi:id="_jteu4P8VEd-lXd5Y3X2Vyw" name="Pub1" partition="_DdcgkP8WEd-lXd5Y3X2Vyw" transportId="1">
-        <writers xsi:type="opendds:dataWriter" xmi:id="_oGwcQP8VEd-lXd5Y3X2Vyw" name="writer1" writerTopic="_U2BycP8VEd-lXd5Y3X2Vyw" topic="_U2BycP8VEd-lXd5Y3X2Vyw"/>
+        <writers xsi:type="opendds:dataWriter" xmi:id="_oGwcQP8VEd-lXd5Y3X2Vyw" name="writer1" topic="_U2BycP8VEd-lXd5Y3X2Vyw"/>
       </publishers>
     </participants>
     <participants xmi:id="_-u-M0AFmEeClcNQU00YEJA" name="Participater2" domain="_MYhaoP8VEd-lXd5Y3X2Vyw">
