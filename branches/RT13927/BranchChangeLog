@@ -1,3 +1,17 @@
+Thu Dec  9 13:48:43 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds_diagram:
+        * tools/modeling/testdata/DcpsLib/DcpsTest_screenshot_2.png:
+
+	  Renamed and refreshed diagram and data content to account for recent
+	  Ecore model changes.
+
+        * tools/modeling/testdata/DcpsLib/DcpsTest.opendds:
+        * tools/modeling/testdata/DcpsLib/DcpsTest.opendds_diagram_dcpslib:
+
+          Removed these files.
+
 Thu Dec  9 13:23:22 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/testdata/DcpsLib:
