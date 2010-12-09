@@ -1,3 +1,10 @@
+Thu Dec  9 16:15:03 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.opendds:
+
+          Handle partition.
+
 Thu Dec  9 14:38:54 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/lut.xml:
