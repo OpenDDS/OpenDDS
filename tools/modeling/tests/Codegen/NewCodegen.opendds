@@ -12,10 +12,10 @@
     <domains xmi:id="_z9cJMPNKEd-3w-8mZYQ1uw" name="domain2" domainId="2"/>
     <participants xmi:id="_-PWQIPNFEd-3w-8mZYQ1uw" name="part1" domain="_F1tSoPNIEd-3w-8mZYQ1uw" entity_factory="_Sw98QPNVEd-3w-8mZYQ1uw" user_data="_PLd1MPNVEd-3w-8mZYQ1uw">
       <publishers xsi:type="opendds:publisher" xmi:id="_Py47MPNNEd-3w-8mZYQ1uw" name="pub1" transportId="1">
-        <writers xsi:type="opendds:dataWriter" xmi:id="_V4zwkPNNEd-3w-8mZYQ1uw" name="writer1" writerTopic="_93D5sPNKEd-3w-8mZYQ1uw"/>
+        <writers xsi:type="opendds:dataWriter" xmi:id="_V4zwkPNNEd-3w-8mZYQ1uw" name="writer1" topic="_93D5sPNKEd-3w-8mZYQ1uw"/>
       </publishers>
       <publishers xsi:type="opendds:publisher" xmi:id="_uzK1APNQEd-3w-8mZYQ1uw" name="pub3" transportId="1">
-        <writers xsi:type="opendds:dataWriter" xmi:id="_xa66YPNQEd-3w-8mZYQ1uw" name="writer2" writerTopic="_DMZmsPNLEd-3w-8mZYQ1uw"/>
+        <writers xsi:type="opendds:dataWriter" xmi:id="_xa66YPNQEd-3w-8mZYQ1uw" name="writer2" topic="_DMZmsPNLEd-3w-8mZYQ1uw"/>
       </publishers>
       <subscribers xsi:type="opendds:subscriber" xmi:id="_2JBoQPNQEd-3w-8mZYQ1uw" name="sub1" transportId="3">
         <readers xsi:type="opendds:dataReader" xmi:id="_4lHQMPNQEd-3w-8mZYQ1uw" name="reader1" topic="_93D5sPNKEd-3w-8mZYQ1uw"/>
@@ -26,10 +26,10 @@
     </participants>
     <participants xmi:id="_x4YhMPNKEd-3w-8mZYQ1uw" name="part2" domain="_z9cJMPNKEd-3w-8mZYQ1uw" entity_factory="_VYpTsPNWEd-3w-8mZYQ1uw" user_data="_Q00jMPNWEd-3w-8mZYQ1uw">
       <publishers xsi:type="opendds:publisher" xmi:id="_Gnx5sPNREd-3w-8mZYQ1uw" name="pub2" transportId="2">
-        <writers xsi:type="opendds:dataWriter" xmi:id="_JUbGIPNREd-3w-8mZYQ1uw" name="writer3" writerTopic="_93D5sPNKEd-3w-8mZYQ1uw"/>
+        <writers xsi:type="opendds:dataWriter" xmi:id="_JUbGIPNREd-3w-8mZYQ1uw" name="writer3" topic="_93D5sPNKEd-3w-8mZYQ1uw"/>
       </publishers>
       <publishers xsi:type="opendds:publisher" xmi:id="_OvMswPNREd-3w-8mZYQ1uw" name="pub4" transportId="2">
-        <writers xsi:type="opendds:dataWriter" xmi:id="_RHO7IPNREd-3w-8mZYQ1uw" name="writer4" writerTopic="_DMZmsPNLEd-3w-8mZYQ1uw"/>
+        <writers xsi:type="opendds:dataWriter" xmi:id="_RHO7IPNREd-3w-8mZYQ1uw" name="writer4" topic="_DMZmsPNLEd-3w-8mZYQ1uw"/>
       </publishers>
       <subscribers xsi:type="opendds:subscriber" xmi:id="_VBB3MPNREd-3w-8mZYQ1uw" name="sub2" transportId="4">
         <readers xsi:type="opendds:dataReader" xmi:id="_WqcsEPNREd-3w-8mZYQ1uw" name="reader3" topic="_93D5sPNKEd-3w-8mZYQ1uw"/>

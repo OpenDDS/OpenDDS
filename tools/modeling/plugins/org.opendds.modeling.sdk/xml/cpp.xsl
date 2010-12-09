@@ -341,7 +341,7 @@ Elements::Data::loadMaps()
     <xsl:value-of select="@name"/>
     <xsl:text>] = Topics::</xsl:text>
     <xsl:call-template name="normalize-identifier">
-      <xsl:with-param name="identifier" select="$topics[@xmi:id = current()/@writerTopic]/@name"/>
+      <xsl:with-param name="identifier" select="$topics[@xmi:id = current()/@topic]/@name"/>
     </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>

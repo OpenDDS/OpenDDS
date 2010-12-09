@@ -1,3 +1,15 @@
+Thu Dec  9 17:57:00 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+
+          Updates to handle partitionQos.
+
+        * tools/modeling/tests/Codegen/NewCodegen.opendds:
+        * tools/modeling/tests/MessengerQos/MessengerQos.opendds:
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.opendds:
+
+          Remove use of writerTopic and topicDesc.
+
 Thu Dec  9 16:15:03 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
