@@ -1,11 +1,19 @@
+Thu Dec  9 14:29:43 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/PublisherQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/SubscriberQoSPoliciesSharedEditPart.java:
+
+	  Applied fix similar to "Wed Dec  8 14:40:53 UTC 2010"
+	  commit that applies to Publisher and Subscriber.
+
 Thu Dec  9 13:48:43 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds:
         * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds_diagram:
         * tools/modeling/testdata/DcpsLib/DcpsTest_screenshot_2.png:
 
-	  Renamed and refreshed diagram and data content to account for recent
-	  Ecore model changes.
+          Renamed and refreshed diagram and data content to account for recent
+          Ecore model changes.
 
         * tools/modeling/testdata/DcpsLib/DcpsTest.opendds:
         * tools/modeling/testdata/DcpsLib/DcpsTest.opendds_diagram_dcpslib:
