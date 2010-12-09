@@ -1,3 +1,9 @@
+Thu Dec  9 13:23:22 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/DcpsLib:
+
+          Renamed Dcps directory to DcpsLib to be consistent with other directories.
+
 Thu Dec  9 13:09:07 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
@@ -14,10 +20,10 @@ Thu Dec  9 13:09:07 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
 
-	  Stereotypes dataReader and dataWriter defined in OpenDDS.ecore had inappropriate
-	  Topic and TopicDescription references. These were removed which allowed similar references
-	  in DataReader and DataWriter defined in DCPS.ecore to be renamed to "topic" as given
-	  in the DDS Profile spec.
+          Stereotypes dataReader and dataWriter defined in OpenDDS.ecore had inappropriate
+          Topic and TopicDescription references. These were removed which allowed similar references
+          in DataReader and DataWriter defined in DCPS.ecore to be renamed to "topic" as given
+          in the DDS Profile spec.
 
 Thu Dec  9 05:03:56 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
