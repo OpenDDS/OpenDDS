@@ -38,7 +38,7 @@
   <qos-field type="opendds:gdQosPolicy" quote="true">group_data</qos-field>
   <qos-field type="opendds:efQosPolicy">entity_factory</qos-field>
   <qos-field type="opendds:durabilityQosPolicy" kind_suffix="_DURABILITY_QOS">durability</qos-field>
-  <qos-field type="opendds:dsQosPolicy">durability_service</qos-field>
+  <qos-field type="opendds:dsQosPolicy" history_kind_suffix="_HISTORY_QOS">durability_service</qos-field>
   <qos-field type="opendds:deadlineQosPolicy">deadline</qos-field>
   <qos-field type="opendds:lbQosPolicy">latency_budget</qos-field>
   <qos-field type="opendds:livelinessQosPolicy" kind_suffix="_LIVELINESS_QOS">liveliness</qos-field>

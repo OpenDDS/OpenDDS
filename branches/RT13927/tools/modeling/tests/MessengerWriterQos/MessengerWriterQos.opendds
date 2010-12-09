@@ -4,7 +4,7 @@
     <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="" domainId="42"/>
     <participants xmi:id="_esFCYPDvEd-I4rwicuuPOw" name="part1" domain="_bs2RIPDvEd-I4rwicuuPOw" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" user_data="_X64DcAJKEeCBAfl9GiYbGg">
       <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" group_data="_os3bUAKJEeCwwtlMwl8TGw" presentation="_wwhIsAKJEeCwwtlMwl8TGw" partition="_2V9HMAKJEeCwwtlMwl8TGw" transportId="1">
-        <writers xsi:type="opendds:dataWriter" xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" destination_order="_2mVAsALlEeCRmKs-7z8NWA" durability="_BoO1oALrEeCRmKs-7z8NWA" history="_VML9cALrEeCRmKs-7z8NWA" liveliness="_zAukQALrEeCRmKs-7z8NWA" reliability="_n1lhgALrEeCRmKs-7z8NWA" writerTopic="_mcVnwPDxEd-I4rwicuuPOw" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+        <writers xsi:type="opendds:dataWriter" xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" deadline="_uvsboALlEeCRmKs-7z8NWA" destination_order="_2mVAsALlEeCRmKs-7z8NWA" durability="_BoO1oALrEeCRmKs-7z8NWA" history="_VML9cALrEeCRmKs-7z8NWA" latency_budget="_CeUPoAMYEeCrTdheTycPFA" liveliness="_zAukQALrEeCRmKs-7z8NWA" reliability="_n1lhgALrEeCRmKs-7z8NWA" resource_limits="_Y8bbcAMYEeCrTdheTycPFA" user_data="_X64DcAJKEeCBAfl9GiYbGg" durability_service="_5tsHgAMXEeCrTdheTycPFA" transport_priority="_qJC4cAMYEeCrTdheTycPFA" writerTopic="_mcVnwPDxEd-I4rwicuuPOw" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </publishers>
     </participants>
     <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
@@ -33,6 +33,15 @@
     <policies xsi:type="opendds:historyQosPolicy" xmi:id="_VML9cALrEeCRmKs-7z8NWA" name="keep_last_fourteen" depth="14" kind="KEEP_LAST"/>
     <policies xsi:type="opendds:reliabilityQosPolicy" xmi:id="_n1lhgALrEeCRmKs-7z8NWA" name="old_reliable" kind="RELIABLE"/>
     <policies xsi:type="opendds:livelinessQosPolicy" xmi:id="_zAukQALrEeCRmKs-7z8NWA" name="mbt" kind="AUTOMATIC"/>
+    <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_COBjIAMTEeCrTdheTycPFA" name="now_for_crying_out_loud"/>
+    <policies xsi:type="opendds:dsQosPolicy" xmi:id="_5HPvYAMTEeCrTdheTycPFA" name="durable" history_depth="1" history_kind="KEEP_ALL" max_instances="20" max_samples="5" max_samples_per_instance="100"/>
+    <policies xsi:type="opendds:dsQosPolicy" xmi:id="_5tsHgAMXEeCrTdheTycPFA" name="default" history_depth="1" history_kind="KEEP_LAST" max_instances="-1" max_samples="-1" max_samples_per_instance="-1"/>
+    <policies xsi:type="opendds:lbQosPolicy" xmi:id="_CeUPoAMYEeCrTdheTycPFA" name="latent">
+      <duration xmi:id="_nU0n4AMZEeCrTdheTycPFA" nanosecond="10" second="1"/>
+    </policies>
+    <policies xsi:type="opendds:lifespanQosPolicy" xmi:id="_JIkhIAMYEeCrTdheTycPFA"/>
+    <policies xsi:type="opendds:rlQosPolicy" xmi:id="_Y8bbcAMYEeCrTdheTycPFA" name="limited" max_instances="100" max_samples="1000" max_samples_per_instance="100"/>
+    <policies xsi:type="opendds:tpQosPolicy" xmi:id="_qJC4cAMYEeCrTdheTycPFA" name="high" value="3"/>
   </dcpsLib>
   <dataLib xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data1">
     <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw" name="Message" isDcpsDataType="true">
