@@ -1,3 +1,10 @@
+Thu Dec  9 22:56:56 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.opendds:
+
+          Supoort Period data types.  Fix Writer example.
+
 Thu Dec  9 20:29:09 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:

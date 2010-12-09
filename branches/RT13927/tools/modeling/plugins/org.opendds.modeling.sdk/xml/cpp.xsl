@@ -748,15 +748,40 @@ Elements::Data::copySubscriptionQos(
       </xsl:choose>
     </xsl:for-each>
 
-    <xsl:if test="@xsi:type = 'opendds:partitionQosPolicy' and count(names) > 0">
-      <xsl:value-of select="concat('  ', $base, $field, '.name.length(',
-                                   count(names), ');', $newline)"/>
-      <xsl:for-each select="names">
-        <xsl:value-of select="concat('  ', $base, $field, '.name[', 
-                                     position() - 1, '] = &quot;',
-                                     ., '&quot;;', $newline)"/>
-      </xsl:for-each>
-    </xsl:if>
+    <!-- special handling cases -->
+    <xsl:choose>
+      <xsl:when test="@xsi:type = 'opendds:partitionQosPolicy' and count(names) > 0">
+        <xsl:value-of select="concat('  ', $base, $field, '.name.length(',
+                                     count(names), ');', $newline)"/>
+        <xsl:for-each select="names">
+          <xsl:value-of select="concat('  ', $base, $field, '.name[', 
+                                       position() - 1, '] = &quot;',
+                                       ., '&quot;;', $newline)"/>
+        </xsl:for-each>
+      </xsl:when>
+      <xsl:when test="duration">
+        <xsl:variable name="sec">
+          <xsl:choose>
+            <xsl:when test="duration/@second">
+              <xsl:value-of select="duration/@second"/>
+            </xsl:when>
+            <xsl:otherwise>0</xsl:otherwise>
+          </xsl:choose>
+        </xsl:variable>
+        <xsl:variable name="nanosec">
+          <xsl:choose>
+            <xsl:when test="duration/@nanosecond">
+              <xsl:value-of select="duration/@nanosecond"/>
+            </xsl:when>
+            <xsl:otherwise>0</xsl:otherwise>
+          </xsl:choose>
+        </xsl:variable>
+        <xsl:value-of select="concat('  ', $base, $field, '.duration.sec = ', 
+                                     $sec, ';', $newline)"/>
+        <xsl:value-of select="concat('  ', $base, $field, '.duration.nanosec = ', 
+                                     $nanosec, ';', $newline)"/>
+      </xsl:when>
+    </xsl:choose>
   </xsl:for-each>
 </xsl:template>
 
