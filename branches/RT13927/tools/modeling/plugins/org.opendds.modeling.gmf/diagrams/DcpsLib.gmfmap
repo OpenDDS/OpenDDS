@@ -1873,7 +1873,7 @@
         href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassChildren"/>
     <linkMetaFeature
         xsi:type="ecore:EReference"
-        href="../../org.opendds.modeling.model/model/DCPS.ecore#//DataReader/topicDesc"/>
+        href="../../org.opendds.modeling.model/model/DCPS.ecore#//DataReader/topic"/>
   </links>
   <links>
     <tool
@@ -1883,7 +1883,7 @@
         href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassChildren"/>
     <linkMetaFeature
         xsi:type="ecore:EReference"
-        href="../../org.opendds.modeling.model/model/DCPS.ecore#//DataWriter/writerTopic"/>
+        href="../../org.opendds.modeling.model/model/DCPS.ecore#//DataWriter/topic"/>
   </links>
   <diagram>
     <diagramCanvas

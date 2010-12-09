@@ -18,12 +18,8 @@
     <genClasses ecoreClass="OpenDDS.ecore#//publisher"/>
     <genClasses ecoreClass="OpenDDS.ecore#//subscriber"/>
     <genClasses ecoreClass="OpenDDS.ecore#//domain"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//dataReader">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//dataReader/topic"/>
-    </genClasses>
-    <genClasses ecoreClass="OpenDDS.ecore#//dataWriter">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//dataWriter/topic"/>
-    </genClasses>
+    <genClasses ecoreClass="OpenDDS.ecore#//dataReader"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//dataWriter"/>
     <genClasses ecoreClass="OpenDDS.ecore#//ddsAppTarget"/>
     <genClasses ecoreClass="OpenDDS.ecore#//deadlineQosPolicy"/>
     <genClasses ecoreClass="OpenDDS.ecore#//destinationOrderQosPolicy"/>
@@ -302,7 +298,7 @@
     <genClasses ecoreClass="DCPS.ecore#//DataReader">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReader/reader_data_lifecycle"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReader/time_based_filter"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReader/topicDesc"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReader/topic"/>
     </genClasses>
     <genClasses ecoreClass="DCPS.ecore#//DataWriter">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataWriter/durability_service"/>
@@ -310,7 +306,7 @@
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataWriter/transport_priority"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataWriter/writer_data_lifecycle"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataWriter/lifespan"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataWriter/writerTopic"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataWriter/topic"/>
     </genClasses>
   </genPackages>
   <genPackages prefix="Application" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"

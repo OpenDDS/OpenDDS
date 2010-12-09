@@ -5075,11 +5075,11 @@
       </labels>
     </topLevelNodes>
     <links
-        visualID="4003"
-        editPartClassName="DataReaderTopicDescEditPart"
-        itemSemanticEditPolicyClassName="DataReaderTopicDescItemSemanticEditPolicy"
-        createCommandClassName="DataReaderTopicDescCreateCommand"
-        reorientCommandClassName="DataReaderTopicDescReorientCommand">
+        visualID="4005"
+        editPartClassName="DataReaderTopicEditPart"
+        itemSemanticEditPolicyClassName="DataReaderTopicItemSemanticEditPolicy"
+        createCommandClassName="DataReaderTopicCreateCommand"
+        reorientCommandClassName="DataReaderTopicReorientCommand">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Edge"/>
       <elementType
@@ -5091,15 +5091,15 @@
       <modelFacet
           xsi:type="gmfgen:FeatureLinkModelFacet">
         <metaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DataReader/topicDesc"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DataReader/topic"/>
       </modelFacet>
     </links>
     <links
-        visualID="4004"
-        editPartClassName="DataWriterWriterTopicEditPart"
-        itemSemanticEditPolicyClassName="DataWriterWriterTopicItemSemanticEditPolicy"
-        createCommandClassName="DataWriterWriterTopicCreateCommand"
-        reorientCommandClassName="DataWriterWriterTopicReorientCommand">
+        visualID="4006"
+        editPartClassName="DataWriterTopicEditPart"
+        itemSemanticEditPolicyClassName="DataWriterTopicItemSemanticEditPolicy"
+        createCommandClassName="DataWriterTopicCreateCommand"
+        reorientCommandClassName="DataWriterTopicReorientCommand">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Edge"/>
       <elementType
@@ -5111,7 +5111,7 @@
       <modelFacet
           xsi:type="gmfgen:FeatureLinkModelFacet">
         <metaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DataWriter/writerTopic"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DataWriter/topic"/>
       </modelFacet>
     </links>
     <compartments
