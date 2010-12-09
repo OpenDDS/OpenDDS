@@ -749,6 +749,16 @@ Elements::Data::copySubscriptionQos(
         </xsl:otherwise>
       </xsl:choose>
     </xsl:for-each>
+
+    <xsl:if test="@xsi:type = 'opendds:partitionQosPolicy' and count(names) > 0">
+      <xsl:value-of select="concat('  ', $base, $field, '.name.length(',
+                                   count(names), ');', $newline)"/>
+      <xsl:for-each select="names">
+        <xsl:value-of select="concat('  ', $base, $field, '.name[', 
+                                     position() - 1, '] = &quot;',
+                                     ., '&quot;;', $newline)"/>
+      </xsl:for-each>
+    </xsl:if>
   </xsl:for-each>
 </xsl:template>
 
