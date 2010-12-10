@@ -45,8 +45,8 @@
     <policies xsi:type="opendds:partitionQosPolicy" xmi:id="_WR3isQQVEeCsYqJtvYWomQ" name="all">
       <names>*</names>
     </policies>
-    <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_o9T74AQaEeCsYqJtvYWomQ" name="nine" autopurge_nowriter_sample_delay="9"/>
-    <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_NdzdUAQbEeCsYqJtvYWomQ" name="tbf_8" minimum_separation="8"/>
+    <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_o9T74AQaEeCsYqJtvYWomQ" name="nine" />
+    <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_NdzdUAQbEeCsYqJtvYWomQ" name="tbf_8">
     <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_mYIE4ARzEeCsYqJtvYWomQ" name="vol" kind="VOLATILE"/>
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_0lhFwAR1EeCsYqJtvYWomQ" name="strong" value="10"/>
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_2rViwAR1EeCsYqJtvYWomQ" name="weak" value="5"/>

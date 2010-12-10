@@ -10,8 +10,7 @@ use strict;
 use Env qw(DDS_ROOT JAVA_HOME);
 use Cwd;
 
-# my @dirs = qw(Codegen Messenger MessengerSplit MessengerMixed MessengerNoPub MessengerNoSub MessengerGlobalNs MessengerMulti MessengerPubQos MessengerWriterQos SubscriberQos);
-my @dirs = qw(Messenger MessengerSplit MessengerMixed MessengerNoPub MessengerNoSub MessengerGlobalNs MessengerMulti MessengerPubQos MessengerWriterQos SubscriberQos);
+my @dirs = qw(CompositeKey Messenger MessengerDpQos MessengerGlobalNs MessengerMixed MessengerMulti MessengerNoPub MessengerNoSub MessengerPubQos MessengerSplit MessengerWriterQos ReaderQos SubscriberQos TopicQos);
 
 my $javapkg = 'org.opendds.modeling.sdk';
 my $subdir = 'model';

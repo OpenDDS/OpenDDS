@@ -9,7 +9,7 @@
     </participants>
     <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" user_data="_X64DcAJKEeCBAfl9GiYbGg">
       <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" group_data="_os3bUAKJEeCwwtlMwl8TGw" presentation="_wwhIsAKJEeCwwtlMwl8TGw" partition="_WR3isQQVEeCsYqJtvYWomQ" transportId="3">
-        <readers xsi:type="opendds:dataReader" xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" deadline="_uvsboALlEeCRmKs-7z8NWA" destination_order="_2mVAsALlEeCRmKs-7z8NWA" durability="_qyi6YAR2EeCsYqJtvYWomQ" history="_VML9cALrEeCRmKs-7z8NWA" latency_budget="_CeUPoAMYEeCrTdheTycPFA" liveliness="_zAukQALrEeCRmKs-7z8NWA" ownership="_M2EAAALrEeCRmKs-7z8NWA" reliability="_n1lhgALrEeCRmKs-7z8NWA" resource_limits="_Y8bbcAMYEeCrTdheTycPFA" user_data="_X64DcAJKEeCBAfl9GiYbGg" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+        <readers xsi:type="opendds:dataReader" xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" deadline="_uvsboALlEeCRmKs-7z8NWA" destination_order="_2mVAsALlEeCRmKs-7z8NWA" durability="_qyi6YAR2EeCsYqJtvYWomQ" history="_VML9cALrEeCRmKs-7z8NWA" latency_budget="_CeUPoAMYEeCrTdheTycPFA" liveliness="_zAukQALrEeCRmKs-7z8NWA" ownership="_M2EAAALrEeCRmKs-7z8NWA" reliability="_n1lhgALrEeCRmKs-7z8NWA" resource_limits="_Y8bbcAMYEeCrTdheTycPFA" user_data="_X64DcAJKEeCBAfl9GiYbGg" reader_data_lifecycle="_o9T74AQaEeCsYqJtvYWomQ" time_based_filter="_NdzdUAQbEeCsYqJtvYWomQ" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </subscribers>
     </participants>
     <participants xmi:id="_4VZKwQMKEeCrTdheTycPFA" name="part3" domain="_bs2RIPDvEd-I4rwicuuPOw">
@@ -49,8 +49,13 @@
     <policies xsi:type="opendds:partitionQosPolicy" xmi:id="_WR3isQQVEeCsYqJtvYWomQ" name="all">
       <names>*</names>
     </policies>
-    <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_o9T74AQaEeCsYqJtvYWomQ" name="nine" autopurge_nowriter_sample_delay="9"/>
-    <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_NdzdUAQbEeCsYqJtvYWomQ" name="tbf_8" minimum_separation="8"/>
+    <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_o9T74AQaEeCsYqJtvYWomQ" name="nine">
+      <autopurge_nowriter_samples_delay xmi:id="_gfeS0AScEeCMT63_i6ctRQ" nanosecond="2" second="1"/>
+      <autopurge_disposed_samples_delay xmi:id="_hbNiUAScEeCMT63_i6ctRQ" nanosecond="4" second="3"/>
+    </policies>
+    <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_NdzdUAQbEeCsYqJtvYWomQ" name="tbf_8">
+      <minimum_separation xmi:id="_CYreYAScEeCMT63_i6ctRQ" nanosecond="8"/>
+    </policies>
     <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_mYIE4ARzEeCsYqJtvYWomQ" name="vol" kind="VOLATILE"/>
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_0lhFwAR1EeCsYqJtvYWomQ" name="strong" value="10"/>
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_2rViwAR1EeCsYqJtvYWomQ" name="weak" value="5"/>

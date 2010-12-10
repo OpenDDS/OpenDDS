@@ -753,8 +753,8 @@ Elements::Data::copySubscriptionQos(
                                        ., '&quot;;', $newline)"/>
         </xsl:for-each>
       </xsl:when>
-      <xsl:when test="duration | period">
-        <xsl:for-each select="duration | period">
+      <xsl:when test="*/@second | */@nanosecond">
+        <xsl:for-each select="*">
           <xsl:variable name="sec">
             <xsl:choose>
               <xsl:when test="@second">
