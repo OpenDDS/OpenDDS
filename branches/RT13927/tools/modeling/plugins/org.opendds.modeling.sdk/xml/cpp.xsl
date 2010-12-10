@@ -759,27 +759,29 @@ Elements::Data::copySubscriptionQos(
                                        ., '&quot;;', $newline)"/>
         </xsl:for-each>
       </xsl:when>
-      <xsl:when test="duration">
-        <xsl:variable name="sec">
-          <xsl:choose>
-            <xsl:when test="duration/@second">
-              <xsl:value-of select="duration/@second"/>
-            </xsl:when>
-            <xsl:otherwise>0</xsl:otherwise>
-          </xsl:choose>
-        </xsl:variable>
-        <xsl:variable name="nanosec">
-          <xsl:choose>
-            <xsl:when test="duration/@nanosecond">
-              <xsl:value-of select="duration/@nanosecond"/>
-            </xsl:when>
-            <xsl:otherwise>0</xsl:otherwise>
-          </xsl:choose>
-        </xsl:variable>
-        <xsl:value-of select="concat('  ', $base, $field, '.duration.sec = ', 
-                                     $sec, ';', $newline)"/>
-        <xsl:value-of select="concat('  ', $base, $field, '.duration.nanosec = ', 
-                                     $nanosec, ';', $newline)"/>
+      <xsl:when test="duration | period">
+        <xsl:for-each select="duration | period">
+          <xsl:variable name="sec">
+            <xsl:choose>
+              <xsl:when test="@second">
+                <xsl:value-of select="@second"/>
+              </xsl:when>
+              <xsl:otherwise>0</xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
+          <xsl:variable name="nanosec">
+            <xsl:choose>
+              <xsl:when test="@nanosecond">
+                <xsl:value-of select="@nanosecond"/>
+              </xsl:when>
+              <xsl:otherwise>0</xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
+          <xsl:value-of select="concat('  ', $base, $field, '.', name(), 
+                                       '.sec = ', $sec, ';', $newline)"/>
+          <xsl:value-of select="concat('  ', $base, $field, '.', name(), 
+                                       '.nanosec = ', $nanosec, ';', $newline)"/>
+        </xsl:for-each>
       </xsl:when>
     </xsl:choose>
   </xsl:for-each>

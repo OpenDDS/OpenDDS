@@ -1,3 +1,18 @@
+Fri Dec 10 16:51:06 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+
+          Updates for Topic qos policies.
+
+        * tools/modeling/tests/TopicQos:
+        * tools/modeling/tests/TopicQos/TopQos.mpc:
+        * tools/modeling/tests/TopicQos/TopQos.opendds:
+        * tools/modeling/tests/TopicQos/publisher.cpp:
+        * tools/modeling/tests/TopicQos/subscriber.cpp:
+        * tools/modeling/tests/TopicQos/transports.traits:
+
+          Test case for Topic qos policies.
+
 Fri Dec 10 16:19:57 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/com.ociweb.emf.util/src/com/ociweb/emf/util/ObjectsFinder.java:
