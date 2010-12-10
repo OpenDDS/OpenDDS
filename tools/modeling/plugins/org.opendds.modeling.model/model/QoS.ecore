@@ -85,8 +85,10 @@
         defaultValueLiteral="false"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReaderDataLifecycleQosPolicy" eSuperTypes="#//QosPolicy">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="autopurge_nowriter_samples_delay"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong" defaultValueLiteral="-1"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="autopurge_nowriter_samples_delay"
+        lowerBound="1" eType="ecore:EClass Enumerations.ecore#//Period" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="autopurge_disposed_samples_delay"
+        lowerBound="1" eType="ecore:EClass Enumerations.ecore#//Period" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReliabilityQosPolicy" eSuperTypes="#//QosPolicy">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="kind" eType="ecore:EEnum Enumerations.ecore#//ReliabilityQosPolicyKind"
@@ -103,8 +105,8 @@
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong" defaultValueLiteral="-1"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TimeBasedFilterQosPolicy" eSuperTypes="#//QosPolicy">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="minimum_separation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"
-        defaultValueLiteral="0"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="minimum_separation" lowerBound="1"
+        eType="ecore:EClass Enumerations.ecore#//Period" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TopicDataQosPolicy" eSuperTypes="#//QosPolicy">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>

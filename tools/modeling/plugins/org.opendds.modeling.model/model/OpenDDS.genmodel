@@ -134,7 +134,8 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//PresentationQosPolicy/ordered_access"/>
     </genClasses>
     <genClasses ecoreClass="QoS.ecore#//ReaderDataLifecycleQosPolicy">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//ReaderDataLifecycleQosPolicy/autopurge_nowriter_samples_delay"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference QoS.ecore#//ReaderDataLifecycleQosPolicy/autopurge_nowriter_samples_delay"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference QoS.ecore#//ReaderDataLifecycleQosPolicy/autopurge_disposed_samples_delay"/>
     </genClasses>
     <genClasses ecoreClass="QoS.ecore#//ReliabilityQosPolicy">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//ReliabilityQosPolicy/kind"/>
@@ -146,7 +147,7 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//ResourceLimitsQosPolicy/max_samples_per_instance"/>
     </genClasses>
     <genClasses ecoreClass="QoS.ecore#//TimeBasedFilterQosPolicy">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//TimeBasedFilterQosPolicy/minimum_separation"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference QoS.ecore#//TimeBasedFilterQosPolicy/minimum_separation"/>
     </genClasses>
     <genClasses ecoreClass="QoS.ecore#//TopicDataQosPolicy">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//TopicDataQosPolicy/value"/>

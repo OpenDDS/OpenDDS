@@ -7,7 +7,7 @@ Bundle-ClassPath: .
 Bundle-Activator: org.opendds.modeling.model.opendds.diagram.policylib.part.OpenDDSPolicyLibDiagramEditorPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Export-Package: org.opendds.modeling.model.opendds.diagram.policylib.edit.parts, 
+Export-Package: org.opendds.modeling.model.opendds.diagram.policylib.edit.parts,
  org.opendds.modeling.model.opendds.diagram.policylib.part,
  org.opendds.modeling.model.opendds.diagram.policylib.providers
 Require-Bundle: org.eclipse.core.runtime,
