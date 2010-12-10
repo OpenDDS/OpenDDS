@@ -81,13 +81,12 @@ public class PublisherQoSPoliciesSharedEditPart extends ListCompartmentEditPart 
 	@Override
 	protected java.util.List getModelChildren() {
 		EPackage dcpsLibsPackage = EPackage.Registry.INSTANCE
-		.getEPackage(OpenDDSPackage.eNS_URI);
+				.getEPackage(OpenDDSPackage.eNS_URI);
 		EClass dcpsLibClass = (EClass) dcpsLibsPackage
-		.getEClassifier("DcpsLib");
+				.getEClassifier("DcpsLib");
 
 		return com.ociweb.gmf.edit.parts.ModelChildrenFilter
-		.filterChildrenByOwner((View) getModel(), dcpsLibClass, super
-				.getModelChildren());
+				.filterChildrenByOwner(dcpsLibClass, super.getModelChildren());
 	}
 
 }

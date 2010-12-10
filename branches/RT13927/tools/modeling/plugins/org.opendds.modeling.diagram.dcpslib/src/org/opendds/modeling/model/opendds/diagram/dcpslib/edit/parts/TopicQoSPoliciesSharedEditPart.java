@@ -14,25 +14,24 @@ import org.eclipse.gmf.runtime.diagram.ui.editpolicies.EditPolicyRoles;
 import org.eclipse.gmf.runtime.diagram.ui.editpolicies.ResizableCompartmentEditPolicy;
 import org.eclipse.gmf.runtime.notation.View;
 import org.opendds.modeling.model.opendds.OpenDDSPackage;
-import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.policies.SubscriberQoSPoliciesSharedCanonicalEditPolicy;
-import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.policies.SubscriberQoSPoliciesSharedItemSemanticEditPolicy;
+import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.policies.TopicQoSPoliciesSharedCanonicalEditPolicy;
+import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.policies.TopicQoSPoliciesSharedItemSemanticEditPolicy;
 import org.opendds.modeling.model.opendds.diagram.dcpslib.part.Messages;
 
 /**
  * @generated
  */
-public class SubscriberQoSPoliciesSharedEditPart extends
-		ListCompartmentEditPart {
+public class TopicQoSPoliciesSharedEditPart extends ListCompartmentEditPart {
 
 	/**
 	 * @generated
 	 */
-	public static final int VISUAL_ID = 7029;
+	public static final int VISUAL_ID = 7033;
 
 	/**
 	 * @generated
 	 */
-	public SubscriberQoSPoliciesSharedEditPart(View view) {
+	public TopicQoSPoliciesSharedEditPart(View view) {
 		super(view);
 	}
 
@@ -47,7 +46,7 @@ public class SubscriberQoSPoliciesSharedEditPart extends
 	 * @generated
 	 */
 	public String getCompartmentName() {
-		return Messages.SubscriberQoSPoliciesSharedEditPart_title;
+		return Messages.TopicQoSPoliciesSharedEditPart_title;
 	}
 
 	/**
@@ -58,13 +57,13 @@ public class SubscriberQoSPoliciesSharedEditPart extends
 		installEditPolicy(EditPolicy.PRIMARY_DRAG_ROLE,
 				new ResizableCompartmentEditPolicy());
 		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
-				new SubscriberQoSPoliciesSharedItemSemanticEditPolicy());
+				new TopicQoSPoliciesSharedItemSemanticEditPolicy());
 		installEditPolicy(EditPolicyRoles.CREATION_ROLE,
 				new CreationEditPolicy());
 		installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE,
 				new DragDropEditPolicy());
 		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE,
-				new SubscriberQoSPoliciesSharedCanonicalEditPolicy());
+				new TopicQoSPoliciesSharedCanonicalEditPolicy());
 	}
 
 	/**
@@ -76,7 +75,7 @@ public class SubscriberQoSPoliciesSharedEditPart extends
 	}
 
 	/**
-	 * Filter out policies that are owned by a DcpsLib.
+	 * Filter out policies that defined in a DcpsLib.
 	 * @generated NOT
 	 */
 	@Override

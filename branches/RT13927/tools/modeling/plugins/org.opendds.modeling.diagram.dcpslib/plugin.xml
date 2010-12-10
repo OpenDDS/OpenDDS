@@ -227,7 +227,7 @@
          <Priority name="Lowest"/>
          <context viewClass="org.eclipse.gmf.runtime.notation.Diagram" semanticHints="OpenDDS DcpsLib"/>
          <context viewClass="org.eclipse.gmf.runtime.notation.Node" semanticHints="2001,2002,2003,3001,3003,3022,3005,3023,3024,3006,3025,3026,3007,3027,3008,3028,3009,3029,3030,3031,3010,3032,3033,3034,3035,3013,3036,3037,3038,3039,3040,3041,3042,3043,3044,3045,3046,3047,3048,3021,3012,3014,3015,3016,3017,3018,3019,3020,3002,3004,3049,3050,3051,3052,3053,3054"/>
-         <context viewClass="org.eclipse.gmf.runtime.notation.Edge" semanticHints="4005,4006"/>
+         <context viewClass="org.eclipse.gmf.runtime.notation.Edge" semanticHints="4005,4006,4007"/>
       </viewProvider>
    </extension>
 
@@ -242,13 +242,13 @@
             <method name="getType()" value="2001,2002,2003,3001,3003,3022,3005,3023,3024,3006,3025,3026,3007,3027,3008,3028,3009,3029,3030,3031,3010,3032,3033,3034,3035,3013,3036,3037,3038,3039,3040,3041,3042,3043,3044,3045,3046,3047,3048,3021,3012,3014,3015,3016,3017,3018,3019,3020,3002,3004,3049,3050,3051,3052,3053,3054"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Edge" id="generated-links">
-            <method name="getType()" value="4005,4006"/>
+            <method name="getType()" value="4005,4006,4007"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-labels">
             <method name="getType()" value="5001,5004,5002,5005,5003,5012,5006,5007,5240,5010,5131,5132,5133,5013,5014,5134,5135,5136,5137,5138,5139,5140,5141,5142,5143,5020,5021,5144,5145,5146,5147,5148,5149,5042,5043,5150,5151,5046,5047,5152,5153,5154,5050,5051,5155,5156,5157,5158,5159,5160,5161,5162,5163,5071,5072,5164,5165,5166,5167,5168,5169,5170,5171,5172,5173,5174,5175,5176,5177,5102,5103,5104,5178,5179,5180,5181,5182,5183,5184,5185,5186,5187,5188,5189,5190,5191,5192,5193,5194,5195,5196,5197,5198,5199,5200,5201,5202,5203,5204,5205,5206,5207,5208,5209,5210,5211,5212,5213,5214,5215,5216,5217,5218,5219,5220,5128,5129,5130,5099,5100,5101,5105,5106,5107,5108,5109,5110,5111,5112,5113,5114,5115,5116,5117,5118,5119,5120,5121,5122,5123,5124,5125,5126,5127,5008,5009,5241,5011,5239,5221,5222,5223,5224,5225,5226,5227,5228,5229,5230,5231,5232,5233,5234,5235,5236,5237,5238"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-compartments">
-            <method name="getType()" value="7001,7008,7011,7009,7012,7014,7015,7016,7017,7018,7019,7020,7021,7022,7023,7024,7025,7026,7027,7028,7010,7013,7029,7030,7031"/>
+            <method name="getType()" value="7001,7008,7011,7009,7012,7014,7015,7016,7017,7018,7019,7020,7021,7022,7023,7024,7025,7026,7027,7028,7010,7013,7029,7030,7031,7032,7033"/>
          </object>
          <context views="generated-diagram,generated-nodes,generated-links,generated-labels,generated-compartments"/>
       </editpartProvider>
@@ -844,6 +844,15 @@
             <param name="semanticHint" value="4006"/>
          </specializationType>
       </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/DCPS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.DomainParticipantDomain_4007"
+               name="%metatype.name.DomainParticipantDomain_4007"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.eclipse.gmf.runtime.emf.type.core.null"/>
+            <param name="semanticHint" value="4007"/>
+         </specializationType>
+      </metamodel>
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.emf.type.core.elementTypeBindings" id="element-types-bindings">
@@ -915,6 +924,7 @@
          <elementType ref="org.opendds.modeling.diagram.dcpslib.TdQosPolicy_3054"/>
          <elementType ref="org.opendds.modeling.diagram.dcpslib.DataReaderTopic_4005"/>
          <elementType ref="org.opendds.modeling.diagram.dcpslib.DataWriterTopic_4006"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DomainParticipantDomain_4007"/>
          <advice ref="org.eclipse.gmf.runtime.diagram.core.advice.notationDepdendents"/>
       </binding>
    </extension>
@@ -1223,8 +1233,58 @@
          </action>
       </objectContribution>
 
+       <!-- Topic -->
+      <objectContribution
+            adaptable="false"
+            id="org.opendds.modeling.diagram.ui.objectContribution.TopicEditPart"
+            objectClass="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.TopicEditPart">
+         <menu 
+            id="TopicInsert" 
+            label="&amp;Add &amp;QoS Policy" 
+            path="additions"> 
+            <separator name="group1"/>
+         </menu>
+         <action
+               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionTopic"
+               enablesFor="1"
+               id="TopicRefQosPolicyAdd"
+               label="Add &amp;reference to library QoS Policy"
+               menubarPath="TopicInsert/group1">
+         </action>
+         <action
+               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionTopic"
+               enablesFor="1"
+               id="org.opendds.modeling.popup.TopicCreateFeatureActionID"
+               label="Add &amp;custom QoS Policy"
+               menubarPath="TopicInsert/group1">
+         </action>
+      </objectContribution>
+
 
     </extension>
+<extension point="org.eclipse.gmf.runtime.common.ui.services.markerNavigationProviders" id="markers-navigation">
+      <?gmfgen generated="true"?>
+      <MarkerNavigationProvider class="org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibMarkerNavigationProvider">
+         <MarkerType name="org.opendds.modeling.diagram.dcpslib.diagnostic"/>
+         <Priority name="Lowest"/>
+      </MarkerNavigationProvider>
+   </extension>
+
+<extension id="diagnostic" name="OpenDDS DcpsLib Plugin problems" point="org.eclipse.core.resources.markers">
+      <?gmfgen generated="true"?>
+      <super type="org.eclipse.core.resources.problemmarker"/>
+      <super type="org.eclipse.gmf.runtime.common.ui.services.marker"/>
+      <persistent value="true"/>
+   </extension>
+<extension id="validationDecoratorProvider" name="ValidationDecorations" point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders">
+      <?gmfgen generated="true"?>
+      <decoratorProvider class="org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibValidationDecoratorProvider">
+         <Priority name="Lowest"/>
+         <object class="org.eclipse.gmf.runtime.diagram.ui.editparts.IPrimaryEditPart(org.eclipse.gmf.runtime.diagram.ui)" id="PRIMARY_VIEW"/>
+         <context decoratorTargets="PRIMARY_VIEW"/>
+      </decoratorProvider>
+   </extension>
+
 
    <!-- optionally, specify keybindings -->
 </plugin>

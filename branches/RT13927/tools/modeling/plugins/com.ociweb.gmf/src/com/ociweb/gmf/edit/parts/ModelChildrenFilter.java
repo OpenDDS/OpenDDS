@@ -61,7 +61,7 @@ public class ModelChildrenFilter {
 	/**
 	 * Filter out children whose owner is of a particular type.
 	 */
-	public static List filterChildrenByOwner(View editPartModel, EClass ownerClass, List children) {
+	public static List filterChildrenByOwner(EClass ownerClass, List children) {
 		List childrenAll = new ArrayList(children);
 		for (Object child: childrenAll) {
 			if (child instanceof View) {
@@ -73,5 +73,23 @@ public class ModelChildrenFilter {
 			}
 		}
 		return children;
+	}
+	
+	/**
+	 * Filter out children that don't have a particular object in their containment tree.
+	 */
+	public static List filterChildrenWithObjectNotInContainmentTree(EObject container, List children) {
+		List childrenAll = new ArrayList(children);
+		for (Object child: childrenAll) {
+			if (child instanceof View) {
+				View childView = (View) child;
+				EObject childElement = childView.getElement();
+				if (! com.ociweb.emf.util.ObjectsFinder.hasObjectInContainmentTree(childElement, container)) {
+					children.remove(child);
+				}
+			}
+		}
+		return children;
+		
 	}
 }
