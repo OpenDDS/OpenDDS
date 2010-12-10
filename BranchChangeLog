@@ -1,10 +1,43 @@
+Fri Dec 10 20:04:37 UTC 2010  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * [r3934] 2010-12-10 19:59  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedModelFile.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGeneratorFactory.java:
+
+          Migrating the previous code generation implementation into the
+          generated editor for the code generation specification meta-model.
+
+        * [r3927] 2010-12-10 17:57  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditorPlugin.java[DEL]:
+
+          Remove accidentally added generated file with no customization.
+
+        * [r3926] 2010-12-10 17:55  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
+
+          Updated default values in meta-model.
+          Switched from using Java default initial values to model initial values.
+          Added serialization options to force defaults to editor save operation.
+
+        * [r3924] 2010-12-10 17:15  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditorPlugin.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
+
+          Generate a skeleton model when creating a new one.
+          Enable serialization of default values.
+
 Fri Dec 10 19:26:16 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
         * tools/modeling/plugins/org.opendds.modeling.model/model/DCPS.ecore:
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
 
-	  Added copyFromTopicQos boolean to DataReaderWriter.
+          Added copyFromTopicQos boolean to DataReaderWriter.
 
 Fri Dec 10 19:11:41 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
