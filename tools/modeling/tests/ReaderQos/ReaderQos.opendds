@@ -3,12 +3,12 @@
   <dcpsLib xmi:id="_XmyasPDvEd-I4rwicuuPOw">
     <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="" domainId="42"/>
     <participants xmi:id="_esFCYPDvEd-I4rwicuuPOw" name="part1" domain="_bs2RIPDvEd-I4rwicuuPOw" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" user_data="_X64DcAJKEeCBAfl9GiYbGg">
-      <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" group_data="_os3bUAKJEeCwwtlMwl8TGw" presentation="_wwhIsAKJEeCwwtlMwl8TGw" transportId="1">
-        <writers xsi:type="opendds:dataWriter" xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" deadline="_uvsboALlEeCRmKs-7z8NWA" destination_order="_2mVAsALlEeCRmKs-7z8NWA" durability="_BoO1oALrEeCRmKs-7z8NWA" history="_VML9cALrEeCRmKs-7z8NWA" latency_budget="_CeUPoAMYEeCrTdheTycPFA" liveliness="_zAukQALrEeCRmKs-7z8NWA" reliability="_n1lhgALrEeCRmKs-7z8NWA" resource_limits="_Y8bbcAMYEeCrTdheTycPFA" user_data="_X64DcAJKEeCBAfl9GiYbGg" durability_service="_5tsHgAMXEeCrTdheTycPFA" transport_priority="_qJC4cAMYEeCrTdheTycPFA" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+      <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" group_data="_os3bUAKJEeCwwtlMwl8TGw" presentation="_wwhIsAKJEeCwwtlMwl8TGw" partition="_2V9HMAKJEeCwwtlMwl8TGw" transportId="1">
+        <writers xsi:type="opendds:dataWriter" xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" deadline="_uvsboALlEeCRmKs-7z8NWA" destination_order="_2mVAsALlEeCRmKs-7z8NWA" history="_VML9cALrEeCRmKs-7z8NWA" liveliness="_zAukQALrEeCRmKs-7z8NWA" reliability="_n1lhgALrEeCRmKs-7z8NWA" resource_limits="_Y8bbcAMYEeCrTdheTycPFA" user_data="_X64DcAJKEeCBAfl9GiYbGg" transport_priority="_qJC4cAMYEeCrTdheTycPFA" lifespan="_JIkhIAMYEeCrTdheTycPFA" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </publishers>
     </participants>
     <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
-      <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportId="3">
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" group_data="_os3bUAKJEeCwwtlMwl8TGw" presentation="_wwhIsAKJEeCwwtlMwl8TGw" partition="_WR3isQQVEeCsYqJtvYWomQ" transportId="3">
         <readers xsi:type="opendds:dataReader" xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" deadline="_uvsboALlEeCRmKs-7z8NWA" destination_order="_2mVAsALlEeCRmKs-7z8NWA" history="_VML9cALrEeCRmKs-7z8NWA" liveliness="_zAukQALrEeCRmKs-7z8NWA" reliability="_n1lhgALrEeCRmKs-7z8NWA" resource_limits="_Y8bbcAMYEeCrTdheTycPFA" user_data="_X64DcAJKEeCBAfl9GiYbGg" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </subscribers>
     </participants>
@@ -42,8 +42,11 @@
     <policies xsi:type="opendds:lifespanQosPolicy" xmi:id="_JIkhIAMYEeCrTdheTycPFA"/>
     <policies xsi:type="opendds:rlQosPolicy" xmi:id="_Y8bbcAMYEeCrTdheTycPFA" name="limited" max_instances="100" max_samples="1000" max_samples_per_instance="100"/>
     <policies xsi:type="opendds:tpQosPolicy" xmi:id="_qJC4cAMYEeCrTdheTycPFA" name="high" value="3"/>
-    <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_OL6VkAPQEeCnzJvb4SFtdA" name="ten" autopurge_nowriter_sample_delay="10"/>
-    <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_0B5DQAPQEeCnzJvb4SFtdA" name="min_seven" minimum_separation="7"/>
+    <policies xsi:type="opendds:partitionQosPolicy" xmi:id="_WR3isQQVEeCsYqJtvYWomQ" name="all">
+      <names>*</names>
+    </policies>
+    <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_o9T74AQaEeCsYqJtvYWomQ" name="nine" autopurge_nowriter_sample_delay="9"/>
+    <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_NdzdUAQbEeCsYqJtvYWomQ" name="tbf_8" minimum_separation="8"/>
   </dcpsLib>
   <dataLib xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data1">
     <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw" name="Message" isDcpsDataType="true">
