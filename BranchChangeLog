@@ -1,3 +1,9 @@
+Fri Dec 10 17:05:10 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/.classpath:
+
+          Added .classpath as we had to do for org.opendds.modeling.model.editor.
+
 Fri Dec 10 16:55:40 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
