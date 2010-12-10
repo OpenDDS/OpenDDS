@@ -7,20 +7,13 @@
 package org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation;
 
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.emf.common.CommonPlugin;
-
 import org.eclipse.emf.common.util.URI;
-
-import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EClassifier;
 
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -58,8 +51,14 @@ import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
+import org.opendds.modeling.sdk.model.GeneratorSpecification.CodeGen;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorFactory;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorPackage;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Instance;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Instances;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.ModelFile;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.TargetDir;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.TransportOffset;
 
 
 import org.eclipse.core.runtime.Path;
@@ -139,14 +138,6 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	protected IWorkbench workbench;
 
 	/**
-	 * Caches the names of the types that can be created as the root object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected List<String> initialObjectNames;
-
-	/**
 	 * This just records the information.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -160,28 +151,6 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	}
 
 	/**
-	 * Returns the names of the types that can be created as the root object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected Collection<String> getInitialObjectNames() {
-		if (initialObjectNames == null) {
-			initialObjectNames = new ArrayList<String>();
-			for (EClassifier eClassifier : generatorPackage.getEClassifiers()) {
-				if (eClassifier instanceof EClass) {
-					EClass eClass = (EClass)eClassifier;
-					if (!eClass.isAbstract()) {
-						initialObjectNames.add(eClass.getName());
-					}
-				}
-			}
-			Collections.sort(initialObjectNames, CommonPlugin.INSTANCE.getComparator());
-		}
-		return initialObjectNames;
-	}
-
-	/**
 	 * Create a new model.
 	 * <!-- begin-user-doc -->
 	 * These documents are always rooted with a "Code Gen" element.
@@ -189,10 +158,33 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	 * @generated NOT
 	 */
 	protected EObject createInitialModel() {
-		String name = "CodeGen";
-		EClass eClass = (EClass)generatorPackage.getEClassifier(name);
-		EObject rootObject = generatorFactory.create(eClass);
-		return rootObject;
+		CodeGen codeGen = generatorFactory.createCodeGen();
+		
+		ModelFile modelFile = generatorFactory.createModelFile();
+		// TODO populate the initial value from the wizard if selected.
+		String initialModelfile = "<none>";
+		modelFile.setName(initialModelfile);
+		codeGen.setSource(modelFile);
+
+		TargetDir targetDir = generatorFactory.createTargetDir();
+		// TODO populate the initial value from the wizard if selected.
+		String initialTargetdir = "<none>";
+		targetDir.setName(initialTargetdir);
+		codeGen.setTarget(targetDir);
+
+		Instances instances = generatorFactory.createInstances();
+		codeGen.setInstances(instances);
+		
+		Instance instance = generatorFactory.createInstance();
+		instance.setName("default");
+		
+		TransportOffset transportOffset = generatorFactory.createTransportOffset();
+		transportOffset.setValue(0);
+		instance.setTransportOffset(transportOffset);
+
+		instances.getInstance().add(instance);
+		
+		return codeGen;
 	}
 
 	/**
@@ -238,6 +230,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 							// Save the contents of the resource to the file system.
 							//
 							Map<Object, Object> options = new HashMap<Object, Object>();
+							options.put(XMLResource.OPTION_KEEP_DEFAULT_CONTENT, Boolean.TRUE);
 							options.put(XMLResource.OPTION_ENCODING, "UTF-8");
 							resource.save(options);
 						}
@@ -362,6 +355,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 				//
 				IResource selectedResource = (IResource)selectedElement;
 				if (selectedResource.getType() == IResource.FILE) {
+					IFile selectedFile = (IFile)selectedResource;
 					selectedResource = selectedResource.getParent();
 				}
 
