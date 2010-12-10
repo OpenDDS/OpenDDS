@@ -685,8 +685,6 @@ Elements::Data::copySubscriptionQos(
   <xsl:for-each select="$reffed-policies">
     <xsl:variable name="policy-type" select="@xsi:type"/>
 
-<xsl:message>reffed policy <xsl:value-of select="@name"/>
-</xsl:message>
     <!-- lookup the field name for the current policy type. -->
     <xsl:variable name="field">
       <xsl:for-each select="$lut-policies"> <!-- Change context for lookup -->
@@ -720,16 +718,12 @@ Elements::Data::copySubscriptionQos(
 
         </xsl:when>
         <xsl:otherwise>
-<xsl:message>  otherwise for qos attribute <xsl:value-of select="name()"/>
-</xsl:message>
           <xsl:variable name="suffix-attr-name" select="concat(name(), '_suffix')"/>
           <xsl:variable name="suffix">
             <xsl:for-each select="$lut-policies"> <!-- Change context for lookup -->
               <xsl:value-of select="key('lut-qos-field', $policy-type)/@*[name() = $suffix-attr-name]"/>
             </xsl:for-each>
           </xsl:variable>
-<xsl:message>  suffix <xsl:value-of select="$suffix"/>
-</xsl:message>
           
           <xsl:value-of select="concat('  ', $base, $field, '.', name(), ' = ')"/>
 
