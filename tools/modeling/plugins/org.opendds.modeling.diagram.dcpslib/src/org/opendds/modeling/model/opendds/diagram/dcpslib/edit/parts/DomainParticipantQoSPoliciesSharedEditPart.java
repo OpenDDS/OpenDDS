@@ -76,7 +76,7 @@ public class DomainParticipantQoSPoliciesSharedEditPart extends
 	}
 
 	/**
-	 * Filter out policies that are in the same resource as the domain entity.
+	 * Filter out policies that defined in a DcpsLib.
 	 * @generated NOT
 	 */
 	@Override
@@ -87,8 +87,7 @@ public class DomainParticipantQoSPoliciesSharedEditPart extends
 				.getEClassifier("DcpsLib");
 
 		return com.ociweb.gmf.edit.parts.ModelChildrenFilter
-				.filterChildrenByOwner((View) getModel(), dcpsLibClass, super
-						.getModelChildren());
+				.filterChildrenByOwner(dcpsLibClass, super.getModelChildren());
 	}
 
 }

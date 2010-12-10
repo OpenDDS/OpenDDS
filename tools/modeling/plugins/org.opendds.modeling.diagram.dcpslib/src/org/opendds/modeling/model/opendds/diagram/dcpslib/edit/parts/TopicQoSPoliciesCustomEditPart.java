@@ -4,8 +4,6 @@
 package org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts;
 
 import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gmf.runtime.diagram.ui.editparts.ListCompartmentEditPart;
 import org.eclipse.gmf.runtime.diagram.ui.editpolicies.CreationEditPolicy;
@@ -13,26 +11,24 @@ import org.eclipse.gmf.runtime.diagram.ui.editpolicies.DragDropEditPolicy;
 import org.eclipse.gmf.runtime.diagram.ui.editpolicies.EditPolicyRoles;
 import org.eclipse.gmf.runtime.diagram.ui.editpolicies.ResizableCompartmentEditPolicy;
 import org.eclipse.gmf.runtime.notation.View;
-import org.opendds.modeling.model.opendds.OpenDDSPackage;
-import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.policies.SubscriberQoSPoliciesSharedCanonicalEditPolicy;
-import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.policies.SubscriberQoSPoliciesSharedItemSemanticEditPolicy;
+import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.policies.TopicQoSPoliciesCustomCanonicalEditPolicy;
+import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.policies.TopicQoSPoliciesCustomItemSemanticEditPolicy;
 import org.opendds.modeling.model.opendds.diagram.dcpslib.part.Messages;
 
 /**
  * @generated
  */
-public class SubscriberQoSPoliciesSharedEditPart extends
-		ListCompartmentEditPart {
+public class TopicQoSPoliciesCustomEditPart extends ListCompartmentEditPart {
 
 	/**
 	 * @generated
 	 */
-	public static final int VISUAL_ID = 7029;
+	public static final int VISUAL_ID = 7032;
 
 	/**
 	 * @generated
 	 */
-	public SubscriberQoSPoliciesSharedEditPart(View view) {
+	public TopicQoSPoliciesCustomEditPart(View view) {
 		super(view);
 	}
 
@@ -47,7 +43,7 @@ public class SubscriberQoSPoliciesSharedEditPart extends
 	 * @generated
 	 */
 	public String getCompartmentName() {
-		return Messages.SubscriberQoSPoliciesSharedEditPart_title;
+		return Messages.TopicQoSPoliciesCustomEditPart_title;
 	}
 
 	/**
@@ -58,13 +54,13 @@ public class SubscriberQoSPoliciesSharedEditPart extends
 		installEditPolicy(EditPolicy.PRIMARY_DRAG_ROLE,
 				new ResizableCompartmentEditPolicy());
 		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
-				new SubscriberQoSPoliciesSharedItemSemanticEditPolicy());
+				new TopicQoSPoliciesCustomItemSemanticEditPolicy());
 		installEditPolicy(EditPolicyRoles.CREATION_ROLE,
 				new CreationEditPolicy());
 		installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE,
 				new DragDropEditPolicy());
 		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE,
-				new SubscriberQoSPoliciesSharedCanonicalEditPolicy());
+				new TopicQoSPoliciesCustomCanonicalEditPolicy());
 	}
 
 	/**
@@ -76,18 +72,16 @@ public class SubscriberQoSPoliciesSharedEditPart extends
 	}
 
 	/**
-	 * Filter out policies that are owned by a DcpsLib.
+	 * Filter out policies that are in different resources.
 	 * @generated NOT
 	 */
 	@Override
 	protected java.util.List getModelChildren() {
-		EPackage dcpsLibsPackage = EPackage.Registry.INSTANCE
-				.getEPackage(OpenDDSPackage.eNS_URI);
-		EClass dcpsLibClass = (EClass) dcpsLibsPackage
-				.getEClassifier("DcpsLib");
-
+		org.eclipse.emf.ecore.EObject dcpsLib = ((View) getModel())
+				.getElement().eContainer();
 		return com.ociweb.gmf.edit.parts.ModelChildrenFilter
-				.filterChildrenByOwner(dcpsLibClass, super.getModelChildren());
+				.filterChildrenWithObjectNotInContainmentTree(dcpsLib, super
+						.getModelChildren());
 	}
 
 }

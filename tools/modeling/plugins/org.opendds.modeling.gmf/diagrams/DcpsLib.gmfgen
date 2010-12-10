@@ -12,7 +12,9 @@
       itemSemanticEditPolicyClassName="DcpsLibItemSemanticEditPolicy"
       canonicalEditPolicyClassName="DcpsLibCanonicalEditPolicy"
       iconProviderPriority="Low"
-      validationProviderPriority="Low">
+      validationProviderPriority="Low"
+      validationEnabled="true"
+      validationDecorators="true">
     <diagramRunTimeClass
         href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Diagram"/>
     <elementType
@@ -189,7 +191,7 @@
         compartments="//@diagram/@compartments.8"
         graphicalNodeEditPolicyClassName="DeadlineQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="DeadlineQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -342,7 +344,7 @@
         canonicalEditPolicyClassName="DestinationOrderQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DestinationOrderQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="DestinationOrderQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -427,7 +429,7 @@
         compartments="//@diagram/@compartments.9"
         graphicalNodeEditPolicyClassName="DsQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="DsQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.25">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -680,7 +682,7 @@
         canonicalEditPolicyClassName="HistoryQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="HistoryQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="HistoryQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -787,7 +789,7 @@
         compartments="//@diagram/@compartments.10"
         graphicalNodeEditPolicyClassName="LbQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="LbQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -942,7 +944,7 @@
         compartments="//@diagram/@compartments.11"
         graphicalNodeEditPolicyClassName="LifespanQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="LifespanQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.25">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1097,7 +1099,7 @@
         compartments="//@diagram/@compartments.12"
         graphicalNodeEditPolicyClassName="LivelinessQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="LivelinessQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1356,7 +1358,7 @@
         canonicalEditPolicyClassName="OwnershipQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="OwnershipQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="OwnershipQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1442,7 +1444,7 @@
         compartments="//@diagram/@compartments.13"
         graphicalNodeEditPolicyClassName="ReliabilityQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="ReliabilityQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1616,7 +1618,7 @@
         canonicalEditPolicyClassName="RlQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="RlQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="RlQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1743,7 +1745,7 @@
         canonicalEditPolicyClassName="TpQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TpQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="TpQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.25">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1913,7 +1915,7 @@
         canonicalEditPolicyClassName="DurabilityQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DurabilityQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="DurabilityQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2084,7 +2086,7 @@
         compartments="//@diagram/@compartments.14"
         graphicalNodeEditPolicyClassName="DeadlineQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="DeadlineQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2170,7 +2172,7 @@
         canonicalEditPolicyClassName="DestinationOrderQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DestinationOrderQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="DestinationOrderQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2255,7 +2257,7 @@
         compartments="//@diagram/@compartments.15"
         graphicalNodeEditPolicyClassName="DsQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="DsQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.26">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2441,7 +2443,7 @@
         canonicalEditPolicyClassName="DurabilityQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DurabilityQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="DurabilityQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2526,7 +2528,7 @@
         canonicalEditPolicyClassName="HistoryQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="HistoryQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="HistoryQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2633,7 +2635,7 @@
         compartments="//@diagram/@compartments.16"
         graphicalNodeEditPolicyClassName="LbQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="LbQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2721,7 +2723,7 @@
         compartments="//@diagram/@compartments.17"
         graphicalNodeEditPolicyClassName="LifespanQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="LifespanQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.26">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2809,7 +2811,7 @@
         compartments="//@diagram/@compartments.18"
         graphicalNodeEditPolicyClassName="LivelinessQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="LivelinessQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -3001,7 +3003,7 @@
         canonicalEditPolicyClassName="OwnershipQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="OwnershipQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="OwnershipQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -3087,7 +3089,7 @@
         compartments="//@diagram/@compartments.19"
         graphicalNodeEditPolicyClassName="ReliabilityQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="ReliabilityQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -3194,7 +3196,7 @@
         canonicalEditPolicyClassName="RlQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="RlQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="RlQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -3321,7 +3323,7 @@
         canonicalEditPolicyClassName="TpQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TpQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="TpQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.26">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -4541,7 +4543,7 @@
         canonicalEditPolicyClassName="TdQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TdQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="TdQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.23">
+        containers="//@diagram/@compartments.23 //@diagram/@compartments.25">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -4796,7 +4798,7 @@
         canonicalEditPolicyClassName="TdQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TdQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="TdQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.24">
+        containers="//@diagram/@compartments.24 //@diagram/@compartments.26">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -5011,6 +5013,7 @@
         editPartClassName="TopicEditPart"
         itemSemanticEditPolicyClassName="TopicItemSemanticEditPolicy"
         canonicalEditPolicyClassName="TopicCanonicalEditPolicy"
+        compartments="//@diagram/@compartments.25 //@diagram/@compartments.26"
         graphicalNodeEditPolicyClassName="TopicGraphicalNodeEditPolicy"
         createCommandClassName="TopicCreateCommand">
       <diagramRunTimeClass
@@ -5112,6 +5115,26 @@
           xsi:type="gmfgen:FeatureLinkModelFacet">
         <metaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DataWriter/topic"/>
+      </modelFacet>
+    </links>
+    <links
+        visualID="4007"
+        editPartClassName="DomainParticipantDomainEditPart"
+        itemSemanticEditPolicyClassName="DomainParticipantDomainItemSemanticEditPolicy"
+        createCommandClassName="DomainParticipantDomainCreateCommand"
+        reorientCommandClassName="DomainParticipantDomainReorientCommand">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Edge"/>
+      <elementType
+          xsi:type="gmfgen:SpecializationType"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          className="ClassChildrenFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassChildrenFigure extends org.eclipse.gmf.runtime.draw2d.ui.figures.PolylineConnectionEx {&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassChildrenFigure() {&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#xA;&#x9;&#x9;setTargetDecoration(createTargetDecoration());&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.draw2d.RotatableDecoration createTargetDecoration() {&#xA;&#x9;&#x9;org.eclipse.draw2d.PolylineDecoration df = new org.eclipse.draw2d.PolylineDecoration();&#xA;df.setLineWidth(1);&#xA;&#x9;&#x9;return df;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+      <modelFacet
+          xsi:type="gmfgen:FeatureLinkModelFacet">
+        <metaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DomainParticipant/domain"/>
       </modelFacet>
     </links>
     <compartments
@@ -5482,6 +5505,34 @@
         childNodes="//@diagram/@childNodes.23 //@diagram/@childNodes.24 //@diagram/@childNodes.26 //@diagram/@childNodes.27 //@diagram/@childNodes.28 //@diagram/@childNodes.30 //@diagram/@childNodes.32 //@diagram/@childNodes.50 //@diagram/@childNodes.33 //@diagram/@childNodes.34 //@diagram/@childNodes.51 //@diagram/@childNodes.52 //@diagram/@childNodes.36"
         title="QoS Policies- Shared"
         node="//@diagram/@childNodes.46">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <viewmap
+          xsi:type="gmfgen:FigureViewmap"
+          figureQualifiedClassName="org.eclipse.draw2d.RectangleFigure"/>
+    </compartments>
+    <compartments
+        visualID="7032"
+        editPartClassName="TopicQoSPoliciesCustomEditPart"
+        itemSemanticEditPolicyClassName="TopicQoSPoliciesCustomItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="TopicQoSPoliciesCustomCanonicalEditPolicy"
+        childNodes="//@diagram/@childNodes.2 //@diagram/@childNodes.4 //@diagram/@childNodes.5 //@diagram/@childNodes.21 //@diagram/@childNodes.7 //@diagram/@childNodes.8 //@diagram/@childNodes.10 //@diagram/@childNodes.12 //@diagram/@childNodes.15 //@diagram/@childNodes.16 //@diagram/@childNodes.18 //@diagram/@childNodes.49 //@diagram/@childNodes.19"
+        title="QoS Policies- Custom"
+        node="//@diagram/@topLevelNodes.2">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <viewmap
+          xsi:type="gmfgen:FigureViewmap"
+          figureQualifiedClassName="org.eclipse.draw2d.RectangleFigure"/>
+    </compartments>
+    <compartments
+        visualID="7033"
+        editPartClassName="TopicQoSPoliciesSharedEditPart"
+        itemSemanticEditPolicyClassName="TopicQoSPoliciesSharedItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="TopicQoSPoliciesSharedCanonicalEditPolicy"
+        childNodes="//@diagram/@childNodes.23 //@diagram/@childNodes.24 //@diagram/@childNodes.25 //@diagram/@childNodes.26 //@diagram/@childNodes.27 //@diagram/@childNodes.28 //@diagram/@childNodes.29 //@diagram/@childNodes.30 //@diagram/@childNodes.32 //@diagram/@childNodes.33 //@diagram/@childNodes.34 //@diagram/@childNodes.52 //@diagram/@childNodes.35"
+        title="QoS Policies- Shared"
+        node="//@diagram/@topLevelNodes.2">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <viewmap
@@ -5862,6 +5913,84 @@
         parent="//@diagram"
         child="//@diagram/@topLevelNodes.1"/>
     <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.2"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.4"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.5"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.21"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.7"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.8"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.10"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.12"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.15"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.16"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.18"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.49"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.19"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.23"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.24"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.25"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.26"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.27"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.28"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.29"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.30"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.32"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.33"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.34"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.52"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.35"/>
+    <childReferences
         parent="//@diagram"
         child="//@diagram/@topLevelNodes.2"/>
     <childReferences
@@ -5919,6 +6048,35 @@
     <childReferences
         parent="//@diagram/@childNodes.1"
         child="//@diagram/@links.1"
+        referenceType="out_target"
+        groupName="outgoing links"
+        groupIcon="icons/outgoingLinksNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram"
+        child="//@diagram/@links.2"
+        groupName="links"
+        groupIcon="icons/linksNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@links.2"
+        child="//@diagram/@topLevelNodes.1"
+        referenceType="out_target"
+        groupName="target"
+        groupIcon="icons/linkTargetNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.1"
+        child="//@diagram/@links.2"
+        referenceType="in_source"
+        groupName="incoming links"
+        groupIcon="icons/incomingLinksNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@links.2"
+        child="//@diagram/@topLevelNodes.0"
+        referenceType="in_source"
+        groupName="source"
+        groupIcon="icons/linkSourceNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.0"
+        child="//@diagram/@links.2"
         referenceType="out_target"
         groupName="outgoing links"
         groupIcon="icons/outgoingLinksNavigatorGroup.gif"/>

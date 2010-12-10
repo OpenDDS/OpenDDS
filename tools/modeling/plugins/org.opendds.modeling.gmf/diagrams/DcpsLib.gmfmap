@@ -1863,6 +1863,172 @@
           href="DcpsLib.gmftool#//@palette/@tools.0/@tools.11"/>
       <diagramNode
           href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#Class"/>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.1/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.2/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.13/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.3/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.4/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.5/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.6/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.8/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.9/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.10/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild/@children.1/@ownedChild/@children.0/@ownedChild/@children.11/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.11/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.1"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.1"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.1/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.1"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.2/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.1"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.13/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.1"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.3/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.1"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.4/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.1"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.5/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.1"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.6/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.1"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.8/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.1"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.9/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.1"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.10/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.1"
+          referencedChild="//@nodes.0/@ownedChild/@children.1/@ownedChild/@children.0/@ownedChild/@children.11/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.1"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild/@children.0/@ownedChild/@children.11/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/policies"/>
+      </children>
+      <compartments
+          children="//@nodes.2/@ownedChild/@children.1 //@nodes.2/@ownedChild/@children.0 //@nodes.2/@ownedChild/@children.2 //@nodes.2/@ownedChild/@children.3 //@nodes.2/@ownedChild/@children.4 //@nodes.2/@ownedChild/@children.5 //@nodes.2/@ownedChild/@children.6 //@nodes.2/@ownedChild/@children.8 //@nodes.2/@ownedChild/@children.9 //@nodes.2/@ownedChild/@children.10 //@nodes.2/@ownedChild/@children.11 //@nodes.2/@ownedChild/@children.12 //@nodes.2/@ownedChild/@children.7">
+        <compartment
+            href="QosPolicies.gmfgraph#QoS Policies- Custom"/>
+      </compartments>
+      <compartments
+          children="//@nodes.2/@ownedChild/@children.13 //@nodes.2/@ownedChild/@children.14 //@nodes.2/@ownedChild/@children.15 //@nodes.2/@ownedChild/@children.16 //@nodes.2/@ownedChild/@children.17 //@nodes.2/@ownedChild/@children.18 //@nodes.2/@ownedChild/@children.19 //@nodes.2/@ownedChild/@children.20 //@nodes.2/@ownedChild/@children.21 //@nodes.2/@ownedChild/@children.22 //@nodes.2/@ownedChild/@children.23 //@nodes.2/@ownedChild/@children.24 //@nodes.2/@ownedChild/@children.25">
+        <compartment
+            href="QosPolicies.gmfgraph#QoS Policies- Shared"/>
+      </compartments>
     </ownedChild>
   </nodes>
   <links>
@@ -1884,6 +2050,13 @@
     <linkMetaFeature
         xsi:type="ecore:EReference"
         href="../../org.opendds.modeling.model/model/DCPS.ecore#//DataWriter/topic"/>
+  </links>
+  <links>
+    <diagramLink
+        href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassChildren"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="../../org.opendds.modeling.model/model/DCPS.ecore#//DomainParticipant/domain"/>
   </links>
   <diagram>
     <diagramCanvas
