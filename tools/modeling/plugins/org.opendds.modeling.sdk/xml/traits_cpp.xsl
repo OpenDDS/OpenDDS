@@ -64,7 +64,6 @@ void
 </xsl:template>
 
 <xsl:template match="opendds:transport">
-  <xsl:message>transport </xsl:message>
   <xsl:variable name="type" select="opendds:commonConfig/opendds:transport_type/@value"/>
   <xsl:value-of select="concat('      case ', @key, ':', $newline)"/>
   <xsl:value-of select="concat('        transport_type = &quot;', $type, '&quot;;', $newline)"/>
