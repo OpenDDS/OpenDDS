@@ -53,6 +53,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="reliability" eType="ecore:EClass QoS.ecore#//ReliabilityQosPolicy"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="resource_limits" eType="ecore:EClass QoS.ecore#//ResourceLimitsQosPolicy"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="user_data" eType="ecore:EClass QoS.ecore#//UserDataQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="copyFromTopicQos" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="DataReader" eSuperTypes="#//DataReaderWriter">
     <eStructuralFeatures xsi:type="ecore:EReference" name="reader_data_lifecycle"
