@@ -1,3 +1,19 @@
+Fri Dec 10 20:53:15 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+
+          Support for reader data lifecycle qos.
+
+        * tools/modeling/tests/ReaderQos/ReaderQos.opendds:
+        * tools/modeling/tests/TopicQos/TopQos.opendds:
+
+          Additional test cases for reader data lifecycle and time based
+          filter qos.
+
+        * tools/modeling/tests/setup.pl:
+
+          Additional tests.
+
 Fri Dec 10 20:04:37 UTC 2010  Mike Martinez  <martinez_m@lab.ociweb.com>
 
         * [r3934] 2010-12-10 19:59  martinezm
