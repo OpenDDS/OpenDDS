@@ -134,7 +134,7 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//PresentationQosPolicy/ordered_access"/>
     </genClasses>
     <genClasses ecoreClass="QoS.ecore#//ReaderDataLifecycleQosPolicy">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//ReaderDataLifecycleQosPolicy/autopurge_nowriter_sample_delay"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//ReaderDataLifecycleQosPolicy/autopurge_nowriter_samples_delay"/>
     </genClasses>
     <genClasses ecoreClass="QoS.ecore#//ReliabilityQosPolicy">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute QoS.ecore#//ReliabilityQosPolicy/kind"/>

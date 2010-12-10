@@ -85,7 +85,7 @@
         defaultValueLiteral="false"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReaderDataLifecycleQosPolicy" eSuperTypes="#//QosPolicy">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="autopurge_nowriter_sample_delay"
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="autopurge_nowriter_samples_delay"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong" defaultValueLiteral="-1"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReliabilityQosPolicy" eSuperTypes="#//QosPolicy">

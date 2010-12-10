@@ -1444,13 +1444,13 @@
                   </labelMappings>
                   <labelMappings
                       xsi:type="gmfmap:FeatureLabelMapping"
-                      viewPattern="autopurge_nowriter_sample_delay: {0}"
+                      viewPattern="autopurge_nowriter_samples_delay: {0}"
                       editorPattern="{0}"
                       editPattern="{0}">
                     <diagramLabel
                         href="QosPolicies.gmfgraph#RdlQosPolicyAutopurge_nowriter_sample_delay"/>
                     <features
-                        href="../../org.opendds.modeling.model/model/QoS.ecore#//ReaderDataLifecycleQosPolicy/autopurge_nowriter_sample_delay"/>
+                        href="../../org.opendds.modeling.model/model/QoS.ecore#//ReaderDataLifecycleQosPolicy/autopurge_nowriter_samples_delay"/>
                   </labelMappings>
                   <diagramNode
                       href="QosPolicies.gmfgraph#RdlQosPolicy"/>
