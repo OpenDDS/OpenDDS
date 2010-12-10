@@ -1,3 +1,31 @@
+Fri Dec 10 19:11:41 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/QoS.ecore:
+
+	  Changed ReaderDataLifecycleQosPolicy::autopurge_nowriter_samples_delay from
+	  type Long to Period.
+	  Added ReaderDataLifecycleQosPolicy::autopurge_disposed_samples_delay of type Period.
+	  Changed TimeBasedFilterQosPolicy::minimum_separation from Long to Period.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.trace:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.trace:
+
+	  Temporarily disable diagram manipulation of
+	  ReaderDataLifecycleQosPolicy::autopurge_nowriter_samples_delay and
+          TimeBasedFilterQosPolicy::minimum_separation until presentation of types
+	  changed from Long to Period.
+
 Fri Dec 10 18:15:39 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
