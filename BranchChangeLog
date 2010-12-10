@@ -1,3 +1,9 @@
+Fri Dec 10 17:16:47 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/TopicQos/TopQos.opendds:
+
+          Added durability service.
+
 Fri Dec 10 17:05:10 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/.classpath:
