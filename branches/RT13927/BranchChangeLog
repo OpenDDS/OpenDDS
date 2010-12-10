@@ -1,3 +1,23 @@
+Fri Dec 10 17:35:48 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/ReaderQos:
+        * tools/modeling/tests/TopicQos:
+
+          set svn:ignore.
+
+        * tools/modeling/tests/MessengerQos:
+        * tools/modeling/tests/MessengerQos/MessengerQos.mpc:
+        * tools/modeling/tests/MessengerQos/MessengerQos.opendds:
+        * tools/modeling/tests/MessengerQos/MessengerQos.opendds_diagram:
+        * tools/modeling/tests/MessengerQos/README:
+        * tools/modeling/tests/MessengerQos/publisher.cpp:
+        * tools/modeling/tests/MessengerQos/run_test.pl:
+        * tools/modeling/tests/MessengerQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerQos/tcp.conf:
+        * tools/modeling/tests/MessengerQos/transports.traits:
+
+          Removed these files.  Covered by other examples.
+
 Fri Dec 10 17:16:47 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/TopicQos/TopQos.opendds:
