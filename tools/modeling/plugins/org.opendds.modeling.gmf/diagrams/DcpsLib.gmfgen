@@ -4443,11 +4443,11 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0"
-            viewPattern="autopurge_nowriter_sample_delay: {0}"
+            viewPattern="autopurge_nowriter_samples_delay: {0}"
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReaderDataLifecycleQosPolicy/autopurge_nowriter_sample_delay"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReaderDataLifecycleQosPolicy/autopurge_nowriter_samples_delay"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -4698,11 +4698,11 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0"
-            viewPattern="autopurge_nowriter_sample_delay: {0}"
+            viewPattern="autopurge_nowriter_samples_delay: {0}"
             editorPattern="{0}"
             editPattern="{0}">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReaderDataLifecycleQosPolicy/autopurge_nowriter_sample_delay"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReaderDataLifecycleQosPolicy/autopurge_nowriter_samples_delay"/>
         </modelFacet>
       </labels>
     </childNodes>
