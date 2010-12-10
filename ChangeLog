@@ -1,3 +1,10 @@
+Fri Dec 10 19:21:45 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Use the actual enum name instead of the typedef alias when a
+          typedef'd enum type is used as a field of a struct.
+
 Mon Dec  6 16:33:31 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/marshal_generator.cpp:

@@ -54,8 +54,10 @@ namespace {
     if (cls & CL_SCALAR) {
       std::string prefix, suffix;
       if (cls & CL_ENUM) {
+        AST_Type* enum_type = field->field_type();
+        unTypeDef(enum_type);
         prefix = "gen_" +
-          dds_generator::scoped_helper(field->field_type()->name(), "_")
+          dds_generator::scoped_helper(enum_type->name(), "_")
           + "_names[";
         suffix = "]";
       }
