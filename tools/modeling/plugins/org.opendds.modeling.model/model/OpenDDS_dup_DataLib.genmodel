@@ -295,6 +295,7 @@
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReaderWriter/reliability"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReaderWriter/resource_limits"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReaderWriter/user_data"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute DCPS.ecore#//DataReaderWriter/copyFromTopicQos"/>
     </genClasses>
     <genClasses ecoreClass="DCPS.ecore#//DataReader">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DCPS.ecore#//DataReader/reader_data_lifecycle"/>

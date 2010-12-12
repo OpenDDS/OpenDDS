@@ -3,13 +3,21 @@
  */
 package org.opendds.modeling.model.opendds.diagram.dcpslib.edit.policies;
 
+import java.util.Iterator;
 import org.eclipse.emf.ecore.EAnnotation;
 import org.eclipse.gef.commands.Command;
+import org.eclipse.gmf.runtime.common.core.command.ICompositeCommand;
 import org.eclipse.gmf.runtime.diagram.core.commands.DeleteCommand;
 import org.eclipse.gmf.runtime.emf.commands.core.command.CompositeTransactionalCommand;
 import org.eclipse.gmf.runtime.emf.type.core.commands.DestroyElementCommand;
 import org.eclipse.gmf.runtime.emf.type.core.requests.DestroyElementRequest;
+import org.eclipse.gmf.runtime.notation.Node;
 import org.eclipse.gmf.runtime.notation.View;
+import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.Period7EditPart;
+import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.Period8EditPart;
+import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.RdlQosPolicyAutopurge_disposed_samples_delay2EditPart;
+import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.RdlQosPolicyAutopurge_nowriter_samples_delay2EditPart;
+import org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibVisualIDRegistry;
 import org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibElementTypes;
 
 /**
@@ -39,5 +47,47 @@ public class RdlQosPolicy2ItemSemanticEditPolicy extends
 				.destroyElementRequestToDestroyReferenceCommand(req, getHost(),
 						getEditingDomain()));
 		return getGEFWrapper(cmd);
+	}
+
+	/**
+	 * @generated
+	 */
+	private void addDestroyChildNodesCommand(ICompositeCommand cmd) {
+		View view = (View) getHost().getModel();
+		for (Iterator nit = view.getChildren().iterator(); nit.hasNext();) {
+			Node node = (Node) nit.next();
+			switch (OpenDDSDcpsLibVisualIDRegistry.getVisualID(node)) {
+			case RdlQosPolicyAutopurge_disposed_samples_delay2EditPart.VISUAL_ID:
+				for (Iterator cit = node.getChildren().iterator(); cit
+						.hasNext();) {
+					Node cnode = (Node) cit.next();
+					switch (OpenDDSDcpsLibVisualIDRegistry.getVisualID(cnode)) {
+					case Period7EditPart.VISUAL_ID:
+						cmd.add(new DestroyElementCommand(
+								new DestroyElementRequest(getEditingDomain(),
+										cnode.getElement(), false))); // directlyOwned: true
+						// don't need explicit deletion of cnode as parent's view deletion would clean child views as well 
+						// cmd.add(new org.eclipse.gmf.runtime.diagram.core.commands.DeleteCommand(getEditingDomain(), cnode));
+						break;
+					}
+				}
+				break;
+			case RdlQosPolicyAutopurge_nowriter_samples_delay2EditPart.VISUAL_ID:
+				for (Iterator cit = node.getChildren().iterator(); cit
+						.hasNext();) {
+					Node cnode = (Node) cit.next();
+					switch (OpenDDSDcpsLibVisualIDRegistry.getVisualID(cnode)) {
+					case Period8EditPart.VISUAL_ID:
+						cmd.add(new DestroyElementCommand(
+								new DestroyElementRequest(getEditingDomain(),
+										cnode.getElement(), false))); // directlyOwned: true
+						// don't need explicit deletion of cnode as parent's view deletion would clean child views as well 
+						// cmd.add(new org.eclipse.gmf.runtime.diagram.core.commands.DeleteCommand(getEditingDomain(), cnode));
+						break;
+					}
+				}
+				break;
+			}
+		}
 	}
 }

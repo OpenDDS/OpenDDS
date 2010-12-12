@@ -100,6 +100,9 @@
     <nodeLabelTraces
         visualID="5131"
         queryText="true"/>
+    <nodeLabelTraces
+        visualID="5242"
+        queryText="true"/>
     <compartmentTraces
         visualID="7015"
         queryText="true"/>
@@ -115,6 +118,9 @@
         queryText="true"/>
     <nodeLabelTraces
         visualID="5239"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5249"
         queryText="true"/>
     <compartmentTraces
         visualID="7030"
@@ -739,6 +745,12 @@
     <nodeLabelTraces
         visualID="5222"
         queryText="true"/>
+    <compartmentTraces
+        visualID="7034"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7035"
+        queryText="true"/>
   </childNodeTraces>
   <childNodeTraces
       visualID="3050"
@@ -748,6 +760,9 @@
         queryText="true"/>
     <nodeLabelTraces
         visualID="5225"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7036"
         queryText="true"/>
   </childNodeTraces>
   <childNodeTraces
@@ -772,6 +787,12 @@
     <nodeLabelTraces
         visualID="5231"
         queryText="true"/>
+    <compartmentTraces
+        visualID="7037"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7038"
+        queryText="true"/>
   </childNodeTraces>
   <childNodeTraces
       visualID="3053"
@@ -781,6 +802,9 @@
         queryText="true"/>
     <nodeLabelTraces
         visualID="5234"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7039"
         queryText="true"/>
   </childNodeTraces>
   <childNodeTraces
@@ -794,6 +818,36 @@
         queryText="true"/>
     <nodeLabelTraces
         visualID="5238"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3055"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Enumerations/1.0' and _eClass_.name = 'Period') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/QoS/1.0' and _eClass_.name = 'ReaderDataLifecycleQosPolicy') and _containmentMF_.name = 'autopurge_disposed_samples_delay')">
+    <nodeLabelTraces
+        visualID="5243"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5244"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3056"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Enumerations/1.0' and _eClass_.name = 'Period') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/QoS/1.0' and _eClass_.name = 'ReaderDataLifecycleQosPolicy') and _containmentMF_.name = 'autopurge_nowriter_samples_delay')">
+    <nodeLabelTraces
+        visualID="5245"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5246"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3057"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Enumerations/1.0' and _eClass_.name = 'Period') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/QoS/1.0' and _eClass_.name = 'TimeBasedFilterQosPolicy') and _containmentMF_.name = 'minimum_separation')">
+    <nodeLabelTraces
+        visualID="5247"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5248"
         queryText="true"/>
   </childNodeTraces>
   <linkTraces

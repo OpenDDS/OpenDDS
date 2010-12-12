@@ -902,6 +902,57 @@
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//rdlQosPolicy"/>
+      <domainInitializer
+          xsi:type="gmfmap:FeatureSeqInitializer">
+        <initializers
+            xsi:type="gmfmap:ReferenceNewElementSpec">
+          <feature
+              xsi:type="ecore:EReference"
+              href="../../org.opendds.modeling.model/model/QoS.ecore#//ReaderDataLifecycleQosPolicy/autopurge_disposed_samples_delay"/>
+          <newElementInitializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
+              <value
+                  body="0"/>
+            </initializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
+              <value
+                  body="0"/>
+            </initializers>
+          </newElementInitializers>
+        </initializers>
+        <initializers
+            xsi:type="gmfmap:ReferenceNewElementSpec">
+          <feature
+              xsi:type="ecore:EReference"
+              href="../../org.opendds.modeling.model/model/QoS.ecore#//ReaderDataLifecycleQosPolicy/autopurge_nowriter_samples_delay"/>
+          <newElementInitializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
+              <value
+                  body="0"/>
+            </initializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
+              <value
+                  body="0"/>
+            </initializers>
+          </newElementInitializers>
+        </initializers>
+      </domainInitializer>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"
@@ -923,6 +974,28 @@
           href="PolicyLib.gmftool#//@palette/@tools.0/@tools.14"/>
       <diagramNode
           href="QosPolicies.gmfgraph#RdlQosPolicy"/>
+      <children
+          compartment="//@nodes.14/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/QoS.ecore#//ReaderDataLifecycleQosPolicy/autopurge_disposed_samples_delay"/>
+      </children>
+      <children
+          compartment="//@nodes.14/@ownedChild/@compartments.1"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/QoS.ecore#//ReaderDataLifecycleQosPolicy/autopurge_nowriter_samples_delay"/>
+      </children>
+      <compartments
+          children="//@nodes.14/@ownedChild/@children.0">
+        <compartment
+            href="QosPolicies.gmfgraph#autopurge_disposed_samples_delay"/>
+      </compartments>
+      <compartments
+          children="//@nodes.14/@ownedChild/@children.1">
+        <compartment
+            href="QosPolicies.gmfgraph#autopurge_nowriter_samples_delay"/>
+      </compartments>
     </ownedChild>
   </nodes>
   <nodes>
@@ -1092,6 +1165,33 @@
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//tbfQosPolicy"/>
+      <domainInitializer
+          xsi:type="gmfmap:FeatureSeqInitializer">
+        <initializers
+            xsi:type="gmfmap:ReferenceNewElementSpec">
+          <feature
+              xsi:type="ecore:EReference"
+              href="../../org.opendds.modeling.model/model/QoS.ecore#//TimeBasedFilterQosPolicy/minimum_separation"/>
+          <newElementInitializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
+              <value
+                  body="0"/>
+            </initializers>
+            <initializers
+                xsi:type="gmfmap:FeatureValueSpec">
+              <feature
+                  xsi:type="ecore:EAttribute"
+                  href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
+              <value
+                  body="0"/>
+            </initializers>
+          </newElementInitializers>
+        </initializers>
+      </domainInitializer>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"
@@ -1113,6 +1213,17 @@
           href="PolicyLib.gmftool#//@palette/@tools.0/@tools.17"/>
       <diagramNode
           href="QosPolicies.gmfgraph#TbfQosPolicy"/>
+      <children
+          compartment="//@nodes.17/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild/@children.0/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/QoS.ecore#//TimeBasedFilterQosPolicy/minimum_separation"/>
+      </children>
+      <compartments
+          children="//@nodes.17/@ownedChild/@children.0">
+        <compartment
+            href="QosPolicies.gmfgraph#minimum_separation"/>
+      </compartments>
     </ownedChild>
   </nodes>
   <nodes>
