@@ -44,10 +44,42 @@
       <accessors
           figure="//@figures.0/@descriptors.0/@actualFigure/@children.2"/>
     </descriptors>
+    <descriptors
+        name="DataReaderWriterFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Rectangle"
+          name="DataReaderWriterFigure">
+        <layout
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"
+            forceSingleLine="true"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="DataReaderWriterStereotypeFigure"
+            text="&lt;...>"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="DataReaderWriterNameFigure"
+            text="&lt;...>"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="DataReaderWriterCopyFromTopicQosFigure"
+            text=""/>
+      </actualFigure>
+      <accessors
+          figure="//@figures.0/@descriptors.1/@actualFigure/@children.0"/>
+      <accessors
+          figure="//@figures.0/@descriptors.1/@actualFigure/@children.1"/>
+      <accessors
+          figure="//@figures.0/@descriptors.1/@actualFigure/@children.2"/>
+    </descriptors>
   </figures>
   <nodes
       name="PubSub"
       figure="PubSubFigure"/>
+  <nodes
+      name="DataReaderWriter"
+      figure="DataReaderWriterFigure"/>
   <compartments
       name="DataWriters"
       collapsible="true"
@@ -76,4 +108,20 @@
       figure="PubSubFigure"
       elementIcon="false"
       accessor="//@figures.0/@descriptors.0/@accessors.2"/>
+  <labels
+      name="DataReaderWriterStereotype"
+      figure="DataReaderWriterFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.1/@accessors.0"/>
+  <labels
+      name="DataReaderWriterName"
+      accessor="//@figures.0/@descriptors.1/@accessors.1">
+    <figure
+        href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementFigure"/>
+  </labels>
+  <labels
+      name="DataReaderWriterCopyFromTopicQos"
+      figure="DataReaderWriterFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.1/@accessors.2"/>
 </gmfgraph:Canvas>

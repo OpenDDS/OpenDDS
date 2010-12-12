@@ -131,12 +131,8 @@
       <viewmap
           xsi:type="gmfgen:InnerClassViewmap"
           layoutType="TOOLBAR_LAYOUT"
-          className="StereotypedFigure"
-          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class StereotypedFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public StereotypedFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;this.setBackgroundColor(THIS_BACK&#xA;);&#xA;this.setBorder(new org.eclipse.draw2d.MarginBorder(getMapMode().DPtoLP(0)&#xA;, getMapMode().DPtoLP(5)&#xA;, getMapMode().DPtoLP(0)&#xA;, getMapMode().DPtoLP(0)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureStereotypedStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureStereotypedNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedNameFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;/**&#xA; * @generated&#xA; */&#xA;static final org.eclipse.swt.graphics.Color THIS_BACK = new org.eclipse.swt.graphics.Color(null, 240, 240, 240);&#xA;&#xA;">
-        <attributes
-            xsi:type="gmfgen:StyleAttributes"
-            fixedBackground="true"/>
-      </viewmap>
+          className="DataReaderWriterFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class DataReaderWriterFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDataReaderWriterStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDataReaderWriterNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDataReaderWriterCopyFromTopicQosFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public DataReaderWriterFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureDataReaderWriterStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDataReaderWriterStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDataReaderWriterStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureDataReaderWriterNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDataReaderWriterNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDataReaderWriterNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureDataReaderWriterCopyFromTopicQosFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDataReaderWriterCopyFromTopicQosFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureDataReaderWriterCopyFromTopicQosFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDataReaderWriterStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureDataReaderWriterStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDataReaderWriterNameFigure() {&#xA;&#x9;&#x9;return fFigureDataReaderWriterNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDataReaderWriterCopyFromTopicQosFigure() {&#xA;&#x9;&#x9;return fFigureDataReaderWriterCopyFromTopicQosFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/dataWriter"/>
@@ -154,7 +150,7 @@
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
             xsi:type="gmfgen:ParentAssignedViewmap"
-            getterName="getFigureStereotypedNameFigure"
+            getterName="getFigureDataReaderWriterNameFigure"
             figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
@@ -172,7 +168,7 @@
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
             xsi:type="gmfgen:ParentAssignedViewmap"
-            getterName="getFigureStereotypedStereotypeFigure"
+            getterName="getFigureDataReaderWriterStereotypeFigure"
             figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
@@ -180,6 +176,26 @@
             viewPattern="«dataWriter»">
           <metaFeatures
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5242"
+          editPartClassName="DataWriterCopyFromTopicQosEditPart"
+          itemSemanticEditPolicyClassName="DataWriterCopyFromTopicQosItemSemanticEditPolicy">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureDataReaderWriterCopyFromTopicQosFigure"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="copyFromTopicQos: {0}"
+            editorPattern="{0}"
+            editPattern="{0}">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DataReaderWriter/copyFromTopicQos"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -191,7 +207,7 @@
         compartments="//@diagram/@compartments.8"
         graphicalNodeEditPolicyClassName="DeadlineQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="DeadlineQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -344,7 +360,7 @@
         canonicalEditPolicyClassName="DestinationOrderQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DestinationOrderQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="DestinationOrderQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -429,7 +445,7 @@
         compartments="//@diagram/@compartments.9"
         graphicalNodeEditPolicyClassName="DsQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="DsQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.25">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.31">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -682,7 +698,7 @@
         canonicalEditPolicyClassName="HistoryQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="HistoryQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="HistoryQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -789,7 +805,7 @@
         compartments="//@diagram/@compartments.10"
         graphicalNodeEditPolicyClassName="LbQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="LbQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -944,7 +960,7 @@
         compartments="//@diagram/@compartments.11"
         graphicalNodeEditPolicyClassName="LifespanQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="LifespanQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.25">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.31">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1099,7 +1115,7 @@
         compartments="//@diagram/@compartments.12"
         graphicalNodeEditPolicyClassName="LivelinessQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="LivelinessQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1358,7 +1374,7 @@
         canonicalEditPolicyClassName="OwnershipQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="OwnershipQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="OwnershipQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1444,7 +1460,7 @@
         compartments="//@diagram/@compartments.13"
         graphicalNodeEditPolicyClassName="ReliabilityQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="ReliabilityQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1618,7 +1634,7 @@
         canonicalEditPolicyClassName="RlQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="RlQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="RlQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1745,7 +1761,7 @@
         canonicalEditPolicyClassName="TpQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TpQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="TpQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.25">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.31">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1915,7 +1931,7 @@
         canonicalEditPolicyClassName="DurabilityQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DurabilityQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="DurabilityQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.25">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2086,7 +2102,7 @@
         compartments="//@diagram/@compartments.14"
         graphicalNodeEditPolicyClassName="DeadlineQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="DeadlineQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2172,7 +2188,7 @@
         canonicalEditPolicyClassName="DestinationOrderQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DestinationOrderQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="DestinationOrderQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2257,7 +2273,7 @@
         compartments="//@diagram/@compartments.15"
         graphicalNodeEditPolicyClassName="DsQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="DsQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.26">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2443,7 +2459,7 @@
         canonicalEditPolicyClassName="DurabilityQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DurabilityQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="DurabilityQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2528,7 +2544,7 @@
         canonicalEditPolicyClassName="HistoryQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="HistoryQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="HistoryQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2635,7 +2651,7 @@
         compartments="//@diagram/@compartments.16"
         graphicalNodeEditPolicyClassName="LbQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="LbQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2723,7 +2739,7 @@
         compartments="//@diagram/@compartments.17"
         graphicalNodeEditPolicyClassName="LifespanQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="LifespanQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.26">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2811,7 +2827,7 @@
         compartments="//@diagram/@compartments.18"
         graphicalNodeEditPolicyClassName="LivelinessQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="LivelinessQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -3003,7 +3019,7 @@
         canonicalEditPolicyClassName="OwnershipQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="OwnershipQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="OwnershipQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -3089,7 +3105,7 @@
         compartments="//@diagram/@compartments.19"
         graphicalNodeEditPolicyClassName="ReliabilityQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="ReliabilityQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -3196,7 +3212,7 @@
         canonicalEditPolicyClassName="RlQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="RlQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="RlQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.26">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -3323,7 +3339,7 @@
         canonicalEditPolicyClassName="TpQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TpQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="TpQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.26">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -4314,12 +4330,8 @@
       <viewmap
           xsi:type="gmfgen:InnerClassViewmap"
           layoutType="TOOLBAR_LAYOUT"
-          className="StereotypedFigure"
-          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class StereotypedFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStereotypedNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public StereotypedFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;this.setBackgroundColor(THIS_BACK&#xA;);&#xA;this.setBorder(new org.eclipse.draw2d.MarginBorder(getMapMode().DPtoLP(0)&#xA;, getMapMode().DPtoLP(5)&#xA;, getMapMode().DPtoLP(0)&#xA;, getMapMode().DPtoLP(0)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureStereotypedStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureStereotypedNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStereotypedNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureStereotypedNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStereotypedNameFigure() {&#xA;&#x9;&#x9;return fFigureStereotypedNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;/**&#xA; * @generated&#xA; */&#xA;static final org.eclipse.swt.graphics.Color THIS_BACK = new org.eclipse.swt.graphics.Color(null, 240, 240, 240);&#xA;&#xA;">
-        <attributes
-            xsi:type="gmfgen:StyleAttributes"
-            fixedBackground="true"/>
-      </viewmap>
+          className="DataReaderWriterFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class DataReaderWriterFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDataReaderWriterStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDataReaderWriterNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDataReaderWriterCopyFromTopicQosFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public DataReaderWriterFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureDataReaderWriterStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDataReaderWriterStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDataReaderWriterStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureDataReaderWriterNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDataReaderWriterNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDataReaderWriterNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureDataReaderWriterCopyFromTopicQosFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDataReaderWriterCopyFromTopicQosFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureDataReaderWriterCopyFromTopicQosFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDataReaderWriterStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureDataReaderWriterStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDataReaderWriterNameFigure() {&#xA;&#x9;&#x9;return fFigureDataReaderWriterNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDataReaderWriterCopyFromTopicQosFigure() {&#xA;&#x9;&#x9;return fFigureDataReaderWriterCopyFromTopicQosFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/dataReader"/>
@@ -4337,7 +4349,7 @@
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
             xsi:type="gmfgen:ParentAssignedViewmap"
-            getterName="getFigureStereotypedNameFigure"
+            getterName="getFigureDataReaderWriterNameFigure"
             figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
@@ -4355,7 +4367,7 @@
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
             xsi:type="gmfgen:ParentAssignedViewmap"
-            getterName="getFigureStereotypedStereotypeFigure"
+            getterName="getFigureDataReaderWriterStereotypeFigure"
             figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
@@ -4365,12 +4377,33 @@
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
         </modelFacet>
       </labels>
+      <labels
+          visualID="5249"
+          editPartClassName="DataReaderCopyFromTopicQosEditPart"
+          itemSemanticEditPolicyClassName="DataReaderCopyFromTopicQosItemSemanticEditPolicy">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureDataReaderWriterCopyFromTopicQosFigure"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="copyFromTopicQos: {0}"
+            editorPattern="{0}"
+            editPattern="{0}">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DataReaderWriter/copyFromTopicQos"/>
+        </modelFacet>
+      </labels>
     </childNodes>
     <childNodes
         visualID="3049"
         editPartClassName="RdlQosPolicyEditPart"
         itemSemanticEditPolicyClassName="RdlQosPolicyItemSemanticEditPolicy"
         canonicalEditPolicyClassName="RdlQosPolicyCanonicalEditPolicy"
+        compartments="//@diagram/@compartments.25 //@diagram/@compartments.26"
         graphicalNodeEditPolicyClassName="RdlQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="RdlQosPolicyCreateCommand"
         containers="//@diagram/@compartments.23">
@@ -4383,7 +4416,7 @@
           xsi:type="gmfgen:InnerClassViewmap"
           layoutType="FLOW_LAYOUT"
           className="RdlQosPolicyFigure"
-          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class RdlQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRdlQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRdlQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public RdlQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureRdlQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRdlQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureRdlQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureRdlQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRdlQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureRdlQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRdlQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureRdlQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRdlQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureRdlQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure() {&#xA;&#x9;&#x9;return fFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class RdlQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRdlQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRdlQosPolicyNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public RdlQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureRdlQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRdlQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureRdlQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureRdlQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRdlQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureRdlQosPolicyNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRdlQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureRdlQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRdlQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureRdlQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/rdlQosPolicy"/>
@@ -4391,6 +4424,47 @@
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
+        <modelElementInitializer
+            xsi:type="gmfgen:GenFeatureSeqInitializer">
+          <initializers
+              xsi:type="gmfgen:GenReferenceNewElementSpec">
+            <feature
+                href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReaderDataLifecycleQosPolicy/autopurge_disposed_samples_delay"/>
+            <newElementInitializers>
+              <initializers
+                  xsi:type="gmfgen:GenFeatureValueSpec"
+                  value="//@expressionProviders/@providers.0/@expressions.12">
+                <feature
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
+              </initializers>
+              <initializers
+                  xsi:type="gmfgen:GenFeatureValueSpec"
+                  value="//@expressionProviders/@providers.0/@expressions.13">
+                <feature
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
+              </initializers>
+            </newElementInitializers>
+          </initializers>
+          <initializers
+              xsi:type="gmfgen:GenReferenceNewElementSpec">
+            <feature
+                href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReaderDataLifecycleQosPolicy/autopurge_nowriter_samples_delay"/>
+            <newElementInitializers>
+              <initializers
+                  xsi:type="gmfgen:GenFeatureValueSpec"
+                  value="//@expressionProviders/@providers.0/@expressions.14">
+                <feature
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
+              </initializers>
+              <initializers
+                  xsi:type="gmfgen:GenFeatureValueSpec"
+                  value="//@expressionProviders/@providers.0/@expressions.15">
+                <feature
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
+              </initializers>
+            </newElementInitializers>
+          </initializers>
+        </modelElementInitializer>
       </modelFacet>
       <labels
           visualID="5221"
@@ -4431,10 +4505,145 @@
       </labels>
     </childNodes>
     <childNodes
+        visualID="3055"
+        editPartClassName="Period7EditPart"
+        itemSemanticEditPolicyClassName="Period7ItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="Period7CanonicalEditPolicy"
+        graphicalNodeEditPolicyClassName="Period7GraphicalNodeEditPolicy"
+        createCommandClassName="Period7CreateCommand"
+        containers="//@diagram/@compartments.25 //@diagram/@compartments.28">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <elementType
+          xsi:type="gmfgen:SpecializationType"
+          metamodelType="//@diagram/@childNodes.3/@elementType"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          layoutType="FLOW_LAYOUT"
+          className="PeriodFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+      <modelFacet>
+        <metaClass
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period"/>
+        <containmentMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReaderDataLifecycleQosPolicy/autopurge_disposed_samples_delay"/>
+        <childMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReaderDataLifecycleQosPolicy/autopurge_disposed_samples_delay"/>
+      </modelFacet>
+      <labels
+          visualID="5243"
+          editPartClassName="PeriodSecond7EditPart"
+          itemSemanticEditPolicyClassName="PeriodSecond7ItemSemanticEditPolicy">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigurePeriodSecondFigure"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="second: {0}"
+            editorPattern="{0}"
+            editPattern="{0}">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5244"
+          editPartClassName="PeriodNanosecond7EditPart"
+          itemSemanticEditPolicyClassName="PeriodNanosecond7ItemSemanticEditPolicy">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigurePeriodNanosecondFigure"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="nanosecond: {0}"
+            editorPattern="{0}"
+            editPattern="{0}">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
+        </modelFacet>
+      </labels>
+    </childNodes>
+    <childNodes
+        visualID="3056"
+        editPartClassName="Period8EditPart"
+        itemSemanticEditPolicyClassName="Period8ItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="Period8CanonicalEditPolicy"
+        graphicalNodeEditPolicyClassName="Period8GraphicalNodeEditPolicy"
+        createCommandClassName="Period8CreateCommand"
+        containers="//@diagram/@compartments.26 //@diagram/@compartments.29">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <elementType
+          xsi:type="gmfgen:SpecializationType"
+          metamodelType="//@diagram/@childNodes.3/@elementType"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          layoutType="FLOW_LAYOUT"
+          className="PeriodFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+      <modelFacet>
+        <metaClass
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period"/>
+        <containmentMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReaderDataLifecycleQosPolicy/autopurge_nowriter_samples_delay"/>
+        <childMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReaderDataLifecycleQosPolicy/autopurge_nowriter_samples_delay"/>
+      </modelFacet>
+      <labels
+          visualID="5245"
+          editPartClassName="PeriodSecond8EditPart"
+          itemSemanticEditPolicyClassName="PeriodSecond8ItemSemanticEditPolicy">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigurePeriodSecondFigure"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="second: {0}"
+            editorPattern="{0}"
+            editPattern="{0}">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5246"
+          editPartClassName="PeriodNanosecond8EditPart"
+          itemSemanticEditPolicyClassName="PeriodNanosecond8ItemSemanticEditPolicy">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigurePeriodNanosecondFigure"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="nanosecond: {0}"
+            editorPattern="{0}"
+            editPattern="{0}">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
+        </modelFacet>
+      </labels>
+    </childNodes>
+    <childNodes
         visualID="3050"
         editPartClassName="TbfQosPolicyEditPart"
         itemSemanticEditPolicyClassName="TbfQosPolicyItemSemanticEditPolicy"
         canonicalEditPolicyClassName="TbfQosPolicyCanonicalEditPolicy"
+        compartments="//@diagram/@compartments.27"
         graphicalNodeEditPolicyClassName="TbfQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="TbfQosPolicyCreateCommand"
         containers="//@diagram/@compartments.23">
@@ -4447,7 +4656,7 @@
           xsi:type="gmfgen:InnerClassViewmap"
           layoutType="FLOW_LAYOUT"
           className="TbfQosPolicyFigure"
-          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class TbfQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTbfQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTbfQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTbfQosPolicyMinimum_separationFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public TbfQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureTbfQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTbfQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureTbfQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureTbfQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTbfQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureTbfQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureTbfQosPolicyMinimum_separationFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTbfQosPolicyMinimum_separationFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureTbfQosPolicyMinimum_separationFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTbfQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureTbfQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTbfQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureTbfQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTbfQosPolicyMinimum_separationFigure() {&#xA;&#x9;&#x9;return fFigureTbfQosPolicyMinimum_separationFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class TbfQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTbfQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTbfQosPolicyNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public TbfQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureTbfQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTbfQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureTbfQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureTbfQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTbfQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureTbfQosPolicyNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTbfQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureTbfQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTbfQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureTbfQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/tbfQosPolicy"/>
@@ -4455,6 +4664,28 @@
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
         <childMetaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/policies"/>
+        <modelElementInitializer
+            xsi:type="gmfgen:GenFeatureSeqInitializer">
+          <initializers
+              xsi:type="gmfgen:GenReferenceNewElementSpec">
+            <feature
+                href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/TimeBasedFilterQosPolicy/minimum_separation"/>
+            <newElementInitializers>
+              <initializers
+                  xsi:type="gmfgen:GenFeatureValueSpec"
+                  value="//@expressionProviders/@providers.0/@expressions.16">
+                <feature
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
+              </initializers>
+              <initializers
+                  xsi:type="gmfgen:GenFeatureValueSpec"
+                  value="//@expressionProviders/@providers.0/@expressions.17">
+                <feature
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
+              </initializers>
+            </newElementInitializers>
+          </initializers>
+        </modelElementInitializer>
       </modelFacet>
       <labels
           visualID="5224"
@@ -4495,13 +4726,80 @@
       </labels>
     </childNodes>
     <childNodes
+        visualID="3057"
+        editPartClassName="Period9EditPart"
+        itemSemanticEditPolicyClassName="Period9ItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="Period9CanonicalEditPolicy"
+        graphicalNodeEditPolicyClassName="Period9GraphicalNodeEditPolicy"
+        createCommandClassName="Period9CreateCommand"
+        containers="//@diagram/@compartments.27 //@diagram/@compartments.30">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <elementType
+          xsi:type="gmfgen:SpecializationType"
+          metamodelType="//@diagram/@childNodes.3/@elementType"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          layoutType="FLOW_LAYOUT"
+          className="PeriodFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+      <modelFacet>
+        <metaClass
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period"/>
+        <containmentMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/TimeBasedFilterQosPolicy/minimum_separation"/>
+        <childMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/TimeBasedFilterQosPolicy/minimum_separation"/>
+      </modelFacet>
+      <labels
+          visualID="5247"
+          editPartClassName="PeriodSecond9EditPart"
+          itemSemanticEditPolicyClassName="PeriodSecond9ItemSemanticEditPolicy">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigurePeriodSecondFigure"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="second: {0}"
+            editorPattern="{0}"
+            editPattern="{0}">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5248"
+          editPartClassName="PeriodNanosecond9EditPart"
+          itemSemanticEditPolicyClassName="PeriodNanosecond9ItemSemanticEditPolicy">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigurePeriodNanosecondFigure"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="nanosecond: {0}"
+            editorPattern="{0}"
+            editPattern="{0}">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
+        </modelFacet>
+      </labels>
+    </childNodes>
+    <childNodes
         visualID="3051"
         editPartClassName="TdQosPolicyEditPart"
         itemSemanticEditPolicyClassName="TdQosPolicyItemSemanticEditPolicy"
         canonicalEditPolicyClassName="TdQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TdQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="TdQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.23 //@diagram/@compartments.25">
+        containers="//@diagram/@compartments.23 //@diagram/@compartments.31">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -4584,6 +4882,7 @@
         editPartClassName="RdlQosPolicy2EditPart"
         itemSemanticEditPolicyClassName="RdlQosPolicy2ItemSemanticEditPolicy"
         canonicalEditPolicyClassName="RdlQosPolicy2CanonicalEditPolicy"
+        compartments="//@diagram/@compartments.28 //@diagram/@compartments.29"
         graphicalNodeEditPolicyClassName="RdlQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="RdlQosPolicy2CreateCommand"
         containers="//@diagram/@compartments.24">
@@ -4596,7 +4895,7 @@
           xsi:type="gmfgen:InnerClassViewmap"
           layoutType="FLOW_LAYOUT"
           className="RdlQosPolicyFigure"
-          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class RdlQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRdlQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRdlQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public RdlQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureRdlQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRdlQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureRdlQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureRdlQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRdlQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureRdlQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRdlQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureRdlQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRdlQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureRdlQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure() {&#xA;&#x9;&#x9;return fFigureRdlQosPolicyAutopurge_nowriter_sample_delayFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class RdlQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRdlQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureRdlQosPolicyNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public RdlQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureRdlQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRdlQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureRdlQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureRdlQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureRdlQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureRdlQosPolicyNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRdlQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureRdlQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureRdlQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureRdlQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/rdlQosPolicy"/>
@@ -4604,6 +4903,47 @@
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/PolicyLib/policies"/>
         <childMetaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/PolicyLib/policies"/>
+        <modelElementInitializer
+            xsi:type="gmfgen:GenFeatureSeqInitializer">
+          <initializers
+              xsi:type="gmfgen:GenReferenceNewElementSpec">
+            <feature
+                href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReaderDataLifecycleQosPolicy/autopurge_disposed_samples_delay"/>
+            <newElementInitializers>
+              <initializers
+                  xsi:type="gmfgen:GenFeatureValueSpec"
+                  value="//@expressionProviders/@providers.0/@expressions.12">
+                <feature
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
+              </initializers>
+              <initializers
+                  xsi:type="gmfgen:GenFeatureValueSpec"
+                  value="//@expressionProviders/@providers.0/@expressions.13">
+                <feature
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
+              </initializers>
+            </newElementInitializers>
+          </initializers>
+          <initializers
+              xsi:type="gmfgen:GenReferenceNewElementSpec">
+            <feature
+                href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/ReaderDataLifecycleQosPolicy/autopurge_nowriter_samples_delay"/>
+            <newElementInitializers>
+              <initializers
+                  xsi:type="gmfgen:GenFeatureValueSpec"
+                  value="//@expressionProviders/@providers.0/@expressions.14">
+                <feature
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
+              </initializers>
+              <initializers
+                  xsi:type="gmfgen:GenFeatureValueSpec"
+                  value="//@expressionProviders/@providers.0/@expressions.15">
+                <feature
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
+              </initializers>
+            </newElementInitializers>
+          </initializers>
+        </modelElementInitializer>
       </modelFacet>
       <labels
           visualID="5230"
@@ -4648,6 +4988,7 @@
         editPartClassName="TbfQosPolicy2EditPart"
         itemSemanticEditPolicyClassName="TbfQosPolicy2ItemSemanticEditPolicy"
         canonicalEditPolicyClassName="TbfQosPolicy2CanonicalEditPolicy"
+        compartments="//@diagram/@compartments.30"
         graphicalNodeEditPolicyClassName="TbfQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="TbfQosPolicy2CreateCommand"
         containers="//@diagram/@compartments.24">
@@ -4655,12 +4996,12 @@
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
           xsi:type="gmfgen:SpecializationType"
-          metamodelType="//@diagram/@childNodes.48/@elementType"/>
+          metamodelType="//@diagram/@childNodes.50/@elementType"/>
       <viewmap
           xsi:type="gmfgen:InnerClassViewmap"
           layoutType="FLOW_LAYOUT"
           className="TbfQosPolicyFigure"
-          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class TbfQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTbfQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTbfQosPolicyNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTbfQosPolicyMinimum_separationFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public TbfQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureTbfQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTbfQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureTbfQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureTbfQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTbfQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureTbfQosPolicyNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureTbfQosPolicyMinimum_separationFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTbfQosPolicyMinimum_separationFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureTbfQosPolicyMinimum_separationFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTbfQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureTbfQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTbfQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureTbfQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTbfQosPolicyMinimum_separationFigure() {&#xA;&#x9;&#x9;return fFigureTbfQosPolicyMinimum_separationFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class TbfQosPolicyFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTbfQosPolicyStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureTbfQosPolicyNameFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public TbfQosPolicyFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureTbfQosPolicyStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTbfQosPolicyStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureTbfQosPolicyStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureTbfQosPolicyNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureTbfQosPolicyNameFigure.setText(&quot;&lt;name>&quot;);&#xA;&#xA;this.add(fFigureTbfQosPolicyNameFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTbfQosPolicyStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureTbfQosPolicyStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureTbfQosPolicyNameFigure() {&#xA;&#x9;&#x9;return fFigureTbfQosPolicyNameFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/tbfQosPolicy"/>
@@ -4668,6 +5009,28 @@
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/PolicyLib/policies"/>
         <childMetaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/PolicyLib/policies"/>
+        <modelElementInitializer
+            xsi:type="gmfgen:GenFeatureSeqInitializer">
+          <initializers
+              xsi:type="gmfgen:GenReferenceNewElementSpec">
+            <feature
+                href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/TimeBasedFilterQosPolicy/minimum_separation"/>
+            <newElementInitializers>
+              <initializers
+                  xsi:type="gmfgen:GenFeatureValueSpec"
+                  value="//@expressionProviders/@providers.0/@expressions.16">
+                <feature
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
+              </initializers>
+              <initializers
+                  xsi:type="gmfgen:GenFeatureValueSpec"
+                  value="//@expressionProviders/@providers.0/@expressions.17">
+                <feature
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
+              </initializers>
+            </newElementInitializers>
+          </initializers>
+        </modelElementInitializer>
       </modelFacet>
       <labels
           visualID="5233"
@@ -4714,12 +5077,12 @@
         canonicalEditPolicyClassName="TdQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TdQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="TdQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.24 //@diagram/@compartments.26">
+        containers="//@diagram/@compartments.24 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
           xsi:type="gmfgen:SpecializationType"
-          metamodelType="//@diagram/@childNodes.49/@elementType"/>
+          metamodelType="//@diagram/@childNodes.52/@elementType"/>
       <viewmap
           xsi:type="gmfgen:InnerClassViewmap"
           layoutType="FLOW_LAYOUT"
@@ -4929,7 +5292,7 @@
         editPartClassName="TopicEditPart"
         itemSemanticEditPolicyClassName="TopicItemSemanticEditPolicy"
         canonicalEditPolicyClassName="TopicCanonicalEditPolicy"
-        compartments="//@diagram/@compartments.25 //@diagram/@compartments.26"
+        compartments="//@diagram/@compartments.31 //@diagram/@compartments.32"
         graphicalNodeEditPolicyClassName="TopicGraphicalNodeEditPolicy"
         createCommandClassName="TopicCreateCommand">
       <diagramRunTimeClass
@@ -5076,6 +5439,7 @@
         canonicalEditPolicyClassName="DomainParticipantQoSPoliciesCustomCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.37 //@diagram/@childNodes.22"
         title="QoS Policies- Custom"
+        needsTitle="false"
         node="//@diagram/@topLevelNodes.0">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -5090,6 +5454,7 @@
         canonicalEditPolicyClassName="DomainParticipantQoSPoliciesSharedCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.41 //@diagram/@childNodes.36"
         title="QoS Policies- Shared"
+        needsTitle="false"
         node="//@diagram/@topLevelNodes.0">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -5119,6 +5484,7 @@
         canonicalEditPolicyClassName="PublisherQoSPoliciesCustomCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.37 //@diagram/@childNodes.38 //@diagram/@childNodes.39 //@diagram/@childNodes.40"
         title="QoS Policies- Custom"
+        needsTitle="false"
         node="//@diagram/@childNodes.0">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -5133,6 +5499,7 @@
         canonicalEditPolicyClassName="PublisherQoSPoliciesSharedCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.41 //@diagram/@childNodes.42 //@diagram/@childNodes.43 //@diagram/@childNodes.44"
         title="QoS Policies- Shared"
+        needsTitle="false"
         node="//@diagram/@childNodes.0">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -5147,6 +5514,7 @@
         canonicalEditPolicyClassName="DataWriterQoSPoliciesCustomCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.2 //@diagram/@childNodes.4 //@diagram/@childNodes.5 //@diagram/@childNodes.7 //@diagram/@childNodes.8 //@diagram/@childNodes.10 //@diagram/@childNodes.12 //@diagram/@childNodes.14 //@diagram/@childNodes.15 //@diagram/@childNodes.16 //@diagram/@childNodes.18 //@diagram/@childNodes.19 //@diagram/@childNodes.20 //@diagram/@childNodes.21 //@diagram/@childNodes.22"
         title="QoS Policies- Custom"
+        needsTitle="false"
         node="//@diagram/@childNodes.1">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -5161,6 +5529,7 @@
         canonicalEditPolicyClassName="DataWriterQoSPoliciesSharedCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.23 //@diagram/@childNodes.24 //@diagram/@childNodes.25 //@diagram/@childNodes.26 //@diagram/@childNodes.27 //@diagram/@childNodes.28 //@diagram/@childNodes.29 //@diagram/@childNodes.30 //@diagram/@childNodes.31 //@diagram/@childNodes.32 //@diagram/@childNodes.33 //@diagram/@childNodes.34 //@diagram/@childNodes.35 //@diagram/@childNodes.36"
         title="QoS Policies- Shared"
+        needsTitle="false"
         node="//@diagram/@childNodes.1">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -5378,6 +5747,7 @@
         canonicalEditPolicyClassName="SubscriberQoSPoliciesCustomCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.37 //@diagram/@childNodes.38 //@diagram/@childNodes.39 //@diagram/@childNodes.40"
         title="QoS Policies- Custom"
+        needsTitle="false"
         node="//@diagram/@childNodes.45">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -5392,6 +5762,7 @@
         canonicalEditPolicyClassName="SubscriberQoSPoliciesSharedCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.41 //@diagram/@childNodes.42 //@diagram/@childNodes.43 //@diagram/@childNodes.44"
         title="QoS Policies- Shared"
+        needsTitle="false"
         node="//@diagram/@childNodes.45">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -5404,8 +5775,9 @@
         editPartClassName="DataReaderQoSPoliciesCustomEditPart"
         itemSemanticEditPolicyClassName="DataReaderQoSPoliciesCustomItemSemanticEditPolicy"
         canonicalEditPolicyClassName="DataReaderQoSPoliciesCustomCanonicalEditPolicy"
-        childNodes="//@diagram/@childNodes.2 //@diagram/@childNodes.4 //@diagram/@childNodes.21 //@diagram/@childNodes.7 //@diagram/@childNodes.8 //@diagram/@childNodes.12 //@diagram/@childNodes.15 //@diagram/@childNodes.47 //@diagram/@childNodes.16 //@diagram/@childNodes.18 //@diagram/@childNodes.48 //@diagram/@childNodes.49 //@diagram/@childNodes.22"
+        childNodes="//@diagram/@childNodes.2 //@diagram/@childNodes.4 //@diagram/@childNodes.21 //@diagram/@childNodes.7 //@diagram/@childNodes.8 //@diagram/@childNodes.12 //@diagram/@childNodes.15 //@diagram/@childNodes.47 //@diagram/@childNodes.16 //@diagram/@childNodes.18 //@diagram/@childNodes.50 //@diagram/@childNodes.52 //@diagram/@childNodes.22"
         title="QoS Policies- Custom"
+        needsTitle="false"
         node="//@diagram/@childNodes.46">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -5418,8 +5790,9 @@
         editPartClassName="DataReaderQoSPoliciesSharedEditPart"
         itemSemanticEditPolicyClassName="DataReaderQoSPoliciesSharedItemSemanticEditPolicy"
         canonicalEditPolicyClassName="DataReaderQoSPoliciesSharedCanonicalEditPolicy"
-        childNodes="//@diagram/@childNodes.23 //@diagram/@childNodes.24 //@diagram/@childNodes.26 //@diagram/@childNodes.27 //@diagram/@childNodes.28 //@diagram/@childNodes.30 //@diagram/@childNodes.32 //@diagram/@childNodes.50 //@diagram/@childNodes.33 //@diagram/@childNodes.34 //@diagram/@childNodes.51 //@diagram/@childNodes.52 //@diagram/@childNodes.36"
+        childNodes="//@diagram/@childNodes.23 //@diagram/@childNodes.24 //@diagram/@childNodes.26 //@diagram/@childNodes.27 //@diagram/@childNodes.28 //@diagram/@childNodes.30 //@diagram/@childNodes.32 //@diagram/@childNodes.53 //@diagram/@childNodes.33 //@diagram/@childNodes.34 //@diagram/@childNodes.54 //@diagram/@childNodes.55 //@diagram/@childNodes.36"
         title="QoS Policies- Shared"
+        needsTitle="false"
         node="//@diagram/@childNodes.46">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -5428,12 +5801,109 @@
           figureQualifiedClassName="org.eclipse.draw2d.RectangleFigure"/>
     </compartments>
     <compartments
+        visualID="7034"
+        editPartClassName="RdlQosPolicyAutopurge_disposed_samples_delayEditPart"
+        itemSemanticEditPolicyClassName="RdlQosPolicyAutopurge_disposed_samples_delayItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="RdlQosPolicyAutopurge_disposed_samples_delayCanonicalEditPolicy"
+        childNodes="//@diagram/@childNodes.48"
+        title="autopurge_disposed_samples_delay"
+        canCollapse="false"
+        node="//@diagram/@childNodes.47">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          className="PeriodFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+    </compartments>
+    <compartments
+        visualID="7035"
+        editPartClassName="RdlQosPolicyAutopurge_nowriter_samples_delayEditPart"
+        itemSemanticEditPolicyClassName="RdlQosPolicyAutopurge_nowriter_samples_delayItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="RdlQosPolicyAutopurge_nowriter_samples_delayCanonicalEditPolicy"
+        childNodes="//@diagram/@childNodes.49"
+        title="autopurge_nowriter_samples_delay"
+        canCollapse="false"
+        node="//@diagram/@childNodes.47">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          className="PeriodFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+    </compartments>
+    <compartments
+        visualID="7036"
+        editPartClassName="TbfQosPolicyMinimum_separationEditPart"
+        itemSemanticEditPolicyClassName="TbfQosPolicyMinimum_separationItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="TbfQosPolicyMinimum_separationCanonicalEditPolicy"
+        childNodes="//@diagram/@childNodes.51"
+        title="minimum_separation"
+        canCollapse="false"
+        node="//@diagram/@childNodes.50">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          className="PeriodFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+    </compartments>
+    <compartments
+        visualID="7037"
+        editPartClassName="RdlQosPolicyAutopurge_disposed_samples_delay2EditPart"
+        itemSemanticEditPolicyClassName="RdlQosPolicyAutopurge_disposed_samples_delay2ItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="RdlQosPolicyAutopurge_disposed_samples_delay2CanonicalEditPolicy"
+        childNodes="//@diagram/@childNodes.48"
+        title="autopurge_disposed_samples_delay"
+        canCollapse="false"
+        node="//@diagram/@childNodes.53">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          className="PeriodFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+    </compartments>
+    <compartments
+        visualID="7038"
+        editPartClassName="RdlQosPolicyAutopurge_nowriter_samples_delay2EditPart"
+        itemSemanticEditPolicyClassName="RdlQosPolicyAutopurge_nowriter_samples_delay2ItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="RdlQosPolicyAutopurge_nowriter_samples_delay2CanonicalEditPolicy"
+        childNodes="//@diagram/@childNodes.49"
+        title="autopurge_nowriter_samples_delay"
+        canCollapse="false"
+        node="//@diagram/@childNodes.53">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          className="PeriodFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+    </compartments>
+    <compartments
+        visualID="7039"
+        editPartClassName="TbfQosPolicyMinimum_separation2EditPart"
+        itemSemanticEditPolicyClassName="TbfQosPolicyMinimum_separation2ItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="TbfQosPolicyMinimum_separation2CanonicalEditPolicy"
+        childNodes="//@diagram/@childNodes.51"
+        title="minimum_separation"
+        canCollapse="false"
+        node="//@diagram/@childNodes.54">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          className="PeriodFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+    </compartments>
+    <compartments
         visualID="7032"
         editPartClassName="TopicQoSPoliciesCustomEditPart"
         itemSemanticEditPolicyClassName="TopicQoSPoliciesCustomItemSemanticEditPolicy"
         canonicalEditPolicyClassName="TopicQoSPoliciesCustomCanonicalEditPolicy"
-        childNodes="//@diagram/@childNodes.2 //@diagram/@childNodes.4 //@diagram/@childNodes.5 //@diagram/@childNodes.21 //@diagram/@childNodes.7 //@diagram/@childNodes.8 //@diagram/@childNodes.10 //@diagram/@childNodes.12 //@diagram/@childNodes.15 //@diagram/@childNodes.16 //@diagram/@childNodes.18 //@diagram/@childNodes.49 //@diagram/@childNodes.19"
+        childNodes="//@diagram/@childNodes.2 //@diagram/@childNodes.4 //@diagram/@childNodes.5 //@diagram/@childNodes.21 //@diagram/@childNodes.7 //@diagram/@childNodes.8 //@diagram/@childNodes.10 //@diagram/@childNodes.12 //@diagram/@childNodes.15 //@diagram/@childNodes.16 //@diagram/@childNodes.18 //@diagram/@childNodes.52 //@diagram/@childNodes.19"
         title="QoS Policies- Custom"
+        needsTitle="false"
         node="//@diagram/@topLevelNodes.2">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -5446,8 +5916,9 @@
         editPartClassName="TopicQoSPoliciesSharedEditPart"
         itemSemanticEditPolicyClassName="TopicQoSPoliciesSharedItemSemanticEditPolicy"
         canonicalEditPolicyClassName="TopicQoSPoliciesSharedCanonicalEditPolicy"
-        childNodes="//@diagram/@childNodes.23 //@diagram/@childNodes.24 //@diagram/@childNodes.25 //@diagram/@childNodes.26 //@diagram/@childNodes.27 //@diagram/@childNodes.28 //@diagram/@childNodes.29 //@diagram/@childNodes.30 //@diagram/@childNodes.32 //@diagram/@childNodes.33 //@diagram/@childNodes.34 //@diagram/@childNodes.52 //@diagram/@childNodes.35"
+        childNodes="//@diagram/@childNodes.23 //@diagram/@childNodes.24 //@diagram/@childNodes.25 //@diagram/@childNodes.26 //@diagram/@childNodes.27 //@diagram/@childNodes.28 //@diagram/@childNodes.29 //@diagram/@childNodes.30 //@diagram/@childNodes.32 //@diagram/@childNodes.33 //@diagram/@childNodes.34 //@diagram/@childNodes.55 //@diagram/@childNodes.35"
         title="QoS Policies- Shared"
+        needsTitle="false"
         node="//@diagram/@topLevelNodes.2">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -5724,6 +6195,12 @@
         parent="//@diagram/@childNodes.46"
         child="//@diagram/@childNodes.15"/>
     <childReferences
+        parent="//@diagram/@childNodes.47"
+        child="//@diagram/@childNodes.48"/>
+    <childReferences
+        parent="//@diagram/@childNodes.47"
+        child="//@diagram/@childNodes.49"/>
+    <childReferences
         parent="//@diagram/@childNodes.46"
         child="//@diagram/@childNodes.47"/>
     <childReferences
@@ -5733,11 +6210,14 @@
         parent="//@diagram/@childNodes.46"
         child="//@diagram/@childNodes.18"/>
     <childReferences
-        parent="//@diagram/@childNodes.46"
-        child="//@diagram/@childNodes.48"/>
+        parent="//@diagram/@childNodes.50"
+        child="//@diagram/@childNodes.51"/>
     <childReferences
         parent="//@diagram/@childNodes.46"
-        child="//@diagram/@childNodes.49"/>
+        child="//@diagram/@childNodes.50"/>
+    <childReferences
+        parent="//@diagram/@childNodes.46"
+        child="//@diagram/@childNodes.52"/>
     <childReferences
         parent="//@diagram/@childNodes.46"
         child="//@diagram/@childNodes.22"/>
@@ -5763,8 +6243,14 @@
         parent="//@diagram/@childNodes.46"
         child="//@diagram/@childNodes.32"/>
     <childReferences
+        parent="//@diagram/@childNodes.53"
+        child="//@diagram/@childNodes.48"/>
+    <childReferences
+        parent="//@diagram/@childNodes.53"
+        child="//@diagram/@childNodes.49"/>
+    <childReferences
         parent="//@diagram/@childNodes.46"
-        child="//@diagram/@childNodes.50"/>
+        child="//@diagram/@childNodes.53"/>
     <childReferences
         parent="//@diagram/@childNodes.46"
         child="//@diagram/@childNodes.33"/>
@@ -5772,11 +6258,14 @@
         parent="//@diagram/@childNodes.46"
         child="//@diagram/@childNodes.34"/>
     <childReferences
-        parent="//@diagram/@childNodes.46"
+        parent="//@diagram/@childNodes.54"
         child="//@diagram/@childNodes.51"/>
     <childReferences
         parent="//@diagram/@childNodes.46"
-        child="//@diagram/@childNodes.52"/>
+        child="//@diagram/@childNodes.54"/>
+    <childReferences
+        parent="//@diagram/@childNodes.46"
+        child="//@diagram/@childNodes.55"/>
     <childReferences
         parent="//@diagram/@childNodes.46"
         child="//@diagram/@childNodes.36"/>
@@ -5863,7 +6352,7 @@
         child="//@diagram/@childNodes.18"/>
     <childReferences
         parent="//@diagram/@topLevelNodes.2"
-        child="//@diagram/@childNodes.49"/>
+        child="//@diagram/@childNodes.52"/>
     <childReferences
         parent="//@diagram/@topLevelNodes.2"
         child="//@diagram/@childNodes.19"/>
@@ -5902,7 +6391,7 @@
         child="//@diagram/@childNodes.34"/>
     <childReferences
         parent="//@diagram/@topLevelNodes.2"
-        child="//@diagram/@childNodes.52"/>
+        child="//@diagram/@childNodes.55"/>
     <childReferences
         parent="//@diagram/@topLevelNodes.2"
         child="//@diagram/@childNodes.35"/>
@@ -6046,13 +6535,25 @@
           body="0"/>
       <expressions
           body="0"/>
+      <expressions
+          body="0"/>
+      <expressions
+          body="0"/>
+      <expressions
+          body="0"/>
+      <expressions
+          body="0"/>
+      <expressions
+          body="0"/>
+      <expressions
+          body="0"/>
     </providers>
   </expressionProviders>
   <labelParsers
       extensibleViaService="true">
     <implementations
         xsi:type="gmfgen:PredefinedParser"
-        uses="//@diagram/@childNodes.3/@labels.0/@modelFacet //@diagram/@childNodes.3/@labels.1/@modelFacet //@diagram/@childNodes.2/@labels.0/@modelFacet //@diagram/@childNodes.2/@labels.1/@modelFacet //@diagram/@childNodes.4/@labels.0/@modelFacet //@diagram/@childNodes.4/@labels.1/@modelFacet //@diagram/@childNodes.4/@labels.2/@modelFacet //@diagram/@childNodes.6/@labels.0/@modelFacet //@diagram/@childNodes.6/@labels.1/@modelFacet //@diagram/@childNodes.5/@labels.0/@modelFacet //@diagram/@childNodes.5/@labels.1/@modelFacet //@diagram/@childNodes.5/@labels.2/@modelFacet //@diagram/@childNodes.5/@labels.3/@modelFacet //@diagram/@childNodes.5/@labels.4/@modelFacet //@diagram/@childNodes.5/@labels.5/@modelFacet //@diagram/@childNodes.5/@labels.6/@modelFacet //@diagram/@childNodes.7/@labels.0/@modelFacet //@diagram/@childNodes.7/@labels.1/@modelFacet //@diagram/@childNodes.7/@labels.2/@modelFacet //@diagram/@childNodes.7/@labels.3/@modelFacet //@diagram/@childNodes.9/@labels.0/@modelFacet //@diagram/@childNodes.9/@labels.1/@modelFacet //@diagram/@childNodes.8/@labels.0/@modelFacet //@diagram/@childNodes.8/@labels.1/@modelFacet //@diagram/@childNodes.11/@labels.0/@modelFacet //@diagram/@childNodes.11/@labels.1/@modelFacet //@diagram/@childNodes.10/@labels.0/@modelFacet //@diagram/@childNodes.10/@labels.1/@modelFacet //@diagram/@childNodes.13/@labels.0/@modelFacet //@diagram/@childNodes.13/@labels.1/@modelFacet //@diagram/@childNodes.12/@labels.0/@modelFacet //@diagram/@childNodes.12/@labels.1/@modelFacet //@diagram/@childNodes.12/@labels.2/@modelFacet //@diagram/@childNodes.14/@labels.0/@modelFacet //@diagram/@childNodes.14/@labels.1/@modelFacet //@diagram/@childNodes.14/@labels.2/@modelFacet //@diagram/@childNodes.15/@labels.0/@modelFacet //@diagram/@childNodes.15/@labels.1/@modelFacet //@diagram/@childNodes.15/@labels.2/@modelFacet //@diagram/@childNodes.17/@labels.0/@modelFacet //@diagram/@childNodes.17/@labels.1/@modelFacet //@diagram/@childNodes.16/@labels.0/@modelFacet //@diagram/@childNodes.16/@labels.1/@modelFacet //@diagram/@childNodes.16/@labels.2/@modelFacet //@diagram/@childNodes.18/@labels.0/@modelFacet //@diagram/@childNodes.18/@labels.1/@modelFacet //@diagram/@childNodes.18/@labels.2/@modelFacet //@diagram/@childNodes.18/@labels.3/@modelFacet //@diagram/@childNodes.18/@labels.4/@modelFacet //@diagram/@childNodes.19/@labels.0/@modelFacet //@diagram/@childNodes.19/@labels.1/@modelFacet //@diagram/@childNodes.19/@labels.2/@modelFacet //@diagram/@childNodes.20/@labels.0/@modelFacet //@diagram/@childNodes.20/@labels.1/@modelFacet //@diagram/@childNodes.20/@labels.2/@modelFacet //@diagram/@childNodes.21/@labels.0/@modelFacet //@diagram/@childNodes.21/@labels.1/@modelFacet //@diagram/@childNodes.21/@labels.2/@modelFacet //@diagram/@childNodes.22/@labels.0/@modelFacet //@diagram/@childNodes.22/@labels.1/@modelFacet //@diagram/@childNodes.22/@labels.2/@modelFacet //@diagram/@childNodes.23/@labels.0/@modelFacet //@diagram/@childNodes.23/@labels.1/@modelFacet //@diagram/@childNodes.24/@labels.0/@modelFacet //@diagram/@childNodes.24/@labels.1/@modelFacet //@diagram/@childNodes.24/@labels.2/@modelFacet //@diagram/@childNodes.25/@labels.0/@modelFacet //@diagram/@childNodes.25/@labels.1/@modelFacet //@diagram/@childNodes.25/@labels.2/@modelFacet //@diagram/@childNodes.25/@labels.3/@modelFacet //@diagram/@childNodes.25/@labels.4/@modelFacet //@diagram/@childNodes.25/@labels.5/@modelFacet //@diagram/@childNodes.25/@labels.6/@modelFacet //@diagram/@childNodes.26/@labels.0/@modelFacet //@diagram/@childNodes.26/@labels.1/@modelFacet //@diagram/@childNodes.26/@labels.2/@modelFacet //@diagram/@childNodes.27/@labels.0/@modelFacet //@diagram/@childNodes.27/@labels.1/@modelFacet //@diagram/@childNodes.27/@labels.2/@modelFacet //@diagram/@childNodes.27/@labels.3/@modelFacet //@diagram/@childNodes.28/@labels.0/@modelFacet //@diagram/@childNodes.28/@labels.1/@modelFacet //@diagram/@childNodes.29/@labels.0/@modelFacet //@diagram/@childNodes.29/@labels.1/@modelFacet //@diagram/@childNodes.30/@labels.0/@modelFacet //@diagram/@childNodes.30/@labels.1/@modelFacet //@diagram/@childNodes.30/@labels.2/@modelFacet //@diagram/@childNodes.31/@labels.0/@modelFacet //@diagram/@childNodes.31/@labels.1/@modelFacet //@diagram/@childNodes.31/@labels.2/@modelFacet //@diagram/@childNodes.32/@labels.0/@modelFacet //@diagram/@childNodes.32/@labels.1/@modelFacet //@diagram/@childNodes.32/@labels.2/@modelFacet //@diagram/@childNodes.33/@labels.0/@modelFacet //@diagram/@childNodes.33/@labels.1/@modelFacet //@diagram/@childNodes.33/@labels.2/@modelFacet //@diagram/@childNodes.34/@labels.0/@modelFacet //@diagram/@childNodes.34/@labels.1/@modelFacet //@diagram/@childNodes.34/@labels.2/@modelFacet //@diagram/@childNodes.34/@labels.3/@modelFacet //@diagram/@childNodes.34/@labels.4/@modelFacet //@diagram/@childNodes.35/@labels.0/@modelFacet //@diagram/@childNodes.35/@labels.1/@modelFacet //@diagram/@childNodes.35/@labels.2/@modelFacet //@diagram/@childNodes.36/@labels.0/@modelFacet //@diagram/@childNodes.36/@labels.1/@modelFacet //@diagram/@childNodes.36/@labels.2/@modelFacet //@diagram/@childNodes.1/@labels.0/@modelFacet //@diagram/@childNodes.1/@labels.1/@modelFacet //@diagram/@childNodes.37/@labels.0/@modelFacet //@diagram/@childNodes.37/@labels.1/@modelFacet //@diagram/@childNodes.37/@labels.2/@modelFacet //@diagram/@childNodes.38/@labels.0/@modelFacet //@diagram/@childNodes.38/@labels.1/@modelFacet //@diagram/@childNodes.38/@labels.2/@modelFacet //@diagram/@childNodes.39/@labels.0/@modelFacet //@diagram/@childNodes.39/@labels.1/@modelFacet //@diagram/@childNodes.40/@labels.0/@modelFacet //@diagram/@childNodes.40/@labels.1/@modelFacet //@diagram/@childNodes.40/@labels.2/@modelFacet //@diagram/@childNodes.40/@labels.3/@modelFacet //@diagram/@childNodes.40/@labels.4/@modelFacet //@diagram/@childNodes.41/@labels.0/@modelFacet //@diagram/@childNodes.41/@labels.1/@modelFacet //@diagram/@childNodes.41/@labels.2/@modelFacet //@diagram/@childNodes.42/@labels.0/@modelFacet //@diagram/@childNodes.42/@labels.1/@modelFacet //@diagram/@childNodes.42/@labels.2/@modelFacet //@diagram/@childNodes.43/@labels.0/@modelFacet //@diagram/@childNodes.43/@labels.1/@modelFacet //@diagram/@childNodes.44/@labels.0/@modelFacet //@diagram/@childNodes.44/@labels.1/@modelFacet //@diagram/@childNodes.44/@labels.2/@modelFacet //@diagram/@childNodes.44/@labels.3/@modelFacet //@diagram/@childNodes.44/@labels.4/@modelFacet //@diagram/@childNodes.0/@labels.0/@modelFacet //@diagram/@childNodes.0/@labels.1/@modelFacet //@diagram/@childNodes.0/@labels.2/@modelFacet //@diagram/@childNodes.47/@labels.0/@modelFacet //@diagram/@childNodes.47/@labels.1/@modelFacet //@diagram/@childNodes.48/@labels.0/@modelFacet //@diagram/@childNodes.48/@labels.1/@modelFacet //@diagram/@childNodes.49/@labels.0/@modelFacet //@diagram/@childNodes.49/@labels.1/@modelFacet //@diagram/@childNodes.49/@labels.2/@modelFacet //@diagram/@childNodes.50/@labels.0/@modelFacet //@diagram/@childNodes.50/@labels.1/@modelFacet //@diagram/@childNodes.51/@labels.0/@modelFacet //@diagram/@childNodes.51/@labels.1/@modelFacet //@diagram/@childNodes.52/@labels.0/@modelFacet //@diagram/@childNodes.52/@labels.1/@modelFacet //@diagram/@childNodes.52/@labels.2/@modelFacet //@diagram/@childNodes.46/@labels.0/@modelFacet //@diagram/@childNodes.46/@labels.1/@modelFacet //@diagram/@childNodes.45/@labels.0/@modelFacet //@diagram/@childNodes.45/@labels.1/@modelFacet //@diagram/@childNodes.45/@labels.2/@modelFacet //@diagram/@topLevelNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.0/@labels.1/@modelFacet //@diagram/@topLevelNodes.1/@labels.0/@modelFacet //@diagram/@topLevelNodes.1/@labels.1/@modelFacet //@diagram/@topLevelNodes.2/@labels.0/@modelFacet //@diagram/@topLevelNodes.2/@labels.1/@modelFacet"/>
+        uses="//@diagram/@childNodes.3/@labels.0/@modelFacet //@diagram/@childNodes.3/@labels.1/@modelFacet //@diagram/@childNodes.2/@labels.0/@modelFacet //@diagram/@childNodes.2/@labels.1/@modelFacet //@diagram/@childNodes.4/@labels.0/@modelFacet //@diagram/@childNodes.4/@labels.1/@modelFacet //@diagram/@childNodes.4/@labels.2/@modelFacet //@diagram/@childNodes.6/@labels.0/@modelFacet //@diagram/@childNodes.6/@labels.1/@modelFacet //@diagram/@childNodes.5/@labels.0/@modelFacet //@diagram/@childNodes.5/@labels.1/@modelFacet //@diagram/@childNodes.5/@labels.2/@modelFacet //@diagram/@childNodes.5/@labels.3/@modelFacet //@diagram/@childNodes.5/@labels.4/@modelFacet //@diagram/@childNodes.5/@labels.5/@modelFacet //@diagram/@childNodes.5/@labels.6/@modelFacet //@diagram/@childNodes.7/@labels.0/@modelFacet //@diagram/@childNodes.7/@labels.1/@modelFacet //@diagram/@childNodes.7/@labels.2/@modelFacet //@diagram/@childNodes.7/@labels.3/@modelFacet //@diagram/@childNodes.9/@labels.0/@modelFacet //@diagram/@childNodes.9/@labels.1/@modelFacet //@diagram/@childNodes.8/@labels.0/@modelFacet //@diagram/@childNodes.8/@labels.1/@modelFacet //@diagram/@childNodes.11/@labels.0/@modelFacet //@diagram/@childNodes.11/@labels.1/@modelFacet //@diagram/@childNodes.10/@labels.0/@modelFacet //@diagram/@childNodes.10/@labels.1/@modelFacet //@diagram/@childNodes.13/@labels.0/@modelFacet //@diagram/@childNodes.13/@labels.1/@modelFacet //@diagram/@childNodes.12/@labels.0/@modelFacet //@diagram/@childNodes.12/@labels.1/@modelFacet //@diagram/@childNodes.12/@labels.2/@modelFacet //@diagram/@childNodes.14/@labels.0/@modelFacet //@diagram/@childNodes.14/@labels.1/@modelFacet //@diagram/@childNodes.14/@labels.2/@modelFacet //@diagram/@childNodes.15/@labels.0/@modelFacet //@diagram/@childNodes.15/@labels.1/@modelFacet //@diagram/@childNodes.15/@labels.2/@modelFacet //@diagram/@childNodes.17/@labels.0/@modelFacet //@diagram/@childNodes.17/@labels.1/@modelFacet //@diagram/@childNodes.16/@labels.0/@modelFacet //@diagram/@childNodes.16/@labels.1/@modelFacet //@diagram/@childNodes.16/@labels.2/@modelFacet //@diagram/@childNodes.18/@labels.0/@modelFacet //@diagram/@childNodes.18/@labels.1/@modelFacet //@diagram/@childNodes.18/@labels.2/@modelFacet //@diagram/@childNodes.18/@labels.3/@modelFacet //@diagram/@childNodes.18/@labels.4/@modelFacet //@diagram/@childNodes.19/@labels.0/@modelFacet //@diagram/@childNodes.19/@labels.1/@modelFacet //@diagram/@childNodes.19/@labels.2/@modelFacet //@diagram/@childNodes.20/@labels.0/@modelFacet //@diagram/@childNodes.20/@labels.1/@modelFacet //@diagram/@childNodes.20/@labels.2/@modelFacet //@diagram/@childNodes.21/@labels.0/@modelFacet //@diagram/@childNodes.21/@labels.1/@modelFacet //@diagram/@childNodes.21/@labels.2/@modelFacet //@diagram/@childNodes.22/@labels.0/@modelFacet //@diagram/@childNodes.22/@labels.1/@modelFacet //@diagram/@childNodes.22/@labels.2/@modelFacet //@diagram/@childNodes.23/@labels.0/@modelFacet //@diagram/@childNodes.23/@labels.1/@modelFacet //@diagram/@childNodes.24/@labels.0/@modelFacet //@diagram/@childNodes.24/@labels.1/@modelFacet //@diagram/@childNodes.24/@labels.2/@modelFacet //@diagram/@childNodes.25/@labels.0/@modelFacet //@diagram/@childNodes.25/@labels.1/@modelFacet //@diagram/@childNodes.25/@labels.2/@modelFacet //@diagram/@childNodes.25/@labels.3/@modelFacet //@diagram/@childNodes.25/@labels.4/@modelFacet //@diagram/@childNodes.25/@labels.5/@modelFacet //@diagram/@childNodes.25/@labels.6/@modelFacet //@diagram/@childNodes.26/@labels.0/@modelFacet //@diagram/@childNodes.26/@labels.1/@modelFacet //@diagram/@childNodes.26/@labels.2/@modelFacet //@diagram/@childNodes.27/@labels.0/@modelFacet //@diagram/@childNodes.27/@labels.1/@modelFacet //@diagram/@childNodes.27/@labels.2/@modelFacet //@diagram/@childNodes.27/@labels.3/@modelFacet //@diagram/@childNodes.28/@labels.0/@modelFacet //@diagram/@childNodes.28/@labels.1/@modelFacet //@diagram/@childNodes.29/@labels.0/@modelFacet //@diagram/@childNodes.29/@labels.1/@modelFacet //@diagram/@childNodes.30/@labels.0/@modelFacet //@diagram/@childNodes.30/@labels.1/@modelFacet //@diagram/@childNodes.30/@labels.2/@modelFacet //@diagram/@childNodes.31/@labels.0/@modelFacet //@diagram/@childNodes.31/@labels.1/@modelFacet //@diagram/@childNodes.31/@labels.2/@modelFacet //@diagram/@childNodes.32/@labels.0/@modelFacet //@diagram/@childNodes.32/@labels.1/@modelFacet //@diagram/@childNodes.32/@labels.2/@modelFacet //@diagram/@childNodes.33/@labels.0/@modelFacet //@diagram/@childNodes.33/@labels.1/@modelFacet //@diagram/@childNodes.33/@labels.2/@modelFacet //@diagram/@childNodes.34/@labels.0/@modelFacet //@diagram/@childNodes.34/@labels.1/@modelFacet //@diagram/@childNodes.34/@labels.2/@modelFacet //@diagram/@childNodes.34/@labels.3/@modelFacet //@diagram/@childNodes.34/@labels.4/@modelFacet //@diagram/@childNodes.35/@labels.0/@modelFacet //@diagram/@childNodes.35/@labels.1/@modelFacet //@diagram/@childNodes.35/@labels.2/@modelFacet //@diagram/@childNodes.36/@labels.0/@modelFacet //@diagram/@childNodes.36/@labels.1/@modelFacet //@diagram/@childNodes.36/@labels.2/@modelFacet //@diagram/@childNodes.1/@labels.0/@modelFacet //@diagram/@childNodes.1/@labels.1/@modelFacet //@diagram/@childNodes.1/@labels.2/@modelFacet //@diagram/@childNodes.37/@labels.0/@modelFacet //@diagram/@childNodes.37/@labels.1/@modelFacet //@diagram/@childNodes.37/@labels.2/@modelFacet //@diagram/@childNodes.38/@labels.0/@modelFacet //@diagram/@childNodes.38/@labels.1/@modelFacet //@diagram/@childNodes.38/@labels.2/@modelFacet //@diagram/@childNodes.39/@labels.0/@modelFacet //@diagram/@childNodes.39/@labels.1/@modelFacet //@diagram/@childNodes.40/@labels.0/@modelFacet //@diagram/@childNodes.40/@labels.1/@modelFacet //@diagram/@childNodes.40/@labels.2/@modelFacet //@diagram/@childNodes.40/@labels.3/@modelFacet //@diagram/@childNodes.40/@labels.4/@modelFacet //@diagram/@childNodes.41/@labels.0/@modelFacet //@diagram/@childNodes.41/@labels.1/@modelFacet //@diagram/@childNodes.41/@labels.2/@modelFacet //@diagram/@childNodes.42/@labels.0/@modelFacet //@diagram/@childNodes.42/@labels.1/@modelFacet //@diagram/@childNodes.42/@labels.2/@modelFacet //@diagram/@childNodes.43/@labels.0/@modelFacet //@diagram/@childNodes.43/@labels.1/@modelFacet //@diagram/@childNodes.44/@labels.0/@modelFacet //@diagram/@childNodes.44/@labels.1/@modelFacet //@diagram/@childNodes.44/@labels.2/@modelFacet //@diagram/@childNodes.44/@labels.3/@modelFacet //@diagram/@childNodes.44/@labels.4/@modelFacet //@diagram/@childNodes.0/@labels.0/@modelFacet //@diagram/@childNodes.0/@labels.1/@modelFacet //@diagram/@childNodes.0/@labels.2/@modelFacet //@diagram/@childNodes.48/@labels.0/@modelFacet //@diagram/@childNodes.48/@labels.1/@modelFacet //@diagram/@childNodes.49/@labels.0/@modelFacet //@diagram/@childNodes.49/@labels.1/@modelFacet //@diagram/@childNodes.47/@labels.0/@modelFacet //@diagram/@childNodes.47/@labels.1/@modelFacet //@diagram/@childNodes.51/@labels.0/@modelFacet //@diagram/@childNodes.51/@labels.1/@modelFacet //@diagram/@childNodes.50/@labels.0/@modelFacet //@diagram/@childNodes.50/@labels.1/@modelFacet //@diagram/@childNodes.52/@labels.0/@modelFacet //@diagram/@childNodes.52/@labels.1/@modelFacet //@diagram/@childNodes.52/@labels.2/@modelFacet //@diagram/@childNodes.53/@labels.0/@modelFacet //@diagram/@childNodes.53/@labels.1/@modelFacet //@diagram/@childNodes.54/@labels.0/@modelFacet //@diagram/@childNodes.54/@labels.1/@modelFacet //@diagram/@childNodes.55/@labels.0/@modelFacet //@diagram/@childNodes.55/@labels.1/@modelFacet //@diagram/@childNodes.55/@labels.2/@modelFacet //@diagram/@childNodes.46/@labels.0/@modelFacet //@diagram/@childNodes.46/@labels.1/@modelFacet //@diagram/@childNodes.46/@labels.2/@modelFacet //@diagram/@childNodes.45/@labels.0/@modelFacet //@diagram/@childNodes.45/@labels.1/@modelFacet //@diagram/@childNodes.45/@labels.2/@modelFacet //@diagram/@topLevelNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.0/@labels.1/@modelFacet //@diagram/@topLevelNodes.1/@labels.0/@modelFacet //@diagram/@topLevelNodes.1/@labels.1/@modelFacet //@diagram/@topLevelNodes.2/@labels.0/@modelFacet //@diagram/@topLevelNodes.2/@labels.1/@modelFacet"/>
   </labelParsers>
   <contextMenus
       context="//@diagram">

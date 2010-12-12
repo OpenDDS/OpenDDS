@@ -431,17 +431,11 @@
             xsi:type="gmfgraph:Label"
             name="RdlQosPolicyNameFigure"
             text="&lt;name>"/>
-        <children
-            xsi:type="gmfgraph:Label"
-            name="RdlQosPolicyAutopurge_nowriter_sample_delayFigure"
-            text="&lt;...>"/>
       </actualFigure>
       <accessors
           figure="//@figures.0/@descriptors.14/@actualFigure/@children.0"/>
       <accessors
           figure="//@figures.0/@descriptors.14/@actualFigure/@children.1"/>
-      <accessors
-          figure="//@figures.0/@descriptors.14/@actualFigure/@children.2"/>
     </descriptors>
     <descriptors
         name="ReliabilityQosPolicyFigure">
@@ -527,17 +521,11 @@
             xsi:type="gmfgraph:Label"
             name="TbfQosPolicyNameFigure"
             text="&lt;name>"/>
-        <children
-            xsi:type="gmfgraph:Label"
-            name="TbfQosPolicyMinimum_separationFigure"
-            text="&lt;...>"/>
       </actualFigure>
       <accessors
           figure="//@figures.0/@descriptors.17/@actualFigure/@children.0"/>
       <accessors
           figure="//@figures.0/@descriptors.17/@actualFigure/@children.1"/>
-      <accessors
-          figure="//@figures.0/@descriptors.17/@actualFigure/@children.2"/>
     </descriptors>
     <descriptors
         name="TdQosPolicyFigure">
@@ -769,18 +757,28 @@
       needsTitle="true"/>
   <compartments
       name="QoS Policies- Custom"
-      collapsible="true"
-      needsTitle="true">
+      collapsible="true">
     <figure
         href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#CompartmentFigure"/>
   </compartments>
   <compartments
       name="QoS Policies- Shared"
-      collapsible="true"
-      needsTitle="true">
+      collapsible="true">
     <figure
         href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#CompartmentFigure"/>
   </compartments>
+  <compartments
+      name="autopurge_nowriter_samples_delay"
+      figure="PeriodFigure"
+      needsTitle="true"/>
+  <compartments
+      name="autopurge_disposed_samples_delay"
+      figure="PeriodFigure"
+      needsTitle="true"/>
+  <compartments
+      name="minimum_separation"
+      figure="PeriodFigure"
+      needsTitle="true"/>
   <labels
       name="DeadlineQosPolicyStereotype"
       figure="DeadlineQosPolicyFigure"
@@ -991,10 +989,6 @@
       figure="RdlQosPolicyFigure"
       accessor="//@figures.0/@descriptors.14/@accessors.1"/>
   <labels
-      name="RdlQosPolicyAutopurge_nowriter_sample_delay"
-      figure="RdlQosPolicyFigure"
-      accessor="//@figures.0/@descriptors.14/@accessors.2"/>
-  <labels
       name="ReliabilityQosPolicyStereotype"
       figure="ReliabilityQosPolicyFigure"
       elementIcon="false"
@@ -1039,8 +1033,7 @@
       accessor="//@figures.0/@descriptors.17/@accessors.1"/>
   <labels
       name="TbfQosPolicyMinimum_separation"
-      figure="TbfQosPolicyFigure"
-      accessor="//@figures.0/@descriptors.17/@accessors.2"/>
+      figure="TbfQosPolicyFigure"/>
   <labels
       name="TdQosPolicyStereotype"
       figure="TdQosPolicyFigure"
