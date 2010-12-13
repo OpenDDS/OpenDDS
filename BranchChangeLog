@@ -1,3 +1,10 @@
+Mon Dec 13 20:53:12 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Sequences:
+        * tools/modeling/tests/Sequences/aModel.opendds:
+
+          Removed these files.
+
 Mon Dec 13 19:32:20 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/PolicyLib:
