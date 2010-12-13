@@ -7,7 +7,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerGlobalNsModel_T.h"
+#include "model/MessengerGlobalNsModelTraits.h"
 
 int main(int argc, char** argv)
 {

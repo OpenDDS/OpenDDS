@@ -7,7 +7,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/CompositeKey_T.h"
+#include "model/CompositeKeyTraits.h"
 
 int main(int argc, char** argv)
 {

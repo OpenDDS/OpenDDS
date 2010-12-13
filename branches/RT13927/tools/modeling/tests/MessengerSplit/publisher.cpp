@@ -7,7 +7,8 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerSplit_T.h"
+#include "model/MessengerSplitTraits.h"
+#include "model/MessengerTypes_T.h"
 
 int main(int argc, char** argv)
 {

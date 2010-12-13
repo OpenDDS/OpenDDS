@@ -7,7 +7,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerNoSub_T.h"
+#include "model/MessengerNoSubTraits.h"
 
 int main(int argc, char** argv)
 {

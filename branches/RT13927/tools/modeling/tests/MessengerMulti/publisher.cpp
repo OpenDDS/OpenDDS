@@ -7,7 +7,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerMulti_T.h"
+#include "model/MessengerMultiTraits.h"
 
 int main(int argc, char** argv)
 {

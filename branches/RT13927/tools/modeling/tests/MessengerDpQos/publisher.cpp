@@ -7,7 +7,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerDpQos_T.h"
+#include "model/MessengerDpQosTraits.h"
 
 int main(int argc, char** argv)
 {

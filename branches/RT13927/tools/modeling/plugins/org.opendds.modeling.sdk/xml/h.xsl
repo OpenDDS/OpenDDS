@@ -829,15 +829,10 @@ OpenDDS::Model::</xsl:text>
 
 </xsl:text>
   <xsl:value-of select="concat('#include &quot;', $modelname, 'TypeSupportImpl.h&quot;', $newline)"/>
-  <xsl:value-of select="concat('#include &quot;', $modelname, 'Traits.h&quot;')"/>
 <xsl:text>
 #include "model/DefaultInstanceTraits.h"
 #include "model/Service_T.h"
 
-typedef OpenDDS::Model::Service&lt; OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="concat($modelname, '::Elements, ', $modelname, 'Traits&gt; ', $modelname, 'Type;', $newline)"/>
-
-<xsl:text>
 #endif /* </xsl:text>
   <xsl:value-of select="$MODELNAME"/>
   <xsl:text>_T_H */

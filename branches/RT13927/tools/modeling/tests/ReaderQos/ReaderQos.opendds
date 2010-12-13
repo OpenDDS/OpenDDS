@@ -46,7 +46,7 @@
       <names>*</names>
     </policies>
     <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_o9T74AQaEeCsYqJtvYWomQ" name="nine" />
-    <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_NdzdUAQbEeCsYqJtvYWomQ" name="tbf_8">
+    <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_NdzdUAQbEeCsYqJtvYWomQ" name="tbf_8"/>
     <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_mYIE4ARzEeCsYqJtvYWomQ" name="vol" kind="VOLATILE"/>
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_0lhFwAR1EeCsYqJtvYWomQ" name="strong" value="10"/>
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_2rViwAR1EeCsYqJtvYWomQ" name="weak" value="5"/>
