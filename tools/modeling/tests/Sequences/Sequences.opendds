@@ -38,7 +38,8 @@
       <fields xmi:id="_eRvwoAcFEeCTrrqfM0kA8A" name="wchars" type="_dq7BMAcFEeCTrrqfM0kA8A"/>
       <fields xmi:id="_Oq3s8AcGEeCTrrqfM0kA8A" name="unboundedWstrings" type="_0SrRMAcFEeCTrrqfM0kA8A"/>
       <fields xmi:id="_PR5QsAcGEeCTrrqfM0kA8A" name="boundedWstrings" type="_1ug9EAcFEeCTrrqfM0kA8A"/>
-      <fields xmi:id="_nkD-oAcHEeCTrrqfM0kA8A" name="sturcts" type="_eguV4AcHEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_8--9MAcJEeCTrrqfM0kA8A" name="arrays" type="_8SGpEAcJEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_ns-tQAcLEeCTrrqfM0kA8A" name="octetSeqs" type="_jfUaAAcLEeCTrrqfM0kA8A"/>
       <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_M8mv8PDvEd-I4rwicuuPOw"/>
     </types>
     <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw"/>
@@ -102,7 +103,11 @@
       <fields xmi:id="_YrbWcAcHEeCTrrqfM0kA8A" name="long1" type="_PXgFEPDvEd-I4rwicuuPOw"/>
       <fields xmi:id="_aQX7AAcHEeCTrrqfM0kA8A" name="long2" type="_PXgFEPDvEd-I4rwicuuPOw"/>
     </types>
-    <types xsi:type="types:Sequence" xmi:id="_dcpCsAcHEeCTrrqfM0kA8A" length="18" subtype="_VaQgoAcHEeCTrrqfM0kA8A"/>
-    <types xsi:type="types:Typedef" xmi:id="_eguV4AcHEeCTrrqfM0kA8A" type="_dcpCsAcHEeCTrrqfM0kA8A" name="StructSeq"/>
+    <types xsi:type="types:Array" xmi:id="_3gIu4AcJEeCTrrqfM0kA8A" length="9" subtype="_xMXAgAcFEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Sequence" xmi:id="_7VUQsAcJEeCTrrqfM0kA8A" length="47" subtype="_zY1s4AcKEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_8SGpEAcJEeCTrrqfM0kA8A" type="_7VUQsAcJEeCTrrqfM0kA8A" name="ArraySeq"/>
+    <types xsi:type="types:Typedef" xmi:id="_zY1s4AcKEeCTrrqfM0kA8A" type="_3gIu4AcJEeCTrrqfM0kA8A" name="StringArray"/>
+    <types xsi:type="types:Sequence" xmi:id="_fYEQwAcLEeCTrrqfM0kA8A" length="21" subtype="_ZJhPYAcBEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_jfUaAAcLEeCTrrqfM0kA8A" type="_fYEQwAcLEeCTrrqfM0kA8A" name="OctetSeqSeq"/>
   </dataLib>
 </opendds:OpenDDSModel>
