@@ -1,3 +1,14 @@
+Mon Dec 13 19:32:20 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/PolicyLib:
+        * tools/modeling/tests/PolicyLib/PolicyLib.mpc:
+        * tools/modeling/tests/PolicyLib/PolicyLib.opendds:
+        * tools/modeling/tests/PolicyLib/publisher.cpp:
+        * tools/modeling/tests/PolicyLib/subscriber.cpp:
+        * tools/modeling/tests/PolicyLib/transports.traits:
+
+          Move Qos policies to internal policy lib.
+
 Mon Dec 13 18:38:25 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DomainParticipantQoSPoliciesCustomEditPart.java:
