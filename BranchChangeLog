@@ -1,3 +1,9 @@
+Mon Dec 13 21:43:36 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+
+          Fix bug in Octet sequence support.
+
 Mon Dec 13 20:53:12 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Sequences:
