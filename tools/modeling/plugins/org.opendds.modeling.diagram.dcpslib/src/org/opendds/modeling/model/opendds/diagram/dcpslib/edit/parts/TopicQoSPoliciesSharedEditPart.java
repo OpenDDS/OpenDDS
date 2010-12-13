@@ -87,7 +87,7 @@ public class TopicQoSPoliciesSharedEditPart extends ListCompartmentEditPart {
 	}
 
 	/**
-	 * Filter out policies that defined in a DcpsLib.
+	 * Filter out policies that are defined in a DcpsLib.
 	 * @generated NOT
 	 */
 	@Override

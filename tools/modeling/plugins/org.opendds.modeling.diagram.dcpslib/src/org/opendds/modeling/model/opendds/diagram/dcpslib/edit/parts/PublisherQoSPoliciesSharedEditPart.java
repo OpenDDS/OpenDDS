@@ -87,7 +87,7 @@ public class PublisherQoSPoliciesSharedEditPart extends ListCompartmentEditPart 
 	}
 
 	/**
-	 * Filter out policies that are owned by a DcpsLib.
+	 * Filter out policies that defined in a DcpsLib.
 	 * @generated NOT
 	 */
 	@Override

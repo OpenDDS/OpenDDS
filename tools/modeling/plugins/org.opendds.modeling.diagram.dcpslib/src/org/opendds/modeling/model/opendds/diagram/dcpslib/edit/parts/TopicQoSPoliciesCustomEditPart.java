@@ -84,7 +84,7 @@ public class TopicQoSPoliciesCustomEditPart extends ListCompartmentEditPart {
 	}
 
 	/**
-	 * Filter out policies that are in different resources.
+	 * Filter out policies that are not defined in a in DcpsLib.
 	 * @generated NOT
 	 */
 	@Override
