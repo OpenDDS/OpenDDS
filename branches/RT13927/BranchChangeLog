@@ -1,3 +1,21 @@
+Mon Dec 13 17:37:09 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling/model/opendds/presentation/OpenDDSEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/OpenDDSResource.java:
+
+          Move set of OPTION_KEEP_DEFAULT_CONTENT from editor to resource.  
+          This should effect GMF as well.
+
+        * tools/modeling/tests/DomainZero:
+        * tools/modeling/tests/DomainZero/DomainZero.mpc:
+        * tools/modeling/tests/DomainZero/DomainZero.opendds:
+        * tools/modeling/tests/DomainZero/publisher.cpp:
+        * tools/modeling/tests/DomainZero/subscriber.cpp:
+        * tools/modeling/tests/DomainZero/transports.traits:
+
+          New test case for domainId 0.
+
 Mon Dec 13 16:54:26 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
