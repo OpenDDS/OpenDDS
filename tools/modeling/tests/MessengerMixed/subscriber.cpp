@@ -7,7 +7,8 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerMixed_T.h"
+#include "model/MessengerMixedTraits.h"
+#include "model/MessengerTypesMixed_T.h"
 #include <model/NullReaderListener.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {

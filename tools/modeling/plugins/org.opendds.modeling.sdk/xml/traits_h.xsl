@@ -30,14 +30,15 @@
 <xsl:template match="/">
   <xsl:value-of select="concat('#ifndef ', $MODELNAME, '_TRAITS_H', $newline)"/>
   <xsl:value-of select="concat('#define ', $MODELNAME, '_TRAITS_H', $newline)"/>
+
+<!--
+  <xsl:value-of select="concat('#include &quot;', $modelname, '_T.h&quot;')"/>
+-->
+
   <xsl:variable name="structname" select="concat($modelname, 'Traits')"/>
+<xsl:value-of select="concat('#include &quot;', $modelname, '_T.h&quot;', $newline)"/>
 
-  <xsl:text>
-#include "model/DefaultInstanceTraits.h"
-#include "</xsl:text>
-  <xsl:value-of select="$modelname"/>
-<xsl:text>_export.h"
-
+<xsl:text>
 struct </xsl:text>
   <xsl:value-of select="concat($modelname, '_Export ')"/>
   <xsl:value-of select="$structname"/>
@@ -45,6 +46,10 @@ struct </xsl:text>
   void transport_config(OpenDDS::DCPS::TransportIdType id);
 };
 
+typedef OpenDDS::Model::Service&lt; OpenDDS::Model::</xsl:text>
+<xsl:value-of select="concat($modelname, '::Elements, ', $structname, '&gt; ',
+                             $modelname, 'Type;', $newline)"/>
+<xsl:text>
 #endif
 </xsl:text>
 </xsl:template>

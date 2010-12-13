@@ -7,7 +7,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/ReaderQos_T.h"
+#include "model/ReaderQosTraits.h"
 
 int main(int argc, char** argv)
 {

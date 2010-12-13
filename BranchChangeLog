@@ -1,3 +1,41 @@
+Mon Dec 13 16:54:26 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_h.xsl:
+
+          Reverse the traits dependency.
+
+        * tools/modeling/tests/CompositeKey/publisher.cpp:
+        * tools/modeling/tests/CompositeKey/subscriber.cpp:
+        * tools/modeling/tests/Messenger/publisher.cpp:
+        * tools/modeling/tests/Messenger/subscriber.cpp:
+        * tools/modeling/tests/MessengerDpQos/publisher.cpp:
+        * tools/modeling/tests/MessengerDpQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerGlobalNs/publisher.cpp:
+        * tools/modeling/tests/MessengerGlobalNs/subscriber.cpp:
+        * tools/modeling/tests/MessengerMixed/publisher.cpp:
+        * tools/modeling/tests/MessengerMixed/subscriber.cpp:
+        * tools/modeling/tests/MessengerMulti/publisher.cpp:
+        * tools/modeling/tests/MessengerMulti/subscriber.cpp:
+        * tools/modeling/tests/MessengerNoPub/subscriber.cpp:
+        * tools/modeling/tests/MessengerNoSub/publisher.cpp:
+        * tools/modeling/tests/MessengerNoSub/transports.traits:
+        * tools/modeling/tests/MessengerPubQos/publisher.cpp:
+        * tools/modeling/tests/MessengerPubQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerSplit/publisher.cpp:
+        * tools/modeling/tests/MessengerSplit/subscriber.cpp:
+        * tools/modeling/tests/MessengerWriterQos/publisher.cpp:
+        * tools/modeling/tests/MessengerWriterQos/subscriber.cpp:
+        * tools/modeling/tests/ReaderQos/ReaderQos.opendds:
+        * tools/modeling/tests/ReaderQos/publisher.cpp:
+        * tools/modeling/tests/ReaderQos/subscriber.cpp:
+        * tools/modeling/tests/SubscriberQos/publisher.cpp:
+        * tools/modeling/tests/SubscriberQos/subscriber.cpp:
+        * tools/modeling/tests/TopicQos/publisher.cpp:
+        * tools/modeling/tests/TopicQos/subscriber.cpp:
+
+          Include Traits.h file, rather than the _T.h file.
+
 Sun Dec 12 22:20:39 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
@@ -30,7 +68,7 @@ Sun Dec 12 22:20:39 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
 
-	  Diagram updates to account for recent model changes to rdlQosPolicy, tbfQosPolicy, and DataReaderWriter.
+          Diagram updates to account for recent model changes to rdlQosPolicy, tbfQosPolicy, and DataReaderWriter.
 
 Fri Dec 10 20:53:15 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
