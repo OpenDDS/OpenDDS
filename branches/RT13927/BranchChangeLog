@@ -1,10 +1,23 @@
+Mon Dec 13 18:38:25 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DomainParticipantQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/PublisherQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/PublisherQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/SubscriberQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/SubscriberQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/TopicQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/TopicQoSPoliciesSharedEditPart.java:
+
+          Fixed policy compartment filtering to work with policy libraries defined either
+          in same resource or external resource.
+
 Mon Dec 13 17:37:09 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling/model/opendds/presentation/OpenDDSEditor.java:
         * tools/modeling/plugins/org.opendds.modeling.model/META-INF/MANIFEST.MF:
         * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/OpenDDSResource.java:
 
-          Move set of OPTION_KEEP_DEFAULT_CONTENT from editor to resource.  
+          Move set of OPTION_KEEP_DEFAULT_CONTENT from editor to resource.
           This should effect GMF as well.
 
         * tools/modeling/tests/DomainZero:
