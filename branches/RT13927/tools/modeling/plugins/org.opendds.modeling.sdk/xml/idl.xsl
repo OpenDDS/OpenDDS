@@ -423,7 +423,7 @@
 </xsl:text>
   </xsl:if>
   <xsl:if test="$sequence-types[@xsi:type = 'types:Octet']">
-    <xsl:text>#include &lt;tao/Octet.pidl&gt;
+    <xsl:text>#include &lt;tao/OctetSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
   <xsl:if test="$sequence-types[@xsi:type = 'types:Double']">
@@ -470,6 +470,7 @@
   <!-- ecore don't know how to translate Enum 
        where from?  LongDoubleSeq.pidl -->
     
+  <xsl:value-of select="$newline"/>
 </xsl:template>
 
 </xsl:stylesheet>
