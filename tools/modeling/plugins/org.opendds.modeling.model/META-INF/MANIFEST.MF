@@ -39,4 +39,5 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  com.ociweb.emf.util
 Bundle-ActivationPolicy: lazy
-Import-Package: org.eclipse.emf.ecore.xmi.impl
+Import-Package: org.eclipse.emf.ecore.xmi,
+ org.eclipse.emf.ecore.xmi.impl
