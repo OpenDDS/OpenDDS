@@ -1,3 +1,14 @@
+Mon Dec 13 22:15:11 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Sequences:
+        * tools/modeling/tests/Sequences/Sequences.mpc:
+        * tools/modeling/tests/Sequences/Sequences.opendds:
+        * tools/modeling/tests/Sequences/publisher.cpp:
+        * tools/modeling/tests/Sequences/subscriber.cpp:
+        * tools/modeling/tests/Sequences/transports.traits:
+
+          Sequences of all intrinsic types.
+
 Mon Dec 13 21:43:36 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
