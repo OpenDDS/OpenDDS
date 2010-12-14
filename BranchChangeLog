@@ -1,3 +1,15 @@
+Tue Dec 14 19:08:50 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/ExernalPolicies:
+        * tools/modeling/tests/ExernalPolicies/ExternalPolicies.mpc:
+        * tools/modeling/tests/ExernalPolicies/ExternalPolicies.opendds:
+        * tools/modeling/tests/ExernalPolicies/PolicyLib.opendds:
+        * tools/modeling/tests/ExernalPolicies/publisher.cpp:
+        * tools/modeling/tests/ExernalPolicies/subscriber.cpp:
+        * tools/modeling/tests/ExernalPolicies/transports.traits:
+
+          Test case for Qos policies in external file.  Doesn't work yet.
+
 Tue Dec 14 18:40:27 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
