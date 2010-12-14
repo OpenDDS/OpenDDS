@@ -345,7 +345,7 @@ Elements::Data::loadMaps()
   <!-- '  this->writerTopics[ DataWriters::(dataWriter/@name)] = Topics::(dataWriter/@topic);\n' -->
   <xsl:for-each select="$writers">
     <xsl:text>  this->writerTopics_[ DataWriters::</xsl:text>
-    <xsl:value-of select="@name"/>
+    <xsl:call-template name="normalize-identifier"/>
     <xsl:text>] = Topics::</xsl:text>
     <xsl:call-template name="normalize-identifier">
       <xsl:with-param name="identifier" select="$topics[@xmi:id = current()/@topic]/@name"/>
@@ -358,7 +358,7 @@ Elements::Data::loadMaps()
   <!-- '  this->readerTopics[ DataReaders::(dataReader/@name)] = Topics::(dataReader/@topic);\n' -->
   <xsl:for-each select="$readers">
     <xsl:text>  this->readerTopics_[ DataReaders::</xsl:text>
-    <xsl:value-of select="@name"/>
+    <xsl:call-template name="normalize-identifier"/>
     <xsl:text>] = Topics::</xsl:text>
     <xsl:call-template name="normalize-identifier">
       <xsl:with-param name="identifier" select="$topics[@xmi:id = current()/@topic]/@name"/>
@@ -371,7 +371,7 @@ Elements::Data::loadMaps()
   <!-- '  this->publishers_[ DataWriters::(dataWriter/@name)] = Publishers::(dataWriter/../@name);\n' -->
   <xsl:for-each select="$writers">
     <xsl:text>  this->publishers_[ DataWriters::</xsl:text>
-    <xsl:value-of select="@name"/>
+    <xsl:call-template name="normalize-identifier"/>
     <xsl:text>] = Publishers::</xsl:text>
     <xsl:call-template name="normalize-identifier">
       <xsl:with-param name="identifier" select="../@name"/>
@@ -384,7 +384,7 @@ Elements::Data::loadMaps()
   <!-- '  this->subscribers_[ DataReaders::(dataReader/@name)] = Subscribers::(dataReader/../@name);\n' -->
   <xsl:for-each select="$readers">
     <xsl:text>  this->subscribers_[ DataReaders::</xsl:text>
-    <xsl:value-of select="@name"/>
+    <xsl:call-template name="normalize-identifier"/>
     <xsl:text>] = Subscribers::</xsl:text>
     <xsl:call-template name="normalize-identifier">
       <xsl:with-param name="identifier" select="../@name"/>
@@ -567,7 +567,7 @@ Elements::Data::buildPublicationsQos()
     <xsl:for-each select="$writers">
       <xsl:value-of select="$newline"/>
       <xsl:text>  writer    = DataWriters::</xsl:text>
-      <xsl:value-of select="@name"/>
+      <xsl:call-template name="normalize-identifier"/>
       <xsl:text>;
   writerQos = TheServiceParticipant->initial_DataWriterQos();
 </xsl:text>
@@ -602,7 +602,7 @@ Elements::Data::buildSubscriptionsQos()
   <xsl:for-each select="$readers">
     <xsl:value-of select="$newline"/>
     <xsl:text>  reader    = DataReaders::</xsl:text>
-    <xsl:value-of select="@name"/>
+    <xsl:call-template name="normalize-identifier"/>
     <xsl:text>;
   readerQos = TheServiceParticipant->initial_DataReaderQos();
 </xsl:text>
@@ -629,7 +629,7 @@ Elements::Data::copyPublicationQos(
 </xsl:text>
   <xsl:for-each select="$writers">
     <xsl:text>    case DataWriters::</xsl:text>
-    <xsl:value-of select="@name"/>
+    <xsl:call-template name="normalize-identifier"/>
     <xsl:text>:</xsl:text>
     <xsl:value-of select="$newline"/>
 
@@ -665,7 +665,7 @@ Elements::Data::copySubscriptionQos(
 </xsl:text>
   <xsl:for-each select="$readers">
     <xsl:text>    case DataReaders::</xsl:text>
-    <xsl:value-of select="@name"/>
+    <xsl:call-template name="normalize-identifier"/>
     <xsl:text>:</xsl:text>
     <xsl:value-of select="$newline"/>
 
