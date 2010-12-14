@@ -1,3 +1,10 @@
+Tue Dec 14 20:35:56 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DCPS.ecore:
+
+          For DataReaderWriter::copyTopicQosPolicy, set default value
+          to false so it will be serialized.
+
 Tue Dec 14 20:04:30 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
