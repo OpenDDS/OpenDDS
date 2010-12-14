@@ -148,6 +148,7 @@ implements IObjectActionDelegate {
 
 	private void updateFigureView(GraphicalEditPart containerEditPart) {
 		final EditPartViewer viewer = selectedElement.getViewer();
+		assert containerEditPart.getChildren() != null;
 		assert containerEditPart.getChildren().size() > 0;
 		final EditPart ep = (EditPart) containerEditPart.getChildren().get(
 				containerEditPart.getChildren().size() - 1);

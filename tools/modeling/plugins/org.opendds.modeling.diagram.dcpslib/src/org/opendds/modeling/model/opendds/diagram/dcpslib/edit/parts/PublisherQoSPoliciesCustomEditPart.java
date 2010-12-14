@@ -84,16 +84,13 @@ public class PublisherQoSPoliciesCustomEditPart extends ListCompartmentEditPart 
 	}
 
 	/**
-	 * Filter out policies that are not defined in a in DcpsLib.
+	 * Filter out policies that are not owned by a DcpsLib.
 	 * @generated NOT
 	 */
 	@Override
 	protected java.util.List getModelChildren() {
-		org.eclipse.emf.ecore.EObject dcpsLib = ((View) getModel())
-				.getElement().eContainer();
-		return com.ociweb.gmf.edit.parts.ModelChildrenFilter
-				.filterChildrenWithObjectNotInContainmentTree(dcpsLib, super
-						.getModelChildren());
+		return CompartmentChildrenFinder.filterPoliciesNotOwnedByDcpsLib(
+				((View) getModel()).getElement(), super.getModelChildren());
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.ociweb.emf.util;
 
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 
 public class ObjectsFinder {
@@ -23,7 +24,7 @@ public class ObjectsFinder {
 	}
 
 	/**
-	 * Answer if one object is in the container tree for another object.
+	 * Answer if one object is in the containment tree for another object.
 	 * @param obj The object whose containers in the containment tree should be checked. 
 	 * @param containerCandidate The object to test if it is in the containment tree.
 	 * @return true if containerCandidate is in the containment tree for obj.
@@ -39,5 +40,24 @@ public class ObjectsFinder {
 			container = container.eContainer();
 		}
 		return candidateMatches;
+	}
+	
+	/**
+	 * Return the first object in the containment tree that is a specified type.
+	 * @param obj The object whose containers in the containment tree should be checked.
+	 * @param containerClass For the containers in the containment tree, test if the
+	 * container is of (or is derived from) this type.
+	 * @return The container of type containerClass, or null if non exist.
+	 */
+	public static EObject findObjectInContainmentTree(EObject obj, EClass containerClass) {
+		EObject container = obj.eContainer();
+		while (container != null) {
+			if (containerClass.isSuperTypeOf(container.eClass())) {
+				return container;
+			}
+			container = container.eContainer();
+		}
+		
+		return container;
 	}
 }

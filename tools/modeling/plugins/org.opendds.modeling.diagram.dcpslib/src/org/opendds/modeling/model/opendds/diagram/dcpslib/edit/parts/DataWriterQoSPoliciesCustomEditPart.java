@@ -13,25 +13,25 @@ import org.eclipse.gmf.runtime.diagram.ui.editpolicies.EditPolicyRoles;
 import org.eclipse.gmf.runtime.diagram.ui.editpolicies.ResizableCompartmentEditPolicy;
 import org.eclipse.gmf.runtime.diagram.ui.figures.ResizableCompartmentFigure;
 import org.eclipse.gmf.runtime.notation.View;
-import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.policies.DomainParticipantQoSPoliciesCustomCanonicalEditPolicy;
-import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.policies.DomainParticipantQoSPoliciesCustomItemSemanticEditPolicy;
+import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.policies.DataWriterQoSPoliciesCustomCanonicalEditPolicy;
+import org.opendds.modeling.model.opendds.diagram.dcpslib.edit.policies.DataWriterQoSPoliciesCustomItemSemanticEditPolicy;
 import org.opendds.modeling.model.opendds.diagram.dcpslib.part.Messages;
 
 /**
  * @generated
  */
-public class DomainParticipantQoSPoliciesCustomEditPart extends
+public class DataWriterQoSPoliciesCustomEditPart extends
 		ListCompartmentEditPart {
 
 	/**
 	 * @generated
 	 */
-	public static final int VISUAL_ID = 7008;
+	public static final int VISUAL_ID = 7015;
 
 	/**
 	 * @generated
 	 */
-	public DomainParticipantQoSPoliciesCustomEditPart(View view) {
+	public DataWriterQoSPoliciesCustomEditPart(View view) {
 		super(view);
 	}
 
@@ -46,7 +46,7 @@ public class DomainParticipantQoSPoliciesCustomEditPart extends
 	 * @generated
 	 */
 	public String getCompartmentName() {
-		return Messages.DomainParticipantQoSPoliciesCustomEditPart_title;
+		return Messages.DataWriterQoSPoliciesCustomEditPart_title;
 	}
 
 	/**
@@ -67,13 +67,13 @@ public class DomainParticipantQoSPoliciesCustomEditPart extends
 		installEditPolicy(EditPolicy.PRIMARY_DRAG_ROLE,
 				new ResizableCompartmentEditPolicy());
 		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
-				new DomainParticipantQoSPoliciesCustomItemSemanticEditPolicy());
+				new DataWriterQoSPoliciesCustomItemSemanticEditPolicy());
 		installEditPolicy(EditPolicyRoles.CREATION_ROLE,
 				new CreationEditPolicy());
 		installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE,
 				new DragDropEditPolicy());
 		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE,
-				new DomainParticipantQoSPoliciesCustomCanonicalEditPolicy());
+				new DataWriterQoSPoliciesCustomCanonicalEditPolicy());
 	}
 
 	/**
