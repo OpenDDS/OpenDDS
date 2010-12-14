@@ -4,22 +4,74 @@
     <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="" domainId="42"/>
     <participants xmi:id="_esFCYPDvEd-I4rwicuuPOw" name="part1" domain="_bs2RIPDvEd-I4rwicuuPOw">
       <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" transportId="1">
-        <writers xsi:type="opendds:dataWriter" xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+        <type href="PolicyLib.opendds#_uvsboALlEeCRmKs-7z8NWA"/>
+        <entity_factory href="PolicyLib.opendds#_TwSSUAJKEeCBAfl9GiYbGg"/>
+        <group_data href="PolicyLib.opendds#_os3bUAKJEeCwwtlMwl8TGw"/>
+        <presentation href="PolicyLib.opendds#_wwhIsAKJEeCwwtlMwl8TGw"/>
+        <partition href="PolicyLib.opendds#_2V9HMAKJEeCwwtlMwl8TGw"/>
+        <writers xsi:type="opendds:dataWriter" xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" topic="_mcVnwPDxEd-I4rwicuuPOw">
+          <deadline href="PolicyLib.opendds#_uvsboALlEeCRmKs-7z8NWA"/>
+          <destination_order href="PolicyLib.opendds#_2mVAsALlEeCRmKs-7z8NWA"/>
+          <durability href="PolicyLib.opendds#_BoO1oALrEeCRmKs-7z8NWA"/>
+          <history href="PolicyLib.opendds#_VML9cALrEeCRmKs-7z8NWA"/>
+          <latency_budget href="PolicyLib.opendds#_CeUPoAMYEeCrTdheTycPFA"/>
+          <liveliness href="PolicyLib.opendds#_zAukQALrEeCRmKs-7z8NWA"/>
+          <ownership href="PolicyLib.opendds#_M2EAAALrEeCRmKs-7z8NWA"/>
+          <reliability href="PolicyLib.opendds#_n1lhgALrEeCRmKs-7z8NWA"/>
+          <resource_limits href="PolicyLib.opendds#_Y8bbcAMYEeCrTdheTycPFA"/>
+          <user_data href="PolicyLib.opendds#_X64DcAJKEeCBAfl9GiYbGg"/>
+          <durability_service href="PolicyLib.opendds#_5tsHgAMXEeCrTdheTycPFA"/>
+          <ownership_strength href="PolicyLib.opendds#_0lhFwAR1EeCsYqJtvYWomQ"/>
+          <transport_priority href="PolicyLib.opendds#_qJC4cAMYEeCrTdheTycPFA"/>
+          <lifespan href="PolicyLib.opendds#_JIkhIAMYEeCrTdheTycPFA"/>
+        </writers>
       </publishers>
       <entity_factory href="PolicyLib.opendds#_TwSSUAJKEeCBAfl9GiYbGg"/>
       <user_data href="PolicyLib.opendds#_X64DcAJKEeCBAfl9GiYbGg"/>
     </participants>
     <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
       <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportId="3">
-        <readers xsi:type="opendds:dataReader" xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+        <entity_factory href="PolicyLib.opendds#_TwSSUAJKEeCBAfl9GiYbGg"/>
+        <group_data href="PolicyLib.opendds#_os3bUAKJEeCwwtlMwl8TGw"/>
+        <presentation href="PolicyLib.opendds#_wwhIsAKJEeCwwtlMwl8TGw"/>
+        <partition href="PolicyLib.opendds#_WR3isQQVEeCsYqJtvYWomQ"/>
+        <readers xsi:type="opendds:dataReader" xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" topic="_mcVnwPDxEd-I4rwicuuPOw">
+          <deadline href="PolicyLib.opendds#_uvsboALlEeCRmKs-7z8NWA"/>
+          <destination_order href="PolicyLib.opendds#_2mVAsALlEeCRmKs-7z8NWA"/>
+          <durability href="PolicyLib.opendds#_BoO1oALrEeCRmKs-7z8NWA"/>
+          <history href="PolicyLib.opendds#_VML9cALrEeCRmKs-7z8NWA"/>
+          <latency_budget href="PolicyLib.opendds#_CeUPoAMYEeCrTdheTycPFA"/>
+          <liveliness href="PolicyLib.opendds#_zAukQALrEeCRmKs-7z8NWA"/>
+          <ownership href="PolicyLib.opendds#_M2EAAALrEeCRmKs-7z8NWA"/>
+          <reliability href="PolicyLib.opendds#_n1lhgALrEeCRmKs-7z8NWA"/>
+          <resource_limits href="PolicyLib.opendds#_Y8bbcAMYEeCrTdheTycPFA"/>
+          <user_data href="PolicyLib.opendds#_X64DcAJKEeCBAfl9GiYbGg"/>
+          <reader_data_lifecycle href="PolicyLib.opendds#_o9T74AQaEeCsYqJtvYWomQ"/>
+          <time_based_filter href="PolicyLib.opendds#_NdzdUAQbEeCsYqJtvYWomQ"/>
+        </readers>
       </subscribers>
+      <entity_factory href="PolicyLib.opendds#_TwSSUAJKEeCBAfl9GiYbGg"/>
+      <user_data href="PolicyLib.opendds#_X64DcAJKEeCBAfl9GiYbGg"/>
     </participants>
     <participants xmi:id="_4VZKwQMKEeCrTdheTycPFA" name="part3" domain="_bs2RIPDvEd-I4rwicuuPOw">
       <publishers xsi:type="opendds:publisher" xmi:id="_7YHU4AMKEeCrTdheTycPFA" name="pub3" transportId="-1">
         <writers xsi:type="opendds:dataWriter" xmi:id="_9_r0EAMKEeCrTdheTycPFA" name="writer3" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </publishers>
     </participants>
-    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
+    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw">
+      <deadline href="PolicyLib.opendds#_uvsboALlEeCRmKs-7z8NWA"/>
+      <destination_order href="PolicyLib.opendds#_2mVAsALlEeCRmKs-7z8NWA"/>
+      <durability href="PolicyLib.opendds#_BoO1oALrEeCRmKs-7z8NWA"/>
+      <durability_service href="PolicyLib.opendds#_5tsHgAMXEeCrTdheTycPFA"/>
+      <history href="PolicyLib.opendds#_VML9cALrEeCRmKs-7z8NWA"/>
+      <latency_budget href="PolicyLib.opendds#_CeUPoAMYEeCrTdheTycPFA"/>
+      <liveliness href="PolicyLib.opendds#_zAukQALrEeCRmKs-7z8NWA"/>
+      <ownership href="PolicyLib.opendds#_M2EAAALrEeCRmKs-7z8NWA"/>
+      <reliability href="PolicyLib.opendds#_n1lhgALrEeCRmKs-7z8NWA"/>
+      <resource_limits href="PolicyLib.opendds#_Y8bbcAMYEeCrTdheTycPFA"/>
+      <transport_priority href="PolicyLib.opendds#_qJC4cAMYEeCrTdheTycPFA"/>
+      <lifespan href="PolicyLib.opendds#_JIkhIAMYEeCrTdheTycPFA"/>
+    </topics>
   </dcpsLib>
   <dataLib xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data1">
     <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw" name="Message" isDcpsDataType="true">
