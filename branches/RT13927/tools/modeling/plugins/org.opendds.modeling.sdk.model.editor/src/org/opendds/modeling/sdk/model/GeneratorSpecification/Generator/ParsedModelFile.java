@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
@@ -35,7 +35,7 @@ public class ParsedModelFile {
 	private static XPathExpression transportIdExpr;
 
 	private String modelName;
-	private Set<Integer> transportIndices = new LinkedHashSet<Integer>();
+	private Set<Integer> transportIndices = new TreeSet<Integer>();
 
 	private Document modelDocument;
 	private DocumentBuilder documentBuilder;
@@ -43,18 +43,43 @@ public class ParsedModelFile {
 	private SdkGenerator.ErrorHandler errorHandler;
 	private SdkGenerator.FileProvider fileProvider;
 	
-	public ParsedModelFile( SdkGenerator.FileProvider fp, SdkGenerator.ErrorHandler eh) {
+	/**
+	 * Create a new object of the ParsedModelFile class.
+	 * This is the correct way to obtain new instances of this class.
+	 * 
+	 * @param fp - FileProvider to be used by a ParsedModelFile object.
+	 * @param eh - ErrorHandler to be used by a ParsedModelFile object.
+	 * @return   - ParsedModelFile object.
+	 */
+	public static ParsedModelFile create( SdkGenerator.FileProvider fp, SdkGenerator.ErrorHandler eh) {
+		return new ParsedModelFile( fp, eh);
+	}
+	
+	private ParsedModelFile( SdkGenerator.FileProvider fp, SdkGenerator.ErrorHandler eh) {
 		fileProvider = fp;
 		errorHandler = eh;
 	}
-	
+
+	private XPathFactory getPathFactory() {
+		if( pathFactory == null) {
+			pathFactory = XPathFactory.newInstance();
+		}
+		return pathFactory;
+	}
+
+	private XPath getXpath() {
+		if( xpath == null) {
+			xpath = getPathFactory().newXPath();
+			xpath.setNamespaceContext(new OpenDDSNamespaceContext());
+		}
+		return xpath;
+	}
+
 	private XPathExpression getNameExpr() {
 		if (nameExpr == null) {
-			pathFactory = XPathFactory.newInstance();
-			xpath = pathFactory.newXPath();
-			xpath.setNamespaceContext(new OpenDDSNamespaceContext());
 			try {
-				nameExpr = xpath.compile(modelNameExpression);
+				nameExpr = getXpath().compile(modelNameExpression);
+
 			} catch (XPathExpressionException e) {
 				errorHandler.error(Severity.ERROR, "getNameExpr",
 						"XPath expression not available to obtain the model name.", e);
@@ -65,11 +90,9 @@ public class ParsedModelFile {
 	
 	private XPathExpression getTransportIdExpr() {
 		if (transportIdExpr == null) {
-			pathFactory = XPathFactory.newInstance();
-			xpath = pathFactory.newXPath();
-			xpath.setNamespaceContext(new OpenDDSNamespaceContext());
 			try {
-				transportIdExpr = xpath.compile(transportIndexExpression);
+				transportIdExpr = getXpath().compile(transportIndexExpression);
+
 			} catch (XPathExpressionException e) {
 				errorHandler.error(Severity.ERROR, "getTransportIdExpr",
 						"XPath expression not available to obtain the active transport Id values.", e);
@@ -79,6 +102,12 @@ public class ParsedModelFile {
 	}
 	
 	public Document getModelDocument(String sourceName) {
+		if (this.sourceName != sourceName) {
+			this.sourceName = sourceName;
+			this.modelDocument = null;
+			this.transportIndices.clear();
+		}
+
 		if (modelDocument != null) {
 			return modelDocument;
 		}
@@ -167,7 +196,13 @@ public class ParsedModelFile {
 		return modelName;
 	}
 	
-	public Set<Integer> getTransportIds() {
+	public Set<Integer> getTransportIds( String sourceName) {
+		if (this.sourceName != sourceName) {
+			this.sourceName = sourceName;
+			this.modelDocument = null;
+			this.transportIndices.clear();
+		}
+
 		if (!this.transportIndices.isEmpty()) {
 			return transportIndices;
 		}

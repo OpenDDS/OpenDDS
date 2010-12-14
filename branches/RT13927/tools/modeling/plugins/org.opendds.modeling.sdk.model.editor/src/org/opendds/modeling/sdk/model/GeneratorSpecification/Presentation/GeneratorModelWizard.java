@@ -7,21 +7,14 @@
 package org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation;
 
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import java.util.MissingResourceException;
-import java.util.StringTokenizer;
-import org.eclipse.emf.common.CommonPlugin;
+import java.util.Set;
 import org.eclipse.emf.common.util.URI;
 
-import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
@@ -44,19 +37,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
-
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Combo;
+
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
@@ -70,11 +58,13 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.CodeGen;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorFactory;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorPackage;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Provider.GeneratorEditPlugin;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.ParsedModelFile;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGeneratorFactory;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Instance;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Instances;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.ModelFile;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.TargetDir;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Transport;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.TransportOffset;
 
 
@@ -138,13 +128,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	 */
 	protected GeneratorModelWizardNewFileCreationPage newFileCreationPage;
 
-	/**
-	 * This is the initial object creation page.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected GeneratorModelWizardInitialObjectCreationPage initialObjectCreationPage;
+	protected GeneratorModelWizardModelSelectionPage modelSelectionPage;
 
 	/**
 	 * Remember the selection during initialization for populating the default container.
@@ -161,15 +145,11 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	 * @generated
 	 */
 	protected IWorkbench workbench;
-
-	/**
-	 * Caches the names of the types that can be created as the root object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected List<String> initialObjectNames;
-
+	
+	protected URI modelFileURI;
+	
+	protected URI targetDirURI;
+	
 	/**
 	 * This just records the information.
 	 * <!-- begin-user-doc -->
@@ -184,31 +164,15 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	}
 
 	/**
-	 * Returns the names of the types that can be created as the root object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected Collection<String> getInitialObjectNames() {
-		if (initialObjectNames == null) {
-			initialObjectNames = new ArrayList<String>();
-			for (EClassifier eClassifier : generatorPackage.getEClassifiers()) {
-				if (eClassifier instanceof EClass) {
-					EClass eClass = (EClass)eClassifier;
-					if (!eClass.isAbstract()) {
-						initialObjectNames.add(eClass.getName());
-					}
-				}
-			}
-			Collections.sort(initialObjectNames, CommonPlugin.INSTANCE.getComparator());
-		}
-		return initialObjectNames;
-	}
-
-	/**
 	 * Create a new model.
 	 * <!-- begin-user-doc -->
-	 * These documents are always rooted with a "Code Gen" element.
+	 * These documents are always rooted with a "Code Gen" element.  The
+	 * initial model will have the ModelFile, TargetDir, and Instances top
+	 * level elements.  Instances will contain a single Instance with the
+	 * name 'default', which will have a 'TransportOffset' and one
+	 * 'Transport' element for each unique transport index used in the
+	 * model.  All of these should be immutable, so that we can then
+	 * validate that all other instances have the same transports defined.
 	 * <!-- end-user-doc -->
 	 * @generated NOT
 	 */
@@ -216,18 +180,13 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		CodeGen codeGen = generatorFactory.createCodeGen();
 		
 		ModelFile modelFile = generatorFactory.createModelFile();
-		if( false) {
-			// TODO populate the initial value from the wizard if selected.
-			String initialModelfile = "<none>";
-			modelFile.setName(initialModelfile);
+		if( modelFileURI != null && !modelFileURI.isEmpty()) {
+			modelFile.setName( modelFileURI.toPlatformString(true));
 		}
-		codeGen.setSource(modelFile);
 
 		TargetDir targetDir = generatorFactory.createTargetDir();
-		if( false) {
-			// TODO populate the initial value from the wizard if selected.
-			String initialTargetdir = "<none>";
-			targetDir.setName(initialTargetdir);
+		if( targetDirURI != null && !targetDirURI.isEmpty()) {
+			targetDir.setName( targetDirURI.toPlatformString(true));
 		}
 		codeGen.setTarget(targetDir);
 
@@ -239,6 +198,19 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		TransportOffset transportOffset = generatorFactory.createTransportOffset();
 		transportOffset.setValue(0);
 		instance.setTransportOffset(transportOffset);
+
+		if( modelFile.getName() != null) {
+			// Load the default instance with a transport for each index found in the model.
+			ParsedModelFile parsedModelFile = SdkGeneratorFactory.createParsedModelFile(
+					(Window)this.workbench.getActiveWorkbenchWindow());
+			Set<Integer> transportIndices = parsedModelFile.getTransportIds(modelFile.getName());
+			for( Integer current : transportIndices) {
+				Transport transport = generatorFactory.createTransport();
+				transport.setTransportIndex(current);
+				instance.getTransport().add(transport);
+			}
+			codeGen.setSource(modelFile);
+		}
 
 		instances.getInstance().add(instance);
 		
@@ -386,211 +358,39 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	}
 
 	/**
-	 * This is the page where the type of object to create is selected.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
+	 * @author martinezm
+	 *
 	 */
-	public class GeneratorModelWizardInitialObjectCreationPage extends WizardPage {
-		/**
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		protected Combo initialObjectField;
+	public class GeneratorModelWizardModelSelectionPage extends WizardPage {
 
 		/**
-		 * @generated
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
+		 * @param pageName
 		 */
-		protected List<String> encodings;
-
-		/**
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		protected Combo encodingField;
-
-		/**
-		 * Pass in the selection.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		public GeneratorModelWizardInitialObjectCreationPage(String pageId) {
-			super(pageId);
+		public GeneratorModelWizardModelSelectionPage(String pageName) {
+			super(pageName);
+			// TODO Auto-generated constructor stub
 		}
 
 		/**
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
+		 * @param pageName
+		 * @param title
+		 * @param titleImage
 		 */
-		public void createControl(Composite parent) {
-			Composite composite = new Composite(parent, SWT.NONE); {
-				GridLayout layout = new GridLayout();
-				layout.numColumns = 1;
-				layout.verticalSpacing = 12;
-				composite.setLayout(layout);
-
-				GridData data = new GridData();
-				data.verticalAlignment = GridData.FILL;
-				data.grabExcessVerticalSpace = true;
-				data.horizontalAlignment = GridData.FILL;
-				composite.setLayoutData(data);
-			}
-
-			Label containerLabel = new Label(composite, SWT.LEFT);
-			{
-				containerLabel.setText(GeneratorEditorPlugin.INSTANCE.getString("_UI_ModelObject"));
-
-				GridData data = new GridData();
-				data.horizontalAlignment = GridData.FILL;
-				containerLabel.setLayoutData(data);
-			}
-
-			initialObjectField = new Combo(composite, SWT.BORDER);
-			{
-				GridData data = new GridData();
-				data.horizontalAlignment = GridData.FILL;
-				data.grabExcessHorizontalSpace = true;
-				initialObjectField.setLayoutData(data);
-			}
-
-			for (String objectName : getInitialObjectNames()) {
-				initialObjectField.add(getLabel(objectName));
-			}
-
-			if (initialObjectField.getItemCount() == 1) {
-				initialObjectField.select(0);
-			}
-			initialObjectField.addModifyListener(validator);
-
-			Label encodingLabel = new Label(composite, SWT.LEFT);
-			{
-				encodingLabel.setText(GeneratorEditorPlugin.INSTANCE.getString("_UI_XMLEncoding"));
-
-				GridData data = new GridData();
-				data.horizontalAlignment = GridData.FILL;
-				encodingLabel.setLayoutData(data);
-			}
-			encodingField = new Combo(composite, SWT.BORDER);
-			{
-				GridData data = new GridData();
-				data.horizontalAlignment = GridData.FILL;
-				data.grabExcessHorizontalSpace = true;
-				encodingField.setLayoutData(data);
-			}
-
-			for (String encoding : getEncodings()) {
-				encodingField.add(encoding);
-			}
-
-			encodingField.select(0);
-			encodingField.addModifyListener(validator);
-
-			setPageComplete(validatePage());
-			setControl(composite);
+		public GeneratorModelWizardModelSelectionPage(String pageName,
+				String title, ImageDescriptor titleImage) {
+			super(pageName, title, titleImage);
+			// TODO Auto-generated constructor stub
 		}
 
-		/**
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		protected ModifyListener validator =
-			new ModifyListener() {
-				public void modifyText(ModifyEvent e) {
-					setPageComplete(validatePage());
-				}
-			};
-
-		/**
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		protected boolean validatePage() {
-			return getInitialObjectName() != null && getEncodings().contains(encodingField.getText());
-		}
-
-		/**
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 		 */
 		@Override
-		public void setVisible(boolean visible) {
-			super.setVisible(visible);
-			if (visible) {
-				if (initialObjectField.getItemCount() == 1) {
-					initialObjectField.clearSelection();
-					encodingField.setFocus();
-				}
-				else {
-					encodingField.clearSelection();
-					initialObjectField.setFocus();
-				}
-			}
+		public void createControl(Composite parent) {
+			// TODO Auto-generated method stub
+
 		}
 
-		/**
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		public String getInitialObjectName() {
-			String label = initialObjectField.getText();
-
-			for (String name : getInitialObjectNames()) {
-				if (getLabel(name).equals(label)) {
-					return name;
-				}
-			}
-			return null;
-		}
-
-		/**
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		public String getEncoding() {
-			return encodingField.getText();
-		}
-
-		/**
-		 * Returns the label for the specified type name.
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		protected String getLabel(String typeName) {
-			try {
-				return GeneratorEditPlugin.INSTANCE.getString("_UI_" + typeName + "_type");
-			}
-			catch(MissingResourceException mre) {
-				GeneratorEditorPlugin.INSTANCE.log(mre);
-			}
-			return typeName;
-		}
-
-		/**
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
-		 * @generated
-		 */
-		protected Collection<String> getEncodings() {
-			if (encodings == null) {
-				encodings = new ArrayList<String>();
-				for (StringTokenizer stringTokenizer = new StringTokenizer(GeneratorEditorPlugin.INSTANCE.getString("_UI_XMLEncodingChoices")); stringTokenizer.hasMoreTokens(); ) {
-					encodings.add(stringTokenizer.nextToken());
-				}
-			}
-			return encodings;
-		}
 	}
 
 	/**
@@ -621,7 +421,9 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 				//
 				IResource selectedResource = (IResource)selectedElement;
 				if (selectedResource.getType() == IResource.FILE) {
-					IFile selectedFile = (IFile)selectedResource;
+					// If a file is selected, that will be used as the model
+					// source file, and a new file will be created for this
+					modelFileURI = URI.createPlatformResourceURI(selectedResource.getFullPath().toOSString(),true);
 					selectedResource = selectedResource.getParent();
 				}
 
@@ -634,16 +436,19 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 
 					// Make up a unique new name here.
 					//
-					String defaultModelBaseFilename = GeneratorEditorPlugin.INSTANCE.getString("_UI_GeneratorEditorFilenameDefaultBase");
-					String defaultModelFilenameExtension = FILE_EXTENSIONS.get(0);
-					String modelFilename = defaultModelBaseFilename + "." + defaultModelFilenameExtension;
-					for (int i = 1; ((IContainer)selectedResource).findMember(modelFilename) != null; ++i) {
-						modelFilename = defaultModelBaseFilename + i + "." + defaultModelFilenameExtension;
+					String defaultGenBaseFilename = GeneratorEditorPlugin.INSTANCE.getString("_UI_GeneratorEditorFilenameDefaultBase");
+					String defaultGenFilenameExtension = FILE_EXTENSIONS.get(0);
+					String genFilename = defaultGenBaseFilename + "." + defaultGenFilenameExtension;
+					for (int i = 1; ((IContainer)selectedResource).findMember(genFilename) != null; ++i) {
+						genFilename = defaultGenBaseFilename + i + "." + defaultGenFilenameExtension;
 					}
-					newFileCreationPage.setFileName(modelFilename);
+					newFileCreationPage.setFileName(genFilename);
 				}
 			}
 		}
+		
+//		modelSelectionPage = new GeneratorModelWizardModelSelectionPage("Model File and Target","Model File and Target",null);
+//		addPage(modelSelectionPage);
 	}
 
 	/**

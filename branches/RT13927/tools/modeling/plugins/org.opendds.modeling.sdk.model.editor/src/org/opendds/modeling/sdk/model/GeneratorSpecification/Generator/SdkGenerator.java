@@ -5,17 +5,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
-import javax.xml.XMLConstants;
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -26,38 +17,20 @@ import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGenerator.ErrorHandler.Severity;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 public class SdkGenerator {
-	private static final String modelNameExpression = "//opendds:OpenDDSModel/@name";
-	private static final String transportIndexExpression = "//@transportId";
-	private static final String openDDSNamespace = "http://www.opendds.org/modeling/schemas/OpenDDS/1.0";
 
-	private static XPathFactory pathFactory;
-	private static XPath xpath;
-	private static XPathExpression nameExpr;
-	private static XPathExpression transportIdExpr;
 	private static TransformerFactory tFactory;
 	private static Transformer idlTransformer;
 	private static Transformer hTransformer;
 	private static Transformer cppTransformer;
 	private static Transformer mpcTransformer;
-
-	private String modelName;
-	private Set<Integer> transportIndices = new LinkedHashSet<Integer>();
-	private Document modelDocument;
-	private DocumentBuilder documentBuilder;
-	private String sourceName;
+	
+	private ParsedModelFile parsedModelFile;
 	private ErrorHandler errorHandler;
 	private FileProvider fileProvider;
 
@@ -109,10 +82,34 @@ public class SdkGenerator {
 		URL fromBundle(String fileName) throws MalformedURLException;
 		void refresh(String targetFolder);
 	}
+	
+	/**
+	 * Create a new instance of the SDK code generation class.
+	 * 
+	 * This is the correct way to obtain new instances of the SDK code
+	 * generation class.
+	 * 
+	 * @param fp - file provider to be used by the SDK code generation class.
+	 * @param eh - error handler to be used by the SDK code generation class.
+	 * @return   - a new instance of the SDK code generation class.
+	 */
+	public static SdkGenerator create( FileProvider fp, ErrorHandler eh) {
+		return new SdkGenerator( fp, eh);
+	}
 
-	public SdkGenerator(FileProvider fp, ErrorHandler eh) {
+	/**
+	 * Construct an instance of the SDK code generation class.
+	 * 
+	 * The correct way to create new instances of the SDK code generator
+	 * is to call the static create() method.
+	 * 
+	 * @param fp - file provider for the code generator.
+	 * @param eh - error handler for the code generator.
+	 */
+	private SdkGenerator(FileProvider fp, ErrorHandler eh) {
 		fileProvider = fp;
 		errorHandler = eh;
+		parsedModelFile = SdkGeneratorFactory.createParsedModelFile(fp, eh);
 	}
 
 	private TransformerFactory getTransformerFactory() {
@@ -120,154 +117,6 @@ public class SdkGenerator {
 			tFactory = TransformerFactory.newInstance();
 		}
 		return tFactory;
-	}
-	
-	private XPathExpression getNameExpr() {
-		if (nameExpr == null) {
-			pathFactory = XPathFactory.newInstance();
-			xpath = pathFactory.newXPath();
-			xpath.setNamespaceContext(new OpenDDSNamespaceContext());
-			try {
-				nameExpr = xpath.compile(modelNameExpression);
-			} catch (XPathExpressionException e) {
-				errorHandler.error(Severity.ERROR, "getNameExpr",
-						"XPath expression not available to obtain the model name.", e);
-			}
-		}
-		return nameExpr;
-	}
-	
-	private XPathExpression getTransportIdExpr() {
-		if (transportIdExpr == null) {
-			pathFactory = XPathFactory.newInstance();
-			xpath = pathFactory.newXPath();
-			xpath.setNamespaceContext(new OpenDDSNamespaceContext());
-			try {
-				transportIdExpr = xpath.compile(transportIndexExpression);
-			} catch (XPathExpressionException e) {
-				errorHandler.error(Severity.ERROR, "getTransportIdExpr",
-						"XPath expression not available to obtain the active transport Id values.", e);
-			}
-		}
-		return transportIdExpr;
-	}
-	
-	private Document getModelDocument(String sourceName) {
-		if (modelDocument != null) {
-			return modelDocument;
-		}
-
-		try {
-			URL modelUrl = fileProvider.fromWorkspace(sourceName);
-			File modelFile = new File(modelUrl.toURI());
-			if (!modelFile.exists()) {
-				errorHandler.error(Severity.ERROR, "getModelDocument",
-						"Model file " + sourceName + " does not exist.", null);
-				return null;
-			}
-
-			// We have a good input file, now parse the XML.
-			if (documentBuilder == null) {
-				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-				docFactory.setNamespaceAware(true);
-				try {
-					documentBuilder = docFactory.newDocumentBuilder();
-	
-				} catch (ParserConfigurationException e) {
-					errorHandler.error(Severity.ERROR, "getModelDocument",
-							"Problem configuring the parser for file " + sourceName, e);
-					return null;
-				}
-			}
-
-			modelDocument = documentBuilder.parse(modelFile);
-
-		} catch (SAXException e) {
-			errorHandler.error(Severity.ERROR, "getModelDocument",
-					"Problem parsing the source file " + sourceName, e);
-		} catch (IOException e) {
-			errorHandler.error(Severity.ERROR, "getModelDocument",
-					"Problem reading the source file " + sourceName, e);
-		} catch (URISyntaxException e) {
-			errorHandler.error(Severity.ERROR, "getModelDocument",
-					"Problem reading the source file " + sourceName, e);
-		}
-		return modelDocument;
-	}
-
-	public String getModelName(String sourceName) {
-		if (this.sourceName == sourceName) {
-			return modelName;
-		}
-		this.sourceName = sourceName;
-		this.modelDocument = null;
-		this.transportIndices.clear();
-
-		XPathExpression nameExpr = getNameExpr();
-		if (nameExpr == null) {
-			return null; // messages were generated in the get call.
-		}
-
-		Document doc = getModelDocument(sourceName);
-		if (doc == null) {
-			return null; // messages were generated in the get call.
-		}
-		
-		try {
-			Object result = nameExpr.evaluate(doc, XPathConstants.NODESET);
-			NodeList nodes = (NodeList) result;
-			switch(nodes.getLength()) {
-			case 1:
-				modelName = nodes.item(0).getNodeValue();
-				break;
-
-			case 0:
-				errorHandler.error(Severity.ERROR, "getModelName",
-						"Could not find any model name in the source file " + sourceName,
-						null);
-				break;
-
-			default:
-				errorHandler.error(Severity.ERROR, "getModelName",
-						"Found " + nodes.getLength() + " candidate model names in the source file "
-						+ sourceName + ", which is too many!", null);
-				break;
-			}
-
-		} catch (XPathExpressionException e) {
-			errorHandler.error(Severity.ERROR, "getModelName",
-					"Problem extracting the modelname from the source file " + sourceName, e);
-		}
-		return modelName;
-	}
-	
-	public Set<Integer> getTransportIds() {
-		if (!this.transportIndices.isEmpty()) {
-			return transportIndices;
-		}
-
-		XPathExpression transportIdExpr = getTransportIdExpr();
-		if (transportIdExpr == null) {
-			return null; // messages were generated in the get call.
-		}
-
-		Document doc = getModelDocument(this.sourceName);
-		if (doc == null) {
-			return null; // messages were generated in the get call.
-		}
-		
-		try {
-			Object result = transportIdExpr.evaluate(doc, XPathConstants.NODESET);
-			NodeList nodes = (NodeList) result;
-			for( int index = 0; index < nodes.getLength(); ++index) {
-				transportIndices.add(Integer.valueOf(nodes.item(index).getNodeValue()));
-			}
-
-		} catch (XPathExpressionException e) {
-			errorHandler.error(Severity.ERROR, "getTransportIds",
-					"Problem extracting the transport indices from the source file " + this.sourceName, e);
-		}
-		return this.transportIndices;
 	}
 	
 	public void generate(TransformType which, String sourceName, String targetName) {
@@ -282,9 +131,14 @@ public class SdkGenerator {
 					return;
 				}
 				Source converter = new StreamSource(xsl.openStream());
+				Transformer transformer = factory.newTransformer(converter);
+				
+				// TODO Base this on resources rather than string parsing.
+				//      I suspect that if we phrase the names in terms of
+				//      eclipse URI types (platform:/project/, platform:/plugin/,
+				//      etc. that we may not need a 'special' one here.
 				final String dir = which.xslFilename().substring(0, which.xslFilename().lastIndexOf("/"));
 				final String sourceDir = sourceName.contains("/") ? sourceName.substring(0, sourceName.lastIndexOf("/")) : ".";
-				Transformer transformer = factory.newTransformer(converter);
 				transformer.setURIResolver(new URIResolver() {
 					public Source resolve(String fname, String base) throws TransformerException {
 						try {
@@ -305,6 +159,7 @@ public class SdkGenerator {
 					}
 				});
 				which.setTransformer(transformer);
+
 			} catch (TransformerConfigurationException e) {
 				errorHandler.error(Severity.ERROR, which.dialogTitle(),
 						"Failed to configure the transformer.", e);
@@ -324,7 +179,7 @@ public class SdkGenerator {
 				return;
 			}
 	
-			String modelname = getModelName(sourceName);
+			String modelname = parsedModelFile.getModelName(sourceName);
 			if (modelname == null) {
 				return; // messages were generated in the get call.
 			}
@@ -338,12 +193,13 @@ public class SdkGenerator {
 		}
 		
 		try {
-			Document document = getModelDocument(sourceName);
+			Document document = parsedModelFile.getModelDocument(sourceName);
 			if (document == null) {
 				return; // messages were generated in the get call.
 			}
 			Source source = new DOMSource(document);
 			which.transform(source, result);
+
 		} catch (TransformerException e) {
 			errorHandler.error(Severity.ERROR, which.dialogTitle(),
 					"Transformation failed!", e);
@@ -351,32 +207,14 @@ public class SdkGenerator {
 		}
 
 		try {
+			// Refresh the container where we just placed the result
+			// as a service to the user.
 			fileProvider.refresh(targetName);
+
 		} catch (Exception e) {
 			errorHandler.error(Severity.WARNING, which.dialogTitle(),
 					"Unable to refresh output folder " + targetName, e);
 		}
-	}
-
-	public class OpenDDSNamespaceContext implements NamespaceContext {
-	    public String getNamespaceURI(String prefix) {
-	        if (prefix == null) throw new NullPointerException("Null prefix");
-	        else if ("opendds".equals(prefix)) return openDDSNamespace;
-	        else if ("xml".equals(prefix)) return XMLConstants.XML_NS_URI;
-	        return XMLConstants.NULL_NS_URI;
-	    }
-
-	    // This method isn't necessary for XPath processing.
-	    public String getPrefix(String uri) {
-	        throw new UnsupportedOperationException();
-	    }
-
-	    // This method isn't necessary for XPath processing either.
-	    @SuppressWarnings("unchecked")
-		public Iterator getPrefixes(String uri) {
-	        throw new UnsupportedOperationException();
-	    }
-
 	}
 
 	/// Allows testing of code generation outside of Eclipse, by instantiating
