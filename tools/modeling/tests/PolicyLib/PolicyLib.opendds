@@ -52,7 +52,7 @@
         <writers xsi:type="opendds:dataWriter" xmi:id="_9_r0EAMKEeCrTdheTycPFA" name="writer3" ownership="_M2EAAALrEeCRmKs-7z8NWA" ownership_strength="_2rViwAR1EeCsYqJtvYWomQ" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </publishers>
     </participants>
-    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw" durability="_qyi6YAR2EeCsYqJtvYWomQ"/>
+    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw" deadline="_uvsboALlEeCRmKs-7z8NWA" destination_order="_2mVAsALlEeCRmKs-7z8NWA" durability="_qyi6YAR2EeCsYqJtvYWomQ" durability_service="_5tsHgAMXEeCrTdheTycPFA" history="_VML9cALrEeCRmKs-7z8NWA" latency_budget="_CeUPoAMYEeCrTdheTycPFA" liveliness="_zAukQALrEeCRmKs-7z8NWA" ownership="_M2EAAALrEeCRmKs-7z8NWA" reliability="_n1lhgALrEeCRmKs-7z8NWA" resource_limits="_Y8bbcAMYEeCrTdheTycPFA" transport_priority="_qJC4cAMYEeCrTdheTycPFA" lifespan="_JIkhIAMYEeCrTdheTycPFA"/>
   </dcpsLib>
   <dataLib xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data1">
     <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw" name="Message" isDcpsDataType="true">

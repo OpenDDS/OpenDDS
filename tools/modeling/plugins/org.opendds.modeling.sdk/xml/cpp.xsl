@@ -35,6 +35,7 @@
 <xsl:variable name="subscribers"  select="//subscribers"/>
 <xsl:variable name="topics"       select="//topics"/>
 <xsl:variable name="types"        select="//types"/>
+<xsl:variable name="entities"     select="$participants | $publishers | $subscribers | $readers | $writers | $topics" />
 
 <!-- Indices (lookup tables are at the bottom of this document) -->
 <xsl:key
@@ -679,106 +680,130 @@ Elements::Data::copySubscriptionQos(
 <!-- End of main processing template. -->
 
 <xsl:template name="process-policies">
-  <xsl:param name="reffed-policies" select="$policies[@xmi:id = current()/@*]"/>
   <xsl:param name="base"/>
 
+  <!-- direct references -->
+  <xsl:variable name="reffed-policies" select="$policies[@xmi:id = current()/@*]"/>
+
+  <xsl:message>Processing <xsl:value-of select="count($reffed-policies)"/> policies.</xsl:message>
   <xsl:for-each select="$reffed-policies">
-    <xsl:variable name="policy-type" select="@xsi:type"/>
+    <xsl:call-template name="process-policy">
+      <xsl:with-param name="base" select="$base"/>
+    </xsl:call-template>
+  </xsl:for-each>
 
-    <!-- lookup the field name for the current policy type. -->
-    <xsl:variable name="field">
-      <xsl:for-each select="$lut-policies"> <!-- Change context for lookup -->
-        <xsl:value-of select="key('lut-qos-field', $policy-type)/text()"/>
-      </xsl:for-each>
-    </xsl:variable>
-
-    <!-- lookup whether to quote the value. -->
-    <xsl:variable name="should-quote">
-      <xsl:for-each select="$lut-policies"> <!-- Change context for lookup -->
-        <xsl:value-of select="key('lut-qos-field', $policy-type)/@quote"/>
-      </xsl:for-each>
-    </xsl:variable>
-
-    <!-- process all of the policy attributes -->
-    <xsl:for-each select="@*">
-      <xsl:choose>
-        <!-- ignore the 'name', 'type' and 'id' attributes of the policy. -->
-        <xsl:when test="name() = 'name' or 
-                        name() = 'xsi:type' or 
-                        name() = 'xmi:id'"/>
-
-        <xsl:when test="../@xsi:type = 'opendds:udQosPolicy'
-                     or ../@xsi:type = 'opendds:tdQosPolicy'
-                     or ../@xsi:type = 'opendds:gdQosPolicy'">
-          <xsl:variable name="value" select="concat($base, $field, '.value')"/>
-          <xsl:value-of select="concat('  ', $value, '.replace(', $newline, 
-                                  '      ', $value, '.length(),', $newline,
-                                  '      ', $value, '.length(),', $newline,
-                                  '      (CORBA::Octet*)&quot;', ., '&quot;);', $newline)"/>
-
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:variable name="suffix-attr-name" select="concat(name(), '_suffix')"/>
-          <xsl:variable name="suffix">
-            <xsl:for-each select="$lut-policies"> <!-- Change context for lookup -->
-              <xsl:value-of select="key('lut-qos-field', $policy-type)/@*[name() = $suffix-attr-name]"/>
-            </xsl:for-each>
-          </xsl:variable>
-          
-          <xsl:value-of select="concat('  ', $base, $field, '.', name(), ' = ')"/>
-
-          <!-- quote the value if specified in the lookup table. -->
-          <xsl:choose>
-            <xsl:when test="$should-quote = 'true'">
-              <xsl:value-of select="concat('&quot;', ., $suffix, '&quot;;')"/>
-            </xsl:when>
-            <xsl:otherwise>
-              <xsl:value-of select="concat(., $suffix, ';')"/>
-            </xsl:otherwise>
-          </xsl:choose>
-
-          <xsl:value-of select="$newline"/>
-        </xsl:otherwise>
-      </xsl:choose>
+  <xsl:variable name="external-policy-refs" select="*[name() != 'datatype'][@href]"/>
+  <xsl:message>Found <xsl:value-of select="count($external-policy-refs)"/> policy refs.</xsl:message>
+  <xsl:for-each select="$external-policy-refs">
+    <xsl:variable name="policy-file" select="substring-before(@href, '#')"/>
+    <xsl:variable name="policy-id" select="substring-after(@href, '#')"/>
+    <!-- Context switch -->
+    <xsl:for-each select="document($policy-file)//*[@xmi:id = $policy-id]">
+      <xsl:call-template name="process-policy">
+        <xsl:with-param name="base" select="$base"/>
+      </xsl:call-template>
     </xsl:for-each>
+  </xsl:for-each>
 
-    <!-- special handling cases -->
+</xsl:template>
+
+<xsl:template name="process-policy">
+  <xsl:param name="base"/>
+  <xsl:variable name="policy-type" select="@xsi:type"/>
+
+  <!-- lookup the field name for the current policy type. -->
+  <xsl:variable name="field">
+    <xsl:for-each select="$lut-policies"> <!-- Change context for lookup -->
+      <xsl:value-of select="key('lut-qos-field', $policy-type)/text()"/>
+    </xsl:for-each>
+  </xsl:variable>
+
+  <!-- lookup whether to quote the value. -->
+  <xsl:variable name="should-quote">
+    <xsl:for-each select="$lut-policies"> <!-- Change context for lookup -->
+      <xsl:value-of select="key('lut-qos-field', $policy-type)/@quote"/>
+    </xsl:for-each>
+  </xsl:variable>
+
+  <!-- process all of the policy attributes -->
+  <xsl:for-each select="@*">
     <xsl:choose>
-      <xsl:when test="@xsi:type = 'opendds:partitionQosPolicy' and count(names) > 0">
-        <xsl:value-of select="concat('  ', $base, $field, '.name.length(',
-                                     count(names), ');', $newline)"/>
-        <xsl:for-each select="names">
-          <xsl:value-of select="concat('  ', $base, $field, '.name[', 
-                                       position() - 1, '] = &quot;',
-                                       ., '&quot;;', $newline)"/>
-        </xsl:for-each>
+      <!-- ignore the 'name', 'type' and 'id' attributes of the policy. -->
+      <xsl:when test="name() = 'name' or 
+                      name() = 'xsi:type' or 
+                      name() = 'xmi:id'"/>
+
+      <xsl:when test="../@xsi:type = 'opendds:udQosPolicy'
+                   or ../@xsi:type = 'opendds:tdQosPolicy'
+                   or ../@xsi:type = 'opendds:gdQosPolicy'">
+        <xsl:variable name="value" select="concat($base, $field, '.value')"/>
+        <xsl:value-of select="concat('  ', $value, '.replace(', $newline, 
+                                '      ', $value, '.length(),', $newline,
+                                '      ', $value, '.length(),', $newline,
+                                '      (CORBA::Octet*)&quot;', ., '&quot;);', $newline)"/>
+
       </xsl:when>
-      <xsl:when test="*/@second | */@nanosecond">
-        <xsl:for-each select="*">
-          <xsl:variable name="sec">
-            <xsl:choose>
-              <xsl:when test="@second">
-                <xsl:value-of select="@second"/>
-              </xsl:when>
-              <xsl:otherwise>0</xsl:otherwise>
-            </xsl:choose>
-          </xsl:variable>
-          <xsl:variable name="nanosec">
-            <xsl:choose>
-              <xsl:when test="@nanosecond">
-                <xsl:value-of select="@nanosecond"/>
-              </xsl:when>
-              <xsl:otherwise>0</xsl:otherwise>
-            </xsl:choose>
-          </xsl:variable>
-          <xsl:value-of select="concat('  ', $base, $field, '.', name(), 
-                                       '.sec = ', $sec, ';', $newline)"/>
-          <xsl:value-of select="concat('  ', $base, $field, '.', name(), 
-                                       '.nanosec = ', $nanosec, ';', $newline)"/>
-        </xsl:for-each>
-      </xsl:when>
+      <xsl:otherwise>
+        <xsl:variable name="suffix-attr-name" select="concat(name(), '_suffix')"/>
+        <xsl:variable name="suffix">
+          <xsl:for-each select="$lut-policies"> <!-- Change context for lookup -->
+            <xsl:value-of select="key('lut-qos-field', $policy-type)/@*[name() = $suffix-attr-name]"/>
+          </xsl:for-each>
+        </xsl:variable>
+        
+        <xsl:value-of select="concat('  ', $base, $field, '.', name(), ' = ')"/>
+
+        <!-- quote the value if specified in the lookup table. -->
+        <xsl:choose>
+          <xsl:when test="$should-quote = 'true'">
+            <xsl:value-of select="concat('&quot;', ., $suffix, '&quot;;')"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="concat(., $suffix, ';')"/>
+          </xsl:otherwise>
+        </xsl:choose>
+
+        <xsl:value-of select="$newline"/>
+      </xsl:otherwise>
     </xsl:choose>
   </xsl:for-each>
+
+  <!-- special handling cases -->
+  <xsl:choose>
+    <xsl:when test="@xsi:type = 'opendds:partitionQosPolicy' and count(names) > 0">
+      <xsl:value-of select="concat('  ', $base, $field, '.name.length(',
+                                   count(names), ');', $newline)"/>
+      <xsl:for-each select="names">
+        <xsl:value-of select="concat('  ', $base, $field, '.name[', 
+                                     position() - 1, '] = &quot;',
+                                     ., '&quot;;', $newline)"/>
+      </xsl:for-each>
+    </xsl:when>
+    <xsl:when test="*/@second | */@nanosecond">
+      <xsl:for-each select="*">
+        <xsl:variable name="sec">
+          <xsl:choose>
+            <xsl:when test="@second">
+              <xsl:value-of select="@second"/>
+            </xsl:when>
+            <xsl:otherwise>0</xsl:otherwise>
+          </xsl:choose>
+        </xsl:variable>
+        <xsl:variable name="nanosec">
+          <xsl:choose>
+            <xsl:when test="@nanosecond">
+              <xsl:value-of select="@nanosecond"/>
+            </xsl:when>
+            <xsl:otherwise>0</xsl:otherwise>
+          </xsl:choose>
+        </xsl:variable>
+        <xsl:value-of select="concat('  ', $base, $field, '.', name(), 
+                                     '.sec = ', $sec, ';', $newline)"/>
+        <xsl:value-of select="concat('  ', $base, $field, '.', name(), 
+                                     '.nanosec = ', $nanosec, ';', $newline)"/>
+      </xsl:for-each>
+    </xsl:when>
+  </xsl:choose>
 </xsl:template>
 
 <!-- Process QoS policy names into value assignments. -->
