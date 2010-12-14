@@ -260,9 +260,11 @@ Elements::Data::loadDomains()
   <!-- '  this->domains_[ Participants::(domainParticipant/@name)] = (domainParticipant/@domain);\n' -->
   <xsl:for-each select="$participants/@domain">
     <xsl:text>  this->domains_[ Participants::</xsl:text>
-    <xsl:value-of select="../@name"/>
-      <xsl:text>] = </xsl:text>
-      <xsl:value-of select="$domains[@xmi:id = current()]/@domainId"/>
+    <xsl:call-template name="normalize-identifier">
+      <xsl:with-param name="identifier" select="../@name"/>
+    </xsl:call-template>
+    <xsl:text>] = </xsl:text>
+    <xsl:value-of select="$domains[@xmi:id = current()]/@domainId"/>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
@@ -295,7 +297,9 @@ Elements::Data::loadMaps()
     <xsl:text>  this->publisherParticipants_[ Publishers::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>] = Participants::</xsl:text>
-    <xsl:value-of select="../@name"/>
+    <xsl:call-template name="normalize-identifier">
+      <xsl:with-param name="identifier" select="../@name"/>
+    </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
@@ -410,7 +414,9 @@ Elements::Data::buildParticipantsQos()
   <xsl:for-each select="$participants">
     <xsl:value-of select="$newline"/>
     <xsl:text>  participant = Participants::</xsl:text>
-    <xsl:value-of select="@name"/>
+    <xsl:call-template name="normalize-identifier">
+      <xsl:with-param name="identifier" select="@name"/>
+    </xsl:call-template>
     <xsl:text>;
   participantQos = TheServiceParticipant->initial_DomainParticipantQos();
 </xsl:text>
@@ -685,7 +691,6 @@ Elements::Data::copySubscriptionQos(
   <!-- direct references -->
   <xsl:variable name="reffed-policies" select="$policies[@xmi:id = current()/@*]"/>
 
-  <xsl:message>Processing <xsl:value-of select="count($reffed-policies)"/> policies.</xsl:message>
   <xsl:for-each select="$reffed-policies">
     <xsl:call-template name="process-policy">
       <xsl:with-param name="base" select="$base"/>
@@ -693,7 +698,6 @@ Elements::Data::copySubscriptionQos(
   </xsl:for-each>
 
   <xsl:variable name="external-policy-refs" select="*[name() != 'datatype'][@href]"/>
-  <xsl:message>Found <xsl:value-of select="count($external-policy-refs)"/> policy refs.</xsl:message>
   <xsl:for-each select="$external-policy-refs">
     <xsl:variable name="policy-file" select="substring-before(@href, '#')"/>
     <xsl:variable name="policy-id" select="substring-after(@href, '#')"/>
