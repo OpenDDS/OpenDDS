@@ -40,6 +40,9 @@
       <fields xmi:id="_PR5QsAcGEeCTrrqfM0kA8A" name="boundedWstrings" type="_1ug9EAcFEeCTrrqfM0kA8A"/>
       <fields xmi:id="_8--9MAcJEeCTrrqfM0kA8A" name="arrays" type="_8SGpEAcJEeCTrrqfM0kA8A"/>
       <fields xmi:id="_ns-tQAcLEeCTrrqfM0kA8A" name="octetSeqs" type="_jfUaAAcLEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_PEv_kAeVEeCxruCPh_66Sg" name="structs" type="_YIvvoAeVEeCxruCPh_66Sg"/>
+      <fields xmi:id="_mxhhcAeWEeCxruCPh_66Sg" name="thisthat" type="_MQItcAeWEeCxruCPh_66Sg"/>
+      <fields xmi:id="_nSrtwAeWEeCxruCPh_66Sg" name="unions" type="_mFfh4AeWEeCxruCPh_66Sg"/>
       <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_M8mv8PDvEd-I4rwicuuPOw"/>
     </types>
     <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw"/>
@@ -99,7 +102,7 @@
     <types xsi:type="types:Typedef" xmi:id="_0SrRMAcFEeCTrrqfM0kA8A" type="_zfwmgAcFEeCTrrqfM0kA8A" name="UnboundedWStringSeq"/>
     <types xsi:type="types:Sequence" xmi:id="_1C7CYAcFEeCTrrqfM0kA8A" length="16" subtype="_xMXAgAcFEeCTrrqfM0kA8A"/>
     <types xsi:type="types:Typedef" xmi:id="_1ug9EAcFEeCTrrqfM0kA8A" type="_1C7CYAcFEeCTrrqfM0kA8A" name="BoundedWStringSeq"/>
-    <types xsi:type="opendds:struct" xmi:id="_VaQgoAcHEeCTrrqfM0kA8A" name="LongStruct" isDcpsDataType="true">
+    <types xsi:type="types:Struct" xmi:id="_VaQgoAcHEeCTrrqfM0kA8A" name="LongStruct" isDcpsDataType="true">
       <fields xmi:id="_YrbWcAcHEeCTrrqfM0kA8A" name="long1" type="_PXgFEPDvEd-I4rwicuuPOw"/>
       <fields xmi:id="_aQX7AAcHEeCTrrqfM0kA8A" name="long2" type="_PXgFEPDvEd-I4rwicuuPOw"/>
     </types>
@@ -109,5 +112,20 @@
     <types xsi:type="types:Typedef" xmi:id="_zY1s4AcKEeCTrrqfM0kA8A" type="_3gIu4AcJEeCTrrqfM0kA8A" name="StringArray"/>
     <types xsi:type="types:Sequence" xmi:id="_fYEQwAcLEeCTrrqfM0kA8A" length="21" subtype="_ZJhPYAcBEeCTrrqfM0kA8A"/>
     <types xsi:type="types:Typedef" xmi:id="_jfUaAAcLEeCTrrqfM0kA8A" type="_fYEQwAcLEeCTrrqfM0kA8A" name="OctetSeqSeq"/>
+    <types xsi:type="types:Sequence" xmi:id="_WtvKMAeVEeCxruCPh_66Sg" length="22" subtype="_VaQgoAcHEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_YIvvoAeVEeCxruCPh_66Sg" type="_WtvKMAeVEeCxruCPh_66Sg" name="StructSeq"/>
+    <types xsi:type="types:Union" xmi:id="_MQItcAeWEeCxruCPh_66Sg" name="ThisOrThat" switch="_OFB5IAb_EeCTrrqfM0kA8A">
+      <branches xmi:id="_P1qpsAeWEeCxruCPh_66Sg">
+        <field xmi:id="_Q6HJQAeWEeCxruCPh_66Sg" name="this_string" type="_E8F2IPDvEd-I4rwicuuPOw"/>
+        <cases xmi:id="_ymsjMAeXEeCxruCPh_66Sg" literal="true"/>
+      </branches>
+      <branches xmi:id="_W4WCQAeWEeCxruCPh_66Sg">
+        <field xmi:id="_XqlXgAeWEeCxruCPh_66Sg" name="that_long" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+        <cases xmi:id="_0lKbAAeXEeCxruCPh_66Sg" literal="false"/>
+      </branches>
+      <default xmi:id="_Z-OOEAeWEeCxruCPh_66Sg" name="common_double" type="_W1ODwAb8EeCTrrqfM0kA8A"/>
+    </types>
+    <types xsi:type="types:Sequence" xmi:id="_lS6OYAeWEeCxruCPh_66Sg" length="23" subtype="_MQItcAeWEeCxruCPh_66Sg"/>
+    <types xsi:type="types:Typedef" xmi:id="_mFfh4AeWEeCxruCPh_66Sg" type="_lS6OYAeWEeCxruCPh_66Sg" name="UnionSeq"/>
   </dataLib>
 </opendds:OpenDDSModel>
