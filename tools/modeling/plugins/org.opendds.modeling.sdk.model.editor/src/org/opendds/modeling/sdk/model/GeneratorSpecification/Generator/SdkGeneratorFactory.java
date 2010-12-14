@@ -26,7 +26,18 @@ public class SdkGeneratorFactory {
 	}
 	
 	public static SdkGenerator createSdkGenerator( SdkGenerator.FileProvider provider, SdkGenerator.ErrorHandler handler) {
-		return new SdkGenerator( provider, handler);
+		return SdkGenerator.create( provider, handler);
+	}
+	
+	public static ParsedModelFile createParsedModelFile( Window parent) {
+		SdkGenerator.FileProvider fileProvider = createFileProvider();
+		SdkGenerator.ErrorHandler errorHandler = createErrorHandler( parent);
+		
+		return ParsedModelFile.create( fileProvider, errorHandler);
+	}
+	
+	public static ParsedModelFile createParsedModelFile( SdkGenerator.FileProvider provider, SdkGenerator.ErrorHandler handler) {
+		return ParsedModelFile.create( provider, handler);
 	}
 	
 	public static SdkGenerator.FileProvider createFileProvider() {
