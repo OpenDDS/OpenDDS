@@ -1018,7 +1018,6 @@ switch.oclIsTypeOf(WChar)
    </extension>
 
    <!-- Manual edits begin -->
-
 	<extension point="org.eclipse.gmf.runtime.common.ui.services.parserProviders">
      <?gmfgen generated="false"?>
 	  	<ParserProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.FieldParserProvider">
@@ -1032,6 +1031,8 @@ switch.oclIsTypeOf(WChar)
 	     	<Priority name="Low"/>
 	  	</ParserProvider>
 	</extension>
+   <!-- Manual edits end -->
+
 <extension id="validationDecoratorProvider" name="ValidationDecorations" point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders">
       <?gmfgen generated="true"?>
       <decoratorProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibValidationDecoratorProvider">
@@ -1047,7 +1048,6 @@ switch.oclIsTypeOf(WChar)
 
 
 
-   <!-- Manual edits end -->
 
    <!-- optionally, specify keybindings -->
 </plugin>

@@ -1,3 +1,11 @@
+Tue Dec 14 18:40:27 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/providers/FieldParserProvider.java:
+
+          Parsing of "name: type" for Field was only working if DataLib was top-level element.
+          Removed assumption.
+
 Tue Dec 14 18:29:57 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Arrays:
