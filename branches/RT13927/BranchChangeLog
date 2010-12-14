@@ -1,3 +1,9 @@
+Tue Dec 14 15:45:06 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Sequences/Sequences.opendds:
+
+          Added sequence of struct, sequence of union.
+
 Tue Dec 14 15:16:24 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/com.ociweb.emf.util/src/com/ociweb/emf/util/ObjectsFinder.java:
