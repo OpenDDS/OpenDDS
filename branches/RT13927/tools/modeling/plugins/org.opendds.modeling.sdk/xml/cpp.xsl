@@ -295,7 +295,7 @@ Elements::Data::loadMaps()
   <!-- '  this->publisherParticipants_[ Publishers::(publisher/@name)] = Participants::(publisher/../@name);\n' -->
   <xsl:for-each select="$publishers">
     <xsl:text>  this->publisherParticipants_[ Publishers::</xsl:text>
-    <xsl:value-of select="@name"/>
+    <xsl:call-template name="normalize-identifier"/>
     <xsl:text>] = Participants::</xsl:text>
     <xsl:call-template name="normalize-identifier">
       <xsl:with-param name="identifier" select="../@name"/>
@@ -308,9 +308,11 @@ Elements::Data::loadMaps()
   <!-- '  this->subscriberParticipants_[ Subscribers::(subscriber/@name)] = Participants::(subscriber/../@name);\n' -->
   <xsl:for-each select="$subscribers">
     <xsl:text>  this->subscriberParticipants_[ Subscribers::</xsl:text>
-    <xsl:value-of select="@name"/>
+    <xsl:call-template name="normalize-identifier"/>
     <xsl:text>] = Participants::</xsl:text>
-    <xsl:value-of select="../@name"/>
+    <xsl:call-template name="normalize-identifier">
+      <xsl:with-param name="identifier" select="../@name"/>
+    </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
@@ -371,7 +373,9 @@ Elements::Data::loadMaps()
     <xsl:text>  this->publishers_[ DataWriters::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>] = Publishers::</xsl:text>
-    <xsl:value-of select="../@name"/>
+    <xsl:call-template name="normalize-identifier">
+      <xsl:with-param name="identifier" select="../@name"/>
+    </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
@@ -382,7 +386,9 @@ Elements::Data::loadMaps()
     <xsl:text>  this->subscribers_[ DataReaders::</xsl:text>
     <xsl:value-of select="@name"/>
     <xsl:text>] = Subscribers::</xsl:text>
-    <xsl:value-of select="../@name"/>
+    <xsl:call-template name="normalize-identifier">
+      <xsl:with-param name="identifier" select="../@name"/>
+    </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
@@ -392,7 +398,8 @@ Elements::Data::loadMaps()
   <!-- '  this->publisherTransports_[ Publishers::(publisher/@name)] = Transports::(publisher/@transport);\n' -->
   <xsl:for-each select="$publishers">
     <xsl:text>  this->publisherTransports_[ Publishers::</xsl:text>
-    <xsl:value-of select="concat(@name, '] = ', @transportId, ';', $newline)"/>
+    <xsl:call-template name="normalize-identifier"/>
+    <xsl:value-of select="concat('] = ', @transportId, ';', $newline)"/>
   </xsl:for-each>
   <xsl:value-of select="$newline"/>
 
@@ -400,7 +407,8 @@ Elements::Data::loadMaps()
   <!-- '  this->subscriberTransports_[ Subscribers::(subscriber/@name)] = Transports::(subscriber/@transport);\n' -->
   <xsl:for-each select="$subscribers">
     <xsl:text>  this->subscriberTransports_[ Subscribers::</xsl:text>
-    <xsl:value-of select="concat(@name, '] = ', @transportId, ';', $newline)"/>
+    <xsl:call-template name="normalize-identifier"/>
+    <xsl:value-of select="concat('] = ', @transportId, ';', $newline)"/>
   </xsl:for-each>
   <xsl:text>}
 
@@ -414,9 +422,7 @@ Elements::Data::buildParticipantsQos()
   <xsl:for-each select="$participants">
     <xsl:value-of select="$newline"/>
     <xsl:text>  participant = Participants::</xsl:text>
-    <xsl:call-template name="normalize-identifier">
-      <xsl:with-param name="identifier" select="@name"/>
-    </xsl:call-template>
+    <xsl:call-template name="normalize-identifier"/>
     <xsl:text>;
   participantQos = TheServiceParticipant->initial_DomainParticipantQos();
 </xsl:text>
@@ -482,7 +488,7 @@ Elements::Data::buildPublishersQos()
   <xsl:for-each select="$publishers">
     <xsl:value-of select="$newline"/>
     <xsl:text>  publisher    = Publishers::</xsl:text>
-    <xsl:value-of select="@name"/>
+    <xsl:call-template name="normalize-identifier"/>
     <xsl:text>;
   publisherQos = TheServiceParticipant->initial_PublisherQos();
 </xsl:text>
@@ -522,7 +528,7 @@ Elements::Data::buildSubscribersQos()
       <xsl:for-each select="$subscribers">
         <xsl:value-of select="$newline"/>
         <xsl:text>  subscriber    = Subscribers::</xsl:text>
-        <xsl:value-of select="@name"/>
+        <xsl:call-template name="normalize-identifier"/>
         <xsl:text>;
   subscriberQos = TheServiceParticipant->initial_SubscriberQos();
 </xsl:text>
@@ -1016,7 +1022,7 @@ Elements::Data::copySubscriptionQos(
 </xsl:text>
 </xsl:template>
 <xsl:template name="normalize-identifier">
-  <xsl:param name="identifier" select="."/>
+  <xsl:param name="identifier" select="@name"/>
   <xsl:value-of select="translate($identifier, ' -', '__')"/>
 </xsl:template>
 
