@@ -1,3 +1,13 @@
+Tue Dec 14 12:41:51 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+
+	  Removed unused element struct.
+
 Tue Dec 14 04:25:03 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3947] 2010-12-14 04:17  martinezm
