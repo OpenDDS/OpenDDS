@@ -1,3 +1,18 @@
+Tue Dec 14 21:54:52 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+
+          Handle invalid participant name.
+
+        * tools/modeling/tests/InvalidNames:
+        * tools/modeling/tests/InvalidNames/InvalidNames.mpc:
+        * tools/modeling/tests/InvalidNames/InvalidNames.opendds:
+        * tools/modeling/tests/InvalidNames/publisher.cpp:
+        * tools/modeling/tests/InvalidNames/subscriber.cpp:
+        * tools/modeling/tests/InvalidNames/transports.traits:
+
+          New test case for names which are invalid identifiers.
+
 Tue Dec 14 20:35:56 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/DCPS.ecore:
