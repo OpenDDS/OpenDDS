@@ -31,6 +31,7 @@ import org.eclipse.gmf.runtime.emf.commands.core.command.AbstractTransactionalCo
 import org.eclipse.gmf.runtime.emf.ui.services.parser.ISemanticParser;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 
+import org.opendds.modeling.model.opendds.OpenDDSModel;
 import org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.Field2EditPart;
 import org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.Field3EditPart;
 import org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.FieldEditPart;
@@ -39,6 +40,8 @@ import org.opendds.modeling.model.types.DataLib;
 import org.opendds.modeling.model.types.Field;
 import org.opendds.modeling.model.types.TypesPackage;
 import org.opendds.modeling.model.types.Type;
+
+import com.ociweb.emf.util.ObjectsFinder;
 
 
 
@@ -103,23 +106,15 @@ public class FieldParserProvider extends AbstractProvider implements IParserProv
 		private Type findType(final String typeName, final Field field) {
 			Type type = null;
 			if (typeName.length() > 0) {
-				EList<Resource> resources = field.eResource().getResourceSet().getResources();
-				for (Resource resource : resources) {
-					for (EObject object : resource.getContents()) {
-						if (object instanceof DataLib) {
-							type = findInDataLib((DataLib) object, typeName);
-							if (type != null)
-								return type;
-						}
-					}
-				}
+				DataLib dataLib = (DataLib) ObjectsFinder.findObjectInContainmentTree(field, TypesPackage.eINSTANCE.getDataLib());
+				type = findInDataLib(dataLib, typeName);
 			}
 			return type;
 		}
 
 		private Type findInDataLib(DataLib lib, String typeName) {
 			for (Type element : lib.getTypes()) {
-				if (element instanceof Type && typeName.equals(getTypeName(element))) {
+				if (typeName.equals(getTypeName(element))) {
 					return element;
 				}
 				if (element instanceof DataLib) {
