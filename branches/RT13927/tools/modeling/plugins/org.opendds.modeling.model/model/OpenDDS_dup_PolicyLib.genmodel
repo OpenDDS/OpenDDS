@@ -12,7 +12,6 @@
     <genClasses ecoreClass="OpenDDS.ecore#//qosProperty"/>
     <genClasses image="false" ecoreClass="OpenDDS.ecore#//qosPolicy"/>
     <genClasses ecoreClass="OpenDDS.ecore#//topic"/>
-    <genClasses ecoreClass="OpenDDS.ecore#//struct"/>
     <genClasses image="false" ecoreClass="OpenDDS.ecore#//topicField"/>
     <genClasses ecoreClass="OpenDDS.ecore#//domainParticipant"/>
     <genClasses ecoreClass="OpenDDS.ecore#//publisher"/>
