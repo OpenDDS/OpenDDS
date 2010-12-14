@@ -1,3 +1,35 @@
+Tue Dec 14 15:16:24 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/com.ociweb.emf.util/src/com/ociweb/emf/util/ObjectsFinder.java:
+
+	  Added a method to support CompartmentChildrenFinder.java
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/CompartmentChildrenFinder.java:
+
+	  Added to minimize custom code needed in domain entity policy compartment edit parts.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DataReaderQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DataReaderQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DataWriterQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DataWriterQoSPoliciesSharedEditPart.java:
+
+	  Forgot to add to repository.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DomainParticipantQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DomainParticipantQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/PublisherQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/PublisherQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/SubscriberQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/SubscriberQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/TopicQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/TopicQoSPoliciesSharedEditPart.java:
+
+	  Refactored to use CompartmentChildrenFinder so that all the manual overrides are the same.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/OpenDDSDcpsLibCreateQosPolicyAction.java:
+
+	  Added additional assert statement.
+
 Tue Dec 14 12:41:51 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:
@@ -6,7 +38,7 @@ Tue Dec 14 12:41:51 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
 
-	  Removed unused element struct.
+          Removed unused element struct.
 
 Tue Dec 14 04:25:03 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 

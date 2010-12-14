@@ -88,18 +88,13 @@ public class SubscriberQoSPoliciesSharedEditPart extends
 	}
 
 	/**
-	 * Filter out policies that defined in a DcpsLib.
+	 * Filter out policies that are owned in the DcpsLib that (ultimately) owns the domain entity.
 	 * @generated NOT
 	 */
 	@Override
 	protected java.util.List getModelChildren() {
-		EPackage dcpsLibsPackage = EPackage.Registry.INSTANCE
-				.getEPackage(OpenDDSPackage.eNS_URI);
-		EClass dcpsLibClass = (EClass) dcpsLibsPackage
-				.getEClassifier("DcpsLib");
-
-		return com.ociweb.gmf.edit.parts.ModelChildrenFilter
-				.filterChildrenByOwner(dcpsLibClass, super.getModelChildren());
+		return CompartmentChildrenFinder.filterPoliciesOwnedByDcpsLib(super
+				.getModelChildren());
 	}
 
 }
