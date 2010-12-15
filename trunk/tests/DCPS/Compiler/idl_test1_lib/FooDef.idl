@@ -115,7 +115,7 @@ module Xyz {
   case TRUE:
     StructWithTypedefedEnum swte;
   };
-    
+
 };
 
 //Need to verify that we can have a "Foo" (or in this case, a "Bar") outside
