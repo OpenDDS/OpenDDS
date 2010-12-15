@@ -937,13 +937,13 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
     is_bounded.endArgs();
     be_global->impl_ << "  return 100000; /* from TAO_IDL_BE */\n";
   }
+  const string wrap_out = getWrapper("uni._d()", discriminator, WD_OUTPUT);
   {
     Function is_bounded("gen_find_size", "size_t");
     is_bounded.addArg("uni", "const " + cxx + "&");
     is_bounded.endArgs();
     be_global->impl_ <<
-      "  size_t result = gen_max_marshaled_size("
-      << getWrapper("uni._d()", discriminator, WD_OUTPUT) << ");\n"
+      "  size_t result = gen_max_marshaled_size(" << wrap_out << ");\n"
       "  switch (uni._d()) {\n";
     generateSwitchBodyForUnion(findSizeCommon, branches, discriminator,
       "result +=");
@@ -956,7 +956,8 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("uni", "const " + cxx + "&");
     insertion.endArgs();
-    be_global->impl_ << streamAndCheck("<< uni._d()") <<
+    be_global->impl_ <<
+      streamAndCheck("<< " + wrap_out) <<
       "  switch (uni._d()) {\n";
     generateSwitchBodyForUnion(streamCommon, branches, discriminator,
       "return", "<< ");
@@ -971,7 +972,7 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
     extraction.endArgs();
     be_global->impl_ <<
       "  " << scoped(discriminator->name()) << " disc;\n" <<
-      streamAndCheck(">> disc") <<
+      streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT)) <<
       "  switch (disc) {\n";
     generateSwitchBodyForUnion(streamCommon, branches, discriminator,
       "if", ">> ");

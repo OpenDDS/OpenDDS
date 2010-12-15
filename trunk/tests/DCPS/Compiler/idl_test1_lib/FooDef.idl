@@ -101,6 +101,21 @@ module Xyz {
     AUnion theUnion; //+4+4 =135
   };
 
+  // regression test for typedef'ed enum (metaclass_generator.cpp)
+  enum TestEnum {TE_1, TE_2};
+  typedef TestEnum TypedefTestEnum;
+  struct StructWithTypedefedEnum {
+    TypedefTestEnum tte;
+  };
+
+  // regression test for boolean-discriminated union (marshal_generator.cpp)
+  union TestUnion switch (boolean) {
+  case FALSE:
+    TestEnum te;
+  case TRUE:
+    StructWithTypedefedEnum swte;
+  };
+    
 };
 
 //Need to verify that we can have a "Foo" (or in this case, a "Bar") outside
