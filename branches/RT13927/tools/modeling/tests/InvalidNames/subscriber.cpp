@@ -22,8 +22,8 @@ void
 ReaderListener::on_data_available(DDS::DataReader_ptr reader)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  data1::MessageDataReader_var reader_i =
-    data1::MessageDataReader::_narrow(reader);
+  data_1::MessageDataReader_var reader_i =
+    data_1::MessageDataReader::_narrow(reader);
 
   if (CORBA::is_nil(reader_i.in())) {
     ACE_ERROR((LM_ERROR,
@@ -32,7 +32,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     ACE_OS::exit(-1);
   }
 
-  data1::Message message;
+  data_1::Message message;
   DDS::SampleInfo info;
 
   DDS::ReturnCode_t error = reader_i->take_next_sample(message, info);
@@ -66,15 +66,15 @@ int main(int argc, char** argv)
 
     using OpenDDS::Model::InvalidNames::Elements;
 
-    DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
+    DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader_2);
 
     DDS::DataReaderListener_var listener(new ReaderListener);
     reader->set_listener( listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
-    data1::MessageDataReader_var reader_i =
-      data1::MessageDataReader::_narrow(reader);
+    data_1::MessageDataReader_var reader_i =
+      data_1::MessageDataReader::_narrow(reader);
 
     if (CORBA::is_nil(reader_i.in())) {
       ACE_ERROR_RETURN((LM_ERROR,

@@ -1,3 +1,10 @@
+Wed Dec 15 20:23:31 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/InvalidNames/publisher.cpp:
+        * tools/modeling/tests/InvalidNames/subscriber.cpp:
+
+          Updates to build with new identifiers.
+
 Wed Dec 15 19:59:45 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
