@@ -135,6 +135,7 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
   replacements["SCOPED"] = scoped(name);
   replacements["TYPE"] = name->last_component()->get_string();
   replacements["EXPORT"] = be_global->export_macro().c_str();
+  replacements["SEQ"] = be_global->sequence_suffix().c_str();
 
   TS_NamespaceGuard idlGuard(name, be_global->idl_, "module");
   std::string idl = idl_template_;

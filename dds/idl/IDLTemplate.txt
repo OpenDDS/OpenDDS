@@ -1,9 +1,9 @@
 #pragma DCPS_SUPPORT_ZERO_COPY_READ
 #pragma DCPS_GEN_ZERO_COPY_READ
-//typedef sequence<<%SCOPED%>> <%TYPE%>Seq;
-native <%TYPE%>Seq;
+//typedef sequence<<%SCOPED%>> <%TYPE%><%SEQ%>;
+native <%TYPE%><%SEQ%>;
 
-/** Support topic registartion for <%TYPE%> data type.
+/** Support topic registration for <%TYPE%> data type.
  *
  * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
@@ -22,7 +22,6 @@ local interface <%TYPE%>DataWriter : DDS::DataWriter {
 
     DDS::InstanceHandle_t register_instance_w_timestamp(
                 in <%SCOPED%> instance,
-                in DDS::InstanceHandle_t handle,
                 in DDS::Time_t timestamp);
 
     DDS::ReturnCode_t unregister_instance(
@@ -73,7 +72,7 @@ local interface <%TYPE%>DataWriter : DDS::DataWriter {
  */
 local interface <%TYPE%>DataReader : OpenDDS::DCPS::DataReaderEx {
     DDS::ReturnCode_t read(
-                inout <%TYPE%>Seq received_data,
+                inout <%TYPE%><%SEQ%> received_data,
                 inout DDS::SampleInfoSeq info_seq,
                 in long max_samples,
                 in DDS::SampleStateMask sample_states,
@@ -81,7 +80,7 @@ local interface <%TYPE%>DataReader : OpenDDS::DCPS::DataReaderEx {
                 in DDS::InstanceStateMask instance_states);
 
     DDS::ReturnCode_t take(
-                inout <%TYPE%>Seq received_data,
+                inout <%TYPE%><%SEQ%> received_data,
                 inout DDS::SampleInfoSeq info_seq,
                 in long max_samples,
                 in DDS::SampleStateMask sample_states,
@@ -89,13 +88,13 @@ local interface <%TYPE%>DataReader : OpenDDS::DCPS::DataReaderEx {
                 in DDS::InstanceStateMask instance_states);
 
     DDS::ReturnCode_t read_w_condition(
-                inout <%TYPE%>Seq data_values,
+                inout <%TYPE%><%SEQ%> data_values,
                 inout DDS::SampleInfoSeq sample_infos,
                 in long max_samples,
                 in DDS::ReadCondition a_condition);
 
     DDS::ReturnCode_t take_w_condition(
-                inout <%TYPE%>Seq data_values,
+                inout <%TYPE%><%SEQ%> data_values,
                 inout DDS::SampleInfoSeq sample_infos,
                 in long max_samples,
                 in DDS::ReadCondition a_condition);
@@ -109,7 +108,7 @@ local interface <%TYPE%>DataReader : OpenDDS::DCPS::DataReaderEx {
                 inout DDS::SampleInfo sample_info);
 
     DDS::ReturnCode_t read_instance(
-                inout <%TYPE%>Seq received_data,
+                inout <%TYPE%><%SEQ%> received_data,
                 inout DDS::SampleInfoSeq info_seq,
                 in long max_samples,
                 in DDS::InstanceHandle_t a_handle,
@@ -118,7 +117,7 @@ local interface <%TYPE%>DataReader : OpenDDS::DCPS::DataReaderEx {
                 in DDS::InstanceStateMask instance_states);
 
     DDS::ReturnCode_t take_instance(
-                inout <%TYPE%>Seq received_data,
+                inout <%TYPE%><%SEQ%> received_data,
                 inout DDS::SampleInfoSeq info_seq,
                 in long max_samples,
                 in DDS::InstanceHandle_t a_handle,
@@ -127,7 +126,7 @@ local interface <%TYPE%>DataReader : OpenDDS::DCPS::DataReaderEx {
                 in DDS::InstanceStateMask instance_states);
 
     DDS::ReturnCode_t read_next_instance(
-                inout <%TYPE%>Seq received_data,
+                inout <%TYPE%><%SEQ%> received_data,
                 inout DDS::SampleInfoSeq info_seq,
                 in long max_samples,
                 in DDS::InstanceHandle_t a_handle,
@@ -136,7 +135,7 @@ local interface <%TYPE%>DataReader : OpenDDS::DCPS::DataReaderEx {
                 in DDS::InstanceStateMask instance_states);
 
     DDS::ReturnCode_t take_next_instance(
-                inout <%TYPE%>Seq received_data,
+                inout <%TYPE%><%SEQ%> received_data,
                 inout DDS::SampleInfoSeq info_seq,
                 in long max_samples,
                 in DDS::InstanceHandle_t a_handle,
@@ -145,21 +144,21 @@ local interface <%TYPE%>DataReader : OpenDDS::DCPS::DataReaderEx {
                 in DDS::InstanceStateMask instance_states);
 
     DDS::ReturnCode_t read_next_instance_w_condition(
-                inout <%TYPE%>Seq data_values,
+                inout <%TYPE%><%SEQ%> data_values,
                 inout DDS::SampleInfoSeq sample_infos,
                 in long max_samples,
                 in DDS::InstanceHandle_t previous_handle,
                 in DDS::ReadCondition a_condition);
 
     DDS::ReturnCode_t take_next_instance_w_condition(
-                inout <%TYPE%>Seq data_values,
+                inout <%TYPE%><%SEQ%> data_values,
                 inout DDS::SampleInfoSeq sample_infos,
                 in long max_samples,
                 in DDS::InstanceHandle_t previous_handle,
                 in DDS::ReadCondition a_condition);
 
     DDS::ReturnCode_t return_loan(
-                inout <%TYPE%>Seq received_data,
+                inout <%TYPE%><%SEQ%> received_data,
                 inout DDS::SampleInfoSeq info_seq);
 
     DDS::ReturnCode_t get_key_value(
