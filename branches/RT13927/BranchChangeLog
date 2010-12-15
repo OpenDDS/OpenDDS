@@ -1,3 +1,11 @@
+Wed Dec 15 17:38:17 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/src/org/opendds/modeling/sdk/codegen/CodeGenerator.java:
+
+          Set URIResolver to transformer factory, rather than tranformer instance.
+          This was moved to allow URI resolution during stylesheet compilation, 
+          as is done with <xsl:import> and <xsl:include>.
+
 Wed Dec 15 04:59:57 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
           Merged trunk r3963 out to this branch.

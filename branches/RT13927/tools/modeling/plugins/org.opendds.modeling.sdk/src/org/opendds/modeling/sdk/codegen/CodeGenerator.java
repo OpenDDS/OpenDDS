@@ -280,11 +280,9 @@ public class CodeGenerator {
 							"Unable to obtain a transformer factory.", null);
 					return;
 				}
-				Source converter = new StreamSource(xsl.openStream());
 				final String dir = which.xslFilename().substring(0, which.xslFilename().lastIndexOf("/"));
 				final String sourceDir = sourceName.contains("/") ? sourceName.substring(0, sourceName.lastIndexOf("/")) : ".";
-				Transformer transformer = factory.newTransformer(converter);
-				transformer.setURIResolver(new URIResolver() {
+				factory.setURIResolver(new URIResolver() {
 					public Source resolve(String fname, String base) throws TransformerException {
 						try {
 							URL resource;
@@ -303,6 +301,8 @@ public class CodeGenerator {
 						}
 					}
 				});
+				Source converter = new StreamSource(xsl.openStream());
+				Transformer transformer = factory.newTransformer(converter);
 				which.setTransformer(transformer);
 			} catch (TransformerConfigurationException e) {
 				errorHandler.error(Severity.ERROR, which.dialogTitle(),
