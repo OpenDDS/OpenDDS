@@ -1,3 +1,14 @@
+Wed Dec 15 21:34:03 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+
+          Adjusted version checks to be correct for TAO 2.0.
+
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+
+          Fixed whitespace.
+
 Wed Dec 15 01:01:54 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * DDS_docgroup_TAO.mwc:

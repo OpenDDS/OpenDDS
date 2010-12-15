@@ -594,11 +594,8 @@ int idl2jni_visitor::visit_valuebox(AST_ValueBox *)
   return 0;
 }
 
-#if (TAO_MAJOR_VERSION > 2 || (TAO_MAJOR_VERSION == 1 && \
-    (TAO_MINOR_VERSION > 7 || (TAO_MINOR_VERSION == 7 && TAO_BETA_VERSION > 3))))
-
-# if (TAO_MAJOR_VERSION > 2 || (TAO_MAJOR_VERSION == 1 && \
-     (TAO_MINOR_VERSION > 7 || (TAO_MINOR_VERSION == 7 && TAO_BETA_VERSION > 5))))
+#if (TAO_MAJOR_VERSION > 1 || \
+     (TAO_MAJOR_VERSION == 1 && (TAO_MINOR_VERSION >= 7)))
 
 int
 idl2jni_visitor::visit_template_module (AST_Template_Module *)
@@ -623,30 +620,6 @@ idl2jni_visitor::visit_param_holder(AST_Param_Holder *)
 {
   return 0;
 }
-
-# else
-
-int idl2jni_visitor::visit_template_interface(AST_Template_Interface *)
-{
-  return 0;
-}
-
-int idl2jni_visitor::visit_instantiated_connector(AST_Instantiated_Connector *)
-{
-  return 0;
-}
-
-int idl2jni_visitor::visit_tmpl_port(AST_Tmpl_Port *)
-{
-  return 0;
-}
-
-int idl2jni_visitor::visit_tmpl_mirror_port(AST_Tmpl_Mirror_Port *)
-{
-  return 0;
-}
-
-# endif
 
 int idl2jni_visitor::visit_porttype(AST_PortType *)
 {
@@ -693,14 +666,9 @@ int idl2jni_visitor::visit_connector(AST_Connector *)
   return 0;
 }
 
-/*# if (TAO_MAJOR_VERSION > 2 || (TAO_MAJOR_VERSION == 1 && \
-     (TAO_MINOR_VERSION > 7 || (TAO_MINOR_VERSION == 7 && TAO_BETA_VERSION > 6))))*/
-
 int idl2jni_visitor::visit_finder(AST_Finder *)
 {
   return 0;
 }
-
-/*# endif*/
 
 #endif

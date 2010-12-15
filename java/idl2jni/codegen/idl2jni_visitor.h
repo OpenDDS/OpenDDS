@@ -105,11 +105,8 @@ public:
 
   virtual int visit_valuebox(AST_ValueBox *node);
 
-#if (TAO_MAJOR_VERSION > 2 || (TAO_MAJOR_VERSION == 1 && \
-    (TAO_MINOR_VERSION > 7 || (TAO_MINOR_VERSION == 7 && TAO_BETA_VERSION > 3))))
-
-# if (TAO_MAJOR_VERSION > 2 || (TAO_MAJOR_VERSION == 1 && \
-     (TAO_MINOR_VERSION > 7 || (TAO_MINOR_VERSION == 7 && TAO_BETA_VERSION > 5))))
+#if (TAO_MAJOR_VERSION > 1 || \
+     (TAO_MAJOR_VERSION == 1 && (TAO_MINOR_VERSION > 7)))
 
   virtual int visit_template_module (AST_Template_Module *node);
 
@@ -118,18 +115,6 @@ public:
   virtual int visit_template_module_ref (AST_Template_Module_Ref *node);
 
   virtual int visit_param_holder(AST_Param_Holder *node);
-
-# else
-
-  virtual int visit_template_interface(AST_Template_Interface *node);
-
-  virtual int visit_instantiated_connector(AST_Instantiated_Connector *node);
-
-  virtual int visit_tmpl_port(AST_Tmpl_Port *node);
-
-  virtual int visit_tmpl_mirror_port(AST_Tmpl_Mirror_Port *node);
-
-# endif
 
   virtual int visit_porttype(AST_PortType *node);
 
@@ -149,12 +134,7 @@ public:
 
   virtual int visit_connector(AST_Connector *node);
 
-/*# if (TAO_MAJOR_VERSION > 2 || (TAO_MAJOR_VERSION == 1 && \
-     (TAO_MINOR_VERSION > 7 || (TAO_MINOR_VERSION == 7 && TAO_BETA_VERSION > 6))))*/
-
   virtual int visit_finder(AST_Finder *node);
-
-/*# endif*/
 
 #endif
 
