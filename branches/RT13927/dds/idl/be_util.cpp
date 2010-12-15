@@ -34,6 +34,8 @@ be_util::prep_be_arg (char *arg)
   static const size_t SZ_WB_JAVA = sizeof(WB_JAVA) - 1;
   static const char WB_TAO_INC_PRE[] = "tao_include_prefix=";
   static const size_t SZ_WB_TAO_INC_PRE = sizeof(WB_TAO_INC_PRE) - 1;
+  static const char WB_DDS_SEQ_SUFFIX[] = "opendds_sequence_suffix=";
+  static const size_t SZ_WB_DDS_SEQ_SUFFIX = sizeof(WB_DDS_SEQ_SUFFIX) - 1;
 
   if (0 == ACE_OS::strncasecmp(arg, WB_EXPORT_MACRO, SZ_WB_EXPORT_MACRO)) {
     be_global->export_macro(arg + SZ_WB_EXPORT_MACRO);
@@ -54,6 +56,9 @@ be_util::prep_be_arg (char *arg)
   } else if (0 == ACE_OS::strncasecmp(arg, WB_TAO_INC_PRE, SZ_WB_TAO_INC_PRE)) {
     be_global->tao_inc_pre_ = arg + SZ_WB_TAO_INC_PRE;
 
+  } else if (0 == ACE_OS::strncasecmp(arg, WB_DDS_SEQ_SUFFIX,
+                                      SZ_WB_DDS_SEQ_SUFFIX)) {
+    be_global->sequence_suffix(arg + SZ_WB_DDS_SEQ_SUFFIX);
   }
 }
 

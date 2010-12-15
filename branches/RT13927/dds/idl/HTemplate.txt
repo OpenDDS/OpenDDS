@@ -68,7 +68,6 @@ public:
 
   virtual DDS::InstanceHandle_t register_instance_w_timestamp (
       const ::<%SCOPED%> & instance,
-      ::DDS::InstanceHandle_t handle,
       const ::DDS::Time_t & timestamp)
     ACE_THROW_SPEC ((CORBA::SystemException));
 
@@ -225,7 +224,7 @@ public:
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   virtual DDS::ReturnCode_t read (
-      ::<%SCOPED%>Seq & received_data,
+      ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::SampleStateMask sample_states,
@@ -234,7 +233,7 @@ public:
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   virtual DDS::ReturnCode_t take (
-      ::<%SCOPED%>Seq & received_data,
+      ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::SampleStateMask sample_states,
@@ -243,14 +242,14 @@ public:
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   virtual ::DDS::ReturnCode_t read_w_condition (
-      ::<%SCOPED%>Seq & data_values,
+      ::<%SCOPED%><%SEQ%> & data_values,
       ::DDS::SampleInfoSeq & sample_infos,
       ::CORBA::Long max_samples,
       ::DDS::ReadCondition_ptr a_condition)
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   virtual ::DDS::ReturnCode_t take_w_condition (
-      ::<%SCOPED%>Seq & data_values,
+      ::<%SCOPED%><%SEQ%> & data_values,
       ::DDS::SampleInfoSeq & sample_infos,
       ::CORBA::Long max_samples,
       ::DDS::ReadCondition_ptr a_condition)
@@ -267,7 +266,7 @@ public:
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   virtual DDS::ReturnCode_t read_instance (
-      ::<%SCOPED%>Seq & received_data,
+      ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
@@ -277,7 +276,7 @@ public:
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   virtual DDS::ReturnCode_t take_instance (
-      ::<%SCOPED%>Seq & received_data,
+      ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
@@ -287,7 +286,7 @@ public:
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   virtual DDS::ReturnCode_t read_next_instance (
-      ::<%SCOPED%>Seq & received_data,
+      ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
@@ -297,7 +296,7 @@ public:
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   virtual DDS::ReturnCode_t take_next_instance (
-      ::<%SCOPED%>Seq & received_data,
+      ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
@@ -307,7 +306,7 @@ public:
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   virtual ::DDS::ReturnCode_t read_next_instance_w_condition (
-      ::<%SCOPED%>Seq & data_values,
+      ::<%SCOPED%><%SEQ%> & data_values,
       ::DDS::SampleInfoSeq & sample_infos,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t previous_handle,
@@ -315,7 +314,7 @@ public:
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   virtual ::DDS::ReturnCode_t take_next_instance_w_condition (
-      ::<%SCOPED%>Seq & data_values,
+      ::<%SCOPED%><%SEQ%> & data_values,
       ::DDS::SampleInfoSeq & sample_infos,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t previous_handle,
@@ -323,7 +322,7 @@ public:
     ACE_THROW_SPEC ((CORBA::SystemException));
 
   virtual DDS::ReturnCode_t return_loan (
-      ::<%SCOPED%>Seq & received_data,
+      ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq)
     ACE_THROW_SPEC ((CORBA::SystemException));
 
@@ -338,7 +337,7 @@ public:
 
   virtual DDS::ReturnCode_t auto_return_loan(void* seq);
 
-  void release_loan (::<%SCOPED%>Seq & received_data);
+  void release_loan (::<%SCOPED%><%SEQ%> & received_data);
 
   void dec_ref_data_element(::OpenDDS::DCPS::ReceivedDataElement* r);
 
@@ -400,7 +399,7 @@ public:
   private:
 
     ::DDS::ReturnCode_t read_i (
-      ::<%SCOPED%>Seq & received_data,
+      ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::SampleStateMask sample_states,
@@ -410,7 +409,7 @@ public:
       );
 
     ::DDS::ReturnCode_t take_i (
-      ::<%SCOPED%>Seq & received_data,
+      ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::SampleStateMask sample_states,
@@ -420,7 +419,7 @@ public:
       );
 
     DDS::ReturnCode_t read_instance_i (
-      ::<%SCOPED%>Seq & received_data,
+      ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
@@ -431,7 +430,7 @@ public:
       );
 
     DDS::ReturnCode_t take_instance_i (
-      ::<%SCOPED%>Seq & received_data,
+      ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
@@ -442,7 +441,7 @@ public:
       );
 
     DDS::ReturnCode_t read_next_instance_i (
-      ::<%SCOPED%>Seq & received_data,
+      ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
@@ -453,7 +452,7 @@ public:
       );
 
     DDS::ReturnCode_t take_next_instance_i (
-      ::<%SCOPED%>Seq & received_data,
+      ::<%SCOPED%><%SEQ%> & received_data,
       ::DDS::SampleInfoSeq & info_seq,
       ::CORBA::Long max_samples,
       ::DDS::InstanceHandle_t a_handle,
@@ -474,7 +473,7 @@ public:
     /// common input read* & take* input processing and precondition checks
     ::DDS::ReturnCode_t check_inputs (
         const char* method_name,
-        ::<%SCOPED%>Seq & received_data,
+        ::<%SCOPED%><%SEQ%> & received_data,
         ::DDS::SampleInfoSeq & info_seq,
         ::CORBA::Long max_samples
         );
