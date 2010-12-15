@@ -1,3 +1,15 @@
+Wed Dec 15 04:53:01 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3962] 2010-12-15 04:51  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/plugin.properties,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedModelFile.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
+
+          Created modelfile and target directory selection wizard page and
+          implemented model file selection behaviors. This includes extracting
+          valid model information as the file is selected. Started
+          implementing the Browse feature for model file selection.
+
 Tue Dec 14 22:55:56 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
