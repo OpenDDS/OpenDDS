@@ -61,6 +61,7 @@ import org.eclipse.ui.IWorkbench;
 
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
+import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
 
@@ -85,7 +86,10 @@ import org.opendds.modeling.sdk.model.GeneratorSpecification.TransportOffset;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.TreeSelection;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -507,69 +511,100 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		}
 
 		protected void browseForTargetDir() {
-			// TODO Auto-generated method stub
-			
+			String currentTarget = targetDirField.getText();
+			ContainerSelectionDialog dialog = new ContainerSelectionDialog(
+					getShell(), ResourcesPlugin.getWorkspace().getRoot(), false,
+					"Select target folder:");
+			dialog.setTitle("Target Selection");
+			if( currentTarget != null && !currentTarget.isEmpty()) {
+				dialog.setInitialSelections( new Object[] {currentTarget} );
+			}
+			if (dialog.open() == ContainerSelectionDialog.OK) {
+				Object[] result = dialog.getResult();
+				if (result.length == 1) {
+					targetDirField.setText(((Path)result[0]).toString());
+				}
+			}
 		}
 
 		protected void browseForModelFile() {
-			IPath path = browse( new Path(modelFileField.getText()));
-			modelFileField.setText(path.toString());
-			if( path.segmentCount() > 1) {
-				currentPath = path.removeLastSegments(1);
-			} else {
-				currentPath = null;
-			}
-		}
-		
-		private IPath browse( IPath path) {
-			ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(
-					getShell(),
-					new WorkbenchLabelProvider(),
-					new BaseWorkbenchContentProvider());
-			dialog.setTitle("Model Selection");
-			dialog.setMessage("Select Model file:");
-			dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());
-			if( currentPath != null) {
-				dialog.setInitialSelection(currentPath.toOSString());
-			}
-			if(dialog.open() == ElementTreeSelectionDialog.OK) {
-				Object[] result = dialog.getResult();
-				if( result.length == 1) {
-					Object r0 = result[0];
-					if( r0 instanceof IFile) {
-						return ((IFile)r0).getFullPath();
-					}
-				}
-			}
-			return null;
+//			ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(
+//					getShell(),
+//					new WorkbenchLabelProvider(),
+//					new BaseWorkbenchContentProvider());
+//			dialog.setTitle("Model Selection");
+//			dialog.setMessage("Select Model file:");
+//			dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());
+//			if( currentPath != null) {
+//				TreePath treePath = new TreePath( currentPath.segments());
+//				ITreeSelection treeSelection = new TreeSelection( treePath);
+//				dialog.setInitialSelection( treeSelection);
+//			}
+//			if(dialog.open() == ElementTreeSelectionDialog.OK) {
+//				Object[] result = dialog.getResult();
+//				if( result.length == 1) {
+//					Object r0 = result[0];
+//					if( r0 instanceof IFile) {
+//						IPath path = ((IFile)r0).getFullPath();
+//						modelFileField.setText( path.toString());
+//						if( path.segmentCount() > 1) {
+//							currentPath = path.removeLastSegments(1);
+//						} else {
+//							currentPath = null;
+//						}
+//					}
+//				}
+//			}
 		}
 
 		protected void updatePageComplete() {
-			setPageComplete(false);
-
-			String newSource = modelFileField.getText();
-			if( newSource == null || newSource.isEmpty()) {
-				parsedModelFile.reset();
-
-			} else {
-				parsedModelFile.setSourceName( newSource);
-				if( !parsedModelFile.exists()) {
-					setMessage(null);
-					setErrorMessage("Model file "
-							+ newSource + " does not exist");
-					return;
-				}
-
-				String modelName = parsedModelFile.getModelName();
-				if( modelName == null) {
-					setMessage(null);
-					setErrorMessage("Model file "
-							+ newSource + " is not a valid OpenDDS model file");
-					return;
-				}
-			}
-			setErrorMessage(null);
-			setPageComplete(true);
+//			setPageComplete(false);
+//
+//			String newSource = modelFileField.getText();
+//			if( newSource == null || newSource.isEmpty()) {
+//				parsedModelFile.reset();
+//
+//			} else {
+//				parsedModelFile.setSourceName( newSource);
+//				if( !parsedModelFile.exists()) {
+//					setMessage(null);
+//					setErrorMessage("Model file "
+//							+ newSource + " does not exist");
+//					return;
+//				}
+//
+//				String modelName = parsedModelFile.getModelName();
+//				if( modelName == null) {
+//					setMessage(null);
+//					setErrorMessage("Model file "
+//							+ newSource + " is not a valid OpenDDS model file");
+//					return;
+//				}
+//			}
+//			
+//			String newTarget = targetDirField.getText();
+//			IResource container = ResourcesPlugin.getWorkspace().getRoot()
+//			                      .findMember(new Path( newTarget));
+//
+//			if( newTarget == null || newTarget.isEmpty()) {
+//				setErrorMessage("Target folder must be specified");
+//				setTargetDirURI( URI.createURI(".", false));
+//				return;
+//			}
+//			if (container == null || (container.getType() & (IResource.PROJECT | IResource.FOLDER)) == 0) {
+//				setErrorMessage("Target folder " + newTarget + " must exist");
+//				setTargetDirURI( URI.createURI(".", false));
+//				return;
+//			}
+//			if (!container.isAccessible()) {
+//				setErrorMessage("Target folder " + newTarget + " must be writable");
+//				setTargetDirURI( URI.createURI(".", false));
+//				return;
+//			}
+//			setTargetDirURI( URI.createURI(newTarget, false));
+//
+//			setErrorMessage(null);
+//			setPageComplete(true);
 		}
 
 	}
