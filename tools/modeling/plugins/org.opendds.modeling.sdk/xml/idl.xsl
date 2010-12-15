@@ -10,6 +10,8 @@
     ** Generate IDL code.
     **
     -->
+<xsl:import href="common.xsl"/>
+
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
 
@@ -64,7 +66,9 @@
 <!-- End of main processing template. -->
 
 <xsl:template match="dataLib">
-  <xsl:variable name="libname" select="@name"/>
+  <xsl:variable name="libname">
+    <xsl:call-template name="normalize-identifier"/>
+  </xsl:variable>
 
   <xsl:if test="(string-length($libname) > 0) and $type">
     <xsl:value-of select="concat('module ', $libname, ' {', $newline,
@@ -222,7 +226,11 @@
 
 <!-- Process data structure definitions. -->
 <xsl:template match="types[@xsi:type = 'types:Struct']">
-  <xsl:variable name="libname" select="../@name"/>
+  <xsl:variable name="libname">
+    <xsl:call-template name="normalize-identifier">
+      <xsl:with-param name="identifier" select="../@name"/>
+    </xsl:call-template>
+  </xsl:variable>
 
   <xsl:value-of select="concat($newline,'#pragma DCPS_DATA_TYPE &quot;')"/>
 
@@ -294,7 +302,11 @@
 
 <!-- Create a DCPS_DATA_KEY pragma line. -->
 <xsl:template match="keys">
-  <xsl:variable name="libname" select="../../@name"/>
+  <xsl:variable name="libname">
+    <xsl:call-template name="normalize-identifier">
+      <xsl:with-param name="identifier" select="../../@name"/>
+    </xsl:call-template>
+  </xsl:variable>
   <xsl:text>#pragma DCPS_DATA_KEY  "</xsl:text>
   <xsl:if test="string-length($libname) > 0">
      <xsl:value-of select="concat($libname,'::')"/>

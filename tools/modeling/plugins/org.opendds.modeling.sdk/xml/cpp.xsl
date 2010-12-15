@@ -14,6 +14,8 @@
     ** @TODO - determine how to set the transport addresses.
     **
     -->
+<xsl:include href="common.xsl"/>
+
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
 
@@ -994,7 +996,11 @@ Elements::Data::copySubscriptionQos(
   <xsl:param name="type" select="."/>
   <xsl:variable name="typename" select="$type/@name"/>
   <xsl:variable name="type-modelname" select="$type/../../@name"/>
-  <xsl:variable name="libname" select="$type/../@name"/>
+  <xsl:variable name="libname">
+    <xsl:call-template name="normalize-identifier">
+      <xsl:with-param name="identifier" select="$type/../@name"/>
+    </xsl:call-template>
+  </xsl:variable>
 
   <xsl:text>    case Types::</xsl:text>
   <xsl:if test="$type-modelname != $modelname">
@@ -1020,10 +1026,6 @@ Elements::Data::copySubscriptionQos(
       break;
 
 </xsl:text>
-</xsl:template>
-<xsl:template name="normalize-identifier">
-  <xsl:param name="identifier" select="@name"/>
-  <xsl:value-of select="translate($identifier, ' -', '__')"/>
 </xsl:template>
 
 <!-- Lookup Table Magic. -->
