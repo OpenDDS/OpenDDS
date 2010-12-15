@@ -2,6 +2,7 @@ package org.opendds.modeling.sdk.model.GeneratorSpecification.Generator;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Iterator;
@@ -101,11 +102,47 @@ public class ParsedModelFile {
 		return transportIdExpr;
 	}
 	
-	public Document getModelDocument(String sourceName) {
-		if (this.sourceName != sourceName) {
+	public boolean exists() {
+		if(sourceName != null) {
+			try {
+				URL modelUrl = fileProvider.fromWorkspace(sourceName);
+				File modelFile = new File(modelUrl.toURI());
+				return modelFile.exists();
+
+			} catch (MalformedURLException e) {
+				errorHandler.error(Severity.INFO, "exists",
+						"Unable to parse URL for file " + sourceName, e);
+
+			} catch (URISyntaxException e) {
+				errorHandler.error(Severity.INFO, "exists",
+						"Badly formed URI for file " + sourceName, e);
+
+			}
+		}
+		return false;
+	}
+	
+	public String getSourceName() {
+		return sourceName;
+	}
+	
+	public void setSourceName( String sourceName) {
+		if( sourceName != null && sourceName != this.sourceName) {
 			this.sourceName = sourceName;
+			this.modelName = null;
 			this.modelDocument = null;
 			this.transportIndices.clear();
+		}
+	}
+	
+	public Document getModelDocument() {
+		return getModelDocument(null);
+	}
+	
+	public Document getModelDocument(String sourceName) {		
+		setSourceName(sourceName);
+		if( this.sourceName == null) {
+			return null;
 		}
 
 		if (modelDocument != null) {
@@ -113,11 +150,11 @@ public class ParsedModelFile {
 		}
 
 		try {
-			URL modelUrl = fileProvider.fromWorkspace(sourceName);
+			URL modelUrl = fileProvider.fromWorkspace(this.sourceName);
 			File modelFile = new File(modelUrl.toURI());
 			if (!modelFile.exists()) {
 				errorHandler.error(Severity.ERROR, "getModelDocument",
-						"Model file " + sourceName + " does not exist.", null);
+						"Model file " + this.sourceName + " does not exist.", null);
 				return null;
 			}
 
@@ -130,7 +167,7 @@ public class ParsedModelFile {
 	
 				} catch (ParserConfigurationException e) {
 					errorHandler.error(Severity.ERROR, "getModelDocument",
-							"Problem configuring the parser for file " + sourceName, e);
+							"Problem configuring the parser for file " + this.sourceName, e);
 					return null;
 				}
 			}
@@ -139,31 +176,37 @@ public class ParsedModelFile {
 
 		} catch (SAXException e) {
 			errorHandler.error(Severity.ERROR, "getModelDocument",
-					"Problem parsing the source file " + sourceName, e);
+					"Problem parsing the source file " + this.sourceName, e);
 		} catch (IOException e) {
 			errorHandler.error(Severity.ERROR, "getModelDocument",
-					"Problem reading the source file " + sourceName, e);
+					"Problem reading the source file " + this.sourceName, e);
 		} catch (URISyntaxException e) {
 			errorHandler.error(Severity.ERROR, "getModelDocument",
-					"Problem reading the source file " + sourceName, e);
+					"Problem reading the source file " + this.sourceName, e);
 		}
 		return modelDocument;
 	}
+	
+	public String getModelName() {
+		return getModelName(null);
+	}
 
 	public String getModelName(String sourceName) {
-		if (this.sourceName == sourceName) {
+		setSourceName(sourceName);
+		if( this.sourceName == null) {
+			return null;
+		}
+
+		if (this.modelName != null) {
 			return modelName;
 		}
-		this.sourceName = sourceName;
-		this.modelDocument = null;
-		this.transportIndices.clear();
 
 		XPathExpression nameExpr = getNameExpr();
 		if (nameExpr == null) {
 			return null; // messages were generated in the get call.
 		}
 
-		Document doc = getModelDocument(sourceName);
+		Document doc = getModelDocument();
 		if (doc == null) {
 			return null; // messages were generated in the get call.
 		}
@@ -178,29 +221,32 @@ public class ParsedModelFile {
 
 			case 0:
 				errorHandler.error(Severity.ERROR, "getModelName",
-						"Could not find any model name in the source file " + sourceName,
+						"Could not find any model name in the source file " + this.sourceName,
 						null);
 				break;
 
 			default:
 				errorHandler.error(Severity.ERROR, "getModelName",
 						"Found " + nodes.getLength() + " candidate model names in the source file "
-						+ sourceName + ", which is too many!", null);
+						+ this.sourceName + ", which is too many!", null);
 				break;
 			}
 
 		} catch (XPathExpressionException e) {
 			errorHandler.error(Severity.ERROR, "getModelName",
-					"Problem extracting the modelname from the source file " + sourceName, e);
+					"Problem extracting the modelname from the source file " + this.sourceName, e);
 		}
 		return modelName;
 	}
 	
+	public Set<Integer> getTransportIds() {
+		return getTransportIds(null);
+	}
+	
 	public Set<Integer> getTransportIds( String sourceName) {
-		if (this.sourceName != sourceName) {
-			this.sourceName = sourceName;
-			this.modelDocument = null;
-			this.transportIndices.clear();
+		setSourceName(sourceName);
+		if( this.sourceName == null) {
+			return null;
 		}
 
 		if (!this.transportIndices.isEmpty()) {
@@ -250,6 +296,13 @@ public class ParsedModelFile {
 	        throw new UnsupportedOperationException();
 	    }
 
+	}
+
+	public void reset() {
+		this.sourceName = null;
+		this.modelName = null;
+		this.modelDocument = null;
+		this.transportIndices.clear();
 	}
 
 }

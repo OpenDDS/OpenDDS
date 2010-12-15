@@ -33,6 +33,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -44,14 +45,27 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
 
+import org.eclipse.ui.model.BaseWorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
@@ -145,10 +159,11 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	 * @generated
 	 */
 	protected IWorkbench workbench;
-	
-	protected URI modelFileURI;
-	
-	protected URI targetDirURI;
+
+	/**
+	 * Cache the parsed model file so we only read it once.
+	 */
+	protected ParsedModelFile parsedModelFile;
 	
 	/**
 	 * This just records the information.
@@ -161,6 +176,8 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		this.selection = selection;
 		setWindowTitle(GeneratorEditorPlugin.INSTANCE.getString("_UI_Wizard_label"));
 		setDefaultPageImageDescriptor(ExtendedImageRegistry.INSTANCE.getImageDescriptor(GeneratorEditorPlugin.INSTANCE.getImage("full/wizban/NewGenerator")));
+		parsedModelFile = SdkGeneratorFactory.createParsedModelFile(
+				(Window)this.workbench.getActiveWorkbenchWindow());
 	}
 
 	/**
@@ -180,11 +197,13 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		CodeGen codeGen = generatorFactory.createCodeGen();
 		
 		ModelFile modelFile = generatorFactory.createModelFile();
-		if( modelFileURI != null && !modelFileURI.isEmpty()) {
-			modelFile.setName( modelFileURI.toPlatformString(true));
+		String modelFileName = parsedModelFile.getSourceName();
+		if( modelFileName != null) {
+			modelFile.setName( modelFileName);
 		}
 
 		TargetDir targetDir = generatorFactory.createTargetDir();
+		URI targetDirURI = modelSelectionPage.getTargetDirURI();
 		if( targetDirURI != null && !targetDirURI.isEmpty()) {
 			targetDir.setName( targetDirURI.toPlatformString(true));
 		}
@@ -201,8 +220,6 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 
 		if( modelFile.getName() != null) {
 			// Load the default instance with a transport for each index found in the model.
-			ParsedModelFile parsedModelFile = SdkGeneratorFactory.createParsedModelFile(
-					(Window)this.workbench.getActiveWorkbenchWindow());
 			Set<Integer> transportIndices = parsedModelFile.getTransportIds(modelFile.getName());
 			for( Integer current : transportIndices) {
 				Transport transport = generatorFactory.createTransport();
@@ -229,7 +246,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		try {
 			// Remember the file.
 			//
-			final IFile modelFile = getModelFile();
+			final IFile genFile = getGenFile();
 
 			// Do the work within an operation.
 			//
@@ -244,7 +261,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 
 							// Get the URI of the model file.
 							//
-							URI fileURI = URI.createPlatformResourceURI(modelFile.getFullPath().toString(), true);
+							URI fileURI = URI.createPlatformResourceURI(genFile.getFullPath().toString(), true);
 
 							// Create a resource for this file.
 							//
@@ -281,7 +298,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 			IWorkbenchPage page = workbenchWindow.getActivePage();
 			final IWorkbenchPart activePart = page.getActivePart();
 			if (activePart instanceof ISetSelectionTarget) {
-				final ISelection targetSelection = new StructuredSelection(modelFile);
+				final ISelection targetSelection = new StructuredSelection(genFile);
 				getShell().getDisplay().asyncExec
 					(new Runnable() {
 						 public void run() {
@@ -294,8 +311,8 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 			//
 			try {
 				page.openEditor
-					(new FileEditorInput(modelFile),
-					 workbench.getEditorRegistry().getDefaultEditor(modelFile.getFullPath().toString()).getId());
+					(new FileEditorInput(genFile),
+					 workbench.getEditorRegistry().getDefaultEditor(genFile.getFullPath().toString()).getId());
 			}
 			catch (PartInitException exception) {
 				MessageDialog.openError(workbenchWindow.getShell(), GeneratorEditorPlugin.INSTANCE.getString("_UI_OpenEditorError_label"), exception.getMessage());
@@ -352,7 +369,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		 * <!-- end-user-doc -->
 		 * @generated
 		 */
-		public IFile getModelFile() {
+		public IFile getGenFile() {
 			return ResourcesPlugin.getWorkspace().getRoot().getFile(getContainerFullPath().append(getFileName()));
 		}
 	}
@@ -362,13 +379,41 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	 *
 	 */
 	public class GeneratorModelWizardModelSelectionPage extends WizardPage {
+		private Text modelFileField;
+		private Text targetDirField;
+		
+		private IPath currentPath;
+		
+		protected URI targetDirURI;
+
+		public void setCurrentPath(IPath path) {
+			currentPath = path;
+		}
+
+		/**
+		 * @return the targetDirURI
+		 */
+		public URI getTargetDirURI() {
+			return targetDirURI;
+		}
+
+		/**
+		 * @param targetDirURI the targetDirURI to set
+		 */
+		public void setTargetDirURI(URI targetDirURI) {
+			if( targetDirURI != null && targetDirURI != this.targetDirURI) {
+				this.targetDirURI = targetDirURI;
+				if( targetDirField != null) {
+					targetDirField.setText(targetDirURI.toPlatformString(true));
+				}
+			}
+		}
 
 		/**
 		 * @param pageName
 		 */
 		public GeneratorModelWizardModelSelectionPage(String pageName) {
 			super(pageName);
-			// TODO Auto-generated constructor stub
 		}
 
 		/**
@@ -379,7 +424,6 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		public GeneratorModelWizardModelSelectionPage(String pageName,
 				String title, ImageDescriptor titleImage) {
 			super(pageName, title, titleImage);
-			// TODO Auto-generated constructor stub
 		}
 
 		/* (non-Javadoc)
@@ -387,8 +431,145 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		 */
 		@Override
 		public void createControl(Composite parent) {
-			// TODO Auto-generated method stub
+			Composite container = new Composite( parent, SWT.NULL);
+			final GridLayout gridLayout = new GridLayout();
+			gridLayout.numColumns = 3;
+			container.setLayout(gridLayout);
+			setControl(container);
+			
+			final Label label_1 = new Label( container, SWT.None);
+			final GridData gridData_1 = new GridData();
+			gridData_1.horizontalSpan = 3;
+			label_1.setLayoutData(gridData_1);
+			label_1.setText("Select the file containing the model definition.");
+			
+			final Label label_2 = new Label( container, SWT.None);
+			final GridData gridData_2 = new GridData(GridData.HORIZONTAL_ALIGN_END);
+			label_2.setLayoutData(gridData_2);
+			label_2.setText("Model File:");
+			
+			modelFileField = new Text( container, SWT.BORDER);
+			modelFileField.addModifyListener( new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					updatePageComplete();					
+				}
+			});
+			modelFileField.setLayoutData( new GridData( GridData.FILL_HORIZONTAL));
+			String modelFileName = parsedModelFile.getSourceName();
+			if( modelFileName != null) {
+				modelFileField.setText(modelFileName);
+			}
+			
+			final Button button_1 = new Button( container, SWT.None);
+			button_1.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected( SelectionEvent e) {
+					browseForModelFile();
+				}
+			});
+			button_1.setText("Browse...");
+			
+			final Label label_3 = new Label( container, SWT.None);
+			final GridData gridData_3 = new GridData();
+			gridData_3.horizontalSpan = 3;
+			label_3.setLayoutData(gridData_3);
+			
+			final Label label_4 = new Label( container, SWT.None);
+			final GridData gridData_4 = new GridData();
+			gridData_4.horizontalSpan = 3;
+			label_4.setLayoutData(gridData_4);
+			label_4.setText("Select the target directory where generated files will be placed.");
+			
+			final Label label_5 = new Label( container, SWT.None);
+			final GridData gridData_5 = new GridData(GridData.HORIZONTAL_ALIGN_END);
+			label_5.setLayoutData(gridData_5);
+			label_5.setText("Target Directory:");
+			
+			targetDirField = new Text( container, SWT.BORDER);
+			targetDirField.addModifyListener( new ModifyListener() {
+				@Override
+				public void modifyText(ModifyEvent e) {
+					updatePageComplete();					
+				}
+			});
+			targetDirField.setLayoutData( new GridData( GridData.FILL_HORIZONTAL));
+			if( targetDirURI != null) {
+				targetDirField.setText(targetDirURI.toPlatformString(true));
+			}
+			
+			final Button button_2 = new Button( container, SWT.None);
+			button_2.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected( SelectionEvent e) {
+					browseForTargetDir();
+				}
+			});
+			button_2.setText("Browse...");
+		}
 
+		protected void browseForTargetDir() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		protected void browseForModelFile() {
+			IPath path = browse( new Path(modelFileField.getText()));
+			modelFileField.setText(path.toString());
+			if( path.segmentCount() > 1) {
+				currentPath = path.removeLastSegments(1);
+			} else {
+				currentPath = null;
+			}
+		}
+		
+		private IPath browse( IPath path) {
+			ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(
+					getShell(),
+					new WorkbenchLabelProvider(),
+					new BaseWorkbenchContentProvider());
+			dialog.setTitle("Model Selection");
+			dialog.setMessage("Select Model file:");
+			dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());
+			if( currentPath != null) {
+				dialog.setInitialSelection(currentPath.toOSString());
+			}
+			if(dialog.open() == ElementTreeSelectionDialog.OK) {
+				Object[] result = dialog.getResult();
+				if( result.length == 1) {
+					Object r0 = result[0];
+					if( r0 instanceof IFile) {
+						return ((IFile)r0).getFullPath();
+					}
+				}
+			}
+			return null;
+		}
+
+		protected void updatePageComplete() {
+			setPageComplete(false);
+
+			String newSource = modelFileField.getText();
+			if( newSource == null || newSource.isEmpty()) {
+				parsedModelFile.reset();
+
+			} else {
+				parsedModelFile.setSourceName( newSource);
+				if( !parsedModelFile.exists()) {
+					setMessage(null);
+					setErrorMessage("Model file "
+							+ newSource + " does not exist");
+					return;
+				}
+
+				String modelName = parsedModelFile.getModelName();
+				if( modelName == null) {
+					setMessage(null);
+					setErrorMessage("Model file "
+							+ newSource + " is not a valid OpenDDS model file");
+					return;
+				}
+			}
+			setErrorMessage(null);
+			setPageComplete(true);
 		}
 
 	}
@@ -402,7 +583,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	 */
 		@Override
 	public void addPages() {
-		// Create a page, set the title, and the initial model file name.
+		// Create a page, set the title, and the initial generation file name.
 		//
 		newFileCreationPage = new GeneratorModelWizardNewFileCreationPage("Whatever", selection);
 		newFileCreationPage.setTitle(GeneratorEditorPlugin.INSTANCE.getString("_UI_GeneratorModelWizard_label"));
@@ -410,7 +591,14 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		newFileCreationPage.setFileName(GeneratorEditorPlugin.INSTANCE.getString("_UI_GeneratorEditorFilenameDefaultBase") + "." + FILE_EXTENSIONS.get(0));
 		addPage(newFileCreationPage);
 
-		// Try and get the resource selection to determine a current directory for the file dialog.
+		// Page for selecting the model file and target directory.
+		//
+		modelSelectionPage = new GeneratorModelWizardModelSelectionPage("Model File and Target","Model File and Target",null);
+		modelSelectionPage.setTitle(GeneratorEditorPlugin.INSTANCE.getString("_UI_Wizard_selection_page_label"));
+		modelSelectionPage.setDescription(GeneratorEditorPlugin.INSTANCE.getString("_UI_Wizard_selection_page_description"));
+		addPage(modelSelectionPage);
+
+		// Try and get the resource selection to determine a current directory and model file.
 		//
 		if (selection != null && !selection.isEmpty()) {
 			// Get the resource...
@@ -423,7 +611,10 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 				if (selectedResource.getType() == IResource.FILE) {
 					// If a file is selected, that will be used as the model
 					// source file, and a new file will be created for this
-					modelFileURI = URI.createPlatformResourceURI(selectedResource.getFullPath().toOSString(),true);
+					parsedModelFile.setSourceName(
+									selectedResource
+									.getFullPath()
+									.toOSString());
 					selectedResource = selectedResource.getParent();
 				}
 
@@ -433,6 +624,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 					// Set this for the container.
 					//
 					newFileCreationPage.setContainerFullPath(selectedResource.getFullPath());
+					modelSelectionPage.setCurrentPath( selectedResource.getFullPath());
 
 					// Make up a unique new name here.
 					//
@@ -446,9 +638,6 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 				}
 			}
 		}
-		
-//		modelSelectionPage = new GeneratorModelWizardModelSelectionPage("Model File and Target","Model File and Target",null);
-//		addPage(modelSelectionPage);
 	}
 
 	/**
@@ -457,8 +646,8 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public IFile getModelFile() {
-		return newFileCreationPage.getModelFile();
+	public IFile getGenFile() {
+		return newFileCreationPage.getGenFile();
 	}
 
 }
