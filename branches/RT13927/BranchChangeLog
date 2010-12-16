@@ -1,3 +1,13 @@
+Thu Dec 16 12:34:27 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+
+          DataWriter's writer_data_lifecycle was treated as a child in the property sheet. Changed
+          to be property like the other policies.
+
 Thu Dec 16 00:01:10 UTC 2010  Mike Martinez  <martinez_m@lab.ociweb.com>
 
         * [r3970] 2010-12-15 22:13  martinezm
