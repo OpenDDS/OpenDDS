@@ -93,7 +93,6 @@ import org.eclipse.ui.ide.IGotoMarker;
 
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
-
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -158,6 +157,7 @@ import org.eclipse.emf.edit.ui.util.EditUIUtil;
 
 import org.eclipse.emf.edit.ui.view.ExtendedPropertySheetPage;
 
+import org.opendds.modeling.sdk.model.GeneratorSpecification.CodeGen;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Provider.GeneratorItemProviderAdapterFactory;
 
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
@@ -1115,6 +1115,13 @@ public class GeneratorEditor
 
 				new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
 
+				// Restrict the tree editor to only the instances.
+				//
+				EObject root = editingDomain.getResourceSet().getResources().get(0).getContents().get(0);
+				if( root instanceof CodeGen) {
+					treeViewer.setInput( ((CodeGen)root).getInstances());
+				}
+
 				createContextMenuFor(treeViewer);
 				int pageIndex = addPage(viewerPane.getControl());
 				setPageText(pageIndex, getString("_UI_TreePage_label"));
@@ -1430,6 +1437,9 @@ public class GeneratorEditor
 					// Set the selection to the widget.
 					//
 					selectionViewer.setSelection(new StructuredSelection(selectionList));
+
+				} else if( currentViewerPane.getViewer() == treeViewer) {
+					; // Force the tree view to be rooted at the Instances only.
 				}
 				else {
 					// Set the input to the widget.

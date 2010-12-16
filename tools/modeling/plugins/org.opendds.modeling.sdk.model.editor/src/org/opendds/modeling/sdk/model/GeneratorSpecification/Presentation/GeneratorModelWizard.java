@@ -568,25 +568,23 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 			}
 			
 			String newTarget = targetDirField.getText();
-			IResource container = ResourcesPlugin.getWorkspace().getRoot()
-			                      .findMember(new Path( newTarget));
 
-			if( newTarget == null || newTarget.isEmpty()) {
-				setErrorMessage("Target folder must be specified");
-				this.targetDir = "/";
-				return;
+			if( newTarget != null && !newTarget.isEmpty()) {
+				IResource container = ResourcesPlugin.getWorkspace().getRoot()
+                						.findMember(new Path( newTarget));
+
+				if (container == null || (container.getType() & (IResource.PROJECT | IResource.FOLDER)) == 0) {
+					setErrorMessage("Target folder " + newTarget + " must exist");
+					this.targetDir = "/";
+					return;
+				}
+				if (!container.isAccessible()) {
+					setErrorMessage("Target folder " + newTarget + " must be writable");
+					this.targetDir = "/";
+					return;
+				}
+				this.targetDir = newTarget;
 			}
-			if (container == null || (container.getType() & (IResource.PROJECT | IResource.FOLDER)) == 0) {
-				setErrorMessage("Target folder " + newTarget + " must exist");
-				this.targetDir = "/";
-				return;
-			}
-			if (!container.isAccessible()) {
-				setErrorMessage("Target folder " + newTarget + " must be writable");
-				this.targetDir = "/";
-				return;
-			}
-			this.targetDir = newTarget;
 
 			setErrorMessage(null);
 			setPageComplete(true);
