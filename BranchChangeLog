@@ -1,3 +1,15 @@
+Thu Dec 16 00:01:10 UTC 2010  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * [r3970] 2010-12-15 22:13  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/plugin.xml:
+
+          Added a missing file.
+
+        * [r3969] 2010-12-15 22:08  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
+
+          Work in progress to account for an error in the previous checkin.
+
 Wed Dec 15 20:23:31 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/InvalidNames/publisher.cpp:
