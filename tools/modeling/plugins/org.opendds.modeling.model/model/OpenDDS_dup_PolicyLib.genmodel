@@ -221,6 +221,7 @@
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Types.ecore#//Key/field"/>
     </genClasses>
     <genClasses ecoreClass="Types.ecore#//Long"/>
+    <genClasses ecoreClass="Types.ecore#//LongDouble"/>
     <genClasses ecoreClass="Types.ecore#//LongLong"/>
     <genClasses ecoreClass="Types.ecore#//Octet"/>
     <genClasses ecoreClass="Types.ecore#//Sequence">
@@ -255,7 +256,8 @@
     <genClasses ecoreClass="Types.ecore#//WString"/>
     <genClasses ecoreClass="Types.ecore#//DataLib">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//DataLib/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Types.ecore#//DataLib/types"/>
+      <genFeatures property="None" children="true" createChild="true" propertySortChoices="true"
+          ecoreFeature="ecore:EReference Types.ecore#//DataLib/types"/>
     </genClasses>
   </genPackages>
   <genPackages prefix="DCPS" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"

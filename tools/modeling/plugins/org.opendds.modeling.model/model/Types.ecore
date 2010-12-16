@@ -40,6 +40,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="field" lowerBound="1" eType="#//Field"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Long" eSuperTypes="#//SignedInt"/>
+  <eClassifiers xsi:type="ecore:EClass" name="LongDouble" eSuperTypes="#//FloatingPoint"/>
   <eClassifiers xsi:type="ecore:EClass" name="LongLong" eSuperTypes="#//SignedInt"/>
   <eClassifiers xsi:type="ecore:EClass" name="Octet" eSuperTypes="#//Simple"/>
   <eClassifiers xsi:type="ecore:EClass" name="Sequence" eSuperTypes="#//Collection">

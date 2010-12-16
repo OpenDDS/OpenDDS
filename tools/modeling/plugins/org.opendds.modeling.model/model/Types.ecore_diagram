@@ -547,6 +547,23 @@
     <element xmi:type="ecore:EClass" href="Types.ecore#//DataLib"/>
     <layoutConstraint xmi:type="notation:Bounds" xmi:id="_GKzIged5Ed-EBorToBm9eQ" x="199" y="22"/>
   </children>
+  <children xmi:type="notation:Shape" xmi:id="_Cgq_YQkTEeCAMfo5lEQksg" type="2001" fontName="Sans">
+    <children xmi:type="notation:DecorationNode" xmi:id="_CgsNgAkTEeCAMfo5lEQksg" type="5001"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_CgsNgQkTEeCAMfo5lEQksg" type="7001">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_CgsNggkTEeCAMfo5lEQksg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_CgsNgwkTEeCAMfo5lEQksg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_CgsNhAkTEeCAMfo5lEQksg" type="7002">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_CgsNhQkTEeCAMfo5lEQksg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_CgsNhgkTEeCAMfo5lEQksg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_Cgs0kAkTEeCAMfo5lEQksg" type="7003">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_Cgs0kQkTEeCAMfo5lEQksg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_Cgs0kgkTEeCAMfo5lEQksg"/>
+    </children>
+    <element xmi:type="ecore:EClass" href="Types.ecore#//LongDouble"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Cgq_YgkTEeCAMfo5lEQksg" x="960" y="432"/>
+  </children>
   <styles xmi:type="notation:DiagramStyle" xmi:id="_qLGioOLGEd-DxoVkl6zeRQ"/>
   <element xmi:type="ecore:EPackage" href="Types.ecore#/"/>
   <edges xmi:type="notation:Connector" xmi:id="_VaocAOLUEd-DxoVkl6zeRQ" type="4004" source="_qOWD4OLGEd-DxoVkl6zeRQ" target="_qOyIyeLGEd-DxoVkl6zeRQ">
