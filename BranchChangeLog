@@ -1,3 +1,25 @@
+Thu Dec 16 22:53:56 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3977] 2010-12-16 22:44  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java:
+
+          Added the all important 'NOT' to the code generation directives for
+          modified source.
+
+        * [r3976] 2010-12-16 22:35  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
+
+          New Wizard is complete, without refactoring to share behavior with
+          the editor.
+          Restricted the editor 'Tree' tab to show only the instances.
+
+        * [r3975] 2010-12-16 17:47  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
+
+          Working New Wizard before factoring actions out for use in Editor
+          proper.
+
 Thu Dec 16 13:35:20 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
