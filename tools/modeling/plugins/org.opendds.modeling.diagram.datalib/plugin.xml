@@ -232,7 +232,7 @@
       <viewProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibViewProvider">
          <Priority name="Lowest"/>
          <context viewClass="org.eclipse.gmf.runtime.notation.Diagram" semanticHints="OpenDDS DataLib"/>
-         <context viewClass="org.eclipse.gmf.runtime.notation.Node" semanticHints="2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,3001,3002,3003,3004"/>
+         <context viewClass="org.eclipse.gmf.runtime.notation.Node" semanticHints="2001,2023,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,3001,3002,3003,3004"/>
          <context viewClass="org.eclipse.gmf.runtime.notation.Edge" semanticHints="4001,4002,4003,4004,4005,4006"/>
       </viewProvider>
    </extension>
@@ -245,13 +245,13 @@
             <method name="getType()" value="OpenDDS DataLib"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-nodes">
-            <method name="getType()" value="2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,3001,3002,3003,3004"/>
+            <method name="getType()" value="2001,2023,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,3001,3002,3003,3004"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Edge" id="generated-links">
             <method name="getType()" value="4001,4002,4003,4004,4005,4006"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-labels">
-            <method name="getType()" value="5001,5002,5003,5004,5005,5006,5007,5008,5009,5010,5011,5012,5013,5014,5015,5016,5017,5018,5019,5020,5021,5022,5023,5024,5025,5026,5027,5028,5029,5030,5031,5032,5033"/>
+            <method name="getType()" value="5001,5034,5002,5003,5004,5005,5006,5007,5008,5009,5010,5011,5012,5013,5014,5015,5016,5017,5018,5019,5020,5021,5022,5023,5024,5025,5026,5027,5028,5029,5030,5031,5032,5033"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-compartments">
             <method name="getType()" value="7001,7002,7003,7004"/>
@@ -266,6 +266,7 @@
          <Priority name="Lowest"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.DataLibEditPart" id="DataLib_1000"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.LongEditPart" id="Long_2001"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.LongDoubleEditPart" id="LongDouble_2023"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.LongLongEditPart" id="LongLong_2002"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.ShortEditPart" id="Short_2003"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.ULongEditPart" id="ULong_2004"/>
@@ -287,7 +288,7 @@
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.BranchEditPart" id="Branch_2020"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.UnionEditPart" id="Union_2021"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.StructEditPart" id="Struct_2022"/>
-         <context elements="DataLib_1000,Long_2001,LongLong_2002,Short_2003,ULong_2004,ULongLong_2005,UShort_2006,Double_2007,Float_2008,Char_2009,WChar_2010,Octet_2011,Boolean_2012,Array_2013,Enum_2014,Sequence_2015,String_2016,WString_2017,Typedef_2018,Case_2019,Branch_2020,Union_2021,Struct_2022"/>
+         <context elements="DataLib_1000,Long_2001,LongDouble_2023,LongLong_2002,Short_2003,ULong_2004,ULongLong_2005,UShort_2006,Double_2007,Float_2008,Char_2009,WChar_2010,Octet_2011,Boolean_2012,Array_2013,Enum_2014,Sequence_2015,String_2016,WString_2017,Typedef_2018,Case_2019,Branch_2020,Union_2021,Struct_2022"/>
       </modelingAssistantProvider>
    </extension>
 
@@ -325,6 +326,16 @@
                eclass="Long"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.LongEditHelper">
             <param name="semanticHint" value="2001"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.LongDouble_2023"
+               name="%metatype.name.LongDouble_2023"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="LongDouble"
+               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.LongDoubleEditHelper">
+            <param name="semanticHint" value="2023"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
@@ -643,6 +654,7 @@
       <binding context="org.opendds.modeling.diagram.datalib.TypeContext">
          <elementType ref="org.opendds.modeling.diagram.datalib.DataLib_1000"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.Long_2001"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.LongDouble_2023"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.LongLong_2002"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.Short_2003"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.ULong_2004"/>
