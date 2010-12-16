@@ -65,6 +65,15 @@
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
+          title="LongDouble"
+          description="Create new LongDouble">
+        <smallIcon
+            xsi:type="gmftool:DefaultImage"/>
+        <largeIcon
+            xsi:type="gmftool:DefaultImage"/>
+      </tools>
+      <tools
+          xsi:type="gmftool:CreationTool"
           title="LongLong"
           description="Create new LongLong">
         <smallIcon
