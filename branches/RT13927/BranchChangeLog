@@ -1,3 +1,16 @@
+Thu Dec 16 13:07:07 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Types.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Types.ecore_diagram:
+
+          Added support for LongDouble type to the Ecore model.
+
 Thu Dec 16 12:34:27 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
