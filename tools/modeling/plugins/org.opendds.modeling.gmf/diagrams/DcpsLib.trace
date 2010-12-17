@@ -46,6 +46,9 @@
     <compartmentTraces
         visualID="7033"
         queryText="true"/>
+    <compartmentTraces
+        visualID="7040"
+        queryText="true"/>
   </nodeTraces>
   <childNodeTraces
       visualID="3001"
@@ -848,6 +851,16 @@
         queryText="true"/>
     <nodeLabelTraces
         visualID="5248"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3058"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'Struct') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'DataLib') and _containmentMF_.name = 'types')">
+    <nodeLabelTraces
+        visualID="5250"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5251"
         queryText="true"/>
   </childNodeTraces>
   <linkTraces

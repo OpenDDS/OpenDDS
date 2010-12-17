@@ -25,7 +25,7 @@ public class TopicQoSPoliciesCustomEditPart extends ListCompartmentEditPart {
 	/**
 	 * @generated
 	 */
-	public static final int VISUAL_ID = 7032;
+	public static final int VISUAL_ID = 7033;
 
 	/**
 	 * @generated
