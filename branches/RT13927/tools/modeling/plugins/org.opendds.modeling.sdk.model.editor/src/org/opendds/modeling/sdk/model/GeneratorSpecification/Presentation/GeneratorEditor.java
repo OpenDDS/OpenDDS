@@ -118,6 +118,7 @@ import org.eclipse.emf.common.ui.viewer.IViewerProvider;
 
 import org.eclipse.emf.common.util.BasicDiagnostic;
 import org.eclipse.emf.common.util.Diagnostic;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 
 import org.eclipse.emf.ecore.EObject;
@@ -1117,10 +1118,18 @@ public class GeneratorEditor
 
 				// Restrict the tree editor to only the instances.
 				//
-				EObject root = editingDomain.getResourceSet().getResources().get(0).getContents().get(0);
-				if( root instanceof CodeGen) {
-					treeViewer.setTreeInput( ((CodeGen)root).getInstances());
+				EList<Resource> resources = editingDomain.getResourceSet().getResources();
+				if( resources.size() > 0) {
+					Resource resource = resources.get(0);
+					EList<EObject> contents = resource.getContents();
+					if( contents.size() > 0) {
+						EObject root = contents.get(0);
+						if( root instanceof CodeGen) {
+							treeViewer.setTreeInput( ((CodeGen)root).getInstances());
+						}
+					}
 				}
+				
 
 				createContextMenuFor(treeViewer);
 				int pageIndex = addPage(viewerPane.getControl());
