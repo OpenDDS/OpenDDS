@@ -207,7 +207,7 @@
         compartments="//@diagram/@compartments.8"
         graphicalNodeEditPolicyClassName="DeadlineQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="DeadlineQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -360,7 +360,7 @@
         canonicalEditPolicyClassName="DestinationOrderQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DestinationOrderQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="DestinationOrderQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -445,7 +445,7 @@
         compartments="//@diagram/@compartments.9"
         graphicalNodeEditPolicyClassName="DsQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="DsQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.31">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -698,7 +698,7 @@
         canonicalEditPolicyClassName="HistoryQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="HistoryQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="HistoryQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -805,7 +805,7 @@
         compartments="//@diagram/@compartments.10"
         graphicalNodeEditPolicyClassName="LbQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="LbQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -960,7 +960,7 @@
         compartments="//@diagram/@compartments.11"
         graphicalNodeEditPolicyClassName="LifespanQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="LifespanQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.31">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1115,7 +1115,7 @@
         compartments="//@diagram/@compartments.12"
         graphicalNodeEditPolicyClassName="LivelinessQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="LivelinessQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1374,7 +1374,7 @@
         canonicalEditPolicyClassName="OwnershipQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="OwnershipQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="OwnershipQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1460,7 +1460,7 @@
         compartments="//@diagram/@compartments.13"
         graphicalNodeEditPolicyClassName="ReliabilityQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="ReliabilityQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1634,7 +1634,7 @@
         canonicalEditPolicyClassName="RlQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="RlQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="RlQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1761,7 +1761,7 @@
         canonicalEditPolicyClassName="TpQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TpQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="TpQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.31">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -1931,7 +1931,7 @@
         canonicalEditPolicyClassName="DurabilityQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DurabilityQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="DurabilityQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.31">
+        containers="//@diagram/@compartments.6 //@diagram/@compartments.23 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2102,7 +2102,7 @@
         compartments="//@diagram/@compartments.14"
         graphicalNodeEditPolicyClassName="DeadlineQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="DeadlineQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.33">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2188,7 +2188,7 @@
         canonicalEditPolicyClassName="DestinationOrderQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DestinationOrderQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="DestinationOrderQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.33">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2273,7 +2273,7 @@
         compartments="//@diagram/@compartments.15"
         graphicalNodeEditPolicyClassName="DsQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="DsQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.32">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.33">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2459,7 +2459,7 @@
         canonicalEditPolicyClassName="DurabilityQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DurabilityQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="DurabilityQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.33">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2544,7 +2544,7 @@
         canonicalEditPolicyClassName="HistoryQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="HistoryQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="HistoryQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.33">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2651,7 +2651,7 @@
         compartments="//@diagram/@compartments.16"
         graphicalNodeEditPolicyClassName="LbQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="LbQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.33">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2739,7 +2739,7 @@
         compartments="//@diagram/@compartments.17"
         graphicalNodeEditPolicyClassName="LifespanQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="LifespanQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.32">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.33">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -2827,7 +2827,7 @@
         compartments="//@diagram/@compartments.18"
         graphicalNodeEditPolicyClassName="LivelinessQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="LivelinessQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.33">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -3019,7 +3019,7 @@
         canonicalEditPolicyClassName="OwnershipQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="OwnershipQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="OwnershipQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.33">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -3105,7 +3105,7 @@
         compartments="//@diagram/@compartments.19"
         graphicalNodeEditPolicyClassName="ReliabilityQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="ReliabilityQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.33">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -3212,7 +3212,7 @@
         canonicalEditPolicyClassName="RlQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="RlQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="RlQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.32">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.24 //@diagram/@compartments.33">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -3339,7 +3339,7 @@
         canonicalEditPolicyClassName="TpQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TpQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="TpQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.7 //@diagram/@compartments.32">
+        containers="//@diagram/@compartments.7 //@diagram/@compartments.33">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -4799,7 +4799,7 @@
         canonicalEditPolicyClassName="TdQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TdQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="TdQosPolicyCreateCommand"
-        containers="//@diagram/@compartments.23 //@diagram/@compartments.31">
+        containers="//@diagram/@compartments.23 //@diagram/@compartments.32">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -5077,7 +5077,7 @@
         canonicalEditPolicyClassName="TdQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TdQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="TdQosPolicy2CreateCommand"
-        containers="//@diagram/@compartments.24 //@diagram/@compartments.32">
+        containers="//@diagram/@compartments.24 //@diagram/@compartments.33">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -5152,6 +5152,72 @@
             editPattern="{0}">
           <metaFeatures
               href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//qos/TopicDataQosPolicy/value"/>
+        </modelFacet>
+      </labels>
+    </childNodes>
+    <childNodes
+        visualID="3058"
+        editPartClassName="StructEditPart"
+        itemSemanticEditPolicyClassName="StructItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="StructCanonicalEditPolicy"
+        graphicalNodeEditPolicyClassName="StructGraphicalNodeEditPolicy"
+        createCommandClassName="StructCreateCommand"
+        containers="//@diagram/@compartments.31">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <elementType
+          xsi:type="gmfgen:MetamodelType"
+          editHelperClassName="StructEditHelper"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          className="StructFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class StructFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStructTypeNameLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureStructNameLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public StructFigure() {&#xA;&#x9;&#x9;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureStructTypeNameLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStructTypeNameLabel.setText(&quot;Struct&quot;);&#xA;&#xA;this.add(fFigureStructTypeNameLabel);&#xA;&#xA;&#xA;&#xA;fFigureStructNameLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureStructNameLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureStructNameLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStructTypeNameLabel() {&#xA;&#x9;&#x9;return fFigureStructTypeNameLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureStructNameLabel() {&#xA;&#x9;&#x9;return fFigureStructNameLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+      <modelFacet>
+        <metaClass
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//types/Struct"/>
+        <containmentMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//types/DataLib/types"/>
+        <childMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//types/DataLib/types"/>
+      </modelFacet>
+      <labels
+          visualID="5250"
+          editPartClassName="StructNameEditPart"
+          itemSemanticEditPolicyClassName="StructNameItemSemanticEditPolicy"
+          readOnly="true"
+          elementIcon="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureStructTypeNameLabel"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="Struct">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//types/Struct/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5251"
+          editPartClassName="StructName2EditPart"
+          itemSemanticEditPolicyClassName="StructName2ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureStructNameLabel"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            editorPattern=""
+            editPattern="">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//types/Struct/name"/>
         </modelFacet>
       </labels>
     </childNodes>
@@ -5292,7 +5358,7 @@
         editPartClassName="TopicEditPart"
         itemSemanticEditPolicyClassName="TopicItemSemanticEditPolicy"
         canonicalEditPolicyClassName="TopicCanonicalEditPolicy"
-        compartments="//@diagram/@compartments.31 //@diagram/@compartments.32"
+        compartments="//@diagram/@compartments.31 //@diagram/@compartments.32 //@diagram/@compartments.33"
         graphicalNodeEditPolicyClassName="TopicGraphicalNodeEditPolicy"
         createCommandClassName="TopicCreateCommand">
       <diagramRunTimeClass
@@ -5898,6 +5964,21 @@
     </compartments>
     <compartments
         visualID="7032"
+        editPartClassName="TopicDataTypeEditPart"
+        itemSemanticEditPolicyClassName="TopicDataTypeItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="TopicDataTypeCanonicalEditPolicy"
+        childNodes="//@diagram/@childNodes.56"
+        title="DataType"
+        canCollapse="false"
+        node="//@diagram/@topLevelNodes.2">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <viewmap
+          xsi:type="gmfgen:FigureViewmap"
+          figureQualifiedClassName="org.eclipse.draw2d.RectangleFigure"/>
+    </compartments>
+    <compartments
+        visualID="7033"
         editPartClassName="TopicQoSPoliciesCustomEditPart"
         itemSemanticEditPolicyClassName="TopicQoSPoliciesCustomItemSemanticEditPolicy"
         canonicalEditPolicyClassName="TopicQoSPoliciesCustomCanonicalEditPolicy"
@@ -5912,7 +5993,7 @@
           figureQualifiedClassName="org.eclipse.draw2d.RectangleFigure"/>
     </compartments>
     <compartments
-        visualID="7033"
+        visualID="7040"
         editPartClassName="TopicQoSPoliciesSharedEditPart"
         itemSemanticEditPolicyClassName="TopicQoSPoliciesSharedItemSemanticEditPolicy"
         canonicalEditPolicyClassName="TopicQoSPoliciesSharedCanonicalEditPolicy"
@@ -6396,6 +6477,9 @@
         parent="//@diagram/@topLevelNodes.2"
         child="//@diagram/@childNodes.35"/>
     <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@childNodes.56"/>
+    <childReferences
         parent="//@diagram"
         child="//@diagram/@topLevelNodes.2"/>
     <childReferences
@@ -6553,7 +6637,7 @@
       extensibleViaService="true">
     <implementations
         xsi:type="gmfgen:PredefinedParser"
-        uses="//@diagram/@childNodes.3/@labels.0/@modelFacet //@diagram/@childNodes.3/@labels.1/@modelFacet //@diagram/@childNodes.2/@labels.0/@modelFacet //@diagram/@childNodes.2/@labels.1/@modelFacet //@diagram/@childNodes.4/@labels.0/@modelFacet //@diagram/@childNodes.4/@labels.1/@modelFacet //@diagram/@childNodes.4/@labels.2/@modelFacet //@diagram/@childNodes.6/@labels.0/@modelFacet //@diagram/@childNodes.6/@labels.1/@modelFacet //@diagram/@childNodes.5/@labels.0/@modelFacet //@diagram/@childNodes.5/@labels.1/@modelFacet //@diagram/@childNodes.5/@labels.2/@modelFacet //@diagram/@childNodes.5/@labels.3/@modelFacet //@diagram/@childNodes.5/@labels.4/@modelFacet //@diagram/@childNodes.5/@labels.5/@modelFacet //@diagram/@childNodes.5/@labels.6/@modelFacet //@diagram/@childNodes.7/@labels.0/@modelFacet //@diagram/@childNodes.7/@labels.1/@modelFacet //@diagram/@childNodes.7/@labels.2/@modelFacet //@diagram/@childNodes.7/@labels.3/@modelFacet //@diagram/@childNodes.9/@labels.0/@modelFacet //@diagram/@childNodes.9/@labels.1/@modelFacet //@diagram/@childNodes.8/@labels.0/@modelFacet //@diagram/@childNodes.8/@labels.1/@modelFacet //@diagram/@childNodes.11/@labels.0/@modelFacet //@diagram/@childNodes.11/@labels.1/@modelFacet //@diagram/@childNodes.10/@labels.0/@modelFacet //@diagram/@childNodes.10/@labels.1/@modelFacet //@diagram/@childNodes.13/@labels.0/@modelFacet //@diagram/@childNodes.13/@labels.1/@modelFacet //@diagram/@childNodes.12/@labels.0/@modelFacet //@diagram/@childNodes.12/@labels.1/@modelFacet //@diagram/@childNodes.12/@labels.2/@modelFacet //@diagram/@childNodes.14/@labels.0/@modelFacet //@diagram/@childNodes.14/@labels.1/@modelFacet //@diagram/@childNodes.14/@labels.2/@modelFacet //@diagram/@childNodes.15/@labels.0/@modelFacet //@diagram/@childNodes.15/@labels.1/@modelFacet //@diagram/@childNodes.15/@labels.2/@modelFacet //@diagram/@childNodes.17/@labels.0/@modelFacet //@diagram/@childNodes.17/@labels.1/@modelFacet //@diagram/@childNodes.16/@labels.0/@modelFacet //@diagram/@childNodes.16/@labels.1/@modelFacet //@diagram/@childNodes.16/@labels.2/@modelFacet //@diagram/@childNodes.18/@labels.0/@modelFacet //@diagram/@childNodes.18/@labels.1/@modelFacet //@diagram/@childNodes.18/@labels.2/@modelFacet //@diagram/@childNodes.18/@labels.3/@modelFacet //@diagram/@childNodes.18/@labels.4/@modelFacet //@diagram/@childNodes.19/@labels.0/@modelFacet //@diagram/@childNodes.19/@labels.1/@modelFacet //@diagram/@childNodes.19/@labels.2/@modelFacet //@diagram/@childNodes.20/@labels.0/@modelFacet //@diagram/@childNodes.20/@labels.1/@modelFacet //@diagram/@childNodes.20/@labels.2/@modelFacet //@diagram/@childNodes.21/@labels.0/@modelFacet //@diagram/@childNodes.21/@labels.1/@modelFacet //@diagram/@childNodes.21/@labels.2/@modelFacet //@diagram/@childNodes.22/@labels.0/@modelFacet //@diagram/@childNodes.22/@labels.1/@modelFacet //@diagram/@childNodes.22/@labels.2/@modelFacet //@diagram/@childNodes.23/@labels.0/@modelFacet //@diagram/@childNodes.23/@labels.1/@modelFacet //@diagram/@childNodes.24/@labels.0/@modelFacet //@diagram/@childNodes.24/@labels.1/@modelFacet //@diagram/@childNodes.24/@labels.2/@modelFacet //@diagram/@childNodes.25/@labels.0/@modelFacet //@diagram/@childNodes.25/@labels.1/@modelFacet //@diagram/@childNodes.25/@labels.2/@modelFacet //@diagram/@childNodes.25/@labels.3/@modelFacet //@diagram/@childNodes.25/@labels.4/@modelFacet //@diagram/@childNodes.25/@labels.5/@modelFacet //@diagram/@childNodes.25/@labels.6/@modelFacet //@diagram/@childNodes.26/@labels.0/@modelFacet //@diagram/@childNodes.26/@labels.1/@modelFacet //@diagram/@childNodes.26/@labels.2/@modelFacet //@diagram/@childNodes.27/@labels.0/@modelFacet //@diagram/@childNodes.27/@labels.1/@modelFacet //@diagram/@childNodes.27/@labels.2/@modelFacet //@diagram/@childNodes.27/@labels.3/@modelFacet //@diagram/@childNodes.28/@labels.0/@modelFacet //@diagram/@childNodes.28/@labels.1/@modelFacet //@diagram/@childNodes.29/@labels.0/@modelFacet //@diagram/@childNodes.29/@labels.1/@modelFacet //@diagram/@childNodes.30/@labels.0/@modelFacet //@diagram/@childNodes.30/@labels.1/@modelFacet //@diagram/@childNodes.30/@labels.2/@modelFacet //@diagram/@childNodes.31/@labels.0/@modelFacet //@diagram/@childNodes.31/@labels.1/@modelFacet //@diagram/@childNodes.31/@labels.2/@modelFacet //@diagram/@childNodes.32/@labels.0/@modelFacet //@diagram/@childNodes.32/@labels.1/@modelFacet //@diagram/@childNodes.32/@labels.2/@modelFacet //@diagram/@childNodes.33/@labels.0/@modelFacet //@diagram/@childNodes.33/@labels.1/@modelFacet //@diagram/@childNodes.33/@labels.2/@modelFacet //@diagram/@childNodes.34/@labels.0/@modelFacet //@diagram/@childNodes.34/@labels.1/@modelFacet //@diagram/@childNodes.34/@labels.2/@modelFacet //@diagram/@childNodes.34/@labels.3/@modelFacet //@diagram/@childNodes.34/@labels.4/@modelFacet //@diagram/@childNodes.35/@labels.0/@modelFacet //@diagram/@childNodes.35/@labels.1/@modelFacet //@diagram/@childNodes.35/@labels.2/@modelFacet //@diagram/@childNodes.36/@labels.0/@modelFacet //@diagram/@childNodes.36/@labels.1/@modelFacet //@diagram/@childNodes.36/@labels.2/@modelFacet //@diagram/@childNodes.1/@labels.0/@modelFacet //@diagram/@childNodes.1/@labels.1/@modelFacet //@diagram/@childNodes.1/@labels.2/@modelFacet //@diagram/@childNodes.37/@labels.0/@modelFacet //@diagram/@childNodes.37/@labels.1/@modelFacet //@diagram/@childNodes.37/@labels.2/@modelFacet //@diagram/@childNodes.38/@labels.0/@modelFacet //@diagram/@childNodes.38/@labels.1/@modelFacet //@diagram/@childNodes.38/@labels.2/@modelFacet //@diagram/@childNodes.39/@labels.0/@modelFacet //@diagram/@childNodes.39/@labels.1/@modelFacet //@diagram/@childNodes.40/@labels.0/@modelFacet //@diagram/@childNodes.40/@labels.1/@modelFacet //@diagram/@childNodes.40/@labels.2/@modelFacet //@diagram/@childNodes.40/@labels.3/@modelFacet //@diagram/@childNodes.40/@labels.4/@modelFacet //@diagram/@childNodes.41/@labels.0/@modelFacet //@diagram/@childNodes.41/@labels.1/@modelFacet //@diagram/@childNodes.41/@labels.2/@modelFacet //@diagram/@childNodes.42/@labels.0/@modelFacet //@diagram/@childNodes.42/@labels.1/@modelFacet //@diagram/@childNodes.42/@labels.2/@modelFacet //@diagram/@childNodes.43/@labels.0/@modelFacet //@diagram/@childNodes.43/@labels.1/@modelFacet //@diagram/@childNodes.44/@labels.0/@modelFacet //@diagram/@childNodes.44/@labels.1/@modelFacet //@diagram/@childNodes.44/@labels.2/@modelFacet //@diagram/@childNodes.44/@labels.3/@modelFacet //@diagram/@childNodes.44/@labels.4/@modelFacet //@diagram/@childNodes.0/@labels.0/@modelFacet //@diagram/@childNodes.0/@labels.1/@modelFacet //@diagram/@childNodes.0/@labels.2/@modelFacet //@diagram/@childNodes.48/@labels.0/@modelFacet //@diagram/@childNodes.48/@labels.1/@modelFacet //@diagram/@childNodes.49/@labels.0/@modelFacet //@diagram/@childNodes.49/@labels.1/@modelFacet //@diagram/@childNodes.47/@labels.0/@modelFacet //@diagram/@childNodes.47/@labels.1/@modelFacet //@diagram/@childNodes.51/@labels.0/@modelFacet //@diagram/@childNodes.51/@labels.1/@modelFacet //@diagram/@childNodes.50/@labels.0/@modelFacet //@diagram/@childNodes.50/@labels.1/@modelFacet //@diagram/@childNodes.52/@labels.0/@modelFacet //@diagram/@childNodes.52/@labels.1/@modelFacet //@diagram/@childNodes.52/@labels.2/@modelFacet //@diagram/@childNodes.53/@labels.0/@modelFacet //@diagram/@childNodes.53/@labels.1/@modelFacet //@diagram/@childNodes.54/@labels.0/@modelFacet //@diagram/@childNodes.54/@labels.1/@modelFacet //@diagram/@childNodes.55/@labels.0/@modelFacet //@diagram/@childNodes.55/@labels.1/@modelFacet //@diagram/@childNodes.55/@labels.2/@modelFacet //@diagram/@childNodes.46/@labels.0/@modelFacet //@diagram/@childNodes.46/@labels.1/@modelFacet //@diagram/@childNodes.46/@labels.2/@modelFacet //@diagram/@childNodes.45/@labels.0/@modelFacet //@diagram/@childNodes.45/@labels.1/@modelFacet //@diagram/@childNodes.45/@labels.2/@modelFacet //@diagram/@topLevelNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.0/@labels.1/@modelFacet //@diagram/@topLevelNodes.1/@labels.0/@modelFacet //@diagram/@topLevelNodes.1/@labels.1/@modelFacet //@diagram/@topLevelNodes.2/@labels.0/@modelFacet //@diagram/@topLevelNodes.2/@labels.1/@modelFacet"/>
+        uses="//@diagram/@childNodes.3/@labels.0/@modelFacet //@diagram/@childNodes.3/@labels.1/@modelFacet //@diagram/@childNodes.2/@labels.0/@modelFacet //@diagram/@childNodes.2/@labels.1/@modelFacet //@diagram/@childNodes.4/@labels.0/@modelFacet //@diagram/@childNodes.4/@labels.1/@modelFacet //@diagram/@childNodes.4/@labels.2/@modelFacet //@diagram/@childNodes.6/@labels.0/@modelFacet //@diagram/@childNodes.6/@labels.1/@modelFacet //@diagram/@childNodes.5/@labels.0/@modelFacet //@diagram/@childNodes.5/@labels.1/@modelFacet //@diagram/@childNodes.5/@labels.2/@modelFacet //@diagram/@childNodes.5/@labels.3/@modelFacet //@diagram/@childNodes.5/@labels.4/@modelFacet //@diagram/@childNodes.5/@labels.5/@modelFacet //@diagram/@childNodes.5/@labels.6/@modelFacet //@diagram/@childNodes.7/@labels.0/@modelFacet //@diagram/@childNodes.7/@labels.1/@modelFacet //@diagram/@childNodes.7/@labels.2/@modelFacet //@diagram/@childNodes.7/@labels.3/@modelFacet //@diagram/@childNodes.9/@labels.0/@modelFacet //@diagram/@childNodes.9/@labels.1/@modelFacet //@diagram/@childNodes.8/@labels.0/@modelFacet //@diagram/@childNodes.8/@labels.1/@modelFacet //@diagram/@childNodes.11/@labels.0/@modelFacet //@diagram/@childNodes.11/@labels.1/@modelFacet //@diagram/@childNodes.10/@labels.0/@modelFacet //@diagram/@childNodes.10/@labels.1/@modelFacet //@diagram/@childNodes.13/@labels.0/@modelFacet //@diagram/@childNodes.13/@labels.1/@modelFacet //@diagram/@childNodes.12/@labels.0/@modelFacet //@diagram/@childNodes.12/@labels.1/@modelFacet //@diagram/@childNodes.12/@labels.2/@modelFacet //@diagram/@childNodes.14/@labels.0/@modelFacet //@diagram/@childNodes.14/@labels.1/@modelFacet //@diagram/@childNodes.14/@labels.2/@modelFacet //@diagram/@childNodes.15/@labels.0/@modelFacet //@diagram/@childNodes.15/@labels.1/@modelFacet //@diagram/@childNodes.15/@labels.2/@modelFacet //@diagram/@childNodes.17/@labels.0/@modelFacet //@diagram/@childNodes.17/@labels.1/@modelFacet //@diagram/@childNodes.16/@labels.0/@modelFacet //@diagram/@childNodes.16/@labels.1/@modelFacet //@diagram/@childNodes.16/@labels.2/@modelFacet //@diagram/@childNodes.18/@labels.0/@modelFacet //@diagram/@childNodes.18/@labels.1/@modelFacet //@diagram/@childNodes.18/@labels.2/@modelFacet //@diagram/@childNodes.18/@labels.3/@modelFacet //@diagram/@childNodes.18/@labels.4/@modelFacet //@diagram/@childNodes.19/@labels.0/@modelFacet //@diagram/@childNodes.19/@labels.1/@modelFacet //@diagram/@childNodes.19/@labels.2/@modelFacet //@diagram/@childNodes.20/@labels.0/@modelFacet //@diagram/@childNodes.20/@labels.1/@modelFacet //@diagram/@childNodes.20/@labels.2/@modelFacet //@diagram/@childNodes.21/@labels.0/@modelFacet //@diagram/@childNodes.21/@labels.1/@modelFacet //@diagram/@childNodes.21/@labels.2/@modelFacet //@diagram/@childNodes.22/@labels.0/@modelFacet //@diagram/@childNodes.22/@labels.1/@modelFacet //@diagram/@childNodes.22/@labels.2/@modelFacet //@diagram/@childNodes.23/@labels.0/@modelFacet //@diagram/@childNodes.23/@labels.1/@modelFacet //@diagram/@childNodes.24/@labels.0/@modelFacet //@diagram/@childNodes.24/@labels.1/@modelFacet //@diagram/@childNodes.24/@labels.2/@modelFacet //@diagram/@childNodes.25/@labels.0/@modelFacet //@diagram/@childNodes.25/@labels.1/@modelFacet //@diagram/@childNodes.25/@labels.2/@modelFacet //@diagram/@childNodes.25/@labels.3/@modelFacet //@diagram/@childNodes.25/@labels.4/@modelFacet //@diagram/@childNodes.25/@labels.5/@modelFacet //@diagram/@childNodes.25/@labels.6/@modelFacet //@diagram/@childNodes.26/@labels.0/@modelFacet //@diagram/@childNodes.26/@labels.1/@modelFacet //@diagram/@childNodes.26/@labels.2/@modelFacet //@diagram/@childNodes.27/@labels.0/@modelFacet //@diagram/@childNodes.27/@labels.1/@modelFacet //@diagram/@childNodes.27/@labels.2/@modelFacet //@diagram/@childNodes.27/@labels.3/@modelFacet //@diagram/@childNodes.28/@labels.0/@modelFacet //@diagram/@childNodes.28/@labels.1/@modelFacet //@diagram/@childNodes.29/@labels.0/@modelFacet //@diagram/@childNodes.29/@labels.1/@modelFacet //@diagram/@childNodes.30/@labels.0/@modelFacet //@diagram/@childNodes.30/@labels.1/@modelFacet //@diagram/@childNodes.30/@labels.2/@modelFacet //@diagram/@childNodes.31/@labels.0/@modelFacet //@diagram/@childNodes.31/@labels.1/@modelFacet //@diagram/@childNodes.31/@labels.2/@modelFacet //@diagram/@childNodes.32/@labels.0/@modelFacet //@diagram/@childNodes.32/@labels.1/@modelFacet //@diagram/@childNodes.32/@labels.2/@modelFacet //@diagram/@childNodes.33/@labels.0/@modelFacet //@diagram/@childNodes.33/@labels.1/@modelFacet //@diagram/@childNodes.33/@labels.2/@modelFacet //@diagram/@childNodes.34/@labels.0/@modelFacet //@diagram/@childNodes.34/@labels.1/@modelFacet //@diagram/@childNodes.34/@labels.2/@modelFacet //@diagram/@childNodes.34/@labels.3/@modelFacet //@diagram/@childNodes.34/@labels.4/@modelFacet //@diagram/@childNodes.35/@labels.0/@modelFacet //@diagram/@childNodes.35/@labels.1/@modelFacet //@diagram/@childNodes.35/@labels.2/@modelFacet //@diagram/@childNodes.36/@labels.0/@modelFacet //@diagram/@childNodes.36/@labels.1/@modelFacet //@diagram/@childNodes.36/@labels.2/@modelFacet //@diagram/@childNodes.1/@labels.0/@modelFacet //@diagram/@childNodes.1/@labels.1/@modelFacet //@diagram/@childNodes.1/@labels.2/@modelFacet //@diagram/@childNodes.37/@labels.0/@modelFacet //@diagram/@childNodes.37/@labels.1/@modelFacet //@diagram/@childNodes.37/@labels.2/@modelFacet //@diagram/@childNodes.38/@labels.0/@modelFacet //@diagram/@childNodes.38/@labels.1/@modelFacet //@diagram/@childNodes.38/@labels.2/@modelFacet //@diagram/@childNodes.39/@labels.0/@modelFacet //@diagram/@childNodes.39/@labels.1/@modelFacet //@diagram/@childNodes.40/@labels.0/@modelFacet //@diagram/@childNodes.40/@labels.1/@modelFacet //@diagram/@childNodes.40/@labels.2/@modelFacet //@diagram/@childNodes.40/@labels.3/@modelFacet //@diagram/@childNodes.40/@labels.4/@modelFacet //@diagram/@childNodes.41/@labels.0/@modelFacet //@diagram/@childNodes.41/@labels.1/@modelFacet //@diagram/@childNodes.41/@labels.2/@modelFacet //@diagram/@childNodes.42/@labels.0/@modelFacet //@diagram/@childNodes.42/@labels.1/@modelFacet //@diagram/@childNodes.42/@labels.2/@modelFacet //@diagram/@childNodes.43/@labels.0/@modelFacet //@diagram/@childNodes.43/@labels.1/@modelFacet //@diagram/@childNodes.44/@labels.0/@modelFacet //@diagram/@childNodes.44/@labels.1/@modelFacet //@diagram/@childNodes.44/@labels.2/@modelFacet //@diagram/@childNodes.44/@labels.3/@modelFacet //@diagram/@childNodes.44/@labels.4/@modelFacet //@diagram/@childNodes.0/@labels.0/@modelFacet //@diagram/@childNodes.0/@labels.1/@modelFacet //@diagram/@childNodes.0/@labels.2/@modelFacet //@diagram/@childNodes.48/@labels.0/@modelFacet //@diagram/@childNodes.48/@labels.1/@modelFacet //@diagram/@childNodes.49/@labels.0/@modelFacet //@diagram/@childNodes.49/@labels.1/@modelFacet //@diagram/@childNodes.47/@labels.0/@modelFacet //@diagram/@childNodes.47/@labels.1/@modelFacet //@diagram/@childNodes.51/@labels.0/@modelFacet //@diagram/@childNodes.51/@labels.1/@modelFacet //@diagram/@childNodes.50/@labels.0/@modelFacet //@diagram/@childNodes.50/@labels.1/@modelFacet //@diagram/@childNodes.52/@labels.0/@modelFacet //@diagram/@childNodes.52/@labels.1/@modelFacet //@diagram/@childNodes.52/@labels.2/@modelFacet //@diagram/@childNodes.53/@labels.0/@modelFacet //@diagram/@childNodes.53/@labels.1/@modelFacet //@diagram/@childNodes.54/@labels.0/@modelFacet //@diagram/@childNodes.54/@labels.1/@modelFacet //@diagram/@childNodes.55/@labels.0/@modelFacet //@diagram/@childNodes.55/@labels.1/@modelFacet //@diagram/@childNodes.55/@labels.2/@modelFacet //@diagram/@childNodes.46/@labels.0/@modelFacet //@diagram/@childNodes.46/@labels.1/@modelFacet //@diagram/@childNodes.46/@labels.2/@modelFacet //@diagram/@childNodes.45/@labels.0/@modelFacet //@diagram/@childNodes.45/@labels.1/@modelFacet //@diagram/@childNodes.45/@labels.2/@modelFacet //@diagram/@topLevelNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.0/@labels.1/@modelFacet //@diagram/@topLevelNodes.1/@labels.0/@modelFacet //@diagram/@topLevelNodes.1/@labels.1/@modelFacet //@diagram/@childNodes.56/@labels.0/@modelFacet //@diagram/@childNodes.56/@labels.1/@modelFacet //@diagram/@topLevelNodes.2/@labels.0/@modelFacet //@diagram/@topLevelNodes.2/@labels.1/@modelFacet"/>
   </labelParsers>
   <contextMenus
       context="//@diagram">

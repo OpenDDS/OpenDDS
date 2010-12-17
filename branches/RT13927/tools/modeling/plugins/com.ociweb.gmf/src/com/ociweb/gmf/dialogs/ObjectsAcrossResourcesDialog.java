@@ -36,6 +36,8 @@ public class ObjectsAcrossResourcesDialog <Obj extends EObject> extends Dialog
 	
 	private final Map<Obj, Boolean> objectSelection;
 
+	private boolean singleItemSelectable = false;
+
 	List<Button> checkboxes;
 
 	ObjectLabeler objectLabeler;
@@ -77,6 +79,11 @@ public class ObjectsAcrossResourcesDialog <Obj extends EObject> extends Dialog
 		}
 		objectLabeler = labeler;
 	}
+
+	public void onlySingleItemSelectable() {
+		this.singleItemSelectable = true;
+	}
+
 
 	/**
 	 * Set the dialog title.
@@ -138,7 +145,8 @@ public class ObjectsAcrossResourcesDialog <Obj extends EObject> extends Dialog
 
 			// Present the objects in the resource
 			for (Obj object: resourceToObjects.get(resource)) {
-				Button checkbox = new Button(comp, SWT.CHECK);
+				int buttonType = singleItemSelectable ? SWT.RADIO : SWT.CHECK;
+				Button checkbox = new Button(comp, buttonType);
 				checkbox.setText(objectLabeler.getLabel(object));
 				checkboxes.add(checkbox);
 				checkbox.addSelectionListener(new SelectionToggleListener(object));

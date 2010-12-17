@@ -73,6 +73,24 @@
       <accessors
           figure="//@figures.0/@descriptors.1/@actualFigure/@children.2"/>
     </descriptors>
+    <descriptors
+        name="StructFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Rectangle"
+          name="StructFigure">
+        <children
+            xsi:type="gmfgraph:Label"
+            name="StructTypeNameLabel"
+            text="Struct"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="StructNameLabel"/>
+      </actualFigure>
+      <accessors
+          figure="//@figures.0/@descriptors.2/@actualFigure/@children.0"/>
+      <accessors
+          figure="//@figures.0/@descriptors.2/@actualFigure/@children.1"/>
+    </descriptors>
   </figures>
   <nodes
       name="PubSub"
@@ -80,6 +98,9 @@
   <nodes
       name="DataReaderWriter"
       figure="DataReaderWriterFigure"/>
+  <nodes
+      name="Struct"
+      figure="StructFigure"/>
   <compartments
       name="DataWriters"
       collapsible="true"
@@ -90,6 +111,12 @@
   <compartments
       name="DataReaders"
       collapsible="true"
+      needsTitle="true">
+    <figure
+        href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#CompartmentFigure"/>
+  </compartments>
+  <compartments
+      name="DataType"
       needsTitle="true">
     <figure
         href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#CompartmentFigure"/>
@@ -124,4 +151,13 @@
       figure="DataReaderWriterFigure"
       elementIcon="false"
       accessor="//@figures.0/@descriptors.1/@accessors.2"/>
+  <labels
+      name="StructTypeName"
+      figure="StructFigure"
+      accessor="//@figures.0/@descriptors.2/@accessors.0"/>
+  <labels
+      name="StructName"
+      figure="StructFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.2/@accessors.1"/>
 </gmfgraph:Canvas>
