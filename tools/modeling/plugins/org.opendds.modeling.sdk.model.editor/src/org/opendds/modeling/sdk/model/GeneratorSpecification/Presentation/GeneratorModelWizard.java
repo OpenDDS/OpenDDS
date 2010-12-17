@@ -587,6 +587,10 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 			}
 
 			setErrorMessage(null);
+			
+			// TODO There is a problem when neither the model nor the target
+			//      are specified for the initial generation file - the initial
+			//      model does not appear to serialize.
 			setPageComplete(true);
 		}
 
