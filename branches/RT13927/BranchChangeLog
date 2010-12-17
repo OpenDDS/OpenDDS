@@ -1,3 +1,19 @@
+Fri Dec 17 00:57:04 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3980] 2010-12-17 00:55  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/plugin.properties,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/CustomizationTab.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java:
+
+          Continuing to implement Customization tab.
+
+        * [r3979] 2010-12-17 00:43  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/CustomizationTab.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/TreeViewerDelegate.java:
+
+          Starting to implement the Customization tab of the code generation
+          editor.
+
 Thu Dec 16 22:53:56 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r3977] 2010-12-16 22:44  martinezm
