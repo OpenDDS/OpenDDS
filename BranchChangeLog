@@ -1,3 +1,12 @@
+Fri Dec 17 18:38:45 UTC 2010  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * [r3986] 2010-12-17 17:06  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
+
+          Fixed issue with empty modelfile causing crash of editor when
+          opening the resource after creation.
+
 Fri Dec 17 15:01:24 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpc.xsl:
