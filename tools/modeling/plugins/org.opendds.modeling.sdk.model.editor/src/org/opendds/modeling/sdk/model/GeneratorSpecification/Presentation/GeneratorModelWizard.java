@@ -205,6 +205,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		if( modelFileName != null) {
 			modelFile.setName( modelFileName);
 		}
+		codeGen.setSource(modelFile);
 
 		TargetDir targetDir = generatorFactory.createTargetDir();
 		String targetDirValue = modelSelectionPage.getTargetDir();
@@ -222,7 +223,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		transportOffset.setValue(0);
 		instance.setTransportOffset(transportOffset);
 
-		if( modelFile.getName() != null) {
+		if( modelFileName != null) {
 			// Load the default instance with a transport for each index found in the model.
 			Set<Integer> transportIndices = parsedModelFile.getTransportIds(modelFile.getName());
 			for( Integer current : transportIndices) {
@@ -230,7 +231,6 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 				transport.setTransportIndex(current);
 				instance.getTransport().add(transport);
 			}
-			codeGen.setSource(modelFile);
 		}
 
 		instances.getInstance().add(instance);
@@ -586,11 +586,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 				this.targetDir = newTarget;
 			}
 
-			setErrorMessage(null);
-			
-			// TODO There is a problem when neither the model nor the target
-			//      are specified for the initial generation file - the initial
-			//      model does not appear to serialize.
+			setErrorMessage(null);			
 			setPageComplete(true);
 		}
 
