@@ -1,3 +1,9 @@
+Fri Dec 17 18:44:53 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/preprocess.xsl:
+
+          Preprocess .opendds files, and pull in external parts.
+
 Fri Dec 17 18:38:45 UTC 2010  Mike Martinez  <martinez_m@lab.ociweb.com>
 
         * [r3986] 2010-12-17 17:06  martinezm
