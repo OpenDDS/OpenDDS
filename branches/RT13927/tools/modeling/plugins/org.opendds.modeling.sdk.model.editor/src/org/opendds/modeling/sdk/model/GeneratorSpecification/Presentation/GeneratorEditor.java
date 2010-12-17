@@ -243,7 +243,7 @@ public class GeneratorEditor
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	protected TreeViewer treeViewer;
+	protected CustomizationTab treeViewer;
 
 	/**
 	 * This shows how a list view works.
@@ -1100,7 +1100,7 @@ public class GeneratorEditor
 					new ViewerPane(getSite().getPage(), GeneratorEditor.this) {
 						@Override
 						public Viewer createViewer(Composite composite) {
-							return new TreeViewer(composite);
+							return new CustomizationTab(composite);
 						}
 						@Override
 						public void requestActivation() {
@@ -1109,7 +1109,7 @@ public class GeneratorEditor
 						}
 					};
 				viewerPane.createControl(getContainer());
-				treeViewer = (TreeViewer)viewerPane.getViewer();
+				treeViewer = (CustomizationTab)viewerPane.getViewer();
 				treeViewer.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
 				treeViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
 

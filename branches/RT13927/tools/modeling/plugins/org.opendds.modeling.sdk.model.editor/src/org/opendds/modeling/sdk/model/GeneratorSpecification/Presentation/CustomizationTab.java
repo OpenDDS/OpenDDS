@@ -6,7 +6,9 @@ package org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation;
 import java.util.List;
 
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
 
 /**
@@ -21,8 +23,10 @@ public class CustomizationTab extends StructuredViewer {
 	/**
 	 * 
 	 */
-	public CustomizationTab() {
-		// TODO Auto-generated constructor stub
+	public CustomizationTab( Composite parent) {
+		treeViewer = new TreeViewerDelegate( parent);
+		
+		// TODO Add the stuff to surround the actual tree viewer.
 	}
 
 	/* (non-Javadoc)
@@ -70,7 +74,8 @@ public class CustomizationTab extends StructuredViewer {
 	 */
 	@Override
 	public void reveal(Object element) {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub / with delegation.
+		treeViewer.reveal( element);
 
 	}
 
@@ -90,8 +95,13 @@ public class CustomizationTab extends StructuredViewer {
 	 */
 	@Override
 	public Control getControl() {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO Auto-generated method stub / with delegation.
+		return treeViewer.getControl();
+	}
+
+	// From TreeViewer
+	public Tree getTree() {
+		return treeViewer.getTree();
 	}
 
 }
