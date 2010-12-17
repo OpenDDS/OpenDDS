@@ -76,6 +76,14 @@ public class TreeViewerDelegate extends TreeViewer {
 	}
 
 	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#inputChanged()
+	 */
+	@Override
+	public void inputChanged(Object input, Object oldInput) {
+		super.inputChanged(input, oldInput);
+	}
+
+	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#internalRefresh(java.lang.Object)
 	 */
 	@Override

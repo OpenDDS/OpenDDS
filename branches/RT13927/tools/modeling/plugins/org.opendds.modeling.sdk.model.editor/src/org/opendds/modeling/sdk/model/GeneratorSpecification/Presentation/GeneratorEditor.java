@@ -1119,7 +1119,7 @@ public class GeneratorEditor
 				//
 				EObject root = editingDomain.getResourceSet().getResources().get(0).getContents().get(0);
 				if( root instanceof CodeGen) {
-					treeViewer.setInput( ((CodeGen)root).getInstances());
+					treeViewer.setTreeInput( ((CodeGen)root).getInstances());
 				}
 
 				createContextMenuFor(treeViewer);
@@ -1440,6 +1440,8 @@ public class GeneratorEditor
 
 				} else if( currentViewerPane.getViewer() == treeViewer) {
 					; // Force the tree view to be rooted at the Instances only.
+					  // This also avoids the issue with the different 'setInput()'
+					  // method for this viewer.
 				}
 				else {
 					// Set the input to the widget.
