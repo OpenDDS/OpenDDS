@@ -21,7 +21,7 @@
 <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
 
 <!-- Node sets -->
-<xsl:variable name="application" select="//opendds:application"/>
+<xsl:variable name="dcpslib" select="//dcpsLib"/>
 
 <!-- Extract the name of the model once. -->
 <xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
@@ -69,12 +69,16 @@
   Header_Files {
 </xsl:text>
     <xsl:value-of select="concat('    ', $modelname, '_T.h', $newline)"/>
-    <xsl:value-of select="concat('    ', $modelname, 'Traits.h', $newline)"/>
+    <xsl:if test="$dcpslib">
+      <xsl:value-of select="concat('    ', $modelname, 'Traits.h', $newline)"/>
+    </xsl:if>
     <xsl:text>  }
 
   Source_Files {
 </xsl:text>
-    <xsl:value-of select="concat('    ', $modelname, 'Traits.cpp', $newline)"/>
+    <xsl:if test="$dcpslib">
+      <xsl:value-of select="concat('    ', $modelname, 'Traits.cpp', $newline)"/>
+    </xsl:if>
     <xsl:text>  }
 
   Template_Files {

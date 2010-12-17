@@ -1,3 +1,9 @@
+Fri Dec 17 15:01:24 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpc.xsl:
+
+          Only add Traits to mpc file when a dcpsLib is present.
+
 Fri Dec 17 13:37:47 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
@@ -5,13 +11,13 @@ Fri Dec 17 13:37:47 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/edit/commands/AddReferenceCommand.java:
         * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/edit/parts/AbstractRefSelectionAction.java:
 
-	  Additions to extract commonality between domain entity QoS Policies and Topic Struct referencing
+          Additions to extract commonality between domain entity QoS Policies and Topic Struct referencing
           diagram code.
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/commands/QosPolicyReferCommand.java:
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/OpenDDSDcpsLibRefQosPolicyAction.java:
 
-	  Refactored to use new com.ociweb.gmf code.
+          Refactored to use new com.ociweb.gmf code.
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/commands/TopicTypeReferCommand.java:
@@ -31,7 +37,7 @@ Fri Dec 17 13:37:47 UTC 2010  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics/impl/MultiTopicImpl.java:
         * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics/impl/TopicImpl.java:
 
-	  Added support for user selecting from context menu the available Structs in all open resources the Struct to be the Topic datatype.
+          Added support for user selecting from context menu the available Structs in all open resources the Struct to be the Topic datatype.
 
 Fri Dec 17 04:54:06 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
 
