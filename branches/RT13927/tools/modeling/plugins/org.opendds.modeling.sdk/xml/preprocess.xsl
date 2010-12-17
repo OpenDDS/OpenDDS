@@ -60,6 +60,9 @@
       <xsl:variable name="external-model" select="substring-before($topic/datatype/@href, '#')"/>
       <xsl:for-each select="document($external-model)//types[@xmi:id = $external-id]">
         <xsl:element name="dataLib">
+          <xsl:attribute name="model">
+            <xsl:value-of select="../../@name"/>
+          </xsl:attribute>
           <xsl:apply-templates select="../@name"/>
           <xsl:copy>
             <xsl:apply-templates select="@name | @xmi:id"/>
