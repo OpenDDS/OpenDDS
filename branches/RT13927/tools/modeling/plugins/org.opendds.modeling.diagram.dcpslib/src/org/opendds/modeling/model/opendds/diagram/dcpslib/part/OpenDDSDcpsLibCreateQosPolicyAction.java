@@ -70,7 +70,7 @@ implements IObjectActionDelegate {
 
 		Collection<String> features = null;
 
-		features = identifyFeatures(selectedElement);
+		features = identifyPolicies(selectedElement);
 
 		ListSelectionDialog listDialog = new ListSelectionDialog(workbenchPart.getSite().getShell(),
 				features.toArray(),
@@ -122,28 +122,28 @@ implements IObjectActionDelegate {
 	}
 
 	/**
-	 * TODO Exclude the adding of a policy to the collection if it's already part of
-	 * the Class.
 	 * @param editPart The Edit Part corresponding to the referrer to add Features to
 	 * @return An alphabetized collection of names of derived Feature types that can be added.
 	 */
-	private Collection<String> identifyFeatures(ShapeNodeEditPart editPart) {
-		List<String> features = new ArrayList<String>();
+	private Collection<String> identifyPolicies(ShapeNodeEditPart editPart) {
+		List<String> policies = new ArrayList<String>();
 		EObject domainElement = ((View) editPart.getModel()).getElement();
 		EClass domainElementClass = domainElement.eClass();
 		EPackage qosPackage = EPackage.Registry.INSTANCE.getEPackage(org.opendds.modeling.model.qos.QoSPackage.eNS_URI);
-		EClass featureClass = (EClass) qosPackage.getEClassifier("QosPolicy");
-		EList<EClass> refs = ReferencesFinder.findDerivedFrom(featureClass, domainElementClass);
+		EClass policyClass = (EClass) qosPackage.getEClassifier("QosPolicy");
+		EList<EClass> refs = ReferencesFinder.findDerivedFrom(policyClass, domainElementClass);
 		EPackage openddsPackage = EPackage.Registry.INSTANCE.getEPackage(org.opendds.modeling.model.opendds.OpenDDSPackage.eNS_URI);
 		for (EClass ref : refs) {
 			// The reference is the non-stereotype form of the policy. Since the edit parts are based
 			// on the stereotypes we need to find the policy that is derived from this one.
 			EList<EClass> derived = ClassesFinder.findDerived(ref, openddsPackage);
 			assert derived.size() == 1;
-			features.add(derived.get(0).getName());
+			if (ReferencesFinder.isReferenceCandidate(ref, domainElement)) {
+				policies.add(derived.get(0).getName());
+			}
 		}
-		Collections.sort(features);
-		return features;
+		Collections.sort(policies);
+		return policies;
 	}
 
 	private void updateFigureView(GraphicalEditPart containerEditPart) {
