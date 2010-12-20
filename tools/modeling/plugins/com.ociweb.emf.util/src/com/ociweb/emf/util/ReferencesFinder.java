@@ -51,17 +51,16 @@ public class ReferencesFinder {
 	}
 
 	/**
-	 * Given some object and a referrer object,
-	 * answer if some object is a candidate reference for
+	 * Given a type and an object,
+	 * answer if the type is a candidate reference to be added to
 	 * the referrer object.
 	 */
-	public static boolean isReferenceCandidate(EObject someObject, EObject referrerObject) {
+	public static boolean isReferenceCandidate(EClass candidateType, EObject referrerObject) {
 		EClass referrerClass = referrerObject.eClass();
-		EClass someClass = someObject.eClass();
 		for (EReference ref: referrerClass.getEAllReferences()) {
 			if (!referrerObject.eIsSet(ref)) {
 				EClass clazz = (ref).getEReferenceType();
-				if (clazz.isSuperTypeOf(someClass)) {
+				if (clazz.isSuperTypeOf(candidateType)) {
 					return true;
 				}
 			}

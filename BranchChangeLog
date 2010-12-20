@@ -1,3 +1,17 @@
+Mon Dec 20 13:31:53 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/com.ociweb.emf.util/src/com/ociweb/emf/util/ReferencesFinder.java:
+
+	  Changed signature of isReferenceCandidate() so it can be used in broader context.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/OpenDDSDcpsLibRefQosPolicyAction.java:
+
+	  Update to use new signature of ReferencesFinder.isReferenceCandidate().
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/OpenDDSDcpsLibCreateQosPolicyAction.java:
+
+          Fixed so that user can't try to add a custom policy that is same type as shared policy.
+
 Mon Dec 20 12:32:59 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/DCPS.ecore_diagram:

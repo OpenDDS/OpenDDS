@@ -58,7 +58,7 @@ public class OpenDDSDcpsLibRefQosPolicyAction<CompartEditPartType extends ListCo
 		// just those that can be associated with domainElement. So filter out objects that cannot be associated.
 		List<QosPolicy> objsToRefCandidates = new ArrayList<QosPolicy>();
 		for (EObject obj : reachableObjects) {
-			if (ReferencesFinder.isReferenceCandidate(obj, domainElement)) {
+			if (ReferencesFinder.isReferenceCandidate(obj.eClass(), domainElement)) {
 				objsToRefCandidates.add((QosPolicy) obj);
 			}
 		}
