@@ -74,9 +74,7 @@
   <genPackages prefix="Domain" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
       generateExampleClass="false" generateModelWizard="false" ecorePackage="Domain.ecore#/">
     <genClasses ecoreClass="Domain.ecore#//QosProperty"/>
-    <genClasses ecoreClass="Domain.ecore#//DomainEntity">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Domain.ecore#//DomainEntity/qosPolicy"/>
-    </genClasses>
+    <genClasses ecoreClass="Domain.ecore#//DomainEntity"/>
   </genPackages>
   <genPackages prefix="QoS" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
       generateExampleClass="false" generateModelWizard="false" ecorePackage="QoS.ecore#/">
