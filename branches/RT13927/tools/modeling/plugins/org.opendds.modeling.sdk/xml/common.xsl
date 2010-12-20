@@ -17,7 +17,6 @@
   <xsl:param name="type" select="."/>
   <xsl:choose>
     <xsl:when test="string-length($type/../@model) &gt; 0">
-      <xsl:value-of select="string-length($type/../@model)"/>
       <xsl:value-of select="concat($type/../@model, '_', $type/@name)"/>
     </xsl:when>
     <xsl:otherwise>
