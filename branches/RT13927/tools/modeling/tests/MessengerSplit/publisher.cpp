@@ -8,7 +8,6 @@
 #endif
 
 #include "model/MessengerSplitTraits.h"
-#include "model/MessengerTypes_T.h"
 
 int main(int argc, char** argv)
 {

@@ -1,3 +1,23 @@
+Mon Dec 20 18:23:11 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+
+          include depended-on idl files.
+
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.mpc:
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.opendds:
+        * tools/modeling/tests/MessengerGlobalNs/publisher.cpp:
+        * tools/modeling/tests/MessengerGlobalNs/subscriber.cpp:
+        * tools/modeling/tests/MessengerGlobalNs/transports.traits:
+
+          Align model names.  
+
+        * tools/modeling/tests/MessengerMixed/publisher.cpp:
+        * tools/modeling/tests/MessengerMixed/subscriber.cpp:
+        * tools/modeling/tests/MessengerSplit/publisher.cpp:
+
+          Don't require additional #include of external models.
+
 Mon Dec 20 17:07:15 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:

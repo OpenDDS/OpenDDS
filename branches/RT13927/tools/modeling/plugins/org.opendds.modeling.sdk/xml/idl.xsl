@@ -23,11 +23,15 @@
 <!-- Lookup table -->
 <xsl:variable name="lut" select="document('lut.xml')/*/lut:types"/>
 
-<!-- All types-->
-<xsl:variable name="type"     select="/opendds:OpenDDSModel/dataLib/types"/>
+<!-- All types -->
+<xsl:variable name="types"       select="/opendds:OpenDDSModel/dataLib/types"/>
+<xsl:variable name="local-types" select="/opendds:OpenDDSModel/dataLib[not(@model)]/types"/>
 
 <!-- Terminal user defined types are all unreferenced user defined types -->
-<xsl:variable name="terminals" select="$type[not(@xmi:id  = $type//@type or @xmi:id=$type//@subtype or @xmi:id=$type//@switch)]"/>
+<xsl:variable name="terminals" select="$local-types[not
+                      (@xmi:id  = $local-types//@type or 
+                       @xmi:id=$local-types//@subtype or 
+                       @xmi:id=$local-types//@switch)]"/>
 
 <!-- determine mode by checking number of datalibs defined in this model -->
 <xsl:variable name="datalib-count" select="count(opendds:OpenDDSModel/dataLib)"/> 
@@ -50,6 +54,9 @@
   <!-- required to build on windows -->
   <xsl:call-template name="processIntrinsicSequences"/>
 
+  <!-- references to external models -->
+  <xsl:call-template name="processExternalModels"/>
+
   <!-- forward declarations -->
   <xsl:apply-templates select="dataLib"/>
 
@@ -70,7 +77,7 @@
     <xsl:call-template name="normalize-identifier"/>
   </xsl:variable>
 
-  <xsl:if test="(string-length($libname) > 0) and $type">
+  <xsl:if test="(string-length($libname) > 0) and $local-types">
     <xsl:value-of select="concat('module ', $libname, ' {', $newline,
                                  '  // Forward declarations', $newline)"/>
   </xsl:if>
@@ -90,7 +97,7 @@
     </xsl:call-template>
   </xsl:if>
 
-  <xsl:if test="(string-length($libname) > 0) and $type">
+  <xsl:if test="(string-length($libname) > 0) and $local-types">
     <xsl:value-of select="concat('};', $newline, $newline)"/>
   </xsl:if>
 </xsl:template>
@@ -118,7 +125,7 @@
     </xsl:variable>
 
     <!-- Process new predecessor types. -->
-    <xsl:variable name="direct-predecessors" select="$type[@xmi:id = current()//@type or @xmi:id = current()//@subtype or @xmi:id = current()//@switch]"/>
+    <xsl:variable name="direct-predecessors" select="$local-types[@xmi:id = current()//@type or @xmi:id = current()//@subtype or @xmi:id = current()//@switch]"/>
 
     <xsl:call-template name="generate-idl">
       <xsl:with-param name="nodes"
@@ -143,7 +150,7 @@
        used to prevent duplicates. -->
   <xsl:param name="successors" select="/.."/>
 
-  <xsl:variable name="direct-predecessors" select="$type[@xmi:id = current()//@type or @xmi:id = current()//@subtype or @xmi:id = current()//@switch]"/>
+  <xsl:variable name="direct-predecessors" select="$local-types[@xmi:id = current()//@type or @xmi:id = current()//@subtype or @xmi:id = current()//@switch]"/>
 
   <!-- using a Kaysian intersection predicate causes issues in eclipse here -->
   <xsl:for-each select="$direct-predecessors">
@@ -213,7 +220,7 @@
   <xsl:value-of select="concat('  union ',@name,' switch (')"/>
 
   <xsl:call-template name="typename">
-    <xsl:with-param name="target" select="$type[@xmi:id = current()/@switch]"/>
+    <xsl:with-param name="target" select="$types[@xmi:id = current()/@switch]"/>
   </xsl:call-template>
 
   <xsl:value-of select="concat(') {', $newline)"/>
@@ -260,7 +267,7 @@
 
   <xsl:variable name="typename">
     <xsl:call-template name="typename">
-      <xsl:with-param name="target" select="$type[@xmi:id = current()/field/@type]"/>
+      <xsl:with-param name="target" select="$types[@xmi:id = current()/field/@type]"/>
     </xsl:call-template>
   </xsl:variable>
 
@@ -272,7 +279,7 @@
 <xsl:template match="default">
   <xsl:variable name="typename">
     <xsl:call-template name="typename">
-      <xsl:with-param name="target" select="$type[@xmi:id = current()/@type]"/>
+      <xsl:with-param name="target" select="$types[@xmi:id = current()/@type]"/>
     </xsl:call-template>
   </xsl:variable>
   <xsl:value-of select="concat('    default: ',$typename,' ',@name,';',$newline)"/>
@@ -283,7 +290,7 @@
   <!-- Build the output string for the type specification. -->
   <xsl:variable name="typename">
     <xsl:call-template name="typename">
-      <xsl:with-param name="target" select="$type[@xmi:id = current()/@type]"/>
+      <xsl:with-param name="target" select="$types[@xmi:id = current()/@type]"/>
     </xsl:call-template>
   </xsl:variable>
 
@@ -321,11 +328,11 @@
   <xsl:param name="name"/>
   <xsl:text>  typedef </xsl:text>
   <xsl:call-template name="typename">
-    <xsl:with-param name="target" select="$type[@xmi:id = $targetid]"/>
+    <xsl:with-param name="target" select="$types[@xmi:id = $targetid]"/>
   </xsl:call-template>
   <xsl:value-of select="concat(' ',$name)"/>
   <xsl:call-template name="typesize">
-    <xsl:with-param name="target" select="$type[@xmi:id = $targetid]"/>
+    <xsl:with-param name="target" select="$types[@xmi:id = $targetid]"/>
   </xsl:call-template>
   <xsl:value-of select="concat(';',$newline)"/>
 </xsl:template>
@@ -348,13 +355,13 @@
       <xsl:choose>
         <xsl:when test="$corbatype = 'array'">
           <xsl:call-template name="typename">
-            <xsl:with-param name="target" select="$type[@xmi:id = $target/@subtype]"/>
+            <xsl:with-param name="target" select="$types[@xmi:id = $target/@subtype]"/>
           </xsl:call-template>
         </xsl:when>
         <xsl:when test="$corbatype = 'sequence'">
           <xsl:text>sequence&lt;</xsl:text>
           <xsl:call-template name="typename">
-            <xsl:with-param name="target" select="$type[@xmi:id = $target/@subtype]"/>
+            <xsl:with-param name="target" select="$types[@xmi:id = $target/@subtype]"/>
           </xsl:call-template>
           <xsl:if test="$target/@length">
             <xsl:value-of select="concat(', ',$target/@length)"/>
@@ -419,8 +426,8 @@
 <xsl:template name="processIntrinsicSequences">
 
   <!-- pull tests to output each include only once -->
-  <xsl:variable name="sequence-defs" select="$type[@xsi:type = 'types:Sequence']"/>
-  <xsl:variable name="sequence-types" select="$type[@xmi:id = $sequence-defs/@subtype]"/>
+  <xsl:variable name="sequence-defs" select="$local-types[@xsi:type = 'types:Sequence']"/>
+  <xsl:variable name="sequence-types" select="$local-types[@xmi:id = $sequence-defs/@subtype]"/>
 
   <xsl:if test="$sequence-types[@xsi:type = 'types:Boolean']">
     <xsl:text>#include &lt;tao/BooleanSeq.pidl&gt;
@@ -483,6 +490,12 @@
        where from?  LongDoubleSeq.pidl -->
     
   <xsl:value-of select="$newline"/>
+</xsl:template>
+
+<xsl:template name="processExternalModels">
+  <xsl:for-each select="/opendds:OpenDDSModel/dataLib/@model">
+    <xsl:value-of select="concat('#include &quot;', ., '.idl&quot;', $newline)"/>
+  </xsl:for-each>
 </xsl:template>
 
 </xsl:stylesheet>
