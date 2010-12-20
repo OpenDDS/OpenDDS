@@ -8,6 +8,8 @@
     ** Generate C++ header code.
     **
     -->
+<xsl:include href="common.xsl"/>
+
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
 
@@ -28,15 +30,6 @@
 <xsl:variable name="subscribers"  select="//subscribers"/>
 <xsl:variable name="writers"      select="//writers"/>
 <xsl:variable name="readers"      select="//readers"/>
-
-<!-- key table of remote data type references -->
-<xsl:key name="remote-topic-types"
-         match="datatype"
-         use="@href"/>
-
-<xsl:key name="remote-models"
-         match="datatype"
-         use="substring-before(@href,'#')"/>
 
 <!-- Extract the name of the model once. -->
 <xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
@@ -88,33 +81,11 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
   <xsl:value-of select="concat('      class Types {', $newline)"/>
 
   <xsl:value-of select="concat('        public: enum Values {', $newline)"/>
-  <xsl:variable name="internal-topic-types" select="$types[@xmi:id = $topics/@datatype]"/>
-  <xsl:for-each select="$internal-topic-types">
-      <xsl:value-of select="concat('          ', @name, ',', $newline)"/>
-  </xsl:for-each>
-
-  <!-- A unique set of remote type hrefs attributes-->
-  <xsl:variable name="uniq-hrefs" select="$topics/datatype[generate-id() = generate-id(key('remote-topic-types', @href)[1])]/@href"/>
-  <!-- A unique set of remote type hrefs, containted in datatype elements -->
-  <xsl:variable name="uniq-type-refs" select="$topics/datatype[generate-id() = generate-id(key('remote-topic-types', @href)[1])]"/>
-  <!-- A unique set of remote model refs, contained in datatype elements -->
-  <xsl:variable name="uniq-model-refs" select="$uniq-type-refs[generate-id() = generate-id(key('remote-models',substring-before(@href,'#'))[1])]"/>
-
-  <xsl:for-each select="$uniq-model-refs">
-    <xsl:variable name="remote-model" select="substring-before(@href, '#')"/>
-    
-    <xsl:for-each select="document($remote-model)//dataLib/types">
-      <!-- what a reference to the current type would like like -->
-      <xsl:variable name="ref-val" select="concat($remote-model,'#',@xmi:id)"/>
-      <xsl:if test="$uniq-hrefs[. = $ref-val]">
-        <xsl:variable name="qname">
-	  <xsl:call-template name="normalize-identifier">
-	    <xsl:with-param name="identifier" select="@name"/>
-	  </xsl:call-template>
-	</xsl:variable>
-        <xsl:value-of select="concat('          ', ../@name, '_', $qname, ',', $newline)"/>
-      </xsl:if>
-    </xsl:for-each>
+  <xsl:for-each select="$types[@xmi:id = $topics/@datatype]">
+    <xsl:variable name="enum">
+      <xsl:call-template name="type-enum"/>
+    </xsl:variable>
+    <xsl:value-of select="concat('          ', $enum, ',', $newline)"/>
   </xsl:for-each>
 
   <xsl:value-of select="concat('          LAST_INDEX', $newline)"/>
@@ -856,7 +827,7 @@ OpenDDS::Model::</xsl:text>
     <xsl:text>
         public: enum Values {
 </xsl:text>
-    <xsl:for-each select="$values/@name">
+    <xsl:for-each select="$values">
       <xsl:text>          </xsl:text>
       <xsl:call-template name="normalize-identifier"/>
       <xsl:value-of select="concat(',', $newline)"/>
@@ -866,11 +837,6 @@ OpenDDS::Model::</xsl:text>
       };
 
 </xsl:text>
-</xsl:template>
-
-<xsl:template name="normalize-identifier">
-  <xsl:param name="identifier" select="."/>
-  <xsl:value-of select="translate($identifier, ' -', '__')"/>
 </xsl:template>
 
 </xsl:stylesheet>
