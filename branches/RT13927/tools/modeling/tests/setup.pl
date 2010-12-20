@@ -20,15 +20,35 @@ my @xsls = glob "$DDS_ROOT/tools/modeling/plugins/$javapkg/xml/*.xsl";
 sub generate {
   my $base = shift;
   my $cwd = getcwd();
-  print "Running code generation on: $cwd/$base.opendds\n";
-  my $status = system("\"$JAVA_HOME/bin/java\" -classpath " .
-                      "$DDS_ROOT/tools/modeling/plugins/$javapkg/bin " .
-                      "$javapkg.codegen.CodeGenerator -o $subdir " .
-                      "$base.opendds");
+  my $tmp = "$base.tmp";
+
+  print "Running code generation on: $base.opendds\n";
+
+  print "   preprocessing...\n";
+  my $status = system("xsltproc --path . ../../plugins/org.opendds.modeling.sdk/xml/preprocess.xsl " .
+                      "$base.opendds > $tmp");
+  
+  if ($status > 0) {
+    print "ERROR: xsltproc failed with $status\n";
+    exit($status >> 8);
+  }
+
+  print "   transforming...\n";
+  $status = system("\"$JAVA_HOME/bin/java\" -classpath " .
+                   "$DDS_ROOT/tools/modeling/plugins/$javapkg/bin " .
+                   "$javapkg.codegen.CodeGenerator -o $subdir " .
+                   "$tmp \n");
   if ($status > 0) {
     print "ERROR: Java CodeGenerator invocation failed with $status\n";
     exit($status >> 8);
   }
+
+  print "   building traits...\n";
+  $status = system("xsltproc ../../plugins/org.opendds.modeling.sdk/xml/traits_h.xsl " .
+                   "transports.traits > model/$base" . "Traits.h");
+  $status = system("xsltproc ../../plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl " .
+                   "transports.traits > model/$base" . "Traits.cpp");
+
 }
 
 my $cwd = getcwd();

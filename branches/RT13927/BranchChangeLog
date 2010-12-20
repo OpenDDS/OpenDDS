@@ -1,3 +1,15 @@
+Mon Dec 20 19:44:39 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+
+          Make work with preprocessed format.
+
+        * tools/modeling/tests/setup.pl:
+
+          Extra steps of preprocessing/traits.
+
 Mon Dec 20 18:37:06 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.mpc:

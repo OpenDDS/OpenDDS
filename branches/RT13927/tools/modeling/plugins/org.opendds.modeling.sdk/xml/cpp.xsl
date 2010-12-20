@@ -37,7 +37,6 @@
 <xsl:variable name="subscribers"  select="//subscribers"/>
 <xsl:variable name="topics"       select="//topics"/>
 <xsl:variable name="types"        select="//types"/>
-<xsl:variable name="entities"     select="$participants | $publishers | $subscribers | $readers | $writers | $topics" />
 
 <!-- Indices (lookup tables are at the bottom of this document) -->
 <xsl:key
@@ -80,10 +79,8 @@
   <xsl:text>TypeSupportImpl.h"</xsl:text>
   <xsl:value-of select="$newline"/>
 
-  <xsl:for-each select="$uniq-model-refs">
-    <xsl:variable name="model-file" select="substring-before(@href, '#')"/>
-    <xsl:variable name="remote-model" select="document($model-file)/opendds:OpenDDSModel"/>
-    <xsl:value-of select="concat('#include &quot;', $remote-model/@name, 'TypeSupportImpl.h&quot;', $newline)"/>
+  <xsl:for-each select="//dataLib/@model">
+    <xsl:value-of select="concat('#include &quot;', ., 'TypeSupportImpl.h&quot;', $newline)"/>
   </xsl:for-each>
 
   <xsl:text>
@@ -325,7 +322,9 @@ Elements::Data::loadMaps()
     <xsl:text>  this->types_[ Topics::</xsl:text>
     <xsl:value-of select="translate(@name,' ','_')"/>
     <xsl:text>] = Types::</xsl:text>
-    <xsl:value-of select="$types[@xmi:id = current()/@datatype]/@name"/>
+    <xsl:call-template name="type-enum">
+      <xsl:with-param name="type" select="$types[@xmi:id = current()/@datatype]"/>
+    </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
@@ -995,7 +994,11 @@ Elements::Data::copySubscriptionQos(
 <xsl:template name="output-registerType-case">
   <xsl:param name="type" select="."/>
   <xsl:variable name="typename" select="$type/@name"/>
-  <xsl:variable name="type-modelname" select="$type/../../@name"/>
+  <xsl:variable name="type-modelname">
+    <xsl:call-template name="normalize-identifier">
+      <xsl:with-param name="identifier" select="$type/../@model"/>
+    </xsl:call-template>
+  </xsl:variable>
   <xsl:variable name="libname">
     <xsl:call-template name="normalize-identifier">
       <xsl:with-param name="identifier" select="$type/../@name"/>
@@ -1003,10 +1006,9 @@ Elements::Data::copySubscriptionQos(
   </xsl:variable>
 
   <xsl:text>    case Types::</xsl:text>
-  <xsl:if test="$type-modelname != $modelname">
-    <xsl:value-of select="concat($type/../@name, '_')"/>
-  </xsl:if>
-  <xsl:value-of select="concat($typename, ':', $newline, '      {', $newline, '        typedef ')"/>
+  <xsl:call-template name="type-enum"/>
+  <xsl:value-of select="concat(':', $newline, '      {', $newline, 
+                               '        typedef ')"/>
   <xsl:if test="string-length($libname)">
     <xsl:value-of select="concat('::', $libname)"/>
   </xsl:if>

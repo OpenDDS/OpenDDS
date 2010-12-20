@@ -34,7 +34,7 @@
                        @xmi:id=$local-types//@switch)]"/>
 
 <!-- determine mode by checking number of datalibs defined in this model -->
-<xsl:variable name="datalib-count" select="count(opendds:OpenDDSModel/dataLib)"/> 
+<xsl:variable name="datalib-count" select="count(opendds:OpenDDSModel/dataLib[not(@model)])"/> 
 
 <!-- Index (lookup table is in lut variable) -->
 <xsl:key
@@ -72,7 +72,7 @@
 </xsl:template>
 <!-- End of main processing template. -->
 
-<xsl:template match="dataLib">
+<xsl:template match="dataLib[not(@model)]">
   <xsl:variable name="libname">
     <xsl:call-template name="normalize-identifier"/>
   </xsl:variable>
