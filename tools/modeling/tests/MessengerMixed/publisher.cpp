@@ -8,7 +8,6 @@
 #endif
 
 #include "model/MessengerMixedTraits.h"
-#include "model/MessengerTypesMixed_T.h"
 
 int main(int argc, char** argv)
 {

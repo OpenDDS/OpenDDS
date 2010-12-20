@@ -8,7 +8,6 @@
 #endif
 
 #include "model/MessengerMixedTraits.h"
-#include "model/MessengerTypesMixed_T.h"
 #include <model/NullReaderListener.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
