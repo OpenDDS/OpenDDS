@@ -1,12 +1,18 @@
+Mon Dec 20 17:07:15 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
+
+          Remove debug info.
+
 Mon Dec 20 13:31:53 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/com.ociweb.emf.util/src/com/ociweb/emf/util/ReferencesFinder.java:
 
-	  Changed signature of isReferenceCandidate() so it can be used in broader context.
+          Changed signature of isReferenceCandidate() so it can be used in broader context.
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/OpenDDSDcpsLibRefQosPolicyAction.java:
 
-	  Update to use new signature of ReferencesFinder.isReferenceCandidate().
+          Update to use new signature of ReferencesFinder.isReferenceCandidate().
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/OpenDDSDcpsLibCreateQosPolicyAction.java:
 
