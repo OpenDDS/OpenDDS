@@ -1,3 +1,21 @@
+Mon Dec 20 12:32:59 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DCPS.ecore_diagram:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Domain.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/domain/DomainEntity.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/domain/impl/DomainEntityImpl.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/impl/publisherImpl.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/impl/subscriberImpl.java:
+
+          Removed subscriber and publisher inheriting from ddsProperty which was allowing them
+          to own any QosPolicy. This was causing the policy selection dialog for them to
+          show policies OpenDDS doesn't support.
+
 Fri Dec 17 21:47:47 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/preprocess.xsl:

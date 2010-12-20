@@ -29,25 +29,11 @@ import org.opendds.modeling.model.domain.QosProperty;
  * An implementation of the model object '<em><b>Entity</b></em>'.
  * <!-- end-user-doc -->
  * <p>
- * The following features are implemented:
- * <ul>
- *   <li>{@link org.opendds.modeling.model.domain.impl.DomainEntityImpl#getQosPolicy <em>Qos Policy</em>}</li>
- * </ul>
  * </p>
  *
  * @generated
  */
 public class DomainEntityImpl extends EntityImpl implements DomainEntity {
-	/**
-	 * The cached value of the '{@link #getQosPolicy() <em>Qos Policy</em>}' containment reference list.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getQosPolicy()
-	 * @generated
-	 * @ordered
-	 */
-	protected EList<QosProperty> qosPolicy;
-
 	/**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -65,92 +51,6 @@ public class DomainEntityImpl extends EntityImpl implements DomainEntity {
 	@Override
 	protected EClass eStaticClass() {
 		return DomainPackage.Literals.DOMAIN_ENTITY;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public EList<QosProperty> getQosPolicy() {
-		if (qosPolicy == null) {
-			qosPolicy = new EObjectContainmentEList<QosProperty>(QosProperty.class, this, DomainPackage.DOMAIN_ENTITY__QOS_POLICY);
-		}
-		return qosPolicy;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
-		switch (featureID) {
-			case DomainPackage.DOMAIN_ENTITY__QOS_POLICY:
-				return ((InternalEList<?>)getQosPolicy()).basicRemove(otherEnd, msgs);
-		}
-		return super.eInverseRemove(otherEnd, featureID, msgs);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public Object eGet(int featureID, boolean resolve, boolean coreType) {
-		switch (featureID) {
-			case DomainPackage.DOMAIN_ENTITY__QOS_POLICY:
-				return getQosPolicy();
-		}
-		return super.eGet(featureID, resolve, coreType);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public void eSet(int featureID, Object newValue) {
-		switch (featureID) {
-			case DomainPackage.DOMAIN_ENTITY__QOS_POLICY:
-				getQosPolicy().clear();
-				getQosPolicy().addAll((Collection<? extends QosProperty>)newValue);
-				return;
-		}
-		super.eSet(featureID, newValue);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void eUnset(int featureID) {
-		switch (featureID) {
-			case DomainPackage.DOMAIN_ENTITY__QOS_POLICY:
-				getQosPolicy().clear();
-				return;
-		}
-		super.eUnset(featureID);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public boolean eIsSet(int featureID) {
-		switch (featureID) {
-			case DomainPackage.DOMAIN_ENTITY__QOS_POLICY:
-				return qosPolicy != null && !qosPolicy.isEmpty();
-		}
-		return super.eIsSet(featureID);
 	}
 
 	/**

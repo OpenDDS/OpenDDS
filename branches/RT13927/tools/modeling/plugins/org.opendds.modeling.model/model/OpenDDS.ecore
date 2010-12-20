@@ -10,8 +10,8 @@
   <eClassifiers xsi:type="ecore:EClass" name="topic" eSuperTypes="Topics.ecore#//Topic #//ddsProperty"/>
   <eClassifiers xsi:type="ecore:EClass" name="topicField" abstract="true" eSuperTypes="Types.ecore#//Field"/>
   <eClassifiers xsi:type="ecore:EClass" name="domainParticipant" eSuperTypes="DCPS.ecore#//DomainParticipant"/>
-  <eClassifiers xsi:type="ecore:EClass" name="publisher" eSuperTypes="#//ddsProperty DCPS.ecore#//Publisher"/>
-  <eClassifiers xsi:type="ecore:EClass" name="subscriber" eSuperTypes="#//ddsProperty DCPS.ecore#//Subscriber"/>
+  <eClassifiers xsi:type="ecore:EClass" name="publisher" eSuperTypes="DCPS.ecore#//Publisher"/>
+  <eClassifiers xsi:type="ecore:EClass" name="subscriber" eSuperTypes="DCPS.ecore#//Subscriber"/>
   <eClassifiers xsi:type="ecore:EClass" name="domain" eSuperTypes="#//ddsProperty DCPS.ecore#//Domain"/>
   <eClassifiers xsi:type="ecore:EClass" name="dataReader" eSuperTypes="DCPS.ecore#//DataReader"/>
   <eClassifiers xsi:type="ecore:EClass" name="dataWriter" eSuperTypes="DCPS.ecore#//DataWriter"/>
