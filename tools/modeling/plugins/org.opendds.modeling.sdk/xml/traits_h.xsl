@@ -21,7 +21,7 @@
 </xsl:variable>
 
 <!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "/generator:model/@name"/>
+<xsl:variable name = "modelname" select = "document(/generator:CodeGen/source/@name)//opendds:OpenDDSModel/@name"/>
 <xsl:variable name = "MODELNAME" select = "translate($modelname, 
                                            'abcdefghijklmnopqrstuvwxyz',
                                            'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>
@@ -30,10 +30,6 @@
 <xsl:template match="/">
   <xsl:value-of select="concat('#ifndef ', $MODELNAME, '_TRAITS_H', $newline)"/>
   <xsl:value-of select="concat('#define ', $MODELNAME, '_TRAITS_H', $newline)"/>
-
-<!--
-  <xsl:value-of select="concat('#include &quot;', $modelname, '_T.h&quot;')"/>
--->
 
   <xsl:variable name="structname" select="concat($modelname, 'Traits')"/>
 <xsl:value-of select="concat('#include &quot;', $modelname, '_T.h&quot;', $newline)"/>

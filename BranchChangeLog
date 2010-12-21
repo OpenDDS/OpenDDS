@@ -1,3 +1,18 @@
+Tue Dec 21 21:55:40 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_h.xsl:
+        * tools/modeling/tests/setup.pl:
+
+          Updates to apply traits to codegen file.
+
+        * tools/modeling/tests/Messenger/Messenger.mpc:
+        * tools/modeling/tests/Messenger/Messenger.opendds:
+        * tools/modeling/tests/Messenger/publisher.cpp:
+        * tools/modeling/tests/Messenger/subscriber.cpp:
+
+          Consisten naming.
+
 Mon Dec 20 19:44:39 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:

@@ -21,7 +21,7 @@
 </xsl:variable>
 
 <!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "/generator:model/@name"/>
+<xsl:variable name = "modelname" select = "document(/generator:CodeGen/source/@name)/opendds:OpenDDSModel/@name"/>
 
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
@@ -47,7 +47,7 @@ void
     // Create configuration for this transport ID
     switch (id) {
 </xsl:text>
-<xsl:apply-templates select="//opendds:transport"/>
+<xsl:apply-templates/>
 <xsl:text>      default:
         throw std::runtime_error("Invalid transport ID in configuration");
     };
@@ -63,62 +63,34 @@ void
 
 </xsl:template>
 
-<xsl:template match="opendds:transport">
-  <xsl:variable name="type" select="opendds:commonConfig/opendds:transport_type/@value"/>
-  <xsl:value-of select="concat('      case ', @key, ':', $newline)"/>
+<xsl:template match="transport">
+  <xsl:variable name="type" select="*/@transport_type"/>
+  <xsl:value-of select="concat('      case ', @transportIndex, ':', $newline)"/>
   <xsl:value-of select="concat('        transport_type = &quot;', $type, '&quot;;', $newline)"/>
   <xsl:text>        config = TheTransportFactory->create_configuration(id, transport_type);
 </xsl:text>
-  <xsl:apply-templates select="*"/>
+  <xsl:apply-templates/>
   <xsl:value-of select="concat('        break;', $newline, $newline)"/>
 </xsl:template>
 
-<xsl:template match="opendds:swap_bytes">
-  <xsl:value-of select="concat('        config->swap_bytes_ = ', 
+<xsl:template match="swap_bytes">
+  <xsl:value-of select="concat('          config->swap_bytes_ = ', 
                                @value, ';', $newline)"/>
 </xsl:template>
 
-<xsl:template match="opendds:queue_messages_per_pool">
-  <xsl:value-of select="concat('        config->queue_messages_per_pool_ = ', 
+<xsl:template match="queue_messages_per_pool 
+                   | queue_initial_pools
+                   | max_packet_size
+                   | max_samples_per_packet
+                   | optimum_packet_size
+                   | thread_per_connection
+                   | datalink_release_delay
+                   | datalink_control_chunks">
+  <xsl:value-of select="concat('          config->', name(), '_ = ', 
                                @value, ';', $newline)"/>
 </xsl:template>
 
-<xsl:template match="opendds:queue_initial_pools">
-  <xsl:value-of select="concat('        config->queue_initial_pools_ = ', 
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:max_packet_size">
-  <xsl:value-of select="concat('        config->max_packet_size_ = ', 
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:max_samples_per_packet">
-  <xsl:value-of select="concat('        config->max_samples_per_packet_ = ', 
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:optimum_packet_size">
-  <xsl:value-of select="concat('        config->optimum_packet_size_ = ', 
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:thread_per_connection">
-  <xsl:value-of select="concat('        config->thread_per_connection_ = ', 
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:datalink_release_delay">
-  <xsl:value-of select="concat('        config->datalink_release_delay_ = ', 
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:datalink_control_chunks">
-  <xsl:value-of select="concat('        config->datalink_control_chunks_ = ', 
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:tcpConfig">
+<xsl:template match="TCPTransport">
   <xsl:text>        {
           OpenDDS::DCPS::SimpleTcpConfiguration* specific_config =
               (OpenDDS::DCPS::SimpleTcpConfiguration*) config.in();
@@ -128,7 +100,7 @@ void
 </xsl:text>
 </xsl:template>
 
-<xsl:template match="opendds:multicastConfig">
+<xsl:template match="MulticastTransport">
   <xsl:text>        {
           OpenDDS::DCPS::MulticastConfiguration* specific_config =
               (OpenDDS::DCPS::MulticastConfiguration*) config.in();
@@ -148,107 +120,56 @@ void
 </xsl:text>
 </xsl:template>
 
-
-<xsl:template match="opendds:local_address_str">
+<xsl:template match="local_address_str">
+  <xsl:variable name="value">
+    <xsl:call-template name="str-value"/>
+  </xsl:variable>
   <xsl:value-of select="concat('          specific_config->local_address_ = ',
-                               'ACE_INET_Addr(&quot;', @value, '&quot;)',
+                               'ACE_INET_Addr(&quot;', $value, '&quot;)',
                                ';', $newline)"/>
 </xsl:template>
 
-<xsl:template match="opendds:enable_nagle_algorithm">
-  <xsl:value-of select="concat('          specific_config->enable_nagle_algorithm_ = ',
+<xsl:template match="enable_nagle_algorithm
+                   | conn_retry_initial_delay
+                   | conn_retry_backoff_multiplier
+                   | conn_retry_attempts
+                   | max_output_pause_period
+                   | passive_reconnect_duration
+                   | passive_connect_duration
+                   | default_to_ipv6
+                   | port_offset
+                   | reliable
+                   | syn_backoff
+                   | syn_interval
+                   | syn_timeout
+                   | nak_depth
+                   | ttl
+                   | rcv_buffer_size
+                   | nak_interval
+                   | nak_timeout">
+
+  <xsl:value-of select="concat('          specific_config->', name(),  '_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 
-<xsl:template match="opendds:conn_retry_initial_delay">
-  <xsl:value-of select="concat('          specific_config->conn_retry_initial_delay_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:conn_retry_backoff_multiplier">
-  <xsl:value-of select="concat('          specific_config->conn_retry_backoff_multiplier_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:conn_retry_attempts">
-  <xsl:value-of select="concat('          specific_config->conn_retry_attempts_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:max_output_pause_period">
-  <xsl:value-of select="concat('          specific_config->max_output_pause_period_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:passive_reconnect_duration">
-  <xsl:value-of select="concat('          specific_config->passive_reconnect_duration_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:passive_connect_duration">
-  <xsl:value-of select="concat('          specific_config->passive_connect_duration_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:default_to_ipv6">
-  <xsl:value-of select="concat('          specific_config->default_to_ipv6_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:port_offset">
-  <xsl:value-of select="concat('          specific_config->port_offset_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:group_address">
+<xsl:template match="group_address">
+  <xsl:variable name="value">
+    <xsl:call-template name="str-value"/>
+  </xsl:variable>
   <xsl:value-of select="concat('          specific_config->group_address_ = ',
-                               'ACE_INET_Addr(&quot;', @value, '&quot;)',
+                               'ACE_INET_Addr(&quot;', $value, '&quot;)',
                                ';', $newline)"/>
 </xsl:template>
 
-<xsl:template match="opendds:reliable">
-  <xsl:value-of select="concat('          specific_config->reliable_ = ',
-                               @value, ';', $newline)"/>
+<xsl:template name="str-value">
+  <xsl:param name="value" select="@value"/>
+  <xsl:choose>
+    <xsl:when test="starts-with($value, '&quot;')">
+      <xsl:value-of select="substring-before(substring-after($value, '&quot;'), '&quot;')"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:value-of select="$value"/>
+    </xsl:otherwise>
+  </xsl:choose>
 </xsl:template>
-
-<xsl:template match="opendds:syn_backoff">
-  <xsl:value-of select="concat('          specific_config->syn_backoff_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:syn_interval">
-  <xsl:value-of select="concat('          specific_config->syn_interval_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:syn_timeout">
-  <xsl:value-of select="concat('          specific_config->syn_timeout_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:nak_depth">
-  <xsl:value-of select="concat('          specific_config->nak_depth_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:ttl">
-  <xsl:value-of select="concat('          specific_config->ttl_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:rcv_buffer_size">
-  <xsl:value-of select="concat('          specific_config->rcv_buffer_size_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:nak_interval">
-  <xsl:value-of select="concat('          specific_config->nak_interval_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
-<xsl:template match="opendds:nak_timeout">
-  <xsl:value-of select="concat('          specific_config->nak_timeout_ = ',
-                               @value, ';', $newline)"/>
-</xsl:template>
-
 </xsl:stylesheet>
