@@ -7,12 +7,16 @@
 package org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
+
 import org.eclipse.emf.common.util.URI;
 
 import org.eclipse.emf.ecore.resource.Resource;
@@ -53,6 +57,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -61,12 +66,8 @@ import org.eclipse.ui.IWorkbench;
 
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
-import org.eclipse.ui.dialogs.ContainerSelectionDialog;
-import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
 
-import org.eclipse.ui.model.BaseWorkbenchContentProvider;
-import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
@@ -86,11 +87,7 @@ import org.opendds.modeling.sdk.model.GeneratorSpecification.TransportOffset;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreePath;
-import org.eclipse.jface.viewers.TreeSelection;
-
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -241,7 +238,6 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	/**
 	 * Do the work after everything is specified.
 	 * <!-- begin-user-doc -->
-	 * Unconditionally use UTF-8 encoding.  This can be externalized later if it becomes necessary.
 	 * <!-- end-user-doc -->
 	 * @generated NOT
 	 */
@@ -282,7 +278,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 							//
 							Map<Object, Object> options = new HashMap<Object, Object>();
 							options.put(XMLResource.OPTION_KEEP_DEFAULT_CONTENT, Boolean.TRUE);
-							options.put(XMLResource.OPTION_ENCODING, "UTF-8");
+							options.put(XMLResource.OPTION_ENCODING, modelSelectionPage.getEncoding());
 							resource.save(options);
 						}
 						catch (Exception exception) {
@@ -385,7 +381,10 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	public class GeneratorModelWizardModelSelectionPage extends WizardPage {
 		private Text modelFileField;
 		private Text targetDirField;
-		
+
+		private List<String> encodings;
+		private Combo encodingField;
+
 		private IPath currentPath;
 		private String targetDir;
 
@@ -418,7 +417,10 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 		 */
 		@Override
-		public void createControl(Composite parent) {
+		public void createControl( Composite parent) {
+			// For use in closures.
+			final Composite finalParent = parent;
+
 			Composite container = new Composite( parent, SWT.NULL);
 			final GridLayout gridLayout = new GridLayout();
 			gridLayout.numColumns = 3;
@@ -448,7 +450,10 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 			final Button button_1 = new Button( container, SWT.None);
 			button_1.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected( SelectionEvent e) {
-					browseForModelFile();
+					IPath modelPath = Utils.browseForModelFile( finalParent, currentPath);
+					if( modelPath != null) {
+						modelFileField.setText( modelPath.toString());
+					}
 				}
 			});
 			button_1.setText("Browse...");
@@ -481,65 +486,59 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 			final Button button_2 = new Button( container, SWT.None);
 			button_2.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected( SelectionEvent e) {
-					browseForTargetDir();
+					Object[] current = new Object[] {targetDirField.getText()};
+					IPath targetPath = Utils.browseForTargetDir( finalParent, current);
+					if( targetPath != null) {
+						targetDirField.setText(targetPath.toString());
+					}
 				}
 			});
 			button_2.setText("Browse...");
 
-			// Set the intial values *after* we have installed everything,
+			final Label label_6 = new Label( container, SWT.None);
+			final GridData gridData_6 = new GridData();
+			gridData_6.horizontalSpan = 3;
+			label_6.setLayoutData(gridData_6);
+			
+			final Label label_7 = new Label( container, SWT.None);
+			final GridData gridData_7 = new GridData();
+			gridData_7.horizontalSpan = GridData.FILL;
+			label_7.setLayoutData(gridData_7);
+			label_7.setText("Select the encoding for the code generation specification file.");
+			
+			final Label label_8 = new Label( container, SWT.None);
+			final GridData gridData_8 = new GridData(GridData.HORIZONTAL_ALIGN_END);
+			label_8.setLayoutData(gridData_8);
+			label_8.setText("Encoding:");
+
+			encodingField = new Combo(container, SWT.BORDER);
+			{
+				GridData data = new GridData();
+				data.horizontalSpan = 2;
+				data.horizontalAlignment = GridData.FILL;
+				data.grabExcessHorizontalSpace = true;
+				encodingField.setLayoutData(data);
+			}
+
+			for (String encoding : getEncodings()) {
+				encodingField.add(encoding);
+			}
+
+			encodingField.select(0);
+			encodingField.addModifyListener(
+					new ModifyListener() {
+						public void modifyText(ModifyEvent e) {
+							updatePageComplete();
+					}});
+
+			// Set the initial values *after* we have installed everything,
 			// since we need to have all the elements available for the change
 			// validation on modification.
 			String modelFileName = parsedModelFile.getSourceName();
 			if( modelFileName != null) {
 				modelFileField.setText(modelFileName);
 			}
-		}
 
-		protected void browseForTargetDir() {
-			String currentTarget = targetDirField.getText();
-			ContainerSelectionDialog dialog = new ContainerSelectionDialog(
-					getShell(), ResourcesPlugin.getWorkspace().getRoot(), false,
-					"Select target folder:");
-			dialog.setTitle("Target Selection");
-			if( currentTarget != null && !currentTarget.isEmpty()) {
-				dialog.setInitialSelections( new Object[] {currentTarget} );
-			}
-			if (dialog.open() == ContainerSelectionDialog.OK) {
-				Object[] result = dialog.getResult();
-				if (result.length == 1) {
-					targetDirField.setText(((Path)result[0]).toString());
-				}
-			}
-		}
-
-		protected void browseForModelFile() {
-			ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(
-					getShell(),
-					new WorkbenchLabelProvider(),
-					new BaseWorkbenchContentProvider());
-			dialog.setTitle("Model Selection");
-			dialog.setMessage("Select Model file:");
-			dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());
-			if( currentPath != null) {
-				TreePath treePath = new TreePath( currentPath.segments());
-				ITreeSelection treeSelection = new TreeSelection( treePath);
-				dialog.setInitialSelection( treeSelection);
-			}
-			if(dialog.open() == ElementTreeSelectionDialog.OK) {
-				Object[] result = dialog.getResult();
-				if( result.length == 1) {
-					Object r0 = result[0];
-					if( r0 instanceof IFile) {
-						IPath path = ((IFile)r0).getFullPath();
-						modelFileField.setText( path.toString());
-						if( path.segmentCount() > 1) {
-							currentPath = path.removeLastSegments(1);
-						} else {
-							currentPath = null;
-						}
-					}
-				}
-			}
 		}
 
 		protected void updatePageComplete() {
@@ -588,6 +587,20 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 
 			setErrorMessage(null);			
 			setPageComplete(true);
+		}
+
+		public String getEncoding() {
+			return encodingField.getText();
+		}
+
+		private Collection<String> getEncodings() {
+			if (encodings == null) {
+				encodings = new ArrayList<String>();
+				for (StringTokenizer stringTokenizer = new StringTokenizer(GeneratorEditorPlugin.INSTANCE.getString("_UI_XMLEncodingChoices")); stringTokenizer.hasMoreTokens(); ) {
+					encodings.add(stringTokenizer.nextToken());
+				}
+			}
+			return encodings;
 		}
 
 	}
