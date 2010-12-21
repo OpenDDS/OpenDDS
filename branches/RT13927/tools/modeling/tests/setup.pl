@@ -10,12 +10,26 @@ use strict;
 use Env qw(DDS_ROOT JAVA_HOME);
 use Cwd;
 
-my @dirs = qw(CompositeKey Messenger MessengerDpQos MessengerGlobalNs MessengerMixed MessengerMulti MessengerNoPub MessengerNoSub MessengerPubQos MessengerSplit MessengerWriterQos ReaderQos SubscriberQos TopicQos);
+my @dirs = qw(Arrays CompositeKey DomainZero ExternalPolicies InvalidNames Messenger MessengerDpQos MessengerGlobalNs MessengerMixed MessengerMulti MessengerNoPub MessengerNoSub MessengerPubQos MessengerSplit MessengerWriterQos PolicyLib ReaderQos Sequences SubscriberQos TopicQos);
 
 my $javapkg = 'org.opendds.modeling.sdk';
 my $subdir = 'model';
 my @suffixes = qw(.idl _T.h _T.cpp .mpc);
-my @xsls = glob "$DDS_ROOT/tools/modeling/plugins/$javapkg/xml/*.xsl";
+my @xsls = glob "$DDS_ROOT/tools/modeling/plugins/$javapkg/xml/*.xsl $DDS_ROOT/tools/modeling/plugins/$javapkg/xml/lut.xml";
+
+sub generate_traits {
+  my @generatorfiles = glob "*.gen";
+  my $status = 0;
+  foreach my $generator (@generatorfiles) {
+    my $base = $generator;
+    $base =~ s/\.gen$//;
+    print "   building traits for $generator... \n";
+    $status = system("xsltproc ../../plugins/org.opendds.modeling.sdk/xml/traits_h.xsl " .
+                     "$generator > model/$base" . "Traits.h");
+    $status = system("xsltproc ../../plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl " .
+                     "$generator > model/$base" . "Traits.cpp");
+  }
+}
 
 sub generate {
   my $base = shift;
@@ -42,12 +56,6 @@ sub generate {
     print "ERROR: Java CodeGenerator invocation failed with $status\n";
     exit($status >> 8);
   }
-
-  print "   building traits...\n";
-  $status = system("xsltproc ../../plugins/org.opendds.modeling.sdk/xml/traits_h.xsl " .
-                   "transports.traits > model/$base" . "Traits.h");
-  $status = system("xsltproc ../../plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl " .
-                   "transports.traits > model/$base" . "Traits.cpp");
 
 }
 
@@ -87,4 +95,6 @@ foreach my $dir (@dirs) {
       }
     }
   }
+
+  generate_traits();
 }
