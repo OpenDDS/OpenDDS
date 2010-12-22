@@ -1,3 +1,10 @@
+Wed Dec 22 18:48:21 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/PolicyLib/PolicyLib.gen:
+        * tools/modeling/tests/ReaderQos/ReaderQos.gen:
+
+          Additional genfiles.
+
 Wed Dec 22 18:32:50 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerPubQos/MessengerPubQos.gen:
