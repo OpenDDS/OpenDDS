@@ -1,3 +1,21 @@
+Wed Dec 22 00:42:08 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r3999] 2010-12-22 00:20  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/plugin.properties,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/CustomizationTab.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
+
+          Work in progress -- implementing the customization tab of the
+          editor, starting to migrate the generation actions as well.
+
+        * [r3997] 2010-12-21 17:16  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/Utils.java:
+
+          Factored the browse dialogs out for reuse by the editor forms.
+          Added the encoding combo selection back into the New Wizard.
+
 Tue Dec 21 21:55:40 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl:
