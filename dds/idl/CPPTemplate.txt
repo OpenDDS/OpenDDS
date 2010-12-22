@@ -101,15 +101,12 @@ DDS::InstanceHandle_t
 {
   ::DDS::Time_t const timestamp =
     ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-  return register_instance_w_timestamp (instance,
-                                        ::DDS::HANDLE_NIL,
-                                        timestamp);
+  return register_instance_w_timestamp (instance, timestamp);
 }
 
 DDS::InstanceHandle_t
 <%TYPE%>DataWriterImpl::register_instance_w_timestamp (
     const ::<%SCOPED%> & instance,
-    ::DDS::InstanceHandle_t /* handle */,
     const ::DDS::Time_t & timestamp)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
@@ -611,7 +608,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::SampleStateMask sample_states,
@@ -632,7 +629,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_i (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::SampleStateMask sample_states,
@@ -640,7 +637,7 @@ DDS::ReturnCode_t
     ::DDS::InstanceStateMask instance_states,
     ::DDS::QueryCondition_ptr a_condition)
 {
-  ::<%SCOPED%>Seq::PrivateMemberAccess received_data_p(received_data);
+  ::<%SCOPED%><%SEQ%>::PrivateMemberAccess received_data_p(received_data);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -661,7 +658,7 @@ DDS::ReturnCode_t
     max_samples = 1;
   }
 
-  ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%>Seq >
+  ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%><%SEQ%> >
     results(this, received_data, info_seq, max_samples,
             this->subqos_.presentation, a_condition,
             ::OpenDDS::DCPS::DDS_OPERATION_READ);
@@ -713,7 +710,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::SampleStateMask sample_states,
@@ -734,7 +731,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_i (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::SampleStateMask sample_states,
@@ -742,7 +739,7 @@ DDS::ReturnCode_t
     ::DDS::InstanceStateMask instance_states,
     ::DDS::QueryCondition_ptr a_condition)
 {
-  ::<%SCOPED%>Seq::PrivateMemberAccess received_data_p(received_data);
+  ::<%SCOPED%><%SEQ%>::PrivateMemberAccess received_data_p(received_data);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
@@ -763,7 +760,7 @@ DDS::ReturnCode_t
     max_samples = 1;
   }
 
-  ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%>Seq >
+  ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%><%SEQ%> >
      results(this, received_data, info_seq, max_samples,
              this->subqos_.presentation, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_TAKE);
@@ -815,7 +812,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_w_condition (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & sample_info,
     ::CORBA::Long max_samples,
     ::DDS::ReadCondition_ptr a_condition)
@@ -845,7 +842,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_w_condition (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & sample_info,
     ::CORBA::Long max_samples,
     ::DDS::ReadCondition_ptr a_condition)
@@ -1049,7 +1046,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_instance (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::InstanceHandle_t a_handle,
@@ -1075,7 +1072,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_instance_i (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::InstanceHandle_t a_handle,
@@ -1084,9 +1081,9 @@ DDS::ReturnCode_t
     ::DDS::InstanceStateMask instance_states,
     ::DDS::QueryCondition_ptr a_condition)
 {
-  ::<%SCOPED%>Seq::PrivateMemberAccess received_data_p(received_data);
+  ::<%SCOPED%><%SEQ%>::PrivateMemberAccess received_data_p(received_data);
 
-  ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%>Seq >
+  ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%><%SEQ%> >
      results(this, received_data, info_seq, max_samples,
              this->subqos_.presentation, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_READ);
@@ -1126,7 +1123,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_instance (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::InstanceHandle_t a_handle,
@@ -1152,7 +1149,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_instance_i (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::InstanceHandle_t a_handle,
@@ -1161,9 +1158,9 @@ DDS::ReturnCode_t
     ::DDS::InstanceStateMask instance_states,
     ::DDS::QueryCondition_ptr a_condition)
 {
-  ::<%SCOPED%>Seq::PrivateMemberAccess received_data_p(received_data);
+  ::<%SCOPED%><%SEQ%>::PrivateMemberAccess received_data_p(received_data);
 
-  ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%>Seq >
+  ::OpenDDS::DCPS::RakeResults< ::<%SCOPED%><%SEQ%> >
      results(this, received_data, info_seq, max_samples,
              this->subqos_.presentation, a_condition,
              ::OpenDDS::DCPS::DDS_OPERATION_TAKE);
@@ -1202,7 +1199,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_next_instance (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::InstanceHandle_t a_handle,
@@ -1224,7 +1221,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_next_instance_i (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::InstanceHandle_t a_handle,
@@ -1281,7 +1278,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_next_instance (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::InstanceHandle_t a_handle,
@@ -1303,7 +1300,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_next_instance_i (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::InstanceHandle_t a_handle,
@@ -1358,7 +1355,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::read_next_instance_w_condition (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::InstanceHandle_t a_handle,
@@ -1393,7 +1390,7 @@ DDS::ReturnCode_t
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::take_next_instance_w_condition (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
     ::CORBA::Long max_samples,
     ::DDS::InstanceHandle_t a_handle,
@@ -1428,7 +1425,7 @@ DDS::ReturnCode_t
 
 void
 <%TYPE%>DataReaderImpl::release_loan (
-    ::<%SCOPED%>Seq & received_data
+    ::<%SCOPED%><%SEQ%> & received_data
   )
 {
   received_data.length(0);
@@ -1462,7 +1459,7 @@ void
 
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::return_loan (
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq)
   ACE_THROW_SPEC ((CORBA::SystemException))
 {
@@ -1565,7 +1562,7 @@ DDS::ReturnCode_t
   DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
   DDS::InstanceStateMask instance_states)
 {
-  <%SCOPED%>Seq data;
+  <%SCOPED%><%SEQ%> data;
   DDS::ReturnCode_t rc = read_i(data, gen.info_, DDS::LENGTH_UNLIMITED,
     sample_states, view_states, instance_states, NULL);
   gen.samples_.reserve(data.length());
@@ -1587,7 +1584,7 @@ DDS::ReturnCode_t
   DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
   DDS::InstanceStateMask instance_states)
 {
-  <%SCOPED%>Seq dataseq;
+  <%SCOPED%><%SEQ%> dataseq;
   DDS::SampleInfoSeq infoseq;
   DDS::ReturnCode_t rc = read_instance_i(dataseq, infoseq,
     DDS::LENGTH_UNLIMITED, instance, sample_states, view_states,
@@ -1605,7 +1602,7 @@ DDS::ReturnCode_t
   DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
   DDS::InstanceStateMask instance_states)
 {
-  <%SCOPED%>Seq dataseq;
+  <%SCOPED%><%SEQ%> dataseq;
   DDS::SampleInfoSeq infoseq;
   DDS::ReturnCode_t rc = read_next_instance_i(dataseq, infoseq,
     DDS::LENGTH_UNLIMITED, previous_instance, sample_states, view_states,
@@ -2126,8 +2123,8 @@ void
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::auto_return_loan(void* seq)
 {
-  ::<%SCOPED%>Seq& received_data =
-    *static_cast< ::<%SCOPED%>Seq*> (seq);
+  ::<%SCOPED%><%SEQ%>& received_data =
+    *static_cast< ::<%SCOPED%><%SEQ%>*> (seq);
 
   if (!received_data.release())
   {
@@ -2140,12 +2137,12 @@ DDS::ReturnCode_t
 DDS::ReturnCode_t
 <%TYPE%>DataReaderImpl::check_inputs (
     const char* method_name,
-    ::<%SCOPED%>Seq & received_data,
+    ::<%SCOPED%><%SEQ%> & received_data,
     ::DDS::SampleInfoSeq & info_seq,
     ::CORBA::Long max_samples
   )
 {
-  ::<%SCOPED%>Seq::PrivateMemberAccess received_data_p (received_data);
+  ::<%SCOPED%><%SEQ%>::PrivateMemberAccess received_data_p (received_data);
 
   // ---- start of preconditions common to read and take -----
   // SPEC ref v1.2 7.1.2.5.3.8 #1

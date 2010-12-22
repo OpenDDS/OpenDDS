@@ -31,7 +31,7 @@ using namespace std;
 BE_GlobalData* be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
-  : filename_(0), java_(false), suppress_idl_(false)
+  : filename_(0), java_(false), suppress_idl_(false), seq_("Seq")
 {
 }
 
@@ -94,6 +94,16 @@ void BE_GlobalData::java_arg(const ACE_CString& str)
 ACE_CString BE_GlobalData::java_arg() const
 {
   return this->java_arg_;
+}
+
+void BE_GlobalData::sequence_suffix(const ACE_CString& str)
+{
+  this->seq_ = str;
+}
+
+ACE_CString BE_GlobalData::sequence_suffix() const
+{
+  return this->seq_;
 }
 
 void BE_GlobalData::java(bool b)

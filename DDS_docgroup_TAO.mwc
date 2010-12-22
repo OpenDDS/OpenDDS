@@ -7,12 +7,13 @@ workspace {
   $(TAO_ROOT)/TAO_IDL
   $(TAO_ROOT)/tao/tao.mpc
   $(TAO_ROOT)/tao/AnyTypeCode/AnyTypeCode.mpc
-  $(TAO_ROOT)/tao/CodeSet/Codeset.mpc
+  $(TAO_ROOT)/tao/Codeset/Codeset.mpc
   $(TAO_ROOT)/tao/IORTable/IORTable.mpc
   $(TAO_ROOT)/tao/PortableServer/PortableServer.mpc
   $(TAO_ROOT)/tao/ImR_Client/ImR_Client.mpc
   $(TAO_ROOT)/tao/PI/PI.mpc
   $(TAO_ROOT)/tao/CodecFactory/CodecFactory.mpc
+  $(TAO_ROOT)/tao/Valuetype/Valuetype.mpc        // used for dds4ccm
   $(TAO_ROOT)/orbsvcs/orbsvcs/Svc_Utils.mpc
   dds
   tools

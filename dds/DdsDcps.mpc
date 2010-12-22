@@ -90,8 +90,10 @@ project: taolib, portableserver, core, dcps_bits, coverage_optional, dcps_option
 }
 
 project (DdsDcps_lem_gen) : dds4ccm_opendds, taoidldefaults {
+  custom_only = 1
   requires += dds4ccm_opendds
   after += DdsDcps
+  idlflags -= -St
   idlflags += -I$(CIAO_ROOT)/connectors \
               -Wb,stub_export_macro=DDSDCPS_LEM_STUB_Export \
               -Wb,stub_export_include=DdsDcps_lem_stub_export.h -SS -I$(DDS_ROOT)
@@ -113,9 +115,12 @@ project (DdsDcps_lem_gen) : dds4ccm_opendds, taoidldefaults {
 
   Source_Files {
   }
+
+  Header_Files {
+  }
 }
 
-project (DdsDcps_lem_stub) : dcps, taolib {
+project (DdsDcps_lem_stub) : dcps, taolib, valuetype {
   requires += dds4ccm_opendds
   after += DdsDcps DdsDcps_lem_gen
   includes += $(CIAO_ROOT)/connectors $(CIAO_ROOT)
