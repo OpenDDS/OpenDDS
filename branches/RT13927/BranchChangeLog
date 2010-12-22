@@ -1,3 +1,10 @@
+Wed Dec 22 18:24:18 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.gen:
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.gen:
+
+          Additional genfiles.
+
 Wed Dec 22 18:15:58 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerDpQos/MessengerDpQos.gen:
