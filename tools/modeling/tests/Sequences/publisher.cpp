@@ -68,6 +68,7 @@ int main(int argc, char** argv)
     message.subject    = CORBA::string_dup("Review");
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
     message.count      = 0;
+    message.thisthat.this_string(CORBA::string_dup("Jeff"));
 
     for (int i = 0; i < 10; i++) {
       DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
