@@ -1,3 +1,97 @@
+Wed Dec 15 21:34:03 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+
+          Adjusted version checks to be correct for TAO 2.0.
+
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+
+          Fixed whitespace.
+
+Wed Dec 15 01:01:54 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_docgroup_TAO.mwc:
+        * dds/DdsDcps.mpc:
+
+          Updated for CIAO's dds4ccm implementation, which requires the TAO
+          valuetype library and corresponding tao_idl codegen for it (no -St).
+
+        * dds/idl/marshal_generator.cpp:
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+
+          Fixed a bug where opendds_idl would generate uncompilable code for
+          boolean-discriminated unions.
+          Added regression tests for both this issue and one fixed in the
+          previous commit.
+
+Fri Dec 10 19:21:45 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Use the actual enum name instead of the typedef alias when a
+          typedef'd enum type is used as a field of a struct.
+
+Mon Dec  6 16:33:31 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/marshal_generator.cpp:
+
+          When encountering a struct/union with a field of unsupported type,
+          for example: a valuetype, issue a warning but still generate
+          code that compiles.
+
+Thu Dec  2 21:24:59 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/IDLTemplate.txt:
+        * dds/idl/be_global.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_util.cpp:
+        * dds/idl/ts_generator.cpp:
+
+          Added an opendds_idl option -Wb,opendds_sequence_suffix for
+          customizing the usual "Seq" sequence suffix.  This is designed
+          for use with dds4ccm (CIAO) and should probably be avoided in
+          other use-cases.  The same option must be provided to tao_idl.
+
+Tue Nov 23 17:49:23 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Ensure that the <cstring> header is included when a struct is
+          present, even if there are no basic data types.  Thanks to
+          Frank Ritter and Martin from L-3 ELAC for reporting this bug.
+
+        * tests/DCPS/Compiler/idl_test2_lib/BazDef.idl:
+        * tests/DCPS/Compiler/idl_test2_lib/idl_test2_lib.mpc:
+
+          Regression test for the above condition.
+
+Mon Nov 15 22:12:22 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/IDLTemplate.txt:
+
+          Fixed method signature of DataWriter::register_instance_w_timestamp()
+          to have two arguments per the latest spec, not three.
+          Thanks to Johnny Willemsen for reporting that it was not updated.
+
+Wed Nov 10 11:57:40 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Lem project is custom only
+
+        * dds/idl/IDLTemplate.txt:
+          Fixed typo in comment
+
+Wed Nov 10 10:29:03 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * DDS_docgroup_TAO.mwc:
+          Fixed casing problem
+
 Mon Nov  8 14:08:39 UTC 2010  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportConfiguration.cpp:

@@ -14,6 +14,7 @@
 
 #include <string>
 #include <sstream>
+#include <iostream>
 #include <cctype>
 using std::string;
 
@@ -258,6 +259,9 @@ namespace {
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
           "  return 0; // sequence of objrefs is not marshaled\n";
+      } else if (elem_cls == CL_UNKNOWN) {
+        be_global->impl_ <<
+          "  return 0; // sequence of unknown/unsupported type\n";
       } else { // String, Struct, Array, Sequence, Union
         be_global->impl_ <<
           "  size_t length = max_marshaled_size_ulong();\n"
@@ -297,6 +301,9 @@ namespace {
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
           "  return false; // sequence of objrefs is not marshaled\n";
+      } else if (elem_cls == CL_UNKNOWN) {
+        be_global->impl_ <<
+          "  return false; // sequence of unknown/unsupported type\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
         be_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
@@ -341,6 +348,9 @@ namespace {
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
           "  return false; // sequence of objrefs is not marshaled\n";
+      } else if (elem_cls == CL_UNKNOWN) {
+        be_global->impl_ <<
+          "  return false; // sequence of unknown/unsupported type\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
         be_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
@@ -590,6 +600,8 @@ namespace {
     } else if (fld_cls & CL_PRIMITIVE) {
       return "gen_max_marshaled_size(" + getWrapper(qual, type, WD_OUTPUT)
         + ')';
+    } else if (fld_cls == CL_UNKNOWN) {
+      return "0"; // warning will be issued for the serialize functions
     } else { // sequence, struct, union, array
       string fieldref = prefix, local = name;
       if (fld_cls & CL_ARRAY) {
@@ -620,6 +632,13 @@ namespace {
     } else if (fld_cls & CL_PRIMITIVE) {
       return "(strm " + shift + ' '
         + getWrapper(qual.substr(3), type, dir) + ')';
+    } else if (fld_cls == CL_UNKNOWN) {
+      if (dir == WD_INPUT) { // no need to warn twice
+        std::cerr << "WARNING: field " << name << " can not be serialized.  "
+          "The struct or union it belongs to can not be used in an OpenDDS "
+          "topic type." << std::endl;
+      }
+      return "false";
     } else { // sequence, struct, union, array, enum, string(insertion)
       string fieldref = prefix, local = name;
       if (fld_cls & CL_ARRAY) {
@@ -698,6 +717,8 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
         if (fld_cls & CL_BOUNDED) {
           expr << " + " << str->max_size()->ev()->u.ulval;
         }
+      } else if (fld_cls == CL_UNKNOWN) {
+        expr << "0"; // warning will be issued for the serialize functions
       } else { // predefined, sequence, struct, union, array
         string fieldref = string("stru");
         if (fld_cls & CL_ARRAY) {
@@ -916,13 +937,13 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
     is_bounded.endArgs();
     be_global->impl_ << "  return 100000; /* from TAO_IDL_BE */\n";
   }
+  const string wrap_out = getWrapper("uni._d()", discriminator, WD_OUTPUT);
   {
     Function is_bounded("gen_find_size", "size_t");
     is_bounded.addArg("uni", "const " + cxx + "&");
     is_bounded.endArgs();
     be_global->impl_ <<
-      "  size_t result = gen_max_marshaled_size("
-      << getWrapper("uni._d()", discriminator, WD_OUTPUT) << ");\n"
+      "  size_t result = gen_max_marshaled_size(" << wrap_out << ");\n"
       "  switch (uni._d()) {\n";
     generateSwitchBodyForUnion(findSizeCommon, branches, discriminator,
       "result +=");
@@ -935,7 +956,8 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("uni", "const " + cxx + "&");
     insertion.endArgs();
-    be_global->impl_ << streamAndCheck("<< uni._d()") <<
+    be_global->impl_ <<
+      streamAndCheck("<< " + wrap_out) <<
       "  switch (uni._d()) {\n";
     generateSwitchBodyForUnion(streamCommon, branches, discriminator,
       "return", "<< ");
@@ -950,7 +972,7 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
     extraction.endArgs();
     be_global->impl_ <<
       "  " << scoped(discriminator->name()) << " disc;\n" <<
-      streamAndCheck(">> disc") <<
+      streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT)) <<
       "  switch (disc) {\n";
     generateSwitchBodyForUnion(streamCommon, branches, discriminator,
       "if", ">> ");

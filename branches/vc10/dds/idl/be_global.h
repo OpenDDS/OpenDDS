@@ -117,6 +117,9 @@ public:
   ACE_CString java_arg() const;
   void java_arg(const ACE_CString& str);
 
+  ACE_CString sequence_suffix() const;
+  void sequence_suffix(const ACE_CString& str);
+
   bool suppress_idl() const { return suppress_idl_; }
 
   static bool writeFile(const char* fileName, const std::string &content);
@@ -127,7 +130,7 @@ private:
 
   bool java_, suppress_idl_;
 
-  ACE_CString export_macro_, export_include_, pch_include_, java_arg_;
+  ACE_CString export_macro_, export_include_, pch_include_, java_arg_, seq_;
 };
 
 class BE_Comment_Guard {
