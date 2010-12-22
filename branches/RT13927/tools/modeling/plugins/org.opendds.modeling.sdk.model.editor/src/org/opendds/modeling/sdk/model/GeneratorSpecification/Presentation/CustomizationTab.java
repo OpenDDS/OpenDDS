@@ -10,11 +10,16 @@ import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.DropTargetListener;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
 
@@ -26,14 +31,57 @@ public class CustomizationTab extends StructuredViewer {
 	// A TreeViewer with the pretected abstract StructuredViewer methods
 	// exposed so that we can simply delegate to them.
 	TreeViewerDelegate treeViewer;
+	
+	Composite control;
 
 	/**
 	 * 
 	 */
 	public CustomizationTab( Composite parent) {
-		treeViewer = new TreeViewerDelegate( parent);
+		control = new Composite(parent, 0);
 		
 		// TODO Add the stuff to surround the actual tree viewer.
+		control.setLayout( new GridLayout( 2, true));
+		{
+			Composite panel = new Composite(control, 0);
+			GridData panelData = new GridData(SWT.FILL, SWT.FILL, true, true);
+			panel.setLayoutData(panelData);
+			
+			GridLayout layout = new GridLayout(1, true);
+			panel.setLayout(layout);
+			{
+				Label label = new Label(panel, 0);
+				label.setText("Model Instance Definitions");
+				GridData data = new GridData(SWT.CENTER, SWT.TOP, false, false);
+				label.setLayoutData(data);
+			}
+			
+			{
+				Composite treePane = new Composite(panel,0);
+				GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
+				treePane.setLayoutData(data);
+				
+				treePane.setLayout( new FillLayout(SWT.VERTICAL));
+				treeViewer = new TreeViewerDelegate( treePane);
+			}
+			
+		}
+		
+		{
+			Composite panel = new Composite(control, 0);
+			GridData panelData = new GridData(SWT.LEAD, SWT.FILL, true, true);
+			panel.setLayoutData(panelData);
+			
+			GridLayout layout = new GridLayout(1, true);
+			panel.setLayout(layout);
+			{
+				Label label = new Label(panel, 0);
+				label.setText("Selection Information");
+				GridData data = new GridData(SWT.CENTER, SWT.TOP, true, true);
+				label.setLayoutData(data);
+			}
+		}
+		
 	}
 
 	/* (non-Javadoc)
@@ -149,6 +197,10 @@ public class CustomizationTab extends StructuredViewer {
 	 */
 	@Override
 	public Control getControl() {
+		return control;
+	}
+	
+	public Control getTreeControl() {
 		return treeViewer.getControl();
 	}
 

@@ -367,7 +367,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		/**
 		 * <!-- begin-user-doc -->
 		 * <!-- end-user-doc -->
-		 * @generated
+		 * @generated NOT
 		 */
 		public IFile getGenFile() {
 			return ResourcesPlugin.getWorkspace().getRoot().getFile(getContainerFullPath().append(getFileName()));
@@ -573,11 +573,13 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
                 						.findMember(new Path( newTarget));
 
 				if (container == null || (container.getType() & (IResource.PROJECT | IResource.FOLDER)) == 0) {
+					setMessage(null);
 					setErrorMessage("Target folder " + newTarget + " must exist");
 					this.targetDir = "/";
 					return;
 				}
 				if (!container.isAccessible()) {
+					setMessage(null);
 					setErrorMessage("Target folder " + newTarget + " must be writable");
 					this.targetDir = "/";
 					return;
