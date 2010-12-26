@@ -62,6 +62,8 @@ public class TbfQosPolicyCreateCommand extends EditElementCommand {
 		QosPolicyCreationHelper.addPolicy(newElement, policyAssociationName,
 				getElementToEdit());
 
+		OpenDDSDcpsLibElementTypes.init_TbfQosPolicy_3050(newElement);
+
 		doConfigure(newElement, monitor, info);
 
 		((CreateElementRequest) getRequest()).setNewElement(newElement);
