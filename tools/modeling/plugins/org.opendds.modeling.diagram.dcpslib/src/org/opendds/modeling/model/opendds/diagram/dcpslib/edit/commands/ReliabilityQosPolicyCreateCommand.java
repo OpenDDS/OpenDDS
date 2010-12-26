@@ -62,6 +62,8 @@ public class ReliabilityQosPolicyCreateCommand extends EditElementCommand {
 		QosPolicyCreationHelper.addPolicy(newElement, policyAssociationName,
 				getElementToEdit());
 
+		OpenDDSDcpsLibElementTypes.init_ReliabilityQosPolicy_3031(newElement);
+
 		doConfigure(newElement, monitor, info);
 
 		((CreateElementRequest) getRequest()).setNewElement(newElement);

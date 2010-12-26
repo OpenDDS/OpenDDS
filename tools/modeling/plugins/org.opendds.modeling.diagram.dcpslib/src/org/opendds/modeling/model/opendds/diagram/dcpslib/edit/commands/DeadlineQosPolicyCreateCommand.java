@@ -65,6 +65,8 @@ public class DeadlineQosPolicyCreateCommand extends EditElementCommand {
 		QosPolicyCreationHelper.addPolicy(newElement, policyAssociationName,
 				getElementToEdit());
 
+		OpenDDSDcpsLibElementTypes.init_DeadlineQosPolicy_3022(newElement);
+
 		doConfigure(newElement, monitor, info);
 
 		((CreateElementRequest) getRequest()).setNewElement(newElement);

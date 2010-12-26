@@ -62,6 +62,8 @@ public class RdlQosPolicyCreateCommand extends EditElementCommand {
 		QosPolicyCreationHelper.addPolicy(newElement, policyAssociationName,
 				getElementToEdit());
 
+		OpenDDSDcpsLibElementTypes.init_RdlQosPolicy_3049(newElement);
+
 		doConfigure(newElement, monitor, info);
 
 		((CreateElementRequest) getRequest()).setNewElement(newElement);
