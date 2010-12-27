@@ -1,3 +1,20 @@
+Mon Dec 27 19:36:11 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/com.ociweb.emf.util/build.properties:
+
+          Removed plugin.xml from the bin.includes list since there
+          is no plugin.xml.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/.project:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/.project:
+
+          Added a few project references for cases where I've seen Eclipse
+          confused about build order during a Clean All & build.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+
+          Added MANIFEST.MF to svn because we need com.ociweb.emf.util.
+
 Mon Dec 27 16:37:31 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerSplit/MessengerSplit.gen:

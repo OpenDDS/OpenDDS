@@ -3,6 +3,7 @@
 	<name>org.opendds.modeling.diagram.datalib</name>
 	<comment></comment>
 	<projects>
+		<project>org.opendds.modeling.model</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
