@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmi:id="_svQ30drLEd-E4av4wTAhDQ" type="OpenDDS PolicyLib" measurementUnit="Pixel">
-  <styles xmi:type="notation:DiagramStyle" xmi:id="_svQ30trLEd-E4av4wTAhDQ"/>
-  <element xmi:type="opendds:PolicyLib" href="NonDefaultPolicyLibTest.opendds#_BD-5cKGNEd-D-tWBUFz8zw"/>
-</notation:Diagram>

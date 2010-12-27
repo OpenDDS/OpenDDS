@@ -222,11 +222,13 @@
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.diagram.core.viewProviders" id="view-provider">
-      <?gmfgen generated="true"?>
+      <?gmfgen generated="false"?>
       <viewProvider class="org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibViewProvider">
          <Priority name="Lowest"/>
          <context viewClass="org.eclipse.gmf.runtime.notation.Diagram" semanticHints="OpenDDS DcpsLib"/>
-         <context viewClass="org.eclipse.gmf.runtime.notation.Node" semanticHints="2001,2002,2003,3001,3003,3022,3005,3023,3024,3006,3025,3026,3007,3027,3008,3028,3009,3029,3030,3031,3010,3032,3033,3034,3035,3013,3036,3037,3038,3039,3040,3041,3042,3043,3044,3045,3046,3047,3048,3021,3012,3014,3015,3016,3017,3018,3019,3020,3002,3004,3049,3055,3056,3050,3057,3051,3052,3053,3054,3058"/>
+         <!-- Emptied semanticHints according to workaround for diagram reload bug 281014,
+         https://bugs.eclipse.org/bugs/show_bug.cgi?id=281014 -->
+         <context viewClass="org.eclipse.gmf.runtime.notation.Node" semanticHints=""/>
          <context viewClass="org.eclipse.gmf.runtime.notation.Edge" semanticHints="4005,4006,4007"/>
       </viewProvider>
    </extension>

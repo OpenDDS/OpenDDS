@@ -1,3 +1,28 @@
+Mon Dec 27 15:23:53 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
+
+          Workaround for GMF bug that prevents diagrams generated from Ecore
+          models from reloading property after diagram app was re-opened.
+          Also was causing Period compartments not to show fields properly when
+          diagram was re-opened.
+
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds_diagram:
+        * tools/modeling/testdata/PolicyLib/DefaultPolicyLibTest.opendds:
+        * tools/modeling/testdata/PolicyLib/DefaultPolicyLibTest.opendds_diagram:
+        * tools/modeling/testdata/PolicyLib/NonDefaultPolicyLibTest.opendds:
+        * tools/modeling/testdata/PolicyLib/NonDefaultPolicyLibTest.opendds_diagram:
+
+          Updates to account for workaround to GMF bug.
+
+        * tools/modeling/testdata/PolicyLib/DefaultPolicyLibTest.opendds_diagram_policylib:
+        * tools/modeling/testdata/PolicyLib/NonDefaultPolicyLibTest.opendds_diagram_policylib:
+
+          Removed these files.
+
 Sun Dec 26 21:49:59 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/commands/DeadlineQosPolicyCreateCommand.java:
