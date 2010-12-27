@@ -132,6 +132,9 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
           DDS::DataWriterQos        qos( DataWriters::Values which);
           DDS::DataReaderQos        qos( DataReaders::Values which);
 
+          bool copyTopicQos(DataWriters::Values which);
+          bool copyTopicQos(DataReaders::Values which);
+
           void copyPublicationQos(  DataWriters::Values which, DDS::DataWriterQos&amp; writerQos);
           void copySubscriptionQos( DataReaders::Values which, DDS::DataReaderQos&amp; readerQos);
           ///}
@@ -210,6 +213,7 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
           Publishers::Values        publishers_[             DataWriters::LAST_INDEX];
           unsigned long             writerMasks_[            DataWriters::LAST_INDEX];
           DDS::DataWriterQos        writersQos_[             DataWriters::LAST_INDEX];
+          bool                      writerCopyTopicQos_[     DataWriters::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:if test="$readers">
@@ -218,6 +222,7 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
           Subscribers::Values       subscribers_[            DataReaders::LAST_INDEX];
           unsigned long             readerMasks_[            DataReaders::LAST_INDEX];
           DDS::DataReaderQos        readersQos_[             DataReaders::LAST_INDEX];
+          bool                      readerCopyTopicQos_[     DataReaders::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:if test="$topics">
@@ -364,6 +369,50 @@ OpenDDS::Model::</xsl:text>
   </xsl:when>
   <xsl:otherwise>
     <xsl:text>  return DDS::DataReaderQos(); // not valid when no data readers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
+
+inline
+bool
+OpenDDS::Model::</xsl:text>
+  <xsl:value-of select="$modelname"/>
+  <xsl:text>::Elements::Data::copyTopicQos(DataWriters::Values which)
+{
+  if (which &lt; 0 || which >= DataWriters::LAST_INDEX) {
+    throw OutOfBoundsException();
+  }
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$writers">
+    <xsl:text>  return this->writerCopyTopicQos_[which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return false; // not valid when no data writers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
+
+inline
+bool
+OpenDDS::Model::</xsl:text>
+  <xsl:value-of select="$modelname"/>
+  <xsl:text>::Elements::Data::copyTopicQos(DataReaders::Values which)
+{
+  if (which &lt; 0 || which >= DataReaders::LAST_INDEX) {
+    throw OutOfBoundsException();
+  }
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$readers">
+    <xsl:text>  return this->readerCopyTopicQos_[which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return false; // not valid when no data readers defined
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>

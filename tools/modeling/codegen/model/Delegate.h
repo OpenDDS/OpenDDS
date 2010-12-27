@@ -72,7 +72,8 @@ namespace OpenDDS { namespace Model {
         DDS::Publisher*    publisher,
         DDS::Topic*        topic,
         DDS::DataWriterQos writerQos,
-        DDS::StatusMask    mask
+        DDS::StatusMask    mask,
+        bool               copyQosFromTopic
       );
 
       DDS::DataWriter*
@@ -89,7 +90,8 @@ namespace OpenDDS { namespace Model {
         DDS::Subscriber*   subscriber,
         DDS::Topic*        topic,
         DDS::DataReaderQos readerQos,
-        DDS::StatusMask    mask
+        DDS::StatusMask    mask,
+        bool               copyQosFromTopic
       );
 
       DDS::DataReader*

@@ -1,3 +1,23 @@
+Mon Dec 27 22:40:03 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Added a boolean parameter 'copyQosFromTopic' to
+          Delegate::createPublication() and createSubscription().
+          Only if this value is true will the Topic QoS values be used when
+          creating a Data Writer or Data Reader.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+          Use the copyFromTopicQos bool in generated code.
+
+        * tools/modeling/tests/Messenger/Messenger.opendds:
+
+          Added the XML attribute copyFromTopicQos for testing.
+
 Mon Dec 27 19:36:11 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/plugins/com.ociweb.emf.util/build.properties:
