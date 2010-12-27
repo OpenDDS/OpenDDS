@@ -112,7 +112,7 @@ OpenDDS::DCPS::TransportFactory::create_transport_impl_i(TransportIdType impl_id
     throw Transport::UnableToCreate();
   }
 
-  int result = bind(impl_map_, impl_id, impl);
+  int result = OpenDDS::DCPS::bind(impl_map_, impl_id, impl);
   impl->set_transport_id(impl_id);
   impl->set_factory_id(type_id);
   if (TheServiceParticipant->monitor_) {
@@ -380,7 +380,7 @@ OpenDDS::DCPS::TransportFactory::register_generator(const ACE_TCHAR* type,
   // we hold the lock.
   {
     GuardType guard(this->lock_);
-    result = bind(generator_map_, type, generator_rch);
+    result = OpenDDS::DCPS::bind(generator_map_, type, generator_rch);
   }
 
   // Check to see if it worked.
@@ -435,7 +435,7 @@ OpenDDS::DCPS::TransportFactory::register_factory(FactoryIdType            facto
   // we hold the lock.
   {
     GuardType guard(this->lock_);
-    result = bind(impl_type_map_, factory_id, factory);
+    result = OpenDDS::DCPS::bind(impl_type_map_, factory_id, factory);
   }
 
   // Check to see if it worked.
@@ -468,7 +468,7 @@ OpenDDS::DCPS::TransportFactory::register_configuration(TransportIdType       tr
   // we hold the lock.
   {
     GuardType guard(this->lock_);
-    result = bind(configuration_map_, transport_id, config);
+    result = OpenDDS::DCPS::bind(configuration_map_, transport_id, config);
   }
 
   // Check to see if it worked.

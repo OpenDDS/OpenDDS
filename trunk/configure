@@ -243,7 +243,7 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
     $clpath =~ s/vc\\bin(\\(x86_)?amd64)?/common7\\ide/i;
     $ENV{'PATH'} .= ";$clpath";
   }
-  my %vers = (13 => 'vc71', 14 => 'vc8', 15 => 'vc9');
+  my %vers = (13 => 'vc71', 14 => 'vc8', 15 => 'vc9', 16 => 'vc10');
   open(CL, "\"$opts{'compiler'}\" /v 2>&1 |");
   while (<CL>) {
     if (/Compiler Version (\d+)\./) {

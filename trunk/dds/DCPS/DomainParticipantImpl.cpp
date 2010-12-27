@@ -1807,7 +1807,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   // this object will also act as a guard against leaking the new TopicImpl
   RefCounted_Topic refCounted_topic(Topic_Pair(topic_servant, obj, NO_DUP));
 
-  if (bind(topics_, topic_name, refCounted_topic) == -1) {
+  if (OpenDDS::DCPS::bind(topics_, topic_name, refCounted_topic) == -1) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic, ")
                ACE_TEXT("%p \n"),
