@@ -3,6 +3,7 @@
 	<name>org.opendds.modeling.sdk</name>
 	<comment></comment>
 	<projects>
+		<project>org.opendds.modeling.model.editor</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
