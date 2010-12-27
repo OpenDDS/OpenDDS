@@ -208,12 +208,13 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createPublication( typename
     this->createTopic( participant, topic);
   }
 
-  this->writers_[ writer] = this->delegate_.createPublication(
+  this->writers_[writer] = this->delegate_.createPublication(
     writer,
-    this->publishers_[ publisher],
-    this->topics_[ participant][ topic],
-    this->modelData_.qos( writer),
-    this->modelData_.mask( writer)
+    this->publishers_[publisher],
+    this->topics_[participant][topic],
+    this->modelData_.qos(writer),
+    this->modelData_.mask(writer),
+    this->modelData_.copyTopicQos(writer)
   );
 }
 
@@ -233,12 +234,13 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscription( typenam
     this->createTopic( participant, topic);
   }
 
-  this->readers_[ reader] = this->delegate_.createSubscription(
+  this->readers_[reader] = this->delegate_.createSubscription(
     reader,
-    this->subscribers_[ subscriber],
-    this->topics_[ participant][ topic],
-    this->modelData_.qos( reader),
-    this->modelData_.mask( reader)
+    this->subscribers_[subscriber],
+    this->topics_[participant][topic],
+    this->modelData_.qos(reader),
+    this->modelData_.mask(reader),
+    this->modelData_.copyTopicQos(reader)
   );
 }
 

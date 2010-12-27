@@ -582,8 +582,9 @@ Elements::Data::buildPublicationsQos()
         <xsl:with-param name="base"   select="'  writerQos.'"/>
       </xsl:call-template>
 -->
-      <xsl:text>  this->writersQos_[ writer] = writerQos;</xsl:text>
-      <xsl:value-of select="$newline"/>
+      <xsl:text>  this->writersQos_[ writer] = writerQos;
+  this->writerCopyTopicQos_[writer] = </xsl:text>
+      <xsl:value-of select="concat(@copyFromTopicQos, ';', $newline)"/>
     </xsl:for-each>
   </xsl:when>
   <xsl:otherwise>
@@ -612,8 +613,9 @@ Elements::Data::buildSubscriptionsQos()
       <xsl:with-param name="base"   select="'readerQos.'"/>
     </xsl:call-template>
 
-    <xsl:text>  this->readersQos_[ reader] = readerQos;</xsl:text>
-    <xsl:value-of select="$newline"/>
+    <xsl:text>  this->readersQos_[ reader] = readerQos;
+  this->readerCopyTopicQos_[reader] = </xsl:text>
+    <xsl:value-of select="concat(@copyFromTopicQos, ';', $newline)"/>
   </xsl:for-each>
   <xsl:text>}
 

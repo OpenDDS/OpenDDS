@@ -127,7 +127,8 @@ OpenDDS::Model::Delegate::createPublication(
   DDS::Publisher*    publisher,
   DDS::Topic*        topic,
   DDS::DataWriterQos writerQos,
-  DDS::StatusMask    mask
+  DDS::StatusMask    mask,
+  bool               copyQosFromTopic
 )
 {
   if( !this->service_) {
@@ -137,7 +138,9 @@ OpenDDS::Model::Delegate::createPublication(
   DDS::TopicQos topicQos = TheServiceParticipant->initial_TopicQos();
   topic->get_qos( topicQos);
   publisher->get_default_datawriter_qos( writerQos);
-  publisher->copy_from_topic_qos( writerQos, topicQos);
+  if (copyQosFromTopic) {
+    publisher->copy_from_topic_qos(writerQos, topicQos);
+  }
   this->service_->copyPublicationQos( which, writerQos);
 
   return this->createWriter(
@@ -170,7 +173,8 @@ OpenDDS::Model::Delegate::createSubscription(
   DDS::Subscriber*   subscriber,
   DDS::Topic*        topic,
   DDS::DataReaderQos readerQos,
-  DDS::StatusMask    mask
+  DDS::StatusMask    mask,
+  bool               copyQosFromTopic
 )
 {
   if( !this->service_) {
@@ -180,7 +184,9 @@ OpenDDS::Model::Delegate::createSubscription(
   DDS::TopicQos topicQos = TheServiceParticipant->initial_TopicQos();
   topic->get_qos( topicQos);
   subscriber->get_default_datareader_qos( readerQos);
-  subscriber->copy_from_topic_qos( readerQos, topicQos);
+  if (copyQosFromTopic) {
+    subscriber->copy_from_topic_qos(readerQos, topicQos);
+  }
   this->service_->copySubscriptionQos( which, readerQos);
 
   return this->createReader(
