@@ -55,7 +55,7 @@ OpenDDS::DCPS::DataLinkSet::insert_link(DataLink* link)
 
   GuardType guard(this->lock_);
 
-  return bind(map_, mylink->id(), mylink);
+  return OpenDDS::DCPS::bind(map_, mylink->id(), mylink);
 }
 
 // Perform "set subtraction" logic.  Subtract the released_set from
@@ -125,7 +125,7 @@ OpenDDS::DCPS::DataLinkSet::select_links(const RepoId* remoteIds,
        ++itr) {
     for (CORBA::ULong i = 0; i < num_targets; ++i) {
       if (itr->second->is_target(remoteIds[i])) {
-        bind(selected_links->map_,
+        OpenDDS::DCPS::bind(selected_links->map_,
              itr->second->id(), itr->second);
         break;
       }

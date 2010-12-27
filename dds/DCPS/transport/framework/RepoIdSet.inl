@@ -21,7 +21,7 @@ ACE_INLINE int
 OpenDDS::DCPS::RepoIdSet::insert_id(RepoId key, RepoId value)
 {
   DBG_ENTRY_LVL("RepoIdSet","insert_id",6);
-  return bind(map_, key, value);
+  return OpenDDS::DCPS::bind(map_, key, value);
 }
 
 ACE_INLINE int

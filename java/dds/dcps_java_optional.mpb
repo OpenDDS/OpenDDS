@@ -32,9 +32,9 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
 
   Java_Files {
     DDS/ParticipantBuiltinTopicDataTypeSupportImpl.java << DDS/ParticipantBuiltinTopicDataTypeSupport.java
-    DDS/TopicBuiltinTopicDataTypeSupportImpl.java
-    DDS/PublicationBuiltinTopicDataTypeSupportImpl.java
-    DDS/SubscriptionBuiltinTopicDataTypeSupportImpl.java
+    DDS/TopicBuiltinTopicDataTypeSupportImpl.java << DDS/TopicBuiltinTopicDataTypeSupport.java
+    DDS/PublicationBuiltinTopicDataTypeSupportImpl.java << DDS/PublicationBuiltinTopicDataTypeSupport.java
+    DDS/SubscriptionBuiltinTopicDataTypeSupportImpl.java << DDS/SubscriptionBuiltinTopicDataTypeSupport.java
     OpenDDS/DCPS/BuiltinTopicUtils.java
   }
 }

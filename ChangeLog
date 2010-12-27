@@ -1,3 +1,52 @@
+Mon Dec 27 16:30:29 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * configure:
+        * java/jms/native/build.xml:
+
+          Initial support for vc10 (Microsoft Visual Studio 2010).  Not yet
+          advertising it in the NEWS, README, etc files until we get a regular
+          nighly build and regression test running.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.inl:
+        * dds/DCPS/transport/framework/RepoIdSet.inl:
+        * dds/DCPS/transport/framework/RepoIdSetMap.inl:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          vc10 implements some of the C++0x features, so we need to qualify
+          calls to OpenDDS::DCPS::bind() in order to avoid abiguity with std.
+
+        * tests/DCPS/Prst_delayed_subscriber/Prst_delayed_subscriber.mpc:
+        * DevGuideExamples/DCPS/Messenger/Messenger.mpc:
+        * examples/DCPS/Messenger_Imr/Messenger_Imr.mpc:
+
+          Corrected an "after" to avoid errors with parallel builds.
+
+        * java/dds/dcps_java.mpc:
+        * java/dds/dcps_java_optional.mpb:
+
+          Improve explicit dependency info for vc10.  vc10 with java=1 still
+          has a few issues but should build (may require running build twice).
+
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+
+          Fixed "after" and idlflags.
+
+        * tests/DCPS/TestFramework/TestFramework.mpc:
+
+          Source_Files was incorrect, just use MPC's defaults.
+
 Wed Dec 15 21:34:03 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * java/idl2jni/codegen/idl2jni_visitor.h:

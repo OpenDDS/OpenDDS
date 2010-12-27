@@ -25,7 +25,7 @@ project(*publisher) : dcpsexe_with_tcp {
 
 project(*subscriber) : dcpsexe_with_tcp {
   exename   = subscriber
-  after    += *idl
+  after    += *publisher
 
   TypeSupport_Files {
     Messenger.idl

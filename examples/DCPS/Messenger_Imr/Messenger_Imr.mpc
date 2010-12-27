@@ -39,7 +39,7 @@ project(DDS*Publisher) : dcpsexe_with_tcp {
 project(DDS*Subscriber) : dcpsexe_with_tcp {
   
   exename   = subscriber
-  after    += DDS*idl
+  after    += DDS*Publisher
 
   TypeSupport_Files {
     Messenger.idl

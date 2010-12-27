@@ -47,7 +47,7 @@ OpenDDS::DCPS::RepoIdSetMap::find_or_create(RepoId key)
     // It wasn't found.  Create one and insert it.
     value = new RepoIdSet();
 
-    if (bind(map_, key, value) != 0) {
+    if (OpenDDS::DCPS::bind(map_, key, value) != 0) {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Unable to insert new RepoIdSet into "
                  "the RepoIdSetMap.\n"));
