@@ -16,7 +16,7 @@ int main(int argc, char** argv)
 
     using OpenDDS::Model::ExternalPolicies::Elements;
 
-    DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
+    DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer3);
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
