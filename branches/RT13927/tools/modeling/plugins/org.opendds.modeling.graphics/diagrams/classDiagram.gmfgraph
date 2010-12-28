@@ -1,4 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gmfgraph:Canvas xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI"
-    xmlns:gmfgraph="http://www.eclipse.org/gmf/2006/GraphicalDefinition" name="classDiagram"/>
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:gmfgraph="http://www.eclipse.org/gmf/2006/GraphicalDefinition" name="classDiagram">
+  <figures
+      name="classDiagramGallery">
+    <descriptors
+        name="StereotypedUmlPackageFigure">
+      <actualFigure
+          xsi:type="gmfgraph:CustomFigure"
+          name="StereotypedUmlPackageFigure"
+          qualifiedClassName="com.ociweb.gmf.figures.UmlPackageFig">
+        <layout
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"
+            forceSingleLine="true"/>
+        <insets
+            top="15"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="UmlPackageStereotypeLabel"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="UmlPackageNameLabel"/>
+      </actualFigure>
+      <accessors
+          figure="//@figures.0/@descriptors.0/@actualFigure/@children.0"/>
+      <accessors
+          figure="//@figures.0/@descriptors.0/@actualFigure/@children.1"/>
+    </descriptors>
+  </figures>
+  <nodes
+      name="StereotypedUmlPackage"
+      figure="StereotypedUmlPackageFigure">
+    <facets
+        xsi:type="gmfgraph:DefaultSizeFacet">
+      <defaultSize
+          dx="100"
+          dy="50"/>
+    </facets>
+  </nodes>
+  <labels
+      name="StereotypedUmlPackageStereotype"
+      figure="StereotypedUmlPackageFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.0/@accessors.0"/>
+  <labels
+      name="StereotypedUmlPackageName"
+      figure="StereotypedUmlPackageFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.0/@accessors.1"/>
+</gmfgraph:Canvas>

@@ -13,7 +13,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackageName"/>
         <features
             href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/name"/>
       </labelMappings>
@@ -22,7 +22,7 @@
           readOnly="true"
           viewPattern="«dcps»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackageStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/name"/>
       </labelMappings>
@@ -32,7 +32,7 @@
           xsi:type="gmftool:CreationTool"
           href="MainDiagram.gmftool#//@palette/@tools.0/@tools.1"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
+          href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackage"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -44,7 +44,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackageName"/>
         <features
             href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/name"/>
       </labelMappings>
@@ -53,7 +53,7 @@
           readOnly="true"
           viewPattern="«policyLib»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackageStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/name"/>
       </labelMappings>
@@ -63,7 +63,7 @@
           xsi:type="gmftool:CreationTool"
           href="MainDiagram.gmftool#//@palette/@tools.0/@tools.0"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
+          href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackage"/>
     </ownedChild>
   </nodes>
   <nodes>
@@ -75,7 +75,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementName"/>
+            href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackageName"/>
         <features
             href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/name"/>
       </labelMappings>
@@ -84,7 +84,7 @@
           readOnly="true"
           viewPattern="«dataLib»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElementStereotype"/>
+            href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackageStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/name"/>
       </labelMappings>
@@ -94,7 +94,7 @@
           xsi:type="gmftool:CreationTool"
           href="MainDiagram.gmftool#//@palette/@tools.0/@tools.2"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#StereotypedElement"/>
+          href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackage"/>
     </ownedChild>
   </nodes>
   <diagram>
