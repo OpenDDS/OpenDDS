@@ -1,3 +1,30 @@
+Tue Dec 28 21:22:17 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/figures:
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/figures/UmlPackageFig.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/.classpath:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmftool:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.trace:
+        * tools/modeling/plugins/org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/DataLib.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/DcpsLib.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/PolicyLib.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/UmlPackage.gif:
+
+          Library figures now look like Packages. Replaced default palette and EMF editor
+          icons for libraries with Package icon taken from Uml2tools with different color
+          to distinguish from future "true" Package.
+
 Mon Dec 27 22:40:03 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/codegen/model/Delegate.h:

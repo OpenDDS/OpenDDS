@@ -13,27 +13,39 @@
           title="PolicyLib"
           description="Create new PolicyLib">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/PolicyLib.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/PolicyLib.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="DcpsLib"
           description="Create new DcpsLib">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/DcpsLib.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/DcpsLib.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="DataLib"
           description="Create new DataLib">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/DataLib.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/DataLib.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
     </tools>
   </palette>
