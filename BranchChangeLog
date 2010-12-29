@@ -1,3 +1,10 @@
+Wed Dec 29 13:18:06 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+
+        * tools/modeling/tests/org.opendds.modeling.graphics.dev:
+
+          Removed these directory as it is no long actively used.
+
 Tue Dec 28 21:22:17 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
