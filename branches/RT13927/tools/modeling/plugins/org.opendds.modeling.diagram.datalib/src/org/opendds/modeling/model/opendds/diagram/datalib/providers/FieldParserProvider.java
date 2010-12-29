@@ -9,10 +9,15 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.util.BasicEList;
+import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.transaction.TransactionalEditingDomain;
 import org.eclipse.emf.transaction.util.TransactionUtil;
 import org.eclipse.emf.workspace.util.WorkspaceSynchronizer;
@@ -33,13 +38,9 @@ import org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.Field2EditP
 import org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.Field3EditPart;
 import org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.FieldEditPart;
 import org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibVisualIDRegistry;
-import org.opendds.modeling.model.types.DataLib;
 import org.opendds.modeling.model.types.Field;
 import org.opendds.modeling.model.types.TypesPackage;
 import org.opendds.modeling.model.types.Type;
-
-import com.ociweb.emf.util.ObjectsFinder;
-
 
 
 /**
@@ -103,22 +104,44 @@ public class FieldParserProvider extends AbstractProvider implements IParserProv
 		private Type findType(final String typeName, final Field field) {
 			Type type = null;
 			if (typeName.length() > 0) {
-				DataLib dataLib = (DataLib) ObjectsFinder.findObjectInContainmentTree(field, TypesPackage.eINSTANCE.getDataLib());
-				type = findInDataLib(dataLib, typeName);
+				EList<Type> reachableTypes = getReachableTypes(field);
+				for (Type typeCandidate: reachableTypes) {
+					if (typeName.equals(getTypeName(typeCandidate))) {
+						type = typeCandidate;
+					}
+				}
 			}
 			return type;
 		}
 
-		private Type findInDataLib(DataLib lib, String typeName) {
-			for (Type element : lib.getTypes()) {
-				if (typeName.equals(getTypeName(element))) {
-					return element;
+		/**
+		 * Search across loaded resources for candidate types
+		 */
+		private EList<Type> getReachableTypes(EObject obj) {
+			EList<Type> types = new BasicEList<Type>();
+
+			Resource resource = obj.eResource();
+			if (resource != null) {
+				ResourceSet resourceSet = resource.getResourceSet();
+				if (resourceSet != null) {
+					for (TreeIterator<?> i = resourceSet.getAllContents(); i.hasNext(); ) {
+						Object child = i.next();
+						if (child instanceof Type) {
+							types.add((Type) child);
+						}
+					}
 				}
-				if (element instanceof DataLib) {
-					return findInDataLib((DataLib) element, typeName);
+				else
+				{
+					for (EObject eObject : resource.getContents()) {
+						if (eObject instanceof Type) {
+							types.add((Type) eObject);
+						}
+
+					}
 				}
 			}
-			return null;
+			return types;
 		}
 
 		@Override
@@ -171,7 +194,7 @@ public class FieldParserProvider extends AbstractProvider implements IParserProv
 		 * @param type
 		 * @return
 		 */
-		private String getTypeName(Type type) {
+		private String getTypeName(EObject type) {
 			String name = null;
 			EClass typeClass = type.eClass();
 			

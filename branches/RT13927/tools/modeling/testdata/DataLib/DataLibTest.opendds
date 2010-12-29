@@ -41,7 +41,9 @@
       <fields xmi:id="_zP-XwP7mEd-9W4ll_I0Ewg" name="shorts" type="_0m4VwP7lEd-9W4ll_I0Ewg"/>
       <fields xmi:id="_1faDwP7mEd-9W4ll_I0Ewg" name="size" type="_f1E6wP7lEd-9W4ll_I0Ewg"/>
       <fields xmi:id="_3jFywP7mEd-9W4ll_I0Ewg" name="id" type="_lwa30P7lEd-9W4ll_I0Ewg"/>
-      <fields xmi:id="_bC1bcBN4EeC-y-hUB_78XA" name="substruct"/>
+      <fields xmi:id="_bC1bcBN4EeC-y-hUB_78XA" name="substruct">
+        <type xsi:type="types:Struct" href="DataLib2.opendds#_BwbDYBN1EeCZGfFbfO9QSA"/>
+      </fields>
       <keys xmi:id="_64VQQP7mEd-9W4ll_I0Ewg" field="_3jFywP7mEd-9W4ll_I0Ewg"/>
     </types>
     <types xsi:type="types:Typedef" xmi:id="_RGVgoBN5EeCLmZr0-O4PNA" name="Struct2Typedef">
