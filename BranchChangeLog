@@ -1,3 +1,13 @@
+Wed Dec 29 21:30:58 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/providers/FieldParserProvider.java:
+
+          Fixed bug not allowing Types across resources to be allowed for Field type.
+
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds:
+
+          Update based on bug fix.
+
 Wed Dec 29 18:43:03 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
