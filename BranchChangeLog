@@ -1,3 +1,25 @@
+Wed Dec 29 18:43:03 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+
+          Enabled drag and drop so that elements from other resources can be included
+          and referred to in diagram.
+
+        * tools/modeling/testdata/DataLib/DataLib2.opendds:
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds:
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds_diagram:
+        * tools/modeling/testdata/DataLib/DataLibTest_screenshot_1.png:
+
+          Updated to start at OpenDDSModel level rather than types:DataLib.
+          Included "shortcut" to element in DataLib2.opendds in diagram with
+          Typedef referencing shortcut.
+
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds_diagram_datalib:
+
+          Removed this file.
+
 Wed Dec 29 13:18:06 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
 

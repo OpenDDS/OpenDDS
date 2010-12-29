@@ -86,6 +86,16 @@
          </ViewId>
       </GlobalActionHandlerProvider>
       <GlobalActionHandlerProvider
+         class="org.eclipse.gmf.runtime.diagram.ui.printing.render.providers.DiagramWithPrintGlobalActionHandlerProvider"
+         id="OpenDDS DataLibPresentationPrint">
+         <Priority name="Lowest"/>
+         <ViewId id="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID">
+            <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
+               <GlobalActionId actionId="print"/>
+            </ElementType>
+         </ViewId>
+      </GlobalActionHandlerProvider>
+      <GlobalActionHandlerProvider
          class="org.eclipse.gmf.runtime.diagram.ui.providers.ide.providers.DiagramIDEGlobalActionHandlerProvider"
          id="OpenDDS DataLibPresentationIDE">
          <Priority name="Lowest"/>
@@ -735,11 +745,17 @@
         	      <test property="org.eclipse.core.resources.extension" value="opendds_diagram_datalib"/>
                </and>
                <instanceof value="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+           	   <adapt type="org.eclipse.gmf.runtime.notation.View">
+           	      <test property="org.opendds.modeling.diagram.datalib.isShortcut"/>
+           	   </adapt>
             </or>
          </triggerPoints>
          <possibleChildren>
             <or>
          	   <instanceof value="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+           	   <adapt type="org.eclipse.gmf.runtime.notation.View">
+           	      <test property="org.opendds.modeling.diagram.datalib.isShortcut"/>
+           	   </adapt>
             </or>
          </possibleChildren>
          <commonSorter 
@@ -783,6 +799,9 @@
          <enablement>
             <or>
                <instanceof value="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+           	   <adapt type="org.eclipse.gmf.runtime.notation.View">
+           	      <test property="org.opendds.modeling.diagram.datalib.isShortcut"/>
+           	   </adapt>
             </or>
          </enablement>
       </actionProvider>
@@ -1055,6 +1074,28 @@ switch.oclIsTypeOf(WChar)
          <context decoratorTargets="PRIMARY_VIEW"/>
       </decoratorProvider>
    </extension>
+<extension point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders" id="decorator-provider">
+      <?gmfgen generated="true"?>
+      <decoratorProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibShortcutsDecoratorProvider">
+         <Priority name="Lowest"/>
+         <object class="org.eclipse.gmf.runtime.notation.Node(org.eclipse.gmf.runtime.notation)" id="generated-top-nodes">
+            <method name="getType()" value="2001,2023,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022"/>
+         </object>
+         <context decoratorTargets="generated-top-nodes"/>
+      </decoratorProvider>
+   </extension>
+
+<extension point="org.eclipse.core.expressions.propertyTesters" id="navigator-proptest.isShortcut">
+      <?gmfgen generated="true"?>
+       <propertyTester
+           id="org.opendds.modeling.diagram.datalib.ShortcutPropertyTester"
+           type="org.eclipse.gmf.runtime.notation.View"
+           namespace="org.opendds.modeling.diagram.datalib"
+           properties="isShortcut"
+           class="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibShortcutPropertyTester">
+       </propertyTester>
+   </extension>
+
 
 
 

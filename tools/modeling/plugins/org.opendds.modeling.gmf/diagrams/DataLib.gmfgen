@@ -214,6 +214,8 @@
     <viewmap
         xsi:type="gmfgen:FigureViewmap"
         figureQualifiedClassName="org.eclipse.draw2d.FreeformLayer"/>
+    <containsShortcutsTo>.opendds</containsShortcutsTo>
+    <shortcutsProvidedFor>OpenDDS DataLib</shortcutsProvidedFor>
     <domainDiagramElement
         href="../../org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel#//types/DataLib"/>
     <childNodes
@@ -1995,7 +1997,8 @@
   </diagram>
   <plugin
       iD="org.opendds.modeling.diagram.datalib"
-      provider="Object Computing, Inc">
+      provider="Object Computing, Inc"
+      printingEnabled="true">
     <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
     <requiredPlugins>org.eclipse.gmf.runtime.draw2d.ui</requiredPlugins>
   </plugin>

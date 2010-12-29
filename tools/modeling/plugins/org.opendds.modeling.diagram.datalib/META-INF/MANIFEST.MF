@@ -7,7 +7,7 @@ Bundle-ClassPath: .
 Bundle-Activator: org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Export-Package: org.opendds.modeling.model.opendds.diagram.datalib.edit.parts, 
+Export-Package: org.opendds.modeling.model.opendds.diagram.datalib.edit.parts,
  org.opendds.modeling.model.opendds.diagram.datalib.part,
  org.opendds.modeling.model.opendds.diagram.datalib.providers
 Require-Bundle: org.eclipse.core.runtime,
@@ -39,5 +39,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.validation;visibility:=reexport,
  org.eclipse.emf.validation.ocl;visibility:=reexport,
  org.eclipse.gef;visibility:=reexport,
- com.ociweb.emf.util;bundle-version="1.0.0"
+ com.ociweb.emf.util;bundle-version="1.0.0",
+ org.eclipse.gmf.runtime.diagram.ui.printing,
+ org.eclipse.gmf.runtime.diagram.ui.printing.render
 Eclipse-LazyStart: true
