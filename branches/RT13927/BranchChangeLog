@@ -1,3 +1,22 @@
+Thu Dec 30 20:41:46 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/icons:
+        * tools/modeling/icons/copy-icons-to-plugins.sh:
+        * tools/modeling/icons/icon-to-element.txt:
+        * tools/modeling/icons/obj16:
+        * tools/modeling/icons/obj16/OpenDDSDiagramFile.gif:
+        * tools/modeling/icons/obj16/OpenDDSModelFile.gif:
+        * tools/modeling/icons/obj16/OpenDDSSdkLib.gif:
+        * tools/modeling/icons/obj16/UmlPackage.gif:
+
+          Start of icon management for the various diagram elements.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/icons/obj16/OpenDDSDiagramFile.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/OpenDDSModel.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/icons/full/obj16/OpenDDSModelFile.gif:
+
+          Additional icons to further customize SDK diagram and files.
+
 Thu Dec 30 19:46:48 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Arrays/Arrays.opendds:
@@ -21,7 +40,7 @@ Thu Dec 30 19:46:48 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
         * tools/modeling/tests/Sequences/Sequences.opendds:
         * tools/modeling/tests/SubscriberQos/SubQos.opendds:
         * tools/modeling/tests/TopicQos/TopQos.opendds:
- 
+
           Set copyFromTopicQos value.  Gen file for each test.
 
         * tools/modeling/tests/setup.pl:
