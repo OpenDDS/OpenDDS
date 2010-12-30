@@ -20,13 +20,10 @@ int main(int argc, char** argv)
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
-std::cout << "narrowing writer3" << std::endl;
-
     data1::MessageDataWriter_var message_writer =
       data1::MessageDataWriter::_narrow(writer.in());
 
     if (CORBA::is_nil(message_writer.in())) {
-std::cout << "erroring writer3 1" << std::endl;
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
                           ACE_TEXT(" _narrow failed!\n")),
@@ -37,7 +34,6 @@ std::cout << "erroring writer3 1" << std::endl;
     DDS::StatusCondition_var condition = writer->get_statuscondition();
     condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
 
-std::cout << "preparing to wait writer3" << std::endl;
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(condition);
 
@@ -46,9 +42,7 @@ std::cout << "preparing to wait writer3" << std::endl;
     DDS::Duration_t timeout = { 30, 0 };
 
     do {
-std::cout << "waiting writer3" << std::endl;
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-std::cout << "erroring writer3 2" << std::endl;
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
                           ACE_TEXT(" wait failed!\n")),
@@ -56,7 +50,6 @@ std::cout << "erroring writer3 2" << std::endl;
       }
 
       if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
-std::cout << "erroring writer3 3" << std::endl;
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
                           ACE_TEXT(" get_publication_matched_status failed!\n")),
@@ -65,10 +58,8 @@ std::cout << "erroring writer3 3" << std::endl;
 
     } while (matches.current_count < 1);
 
-std::cout << "detaching writer3" << std::endl;
     ws->detach_condition(condition);
 
-std::cout << "creating Message writer3" << std::endl;
     // Write samples
     data1::Message message;
     message.subject_id = 99;
@@ -78,13 +69,11 @@ std::cout << "creating Message writer3" << std::endl;
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
     message.count      = 0;
 
-std::cout << "writing writer3" << std::endl;
     for (int i = 0; i < 10; i++) {
       DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
       ++message.count;
 
       if (error != DDS::RETCODE_OK) {
-std::cout << "erroring writer3 4" << std::endl;
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
                    ACE_TEXT(" write returned %d!\n"), error));
@@ -93,7 +82,6 @@ std::cout << "erroring writer3 4" << std::endl;
 
     // Wait for samples to be acknowledged
     if (message_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
-std::cout << "erroring writer3 5" << std::endl;
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
                         ACE_TEXT(" wait_for_acknowledgments failed!\n")),
@@ -106,7 +94,6 @@ std::cout << "erroring writer3 5" << std::endl;
     return -1;
 
   } catch( const std::exception& ex) {
-std::cout << "erroring writer3 6" << std::endl;
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
                       ACE_TEXT(" Exception caught: %C\n"),

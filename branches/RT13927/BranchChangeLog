@@ -1,3 +1,9 @@
+Thu Dec 30 22:06:45 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/ExternalPolicies/publisher.cpp:
+
+          Removed log messages.
+
 Thu Dec 30 21:00:04 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
