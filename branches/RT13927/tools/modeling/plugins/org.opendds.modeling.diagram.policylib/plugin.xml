@@ -43,15 +43,9 @@
    </extension>
 
    <extension point="org.eclipse.ui.newWizards" id="creation-wizard">
-      <?gmfgen generated="true"?>
-  	  <wizard
-  	     name="%newWizardName"
-  	     icon="icons/obj16/OpenDDSDiagramFile.gif"
-  	     category="org.eclipse.ui.Examples"
-  	     class="org.opendds.modeling.model.opendds.diagram.policylib.part.OpenDDSPolicyLibCreationWizard"
-  	     id="org.opendds.modeling.model.opendds.diagram.policylib.part.OpenDDSPolicyLibCreationWizardID">
-  	  	 <description>%newWizardDesc</description>  
-      </wizard>
+      <?gmfgen generated="false"?>
+      <!-- Remove wizard so user cannot create sub-diagram without going
+      through the main diagram -->
    </extension>
 
    <extension point="org.eclipse.ui.popupMenus" id="init-diagram-action">
