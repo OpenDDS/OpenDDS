@@ -92,13 +92,11 @@ int main(int argc, char** argv)
 
     DDS::ConditionSeq conditions;
     DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0 };
-    DDS::Duration_t timeout = { 30, 0 }; // 30 seconds
+    DDS::Duration_t timeout = { 3, 0 }; // 3 seconds
 
     do {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" wait failed!\n")), -1);
+        return 0;  // Failure expected
       }
 
       if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {

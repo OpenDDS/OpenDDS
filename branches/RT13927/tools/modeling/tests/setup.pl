@@ -35,17 +35,21 @@ sub generate {
   my $base = shift;
   my $cwd = getcwd();
   my $tmp = "$base.tmp";
+  my %modtimes;
+  my $mtime = (stat $tmp)[9];
+  my $pp = "../../plugins/org.opendds.modeling.sdk/xml/preprocess.xsl";
+  my $status;
 
   print "Running code generation on: $base.opendds\n";
 
-  print "   preprocessing...\n";
-  my $status = system("xsltproc --path . ../../plugins/org.opendds.modeling.sdk/xml/preprocess.xsl " .
-                      "$base.opendds > $tmp");
-  
-  if ($status > 0) {
-    print "ERROR: xsltproc failed with $status\n";
-    exit($status >> 8);
-  }
+  print -e $tmp;
+
+    print "   preprocessing...\n";
+    $status = system("xsltproc --path . $pp $base.opendds > $tmp");
+    if ($status > 0) {
+      print "ERROR: xsltproc failed with $status\n";
+      exit($status >> 8);
+    }
 
   print "   transforming...\n";
   $status = system("\"$JAVA_HOME/bin/java\" -classpath " .
