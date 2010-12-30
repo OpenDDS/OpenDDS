@@ -1,3 +1,10 @@
+Thu Dec 30 22:28:00 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+          Remove loadMasks.  return DEFAULT_STATUS_MASK in mask methods.
+
 Thu Dec 30 22:06:45 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/ExternalPolicies/publisher.cpp:

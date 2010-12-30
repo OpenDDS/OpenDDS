@@ -169,7 +169,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
         private:
 
           // Initialization.
-          void loadMasks();
           void loadDomains();
           void loadTopics();
           void loadMaps();
@@ -186,7 +185,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 </xsl:text>
 <xsl:if test="$participants">
   <xsl:text>
-          unsigned long             participantMasks_[       Participants::LAST_INDEX];
           unsigned long             domains_[                Participants::LAST_INDEX];
           DDS::DomainParticipantQos participantsQos_[        Participants::LAST_INDEX];
 </xsl:text>
@@ -194,7 +192,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 <xsl:if test="$publishers">
   <xsl:text>
           Participants::Values      publisherParticipants_[   Publishers::LAST_INDEX];
-          unsigned long             publisherMasks_[          Publishers::LAST_INDEX];
           DDS::PublisherQos         publishersQos_[           Publishers::LAST_INDEX];
           OpenDDS::DCPS::TransportIdType publisherTransports_[Publishers::LAST_INDEX];
 </xsl:text>
@@ -202,7 +199,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 <xsl:if test="$subscribers">
   <xsl:text>
           Participants::Values      subscriberParticipants_[   Subscribers::LAST_INDEX];
-          unsigned long             subscriberMasks_[          Subscribers::LAST_INDEX];
           DDS::SubscriberQos        subscribersQos_[           Subscribers::LAST_INDEX];
           OpenDDS::DCPS::TransportIdType subscriberTransports_[Subscribers::LAST_INDEX];
 </xsl:text>
@@ -211,7 +207,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
   <xsl:text>
           Topics::Values            writerTopics_[           DataWriters::LAST_INDEX];
           Publishers::Values        publishers_[             DataWriters::LAST_INDEX];
-          unsigned long             writerMasks_[            DataWriters::LAST_INDEX];
           DDS::DataWriterQos        writersQos_[             DataWriters::LAST_INDEX];
           bool                      writerCopyTopicQos_[     DataWriters::LAST_INDEX];
 </xsl:text>
@@ -220,7 +215,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 <xsl:text>
           Topics::Values            readerTopics_[           DataReaders::LAST_INDEX];
           Subscribers::Values       subscribers_[            DataReaders::LAST_INDEX];
-          unsigned long             readerMasks_[            DataReaders::LAST_INDEX];
           DDS::DataReaderQos        readersQos_[             DataReaders::LAST_INDEX];
           bool                      readerCopyTopicQos_[     DataReaders::LAST_INDEX];
 </xsl:text>
@@ -228,7 +222,6 @@ namespace OpenDDS { namespace Model { namespace </xsl:text>
 <xsl:if test="$topics">
 <xsl:text>
           Types::Values             types_[                  Topics::LAST_INDEX];
-          unsigned long             topicMasks_[             Topics::LAST_INDEX];
           const char*               topicNames_[             Topics::LAST_INDEX];
           DDS::TopicQos             topicsQos_[              Topics::LAST_INDEX];
           char*                     typeNames_[              Types::LAST_INDEX];
@@ -427,18 +420,8 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Participants::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-</xsl:text>
-<xsl:choose>
-  <xsl:when test="$participants">
-    <xsl:text>  return this->participantMasks_[ which];
-</xsl:text>
-  </xsl:when>
-  <xsl:otherwise>
-    <xsl:text>  return 0; // not valid when no domain participants defined
-</xsl:text>
-  </xsl:otherwise>
-</xsl:choose>
-<xsl:text>}
+  return DEFAULT_STATUS_MASK;
+}
 
 inline
 long
@@ -449,18 +432,8 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Publishers::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-</xsl:text>
-<xsl:choose>
-  <xsl:when test="$publishers">
-    <xsl:text>  return this->publisherMasks_[ which];
-</xsl:text>
-  </xsl:when>
-  <xsl:otherwise>
-    <xsl:text>  return 0; // not valid when no publishers defined
-</xsl:text>
-  </xsl:otherwise>
-</xsl:choose>
-<xsl:text>}
+  return DEFAULT_STATUS_MASK;
+}
 
 inline
 long
@@ -471,18 +444,8 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Subscribers::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-</xsl:text>
-<xsl:choose>
-  <xsl:when test="$subscribers">
-    <xsl:text>  return this->subscriberMasks_[ which];
-</xsl:text>
-  </xsl:when>
-  <xsl:otherwise>
-    <xsl:text>  return 0; // not valid when no subscribers defined
-</xsl:text>
-  </xsl:otherwise>
-</xsl:choose>
-<xsl:text>}
+  return DEFAULT_STATUS_MASK;
+}
 
 inline
 long
@@ -493,18 +456,8 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= Topics::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-</xsl:text>
-<xsl:choose>
-  <xsl:when test="$topics">
-    <xsl:text>  return this->topicMasks_[ which];
-</xsl:text>
-  </xsl:when>
-  <xsl:otherwise>
-    <xsl:text>  return 0; // not valid when no topics defined
-</xsl:text>
-  </xsl:otherwise>
-</xsl:choose>
-<xsl:text>}
+  return DEFAULT_STATUS_MASK;
+}
 
 inline
 long
@@ -515,18 +468,8 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= DataWriters::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-</xsl:text>
-<xsl:choose>
-  <xsl:when test="$writers">
-    <xsl:text>  return this->writerMasks_[ which];
-</xsl:text>
-  </xsl:when>
-  <xsl:otherwise>
-    <xsl:text>  return 0; // not valid when no data writers defined
-</xsl:text>
-  </xsl:otherwise>
-</xsl:choose>
-<xsl:text>}
+  return DEFAULT_STATUS_MASK;
+}
 
 inline
 long
@@ -537,18 +480,8 @@ OpenDDS::Model::</xsl:text>
   if( which &lt; 0 || which >= DataReaders::LAST_INDEX) {
     throw OutOfBoundsException();
   }
-</xsl:text>
-<xsl:choose>
-  <xsl:when test="$readers">
-    <xsl:text>  return this->readerMasks_[ which];
-</xsl:text>
-  </xsl:when>
-  <xsl:otherwise>
-    <xsl:text>  return 0; // not valid when no data readers defined
-</xsl:text>
-  </xsl:otherwise>
-</xsl:choose>
-<xsl:text>}
+  return DEFAULT_STATUS_MASK;
+}
 
 inline
 long
