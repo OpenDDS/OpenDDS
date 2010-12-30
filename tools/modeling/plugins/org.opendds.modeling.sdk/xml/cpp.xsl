@@ -49,7 +49,7 @@
      match = "qos-field"
      use   = "@type"/>
 
-<!-- key table of remote data type references -->
+<!-- key table of remote data type references
 <xsl:key name="remote-topic-types"
          match="datatype"
          use="@href"/>
@@ -57,15 +57,16 @@
 <xsl:key name="remote-models"
          match="datatype"
          use="substring-before(@href,'#')"/>
+ -->
 
 <!-- Extract the name of the model once. -->
 <xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
 
-<!-- A unique set of remote type hrefs, containted in datatype elements -->
+<!-- A unique set of remote type hrefs, containted in datatype elements 
 <xsl:variable name="uniq-type-refs" select="$topics/datatype[generate-id() = generate-id(key('remote-topic-types', @href)[1])]"/>
 
-<!-- A unique set of remote model refs, contained in datatype elements -->
 <xsl:variable name="uniq-model-refs" select="$uniq-type-refs[generate-id() = generate-id(key('remote-models',substring-before(@href,'#'))[1])]"/>
+-->
 
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
@@ -164,7 +165,7 @@ Elements::Data::registerType(
     <xsl:call-template name="output-registerType-case"/>
   </xsl:for-each>
 
-  <!-- handle external datatypes -->
+  <!-- handle external datatypes
   <xsl:for-each select="$uniq-type-refs">
     <xsl:variable name="model-file" select="substring-before(@href, '#')"/>
     <xsl:variable name="model-id" select="substring-after(@href, '#')"/>
@@ -172,7 +173,8 @@ Elements::Data::registerType(
     <xsl:call-template name="output-registerType-case">
       <xsl:with-param name="type" select="$remote-type"/>
     </xsl:call-template>
-  </xsl:for-each>
+  </xsl:for-each> 
+-->
 
   <xsl:text>    default:
       throw NoTypeException();
@@ -328,7 +330,7 @@ Elements::Data::loadMaps()
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
-  <!-- referenced types -->
+  <!-- referenced types 
   <xsl:for-each select="$topics[datatype]">
     <xsl:variable name="model-file" select="substring-before(datatype/@href,'#')"/>
     <xsl:variable name="model-id" select="substring-after(datatype/@href,'#')"/>
@@ -341,6 +343,7 @@ Elements::Data::loadMaps()
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
+-->
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->writerTopics[ DataWriters::(dataWriter/@name)] = Topics::(dataWriter/@topic);\n' -->
@@ -706,17 +709,18 @@ Elements::Data::copySubscriptionQos(
     </xsl:call-template>
   </xsl:for-each>
 
+<!--
   <xsl:variable name="external-policy-refs" select="*[name() != 'datatype'][@href]"/>
   <xsl:for-each select="$external-policy-refs">
     <xsl:variable name="policy-file" select="substring-before(@href, '#')"/>
     <xsl:variable name="policy-id" select="substring-after(@href, '#')"/>
-    <!-- Context switch -->
     <xsl:for-each select="document($policy-file)//*[@xmi:id = $policy-id]">
       <xsl:call-template name="process-policy">
         <xsl:with-param name="base" select="$base"/>
       </xsl:call-template>
     </xsl:for-each>
   </xsl:for-each>
+-->
 
 </xsl:template>
 
@@ -731,6 +735,9 @@ Elements::Data::copySubscriptionQos(
     </xsl:for-each>
   </xsl:variable>
 
+<!--
+<xsl:message>process-policy field <xsl:value-of select="$field"/> </xsl:message>
+-->
   <!-- lookup whether to quote the value. -->
   <xsl:variable name="should-quote">
     <xsl:for-each select="$lut-policies"> <!-- Change context for lookup -->
@@ -1032,7 +1039,7 @@ Elements::Data::copySubscriptionQos(
 </xsl:text>
 </xsl:template>
 
-<!-- Lookup Table Magic. -->
+<!-- Lookup Table Magic.
 <lut:tables>
   <qos-field type="opendds:udQosPolicy" quote="true">user_data</qos-field>
   <qos-field type="opendds:tdQosPolicy" quote="true">topic_data</qos-field>
@@ -1061,6 +1068,7 @@ Elements::Data::copySubscriptionQos(
   <transport type="multicast" configtype="MulticastConfiguration"/>
   <transport type="udp" configtype="UdpConfiguration"/>
 </lut:tables>
+ -->
 <!-- ................... -->
 
 </xsl:stylesheet>

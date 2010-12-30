@@ -1,3 +1,13 @@
+Thu Dec 30 18:55:08 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/preprocess.xsl:
+        * tools/modeling/tests/ExternalPolicies/ExternalPolicies.opendds:
+        * tools/modeling/tests/ExternalPolicies/publisher.cpp:
+        * tools/modeling/tests/ReaderQos/ReaderQos.opendds:
+
+          External QosPolicy reference support.
+
 Thu Dec 30 17:14:38 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
