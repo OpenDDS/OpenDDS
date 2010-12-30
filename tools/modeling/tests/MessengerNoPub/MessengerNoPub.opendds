@@ -4,7 +4,7 @@
     <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="" domainId="42"/>
     <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
       <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportId="3">
-        <readers xsi:type="opendds:dataReader" xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+        <readers xsi:type="opendds:dataReader" xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" topic="_mcVnwPDxEd-I4rwicuuPOw" copyFromTopicQos="false"/>
       </subscribers>
     </participants>
     <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
