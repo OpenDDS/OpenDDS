@@ -1,3 +1,10 @@
+Thu Dec 30 21:00:04 UTC 2010  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+
+          Enable drag and drop so that libraries from other resources can be included
+          on the main diagram (with the resource automatically loaded).
+
 Thu Dec 30 20:41:46 UTC 2010  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/icons:

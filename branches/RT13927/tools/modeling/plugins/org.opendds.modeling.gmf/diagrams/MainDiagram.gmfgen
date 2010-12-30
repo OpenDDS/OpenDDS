@@ -21,6 +21,8 @@
     <viewmap
         xsi:type="gmfgen:FigureViewmap"
         figureQualifiedClassName="org.eclipse.draw2d.FreeformLayer"/>
+    <containsShortcutsTo>.opendds</containsShortcutsTo>
+    <shortcutsProvidedFor>OpenDDS</shortcutsProvidedFor>
     <domainDiagramElement
         href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel"/>
     <topLevelNodes
