@@ -116,7 +116,6 @@ Elements::Data::Data()
 </xsl:if>
 <xsl:text>
 
-  this->loadMasks();
   this->loadDomains();
   this->loadTopics();
   this->loadMaps(); /// MUST precede the QoS loading.
@@ -181,77 +180,6 @@ Elements::Data::registerType(
       break;
   }
 }
-
-inline
-void
-Elements::Data::loadMasks()
-{
-</xsl:text>
-  <!-- '  this->participantMasks_[ Participants::(domainParticipant/@name)] = (domainParticipant/@mask);\n' -->
-  <xsl:for-each select="$participants/@mask">
-    <xsl:text>  this->participantMasks_[ Participants::</xsl:text>
-    <xsl:value-of select="../@name"/>
-    <xsl:text>] = </xsl:text>
-    <xsl:value-of select="."/>
-    <xsl:text>;</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
-  <xsl:value-of select="$newline"/>
-
-  <!-- '  this->publisherMasks_[ Publishers::(publisher/@name)] = (publisher/@mask);\n' -->
-  <xsl:for-each select="$publishers/@mask">
-    <xsl:text>  this->publisherMasks_[ Publishers::</xsl:text>
-    <xsl:value-of select="../@name"/>
-    <xsl:text>] = </xsl:text>
-    <xsl:value-of select="."/>
-    <xsl:text>;</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
-  <xsl:value-of select="$newline"/>
-
-  <!-- '  this->subscriberMasks_[ Subscribers::(subscriber/@name)] = (subscriber/@mask);\n' -->
-  <xsl:for-each select="$subscribers/@mask">
-    <xsl:text>  this->subscriberMasks_[ Subscribers::</xsl:text>
-    <xsl:value-of select="../@name"/>
-    <xsl:text>] = </xsl:text>
-    <xsl:value-of select="."/>
-    <xsl:text>;</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
-  <xsl:value-of select="$newline"/>
-
-  <!-- '  this->topicMasks_[ Topics::(topic/@name)] = (topic/@mask);\n' -->
-  <xsl:for-each select="$topics/@mask">
-    <xsl:text>  this->topicMasks_[ Topics::</xsl:text>
-    <xsl:value-of select="translate(../@name,' ','_')"/>
-    <xsl:text>] = </xsl:text>
-    <xsl:value-of select="."/>
-    <xsl:text>;</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
-  <xsl:value-of select="$newline"/>
-
-  <!-- '  this->writerMasks_[ DataWriters::(dataWriters/@name)] = (dataWriters/@mask);\n' -->
-  <xsl:for-each select="$writers/@mask">
-    <xsl:text>  this->writerMasks_[ DataWriters::</xsl:text>
-    <xsl:value-of select="../@name"/>
-    <xsl:text>] = </xsl:text>
-    <xsl:value-of select="."/>
-    <xsl:text>;</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
-  <xsl:value-of select="$newline"/>
-
-  <!-- '  this->readerMasks_[ DataReaders::(dataReaders/@name)] = (dataReaders/@mask);\n' -->
-  <xsl:for-each select="$readers/@mask">
-    <xsl:text>  this->readerMasks_[ DataReaders::</xsl:text>
-    <xsl:value-of select="../@name"/>
-    <xsl:text>] = </xsl:text>
-    <xsl:value-of select="."/>
-    <xsl:text>;</xsl:text>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
-  <xsl:text>}
 
 inline
 void
