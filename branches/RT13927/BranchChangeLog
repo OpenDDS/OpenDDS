@@ -1,3 +1,13 @@
+Mon Jan  3 20:51:11 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/edit/parts/DataLibEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DcpsLibEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/OpenDDSModelEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/PolicyLibEditPart.java:
+
+          Remove the annoying and confusing pop-up bars used for shortcuts to palette tools.
+          If the all the tool icons are distinct for a diagram consider re-enabling for that diagram.
+
 Mon Jan  3 20:37:03 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/icons/copy-icons-to-plugins.pl:
