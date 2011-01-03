@@ -1,8 +1,46 @@
+Mon Jan  3 13:14:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/icons/DataLib-icon-to-element.txt:
+        * tools/modeling/icons/MainDiagram-icon-to-element.txt:
+        * tools/modeling/icons/PolicyLib-icon-to-element.txt:
+        * tools/modeling/icons/copy-icons-to-plugins.sh:
+
+          Split out icon to element mapping based on diagram type.
+
+        * tools/modeling/icons/obj16/DataType.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Array.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Boolean.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Branch.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Case.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Char.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Double.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Enum.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Field.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Float.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Key.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Long.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/LongDouble.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/LongLong.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Octet.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Sequence.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Short.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/String.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Struct.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Typedef.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/ULong.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/ULongLong.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/UShort.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Union.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/WChar.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/WString.gif:
+
+          Added a custom icon for data types.
+
 Mon Jan  3 12:41:38 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/icons/obj16/QosPolicy.gif:
 
-	  Forgot to add icon used for QoS Policies in previous commit.
+          Forgot to add icon used for QoS Policies in previous commit.
 
 Mon Jan  3 00:59:51 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 

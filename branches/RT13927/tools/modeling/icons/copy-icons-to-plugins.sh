@@ -14,10 +14,11 @@ function copy_file()
     source=$1
     target=$2
 
-    echo "Copy $source to $target if they are different..."
+    echo "Copy $source to $target..."
 
     diff -q $source $target
     if [ $? -ne 0 ]; then
+	echo -n "  "
 	cp --force --verbose $source $target
 
     else
@@ -27,7 +28,7 @@ function copy_file()
     # Add to the repository if necessary
     svn info $target > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-	echo "Adding $target to the repository"
+	echo -n "  Adding $target to the repository  "
 	svn add $target
     fi
 }
@@ -41,7 +42,10 @@ function element_icons_set()
     done
 }
 
-element_icons_set < icon-to-element.txt
+element_icons_set < DataLib-icon-to-element.txt
+element_icons_set < MainDiagram-icon-to-element.txt
+element_icons_set < PolicyLib-icon-to-element.txt
+
 
 # Handle icons for files
 copy_file obj16/OpenDDSModelFile.gif $MODEL_FILE_ICONS_DIR/OpenDDSModelFile.gif
