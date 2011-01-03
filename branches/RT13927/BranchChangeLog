@@ -1,9 +1,23 @@
+Mon Jan  3 18:14:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/icons/copy-icons-to-plugins.sh:
+
+          Don't add to icon files under the org.opendds.modeling.model.edit
+          plug-in to the repository.
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons:
+
+          Removed these directory and all the icons under it as there were
+          files whose name differed only by case. For operating systems like
+          Windows that are case-insensitive this
+          causes problems when doing a subversion update.
+
 Mon Jan  3 15:50:42 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmftool:
 
-	  Forgot to update palette icons when customizing DataLib icons.
+          Forgot to update palette icons when customizing DataLib icons.
 
 Mon Jan  3 15:02:31 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
