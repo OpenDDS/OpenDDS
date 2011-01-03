@@ -1,3 +1,12 @@
+Mon Jan  3 23:08:48 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/build.pl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/ant_codegen.xml:
+
+          Added scripted EMF code generation for org.opendds.modeling.sdk.model.
+          In build.pl, only run PDE build steps if --automated is passed.
+          In build.pl, call new copy-icons-to-plugins.pl if --automated.
+
 Mon Jan  3 21:09:12 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.main/.project:

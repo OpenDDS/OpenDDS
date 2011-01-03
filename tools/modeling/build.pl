@@ -4,6 +4,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 # Starting from a fresh svn checkout, build the OpenDDS Modeling SDK feature
 # and its constituent plugins.
+# Without --automated, just runs the code generation steps for EMF and GMF.
+#   (This is meant for use "interactively" by a developer who will then use
+#    Eclipse the GUI to actually build the Java code.)
 # Requires the ECLIPSE_HOME environment variable to be set.
 # If ECLIPSE_WORKSPACE is set, use that workspace, otherwise use a temp dir
 #   (Temp dir is currently experimental, for now make sure this is an actual
@@ -22,11 +25,19 @@ my $cwd = getcwd();
 my @steps = (
   {'dir' => 'plugins/org.opendds.modeling.model',
    'script' => 'ant_codegen.xml'},
-  {'dir' => 'plugins/org.opendds.modeling.gmf',
+  {'dir' => 'plugins/org.opendds.modeling.sdk.model',
    'script' => 'ant_codegen.xml'},
-  {'extra_plugins' => 1},
-  {'dir' => 'features/org.opendds.modeling.feature',
-   'javac_ver' => '1.6'});
+  {'dir' => 'plugins/org.opendds.modeling.gmf',
+   'script' => 'ant_codegen.xml'});
+
+my $automated = 0;
+if (scalar @ARGV && $ARGV[0] =~ /^-?-automated/) {
+  $automated = 1;
+  push(@steps,
+       {'extra_plugins' => 1},
+       {'dir' => 'features/org.opendds.modeling.feature',
+        'javac_ver' => '1.6'});
+}
 
 if (!defined $ECLIPSE_WORKSPACE) {
   $ECLIPSE_WORKSPACE = tempdir();
@@ -48,6 +59,10 @@ foreach my $s (@steps) {
     }
   }
 
+  print "\"$ECLIPSE_HOME/eclipse$suffix\" -nosplash -data " .
+      "$ECLIPSE_WORKSPACE -application org.eclipse.ant.core." .
+      "antRunner -l ant.log @args -vmargs -Xmx1g";
+
   my $status = system("\"$ECLIPSE_HOME/eclipse$suffix\" -nosplash -data " .
                       "$ECLIPSE_WORKSPACE -application org.eclipse.ant.core." .
                       "antRunner -l ant.log @args -vmargs -Xmx1g");
@@ -63,3 +78,11 @@ foreach my $s (@steps) {
   }
 }
 
+if ($automated) {
+  chdir $cwd . '/icons';
+  my $status = system("$^X copy-icons-to-plugins.pl");
+  if ($status > 0) {
+    print "ERROR: copy-icons-to-plugins.pl invocation failed with $status\n";
+    exit($status >> 8);
+  }
+}
