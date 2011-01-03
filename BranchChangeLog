@@ -1,3 +1,10 @@
+Mon Jan  3 21:09:12 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/.project:
+
+          Include in the repository as is done for the other diagram projects
+          to avoid crashing during ant script run.
+
 Mon Jan  3 20:51:11 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/edit/parts/DataLibEditPart.java:
