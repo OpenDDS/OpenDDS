@@ -3,9 +3,10 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
     if 0;
 
 # Purpose: Copy icons under this directory to appropriate places in
-# the plugins. Currently there are not distinct icons for each modeling
-# element. The icon-to-element.txt file in this directory, along with this
-# script, will allow the duplicate icons to automatically be set.
+# the plugins. This script uses the *-icon-to-element.txt files in
+# this directory to determine how to map the icons under this
+# directory to org.opendds.modeling.model.edit plug-in.
+
 
 use strict;
 use File::Copy;
