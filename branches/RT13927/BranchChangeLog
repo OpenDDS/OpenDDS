@@ -1,3 +1,31 @@
+Mon Jan  3 15:02:31 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/icons/DcpsLib-icon-to-element.txt:
+        * tools/modeling/icons/copy-icons-to-plugins.sh:
+        * tools/modeling/icons/obj16/Dcps.gif:
+        * tools/modeling/icons/obj16/InputPin.gif:
+        * tools/modeling/icons/obj16/OutputPin.gif:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmftool:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/ContentFilteredTopic.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/DataReader.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/DataWriter.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Domain.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/DomainParticipant.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/MultiTopic.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Publisher.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Subscriber.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/Topic.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/dataReader.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/dataWriter.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/domain.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/domainParticipant.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/publisher.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/subscriber.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/topic.gif:
+
+          Add custom icons for DcpsLib.
+
 Mon Jan  3 13:14:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/icons/DataLib-icon-to-element.txt:

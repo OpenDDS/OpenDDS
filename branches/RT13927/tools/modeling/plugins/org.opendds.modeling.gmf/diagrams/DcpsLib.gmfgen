@@ -757,8 +757,7 @@
       <labels
           visualID="5146"
           editPartClassName="HistoryQosPolicyDepthEditPart"
-          itemSemanticEditPolicyClassName="HistoryQosPolicyDepthItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="HistoryQosPolicyDepthItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -778,8 +777,7 @@
       <labels
           visualID="5147"
           editPartClassName="HistoryQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="HistoryQosPolicyKindItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="HistoryQosPolicyKindItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1196,8 +1194,7 @@
       <labels
           visualID="5154"
           editPartClassName="LivelinessQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="LivelinessQosPolicyKindItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="LivelinessQosPolicyKindItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1348,8 +1345,7 @@
       <labels
           visualID="5157"
           editPartClassName="OsQosPolicyValueEditPart"
-          itemSemanticEditPolicyClassName="OsQosPolicyValueItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="OsQosPolicyValueItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1433,8 +1429,7 @@
       <labels
           visualID="5160"
           editPartClassName="OwnershipQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="OwnershipQosPolicyKindItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="OwnershipQosPolicyKindItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1541,8 +1536,7 @@
       <labels
           visualID="5163"
           editPartClassName="ReliabilityQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="ReliabilityQosPolicyKindItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="ReliabilityQosPolicyKindItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1693,8 +1687,7 @@
       <labels
           visualID="5166"
           editPartClassName="RlQosPolicyMax_instancesEditPart"
-          itemSemanticEditPolicyClassName="RlQosPolicyMax_instancesItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="RlQosPolicyMax_instancesItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1714,8 +1707,7 @@
       <labels
           visualID="5167"
           editPartClassName="RlQosPolicyMax_samples_per_instancEditPart"
-          itemSemanticEditPolicyClassName="RlQosPolicyMax_samples_per_instancItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="RlQosPolicyMax_samples_per_instancItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1735,8 +1727,7 @@
       <labels
           visualID="5168"
           editPartClassName="RlQosPolicyMax_samplesEditPart"
-          itemSemanticEditPolicyClassName="RlQosPolicyMax_samplesItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="RlQosPolicyMax_samplesItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1820,8 +1811,7 @@
       <labels
           visualID="5171"
           editPartClassName="TpQosPolicyValueEditPart"
-          itemSemanticEditPolicyClassName="TpQosPolicyValueItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="TpQosPolicyValueItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1905,8 +1895,7 @@
       <labels
           visualID="5174"
           editPartClassName="WdlQosPolicyAutodispose_unregistereEditPart"
-          itemSemanticEditPolicyClassName="WdlQosPolicyAutodispose_unregistereItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="WdlQosPolicyAutodispose_unregistereItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1990,8 +1979,7 @@
       <labels
           visualID="5177"
           editPartClassName="DurabilityQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="DurabilityQosPolicyKindItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="DurabilityQosPolicyKindItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2075,8 +2063,7 @@
       <labels
           visualID="5104"
           editPartClassName="UdQosPolicyValueEditPart"
-          itemSemanticEditPolicyClassName="UdQosPolicyValueItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="UdQosPolicyValueItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2518,8 +2505,7 @@
       <labels
           visualID="5192"
           editPartClassName="DurabilityQosPolicyKind2EditPart"
-          itemSemanticEditPolicyClassName="DurabilityQosPolicyKind2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="DurabilityQosPolicyKind2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2603,8 +2589,7 @@
       <labels
           visualID="5195"
           editPartClassName="HistoryQosPolicyDepth2EditPart"
-          itemSemanticEditPolicyClassName="HistoryQosPolicyDepth2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="HistoryQosPolicyDepth2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2624,8 +2609,7 @@
       <labels
           visualID="5196"
           editPartClassName="HistoryQosPolicyKind2EditPart"
-          itemSemanticEditPolicyClassName="HistoryQosPolicyKind2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="HistoryQosPolicyKind2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2908,8 +2892,7 @@
       <labels
           visualID="5203"
           editPartClassName="LivelinessQosPolicyKind2EditPart"
-          itemSemanticEditPolicyClassName="LivelinessQosPolicyKind2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="LivelinessQosPolicyKind2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2993,8 +2976,7 @@
       <labels
           visualID="5206"
           editPartClassName="OsQosPolicyValue2EditPart"
-          itemSemanticEditPolicyClassName="OsQosPolicyValue2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="OsQosPolicyValue2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -3078,8 +3060,7 @@
       <labels
           visualID="5209"
           editPartClassName="OwnershipQosPolicyKind2EditPart"
-          itemSemanticEditPolicyClassName="OwnershipQosPolicyKind2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="OwnershipQosPolicyKind2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -3186,8 +3167,7 @@
       <labels
           visualID="5212"
           editPartClassName="ReliabilityQosPolicyKind2EditPart"
-          itemSemanticEditPolicyClassName="ReliabilityQosPolicyKind2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="ReliabilityQosPolicyKind2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -3271,8 +3251,7 @@
       <labels
           visualID="5215"
           editPartClassName="RlQosPolicyMax_instances2EditPart"
-          itemSemanticEditPolicyClassName="RlQosPolicyMax_instances2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="RlQosPolicyMax_instances2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -3292,8 +3271,7 @@
       <labels
           visualID="5216"
           editPartClassName="RlQosPolicyMax_samples_per_instanc2EditPart"
-          itemSemanticEditPolicyClassName="RlQosPolicyMax_samples_per_instanc2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="RlQosPolicyMax_samples_per_instanc2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -3313,8 +3291,7 @@
       <labels
           visualID="5217"
           editPartClassName="RlQosPolicyMax_samples2EditPart"
-          itemSemanticEditPolicyClassName="RlQosPolicyMax_samples2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="RlQosPolicyMax_samples2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -3398,8 +3375,7 @@
       <labels
           visualID="5220"
           editPartClassName="TpQosPolicyValue2EditPart"
-          itemSemanticEditPolicyClassName="TpQosPolicyValue2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="TpQosPolicyValue2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -3483,8 +3459,7 @@
       <labels
           visualID="5130"
           editPartClassName="UdQosPolicyValue2EditPart"
-          itemSemanticEditPolicyClassName="UdQosPolicyValue2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="UdQosPolicyValue2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -3568,8 +3543,7 @@
       <labels
           visualID="5101"
           editPartClassName="EfQosPolicyAutoenable_created_entiEditPart"
-          itemSemanticEditPolicyClassName="EfQosPolicyAutoenable_created_entiItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="EfQosPolicyAutoenable_created_entiItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -3653,8 +3627,7 @@
       <labels
           visualID="5107"
           editPartClassName="GdQosPolicyDatavalueEditPart"
-          itemSemanticEditPolicyClassName="GdQosPolicyDatavalueItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="GdQosPolicyDatavalueItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -3802,8 +3775,7 @@
       <labels
           visualID="5112"
           editPartClassName="PresentationQosPolicyAccess_scopeEditPart"
-          itemSemanticEditPolicyClassName="PresentationQosPolicyAccess_scopeItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="PresentationQosPolicyAccess_scopeItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -3823,8 +3795,7 @@
       <labels
           visualID="5113"
           editPartClassName="PresentationQosPolicyCoherent_accessEditPart"
-          itemSemanticEditPolicyClassName="PresentationQosPolicyCoherent_accessItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="PresentationQosPolicyCoherent_accessItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -3844,8 +3815,7 @@
       <labels
           visualID="5114"
           editPartClassName="PresentationQosPolicyOrdered_accessEditPart"
-          itemSemanticEditPolicyClassName="PresentationQosPolicyOrdered_accessItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="PresentationQosPolicyOrdered_accessItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -3929,8 +3899,7 @@
       <labels
           visualID="5117"
           editPartClassName="EfQosPolicyAutoenable_created_enti2EditPart"
-          itemSemanticEditPolicyClassName="EfQosPolicyAutoenable_created_enti2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="EfQosPolicyAutoenable_created_enti2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -4014,8 +3983,7 @@
       <labels
           visualID="5120"
           editPartClassName="GdQosPolicyDatavalue2EditPart"
-          itemSemanticEditPolicyClassName="GdQosPolicyDatavalue2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="GdQosPolicyDatavalue2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -4163,8 +4131,7 @@
       <labels
           visualID="5125"
           editPartClassName="PresentationQosPolicyAccess_scope2EditPart"
-          itemSemanticEditPolicyClassName="PresentationQosPolicyAccess_scope2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="PresentationQosPolicyAccess_scope2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -4184,8 +4151,7 @@
       <labels
           visualID="5126"
           editPartClassName="PresentationQosPolicyCoherent_access2EditPart"
-          itemSemanticEditPolicyClassName="PresentationQosPolicyCoherent_access2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="PresentationQosPolicyCoherent_access2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -4205,8 +4171,7 @@
       <labels
           visualID="5127"
           editPartClassName="PresentationQosPolicyOrdered_access2EditPart"
-          itemSemanticEditPolicyClassName="PresentationQosPolicyOrdered_access2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="PresentationQosPolicyOrdered_access2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -4858,8 +4823,7 @@
       <labels
           visualID="5229"
           editPartClassName="TdQosPolicyValueEditPart"
-          itemSemanticEditPolicyClassName="TdQosPolicyValueItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="TdQosPolicyValueItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -5136,8 +5100,7 @@
       <labels
           visualID="5238"
           editPartClassName="TdQosPolicyValue2EditPart"
-          itemSemanticEditPolicyClassName="TdQosPolicyValue2ItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="TdQosPolicyValue2ItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -6014,11 +5977,15 @@
             xsi:type="gmfgen:ToolEntry"
             title="Domain"
             description="Create new Domain"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Domain.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Domain.gif"
             genNodes="//@diagram/@topLevelNodes.1"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DomainParticipant"
             description="Create new DomainParticipant"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DomainParticipant.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DomainParticipant.gif"
             genNodes="//@diagram/@topLevelNodes.0"/>
         <entries
             xsi:type="gmfgen:Separator"/>
@@ -6026,16 +5993,22 @@
             xsi:type="gmfgen:ToolEntry"
             title="Subscriber"
             description="Create new Subscriber"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Subscriber.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Subscriber.gif"
             genNodes="//@diagram/@childNodes.45"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DataReader"
             description="Create new DataReader"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataReader.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataReader.gif"
             genNodes="//@diagram/@childNodes.46"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DataReader-Topic Connector"
             description="Create new DataReader-Topic Connector"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataReader.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataReader.gif"
             genLinks="//@diagram/@links.0"/>
         <entries
             xsi:type="gmfgen:Separator"/>
@@ -6043,16 +6016,22 @@
             xsi:type="gmfgen:ToolEntry"
             title="Publisher"
             description="Create new Publisher"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Publisher.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Publisher.gif"
             genNodes="//@diagram/@childNodes.0"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DataWriter"
             description="Create new DataWriter"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataWriter.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataWriter.gif"
             genNodes="//@diagram/@childNodes.1"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DataWriter-Topic Connector"
             description="Create new DataWriter-Topic Connector"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataWriter.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataWriter.gif"
             genLinks="//@diagram/@links.1"/>
         <entries
             xsi:type="gmfgen:Separator"/>
@@ -6060,6 +6039,8 @@
             xsi:type="gmfgen:ToolEntry"
             title="Topic"
             description="Create New Topic"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Topic.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Topic.gif"
             genNodes="//@diagram/@topLevelNodes.2"/>
       </groups>
     </palette>

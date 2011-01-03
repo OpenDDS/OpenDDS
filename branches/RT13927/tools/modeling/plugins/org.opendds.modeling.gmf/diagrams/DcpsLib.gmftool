@@ -13,18 +13,26 @@
           title="Domain"
           description="Create new Domain">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Domain.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Domain.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="DomainParticipant"
           description="Create new DomainParticipant">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/DomainParticipant.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/DomainParticipant.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:PaletteSeparator"/>
@@ -33,27 +41,39 @@
           title="Subscriber"
           description="Create new Subscriber">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Subscriber.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Subscriber.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="DataReader"
           description="Create new DataReader">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/DataReader.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/DataReader.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="DataReader-Topic Connector"
           description="Create new DataReader-Topic Connector">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/DataReader.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/DataReader.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:PaletteSeparator"/>
@@ -62,27 +82,39 @@
           title="Publisher"
           description="Create new Publisher">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Publisher.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Publisher.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="DataWriter"
           description="Create new DataWriter">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/DataWriter.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/DataWriter.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="DataWriter-Topic Connector"
           description="Create new DataWriter-Topic Connector">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/DataWriter.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/DataWriter.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:PaletteSeparator"/>
@@ -91,9 +123,13 @@
           title="Topic"
           description="Create New Topic">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Topic.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Topic.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
     </tools>
   </palette>
