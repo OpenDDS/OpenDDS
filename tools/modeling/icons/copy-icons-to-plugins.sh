@@ -16,7 +16,7 @@ function copy_file()
 
     echo "Copy $source to $target..."
 
-    diff -q $source $target
+    diff -q $source $target > /dev/null
     if [ $? -ne 0 ]; then
 	echo -n "  "
 	cp --force --verbose $source $target
@@ -28,7 +28,8 @@ function copy_file()
     # Add to the repository if necessary
     svn info $target > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-	echo -n "  Adding $target to the repository  "
+	echo "  Adding $target to the repository"
+	echo -n "  "
 	svn add $target
     fi
 }
@@ -43,6 +44,7 @@ function element_icons_set()
 }
 
 element_icons_set < DataLib-icon-to-element.txt
+element_icons_set < DcpsLib-icon-to-element.txt
 element_icons_set < MainDiagram-icon-to-element.txt
 element_icons_set < PolicyLib-icon-to-element.txt
 
