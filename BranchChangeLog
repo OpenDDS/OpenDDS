@@ -1,3 +1,9 @@
+Mon Jan  3 12:41:38 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/icons/obj16/QosPolicy.gif:
+
+	  Forgot to add icon used for QoS Policies in previous commit.
+
 Mon Jan  3 00:59:51 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/icons/icon-to-element.txt:
