@@ -24,14 +24,6 @@ function copy_file()
     else
 	echo "  The source and target are identical"
     fi
-
-    # Add to the repository if necessary
-    svn info $target > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-	echo "  Adding $target to the repository"
-	echo -n "  "
-	svn add $target
-    fi
 }
 
 function element_icons_set()
