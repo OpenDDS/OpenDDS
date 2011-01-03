@@ -1046,8 +1046,7 @@
       <labels
           visualID="5092"
           editPartClassName="DurabilityQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="DurabilityQosPolicyKindItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="DurabilityQosPolicyKindItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1130,8 +1129,7 @@
       <labels
           visualID="5093"
           editPartClassName="EfQosPolicyAutoenable_created_entiEditPart"
-          itemSemanticEditPolicyClassName="EfQosPolicyAutoenable_created_entiItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="EfQosPolicyAutoenable_created_entiItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1214,8 +1212,7 @@
       <labels
           visualID="5094"
           editPartClassName="GdQosPolicyDatavalueEditPart"
-          itemSemanticEditPolicyClassName="GdQosPolicyDatavalueItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="GdQosPolicyDatavalueItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1298,8 +1295,7 @@
       <labels
           visualID="5095"
           editPartClassName="HistoryQosPolicyDepthEditPart"
-          itemSemanticEditPolicyClassName="HistoryQosPolicyDepthItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="HistoryQosPolicyDepthItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1319,8 +1315,7 @@
       <labels
           visualID="5096"
           editPartClassName="HistoryQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="HistoryQosPolicyKindItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="HistoryQosPolicyKindItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1598,8 +1593,7 @@
       <labels
           visualID="5097"
           editPartClassName="LivelinessQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="LivelinessQosPolicyKindItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="LivelinessQosPolicyKindItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1682,8 +1676,7 @@
       <labels
           visualID="5098"
           editPartClassName="OsQosPolicyValueEditPart"
-          itemSemanticEditPolicyClassName="OsQosPolicyValueItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="OsQosPolicyValueItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1766,8 +1759,7 @@
       <labels
           visualID="5099"
           editPartClassName="OwnershipQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="OwnershipQosPolicyKindItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="OwnershipQosPolicyKindItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1913,8 +1905,7 @@
       <labels
           visualID="5100"
           editPartClassName="PresentationQosPolicyAccess_scopeEditPart"
-          itemSemanticEditPolicyClassName="PresentationQosPolicyAccess_scopeItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="PresentationQosPolicyAccess_scopeItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1934,8 +1925,7 @@
       <labels
           visualID="5101"
           editPartClassName="PresentationQosPolicyCoherent_accessEditPart"
-          itemSemanticEditPolicyClassName="PresentationQosPolicyCoherent_accessItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="PresentationQosPolicyCoherent_accessItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1955,8 +1945,7 @@
       <labels
           visualID="5102"
           editPartClassName="PresentationQosPolicyOrdered_accessEditPart"
-          itemSemanticEditPolicyClassName="PresentationQosPolicyOrdered_accessItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="PresentationQosPolicyOrdered_accessItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2167,8 +2156,7 @@
       <labels
           visualID="5104"
           editPartClassName="ReliabilityQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="ReliabilityQosPolicyKindItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="ReliabilityQosPolicyKindItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2251,8 +2239,7 @@
       <labels
           visualID="5105"
           editPartClassName="RlQosPolicyMax_instancesEditPart"
-          itemSemanticEditPolicyClassName="RlQosPolicyMax_instancesItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="RlQosPolicyMax_instancesItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2272,8 +2259,7 @@
       <labels
           visualID="5106"
           editPartClassName="RlQosPolicyMax_samples_per_instancEditPart"
-          itemSemanticEditPolicyClassName="RlQosPolicyMax_samples_per_instancItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="RlQosPolicyMax_samples_per_instancItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2293,8 +2279,7 @@
       <labels
           visualID="5107"
           editPartClassName="RlQosPolicyMax_samplesEditPart"
-          itemSemanticEditPolicyClassName="RlQosPolicyMax_samplesItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="RlQosPolicyMax_samplesItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2463,8 +2448,7 @@
       <labels
           visualID="5109"
           editPartClassName="TdQosPolicyValueEditPart"
-          itemSemanticEditPolicyClassName="TdQosPolicyValueItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="TdQosPolicyValueItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2547,8 +2531,7 @@
       <labels
           visualID="5110"
           editPartClassName="TpQosPolicyValueEditPart"
-          itemSemanticEditPolicyClassName="TpQosPolicyValueItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="TpQosPolicyValueItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2631,8 +2614,7 @@
       <labels
           visualID="5111"
           editPartClassName="UdQosPolicyValueEditPart"
-          itemSemanticEditPolicyClassName="UdQosPolicyValueItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="UdQosPolicyValueItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2715,8 +2697,7 @@
       <labels
           visualID="5112"
           editPartClassName="WdlQosPolicyAutodispose_unregistereEditPart"
-          itemSemanticEditPolicyClassName="WdlQosPolicyAutodispose_unregistereItemSemanticEditPolicy"
-          elementIcon="true">
+          itemSemanticEditPolicyClassName="WdlQosPolicyAutodispose_unregistereItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2885,111 +2866,155 @@
             xsi:type="gmfgen:ToolEntry"
             title="DeadlineQosPolicy"
             description="Create new DeadlineQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/deadlineQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/deadlineQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.0"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DestinationOrderQosPolicy"
             description="Create new DestinationOrderQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/destinationOrderQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/destinationOrderQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.1"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DsQosPolicy"
             description="Create new DsQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/dsQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/dsQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.2"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DurabilityQosPolicy"
             description="Create new DurabilityQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/durabilityQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/durabilityQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.3"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="EfQosPolicy"
             description="Create new EfQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/efQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/efQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.4"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="GdQosPolicy"
             description="Create new GdQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/gdQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/gdQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.5"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="HistoryQosPolicy"
             description="Create new HistoryQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/historyQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/historyQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.6"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="LbQosPolicy"
             description="Create new LbQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/lbQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/lbQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.7"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="LifespanQosPolicy"
             description="Create new LifespanQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/lifespanQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/lifespanQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.8"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="LivelinessQosPolicy"
             description="Create new LivelinessQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/livelinessQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/livelinessQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.9"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="OsQosPolicy"
             description="Create new OsQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/osQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/osQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.10"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="OwnershipQosPolicy"
             description="Create new OwnershipQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/ownershipQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/ownershipQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.11"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="PartitionQosPolicy"
             description="Create new PartitionQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/partitionQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/partitionQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.12"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="PresentationQosPolicy"
             description="Create new PresentationQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/presentationQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/presentationQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.13"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="RdlQosPolicy"
             description="Create new RdlQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/rdlQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/rdlQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.14"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="ReliabilityQosPolicy"
             description="Create new ReliabilityQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/reliabilityQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/reliabilityQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.15"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="RlQosPolicy"
             description="Create new RlQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/rlQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/rlQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.16"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="TbfQosPolicy"
             description="Create new TbfQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/tbfQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/tbfQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.17"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="TdQosPolicy"
             description="Create new TdQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/tdQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/tdQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.18"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="TpQosPolicy"
             description="Create new TpQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/tpQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/tpQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.19"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="UdQosPolicy"
             description="Create new UdQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/udQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/udQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.20"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="WdlQosPolicy"
             description="Create new WdlQosPolicy"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/wdlQosPolicy.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/wdlQosPolicy.gif"
             genNodes="//@diagram/@topLevelNodes.21"/>
       </groups>
     </palette>

@@ -848,6 +848,7 @@
   <labels
       name="DurabilityQosPolicyKind"
       figure="DurabilityQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.3/@accessors.2"/>
   <labels
       name="EfQosPolicyStereotype"
@@ -861,6 +862,7 @@
   <labels
       name="EfQosPolicyAutoenable_created_entities"
       figure="EfQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.4/@accessors.2"/>
   <labels
       name="GdQosPolicyStereotype"
@@ -874,6 +876,7 @@
   <labels
       name="GdQosPolicyDatavalue"
       figure="GdQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.5/@accessors.2"/>
   <labels
       name="HistoryQosPolicyStereotype"
@@ -887,10 +890,12 @@
   <labels
       name="HistoryQosPolicyDepth"
       figure="HistoryQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.6/@accessors.2"/>
   <labels
       name="HistoryQosPolicyKind"
       figure="HistoryQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.6/@accessors.3"/>
   <labels
       name="LbQosPolicyStereotype"
@@ -922,6 +927,7 @@
   <labels
       name="LivelinessQosPolicyKind"
       figure="LivelinessQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.9/@accessors.2"/>
   <labels
       name="OsQosPolicyStereotype"
@@ -935,6 +941,7 @@
   <labels
       name="OsQosPolicyValue"
       figure="OsQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.10/@accessors.2"/>
   <labels
       name="OwnershipQosPolicyStereotype"
@@ -948,6 +955,7 @@
   <labels
       name="OwnershipQosPolicyKind"
       figure="OwnershipQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.11/@accessors.2"/>
   <labels
       name="PartitionQosPolicyStereotype"
@@ -970,14 +978,17 @@
   <labels
       name="PresentationQosPolicyAccess_scope"
       figure="PresentationQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.13/@accessors.2"/>
   <labels
       name="PresentationQosPolicyCoherent_access"
       figure="PresentationQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.13/@accessors.3"/>
   <labels
       name="PresentationQosPolicyOrdered_access"
       figure="PresentationQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.13/@accessors.4"/>
   <labels
       name="RdlQosPolicyStereotype"
@@ -1000,6 +1011,7 @@
   <labels
       name="ReliabilityQosPolicyKind"
       figure="ReliabilityQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.15/@accessors.2"/>
   <labels
       name="RlQosPolicyStereotype"
@@ -1013,14 +1025,17 @@
   <labels
       name="RlQosPolicyMax_instances"
       figure="RlQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.16/@accessors.2"/>
   <labels
       name="RlQosPolicyMax_samples"
       figure="RlQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.16/@accessors.3"/>
   <labels
       name="RlQosPolicyMax_samples_per_instance"
       figure="RlQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.16/@accessors.4"/>
   <labels
       name="TbfQosPolicyStereotype"
@@ -1046,6 +1061,7 @@
   <labels
       name="TdQosPolicyValue"
       figure="TdQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.18/@accessors.2"/>
   <labels
       name="TpQosPolicyStereotype"
@@ -1059,6 +1075,7 @@
   <labels
       name="TpQosPolicyValue"
       figure="TpQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.19/@accessors.2"/>
   <labels
       name="UdQosPolicyStereotype"
@@ -1072,6 +1089,7 @@
   <labels
       name="UdQosPolicyValue"
       figure="UdQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.20/@accessors.2"/>
   <labels
       name="WdlQosPolicyStereotype"
@@ -1085,6 +1103,7 @@
   <labels
       name="WdlQosPolicyAutodispose_unregistered_instances"
       figure="WdlQosPolicyFigure"
+      elementIcon="false"
       accessor="//@figures.0/@descriptors.21/@accessors.2"/>
   <labels
       name="PeriodSecond"

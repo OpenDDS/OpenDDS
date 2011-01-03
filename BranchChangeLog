@@ -1,3 +1,62 @@
+Mon Jan  3 00:59:51 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/icons/icon-to-element.txt:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/DurabilityQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/HistoryQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/LivelinessQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/OwnershipQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/PresentationQosPolicyAccess_scopeEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/ReliabilityQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmftool:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/QosPolicies.gmfgraph:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/DeadlineQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/DestinationOrderQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/DurabilityQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/DurabilityServiceQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/EntityFactoryQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/GroupDataQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/HistoryQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/LatencyBudgetQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/LifespanQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/LivelinessQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/OwnershipQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/OwnershipStrengthQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/PartitionQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/PresentationQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/ReaderDataLifecycleQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/ReliabilityQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/ResourceLimitsQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/TimeBasedFilterQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/TopicDataQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/TransportPriorityQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/UserDataQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/WriterDataLifecycleQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/deadlineQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/destinationOrderQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/dsQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/durabilityQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/efQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/gdQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/historyQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/lbQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/lifespanQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/livelinessQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/osQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/ownershipQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/partitionQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/presentationQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/rdlQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/reliabilityQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/rlQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/tbfQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/tdQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/tpQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/udQosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/icons/full/obj16/wdlQosPolicy.gif:
+
+          Use a custom icon for the QoS Policies.
+
 Thu Dec 30 22:28:00 UTC 2010  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:

@@ -204,11 +204,7 @@ public class LivelinessQosPolicyKindEditPart extends CompartmentEditPart
 	 * @generated
 	 */
 	protected Image getLabelIcon() {
-		EObject parserElement = getParserElement();
-		if (parserElement == null) {
-			return null;
-		}
-		return OpenDDSPolicyLibElementTypes.getImage(parserElement.eClass());
+		return null;
 	}
 
 	/**

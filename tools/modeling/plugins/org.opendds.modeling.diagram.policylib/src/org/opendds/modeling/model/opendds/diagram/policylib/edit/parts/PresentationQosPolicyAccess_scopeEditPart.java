@@ -207,11 +207,7 @@ public class PresentationQosPolicyAccess_scopeEditPart extends
 	 * @generated
 	 */
 	protected Image getLabelIcon() {
-		EObject parserElement = getParserElement();
-		if (parserElement == null) {
-			return null;
-		}
-		return OpenDDSPolicyLibElementTypes.getImage(parserElement.eClass());
+		return null;
 	}
 
 	/**
