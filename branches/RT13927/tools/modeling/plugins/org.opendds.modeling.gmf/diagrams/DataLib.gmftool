@@ -14,126 +14,182 @@
           title="Boolean"
           description="Create new Boolean">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Boolean.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Boolean.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="Char"
           description="Create new Char">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Char.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Char.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="Double"
           description="Create new Double">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Double.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Double.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="Enum"
           description="Create new Enum">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Enum.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Enum.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="Float"
           description="Create new Float">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Float.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Float.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="Long"
           description="Create new Long">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Long.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Long.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="LongDouble"
           description="Create new LongDouble">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/LongDouble.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/LongDouble.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="LongLong"
           description="Create new LongLong">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/LongLong.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/LongLong.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="Octet"
           description="Create new Octet">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Octet.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Octet.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="Short"
           description="Create new Short">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Short.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Short.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="ULong"
           description="Create new ULong">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/ULong.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/ULong.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="ULongLong"
           description="Create new ULongLong">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/ULongLong.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/ULongLong.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="UShort"
           description="Create new UShort">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/UShort.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/UShort.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="WChar"
           description="Create new WChar">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/WChar.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/WChar.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
     </tools>
     <tools
@@ -145,36 +201,52 @@
           title="Array"
           description="Create new Array">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Array.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Array.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="Sequence"
           description="Create new Sequence">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Sequence.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Sequence.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="String"
           description="Create new String">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/String.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/String.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="WString"
           description="Create new WString">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/WString.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/WString.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
     </tools>
     <tools
@@ -186,27 +258,39 @@
           title="Case"
           description="Create new Case">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Case.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Case.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="Branch"
           description="Create new Branch">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Branch.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Branch.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="Union"
           description="Create new Union">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Union.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Union.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
     </tools>
     <tools
@@ -219,37 +303,53 @@
           title="Struct"
           description="Create new Struct">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Struct.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Struct.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="Key"
           description="Create new Key">
         <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Key.gif"
+            bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Key.gif"
+            bundle="org.opendds.modeling.model.edit"/>
       </tools>
     </tools>
     <tools
         xsi:type="gmftool:CreationTool"
         title="Typedef"
         description="Create new Typedef">
-      <smallIcon
-          xsi:type="gmftool:DefaultImage"/>
-      <largeIcon
-          xsi:type="gmftool:DefaultImage"/>
+        <smallIcon
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Typedef.gif"
+            bundle="org.opendds.modeling.model.edit"/>
+        <largeIcon
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Typedef.gif"
+            bundle="org.opendds.modeling.model.edit"/>
     </tools>
     <tools
         xsi:type="gmftool:CreationTool"
         title="Field"
         description="Create new Field">
-      <smallIcon
-          xsi:type="gmftool:DefaultImage"/>
-      <largeIcon
-          xsi:type="gmftool:DefaultImage"/>
+        <smallIcon
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Field.gif"
+            bundle="org.opendds.modeling.model.edit"/>
+        <largeIcon
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/Field.gif"
+            bundle="org.opendds.modeling.model.edit"/>
     </tools>
   </palette>
 </gmftool:ToolRegistry>

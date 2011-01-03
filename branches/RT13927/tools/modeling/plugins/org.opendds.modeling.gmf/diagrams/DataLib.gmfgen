@@ -1829,11 +1829,15 @@
             xsi:type="gmfgen:ToolEntry"
             title="Typedef"
             description="Create new Typedef"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Typedef.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Typedef.gif"
             genNodes="//@diagram/@topLevelNodes.18"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="Field"
             description="Create new Field"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Field.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Field.gif"
             genNodes="//@diagram/@childNodes.0 //@diagram/@childNodes.1 //@diagram/@childNodes.2"/>
       </groups>
       <groups
@@ -1843,71 +1847,99 @@
             xsi:type="gmfgen:ToolEntry"
             title="Boolean"
             description="Create new Boolean"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Boolean.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Boolean.gif"
             genNodes="//@diagram/@topLevelNodes.12"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="Char"
             description="Create new Char"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Char.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Char.gif"
             genNodes="//@diagram/@topLevelNodes.9"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="Double"
             description="Create new Double"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Double.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Double.gif"
             genNodes="//@diagram/@topLevelNodes.7"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="Enum"
             description="Create new Enum"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Enum.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Enum.gif"
             genNodes="//@diagram/@topLevelNodes.14"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="Float"
             description="Create new Float"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Float.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Float.gif"
             genNodes="//@diagram/@topLevelNodes.8"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="Long"
             description="Create new Long"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Long.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Long.gif"
             genNodes="//@diagram/@topLevelNodes.0"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="LongDouble"
             description="Create new LongDouble"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/LongDouble.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/LongDouble.gif"
             genNodes="//@diagram/@topLevelNodes.1"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="LongLong"
             description="Create new LongLong"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/LongLong.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/LongLong.gif"
             genNodes="//@diagram/@topLevelNodes.2"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="Octet"
             description="Create new Octet"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Octet.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Octet.gif"
             genNodes="//@diagram/@topLevelNodes.11"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="Short"
             description="Create new Short"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Short.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Short.gif"
             genNodes="//@diagram/@topLevelNodes.3"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="ULong"
             description="Create new ULong"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/ULong.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/ULong.gif"
             genNodes="//@diagram/@topLevelNodes.4"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="ULongLong"
             description="Create new ULongLong"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/ULongLong.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/ULongLong.gif"
             genNodes="//@diagram/@topLevelNodes.5"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="UShort"
             description="Create new UShort"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/UShort.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/UShort.gif"
             genNodes="//@diagram/@topLevelNodes.6"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="WChar"
             description="Create new WChar"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/WChar.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/WChar.gif"
             genNodes="//@diagram/@topLevelNodes.10"/>
       </groups>
       <groups
@@ -1917,21 +1949,29 @@
             xsi:type="gmfgen:ToolEntry"
             title="Array"
             description="Create new Array"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Array.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Array.gif"
             genNodes="//@diagram/@topLevelNodes.13"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="Sequence"
             description="Create new Sequence"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Sequence.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Sequence.gif"
             genNodes="//@diagram/@topLevelNodes.15"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="String"
             description="Create new String"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/String.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/String.gif"
             genNodes="//@diagram/@topLevelNodes.16"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="WString"
             description="Create new WString"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/WString.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/WString.gif"
             genNodes="//@diagram/@topLevelNodes.17"/>
       </groups>
       <groups
@@ -1941,16 +1981,22 @@
             xsi:type="gmfgen:ToolEntry"
             title="Case"
             description="Create new Case"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Case.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Case.gif"
             genNodes="//@diagram/@topLevelNodes.19"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="Branch"
             description="Create new Branch"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Branch.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Branch.gif"
             genNodes="//@diagram/@topLevelNodes.20"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="Union"
             description="Create new Union"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Union.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Union.gif"
             genNodes="//@diagram/@topLevelNodes.21"/>
       </groups>
       <groups
@@ -1961,11 +2007,15 @@
             xsi:type="gmfgen:ToolEntry"
             title="Struct"
             description="Create new Struct"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Struct.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Struct.gif"
             genNodes="//@diagram/@topLevelNodes.22"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="Key"
             description="Create new Key"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Key.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Key.gif"
             genNodes="//@diagram/@childNodes.3"/>
       </groups>
     </palette>
