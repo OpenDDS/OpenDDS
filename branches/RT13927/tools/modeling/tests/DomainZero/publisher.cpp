@@ -12,7 +12,7 @@
 int main(int argc, char** argv)
 {
   try {
-    DomainZeroType model(argc, argv);
+    DefaultDomainZeroType model(argc, argv);
 
     using OpenDDS::Model::DomainZero::Elements;
 

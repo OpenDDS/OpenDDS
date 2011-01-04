@@ -62,7 +62,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    InvalidNamesType model(argc, argv);
+    DefaultInvalidNamesType model(argc, argv);
 
     using OpenDDS::Model::InvalidNames::Elements;
 

@@ -12,6 +12,8 @@
     ** @TODO - determine how to set the transport addresses.
     **
     -->
+<xsl:include href="common.xsl"/>
+
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
 
@@ -21,32 +23,48 @@
 </xsl:variable>
 
 <!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "document(/generator:CodeGen/source/@name)//opendds:OpenDDSModel/@name"/>
-<xsl:variable name = "MODELNAME" select = "translate($modelname, 
-                                           'abcdefghijklmnopqrstuvwxyz',
-                                           'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>
+<xsl:variable name="modelname" select="document(/generator:CodeGen/source/@name)//opendds:OpenDDSModel/@name"/>
+<xsl:variable name="MODELNAME" select="translate($modelname, $lower, $upper)"/>
 
-<!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
   <xsl:value-of select="concat('#ifndef ', $MODELNAME, '_TRAITS_H', $newline)"/>
   <xsl:value-of select="concat('#define ', $MODELNAME, '_TRAITS_H', $newline)"/>
+  <xsl:value-of select="concat('#include &quot;', $modelname, '_T.h&quot;', $newline)"/>
 
-  <xsl:variable name="structname" select="concat($modelname, 'Traits')"/>
-<xsl:value-of select="concat('#include &quot;', $modelname, '_T.h&quot;', $newline)"/>
-
-<xsl:text>
-struct </xsl:text>
-  <xsl:value-of select="concat($modelname, '_Export ')"/>
-  <xsl:value-of select="$structname"/>
-  <xsl:text> : OpenDDS::Model::DefaultInstanceTraits {
-  void transport_config(OpenDDS::DCPS::TransportIdType id);
-};
-
-typedef OpenDDS::Model::Service&lt; OpenDDS::Model::</xsl:text>
-<xsl:value-of select="concat($modelname, '::Elements, ', $structname, '&gt; ',
-                             $modelname, 'Type;', $newline)"/>
+  <xsl:apply-templates/>
 <xsl:text>
 #endif
 </xsl:text>
+</xsl:template>
+
+<xsl:template match="//instance">
+  <xsl:variable name="Instname">
+    <xsl:call-template name="capitalize">
+      <xsl:with-param name="value" select="@name"/>
+    </xsl:call-template>
+  </xsl:variable>
+  <xsl:variable name="structname" select="concat($Instname, 
+                                                 $modelname, 
+                                                 'Traits')"/>
+  <xsl:variable name="export" select="concat($modelname, '_Export ')"/>
+  <xsl:variable name="tdname" select="concat($Instname, $modelname, 'Type')"/>
+
+  <!-- output struct declaration -->
+  <xsl:value-of select="concat($newline,
+    'struct ', $export, $structname, 
+    ' : OpenDDS::Model::DefaultInstanceTraits {', $newline,
+    '  enum { transport_key_base = ', transportOffset/@value, '};', $newline,
+    '  void transport_config(OpenDDS::DCPS::TransportIdType id);', $newline,
+    '};', $newline
+  )"/>
+
+  <!-- output typedef-->
+  <xsl:value-of select="concat($newline,
+    'typedef OpenDDS::Model::Service&lt; OpenDDS::Model::', $modelname,
+    '::Elements, ', $structname, '&gt; ', $tdname, ';', $newline
+  )"/>
+
+  <!-- output enum -->
+
 </xsl:template>
 </xsl:stylesheet>

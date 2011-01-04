@@ -12,6 +12,8 @@
     ** @TODO - determine how to set the transport addresses.
     **
     -->
+<xsl:include href="common.xsl"/>
+
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
 
@@ -25,8 +27,8 @@
 
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
-  <xsl:variable name="classname" select="concat($modelname, 'Traits')"/>
-  <xsl:value-of select="concat('#include &quot;', $classname, '.h&quot;', $newline)"/>
+  <xsl:value-of select="concat('#include &quot;', $modelname, 'Traits.h&quot;', 
+                               $newline)"/>
   <xsl:text>
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
@@ -34,13 +36,22 @@
 #include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
 #include "dds/DCPS/transport/udp/UdpConfiguration.h"
 #include &lt;stdexcept&gt;
-
-void
 </xsl:text>
-<xsl:value-of select="$classname"/>
-<xsl:text>::transport_config(OpenDDS::DCPS::TransportIdType id) {
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="//instance">
+  <xsl:variable name="Instname">
+    <xsl:call-template name="capitalize">
+      <xsl:with-param name="value" select="@name"/>
+    </xsl:call-template>
+  </xsl:variable>
+  <xsl:variable name="classname" select="concat($Instname, $modelname, 'Traits')"/>
+  <xsl:value-of select="concat('void ', $classname)"/>
+  <xsl:text>::transport_config(OpenDDS::DCPS::TransportIdType id) {
   OpenDDS::DCPS::TransportConfiguration_rch config;
   ACE_TString transport_type;
+
   try {
     config = TheTransportFactory->get_configuration(id);
   } catch (OpenDDS::DCPS::Transport::NotConfigured&amp; nc) {
@@ -65,7 +76,8 @@ void
 
 <xsl:template match="transport">
   <xsl:variable name="type" select="*/@transport_type"/>
-  <xsl:value-of select="concat('      case ', @transportIndex, ':', $newline)"/>
+  <xsl:variable name="label" select="../transportOffset/@value + @transportIndex"/>
+  <xsl:value-of select="concat('      case ', $label, ':', $newline)"/>
   <xsl:value-of select="concat('        transport_type = &quot;', $type, '&quot;;', $newline)"/>
   <xsl:text>        config = TheTransportFactory->create_configuration(id, transport_type);
 </xsl:text>

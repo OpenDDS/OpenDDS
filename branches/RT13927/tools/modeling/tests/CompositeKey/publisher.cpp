@@ -12,7 +12,7 @@
 int main(int argc, char** argv)
 {
   try {
-    CompositeKeyType model(argc, argv);
+    DefaultCompositeKeyType model(argc, argv);
 
     using OpenDDS::Model::CompositeKey::Elements;
 

@@ -12,7 +12,7 @@
 int main(int argc, char** argv)
 {
   try {
-    MessengerType model(argc, argv);
+    DefaultMessengerType model(argc, argv);
 
     using OpenDDS::Model::Messenger::Elements;
 

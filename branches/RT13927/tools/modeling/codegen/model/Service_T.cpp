@@ -158,13 +158,13 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createPublisher(
     this->createParticipant( participant);
   }
 
-  this->transport_config(transport);
+  this->transport_config(transport + this->transport_key_base);
 
   this->publishers_[ publisher] = this->delegate_.createPublisher(
     this->participants_[ participant],
     this->modelData_.qos( publisher),
     this->modelData_.mask( publisher),
-    transport
+    transport + this->transport_key_base
   );
 }
 
@@ -182,13 +182,13 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscriber(
     this->createParticipant( participant);
   }
 
-  this->transport_config(transport);
+  this->transport_config(transport + this->transport_key_base);
 
   this->subscribers_[ subscriber] = this->delegate_.createSubscriber(
     this->participants_[ participant],
     this->modelData_.qos( subscriber),
     this->modelData_.mask( subscriber),
-    transport
+    transport + this->transport_key_base
   );
 }
 

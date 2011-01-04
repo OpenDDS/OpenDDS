@@ -1,5 +1,6 @@
 
 #include <ace/Log_Msg.h>
+#include <ace/ARGV.h>
 
 #include <dds/DCPS/WaitSet.h>
 
@@ -7,7 +8,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/ArraysTraits.h"
+#include "model/MultiInstanceTraits.h"
 #include <model/NullReaderListener.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
@@ -59,12 +60,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 // END OF EXISTING MESSENGER EXAMPLE LISTENER CODE
 
-int main(int argc, char** argv)
-{
-  try {
-    DefaultArraysType model(argc, argv);
-
-    using OpenDDS::Model::Arrays::Elements;
+template<class ModelType>
+int run_instance(ModelType& model) {
+    using OpenDDS::Model::MultiInstance::Elements;
 
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
 
@@ -112,6 +110,27 @@ int main(int argc, char** argv)
 
     // END OF EXISTING MESSENGER EXAMPLE CODE
 
+  return 0;
+}
+
+int main(int argc, char** argv)
+{
+  int result;
+  ACE_ARGV argv_copy(argc, argv);
+  try {
+    {
+      PrimaryMultiInstanceType primary_model(argc, argv);
+      std::cout << "Running primary subscriber instance" << std::endl;
+      result = run_instance(primary_model);
+      std::cout << "Primary subscriber instance complete" << std::endl;
+    }
+    if (!result) {
+      int argc_copy = argv_copy.argc();
+      SecondaryMultiInstanceType secondary_model(argc_copy, argv_copy.argv());
+      std::cout << "Running secondary subscriber instance" << std::endl;
+      result = run_instance(secondary_model);
+      std::cout << "Secondary subscriber instance complete" << std::endl;
+    }
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
     return -1;
@@ -124,5 +143,5 @@ int main(int argc, char** argv)
                      -1);
   }
 
-  return 0;
+  return result;
 }

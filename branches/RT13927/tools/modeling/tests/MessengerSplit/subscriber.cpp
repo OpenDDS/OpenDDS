@@ -63,7 +63,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    MessengerSplitType model(argc, argv);
+    DefaultMessengerSplitType model(argc, argv);
 
     using OpenDDS::Model::MessengerSplit::Elements;
 

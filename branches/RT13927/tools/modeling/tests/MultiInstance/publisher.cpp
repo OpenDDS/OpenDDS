@@ -1,5 +1,6 @@
 
 #include <ace/Log_Msg.h>
+#include <ace/ARGV.h>
 
 #include <dds/DCPS/WaitSet.h>
 
@@ -7,14 +8,11 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/SubQosTraits.h"
+#include "model/MultiInstanceTraits.h"
 
-int main(int argc, char** argv)
-{
-  try {
-    DefaultSubQosType model(argc, argv);
-
-    using OpenDDS::Model::SubQos::Elements;
+template <class ModelType>
+int run_instance(ModelType& model, int subject_id) {
+    using OpenDDS::Model::MultiInstance::Elements;
 
     DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
 
@@ -62,7 +60,7 @@ int main(int argc, char** argv)
 
     // Write samples
     data1::Message message;
-    message.subject_id = 99;
+    message.subject_id = subject_id;
 
     message.from       = CORBA::string_dup("Comic Book Guy");
     message.subject    = CORBA::string_dup("Review");
@@ -88,6 +86,28 @@ int main(int argc, char** argv)
                        -1);
     }
 
+  return 0;
+}
+
+int main(int argc, char** argv)
+{
+  int result;
+  ACE_ARGV argv_copy(argc, argv);
+  try {
+    {
+      PrimaryMultiInstanceType primary_model(argc, argv);
+      std::cout << "Running primary publisher instance" << std::endl;
+      result = run_instance(primary_model, 86);
+      std::cout << "Primary publisher instance complete" << std::endl;
+    }
+    if (!result) {
+      int argc_copy = argv_copy.argc();
+      SecondaryMultiInstanceType secondary_model(argc_copy, argv_copy.argv());
+      std::cout << "Running secondary publisher instance" << std::endl;
+      result = run_instance(secondary_model, 99);
+      std::cout << "Secondary publisher instance complete" << std::endl;
+    }
+
     // END OF EXISTING MESSENGER EXAMPLE CODE
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
@@ -100,7 +120,6 @@ int main(int argc, char** argv)
                       ex.what()),
                      -1);
   }
-
-  return 0;
+  return result;
 }
 

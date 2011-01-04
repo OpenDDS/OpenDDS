@@ -1,3 +1,93 @@
+Tue Jan  4 19:48:00 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Use transport_key_base as offset of transportId when initializing
+          transport_config, creating publishers and creating subscribers.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_h.xsl:
+
+          Support multiple instances.
+
+        * tools/modeling/tests/Arrays/Arrays.gen:
+        * tools/modeling/tests/Arrays/publisher.cpp:
+        * tools/modeling/tests/Arrays/subscriber.cpp:
+        * tools/modeling/tests/CompositeKey/CompositeKey.gen:
+        * tools/modeling/tests/CompositeKey/publisher.cpp:
+        * tools/modeling/tests/CompositeKey/subscriber.cpp:
+        * tools/modeling/tests/DomainZero/DomainZero.gen:
+        * tools/modeling/tests/DomainZero/publisher.cpp:
+        * tools/modeling/tests/DomainZero/subscriber.cpp:
+        * tools/modeling/tests/ExternalPolicies/ExternalPolicies.gen:
+        * tools/modeling/tests/ExternalPolicies/publisher.cpp:
+        * tools/modeling/tests/ExternalPolicies/subscriber.cpp:
+        * tools/modeling/tests/InvalidNames/InvalidNames.gen:
+        * tools/modeling/tests/InvalidNames/publisher.cpp:
+        * tools/modeling/tests/InvalidNames/subscriber.cpp:
+        * tools/modeling/tests/Messenger/Messenger.gen:
+        * tools/modeling/tests/Messenger/publisher.cpp:
+        * tools/modeling/tests/Messenger/subscriber.cpp:
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.gen:
+        * tools/modeling/tests/MessengerDpQos/publisher.cpp:
+        * tools/modeling/tests/MessengerDpQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.gen:
+        * tools/modeling/tests/MessengerGlobalNs/publisher.cpp:
+        * tools/modeling/tests/MessengerGlobalNs/subscriber.cpp:
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.gen:
+        * tools/modeling/tests/MessengerMixed/publisher.cpp:
+        * tools/modeling/tests/MessengerMixed/subscriber.cpp:
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.gen:
+        * tools/modeling/tests/MessengerMulti/publisher.cpp:
+        * tools/modeling/tests/MessengerMulti/subscriber.cpp:
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.gen:
+        * tools/modeling/tests/MessengerNoPub/subscriber.cpp:
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.gen:
+        * tools/modeling/tests/MessengerNoSub/publisher.cpp:
+        * tools/modeling/tests/MessengerPubQos/MessengerPubQos.gen:
+        * tools/modeling/tests/MessengerPubQos/publisher.cpp:
+        * tools/modeling/tests/MessengerPubQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.gen:
+        * tools/modeling/tests/MessengerSplit/MessengerTypes.gen:
+        * tools/modeling/tests/MessengerSplit/publisher.cpp:
+        * tools/modeling/tests/MessengerSplit/subscriber.cpp:
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.gen:
+        * tools/modeling/tests/MessengerWriterQos/publisher.cpp:
+        * tools/modeling/tests/MessengerWriterQos/subscriber.cpp:
+        * tools/modeling/tests/PolicyLib/PolicyLib.gen:
+        * tools/modeling/tests/PolicyLib/publisher.cpp:
+        * tools/modeling/tests/PolicyLib/subscriber.cpp:
+        * tools/modeling/tests/ReaderQos/ReaderQos.gen:
+        * tools/modeling/tests/ReaderQos/publisher.cpp:
+        * tools/modeling/tests/ReaderQos/subscriber.cpp:
+        * tools/modeling/tests/Sequences/Sequences.gen:
+        * tools/modeling/tests/Sequences/Sequences.opendds:
+        * tools/modeling/tests/Sequences/publisher.cpp:
+        * tools/modeling/tests/Sequences/subscriber.cpp:
+        * tools/modeling/tests/SubscriberQos/SubQos.gen:
+        * tools/modeling/tests/SubscriberQos/publisher.cpp:
+        * tools/modeling/tests/SubscriberQos/subscriber.cpp:
+        * tools/modeling/tests/TopicQos/TopQos.gen:
+        * tools/modeling/tests/TopicQos/publisher.cpp:
+        * tools/modeling/tests/TopicQos/subscriber.cpp:
+
+          Eliminate duplicate instance names in .gen files.
+          Modify Type name to include instance name in publisher and
+          subscriber.
+
+        * tools/modeling/tests/MultiInstance:
+        * tools/modeling/tests/MultiInstance/MultiInstance.gen:
+        * tools/modeling/tests/MultiInstance/MultiInstance.mpc:
+        * tools/modeling/tests/MultiInstance/MultiInstance.opendds:
+        * tools/modeling/tests/MultiInstance/publisher.cpp:
+        * tools/modeling/tests/MultiInstance/subscriber.cpp:
+
+          New test case for mutliple instances.
+
+        * tools/modeling/tests/setup.pl:
+
+          Build new MultiInstance test case.
+
 Tue Jan  4 19:41:57 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
