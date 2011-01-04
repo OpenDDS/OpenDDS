@@ -449,6 +449,10 @@
     <xsl:text>#include &lt;tao/DoubleSeq.pidl&gt;
 </xsl:text>
   </xsl:if>
+  <xsl:if test="$sequence-types[@xsi:type = 'types:LongDouble']">
+    <xsl:text>#include &lt;tao/LongDoubleSeq.pidl&gt;
+</xsl:text>
+  </xsl:if>
   <xsl:if test="$sequence-types[@xsi:type = 'types:Float']">
     <xsl:text>#include &lt;tao/FloatSeq.pidl&gt;
 </xsl:text>
@@ -486,9 +490,6 @@
 </xsl:text>
   </xsl:if>
 
-  <!-- ecore don't know how to translate Enum 
-       where from?  LongDoubleSeq.pidl -->
-    
   <xsl:value-of select="$newline"/>
 </xsl:template>
 
