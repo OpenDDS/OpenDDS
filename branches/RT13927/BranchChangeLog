@@ -1,3 +1,31 @@
+Tue Jan  4 21:10:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+
+        * tools/modeling/tests/Arrays/transports.traits:
+        * tools/modeling/tests/CompositeKey/transports.traits:
+        * tools/modeling/tests/DomainZero/transports.traits:
+        * tools/modeling/tests/ExternalPolicies/transports.traits:
+        * tools/modeling/tests/InvalidNames/transports.traits:
+        * tools/modeling/tests/Messenger/transports.traits:
+        * tools/modeling/tests/MessengerDpQos/transports.traits:
+        * tools/modeling/tests/MessengerGlobalNs/transports.traits:
+        * tools/modeling/tests/MessengerMixed/transports.traits:
+        * tools/modeling/tests/MessengerMulti/transports.traits:
+        * tools/modeling/tests/MessengerNoPub/transports.traits:
+        * tools/modeling/tests/MessengerNoSub/transports.traits:
+        * tools/modeling/tests/MessengerPubQos/transports.traits:
+        * tools/modeling/tests/MessengerSplit/transports.traits:
+        * tools/modeling/tests/MessengerWriterQos/transports.traits:
+        * tools/modeling/tests/MultiInstance/transports.traits:
+        * tools/modeling/tests/Multicast/transports.traits:
+        * tools/modeling/tests/PolicyLib/transports.traits:
+        * tools/modeling/tests/ReaderQos/transports.traits:
+        * tools/modeling/tests/Sequences/transports.traits:
+        * tools/modeling/tests/SubscriberQos/transports.traits:
+        * tools/modeling/tests/TopicQos/transports.traits:
+
+          Removed these legacy files.
+
 Tue Jan  4 21:04:28 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
