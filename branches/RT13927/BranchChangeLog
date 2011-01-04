@@ -1,3 +1,11 @@
+Tue Jan  4 19:41:57 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpc.xsl:
+
+          Common code for capitilization.
+
 Tue Jan  4 18:00:40 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
 
