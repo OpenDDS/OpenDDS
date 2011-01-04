@@ -8,6 +8,9 @@
     ** Common stylesheet templates and variables
     **
     -->
+<xsl:variable name="lower" select="'abcdefghijklmnopqrstuvwxyz'"/>
+<xsl:variable name="upper" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
+
 <xsl:template name="normalize-identifier">
   <xsl:param name="identifier" select="@name"/>
   <xsl:value-of select="translate($identifier, ' -', '__')"/>
@@ -25,5 +28,12 @@
   </xsl:choose>
 </xsl:template>
 
+<xsl:template name="capitalize">
+  <xsl:param name="value"/>
+  <xsl:variable name="first" select="substring($value, 1, 1)"/>
+  <xsl:variable name="FIRST" select="translate($first, $lower, $upper)"/>
+  <xsl:variable name="rest" select="substring($value, 2)"/>
+  <xsl:value-of select="concat($FIRST, $rest)"/>
+</xsl:template>
 </xsl:stylesheet>
 

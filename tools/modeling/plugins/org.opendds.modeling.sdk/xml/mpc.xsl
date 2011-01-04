@@ -8,6 +8,8 @@
     ** Generate MPC implementation code.
     **
     -->
+<xsl:include href="common.xsl"/>
+
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
 
@@ -16,17 +18,13 @@
 </xsl:text>
 </xsl:variable>
 
-<!-- blech -->
-<xsl:variable name="lowercase" select="'abcdefghijklmnopqrstuvwxyz'"/>
-<xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
-
 <!-- Node sets -->
 <xsl:variable name="dcpslib" select="//dcpsLib"/>
 
 <!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
+<xsl:variable name="modelname" select="/opendds:OpenDDSModel/@name"/>
 
-<xsl:variable name = "MODELNAME" select = "translate( $modelname, $lowercase, $uppercase)"/>
+<xsl:variable name="MODELNAME" select="translate($modelname, $lower, $upper)"/>
 
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
