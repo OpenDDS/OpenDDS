@@ -1,3 +1,11 @@
+Tue Jan  4 18:00:40 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+
+        * tools/modeling/icons/icon-to-element.txt:
+
+          Removed this file as the contents were split into files based
+          on diagram type.
+
 Mon Jan  3 23:08:48 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/build.pl:
