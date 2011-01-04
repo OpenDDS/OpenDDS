@@ -107,4 +107,27 @@
     <palette
         href="MainDiagram.gmftool#//@palette"/>
   </diagram>
+  <audits
+      id="org.opendds.modeling.model.validations"
+      name="MainDiagram Validations"
+      description="Detects incorrect or questionable semantic constructs for elements in a main diagram.">
+    <childContainers
+        id="org.opendds.modeling.model.validation.errors"
+        name="OpenDDSModel Errors"
+        description="Detects modeling constructs that would result in invalid generated OpenDDS code.">
+      <audits
+          name="Library Name Empty"
+          description="Library name should not be empty"
+          id="org.opendds.modeling.model.alidation.error.lib_name_blank"
+          message="Library name is empty">
+        <rule
+            body="self.policyLib->select(name.oclIsUndefined() or name = '')->isEmpty() and&#xA;self.dataLib->select(name.oclIsUndefined() or name = '')->isEmpty() and&#xA;self.dcpsLib->select(name.oclIsUndefined() or name = '')->isEmpty()"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel"/>
+        </target>
+      </audits>
+    </childContainers>
+  </audits>
 </gmfmap:Mapping>
