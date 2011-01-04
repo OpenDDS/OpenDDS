@@ -9,27 +9,28 @@
 
 <!-- Lookup Table Magic. -->
 <lut:types>
-  <type type="Boolean"   cpptype="bool"               corbatype="boolean"/>
-  <type type="Char"      cpptype="char"               corbatype="char"/>
-  <type type="Octet"     cpptype="unsigned char"      corbatype="octet"/>
-  <type type="Double"    cpptype="double"             corbatype="double"/>
-  <type type="Float"     cpptype="float"              corbatype="float"/>
-  <type type="Short"     cpptype="short"              corbatype="short"/>
-  <type type="Integer"   cpptype="int"                corbatype="long"/>
-  <type type="Long"      cpptype="long"               corbatype="long"/>
-  <type type="LongLong"  cpptype="long long"          corbatype="long long"/>
-  <type type="UShort"    cpptype="unsigned short"     corbatype="unsigned short"/>
-  <type type="UInteger"  cpptype="unsigned int"       corbatype="unsigned long"/>
-  <type type="ULong"     cpptype="unsigned long"      corbatype="unsigned long"/>
-  <type type="ULongLong" cpptype="unsigned long long" corbatype="unsigned long long"/>
-  <type type="String"    cpptype="char*"              corbatype="string"/>
-  <type type="Array"                                  corbatype="array"/>
-  <type type="Sequence"                               corbatype="sequence"/>
-  <type type="Union"                                  corbatype="union"/>
-  <type type="Enum"                                   corbatype="enum"/>
-  <type type="Struct"                                 corbatype="struct"/>
-  <type type="WChar"                                  corbatype="wchar"/>
-  <type type="WString"                                corbatype="wstring"/>
+  <type type="Boolean"    cpptype="bool"            corbatype="boolean"/>
+  <type type="Char"       cpptype="char"            corbatype="char"/>
+  <type type="Octet"      cpptype="unsigned char"   corbatype="octet"/>
+  <type type="Double"     cpptype="double"          corbatype="double"/>
+  <type type="LongDouble" cpptype="long double"     corbatype="long double"/>
+  <type type="Float"      cpptype="float"           corbatype="float"/>
+  <type type="Short"      cpptype="short"           corbatype="short"/>
+  <type type="Integer"    cpptype="int"             corbatype="long"/>
+  <type type="Long"       cpptype="long"            corbatype="long"/>
+  <type type="LongLong"   cpptype="long long"       corbatype="long long"/>
+  <type type="UShort"     cpptype="unsigned short"  corbatype="unsigned short"/>
+  <type type="UInteger"   cpptype="unsigned int"    corbatype="unsigned long"/>
+  <type type="ULong"      cpptype="unsigned long"   corbatype="unsigned long"/>
+  <type type="ULongLong"  cpptype="unsigned long long" corbatype="unsigned long long"/>
+  <type type="String"     cpptype="char*"           corbatype="string"/>
+  <type type="Array"                                corbatype="array"/>
+  <type type="Sequence"                             corbatype="sequence"/>
+  <type type="Union"                                corbatype="union"/>
+  <type type="Enum"                                 corbatype="enum"/>
+  <type type="Struct"                               corbatype="struct"/>
+  <type type="WChar"                                corbatype="wchar"/>
+  <type type="WString"                              corbatype="wstring"/>
 </lut:types>
 
 <lut:policies>
