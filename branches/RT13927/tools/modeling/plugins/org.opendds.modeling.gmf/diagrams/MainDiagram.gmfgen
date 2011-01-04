@@ -5,14 +5,44 @@
     xmlns:gmfgen="http://www.eclipse.org/gmf/2009/GenModel" packageNamePrefix="org.opendds.modeling.diagram.main"
     diagramFileExtension="opendds_diagram"
     copyrightText="(c) Copyright Object Computing, Incorporated.  2005,2010.  All rights reserved.">
+  <audits>
+    <categories
+        id="org.opendds.modeling.model.validations"
+        name="MainDiagram Validations"
+        description="Detects incorrect or questionable semantic constructs for elements in a main diagram."
+        path="//@audits/@categories.0"/>
+    <categories
+        id="org.opendds.modeling.model.validation.errors"
+        name="OpenDDSModel Errors"
+        description="Detects modeling constructs that would result in invalid generated OpenDDS code."
+        path="//@audits/@categories.0 //@audits/@categories.1"
+        audits="//@audits/@rules.0"/>
+    <rules
+        name="Library Name Empty"
+        description="Library name should not be empty"
+        id="org.opendds.modeling.model.alidation.error.lib_name_blank"
+        rule="//@expressionProviders/@providers.0/@expressions.0"
+        message="Library name is empty"
+        category="//@audits/@categories.1">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel"/>
+      </target>
+    </rules>
+    <clientContexts
+        ruleTargets="//@audits/@rules.0/@target"/>
+  </audits>
   <diagram
       visualID="1000"
       editPartClassName="OpenDDSModelEditPart"
       itemSemanticEditPolicyClassName="OpenDDSModelItemSemanticEditPolicy"
       canonicalEditPolicyClassName="OpenDDSModelCanonicalEditPolicy"
       iconProviderPriority="Low"
-      creationWizardCategoryID="org.opendds.modeling.Wizard.category.ID"
-      validationProviderPriority="Low">
+      validationProviderPriority="Low"
+      validationEnabled="true"
+      validationDecorators="true">
     <diagramRunTimeClass
         href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Diagram"/>
     <elementType
@@ -247,6 +277,8 @@
             xsi:type="gmfgen:ToolEntry"
             title="PolicyLib"
             description="Create new PolicyLib"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/PolicyLib.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/PolicyLib.gif"
             genNodes="//@diagram/@topLevelNodes.1"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
@@ -332,6 +364,14 @@
   </propertySheet>
   <domainGenModel
       href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#/"/>
+  <expressionProviders>
+    <providers
+        xsi:type="gmfgen:GenExpressionInterpreter">
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.policyLib->select(name.oclIsUndefined() or name = '')->isEmpty() and&#xA;self.dataLib->select(name.oclIsUndefined() or name = '')->isEmpty() and&#xA;self.dcpsLib->select(name.oclIsUndefined() or name = '')->isEmpty()"/>
+    </providers>
+  </expressionProviders>
   <labelParsers
       extensibleViaService="true">
     <implementations

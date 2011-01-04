@@ -35,5 +35,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.opendds.modeling.model;visibility:=reexport,
  org.opendds.modeling.model.edit;visibility:=reexport,
  org.eclipse.gef;visibility:=reexport,
- com.ociweb.gmf
+ com.ociweb.gmf,
+ org.eclipse.ocl.ecore;visibility:=reexport,
+ org.eclipse.emf.validation;visibility:=reexport,
+ org.eclipse.emf.validation.ocl;visibility:=reexport
 Eclipse-LazyStart: true

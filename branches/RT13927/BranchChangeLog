@@ -1,3 +1,12 @@
+Tue Jan  4 22:00:52 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfmap:
+
+          Enabled main diagram validation and added audit rule to check that library
+          names are not empty.
+
 Tue Jan  4 21:10:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
 
