@@ -1,3 +1,17 @@
+Tue Jan  4 21:02:00 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Multicast:
+        * tools/modeling/tests/Multicast/Multicast.gen:
+        * tools/modeling/tests/Multicast/Multicast.mpc:
+        * tools/modeling/tests/Multicast/Multicast.opendds:
+        * tools/modeling/tests/Multicast/multicast.conf:
+        * tools/modeling/tests/Multicast/publisher.cpp:
+        * tools/modeling/tests/Multicast/run_test.pl:
+        * tools/modeling/tests/Multicast/subscriber.cpp:
+        * tools/modeling/tests/setup.pl:
+
+          New test case for multicast transport.
+
 Tue Jan  4 19:48:00 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Service_T.cpp:
