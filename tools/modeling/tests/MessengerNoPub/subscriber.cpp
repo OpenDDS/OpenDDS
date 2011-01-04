@@ -62,7 +62,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    MessengerNoPubType model(argc, argv);
+    DefaultMessengerNoPubType model(argc, argv);
 
     using OpenDDS::Model::MessengerNoPub::Elements;
 

@@ -12,7 +12,7 @@
 int main(int argc, char** argv)
 {
   try {
-    ExternalPoliciesType model(argc, argv);
+    DefaultExternalPoliciesType model(argc, argv);
 
     using OpenDDS::Model::ExternalPolicies::Elements;
 

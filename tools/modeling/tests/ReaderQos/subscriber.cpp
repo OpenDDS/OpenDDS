@@ -62,7 +62,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    ReaderQosType model(argc, argv);
+    DefaultReaderQosType model(argc, argv);
 
     using OpenDDS::Model::ReaderQos::Elements;
 

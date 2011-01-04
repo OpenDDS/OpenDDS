@@ -12,7 +12,7 @@
 int main(int argc, char** argv)
 {
   try {
-    ArraysType model(argc, argv);
+    DefaultArraysType model(argc, argv);
 
     using OpenDDS::Model::Arrays::Elements;
 

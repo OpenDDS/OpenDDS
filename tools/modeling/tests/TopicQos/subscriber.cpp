@@ -62,7 +62,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    TopQosType model(argc, argv);
+    DefaultTopQosType model(argc, argv);
 
     using OpenDDS::Model::TopQos::Elements;
 

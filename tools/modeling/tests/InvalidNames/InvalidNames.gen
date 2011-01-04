@@ -98,6 +98,5 @@
         </MulticastTransport>
       </transport>
     </instance>
-    <instance name="default"/>
   </instances>
 </generator:CodeGen>

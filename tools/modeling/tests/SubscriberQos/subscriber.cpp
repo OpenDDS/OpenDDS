@@ -62,7 +62,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    SubQosType model(argc, argv);
+    DefaultSubQosType model(argc, argv);
 
     using OpenDDS::Model::SubQos::Elements;
 

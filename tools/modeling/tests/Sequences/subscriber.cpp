@@ -62,7 +62,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    SequencesType model(argc, argv);
+    DefaultSequencesType model(argc, argv);
 
     using OpenDDS::Model::Sequences::Elements;
 

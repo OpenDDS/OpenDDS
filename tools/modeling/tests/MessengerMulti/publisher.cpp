@@ -12,7 +12,7 @@
 int main(int argc, char** argv)
 {
   try {
-    MessengerMultiType model(argc, argv);
+    DefaultMessengerMultiType model(argc, argv);
 
     using OpenDDS::Model::MessengerMulti::Elements;
 
