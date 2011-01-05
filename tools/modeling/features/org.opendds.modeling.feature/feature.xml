@@ -100,4 +100,18 @@ development model.
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="com.ociweb.emf.util"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.ociweb.gmf"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>
