@@ -1392,4 +1392,27 @@
     <palette
         href="PolicyLib.gmftool#//@palette"/>
   </diagram>
+  <audits
+      id="org.opendds.modeling.model.qospolicies.validations"
+      name="PolicyLib Validations"
+      description="Detects incorrect or questionable semantic constructs for elements in a PolicyLib diagram.">
+    <childContainers
+        id="org.opendds.modeling.model.qospolicies.validation.errors"
+        name="PolicyLib Errors"
+        description="Detects modeling constructs that would result in invalid generated OpenDDS code.">
+      <audits
+          name="Policy Name Emtpy"
+          description="Policy names should not be empty"
+          id="org.opendds.modeling.model.qospolicies.validation.error.name_blank"
+          message="Policy name is empty">
+        <rule
+            body="not self.name.oclIsUndefined() and self.name &lt;> ''"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/QoS.ecore#//QosPolicy"/>
+        </target>
+      </audits>
+    </childContainers>
+  </audits>
 </gmfmap:Mapping>
