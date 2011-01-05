@@ -810,6 +810,67 @@
    <extension point="org.eclipse.ui.handlers" id="menu-handlers">
       <?gmfgen generated="true"?>
    </extension>
+<extension point="org.eclipse.gmf.runtime.common.ui.services.markerNavigationProviders" id="markers-navigation">
+      <?gmfgen generated="true"?>
+      <MarkerNavigationProvider class="org.opendds.modeling.model.opendds.diagram.policylib.providers.OpenDDSPolicyLibMarkerNavigationProvider">
+         <MarkerType name="org.opendds.modeling.diagram.policylib.diagnostic"/>
+         <Priority name="Lowest"/>
+      </MarkerNavigationProvider>
+   </extension>
+
+<extension id="diagnostic" name="OpenDDS PolicyLib Plugin problems" point="org.eclipse.core.resources.markers">
+      <?gmfgen generated="true"?>
+      <super type="org.eclipse.core.resources.problemmarker"/>
+      <super type="org.eclipse.gmf.runtime.common.ui.services.marker"/>
+      <persistent value="true"/>
+   </extension>
+<extension id="validationDecoratorProvider" name="ValidationDecorations" point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders">
+      <?gmfgen generated="true"?>
+      <decoratorProvider class="org.opendds.modeling.model.opendds.diagram.policylib.providers.OpenDDSPolicyLibValidationDecoratorProvider">
+         <Priority name="Lowest"/>
+         <object class="org.eclipse.gmf.runtime.diagram.ui.editparts.IPrimaryEditPart(org.eclipse.gmf.runtime.diagram.ui)" id="PRIMARY_VIEW"/>
+         <context decoratorTargets="PRIMARY_VIEW"/>
+      </decoratorProvider>
+   </extension>
+
+<extension point="org.eclipse.emf.validation.constraintProviders">
+      <?gmfgen generated="true"?>
+            <category id="org.opendds.modeling.model.qospolicies.validations" mandatory="false" name="PolicyLib Validations">
+         <![CDATA[Detects incorrect or questionable semantic constructs for elements in a PolicyLib diagram.]]>
+      </category>
+      <category id="org.opendds.modeling.model.qospolicies.validations/org.opendds.modeling.model.qospolicies.validation.errors" mandatory="false" name="PolicyLib Errors">
+         <![CDATA[Detects modeling constructs that would result in invalid generated OpenDDS code.]]>
+      </category>
+      <constraintProvider cache="true">
+         <package namespaceUri="http://www.opendds.org/modeling/schemas/QoS/1.0"/>
+               <constraints categories="org.opendds.modeling.model.qospolicies.validations">
+                  </constraints>
+         <constraints categories="org.opendds.modeling.model.qospolicies.validations/org.opendds.modeling.model.qospolicies.validation.errors">
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.error.name_blank"
+            lang="OCL"
+            name="Policy Name Emtpy"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not self.name.oclIsUndefined() and self.name <> '']]>
+            <description><![CDATA[Policy names should not be empty]]></description>
+            <message><![CDATA[Policy name is empty]]></message>
+            <target class="qos.QosPolicy"/>
+         </constraint>
+                  </constraints>
+      </constraintProvider>
+   </extension>
+
+<extension point="org.eclipse.emf.validation.constraintBindings">
+      <?gmfgen generated="true"?>
+      <clientContext default="false" id="org.opendds.modeling.diagram.policylibDefaultCtx">
+         <selector class="org.opendds.modeling.model.opendds.diagram.policylib.providers.OpenDDSPolicyLibValidationProvider$DefaultCtx"/>
+      </clientContext>
+      <binding context="org.opendds.modeling.diagram.policylibDefaultCtx">
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.error.name_blank"/>
+               </binding>
+
+   </extension>
+
 
    <!-- optionally, specify keybindings -->
 </plugin>
