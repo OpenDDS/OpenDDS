@@ -36,7 +36,8 @@ if (scalar @ARGV && $ARGV[0] =~ /^-?-automated/) {
   push(@steps,
        {'extra_plugins' => 1},
        {'dir' => 'features/org.opendds.modeling.feature',
-        'javac_ver' => '1.6'});
+#  clean doesn't work yet...        'args' => 'clean build.update.jar'
+       });
 }
 
 if (!defined $ECLIPSE_WORKSPACE) {
@@ -53,19 +54,16 @@ foreach my $s (@steps) {
   if ($s->{'extra_plugins'} && $ECLIPSE_EXTRA_PLUGINS) {
     push(@args, "-Dextra.plugins=$ECLIPSE_EXTRA_PLUGINS");
   }
-  if ($s->{'javac_ver'}) {
-    foreach ('source', 'target') {
-      push(@args, "-Dant.build.javac.$_=$s->{'javac_ver'}");
-    }
+  if ($s->{'args'}) {
+    push(@args, $s->{'args'});
   }
 
-  print "\"$ECLIPSE_HOME/eclipse$suffix\" -nosplash -data " .
+  my $cmd = "\"$ECLIPSE_HOME/eclipse$suffix\" -nosplash -data " .
       "$ECLIPSE_WORKSPACE -application org.eclipse.ant.core." .
       "antRunner -l ant.log @args -vmargs -Xmx1g";
+  print "$cmd\n";
 
-  my $status = system("\"$ECLIPSE_HOME/eclipse$suffix\" -nosplash -data " .
-                      "$ECLIPSE_WORKSPACE -application org.eclipse.ant.core." .
-                      "antRunner -l ant.log @args -vmargs -Xmx1g");
+  my $status = system($cmd);
 
   open LOG, 'ant.log' or die "ERROR: Can't open ant.log";
   while (<LOG>) {
