@@ -75,7 +75,10 @@
 </xsl:template>
 
 <xsl:template match="transport">
-  <xsl:variable name="type" select="*/@transport_type"/>
+  <xsl:variable name="type">
+    <xsl:call-template name="transport-type"/>
+  </xsl:variable>
+
   <xsl:variable name="label" select="../transportOffset/@value + @transportIndex"/>
   <xsl:value-of select="concat('      case ', $label, ':', $newline)"/>
   <xsl:value-of select="concat('        transport_type = &quot;', $type, '&quot;;', $newline)"/>
@@ -122,7 +125,7 @@
 </xsl:text>
 </xsl:template>
 
-<xsl:template match="opendds:udpConfig">
+<xsl:template match="UDPTransport">
   <xsl:text>        {
           OpenDDS::DCPS::UdpConfiguration* specific_config =
               (OpenDDS::DCPS::UdpConfiguration*) config.in();
@@ -171,6 +174,17 @@
   <xsl:value-of select="concat('          specific_config->group_address_ = ',
                                'ACE_INET_Addr(&quot;', $value, '&quot;)',
                                ';', $newline)"/>
+</xsl:template>
+
+<xsl:template name="transport-type">
+  <xsl:choose>
+    <xsl:when test="TCPTransport">SimpleTCP</xsl:when>
+    <xsl:when test="MulticastTransport">multicast</xsl:when>
+    <xsl:when test="UDPTransport">udp</xsl:when>
+    <xsl:otherwise>
+      <xsl:message>Unknown transport_type</xsl:message>
+    </xsl:otherwise>
+  </xsl:choose>
 </xsl:template>
 
 <xsl:template name="str-value">
