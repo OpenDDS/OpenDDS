@@ -6,7 +6,7 @@
     <instance name="Primary">
       <transportOffset value="0"/>
       <transport transportIndex="1">
-        <TCPTransport transport_type="SimpleTcp">
+        <TCPTransport>
           <swap_bytes value="false"/>
           <queue_messages_per_pool value="10"/>
           <queue_initial_pools value="10"/>
@@ -27,7 +27,7 @@
         </TCPTransport>
       </transport>
       <transport transportIndex="2">
-        <MulticastTransport transport_type="multicast">
+        <MulticastTransport>
           <swap_bytes value="false"/>
           <queue_messages_per_pool value="10"/>
           <queue_initial_pools value="10"/>
@@ -52,7 +52,7 @@
         </MulticastTransport>
       </transport>
       <transport transportIndex="3">
-        <TCPTransport transport_type="SimpleTcp">
+        <TCPTransport>
           <swap_bytes value="false"/>
           <queue_messages_per_pool value="10"/>
           <queue_initial_pools value="10"/>
@@ -73,7 +73,7 @@
         </TCPTransport>
       </transport>
       <transport transportIndex="4">
-        <MulticastTransport transport_type="multicast">
+        <MulticastTransport>
           <swap_bytes value="false"/>
           <queue_messages_per_pool value="10"/>
           <queue_initial_pools value="10"/>
@@ -101,7 +101,7 @@
     <instance name="Secondary">
       <transportOffset value="10"/>
       <transport transportIndex="1">
-        <TCPTransport transport_type="SimpleTcp">
+        <TCPTransport>
           <swap_bytes value="false"/>
           <queue_messages_per_pool value="10"/>
           <queue_initial_pools value="10"/>
@@ -122,7 +122,7 @@
         </TCPTransport>
       </transport>
       <transport transportIndex="2">
-        <MulticastTransport transport_type="multicast">
+        <MulticastTransport>
           <swap_bytes value="false"/>
           <queue_messages_per_pool value="10"/>
           <queue_initial_pools value="10"/>
@@ -147,7 +147,7 @@
         </MulticastTransport>
       </transport>
       <transport transportIndex="3">
-        <TCPTransport transport_type="SimpleTcp">
+        <TCPTransport>
           <swap_bytes value="false"/>
           <queue_messages_per_pool value="10"/>
           <queue_initial_pools value="10"/>
@@ -168,7 +168,7 @@
         </TCPTransport>
       </transport>
       <transport transportIndex="4">
-        <MulticastTransport transport_type="multicast">
+        <MulticastTransport>
           <swap_bytes value="false"/>
           <queue_messages_per_pool value="10"/>
           <queue_initial_pools value="10"/>
