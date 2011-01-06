@@ -120,7 +120,7 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0"
-            viewPattern="«dcps»">
+            viewPattern="«dcpslib»">
           <metaFeatures
               href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/DcpsLib/name"/>
         </modelFacet>

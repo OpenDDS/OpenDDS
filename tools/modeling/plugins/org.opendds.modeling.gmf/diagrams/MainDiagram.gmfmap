@@ -20,7 +20,7 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"
-          viewPattern="«dcps»">
+          viewPattern="«dcpslib»">
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackageStereotype"/>
         <features
