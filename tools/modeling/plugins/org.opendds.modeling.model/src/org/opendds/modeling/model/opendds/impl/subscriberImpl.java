@@ -73,7 +73,8 @@ public class subscriberImpl extends SubscriberImpl implements subscriber {
 	 */
 	@Override
 	public EList<org.opendds.modeling.model.qos.QosPolicy> getPolicies() {
-		return com.ociweb.emf.util.ReferencesFinder.findInstancesOf(org.opendds.modeling.model.qos.QosPolicy.class, this);
+		return com.ociweb.emf.util.ReferencesFinder.findInstancesOf(
+				org.opendds.modeling.model.qos.QosPolicy.class, this);
 	}
 
 } //subscriberImpl

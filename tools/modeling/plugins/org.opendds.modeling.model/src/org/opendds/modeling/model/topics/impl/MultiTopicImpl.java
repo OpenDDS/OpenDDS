@@ -86,7 +86,9 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 		String oldSubscription_expression = subscription_expression;
 		subscription_expression = newSubscription_expression;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, TopicsPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION, oldSubscription_expression, subscription_expression));
+			eNotify(new ENotificationImpl(this, Notification.SET,
+					TopicsPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION,
+					oldSubscription_expression, subscription_expression));
 	}
 
 	/**
@@ -97,8 +99,8 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
-			case TopicsPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
-				return getSubscription_expression();
+		case TopicsPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
+			return getSubscription_expression();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -111,9 +113,9 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 	@Override
 	public void eSet(int featureID, Object newValue) {
 		switch (featureID) {
-			case TopicsPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
-				setSubscription_expression((String)newValue);
-				return;
+		case TopicsPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
+			setSubscription_expression((String) newValue);
+			return;
 		}
 		super.eSet(featureID, newValue);
 	}
@@ -126,9 +128,9 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 	@Override
 	public void eUnset(int featureID) {
 		switch (featureID) {
-			case TopicsPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
-				setSubscription_expression(SUBSCRIPTION_EXPRESSION_EDEFAULT);
-				return;
+		case TopicsPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
+			setSubscription_expression(SUBSCRIPTION_EXPRESSION_EDEFAULT);
+			return;
 		}
 		super.eUnset(featureID);
 	}
@@ -141,8 +143,10 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 	@Override
 	public boolean eIsSet(int featureID) {
 		switch (featureID) {
-			case TopicsPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
-				return SUBSCRIPTION_EXPRESSION_EDEFAULT == null ? subscription_expression != null : !SUBSCRIPTION_EXPRESSION_EDEFAULT.equals(subscription_expression);
+		case TopicsPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
+			return SUBSCRIPTION_EXPRESSION_EDEFAULT == null ? subscription_expression != null
+					: !SUBSCRIPTION_EXPRESSION_EDEFAULT
+							.equals(subscription_expression);
 		}
 		return super.eIsSet(featureID);
 	}
@@ -154,7 +158,8 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 	 */
 	@Override
 	public String toString() {
-		if (eIsProxy()) return super.toString();
+		if (eIsProxy())
+			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
 		result.append(" (subscription_expression: ");
@@ -168,7 +173,8 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 	 */
 	@Override
 	public org.eclipse.emf.common.util.EList<org.opendds.modeling.model.types.Type> getTypes() {
-		return com.ociweb.emf.util.ReferencesFinder.findInstancesOf(org.opendds.modeling.model.types.Type.class, this);		
+		return com.ociweb.emf.util.ReferencesFinder.findInstancesOf(
+				org.opendds.modeling.model.types.Type.class, this);
 	}
 
 } //MultiTopicImpl
