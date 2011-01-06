@@ -178,7 +178,7 @@
 
 <xsl:template name="transport-type">
   <xsl:choose>
-    <xsl:when test="TCPTransport">SimpleTCP</xsl:when>
+    <xsl:when test="TCPTransport">SimpleTcp</xsl:when>
     <xsl:when test="MulticastTransport">multicast</xsl:when>
     <xsl:when test="UDPTransport">udp</xsl:when>
     <xsl:otherwise>

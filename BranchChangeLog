@@ -1,3 +1,35 @@
+Thu Jan  6 15:20:53 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl
+
+          Fix SimpleTcp.
+
+        * tools/modeling/tests/Arrays/Arrays.gen:
+        * tools/modeling/tests/CompositeKey/CompositeKey.gen:
+        * tools/modeling/tests/DomainZero/DomainZero.gen:
+        * tools/modeling/tests/ExternalPolicies/ExternalPolicies.gen:
+        * tools/modeling/tests/InvalidNames/InvalidNames.gen:
+        * tools/modeling/tests/Messenger/Messenger.gen:
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.gen:
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.gen:
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.gen:
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.gen:
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.gen:
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.gen:
+        * tools/modeling/tests/MessengerPubQos/MessengerPubQos.gen:
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.gen:
+        * tools/modeling/tests/MessengerSplit/MessengerTypes.gen:
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.gen:
+        * tools/modeling/tests/MultiInstance/MultiInstance.gen:
+        * tools/modeling/tests/Multicast/Multicast.gen:
+        * tools/modeling/tests/PolicyLib/PolicyLib.gen:
+        * tools/modeling/tests/ReaderQos/ReaderQos.gen:
+        * tools/modeling/tests/Sequences/Sequences.gen:
+        * tools/modeling/tests/SubscriberQos/SubQos.gen:
+        * tools/modeling/tests/TopicQos/TopQos.gen:
+
+          remove referencs to transport_type
+
 Thu Jan  6 14:14:43 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
