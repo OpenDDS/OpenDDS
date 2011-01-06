@@ -10,11 +10,5 @@
 
 <plugin>
 
-   <extension point="org.eclipse.emf.ecore.generated_package">
-      <package
-            class="org.opendds.modeling.sdk.model.GeneratorPackage"
-            uri="org.opendds.modeling.sdk.model.GeneratorPackage">
-      </package>
-   </extension>
 
 </plugin>
