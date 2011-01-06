@@ -69,8 +69,8 @@
   <eClassifiers xsi:type="ecore:EClass" name="ULongLong" eSuperTypes="#//UnsignedInt"/>
   <eClassifiers xsi:type="ecore:EClass" name="UShort" eSuperTypes="#//UnsignedInt"/>
   <eClassifiers xsi:type="ecore:EClass" name="Union" eSuperTypes="#//Type">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="branches" upperBound="-1"
-        eType="#//Branch" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="branches" lowerBound="1"
+        upperBound="-1" eType="#//Branch" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="switch" lowerBound="1"
         eType="#//Type"/>

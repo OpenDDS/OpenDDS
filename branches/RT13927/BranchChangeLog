@@ -1,3 +1,10 @@
+Thu Jan  6 21:39:26 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Types.ecore:
+
+          Lower bound of Union's Branch cardinality was 0. Changed to 1 to agree with
+          the CORBA spec.
+
 Thu Jan  6 20:23:19 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
@@ -18,7 +25,7 @@ Thu Jan  6 20:23:19 UTC 2011  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics/impl/MultiTopicImpl.java:
         * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics/impl/TopicImpl.java:
 
-	  Updates due to changing the code formatting.
+          Updates due to changing the code formatting.
 
 Thu Jan  6 16:14:57 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
