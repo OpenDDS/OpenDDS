@@ -25,8 +25,9 @@ my $cwd = getcwd();
 my @steps = (
   {'dir' => 'plugins/org.opendds.modeling.model',
    'script' => 'ant_codegen.xml'},
-  {'dir' => 'plugins/org.opendds.modeling.sdk.model',
-   'script' => 'ant_codegen.xml'},
+#modeling.sdk isn't ready for automated build yet:
+#  {'dir' => 'plugins/org.opendds.modeling.sdk.model',
+#   'script' => 'ant_codegen.xml'},
   {'dir' => 'plugins/org.opendds.modeling.gmf',
    'script' => 'ant_codegen.xml'});
 
