@@ -116,16 +116,16 @@
         name="OpenDDSModel Errors"
         description="Detects modeling constructs that would result in invalid generated OpenDDS code.">
       <audits
-          name="Library Name Empty"
-          description="Library name should not be empty"
-          id="org.opendds.modeling.model.alidation.error.lib_name_blank"
-          message="Library name is empty">
+          name="DcpsLib Name Empty"
+          description="DcpsLib name should not be empty"
+          id="org.opendds.modeling.model.validation.error.dcpslib_name_blank"
+          message="DcpsLib name is empty">
         <rule
-            body="self.policyLib->select(name.oclIsUndefined() or name = '')->isEmpty() and&#xA;self.dataLib->select(name.oclIsUndefined() or name = '')->isEmpty() and&#xA;self.dcpsLib->select(name.oclIsUndefined() or name = '')->isEmpty()"/>
+            body="not name.oclIsUndefined() and name &lt;> ''"/>
         <target
             xsi:type="gmfmap:DomainElementTarget">
           <element
-              href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib"/>
         </target>
       </audits>
     </childContainers>
