@@ -2,14 +2,16 @@
 <genmodel:GenModel xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
     xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/org.opendds.modeling.sdk.model/src"
-    modelPluginID="org.opendds.modeling.sdk.model" modelName="Generator" generateSchema="true"
-    importerID="org.eclipse.emf.importer.ecore" complianceLevel="6.0" copyrightFields="false"
-    providerRootExtendsClass="" interfaceNamePattern="" classNamePattern="">
+    modelPluginID="org.opendds.modeling.sdk.model" templateDirectory="org.opendds.modeling.sdk.model/templates"
+    dynamicTemplates="true" redirection="" modelName="Generator" generateSchema="true"
+    booleanFlagsField="" importerID="org.eclipse.emf.importer.ecore" complianceLevel="6.0"
+    copyrightFields="false" providerRootExtendsClass="" interfaceNamePattern="" classNamePattern="">
   <foreignModel>Generator.ecore</foreignModel>
   <genPackages prefix="Generator" basePackage="org.opendds.modeling.sdk.model" resource="XML"
       disposableProviderFactory="true" classPackageSuffix="Impl" utilityPackageSuffix="Util"
       providerPackageSuffix="Provider" presentationPackageSuffix="Presentation" testsPackageSuffix="Tests"
-      contentTypeIdentifier="" fileExtensions="gen" ecorePackage="Generator.ecore#/">
+      generateModelWizard="false" extensibleProviderFactory="true" contentTypeIdentifier=""
+      fileExtensions="gen" ecorePackage="Generator.ecore#/">
     <genClasses ecoreClass="Generator.ecore#//CodeGen"/>
     <genClasses ecoreClass="Generator.ecore#//genspec">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//genspec/source"/>
