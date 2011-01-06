@@ -329,27 +329,27 @@
         xsi:type="gmftool:CreationTool"
         title="Typedef"
         description="Create new Typedef">
-        <smallIcon
-            xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/Typedef.gif"
-            bundle="org.opendds.modeling.model.edit"/>
-        <largeIcon
-            xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/Typedef.gif"
-            bundle="org.opendds.modeling.model.edit"/>
+      <smallIcon
+          xsi:type="gmftool:BundleImage"
+          path="icons/full/obj16/Typedef.gif"
+          bundle="org.opendds.modeling.model.edit"/>
+      <largeIcon
+          xsi:type="gmftool:BundleImage"
+          path="icons/full/obj16/Typedef.gif"
+          bundle="org.opendds.modeling.model.edit"/>
     </tools>
     <tools
         xsi:type="gmftool:CreationTool"
         title="Field"
         description="Create new Field">
-        <smallIcon
-            xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/Field.gif"
-            bundle="org.opendds.modeling.model.edit"/>
-        <largeIcon
-            xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/Field.gif"
-            bundle="org.opendds.modeling.model.edit"/>
+      <smallIcon
+          xsi:type="gmftool:BundleImage"
+          path="icons/full/obj16/Field.gif"
+          bundle="org.opendds.modeling.model.edit"/>
+      <largeIcon
+          xsi:type="gmftool:BundleImage"
+          path="icons/full/obj16/Field.gif"
+          bundle="org.opendds.modeling.model.edit"/>
     </tools>
   </palette>
 </gmftool:ToolRegistry>
