@@ -1,3 +1,11 @@
+Thu Jan  6 16:14:57 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmftool:
+
+          For unknown reasons XML serialization is now indenting a few elements
+          different than others. Committing to avoid this trivial change showing
+          as part of changes from repository base.
+
 Thu Jan  6 16:13:11 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
