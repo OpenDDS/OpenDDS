@@ -28,7 +28,8 @@ import org.opendds.modeling.model.topics.TopicsPackage;
  *
  * @generated
  */
-public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements ContentFilteredTopic {
+public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements
+		ContentFilteredTopic {
 	/**
 	 * The default value of the '{@link #getFilter_expression() <em>Filter expression</em>}' attribute.
 	 * <!-- begin-user-doc -->
@@ -86,7 +87,9 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 		String oldFilter_expression = filter_expression;
 		filter_expression = newFilter_expression;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, TopicsPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION, oldFilter_expression, filter_expression));
+			eNotify(new ENotificationImpl(this, Notification.SET,
+					TopicsPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION,
+					oldFilter_expression, filter_expression));
 	}
 
 	/**
@@ -97,8 +100,8 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
-			case TopicsPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
-				return getFilter_expression();
+		case TopicsPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
+			return getFilter_expression();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -111,9 +114,9 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 	@Override
 	public void eSet(int featureID, Object newValue) {
 		switch (featureID) {
-			case TopicsPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
-				setFilter_expression((String)newValue);
-				return;
+		case TopicsPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
+			setFilter_expression((String) newValue);
+			return;
 		}
 		super.eSet(featureID, newValue);
 	}
@@ -126,9 +129,9 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 	@Override
 	public void eUnset(int featureID) {
 		switch (featureID) {
-			case TopicsPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
-				setFilter_expression(FILTER_EXPRESSION_EDEFAULT);
-				return;
+		case TopicsPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
+			setFilter_expression(FILTER_EXPRESSION_EDEFAULT);
+			return;
 		}
 		super.eUnset(featureID);
 	}
@@ -141,8 +144,9 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 	@Override
 	public boolean eIsSet(int featureID) {
 		switch (featureID) {
-			case TopicsPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
-				return FILTER_EXPRESSION_EDEFAULT == null ? filter_expression != null : !FILTER_EXPRESSION_EDEFAULT.equals(filter_expression);
+		case TopicsPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION:
+			return FILTER_EXPRESSION_EDEFAULT == null ? filter_expression != null
+					: !FILTER_EXPRESSION_EDEFAULT.equals(filter_expression);
 		}
 		return super.eIsSet(featureID);
 	}
@@ -154,7 +158,8 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 	 */
 	@Override
 	public String toString() {
-		if (eIsProxy()) return super.toString();
+		if (eIsProxy())
+			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
 		result.append(" (filter_expression: ");
@@ -168,7 +173,8 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements Co
 	 */
 	@Override
 	public org.eclipse.emf.common.util.EList<org.opendds.modeling.model.types.Type> getTypes() {
-		return com.ociweb.emf.util.ReferencesFinder.findInstancesOf(org.opendds.modeling.model.types.Type.class, this);		
+		return com.ociweb.emf.util.ReferencesFinder.findInstancesOf(
+				org.opendds.modeling.model.types.Type.class, this);
 	}
 
 } //ContentFilteredTopicImpl

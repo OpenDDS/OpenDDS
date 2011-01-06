@@ -52,7 +52,7 @@ public interface TopicDescription extends Entity {
 	 * @generated
 	 */
 	void setDatatype(Struct value);
-	
+
 	/**
 	 * Needed because datatype is a non-containment reference but will be
 	 * the domain element behind a sub-figure of the Topic figure and GMF

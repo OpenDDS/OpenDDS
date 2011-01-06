@@ -1,3 +1,25 @@
+Thu Jan  6 20:23:19 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+          Changed code formatting to use Eclipse's code formatter (which is set to the default of "Eclipse Built-in").
+          Doing so ensures that the formatting of EMF generated code done within the GUI is the same as when running
+          Eclipse from the command line using -application org.eclipse.emf.codegen.ecore.Generator.
+
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling/model/opendds/presentation/OpenDDSEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/domain/impl/DomainEntityImpl.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/impl/publisherImpl.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/impl/subscriberImpl.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics/TopicDescription.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics/impl/ContentFilteredTopicImpl.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics/impl/MultiTopicImpl.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics/impl/TopicImpl.java:
+
+	  Updates due to changing the code formatting.
+
 Thu Jan  6 16:14:57 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmftool:
