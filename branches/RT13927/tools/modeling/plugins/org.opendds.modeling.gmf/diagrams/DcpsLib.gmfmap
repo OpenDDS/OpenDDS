@@ -2214,4 +2214,46 @@
     <palette
         href="DcpsLib.gmftool#//@palette"/>
   </diagram>
+  <audits
+      id="org.opendds.modeling.model.dcps.validations"
+      name="DcpsLib Validations"
+      description="Detects incorrect or questionable semantic constructs for elements in a DcpsLib diagram.">
+    <childContainers
+        id="org.opendds.modeling.model.dcps.validation.errors"
+        name="DcpsLib Errors"
+        description="Detects modeling constructs that would result in invalid generated OpenDDS code.">
+      <audits
+          name="Domain Entity Name Empty"
+          description="Domain entity names should not be empty"
+          id="org.opendds.modeling.model.dcps.validation.error.domain_entity_name_blank"
+          message="Domain entity name is empty">
+        <rule
+            body="not self.name.oclIsUndefined() and self.name &lt;> ''"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/Domain.ecore#//DomainEntity"/>
+        </target>
+      </audits>
+    </childContainers>
+    <childContainers
+        id="org.opendds.modeling.model.dcps.validation.warnings"
+        name="DcpsLib Warnings"
+        description="Detects questionable modeling constructs.">
+      <audits
+          name="DomainParticipant Empty"
+          description="DomainParticipant should have a Publisher or Subscriber"
+          id="org.opendds.modeling.model.dcps.validation.warning.domainparticipant_empty"
+          severity="WARNING"
+          message="A DomainParticipant should have at least one Publisher or Subscriber">
+        <rule
+            body="self.publishers->size() + self.subscribers->size() > 0"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/DCPS.ecore#//DomainParticipant"/>
+        </target>
+      </audits>
+    </childContainers>
+  </audits>
 </gmfmap:Mapping>
