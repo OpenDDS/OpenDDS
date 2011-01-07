@@ -42,14 +42,30 @@
 
 <xsl:template name="normalize-identifier">
   <xsl:param name="identifier" select="@name"/>
-  <xsl:value-of select="translate($identifier, ' -', '__')"/>
+  <xsl:value-of select="translate($identifier, ' -:', '___')"/>
 </xsl:template>
 
 <xsl:template name="type-enum">
   <xsl:param name="type" select="."/>
   <xsl:choose>
     <xsl:when test="string-length($type/../@model) &gt; 0">
-      <xsl:value-of select="concat($type/../@model, '_', $type/@name)"/>
+      <xsl:variable name="scopename">
+        <xsl:call-template name="scopename">
+          <xsl:with-param name="target" select="$type"/>
+        </xsl:call-template>
+      </xsl:variable>
+      <xsl:variable name="qualname">
+        <xsl:call-template name="normalize-identifier">
+          <xsl:with-param name="identifier">
+            <xsl:value-of select="concat($scopename, $type/@name)"/>
+          </xsl:with-param>
+        </xsl:call-template>
+      </xsl:variable>
+      <xsl:call-template name="string-replace-all">
+        <xsl:with-param name="text" select="$qualname"/>
+        <xsl:with-param name="replace" select="'__'"/>
+        <xsl:with-param name="by" select="'_'"/>
+      </xsl:call-template>
     </xsl:when>
     <xsl:otherwise>
       <xsl:value-of select="$type/@name"/>
@@ -64,5 +80,26 @@
   <xsl:variable name="rest" select="substring($value, 2)"/>
   <xsl:value-of select="concat($FIRST, $rest)"/>
 </xsl:template>
+
+ <xsl:template name="string-replace-all">
+    <xsl:param name="text" />
+    <xsl:param name="replace" />
+    <xsl:param name="by" />
+    <xsl:choose>
+      <xsl:when test="contains($text, $replace)">
+        <xsl:value-of select="substring-before($text,$replace)" />
+        <xsl:value-of select="$by" />
+        <xsl:call-template name="string-replace-all">
+          <xsl:with-param name="text"
+          select="substring-after($text,$replace)" />
+          <xsl:with-param name="replace" select="$replace" />
+          <xsl:with-param name="by" select="$by" />
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$text" />
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
 </xsl:stylesheet>
 

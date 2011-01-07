@@ -8,6 +8,7 @@
     ** Generate C++ header code.
     **
     -->
+<xsl:include href="common.xsl"/>
 
 <xsl:variable name="topics"      select="//topics"/>
 <xsl:variable name="policy-refs" select="//*[not(name() = 'datatype')]/@href"/>
@@ -177,13 +178,24 @@
     <xsl:if test="not(contains($complete-types, concat(' ',$external-id,' ')))">
       <xsl:variable name="external-model" select="substring-before($topic/datatype/@href, '#')"/>
       <xsl:for-each select="document($external-model)//types[@xmi:id = $external-id]">
+
+        <xsl:variable name="modelname">
+          <xsl:call-template name="modelname"/>
+        </xsl:variable>
+<xsl:message>modelname is <xsl:value-of select="$modelname"/> </xsl:message>
+        <xsl:variable name="scopename">
+          <xsl:call-template name="scopename"/>
+        </xsl:variable>
         <xsl:element name="dataLib">
           <xsl:attribute name="model">
-            <xsl:value-of select="../../@name"/>
+            <xsl:value-of select="$modelname"/>
           </xsl:attribute>
           <xsl:apply-templates select="../@name"/>
           <xsl:copy>
-            <xsl:apply-templates select="@name | @xmi:id"/>
+            <xsl:attribute name="name">
+              <xsl:value-of select="concat($scopename, @name)"/>
+            </xsl:attribute>
+            <xsl:apply-templates select="@xmi:id"/>
           </xsl:copy>
         </xsl:element>
       </xsl:for-each>
@@ -216,6 +228,22 @@
       <xsl:with-param name="complete-policies" select="concat($complete-policies, ' ', $external-id, ' ')"/>
     </xsl:call-template>
   </xsl:if>
+</xsl:template>
+
+<xsl:template name="modelname">
+  <xsl:param name="target" select="."/>
+<xsl:message>checking modelname for <xsl:value-of select="name($target)"/> </xsl:message>
+  <xsl:choose>
+    <xsl:when test="name($target) = 'opendds:OpenDDSModel'">
+      <xsl:value-of select="$target/@name"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:call-template name="modelname">
+        <xsl:with-param name="target" select="$target/.."/>
+      </xsl:call-template>
+
+    </xsl:otherwise>
+  </xsl:choose>
 </xsl:template>
 
 </xsl:stylesheet>
