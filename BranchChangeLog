@@ -1,3 +1,15 @@
+Fri Jan  7 16:51:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerMC:
+        * tools/modeling/tests/MessengerMC/MessengerMC.gen:
+        * tools/modeling/tests/MessengerMC/MessengerMC.mpc:
+        * tools/modeling/tests/MessengerMC/MessengerMC.opendds:
+        * tools/modeling/tests/MessengerMC/publisher.cpp:
+        * tools/modeling/tests/MessengerMC/subscriber.cpp:
+        * tools/modeling/tests/setup.pl
+
+          Renamed Multicast test
+
 Fri Jan  7 15:56:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/** (svn props only):
