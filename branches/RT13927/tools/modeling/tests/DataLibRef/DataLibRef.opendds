@@ -21,24 +21,42 @@
         <fields xmi:id="_JUMe0PDvEd-I4rwicuuPOw" name="subject" type="_E8F2IPDvEd-I4rwicuuPOw"/>
         <fields xmi:id="_M8mv8PDvEd-I4rwicuuPOw" name="subject_id" type="_PXgFEPDvEd-I4rwicuuPOw"/>
         <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw" name="text" type="_E8F2IPDvEd-I4rwicuuPOw"/>
-        <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+        <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_5STIgPDuEd-I4rwicuuPOw4"/>
         <fields xmi:id="_DJeIYBm0EeCiwqO3ASSQ8g" name="pos" type="_4C6qsBmzEeCiwqO3ASSQ8g"/>
         <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_M8mv8PDvEd-I4rwicuuPOw"/>
       </types>
       <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw"/>
       <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw"/>
     </dataLib>
+    <dataLib xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data4">
+      <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw4" name="CountType" isDcpsDataType="true">
+        <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+      </types>
+    </dataLib>
   </packages>
   <packages name="data2">
     <dataLib xmi:id="_1xaiIBmzEeCiwqO3ASSQ8g" name="data2">
       <types xsi:type="types:Double" xmi:id="_3YJ2cBmzEeCiwqO3ASSQ8g"/>
+      <types xsi:type="types:Struct" xmi:id="_4C6qsBmzEeCiwqO3ASSQ8g2" name="LongType" isDcpsDataType="true">
+          <fields xmi:id="__ka7ABm4EeCiwqO3ASSQ8gc" name="value" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+      </types>
       <types xsi:type="types:Struct" xmi:id="_4C6qsBmzEeCiwqO3ASSQ8g" name="Position" isDcpsDataType="true">
-        <fields xmi:id="_5khAUBmzEeCiwqO3ASSQ8g" name="lat" type="_3YJ2cBmzEeCiwqO3ASSQ8g"/>
-        <fields xmi:id="_7es1EBmzEeCiwqO3ASSQ8g" name="lon" type="_3YJ2cBmzEeCiwqO3ASSQ8g"/>
+        <fields xmi:id="_5khAUBmzEeCiwqO3ASSQ8g" name="lat" type="_4C6qsBmzEeCiwqO3ASSQ8g3"/>
+        <fields xmi:id="_7es1EBmzEeCiwqO3ASSQ8g" name="lon" type="_4C6qsBmzEeCiwqO3ASSQ8g3"/>
       </types>
       <types xsi:type="types:Struct" xmi:id="_-EgAYBm4EeCiwqO3ASSQ8g" name="ABC" isDcpsDataType="true">
         <fields xmi:id="__ka7ABm4EeCiwqO3ASSQ8g" name="value" type="_E8F2IPDvEd-I4rwicuuPOw"/>
       </types>
     </dataLib>
+    <packages name="data3">
+      <dataLib name="data3">
+        <types xsi:type="types:Struct" xmi:id="_4C6qsBmzEeCiwqO3ASSQ8g3" name="FixedVal" isDcpsDataType="true">
+          <fields xmi:id="__ka7ABm4EeCiwqO3ASSQ8gb" name="base" type="_4C6qsBmzEeCiwqO3ASSQ8g2"/>
+          <fields xmi:id="__ka7ABm4EeCiwqO3ASSQ8gc" name="exponent" type="_4C6qsBmzEeCiwqO3ASSQ8g2"/>
+
+        </types>
+      
+      </dataLib>
+    </packages>
   </packages>
 </opendds:OpenDDSModel>

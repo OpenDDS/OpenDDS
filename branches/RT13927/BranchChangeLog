@@ -1,3 +1,15 @@
+Fri Jan  7 19:07:41 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+
+          Handle child scope properly.
+
+        * tools/modeling/tests/DataLibRef/DataLibRef.opendds:
+        * tools/modeling/tests/DataLibRef/publisher.cpp:
+        * tools/modeling/tests/DataLibRef/subscriber.cpp:
+
+          Additional reference types.
+
 Fri Jan  7 18:23:38 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/setup.pl:
