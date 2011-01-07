@@ -6,6 +6,56 @@
     modelID="OpenDDS DcpsLib"
     diagramFileExtension="opendds_diagram_dcpslib"
     copyrightText="(c) Copyright Object Computing, Incorporated. 2005,2010. All rights reserved.">
+  <audits>
+    <categories
+        id="org.opendds.modeling.model.dcps.validations"
+        name="DcpsLib Validations"
+        description="Detects incorrect or questionable semantic constructs for elements in a DcpsLib diagram."
+        path="//@audits/@categories.0"/>
+    <categories
+        id="org.opendds.modeling.model.dcps.validation.errors"
+        name="DcpsLib Errors"
+        description="Detects modeling constructs that would result in invalid generated OpenDDS code."
+        path="//@audits/@categories.0 //@audits/@categories.1"
+        audits="//@audits/@rules.0"/>
+    <categories
+        id="org.opendds.modeling.model.dcps.validation.warnings"
+        name="DcpsLib Warnings"
+        description="Detects questionable modeling constructs."
+        path="//@audits/@categories.0 //@audits/@categories.2"
+        audits="//@audits/@rules.1"/>
+    <rules
+        name="Domain Entity Name Empty"
+        description="Domain entity names should not be empty"
+        id="org.opendds.modeling.model.dcps.validation.error.domain_entity_name_blank"
+        rule="//@expressionProviders/@providers.0/@expressions.18"
+        message="Domain entity name is empty"
+        category="//@audits/@categories.1">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//domain/DomainEntity"/>
+      </target>
+    </rules>
+    <rules
+        name="DomainParticipant Empty"
+        description="DomainParticipant should have a Publisher or Subscriber"
+        id="org.opendds.modeling.model.dcps.validation.warning.domainparticipant_empty"
+        rule="//@expressionProviders/@providers.0/@expressions.19"
+        message="A DomainParticipant should have at least one Publisher or Subscriber"
+        severity="WARNING"
+        category="//@audits/@categories.2">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DomainParticipant"/>
+      </target>
+    </rules>
+    <clientContexts
+        ruleTargets="//@audits/@rules.0/@target //@audits/@rules.1/@target"/>
+  </audits>
   <diagram
       visualID="1000"
       editPartClassName="DcpsLibEditPart"
@@ -6612,6 +6662,12 @@
           body="0"/>
       <expressions
           body="0"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="not self.name.oclIsUndefined() and self.name &lt;> ''"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.publishers->size() + self.subscribers->size() > 0"/>
     </providers>
   </expressionProviders>
   <labelParsers

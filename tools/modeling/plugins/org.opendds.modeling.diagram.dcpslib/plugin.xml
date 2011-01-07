@@ -1331,6 +1331,61 @@
          <context decoratorTargets="PRIMARY_VIEW"/>
       </decoratorProvider>
    </extension>
+<extension point="org.eclipse.emf.validation.constraintProviders">
+      <?gmfgen generated="true"?>
+            <category id="org.opendds.modeling.model.dcps.validations" mandatory="false" name="DcpsLib Validations">
+         <![CDATA[Detects incorrect or questionable semantic constructs for elements in a DcpsLib diagram.]]>
+      </category>
+      <category id="org.opendds.modeling.model.dcps.validations/org.opendds.modeling.model.dcps.validation.errors" mandatory="false" name="DcpsLib Errors">
+         <![CDATA[Detects modeling constructs that would result in invalid generated OpenDDS code.]]>
+      </category>
+      <category id="org.opendds.modeling.model.dcps.validations/org.opendds.modeling.model.dcps.validation.warnings" mandatory="false" name="DcpsLib Warnings">
+         <![CDATA[Detects questionable modeling constructs.]]>
+      </category>
+      <constraintProvider cache="true">
+         <package namespaceUri="http://www.opendds.org/modeling/schemas/Domain/1.0"/>
+         <package namespaceUri="http://www.opendds.org/modeling/schemas/DCPS/1.0"/>
+               <constraints categories="org.opendds.modeling.model.dcps.validations">
+                  </constraints>
+         <constraints categories="org.opendds.modeling.model.dcps.validations/org.opendds.modeling.model.dcps.validation.errors">
+                  <constraint id="org.opendds.modeling.model.dcps.validation.error.domain_entity_name_blank"
+            lang="OCL"
+            name="Domain Entity Name Empty"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not self.name.oclIsUndefined() and self.name <> '']]>
+            <description><![CDATA[Domain entity names should not be empty]]></description>
+            <message><![CDATA[Domain entity name is empty]]></message>
+            <target class="domain.DomainEntity"/>
+         </constraint>
+                  </constraints>
+         <constraints categories="org.opendds.modeling.model.dcps.validations/org.opendds.modeling.model.dcps.validation.warnings">
+                  <constraint id="org.opendds.modeling.model.dcps.validation.warning.domainparticipant_empty"
+            lang="OCL"
+            name="DomainParticipant Empty"
+            mode="Batch"
+            severity="WARNING" statusCode="200">
+            <![CDATA[self.publishers->size() + self.subscribers->size() > 0]]>
+            <description><![CDATA[DomainParticipant should have a Publisher or Subscriber]]></description>
+            <message><![CDATA[A DomainParticipant should have at least one Publisher or Subscriber]]></message>
+            <target class="dcps.DomainParticipant"/>
+         </constraint>
+                  </constraints>
+      </constraintProvider>
+   </extension>
+
+<extension point="org.eclipse.emf.validation.constraintBindings">
+      <?gmfgen generated="true"?>
+      <clientContext default="false" id="org.opendds.modeling.diagram.dcpslibDefaultCtx">
+         <selector class="org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibValidationProvider$DefaultCtx"/>
+      </clientContext>
+      <binding context="org.opendds.modeling.diagram.dcpslibDefaultCtx">
+                  <constraint ref="org.opendds.modeling.diagram.dcpslib.org.opendds.modeling.model.dcps.validation.error.domain_entity_name_blank"/>
+                  <constraint ref="org.opendds.modeling.diagram.dcpslib.org.opendds.modeling.model.dcps.validation.warning.domainparticipant_empty"/>
+               </binding>
+
+   </extension>
+
 
 
 
