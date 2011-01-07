@@ -12,6 +12,11 @@ use Cwd;
 
 my @dirs = qw(Arrays CompositeKey DataLibRef DomainZero ExternalPolicies InvalidNames Messenger MessengerDpQos MessengerGlobalNs MessengerMC MessengerMixed MessengerMulti MessengerNoPub MessengerNoSub MessengerPubQos MessengerSplit MessengerWriterQos MultiInstance PolicyLib ReaderQos Sequences SubscriberQos TopicQos UDP);
 
+if ($#ARGV + 1 > 0) {
+  print "Overriding dir list\n";
+  @dirs = @ARGV;
+}
+
 my $javapkg = 'org.opendds.modeling.sdk';
 my $subdir = 'model';
 my @suffixes = qw(.idl _T.h _T.cpp .mpc);
@@ -41,8 +46,6 @@ sub generate {
   my $status;
 
   print "Running code generation on: $base.opendds\n";
-
-  print -e $tmp;
 
     print "   preprocessing...\n";
     $status = system("xsltproc --path . $pp $base.opendds > $tmp");
