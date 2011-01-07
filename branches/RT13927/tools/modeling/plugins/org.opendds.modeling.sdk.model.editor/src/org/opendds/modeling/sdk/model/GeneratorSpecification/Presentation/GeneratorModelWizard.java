@@ -71,6 +71,7 @@ import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
+import org.opendds.modeling.common.Plugin;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.CodeGen;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorFactory;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorPackage;
@@ -170,13 +171,13 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	 * This just records the information.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @generated
+	 * @generated NOT
 	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		this.workbench = workbench;
 		this.selection = selection;
 		setWindowTitle(GeneratorEditorPlugin.INSTANCE.getString("_UI_Wizard_label"));
-		setDefaultPageImageDescriptor(ExtendedImageRegistry.INSTANCE.getImageDescriptor(GeneratorEditorPlugin.INSTANCE.getImage("full/wizban/NewGenerator")));
+		setDefaultPageImageDescriptor(ExtendedImageRegistry.INSTANCE.getImageDescriptor(GeneratorEditorPlugin.INSTANCE.getImage("full/wizban/" + Plugin.INSTANCE.imageMapping("NewGenerator"))));
 		parsedModelFile = SdkGeneratorFactory.createParsedModelFile(
 				(Window)this.workbench.getActiveWorkbenchWindow());
 	}

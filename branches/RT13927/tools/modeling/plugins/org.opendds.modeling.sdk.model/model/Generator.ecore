@@ -103,8 +103,6 @@
         defaultValueLiteral="32"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TcpConfig" eSuperTypes="#//TransportConfig">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="transport_type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        changeable="false" defaultValueLiteral="SimpleTcp"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="local_address_str" eType="#//LocalAddressString"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="enable_nagle_algorithm"
@@ -155,8 +153,6 @@
         defaultValueLiteral="10000"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MulticastConfig" eSuperTypes="#//TransportConfig">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="transport_type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        changeable="false" defaultValueLiteral="multicast"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="default_to_ipv6" eType="#//DefaultToIPv6"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="port_offset" eType="#//PortOffset"
