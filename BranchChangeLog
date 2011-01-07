@@ -1,3 +1,14 @@
+Fri Jan  7 21:25:01 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/preprocess.xsl:
+
+          Type enum names using packages.
+
+        * tools/modeling/tests/MessengerMixed/MessengerTypesMixed.opendds:
+
+          Updated test case with packages.
+
 Fri Jan  7 20:57:33 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * BranchChangeLog:
