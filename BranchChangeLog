@@ -1,3 +1,25 @@
+Fri Jan  7 18:04:28 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+
+          Qualify type names using packages, rather than dataLib name.
+
+        * tools/modeling/tests/DataLibRef:
+        * tools/modeling/tests/DataLibRef/DataLibRef.gen:
+        * tools/modeling/tests/DataLibRef/DataLibRef.mpc:
+        * tools/modeling/tests/DataLibRef/DataLibRef.opendds:
+        * tools/modeling/tests/DataLibRef/publisher.cpp:
+        * tools/modeling/tests/DataLibRef/subscriber.cpp:
+        * tools/modeling/tests/setup.pl:
+
+          Test data lib referencing other datalib.
+
+        * tools/modeling/tests/Messenger/Messenger.opendds:
+
+          Add a package level.
+
 Fri Jan  7 16:51:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerMC:

@@ -11,6 +11,35 @@
 <xsl:variable name="lower" select="'abcdefghijklmnopqrstuvwxyz'"/>
 <xsl:variable name="upper" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
 
+<!--
+  A::B::C::D::name
+-->
+<xsl:template name="scopename">
+  <xsl:param name="target" select="."/>
+  <xsl:choose>
+    <xsl:when test="name($target) = 'opendds:OpenDDSModel'">
+    </xsl:when>
+    <xsl:when test="name($target) = 'dataLib'">
+      <xsl:call-template name="scopename">
+        <xsl:with-param name="target" select="$target/.."/>
+      </xsl:call-template>
+    </xsl:when>
+    <xsl:when test="name($target) = 'packages'">
+      <xsl:variable name="prefix">
+        <xsl:call-template name="scopename">
+          <xsl:with-param name="target" select="$target/.."/>
+        </xsl:call-template>
+      </xsl:variable>
+      <xsl:value-of select="concat($prefix, $target/@name, '::')"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:call-template name="scopename">
+        <xsl:with-param name="target" select="$target/.."/>
+      </xsl:call-template>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
+
 <xsl:template name="normalize-identifier">
   <xsl:param name="identifier" select="@name"/>
   <xsl:value-of select="translate($identifier, ' -', '__')"/>

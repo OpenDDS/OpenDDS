@@ -936,20 +936,15 @@ Elements::Data::copySubscriptionQos(
       <xsl:with-param name="identifier" select="$type/../@model"/>
     </xsl:call-template>
   </xsl:variable>
-  <xsl:variable name="libname">
-    <xsl:call-template name="normalize-identifier">
-      <xsl:with-param name="identifier" select="$type/../@name"/>
-    </xsl:call-template>
+  <xsl:variable name="scopename">
+    <xsl:call-template name="scopename"/>
   </xsl:variable>
 
   <xsl:text>    case Types::</xsl:text>
   <xsl:call-template name="type-enum"/>
   <xsl:value-of select="concat(':', $newline, '      {', $newline, 
                                '        typedef ')"/>
-  <xsl:if test="string-length($libname)">
-    <xsl:value-of select="concat('::', $libname)"/>
-  </xsl:if>
-  <xsl:value-of select="concat('::', $type/@name)"/>
+  <xsl:value-of select="concat($scopename, $type/@name)"/>
   <xsl:text>TypeSupportImpl TypeSupport;
 
         TypeSupport* typeSupport = new TypeSupport();
