@@ -22,6 +22,7 @@ use File::Temp qw(tempdir);
 
 my $suffix = ($^O eq 'MSWin32') ? 'c' : '';
 my $cwd = getcwd();
+my $feature_dir = 'features/org.opendds.modeling.feature';
 my @steps = (
   {'dir' => 'plugins/org.opendds.modeling.model',
    'script' => 'ant_codegen.xml'},
@@ -34,11 +35,12 @@ my @steps = (
 my $automated = 0;
 if (scalar @ARGV && $ARGV[0] =~ /^-?-automated/) {
   $automated = 1;
+  unshift(@steps,
+          {'dir' => $feature_dir,
+           'args' => 'clean'}) if -r $feature_dir . '/build.xml';
   push(@steps,
        {'extra_plugins' => 1},
-       {'dir' => 'features/org.opendds.modeling.feature',
-#  clean doesn't work yet...        'args' => 'clean build.update.jar'
-       });
+       {'dir' => $feature_dir});
 }
 
 if (!defined $ECLIPSE_WORKSPACE) {
