@@ -1,3 +1,120 @@
+Fri Jan  7 19:51:07 UTC 2011  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * [r4077] 2011-01-07 19:43  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/GeneratorEditPlugin.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditorPlugin.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/templates/edit/ItemProvider.javajet:
+
+          Defering image locations to the common plug-in.
+
+        * [r4076] 2011-01-07 19:41  martinezm
+          tools/modeling/plugins/org.opendds.modeling.common/.classpath,
+          tools/modeling/plugins/org.opendds.modeling.common/.project,
+          tools/modeling/plugins/org.opendds.modeling.common/META-INF,
+          tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF,
+          tools/modeling/plugins/org.opendds.modeling.common/build.properties,
+          tools/modeling/plugins/org.opendds.modeling.common/icons,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateInstance_transportOffset_TransportOffset.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateInstance_transport_Transport.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateInstances_instance_Instance.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateMulticastConfig_default_to_ipv6_DefaultToIPv6.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateMulticastConfig_group_address_GroupAddress.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateMulticastConfig_nak_depth_NakDepth.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateMulticastConfig_nak_interval_NakInterval.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateMulticastConfig_nak_timeout_NakTimeout.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateMulticastConfig_port_offset_PortOffset.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateMulticastConfig_rcv_buffer_size_RcvBufferSIze.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateMulticastConfig_reliable_Reliable.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateMulticastConfig_syn_backoff_SynBackoff.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateMulticastConfig_syn_interval_SynInterval.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateMulticastConfig_syn_timeout_SynTimeout.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateMulticastConfig_ttl_TTL.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTcpConfig_conn_retry_attempts_ConnRetryAttempts.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTcpConfig_conn_retry_backoff_multiplier_ConnRetryBackoffMultiplier.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTcpConfig_conn_retry_initial_delay_ConnRetryInitialDelay.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTcpConfig_enable_nagle_algorithm_EnableNagleAlgorithm.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTcpConfig_local_address_str_LocalAddressString.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTcpConfig_max_output_pause_period_MaxOutputPausePeriod.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTcpConfig_passive_connect_duration_PassiveConnectDuration.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTcpConfig_passive_reconnect_duration_PassiveReconnectDuration.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTransportConfig_datalink_control_chunks_DatalinkControlChunks.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTransportConfig_datalink_release_delay_DatalinkReleaseDelay.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTransportConfig_max_packet_size_MaxPacketSize.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTransportConfig_max_samples_per_packet_MaxSamplesPerPacket.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTransportConfig_optimum_packet_size_OptimumPacketSize.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTransportConfig_queue_initial_pools_QueueInitialPool.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTransportConfig_queue_messages_per_pool_QueueMessagesPerPool.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTransportConfig_swap_bytes_SwapBytes.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTransportConfig_thread_per_connection_ThreadPerConnection.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTransport_MulticastTransport_MulticastConfig.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTransport_TCPTransport_TcpConfig.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateTransport_UDPTransport_UdpConfig.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateUdpConfig_local_address_str_LocalAddressString.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/Creategenspec_instances_Instances.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/Creategenspec_source_ModelFile.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/Creategenspec_target_TargetDir.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/DefaultImage.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/boolean.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/generator.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/instance.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/node.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/number.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/package.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/string.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/wizban,
+          tools/modeling/plugins/org.opendds.modeling.common/icons/full/wizban/generator-large.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/plugin.properties,
+          tools/modeling/plugins/org.opendds.modeling.common/src,
+          tools/modeling/plugins/org.opendds.modeling.common/src/org,
+          tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds,
+          tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling,
+          tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common,
+          tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/Plugin.java:
+
+          Adding common resource plug-in for use by other SDK plug-ins.
+
+        * [r4075] 2011-01-07 19:35  martinezm
+          tools/modeling/plugins/org.opendds.modeling.common:
+
+          Share project "org.opendds.modeling.common" into "https://svn.dre.vanderbilt.edu/DOC/DDS"
+
+        * [r4062] 2011-01-06 16:59  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/plugin.xml:
+
+          Remove obsolete extension.
+
+        * [r4058] 2011-01-06 16:06  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/templates,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/templates/edit,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/templates/edit/ItemProvider.javajet:
+
+          Added example override of JET template for Edit code generation.
+          This is in anticipation of extending the ResourceLocator for the
+          images.
+
+        * [r4054] 2011-01-06 14:10  martinezm
+          tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+
+          Add the autopurge_nowriter_sample_delay feature string to the
+          checked in properties.
+
 Fri Jan  7 19:07:41 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
