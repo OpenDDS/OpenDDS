@@ -10,5 +10,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.opendds.modeling.sdk.model.GeneratorSpecification,
  org.opendds.modeling.sdk.model.GeneratorSpecification.Util
 Require-Bundle: org.eclipse.emf.ecore.xmi,
- org.eclipse.emf.codegen.ecore
+ org.eclipse.emf.codegen.ecore,
+ org.opendds.modeling.common;visibility:=reexport
 Bundle-ActivationPolicy: lazy

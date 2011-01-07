@@ -20,6 +20,7 @@
 package <%=genPackage.getProviderPackageName()%>;
 
 
+<%genModel.addImport("org.opendds.modeling.common.Plugin");%>
 <%genModel.addImport("org.eclipse.emf.common.notify.AdapterFactory");%>
 <%genModel.addImport("org.eclipse.emf.common.notify.Notification");%>
 <%genModel.addImport("org.eclipse.emf.edit.provider.IEditingDomainItemProvider");%>
@@ -205,8 +206,7 @@ public class <%=genClass.getProviderClassName()%>
 <%}%>
 	public Object getImage(Object object)
 	{
-	    // This is a customization.
-		return overlayImage(object, getResourceLocator().getImage("full/obj16/<%=genClass.getName()%>"));<%=genModel.getNonNLS()%>
+		return overlayImage(object, getResourceLocator().getImage("full/obj16/" + Plugin.INSTANCE.imageMapping("<%=genClass.getName()%>")));<%=genModel.getNonNLS()%>
 	}
 
 <%}%>
