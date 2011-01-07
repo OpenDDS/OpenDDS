@@ -67,11 +67,11 @@ int main(int argc, char** argv)
     message.from       = CORBA::string_dup("Comic Book Guy");
     message.subject    = CORBA::string_dup("Review");
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
-    message.count      = 0;
+    message.count.count      = 0;
 
     for (int i = 0; i < 10; i++) {
       DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
-      ++message.count;
+      ++message.count.count;
 
       if (error != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,

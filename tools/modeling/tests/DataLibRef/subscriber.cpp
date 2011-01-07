@@ -45,7 +45,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
       std::cout << "Message: subject    = " << message.subject.in() << std::endl
                 << "         subject_id = " << message.subject_id   << std::endl
                 << "         from       = " << message.from.in()    << std::endl
-                << "         count      = " << message.count        << std::endl
+                << "         count      = " << message.count.count  << std::endl
                 << "         text       = " << message.text.in()    << std::endl;
 
     }

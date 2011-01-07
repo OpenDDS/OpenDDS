@@ -367,7 +367,7 @@
 
   <xsl:choose>
     <xsl:when test="starts-with($target-scopename, $referrer-scopename)">
-      <xsl:value-of select="concat(substring($target-scopename, string-length($referrer-scopename + 1)), '::')"/>
+      <xsl:value-of select="substring-after($target-scopename, $referrer-scopename)"/>
     </xsl:when>
     <xsl:otherwise>
       <xsl:value-of select="$target-scopename"/>
