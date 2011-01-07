@@ -27,7 +27,6 @@ public class ReferencesFinder {
 		for (EObject obj : referrerObject.eCrossReferences()) {
 			if (superType.isInstance(obj)) {
 				refs.add((T) obj);
-				System.out.println("    Reference found: " + obj.toString());
 			}
 		}
 		return refs;
