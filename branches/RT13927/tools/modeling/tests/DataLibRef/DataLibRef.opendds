@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_4ju5sfDrEd-CmLmrf7-qiA" name="Messenger">
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_4ju5sfDrEd-CmLmrf7-qiA" name="DataLibRef">
   <dcpsLib xmi:id="_XmyasPDvEd-I4rwicuuPOw">
     <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="" domainId="42"/>
     <participants xmi:id="_esFCYPDvEd-I4rwicuuPOw" name="part1" domain="_bs2RIPDvEd-I4rwicuuPOw">
@@ -15,17 +15,30 @@
     <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
   </dcpsLib>
   <packages name="data1">
-    <dataLib xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="datalib1">
+    <dataLib xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data1">
       <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw" name="Message" isDcpsDataType="true">
         <fields xmi:id="_AbpJwPDvEd-I4rwicuuPOw" name="from" type="_E8F2IPDvEd-I4rwicuuPOw"/>
         <fields xmi:id="_JUMe0PDvEd-I4rwicuuPOw" name="subject" type="_E8F2IPDvEd-I4rwicuuPOw"/>
         <fields xmi:id="_M8mv8PDvEd-I4rwicuuPOw" name="subject_id" type="_PXgFEPDvEd-I4rwicuuPOw"/>
         <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw" name="text" type="_E8F2IPDvEd-I4rwicuuPOw"/>
         <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+        <fields xmi:id="_DJeIYBm0EeCiwqO3ASSQ8g" name="pos" type="_4C6qsBmzEeCiwqO3ASSQ8g"/>
         <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_M8mv8PDvEd-I4rwicuuPOw"/>
       </types>
       <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw"/>
       <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw"/>
+    </dataLib>
+  </packages>
+  <packages name="data2">
+    <dataLib xmi:id="_1xaiIBmzEeCiwqO3ASSQ8g" name="data2">
+      <types xsi:type="types:Double" xmi:id="_3YJ2cBmzEeCiwqO3ASSQ8g"/>
+      <types xsi:type="types:Struct" xmi:id="_4C6qsBmzEeCiwqO3ASSQ8g" name="Position" isDcpsDataType="true">
+        <fields xmi:id="_5khAUBmzEeCiwqO3ASSQ8g" name="lat" type="_3YJ2cBmzEeCiwqO3ASSQ8g"/>
+        <fields xmi:id="_7es1EBmzEeCiwqO3ASSQ8g" name="lon" type="_3YJ2cBmzEeCiwqO3ASSQ8g"/>
+      </types>
+      <types xsi:type="types:Struct" xmi:id="_-EgAYBm4EeCiwqO3ASSQ8g" name="ABC" isDcpsDataType="true">
+        <fields xmi:id="__ka7ABm4EeCiwqO3ASSQ8g" name="value" type="_E8F2IPDvEd-I4rwicuuPOw"/>
+      </types>
     </dataLib>
   </packages>
 </opendds:OpenDDSModel>

@@ -24,8 +24,8 @@
 <xsl:variable name="lut" select="document('lut.xml')/*/lut:types"/>
 
 <!-- All types -->
-<xsl:variable name="types"       select="/opendds:OpenDDSModel/dataLib/types"/>
-<xsl:variable name="local-types" select="/opendds:OpenDDSModel/dataLib[not(@model)]/types"/>
+<xsl:variable name="types"       select="//dataLib/types"/>
+<xsl:variable name="local-types" select="//dataLib[not(@model)]/types"/>
 
 <!-- Terminal user defined types are all unreferenced user defined types -->
 <xsl:variable name="terminals" select="$local-types[not
@@ -34,7 +34,7 @@
                        @xmi:id=$local-types//@switch)]"/>
 
 <!-- determine mode by checking number of datalibs defined in this model -->
-<xsl:variable name="datalib-count" select="count(opendds:OpenDDSModel/dataLib[not(@model)])"/> 
+<xsl:variable name="datalib-count" select="count(//dataLib[not(@model)])"/> 
 
 <!-- Index (lookup table is in lut variable) -->
 <xsl:key
@@ -58,49 +58,26 @@
   <xsl:call-template name="processExternalModels"/>
 
   <!-- forward declarations -->
-  <xsl:apply-templates select="dataLib"/>
+  <xsl:apply-templates mode="declare"/>
 
-  <xsl:if test="$datalib-count > 1">
-    <!-- Process all types with no dependencies on them.  This will 
-      ** recursively output the depended-on types ahead of those in
-      ** the nodes param, touching all types in model.
-      -->
-    <xsl:call-template name="generate-idl">
-      <xsl:with-param name="nodes" select="$terminals"/>
-    </xsl:call-template>
-  </xsl:if>
+  <!-- Process all types with no dependencies on them.  This will 
+    ** recursively output the depended-on types ahead of those in
+    ** the nodes param, touching all types in model.
+    -->
+  <xsl:call-template name="generate-idl">
+    <xsl:with-param name="nodes" select="$terminals"/>
+  </xsl:call-template>
 </xsl:template>
 <!-- End of main processing template. -->
 
-<xsl:template match="dataLib[not(@model)]">
-  <xsl:variable name="libname">
-    <xsl:call-template name="normalize-identifier"/>
-  </xsl:variable>
+<!-- TODO: HANDLE FORWARD DECS IN PACKAGES -->
 
-  <xsl:if test="(string-length($libname) > 0) and $local-types">
-    <xsl:value-of select="concat('module ', $libname, ' {', $newline,
-                                 '  // Forward declarations', $newline)"/>
-  </xsl:if>
-
-  <!-- Generate IDL for forward declarations. -->
-  <xsl:apply-templates select="types" mode="declare">
-    <xsl:sort select="@name"/>
-  </xsl:apply-templates>
-
-  <xsl:if test="$datalib-count = 1">
-    <!-- Process all types with no dependencies on them.  This will 
-      ** recursively output the depended-on types ahead of those in
-      ** the nodes param, touching all types in model.
-      -->
-    <xsl:call-template name="generate-idl">
-      <xsl:with-param name="nodes" select="$terminals"/>
-    </xsl:call-template>
-  </xsl:if>
-
-  <xsl:if test="(string-length($libname) > 0) and $local-types">
-    <xsl:value-of select="concat('};', $newline, $newline)"/>
-  </xsl:if>
+<xsl:template match="packages[.//types[@name]]" mode="declare">
+  <xsl:value-of select="concat('module ', @name, ' {', $newline)"/>
+  <xsl:apply-templates mode="declare"/>
+  <xsl:value-of select="concat('};', $newline)"/>
 </xsl:template>
+
 <!-- End of main processing template. -->
 
 <!-- Depth first traversal of type nodes processing predecessors first. -->
@@ -179,23 +156,54 @@
 <xsl:template match="text()" mode="declare">
 </xsl:template>
 
+<xsl:template name="module-wrapper">
+  <xsl:param name="target" select="."/>
+  <xsl:choose>
+    <xsl:when test="name($target) = 'packages'">
+      <xsl:call-template name="module-wrapper">
+        <xsl:with-param name="target" select="$target/.."/>
+      </xsl:call-template>
+      <xsl:value-of select="concat('module ', $target/@name, ' {', $newline)"/>
+    </xsl:when>
+    <xsl:when test="name($target) = 'opendds:OpenDDSModel'">
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:call-template name="module-wrapper">
+        <xsl:with-param name="target" select="$target/.."/>
+      </xsl:call-template>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
+
+<xsl:template name="close-module-wrapper">
+  <xsl:param name="target" select="."/>
+  <xsl:choose>
+    <xsl:when test="name($target) = 'packages'">
+      <xsl:call-template name="close-module-wrapper">
+        <xsl:with-param name="target" select="$target/.."/>
+      </xsl:call-template>
+      <xsl:value-of select="concat('};', $newline)"/>
+    </xsl:when>
+    <xsl:when test="name($target) = 'opendds:OpenDDSModel'">
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:call-template name="close-module-wrapper">
+        <xsl:with-param name="target" select="$target/.."/>
+      </xsl:call-template>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
+
 <!-- Process module wrappers . -->
 <xsl:template match="types[@xsi:type = 'types:Typedef'] |  
                      types[@xsi:type = 'types:Union'] | 
                      types[@xsi:type = 'types:Struct'] | 
                      types[@xsi:type = 'types:Enum']" mode="module-wrapped">
 
-  <xsl:variable name="libname" select="../@name"/>
-  <xsl:if test="($datalib-count > 1) and (string-length($libname) > 0)">
-    <xsl:value-of select="concat('module ', $libname, ' {', $newline)"/>
-  </xsl:if>
-
+  <xsl:call-template name="module-wrapper"/>
   <xsl:apply-templates select="."/>
+  <xsl:call-template name="close-module-wrapper"/>
 
-  <xsl:if test="($datalib-count > 1) and (string-length($libname) > 0)">
-    <xsl:value-of select="concat('};', $newline)"/>
-  </xsl:if>
-  
 </xsl:template>
 
 <!-- Process enumeration definitions. -->
@@ -239,12 +247,12 @@
     </xsl:call-template>
   </xsl:variable>
 
+  <xsl:variable name="scopename">
+    <xsl:call-template name="scopename"/>
+  </xsl:variable>
   <xsl:value-of select="concat($newline,'#pragma DCPS_DATA_TYPE &quot;')"/>
 
-  <xsl:if test="string-length($libname) > 0">
-     <xsl:value-of select="concat($libname,'::')"/>
-  </xsl:if>
-  <xsl:value-of select="concat(@name, '&quot;', $newline)"/>
+  <xsl:value-of select="concat($scopename, @name, '&quot;', $newline)"/>
 
   <xsl:apply-templates select="keys"/>
 
@@ -287,14 +295,23 @@
 
 <!-- Process individual structure members. -->
 <xsl:template match="fields" mode="struct">
+  <xsl:variable name="target" select="$types[@xmi:id = current()/@type]"/>
+
   <!-- Build the output string for the type specification. -->
+  <xsl:variable name="scopename">
+    <xsl:if test="$target[@name]">
+      <xsl:call-template name="ref-scopename">
+        <xsl:with-param name="target" select="$target"/>
+      </xsl:call-template>
+    </xsl:if>
+  </xsl:variable>
   <xsl:variable name="typename">
     <xsl:call-template name="typename">
-      <xsl:with-param name="target" select="$types[@xmi:id = current()/@type]"/>
+      <xsl:with-param name="target" select="$target"/>
     </xsl:call-template>
   </xsl:variable>
 
-  <xsl:value-of select="concat('    ',$typename,' ',@name,';',$newline)"/>
+  <xsl:value-of select="concat('    ',$scopename, $typename,' ',@name,';',$newline)"/>
 </xsl:template>
 
 <!-- Process enumeration members. -->
@@ -309,16 +326,12 @@
 
 <!-- Create a DCPS_DATA_KEY pragma line. -->
 <xsl:template match="keys">
-  <xsl:variable name="libname">
-    <xsl:call-template name="normalize-identifier">
-      <xsl:with-param name="identifier" select="../../@name"/>
-    </xsl:call-template>
+  <xsl:variable name="scopename">
+    <xsl:call-template name="scopename"/>
   </xsl:variable>
   <xsl:text>#pragma DCPS_DATA_KEY  "</xsl:text>
-  <xsl:if test="string-length($libname) > 0">
-     <xsl:value-of select="concat($libname,'::')"/>
-  </xsl:if>
-  <xsl:value-of select="concat(../@name,' ',
+  <xsl:value-of select="concat($scopename, 
+                        ../@name,' ',
                         ../fields[@xmi:id = current()/@field]/@name,
                         '&quot;',$newline)"/>
 </xsl:template>
@@ -335,6 +348,31 @@
     <xsl:with-param name="target" select="$types[@xmi:id = $targetid]"/>
   </xsl:call-template>
   <xsl:value-of select="concat(';',$newline)"/>
+</xsl:template>
+
+<xsl:template name="ref-scopename">
+  <xsl:param name="target"/>
+  <xsl:param name="referrer" select="."/>
+  <xsl:variable name="target-scopename">
+    <xsl:call-template name="scopename">
+      <xsl:with-param name="target" select="$target"/>
+    </xsl:call-template>
+  </xsl:variable>
+
+  <xsl:variable name="referrer-scopename">
+    <xsl:call-template name="scopename">
+      <xsl:with-param name="target" select="$referrer"/>
+    </xsl:call-template>
+  </xsl:variable>
+
+  <xsl:choose>
+    <xsl:when test="starts-with($target-scopename, $referrer-scopename)">
+      <xsl:value-of select="concat(substring($target-scopename, string-length($referrer-scopename + 1)), '::')"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:value-of select="$target-scopename"/>
+    </xsl:otherwise>
+  </xsl:choose>
 </xsl:template>
 
 <xsl:template name="typename">
