@@ -1,3 +1,20 @@
+Fri Jan  7 20:57:33 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * BranchChangeLog:
+
+        * tools/modeling/plugins/com.ociweb.emf.util/src/com/ociweb/emf/util/ReferencesFinder.java:
+
+          Remove print statement used during development.
+
+Fri Jan  7 20:12:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+
+          Added DCPS validations.
+
 Fri Jan  7 19:51:07 UTC 2011  Mike Martinez  <martinez_m@lab.ociweb.com>
 
         * [r4077] 2011-01-07 19:43  martinezm
