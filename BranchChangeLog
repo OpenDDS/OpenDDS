@@ -1,3 +1,59 @@
+Sun Jan  9 14:37:18 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/.project:
+        * tools/modeling/plugins/org.opendds.modeling.help/META-INF:
+        * tools/modeling/plugins/org.opendds.modeling.help/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.help/authoring_guide.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/concepts/maintopic.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/images/opendds.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/concepts/modeling.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/attribute_defined_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/attribute_editing_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/attribute_selected_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/attribute_undefined_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_sequence_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_struct_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_union_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/dcps_datawriter_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/dcpslib_policy_menu.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/dcpslib_pubsub_add.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/diagram_back_forward_buttons.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/diagram_connected_figures.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/diagram_connection_handles.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/diagram_connection_sources_target_menu.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/main_diagram_selected_lib.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/new_diagram_editor.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/new_diagram_selection.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/validation_decorated_figures.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/validations_in_problem_view.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/performingvalidations.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdatalib.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdcpslib.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdiagrams.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithopenddsmodels.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithpolicylib.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/datatypes.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qospolicies.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/samples/maintopic.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/styles.css:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/tasks/maintopic.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/tasks/subtopic.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/tasks/subtopic2.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/toc.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.help/toc.xml:
+        * tools/modeling/plugins/org.opendds.modeling.help/tocconcepts.xml:
+        * tools/modeling/plugins/org.opendds.modeling.help/tocgettingstarted.xml:
+        * tools/modeling/plugins/org.opendds.modeling.help/tocreference.xml:
+        * tools/modeling/plugins/org.opendds.modeling.help/tocsamples.xml:
+        * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
+
+          Start of SDK help content with (hopefully) enough in modeling tasks to be able
+          to create a complete SDK model (little discussion yet about referencing elements
+          from one DataLib to another).
+
 Fri Jan  7 21:26:29 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/build.pl:
