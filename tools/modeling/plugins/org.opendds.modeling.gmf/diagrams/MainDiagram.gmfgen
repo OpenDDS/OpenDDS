@@ -103,7 +103,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/DcpsLib/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSLib/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -122,7 +122,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«dcpslib»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/DcpsLib/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSLib/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -175,7 +175,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/PolicyLib/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSLib/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -194,7 +194,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«policyLib»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/PolicyLib/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSLib/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -247,7 +247,7 @@
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLib/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSLib/name"/>
         </modelFacet>
       </labels>
       <labels
@@ -266,7 +266,7 @@
             parser="//@labelParsers/@implementations.0"
             viewPattern="«dataLib»">
           <metaFeatures
-              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLib/name"/>
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSLib/name"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
