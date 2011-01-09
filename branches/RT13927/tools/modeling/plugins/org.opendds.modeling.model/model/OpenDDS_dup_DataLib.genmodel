@@ -48,12 +48,13 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/dataLib"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//OpenDDSModel/name"/>
     </genClasses>
+    <genClasses image="false" ecoreClass="OpenDDS.ecore#//OpenDDSLib">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//OpenDDSLib/name"/>
+    </genClasses>
     <genClasses ecoreClass="OpenDDS.ecore#//PolicyLib">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//PolicyLib/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//PolicyLib/policies"/>
     </genClasses>
     <genClasses ecoreClass="OpenDDS.ecore#//DcpsLib">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//DcpsLib/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DcpsLib/domains"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DcpsLib/participants"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DcpsLib/topics"/>
@@ -253,7 +254,6 @@
     <genClasses ecoreClass="Types.ecore#//WChar"/>
     <genClasses ecoreClass="Types.ecore#//WString"/>
     <genClasses ecoreClass="Types.ecore#//DataLib">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Types.ecore#//DataLib/name"/>
       <genFeatures property="None" children="true" createChild="true" propertySortChoices="true"
           ecoreFeature="ecore:EReference Types.ecore#//DataLib/types"/>
     </genClasses>

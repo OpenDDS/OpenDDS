@@ -15,7 +15,7 @@
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackageName"/>
         <features
-            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/name"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSLib/name"/>
       </labelMappings>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
@@ -24,7 +24,7 @@
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackageStereotype"/>
         <features
-            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/name"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSLib/name"/>
       </labelMappings>
       <relatedDiagrams
           href="DcpsLib.gmfmap#//@diagram"/>
@@ -46,7 +46,7 @@
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackageName"/>
         <features
-            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/name"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSLib/name"/>
       </labelMappings>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
@@ -55,7 +55,7 @@
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackageStereotype"/>
         <features
-            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib/name"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSLib/name"/>
       </labelMappings>
       <relatedDiagrams
           href="PolicyLib.gmfmap#//@diagram"/>
@@ -77,7 +77,7 @@
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackageName"/>
         <features
-            href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/name"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSLib/name"/>
       </labelMappings>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
@@ -86,7 +86,7 @@
         <diagramLabel
             href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackageStereotype"/>
         <features
-            href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/name"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSLib/name"/>
       </labelMappings>
       <relatedDiagrams
           href="DataLib.gmfmap#//@diagram"/>
