@@ -1,3 +1,20 @@
+Mon Jan 10 22:16:08 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/ant_codegen.xml:
+        * tools/modeling/plugins/org.opendds.modeling.model/ant_codegen.xml:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/ant_codegen.xml:
+
+          Use the eclipse.refreshLocal ant task.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/impl:
+
+          Update svn:ignore for new generated files.
+
+        * tools/modeling/tests/modeling_tests.lst:
+
+          New test list for nightly builds.
+
 Mon Jan 10 22:06:47 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/DataLibRef/DataLibRef.opendds:
