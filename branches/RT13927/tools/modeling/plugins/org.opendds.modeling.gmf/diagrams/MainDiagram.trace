@@ -3,33 +3,33 @@
     xmlns:xmi="http://www.omg.org/XMI"
     xmlns:trace="http://www.eclipse.org/gmf/2006/Trace">
   <nodeTraces
-      visualID="2001"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'OpenDDSModel') and _containmentMF_.name = 'dcpsLib')">
+      visualID="2007"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'OpenDDSModel') and _containmentMF_.name = 'libs')">
     <nodeLabelTraces
-        visualID="5001"
+        visualID="5012"
         queryText="true"/>
     <nodeLabelTraces
-        visualID="5005"
-        queryText="true"/>
-  </nodeTraces>
-  <nodeTraces
-      visualID="2002"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'OpenDDSModel') and _containmentMF_.name = 'policyLib')">
-    <nodeLabelTraces
-        visualID="5002"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5006"
+        visualID="5013"
         queryText="true"/>
   </nodeTraces>
   <nodeTraces
-      visualID="2006"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'DataLib') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'OpenDDSModel') and _containmentMF_.name = 'dataLib')">
+      visualID="2008"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'PolicyLib') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'OpenDDSModel') and _containmentMF_.name = 'libs')">
     <nodeLabelTraces
-        visualID="5010"
+        visualID="5014"
         queryText="true"/>
     <nodeLabelTraces
-        visualID="5011"
+        visualID="5015"
+        queryText="true"/>
+  </nodeTraces>
+  <nodeTraces
+      visualID="2009"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Types/1.0' and _eClass_.name = 'DataLib') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'OpenDDSModel') and _containmentMF_.name = 'libs')">
+    <nodeLabelTraces
+        visualID="5016"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5017"
         queryText="true"/>
   </nodeTraces>
 </trace:TraceModel>

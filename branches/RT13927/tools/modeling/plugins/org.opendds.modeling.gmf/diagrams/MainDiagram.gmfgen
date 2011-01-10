@@ -56,7 +56,7 @@
     <domainDiagramElement
         href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel"/>
     <topLevelNodes
-        visualID="2001"
+        visualID="2007"
         editPartClassName="DcpsLibEditPart"
         itemSemanticEditPolicyClassName="DcpsLibItemSemanticEditPolicy"
         canonicalEditPolicyClassName="DcpsLibCanonicalEditPolicy"
@@ -85,12 +85,12 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/DcpsLib"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/dcpsLib"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/libs"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/dcpsLib"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/libs"/>
       </modelFacet>
       <labels
-          visualID="5001"
+          visualID="5012"
           editPartClassName="DcpsLibNameEditPart"
           itemSemanticEditPolicyClassName="DcpsLibNameItemSemanticEditPolicy">
         <diagramRunTimeClass
@@ -107,7 +107,7 @@
         </modelFacet>
       </labels>
       <labels
-          visualID="5005"
+          visualID="5013"
           editPartClassName="DcpsLibName2EditPart"
           itemSemanticEditPolicyClassName="DcpsLibName2ItemSemanticEditPolicy"
           readOnly="true">
@@ -127,7 +127,7 @@
       </labels>
     </topLevelNodes>
     <topLevelNodes
-        visualID="2002"
+        visualID="2008"
         editPartClassName="PolicyLibEditPart"
         itemSemanticEditPolicyClassName="PolicyLibItemSemanticEditPolicy"
         canonicalEditPolicyClassName="PolicyLibCanonicalEditPolicy"
@@ -157,12 +157,12 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/PolicyLib"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/policyLib"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/libs"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/policyLib"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/libs"/>
       </modelFacet>
       <labels
-          visualID="5002"
+          visualID="5014"
           editPartClassName="PolicyLibNameEditPart"
           itemSemanticEditPolicyClassName="PolicyLibNameItemSemanticEditPolicy">
         <diagramRunTimeClass
@@ -179,7 +179,7 @@
         </modelFacet>
       </labels>
       <labels
-          visualID="5006"
+          visualID="5015"
           editPartClassName="PolicyLibName2EditPart"
           itemSemanticEditPolicyClassName="PolicyLibName2ItemSemanticEditPolicy"
           readOnly="true">
@@ -199,7 +199,7 @@
       </labels>
     </topLevelNodes>
     <topLevelNodes
-        visualID="2006"
+        visualID="2009"
         editPartClassName="DataLibEditPart"
         itemSemanticEditPolicyClassName="DataLibItemSemanticEditPolicy"
         canonicalEditPolicyClassName="DataLibCanonicalEditPolicy"
@@ -229,12 +229,12 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLib"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/dataLib"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/libs"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/dataLib"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/libs"/>
       </modelFacet>
       <labels
-          visualID="5010"
+          visualID="5016"
           editPartClassName="DataLibNameEditPart"
           itemSemanticEditPolicyClassName="DataLibNameItemSemanticEditPolicy">
         <diagramRunTimeClass
@@ -251,7 +251,7 @@
         </modelFacet>
       </labels>
       <labels
-          visualID="5011"
+          visualID="5017"
           editPartClassName="DataLibName2EditPart"
           itemSemanticEditPolicyClassName="DataLibName2ItemSemanticEditPolicy"
           readOnly="true">

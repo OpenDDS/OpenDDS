@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_7w7mIRN0EeCZGfFbfO1234">
-  <dataLib xmi:id="_W-U8gf7lEd-9W4ll_I0Ewg" name="DataLibTest">
+  <libs xsi:type="types:DataLib" xmi:id="_W-U8gf7lEd-9W4ll_I0Ewg" name="DataLibTest">
     <types xsi:type="types:Boolean" xmi:id="_YQlOkP7lEd-9W4ll_I0Ewg"/>
     <types xsi:type="types:Double" xmi:id="_ZGos0P7lEd-9W4ll_I0Ewg"/>
     <types xsi:type="types:Enum" xmi:id="_Z_FXwP7lEd-9W4ll_I0Ewg" name="Color">
@@ -49,5 +49,5 @@
     <types xsi:type="types:Typedef" xmi:id="_RGVgoBN5EeCLmZr0-O4PNA" name="Struct2Typedef">
       <type xsi:type="types:Struct" href="DataLib2.opendds#_BwbDYBN1EeCZGfFbfO9QSA"/>
     </types>
-  </dataLib>
+  </libs>
 </opendds:OpenDDSModel>

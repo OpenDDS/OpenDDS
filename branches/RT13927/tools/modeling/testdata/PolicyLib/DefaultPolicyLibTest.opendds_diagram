@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
   <notation:Diagram xmi:id="_VA2dEBHGEeCDBsaMzc2GBg" type="OpenDDS" measurementUnit="Pixel">
-    <children xmi:type="notation:Shape" xmi:id="_VCMg4BHGEeCDBsaMzc2GBg" type="2002" fontName="Sans">
-      <children xmi:type="notation:DecorationNode" xmi:id="_VCNvABHGEeCDBsaMzc2GBg" type="5002"/>
-      <children xmi:type="notation:DecorationNode" xmi:id="_VCNvARHGEeCDBsaMzc2GBg" type="5006"/>
+    <children xmi:type="notation:Shape" xmi:id="_VCMg4BHGEeCDBsaMzc2GBg" type="2008" fontName="Sans">
+      <children xmi:type="notation:DecorationNode" xmi:id="_VCNvABHGEeCDBsaMzc2GBg" type="5014"/>
+      <children xmi:type="notation:DecorationNode" xmi:id="_VCNvARHGEeCDBsaMzc2GBg" type="5015"/>
       <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_VCMg4RHGEeCDBsaMzc2GBg" diagramLink="_WY0VkBHGEeCDBsaMzc2GBg" hint="OpenDDS PolicyLib"/>
       <element xmi:type="opendds:PolicyLib" href="DefaultPolicyLibTest.opendds#_U54321GNEd-D-tWBUFz8zw"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_VCMg4hHGEeCDBsaMzc2GBg"/>

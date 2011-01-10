@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmi:id="_BD-5cKGNEd-D-tWBUFz8zw">
-  <policyLib xmi:id="_U54321GNEd-D-tWBUFz8zw" name="DefaultPolicyLibTest">
+  <libs xsi:type="opendds:PolicyLib" xmi:id="_U54321GNEd-D-tWBUFz8zw" name="DefaultPolicyLibTest">
     <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_VizHAKGNEd-D-tWBUFz8zw" name="deadlineQosPolicyDefaultTestt">
       <period xmi:id="_cGnWILeCEd-nAsONlpcwOw"/>
     </policies>
@@ -35,5 +35,5 @@
     <policies xsi:type="opendds:tpQosPolicy" xmi:id="_UCLo0KGNEd-D-tWBUFz8zw" name="tpQosPolicyDefaultTest" value="0"/>
     <policies xsi:type="opendds:udQosPolicy" xmi:id="_Pw72EKGNEd-D-tWBUFz8zw" name="udQosPolicyDefaultTest"/>
     <policies xsi:type="opendds:wdlQosPolicy" xmi:id="_OEdGIKGNEd-D-tWBUFz8zw" name="wdlQosPolicyDefaultTest" autodispose_unregistered_instances="true"/>
-  </policyLib>
+  </libs>
 </opendds:OpenDDSModel>

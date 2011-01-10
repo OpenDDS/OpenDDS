@@ -43,10 +43,8 @@
     <genClasses ecoreClass="OpenDDS.ecore#//udQosPolicy"/>
     <genClasses ecoreClass="OpenDDS.ecore#//wdlQosPolicy"/>
     <genClasses ecoreClass="OpenDDS.ecore#//OpenDDSModel">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/policyLib"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/dcpsLib"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/dataLib"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//OpenDDSModel/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/libs"/>
     </genClasses>
     <genClasses image="false" ecoreClass="OpenDDS.ecore#//OpenDDSLib">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//OpenDDSLib/name"/>
