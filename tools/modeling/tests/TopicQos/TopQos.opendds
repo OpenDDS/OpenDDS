@@ -62,6 +62,7 @@
     <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_qyi6YAR2EeCsYqJtvYWomQ" name="persist" kind="PERSISTENT"/>
     <policies xsi:type="opendds:tdQosPolicy" xmi:id="__6rtkAR9EeCsYqJtvYWomQ" name="nine" value="nine is 9"/>
   </libs>
+  <packages name="data1">
   <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data1">
     <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw" name="Message" isDcpsDataType="true">
       <fields xmi:id="_AbpJwPDvEd-I4rwicuuPOw" name="from" type="_E8F2IPDvEd-I4rwicuuPOw"/>
@@ -74,4 +75,5 @@
     <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw"/>
     <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw"/>
   </libs>
+  </packages>
 </opendds:OpenDDSModel>

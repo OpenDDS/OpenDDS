@@ -35,6 +35,7 @@
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_2rViwAR1EeCsYqJtvYWomQ" name="weak" value="5"/>
     <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_qyi6YAR2EeCsYqJtvYWomQ" name="persist" kind="PERSISTENT"/>
   </libs>
+  <packages name="data1">
   <libs xsi:type="opendds:DcpsLib" xmi:id="_XmyasPDvEd-I4rwicuuPOw">
     <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="" domainId="42"/>
     <participants xmi:id="_esFCYPDvEd-I4rwicuuPOw" name="part1" domain="_bs2RIPDvEd-I4rwicuuPOw" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" user_data="_X64DcAJKEeCBAfl9GiYbGg">
@@ -66,4 +67,5 @@
     <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw"/>
     <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw"/>
   </libs>
+  </packages>
 </opendds:OpenDDSModel>

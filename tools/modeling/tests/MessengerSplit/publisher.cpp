@@ -20,8 +20,8 @@ int main(int argc, char** argv)
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
-    data1::MessageDataWriter_var message_writer =
-      data1::MessageDataWriter::_narrow(writer.in());
+    Multi::MessageDataWriter_var message_writer =
+      Multi::MessageDataWriter::_narrow(writer.in());
 
     if (CORBA::is_nil(message_writer.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -61,7 +61,7 @@ int main(int argc, char** argv)
     ws->detach_condition(condition);
 
     // Write samples
-    data1::Message message;
+    Multi::Message message;
     message.subject_id = 99;
 
     message.from       = CORBA::string_dup("Comic Book Guy");
