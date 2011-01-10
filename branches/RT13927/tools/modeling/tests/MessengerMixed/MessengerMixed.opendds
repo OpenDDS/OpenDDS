@@ -25,5 +25,13 @@
       <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw28" name="text" type="_E8F2IPDvEd-I4rwicuuPOw7"/>
     </types>
     <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw7"/>
+    <types xsi:type="types:Struct" xmi:id="_H1e6wB0FEeC07OZrGTNj1A" name="Replay" isDcpsDataType="true">
+      <fields xmi:id="_JoE5wB0FEeC07OZrGTNj1A" name="original">
+        <type xsi:type="types:Struct" href="MessengerTypesMixed.opendds#_5STIgPDuEd-I4rwicuuPOw"/>
+      </fields>
+      <fields xmi:id="_MU66gB0FEeC07OZrGTNj1A" name="replay_id">
+        <type xsi:type="types:Long" href="MessengerTypesMixed.opendds#_PXgFEPDvEd-I4rwicuuPOw"/>
+      </fields>
+    </types>
   </libs>
 </opendds:OpenDDSModel>
