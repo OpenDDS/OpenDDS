@@ -421,6 +421,10 @@ Value::Value(double f, bool conversion_preferred)
   : type_(VAL_FLOAT), f_(f), conversion_preferred_(conversion_preferred)
 {}
 
+Value::Value(ACE_CDR::LongDouble ld, bool conversion_preferred)
+  : type_(VAL_LNGDUB), ld_(ld), conversion_preferred_(conversion_preferred)
+{}
+
 Value::Value(const char* s, bool conversion_preferred)
   : type_(VAL_STRING), s_(ACE_OS::strdup(s))
   , conversion_preferred_(conversion_preferred)
@@ -433,6 +437,7 @@ template<> ACE_INT64& Value::get() { return l_; }
 template<> ACE_UINT64& Value::get() { return m_; }
 template<> char& Value::get() { return c_; }
 template<> double& Value::get() { return f_; }
+template<> ACE_CDR::LongDouble& Value::get() { return ld_; }
 template<> const char*& Value::get() { return s_; }
 
 #ifdef OPENDDS_GCC33
@@ -443,6 +448,8 @@ template<> const ACE_INT64& Value::get<ACE_INT64>() const { return l_; }
 template<> const ACE_UINT64& Value::get<ACE_UINT64>() const { return m_; }
 template<> const char& Value::get<char>() const { return c_; }
 template<> const double& Value::get<double>() const { return f_; }
+template<> const ACE_CDR::LongDouble& Value::get<ACE_CDR::LongDouble>() const
+  { return ld_; }
 template<> const char* const& Value::get<const char*>() const { return s_; }
 #else
 template<> const bool& Value::get() const { return b_; }
@@ -452,6 +459,7 @@ template<> const ACE_INT64& Value::get() const { return l_; }
 template<> const ACE_UINT64& Value::get() const { return m_; }
 template<> const char& Value::get() const { return c_; }
 template<> const double& Value::get() const { return f_; }
+template<> const ACE_CDR::LongDouble& Value::get() const { return ld_; }
 template<> const char* const& Value::get() const { return s_; }
 #endif
 
@@ -477,6 +485,8 @@ namespace {
       return vis(val.m_);
     case Value::VAL_FLOAT:
       return vis(val.f_);
+    case Value::VAL_LNGDUB:
+      return vis(val.ld_);
     case Value::VAL_CHAR:
       return vis(val.c_);
     case Value::VAL_STRING:
@@ -641,6 +651,17 @@ namespace {
 
     void operator()(const char*) {}
     // not called.  prevents instantiation of the following with T = const char*
+
+    void operator()(ACE_CDR::LongDouble ld)
+    {
+#ifdef NONNATIVE_LONGDOUBLE
+      ACE_CDR::LongDouble::NativeImpl ni;
+      is_ >> ni;
+      ld.assign(ni);
+#else
+      is_ >> ld;
+#endif
+    }
 
     template<typename T> void operator()(T& t)
     {

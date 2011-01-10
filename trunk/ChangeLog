@@ -1,3 +1,16 @@
+Mon Jan 10 23:44:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Support for long double in IDL structs.  The FilterEvaluator is called
+          from the IDL-generated code to implement Content-Subscription Profile
+          functions.
+
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
+
+          Test long double, wchar, wstring.
+
 Mon Dec 27 16:30:29 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
         * configure:
@@ -5,7 +18,7 @@ Mon Dec 27 16:30:29 UTC 2010  Adam Mitz  <mitza@ociweb.com>
 
           Initial support for vc10 (Microsoft Visual Studio 2010).  Not yet
           advertising it in the NEWS, README, etc files until we get a regular
-          nighly build and regression test running.
+          nightly build and regression test running.
 
         * dds/DCPS/DataWriterImpl.cpp:
         * dds/DCPS/DomainParticipantFactoryImpl.cpp:
@@ -25,7 +38,7 @@ Mon Dec 27 16:30:29 UTC 2010  Adam Mitz  <mitza@ociweb.com>
         * dds/idl/CPPTemplate.txt:
 
           vc10 implements some of the C++0x features, so we need to qualify
-          calls to OpenDDS::DCPS::bind() in order to avoid abiguity with std.
+          calls to OpenDDS::DCPS::bind() in order to avoid ambiguity with std.
 
         * tests/DCPS/Prst_delayed_subscriber/Prst_delayed_subscriber.mpc:
         * DevGuideExamples/DCPS/Messenger/Messenger.mpc:
