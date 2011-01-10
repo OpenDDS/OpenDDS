@@ -1,3 +1,11 @@
+Mon Jan 10 22:06:47 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/DataLibRef/DataLibRef.opendds:
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.opendds:
+        * tools/modeling/tests/MessengerMixed/MessengerTypesMixed.opendds:
+
+          Additional datalib to datalib references.
+
 Mon Jan 10 19:05:31 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:

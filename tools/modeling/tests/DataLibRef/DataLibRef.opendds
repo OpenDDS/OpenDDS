@@ -13,8 +13,9 @@
       </subscribers>
     </participants>
     <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
+    <topics xmi:id="_Ev0RsB0CEeC07OZrGTNj1A"/>
   </libs>
-  <packages name="data1">
+  <packages xmi:id="_h6HeIB0BEeC07OZrGTNj1A" name="data1">
     <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data1">
       <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw" name="Message" isDcpsDataType="true">
         <fields xmi:id="_AbpJwPDvEd-I4rwicuuPOw" name="from" type="_E8F2IPDvEd-I4rwicuuPOw"/>
@@ -23,22 +24,42 @@
         <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw" name="text" type="_E8F2IPDvEd-I4rwicuuPOw"/>
         <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_5STIgPDuEd-I4rwicuuPOw4"/>
         <fields xmi:id="_DJeIYBm0EeCiwqO3ASSQ8g" name="pos" type="_4C6qsBmzEeCiwqO3ASSQ8g"/>
+        <fields xmi:id="_jHKqoB0CEeC07OZrGTNj1A" name="more" type="_nMvY4B0CEeC07OZrGTNj1A"/>
         <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_M8mv8PDvEd-I4rwicuuPOw"/>
       </types>
       <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw"/>
       <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw"/>
+      <types xsi:type="types:Typedef" xmi:id="_nMvY4B0CEeC07OZrGTNj1A" type="_q4a14B0BEeC07OZrGTNj1A" name="JU"/>
     </libs>
     <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data4">
       <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw4" name="CountType" isDcpsDataType="true">
         <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_PXgFEPDvEd-I4rwicuuPOw"/>
       </types>
+      <types xsi:type="types:Union" xmi:id="_q4a14B0BEeC07OZrGTNj1A" name="JeffUnion" switch="_PXgFEPDvEd-I4rwicuuPOw">
+        <branches xmi:id="_wGv78B0BEeC07OZrGTNj1A">
+          <field xmi:id="_zTVzwB0BEeC07OZrGTNj1A" name="msg" type="_5STIgPDuEd-I4rwicuuPOw"/>
+          <cases xmi:id="_xfyygB0BEeC07OZrGTNj1A" literal="1"/>
+        </branches>
+        <branches xmi:id="_9TN9QB0BEeC07OZrGTNj1A">
+          <field xmi:id="__XVxIB0BEeC07OZrGTNj1A" name="abc" type="_-EgAYBm4EeCiwqO3ASSQ8g"/>
+          <cases xmi:id="_-MNawB0BEeC07OZrGTNj1A" literal="2"/>
+        </branches>
+      </types>
     </libs>
   </packages>
-  <packages name="data2">
+  <packages xmi:id="_h6KhcB0BEeC07OZrGTNj1A" name="data2">
+    <packages xmi:id="_h6MWoB0BEeC07OZrGTNj1A" name="data3">
+      <libs xsi:type="types:DataLib" xmi:id="_h6MWoR0BEeC07OZrGTNj1A" name="data3">
+        <types xsi:type="types:Struct" xmi:id="_4C6qsBmzEeCiwqO3ASSQ8g3" name="FixedVal" isDcpsDataType="true">
+          <fields xmi:id="__ka7ABm4EeCiwqO3ASSQ8gb" name="base" type="_4C6qsBmzEeCiwqO3ASSQ8g2"/>
+          <fields xmi:id="__ka7ABm4EeCiwqO3ASSQ8gc" name="exponent" type="_4C6qsBmzEeCiwqO3ASSQ8g2"/>
+        </types>
+      </libs>
+    </packages>
     <libs xsi:type="types:DataLib" xmi:id="_1xaiIBmzEeCiwqO3ASSQ8g" name="data2">
       <types xsi:type="types:Double" xmi:id="_3YJ2cBmzEeCiwqO3ASSQ8g"/>
       <types xsi:type="types:Struct" xmi:id="_4C6qsBmzEeCiwqO3ASSQ8g2" name="LongType" isDcpsDataType="true">
-          <fields xmi:id="__ka7ABm4EeCiwqO3ASSQ8gc" name="value" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+        <fields xmi:id="__ka7ABm4EeCiwqO3ASSQ8gc" name="value" type="_PXgFEPDvEd-I4rwicuuPOw"/>
       </types>
       <types xsi:type="types:Struct" xmi:id="_4C6qsBmzEeCiwqO3ASSQ8g" name="Position" isDcpsDataType="true">
         <fields xmi:id="_5khAUBmzEeCiwqO3ASSQ8g" name="lat" type="_4C6qsBmzEeCiwqO3ASSQ8g3"/>
@@ -48,15 +69,5 @@
         <fields xmi:id="__ka7ABm4EeCiwqO3ASSQ8g" name="value" type="_E8F2IPDvEd-I4rwicuuPOw"/>
       </types>
     </libs>
-    <packages name="data3">
-      <libs xsi:type="types:DataLib" name="data3">
-        <types xsi:type="types:Struct" xmi:id="_4C6qsBmzEeCiwqO3ASSQ8g3" name="FixedVal" isDcpsDataType="true">
-          <fields xmi:id="__ka7ABm4EeCiwqO3ASSQ8gb" name="base" type="_4C6qsBmzEeCiwqO3ASSQ8g2"/>
-          <fields xmi:id="__ka7ABm4EeCiwqO3ASSQ8gc" name="exponent" type="_4C6qsBmzEeCiwqO3ASSQ8g2"/>
-
-        </types>
-      
-      </libs>
-    </packages>
   </packages>
 </opendds:OpenDDSModel>
