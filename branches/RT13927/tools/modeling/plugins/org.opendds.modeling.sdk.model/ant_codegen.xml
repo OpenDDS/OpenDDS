@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project default="generate" name="build">
-    <target name="generate">
-      <emf.Ecore2Java model="model/Generator.ecore"
-                      genModel="model/Generator.genmodel"
-                      reconcileGenModel="keep"
-                      generateJavaCode="true"
-                      generateModelProject="true"
-                      generateEditProject="true"
-                      generateEditorProject="true"/>
-    </target>
+  <target name="generate">
+    <eclipse.refreshLocal resource="org.opendds.modeling.sdk.model"
+                          depth="infinite"/>
+    <eclipse.refreshLocal resource="org.opendds.modeling.sdk.model.edit"
+                          depth="infinite"/>
+    <eclipse.refreshLocal resource="org.opendds.modeling.sdk.model.editor"
+                          depth="infinite"/>
+    <emf.Ecore2Java model="model/Generator.ecore"
+                    genModel="model/Generator.genmodel"
+                    reconcileGenModel="keep"
+                    generateJavaCode="true"
+                    generateModelProject="true"
+                    generateEditProject="true"
+                    generateEditorProject="true"/>
+  </target>
 </project>
