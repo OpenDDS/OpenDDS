@@ -14,6 +14,7 @@
     </participants>
     <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw1"/>
   </libs>
+  <packages name="data1">
   <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw1" name="data1">
     <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw1" name="Message">
       <fields xmi:id="_AbpJwPDvEd-I4rwicuuPOw" name="from" type="_E8F2IPDvEd-I4rwicuuPOw1"/>
@@ -26,6 +27,8 @@
     <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw1"/>
     <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw1"/>
   </libs>
+  </packages>
+  <packages name="data2">
   <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw2" name="data2">
     <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw2" name="Message">
       <fields xmi:id="_AbpJwPDvEd-I4rwicuuPOw" name="from" type="_E8F2IPDvEd-I4rwicuuPOw2"/>
@@ -38,6 +41,8 @@
     <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw2"/>
     <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw2"/>
   </libs>
+  </packages>
+  <packages name="data3">
   <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw3" name="data3">
     <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw3" name="Message">
       <fields xmi:id="_AbpJwPDvEd-I4rwicuuPOw" name="from" type="_E8F2IPDvEd-I4rwicuuPOw3"/>
@@ -50,4 +55,5 @@
     <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw3"/>
     <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw3"/>
   </libs>
+  </packages>
 </opendds:OpenDDSModel>

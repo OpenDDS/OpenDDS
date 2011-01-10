@@ -1,6 +1,7 @@
 <xsl:stylesheet version='1.0'
      xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
      xmlns:xmi='http://www.omg.org/XMI'
+     xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
      xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'>
   <!--
     ** $Id$
@@ -28,6 +29,24 @@
       </policyLib>
     </xsl:if>
   </xsl:copy>
+</xsl:template>
+
+<xsl:template match="libs[@xsi:type='opendds:DcpsLib']">
+  <xsl:element name="dcpsLib">
+    <xsl:apply-templates select="@*|node()"/>
+  </xsl:element>
+</xsl:template>
+
+<xsl:template match="libs[@xsi:type='opendds:PolicyLib']">
+  <xsl:element name="policyLib">
+    <xsl:apply-templates select="@*|node()"/>
+  </xsl:element>
+</xsl:template>
+
+<xsl:template match="libs[@xsi:type='types:DataLib']">
+  <xsl:element name="dataLib">
+    <xsl:apply-templates select="@*|node()"/>
+  </xsl:element>
 </xsl:template>
 
 <xsl:template match="*[*[@href]]">

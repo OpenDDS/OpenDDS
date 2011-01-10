@@ -58,8 +58,8 @@
     <types xsi:type="types:Enum" xmi:id="_gDY8IAb_EeCTrrqfM0kA8A" name="Greeks">
       <literals>alpha</literals>
       <literals>beta</literals>
-      <literals>gamma</literals>
       <literals>delta</literals>
+      <literals>epsilon</literals>
     </types>
     <types xsi:type="types:Array" xmi:id="_lbgQUAb_EeCTrrqfM0kA8A" length="4" subtype="_gDY8IAb_EeCTrrqfM0kA8A"/>
     <types xsi:type="types:Typedef" xmi:id="_oy7fIAb_EeCTrrqfM0kA8A" type="_lbgQUAb_EeCTrrqfM0kA8A" name="GreekArr"/>

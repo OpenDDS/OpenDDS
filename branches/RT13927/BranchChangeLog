@@ -1,8 +1,49 @@
+Mon Jan 10 19:05:31 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/preprocess.xsl:
+
+          Handle new lib serialization.
+          Handle multiple references to same external datalib.
+
+        * tools/modeling/tests/Arrays/Arrays.opendds:
+        * tools/modeling/tests/Arrays/publisher.cpp:
+        * tools/modeling/tests/Arrays/subscriber.cpp:
+        * tools/modeling/tests/CompositeKey/CompositeKey.opendds:
+        * tools/modeling/tests/DomainZero/DomainZero.opendds:
+        * tools/modeling/tests/ExternalPolicies/publisher.cpp:
+        * tools/modeling/tests/ExternalPolicies/subscriber.cpp:
+        * tools/modeling/tests/InvalidNames/InvalidNames.opendds:
+        * tools/modeling/tests/MessengerDpQos/publisher.cpp:
+        * tools/modeling/tests/MessengerDpQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerMC/MessengerMC.opendds:
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.opendds:
+        * tools/modeling/tests/MessengerNoPub/subscriber.cpp:
+        * tools/modeling/tests/MessengerNoSub/publisher.cpp:
+        * tools/modeling/tests/MessengerPubQos/MessengerPubQos.opendds:
+        * tools/modeling/tests/MessengerSplit/MessengerTypes.opendds:
+        * tools/modeling/tests/MessengerSplit/publisher.cpp:
+        * tools/modeling/tests/MessengerSplit/subscriber.cpp:
+        * tools/modeling/tests/MessengerWriterQos/publisher.cpp:
+        * tools/modeling/tests/MessengerWriterQos/subscriber.cpp:
+        * tools/modeling/tests/MultiInstance/MultiInstance.opendds:
+        * tools/modeling/tests/PolicyLib/PolicyLib.opendds:
+        * tools/modeling/tests/ReaderQos/publisher.cpp:
+        * tools/modeling/tests/ReaderQos/subscriber.cpp:
+        * tools/modeling/tests/Sequences/Sequences.opendds:
+        * tools/modeling/tests/SubscriberQos/publisher.cpp:
+        * tools/modeling/tests/SubscriberQos/subscriber.cpp:
+        * tools/modeling/tests/TopicQos/TopQos.opendds:
+        * tools/modeling/tests/UDP/publisher.cpp:
+        * tools/modeling/tests/UDP/subscriber.cpp:
+
+          Test package-based qualified names.
+
 Mon Jan 10 16:23:33 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:
 
-	  Added LibPackage and added container of LibPackages to OpenDDSModel.
+          Added LibPackage and added container of LibPackages to OpenDDSModel.
 
         * tools/modeling/icons/MainDiagram-icon-to-element.txt:
         * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
@@ -11,7 +52,7 @@ Mon Jan 10 16:23:33 UTC 2011  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
 
-	  Updates to account for change to OpenDDS.ecore.
+          Updates to account for change to OpenDDS.ecore.
 
 Mon Jan 10 15:11:57 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 

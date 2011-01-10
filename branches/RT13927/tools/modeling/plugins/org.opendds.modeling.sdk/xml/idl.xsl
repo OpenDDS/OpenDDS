@@ -532,9 +532,19 @@
 </xsl:template>
 
 <xsl:template name="processExternalModels">
-  <xsl:for-each select="/opendds:OpenDDSModel/dataLib/@model">
-    <xsl:value-of select="concat('#include &quot;', ., '.idl&quot;', $newline)"/>
-  </xsl:for-each>
+  <xsl:param name="lib-refs" select="//dataLib[@model]"/>
+  <xsl:param name="completed"/>
+
+  <xsl:if test="$lib-refs">
+    <xsl:variable name="model" select="$lib-refs[1]/@model"/>
+    <xsl:if test="not(contains($completed, $model))">
+      <xsl:value-of select="concat('#include &quot;', $model, '.idl&quot;', $newline)"/>
+    </xsl:if>
+    <xsl:call-template name="processExternalModels">
+      <xsl:with-param name="lib-refs" select="$lib-refs[position() &gt; 1]"/>
+      <xsl:with-param name="completed" select="concat(' ',$model,' ')"/>
+    </xsl:call-template>
+  </xsl:if>
 </xsl:template>
 
 </xsl:stylesheet>
