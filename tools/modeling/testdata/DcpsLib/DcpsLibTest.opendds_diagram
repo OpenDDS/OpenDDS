@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
   <notation:Diagram xmi:id="_J3emYAOYEeC_KbIBROAyfA" type="OpenDDS" name="DcpsLibTest.opendds_diagram" measurementUnit="Pixel">
-    <children xmi:type="notation:Shape" xmi:id="_LpJYUAOYEeC_KbIBROAyfA" type="2001" fontName="Sans">
-      <children xmi:type="notation:DecorationNode" xmi:id="_LpLNgAOYEeC_KbIBROAyfA" type="5001"/>
-      <children xmi:type="notation:DecorationNode" xmi:id="_LpLNgQOYEeC_KbIBROAyfA" type="5005"/>
+    <children xmi:type="notation:Shape" xmi:id="_LpJYUAOYEeC_KbIBROAyfA" type="2007" fontName="Sans">
+      <children xmi:type="notation:DecorationNode" xmi:id="_LpLNgAOYEeC_KbIBROAyfA" type="5012"/>
+      <children xmi:type="notation:DecorationNode" xmi:id="_LpLNgQOYEeC_KbIBROAyfA" type="5013"/>
       <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_LpJYUQOYEeC_KbIBROAyfA" diagramLink="_OFVG4AOYEeC_KbIBROAyfA" hint="OpenDDS DcpsLib"/>
       <element xmi:type="opendds:DcpsLib" href="DcpsLibTest.opendds#_LoyzAAOYEeC_KbIBROAyfA"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_LpJYUgOYEeC_KbIBROAyfA" x="396" y="149"/>
     </children>
-    <children xmi:type="notation:Shape" xmi:id="_VafWkAOYEeC_KbIBROAyfA" type="2002" fontName="Sans">
-      <children xmi:type="notation:DecorationNode" xmi:id="_Vaf9oAOYEeC_KbIBROAyfA" type="5002"/>
-      <children xmi:type="notation:DecorationNode" xmi:id="_VagksAOYEeC_KbIBROAyfA" type="5006"/>
+    <children xmi:type="notation:Shape" xmi:id="_VafWkAOYEeC_KbIBROAyfA" type="2008" fontName="Sans">
+      <children xmi:type="notation:DecorationNode" xmi:id="_Vaf9oAOYEeC_KbIBROAyfA" type="5014"/>
+      <children xmi:type="notation:DecorationNode" xmi:id="_VagksAOYEeC_KbIBROAyfA" type="5015"/>
       <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_VafWkQOYEeC_KbIBROAyfA" diagramLink="_c2CiIAOYEeC_KbIBROAyfA" hint="OpenDDS PolicyLib"/>
       <element xmi:type="opendds:PolicyLib" href="DcpsLibTest.opendds#_VaZ3AAOYEeC_KbIBROAyfA"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_VafWkgOYEeC_KbIBROAyfA" x="509" y="311"/>
@@ -19,26 +19,26 @@
     <element xmi:type="opendds:OpenDDSModel" href="DcpsLibTest.opendds#_J3PV0QOYEeC_KbIBROAyfA"/>
   </notation:Diagram>
   <notation:Diagram xmi:id="_OFVG4AOYEeC_KbIBROAyfA" type="OpenDDS DcpsLib" measurementUnit="Pixel">
-    <children xmi:type="notation:Node" xmi:id="_PsNlIAOYEeC_KbIBROAyfA" type="2002">
-      <children xmi:type="notation:DecorationNode" xmi:id="_PsOzQAOYEeC_KbIBROAyfA" type="5002"/>
-      <children xmi:type="notation:DecorationNode" xmi:id="_PsPaUAOYEeC_KbIBROAyfA" type="5005"/>
+    <children xmi:type="notation:Node" xmi:id="_PsNlIAOYEeC_KbIBROAyfA" type="2008">
+      <children xmi:type="notation:DecorationNode" xmi:id="_PsOzQAOYEeC_KbIBROAyfA" type="5014"/>
+      <children xmi:type="notation:DecorationNode" xmi:id="_PsPaUAOYEeC_KbIBROAyfA" type="5013"/>
       <styles xmi:type="notation:DescriptionStyle" xmi:id="_PsOMMAOYEeC_KbIBROAyfA"/>
       <styles xmi:type="notation:FontStyle" xmi:id="_PsOMMQOYEeC_KbIBROAyfA" fontName="Sans"/>
       <styles xmi:type="notation:LineStyle" xmi:id="_PsOMMgOYEeC_KbIBROAyfA"/>
       <element xmi:type="opendds:domain" href="DcpsLibTest.opendds#_PsEbMAOYEeC_KbIBROAyfA"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_PsOMMwOYEeC_KbIBROAyfA" x="46" y="34"/>
     </children>
-    <children xmi:type="notation:Shape" xmi:id="_ylkJoAOYEeC_KbIBROAyfA" type="2001" fontName="Sans">
-      <children xmi:type="notation:DecorationNode" xmi:id="_ylkwsAOYEeC_KbIBROAyfA" type="5001"/>
+    <children xmi:type="notation:Shape" xmi:id="_ylkJoAOYEeC_KbIBROAyfA" type="2007" fontName="Sans">
+      <children xmi:type="notation:DecorationNode" xmi:id="_ylkwsAOYEeC_KbIBROAyfA" type="5012"/>
       <children xmi:type="notation:DecorationNode" xmi:id="_yllXwAOYEeC_KbIBROAyfA" type="5004"/>
       <children xmi:type="notation:BasicCompartment" xmi:id="_yllXwQOYEeC_KbIBROAyfA" type="7001">
         <children xmi:type="notation:Node" xmi:id="_BG99kAOZEeC_KbIBROAyfA" type="3001">
-          <children xmi:type="notation:DecorationNode" xmi:id="_BG-koAOZEeC_KbIBROAyfA" type="5006"/>
+          <children xmi:type="notation:DecorationNode" xmi:id="_BG-koAOZEeC_KbIBROAyfA" type="5015"/>
           <children xmi:type="notation:DecorationNode" xmi:id="_BG_LsAOZEeC_KbIBROAyfA" type="5007"/>
           <children xmi:type="notation:DecorationNode" xmi:id="_BG_LsQOZEeC_KbIBROAyfA" type="5240"/>
           <children xmi:type="notation:BasicCompartment" xmi:id="_BG_LsgOZEeC_KbIBROAyfA" type="7009">
             <children xmi:type="notation:Node" xmi:id="_H2iM4AOZEeC_KbIBROAyfA" type="3003">
-              <children xmi:type="notation:DecorationNode" xmi:id="_H2jbAAOZEeC_KbIBROAyfA" type="5010"/>
+              <children xmi:type="notation:DecorationNode" xmi:id="_H2jbAAOZEeC_KbIBROAyfA" type="5016"/>
               <children xmi:type="notation:DecorationNode" xmi:id="_H2jbAQOZEeC_KbIBROAyfA" type="5131"/>
               <children xmi:type="notation:BasicCompartment" xmi:id="_H2jbAgOZEeC_KbIBROAyfA" type="7015">
                 <styles xmi:type="notation:TitleStyle" xmi:id="_H2jbAwOZEeC_KbIBROAyfA" showTitle="true"/>
@@ -87,7 +87,7 @@
           <children xmi:type="notation:DecorationNode" xmi:id="_SZcyAgOZEeC_KbIBROAyfA" type="5241"/>
           <children xmi:type="notation:BasicCompartment" xmi:id="_SZdZEAOZEeC_KbIBROAyfA" type="7010">
             <children xmi:type="notation:Node" xmi:id="_U486UAOZEeC_KbIBROAyfA" type="3004">
-              <children xmi:type="notation:DecorationNode" xmi:id="_U49hYAOZEeC_KbIBROAyfA" type="5011"/>
+              <children xmi:type="notation:DecorationNode" xmi:id="_U49hYAOZEeC_KbIBROAyfA" type="5017"/>
               <children xmi:type="notation:DecorationNode" xmi:id="_U49hYQOZEeC_KbIBROAyfA" type="5239"/>
               <children xmi:type="notation:BasicCompartment" xmi:id="_U4-IcAOZEeC_KbIBROAyfA" type="7030">
                 <styles xmi:type="notation:TitleStyle" xmi:id="_U4-IcQOZEeC_KbIBROAyfA" showTitle="true"/>

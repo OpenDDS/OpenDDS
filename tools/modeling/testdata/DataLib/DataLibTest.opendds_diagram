@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0">
   <notation:Diagram xmi:id="_JKA1MBN3EeCZGfFbfO9QSA" type="OpenDDS" measurementUnit="Pixel">
-    <children xmi:type="notation:Shape" xmi:id="_JK4X4BN3EeCZGfFbfO9QSA" type="2006" fontName="Sans">
-      <children xmi:type="notation:DecorationNode" xmi:id="_JK4X4xN3EeCZGfFbfO9QSA" type="5010"/>
-      <children xmi:type="notation:DecorationNode" xmi:id="_JK4-8BN3EeCZGfFbfO9QSA" type="5011"/>
+    <children xmi:type="notation:Shape" xmi:id="_JK4X4BN3EeCZGfFbfO9QSA" type="2009" fontName="Sans">
+      <children xmi:type="notation:DecorationNode" xmi:id="_JK4X4xN3EeCZGfFbfO9QSA" type="5016"/>
+      <children xmi:type="notation:DecorationNode" xmi:id="_JK4-8BN3EeCZGfFbfO9QSA" type="5017"/>
       <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_JK4X4RN3EeCZGfFbfO9QSA" diagramLink="_MfXncBN3EeCZGfFbfO9QSA" hint="OpenDDS DataLib"/>
       <element xmi:type="types:DataLib" href="DataLibTest.opendds#_W-U8gf7lEd-9W4ll_I0Ewg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_JK4X4hN3EeCZGfFbfO9QSA" x="180" y="72"/>
@@ -34,13 +34,13 @@
       <element xmi:type="types:Float" href="DataLibTest.opendds#_fDQcQP7lEd-9W4ll_I0Ewg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MgaJRBN3EeCZGfFbfO9QSA" x="12" y="108"/>
     </children>
-    <children xmi:type="notation:Shape" xmi:id="_MgbXYBN3EeCZGfFbfO9QSA" type="2001" fontName="Sans">
-      <children xmi:type="notation:DecorationNode" xmi:id="_MgbXYhN3EeCZGfFbfO9QSA" type="5001"/>
+    <children xmi:type="notation:Shape" xmi:id="_MgbXYBN3EeCZGfFbfO9QSA" type="2007" fontName="Sans">
+      <children xmi:type="notation:DecorationNode" xmi:id="_MgbXYhN3EeCZGfFbfO9QSA" type="5012"/>
       <element xmi:type="types:Long" href="DataLibTest.opendds#_f1E6wP7lEd-9W4ll_I0Ewg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MgbXYRN3EeCZGfFbfO9QSA" x="108" y="108"/>
     </children>
-    <children xmi:type="notation:Shape" xmi:id="_Mgb-cBN3EeCZGfFbfO9QSA" type="2002" fontName="Sans">
-      <children xmi:type="notation:DecorationNode" xmi:id="_Mgb-chN3EeCZGfFbfO9QSA" type="5002"/>
+    <children xmi:type="notation:Shape" xmi:id="_Mgb-cBN3EeCZGfFbfO9QSA" type="2008" fontName="Sans">
+      <children xmi:type="notation:DecorationNode" xmi:id="_Mgb-chN3EeCZGfFbfO9QSA" type="5014"/>
       <element xmi:type="types:LongLong" href="DataLibTest.opendds#_gez0QP7lEd-9W4ll_I0Ewg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Mgb-cRN3EeCZGfFbfO9QSA" x="192" y="108"/>
     </children>
@@ -55,12 +55,12 @@
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MgdzoRN3EeCZGfFbfO9QSA" x="96" y="180"/>
     </children>
     <children xmi:type="notation:Shape" xmi:id="_MgeasBN3EeCZGfFbfO9QSA" type="2005" fontName="Sans">
-      <children xmi:type="notation:DecorationNode" xmi:id="_MgfBwBN3EeCZGfFbfO9QSA" type="5005"/>
+      <children xmi:type="notation:DecorationNode" xmi:id="_MgfBwBN3EeCZGfFbfO9QSA" type="5013"/>
       <element xmi:type="types:ULongLong" href="DataLibTest.opendds#_jaapwP7lEd-9W4ll_I0Ewg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MgeasRN3EeCZGfFbfO9QSA" x="192" y="180"/>
     </children>
     <children xmi:type="notation:Shape" xmi:id="_Mgfo0BN3EeCZGfFbfO9QSA" type="2010" fontName="Sans">
-      <children xmi:type="notation:DecorationNode" xmi:id="_Mgfo0hN3EeCZGfFbfO9QSA" type="5010"/>
+      <children xmi:type="notation:DecorationNode" xmi:id="_Mgfo0hN3EeCZGfFbfO9QSA" type="5016"/>
       <element xmi:type="types:WChar" href="DataLibTest.opendds#_kW11wP7lEd-9W4ll_I0Ewg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Mgfo0RN3EeCZGfFbfO9QSA" x="24" y="264"/>
     </children>
@@ -77,12 +77,12 @@
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Mgg28RN3EeCZGfFbfO9QSA" x="120" y="264"/>
     </children>
     <children xmi:type="notation:Shape" xmi:id="_MgheARN3EeCZGfFbfO9QSA" type="2011" fontName="Sans">
-      <children xmi:type="notation:DecorationNode" xmi:id="_MgiFEBN3EeCZGfFbfO9QSA" type="5011"/>
+      <children xmi:type="notation:DecorationNode" xmi:id="_MgiFEBN3EeCZGfFbfO9QSA" type="5017"/>
       <element xmi:type="types:Octet" href="DataLibTest.opendds#_n17LwP7lEd-9W4ll_I0Ewg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MgheAhN3EeCZGfFbfO9QSA" x="360" y="48"/>
     </children>
-    <children xmi:type="notation:Shape" xmi:id="_MgiFERN3EeCZGfFbfO9QSA" type="2006" fontName="Sans">
-      <children xmi:type="notation:DecorationNode" xmi:id="_MgisIBN3EeCZGfFbfO9QSA" type="5006"/>
+    <children xmi:type="notation:Shape" xmi:id="_MgiFERN3EeCZGfFbfO9QSA" type="2009" fontName="Sans">
+      <children xmi:type="notation:DecorationNode" xmi:id="_MgisIBN3EeCZGfFbfO9QSA" type="5015"/>
       <element xmi:type="types:UShort" href="DataLibTest.opendds#_oW4jwP7lEd-9W4ll_I0Ewg"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_MgiFEhN3EeCZGfFbfO9QSA" x="360" y="156"/>
     </children>

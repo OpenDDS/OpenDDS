@@ -6,7 +6,7 @@
     xmlns:gmftool="http://www.eclipse.org/gmf/2005/ToolDefinition">
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/dcpsLib"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/libs"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib"/>
@@ -37,7 +37,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/policyLib"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/libs"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//PolicyLib"/>
@@ -68,7 +68,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/dataLib"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/libs"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib"/>
