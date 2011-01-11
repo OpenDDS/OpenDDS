@@ -15,16 +15,11 @@
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
 
-<xsl:variable name="newline">
-<xsl:text>
-</xsl:text>
-</xsl:variable>
-
 <!-- Lookup table -->
 <xsl:variable name="lut" select="document('lut.xml')/*/lut:types"/>
 
 <!-- All types -->
-<xsl:variable name="types"       select="//dataLib/types"/>
+<xsl:variable name="types"       select="//types"/>
 <xsl:variable name="local-types" select="//dataLib[not(@model)]/types"/>
 
 <!-- Terminal user defined types are all unreferenced user defined types -->
@@ -33,22 +28,13 @@
                        @xmi:id=$local-types//@subtype or 
                        @xmi:id=$local-types//@switch)]"/>
 
-<!-- determine mode by checking number of datalibs defined in this model -->
-<xsl:variable name="datalib-count" select="count(//dataLib[not(@model)])"/> 
-
 <!-- Index (lookup table is in lut variable) -->
 <xsl:key
      name  = "lut-type"
      match = "type"
      use   = "@type"/>
 
-<!-- process the entire model document to produce the IDL. 
-  ** 
-  ** Strategy: determine the output order of the types. Output module wrapper
-  ** with each type if there are multiple dataLib elements.  Otherwise output
-  ** wrapper only once.
-  **
-  -->
+<!-- process the entire model document to produce the IDL.  -->
 <xsl:template match="/opendds:OpenDDSModel">
 
   <!-- required to build on windows -->
@@ -144,12 +130,16 @@
 
 <!-- Forward declare union definitions. -->
 <xsl:template match="types[@xsi:type = 'types:Union']" mode="declare">
-  <xsl:value-of select="concat('  union ', @name, ';', $newline)"/>
+  <xsl:call-template name="module-wrapped-qname">
+    <xsl:with-param name="type" select="'  union '"/>
+  </xsl:call-template>
 </xsl:template>
 
 <!-- Forward declare data structure definitions. -->
 <xsl:template match="types[@xsi:type = 'types:Struct']" mode="declare">
-  <xsl:value-of select="concat('  struct ', @name, ';', $newline)"/>
+  <xsl:call-template name="module-wrapped-qname">
+    <xsl:with-param name="type" select="'  struct '"/>
+  </xsl:call-template>
 </xsl:template>
 
 <!-- Ignore text in declare mode (enums) -->
@@ -190,6 +180,29 @@
       <xsl:call-template name="close-module-wrapper">
         <xsl:with-param name="target" select="$target/.."/>
       </xsl:call-template>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
+
+<xsl:template name="module-wrapped-qname">
+  <xsl:param name="name" select="@name"/>
+  <xsl:param name="closing"/>
+  <xsl:param name="type"/>
+
+  <xsl:choose>
+    <xsl:when test="contains($name, '::')">
+      <xsl:value-of select="concat('module ', 
+                                   substring-before($name, '::'),
+                                   ' {',
+                                   $newline)"/>
+      <xsl:call-template name="module-wrapped-qname">
+        <xsl:with-param name="name" select="substring-after($name, '::')"/>
+        <xsl:with-param name="closing" select="concat($closing, '};', $newline)"/>
+        <xsl:with-param name="type" select="$type"/>
+      </xsl:call-template>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:value-of select="concat($type, $name, ';', $newline, $closing)"/>
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>
@@ -265,6 +278,7 @@
 
 <!-- Process individual union cases. -->
 <xsl:template match="branches">
+<xsl:message>branches</xsl:message>
   <!-- handle mulitple cases for the variant... -->
   <xsl:for-each select="cases">
     <xsl:if test="position() > 1">
@@ -280,7 +294,7 @@
   </xsl:variable>
 
   <!-- output variant ... -->
-  <xsl:value-of select="concat($typename,' ',field/@name,';',$newline)"/>
+  <xsl:value-of select="concat($typename,' ', field/@name,';',$newline)"/>
 </xsl:template>
 
 <!-- Process union default. -->
@@ -298,20 +312,13 @@
   <xsl:variable name="target" select="$types[@xmi:id = current()/@type]"/>
 
   <!-- Build the output string for the type specification. -->
-  <xsl:variable name="scopename">
-    <xsl:if test="$target[@name]">
-      <xsl:call-template name="ref-scopename">
-        <xsl:with-param name="target" select="$target"/>
-      </xsl:call-template>
-    </xsl:if>
-  </xsl:variable>
   <xsl:variable name="typename">
     <xsl:call-template name="typename">
       <xsl:with-param name="target" select="$target"/>
     </xsl:call-template>
   </xsl:variable>
 
-  <xsl:value-of select="concat('    ',$scopename, $typename,' ',@name,';',$newline)"/>
+  <xsl:value-of select="concat('    ', $typename,' ',@name,';',$newline)"/>
 </xsl:template>
 
 <!-- Process enumeration members. -->
@@ -382,7 +389,12 @@
 
   <xsl:choose>
     <xsl:when test="string-length($targetname) > 0">
-      <xsl:value-of select="$targetname"/>
+      <xsl:variable name="scopename">
+        <xsl:call-template name="scopename">
+          <xsl:with-param name="target" select="$target"/>
+        </xsl:call-template>
+      </xsl:variable>
+      <xsl:value-of select="concat($scopename, $targetname)"/>
     </xsl:when>
     <xsl:when test="string-length($targettype) > 0">
       <xsl:variable name="corbatype">
@@ -419,6 +431,19 @@
     </xsl:when>
     <xsl:otherwise>???</xsl:otherwise>
   </xsl:choose>
+</xsl:template>
+
+<xsl:template name="qname">
+  <xsl:param name="target" select="."/>
+<xsl:message>
+qname looking up scopename for <xsl:value-of select="concat(name($target), ' ', $target/@name)"/>
+</xsl:message>
+  <xsl:variable name="scopename">
+    <xsl:call-template name="scopename">
+      <xsl:with-param name="target" select="$target"/>
+    </xsl:call-template>
+  </xsl:variable>
+  <xsl:value-of select="concat($scopename, $target/@name)"/>
 </xsl:template>
 
 <xsl:template name="typesize">
@@ -532,11 +557,11 @@
 </xsl:template>
 
 <xsl:template name="processExternalModels">
-  <xsl:param name="lib-refs" select="//dataLib[@model]"/>
+  <xsl:param name="lib-refs" select="//types[@model]/@model"/>
   <xsl:param name="completed"/>
 
   <xsl:if test="$lib-refs">
-    <xsl:variable name="model" select="$lib-refs[1]/@model"/>
+    <xsl:variable name="model" select="$lib-refs[1]"/>
     <xsl:if test="not(contains($completed, $model))">
       <xsl:value-of select="concat('#include &quot;', $model, '.idl&quot;', $newline)"/>
     </xsl:if>

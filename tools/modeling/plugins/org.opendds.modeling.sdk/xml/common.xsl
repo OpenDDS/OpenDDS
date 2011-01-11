@@ -11,13 +11,23 @@
 <xsl:variable name="lower" select="'abcdefghijklmnopqrstuvwxyz'"/>
 <xsl:variable name="upper" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
 
+<xsl:variable name="newline">
+<xsl:text>
+</xsl:text>
+</xsl:variable>
+
 <!--
   A::B::C::D::name
 -->
 <xsl:template name="scopename">
   <xsl:param name="target" select="."/>
+
   <xsl:choose>
+    <xsl:when test="not($target)">
+    </xsl:when>
     <xsl:when test="name($target) = 'opendds:OpenDDSModel'">
+    </xsl:when>
+    <xsl:when test="name($target) = 'external-refs'">
     </xsl:when>
     <xsl:when test="name($target) = 'dataLib'">
       <xsl:call-template name="scopename">
@@ -47,30 +57,9 @@
 
 <xsl:template name="type-enum">
   <xsl:param name="type" select="."/>
-  <xsl:choose>
-    <xsl:when test="string-length($type/../@model) &gt; 0">
-      <xsl:variable name="scopename">
-        <xsl:call-template name="scopename">
-          <xsl:with-param name="target" select="$type"/>
-        </xsl:call-template>
-      </xsl:variable>
-      <xsl:variable name="qualname">
-        <xsl:call-template name="normalize-identifier">
-          <xsl:with-param name="identifier">
-            <xsl:value-of select="concat($scopename, $type/@name)"/>
-          </xsl:with-param>
-        </xsl:call-template>
-      </xsl:variable>
-      <xsl:call-template name="string-replace-all">
-        <xsl:with-param name="text" select="$qualname"/>
-        <xsl:with-param name="replace" select="'__'"/>
-        <xsl:with-param name="by" select="'_'"/>
-      </xsl:call-template>
-    </xsl:when>
-    <xsl:otherwise>
-      <xsl:value-of select="$type/@name"/>
-    </xsl:otherwise>
-  </xsl:choose>
+  <xsl:call-template name="normalize-identifier">
+    <xsl:with-param name="identifier" select="$type/@name"/>
+  </xsl:call-template>
 </xsl:template>
 
 <xsl:template name="capitalize">

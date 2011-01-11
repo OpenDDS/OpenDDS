@@ -13,11 +13,6 @@
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
 
-<xsl:variable name="newline">
-  <xsl:text>
-</xsl:text>
-</xsl:variable>
-
 <!-- Node sets -->
 <xsl:variable name="dcpslib" select="//dcpsLib"/>
 
