@@ -32,14 +32,13 @@ my @steps = (
   {'dir' => 'plugins/org.opendds.modeling.gmf',
    'script' => 'ant_codegen.xml'});
 
-my $automated = 0;
 if (scalar @ARGV && $ARGV[0] =~ /^-?-automated/) {
-  $automated = 1;
   unshift(@steps,
           {'dir' => $feature_dir,
            'args' => 'clean'}) if -r $feature_dir . '/build.xml';
   push(@steps,
-       {'extra_plugins' => 1},
+       {'extra_plugins' => 1,
+        'copy_icons' => 1},
        {'dir' => $feature_dir});
 }
 
@@ -77,13 +76,14 @@ foreach my $s (@steps) {
     print "ERROR: Eclipse antRunner invocation failed with $status\n";
     exit($status >> 8);
   }
-}
 
-if ($automated) {
-  chdir $cwd . '/icons';
-  my $status = system("$^X copy-icons-to-plugins.pl");
-  if ($status > 0) {
-    print "ERROR: copy-icons-to-plugins.pl invocation failed with $status\n";
-    exit($status >> 8);
+  if ($s->{'copy_icons'}) {
+    chdir $cwd . '/icons';
+    my $status = system("$^X copy-icons-to-plugins.pl");
+    if ($status > 0) {
+      print "ERROR: copy-icons-to-plugins.pl invocation failed with $status\n";
+      exit($status >> 8);
+    }
   }
+
 }
