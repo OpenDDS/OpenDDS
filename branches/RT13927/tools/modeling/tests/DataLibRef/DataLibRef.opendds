@@ -13,7 +13,7 @@
       </subscribers>
     </participants>
     <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
-    <topics xmi:id="_Ev0RsB0CEeC07OZrGTNj1A"/>
+    <topics xmi:id="_Ev0RsB0CEeC07OZrGTNj1A" name="Other" datatype="_4C6qsBmzEeCiwqO3ASSQ8g3"/>
   </libs>
   <packages xmi:id="_h6HeIB0BEeC07OZrGTNj1A" name="data1">
     <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data1">
@@ -37,7 +37,7 @@
       </types>
       <types xsi:type="types:Union" xmi:id="_q4a14B0BEeC07OZrGTNj1A" name="JeffUnion" switch="_PXgFEPDvEd-I4rwicuuPOw">
         <branches xmi:id="_wGv78B0BEeC07OZrGTNj1A">
-          <field xmi:id="_zTVzwB0BEeC07OZrGTNj1A" name="msg" type="_5STIgPDuEd-I4rwicuuPOw"/>
+          <field xmi:id="_zTVzwB0BEeC07OZrGTNj1A" name="msg" type="_4C6qsBmzEeCiwqO3ASSQ8g3"/>
           <cases xmi:id="_xfyygB0BEeC07OZrGTNj1A" literal="1"/>
         </branches>
         <branches xmi:id="_9TN9QB0BEeC07OZrGTNj1A">

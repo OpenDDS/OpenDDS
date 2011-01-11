@@ -19,11 +19,6 @@
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
 
-<xsl:variable name="newline">
-<xsl:text>
-</xsl:text>
-</xsl:variable>
-
 <!-- Documents -->
 <xsl:variable name="lut-policies" select="document('lut.xml')/*/lut:policies"/>
 
@@ -80,9 +75,9 @@
   <xsl:text>TypeSupportImpl.h"</xsl:text>
   <xsl:value-of select="$newline"/>
 
-  <xsl:for-each select="//dataLib/@model">
-    <xsl:value-of select="concat('#include &quot;', ., 'TypeSupportImpl.h&quot;', $newline)"/>
-  </xsl:for-each>
+  <xsl:call-template name="include-referenced-models">
+    <xsl:with-param name="models" select="//@model"/>
+  </xsl:call-template>
 
   <xsl:text>
 
@@ -267,7 +262,9 @@ Elements::Data::loadMaps()
     <xsl:text>  this->types_[ Topics::</xsl:text>
     <xsl:value-of select="translate(@name,' ','_')"/>
     <xsl:text>] = Types::</xsl:text>
-    <xsl:value-of select="concat($referred-type/../@name, '_', $referred-type/@name)"/>
+    <xsl:call-template name="normalize-identifier">
+      <xsl:with-param name="identifier" select="$referred-type/@name"/>
+    </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
@@ -678,6 +675,7 @@ Elements::Data::copySubscriptionQos(
     <xsl:choose>
       <!-- ignore the 'name', 'type' and 'id' attributes of the policy. -->
       <xsl:when test="name() = 'name' or 
+                      name() = 'model' or
                       name() = 'xsi:type' or 
                       name() = 'xmi:id'"/>
 
@@ -925,6 +923,23 @@ Elements::Data::copySubscriptionQos(
       </xsl:choose>
     </xsl:if>
   </xsl:for-each>
+</xsl:template>
+
+<xsl:template name="include-referenced-models">
+  <xsl:param name="models"/>
+  <xsl:param name="completed-models" select="' '"/>
+  
+  <xsl:if test="$models">
+    <xsl:variable name="model" select="$models[1]"/>
+
+    <xsl:if test="not(contains($completed-models, $model))">
+      <xsl:value-of select="concat('#include &quot;', $model, 'TypeSupportImpl.h&quot;', $newline)"/>
+    </xsl:if>
+    <xsl:call-template name="include-referenced-models">
+      <xsl:with-param name="models" select="$models[position() &gt; 1]"/>
+      <xsl:with-param name="completed-models" select="concat(' ', $model, ' ')"/>
+    </xsl:call-template>
+  </xsl:if>
 </xsl:template>
 
 <!-- will only be called if topics defined -->

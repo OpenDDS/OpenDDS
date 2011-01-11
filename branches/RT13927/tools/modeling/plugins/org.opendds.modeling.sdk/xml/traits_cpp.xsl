@@ -17,11 +17,6 @@
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
 
-<xsl:variable name="newline">
-<xsl:text>
-</xsl:text>
-</xsl:variable>
-
 <!-- Extract the name of the model once. -->
 <xsl:variable name = "modelname" select = "document(/generator:CodeGen/source/@name)/opendds:OpenDDSModel/@name"/>
 

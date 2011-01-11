@@ -18,6 +18,10 @@
   <xsl:copy>
     <xsl:apply-templates select="@*"/>
     <xsl:apply-templates/>
+    <external-refs>
+      <xsl:call-template name="process-external-refs"/>
+    </external-refs>
+<!--
     <xsl:call-template name="process-external-ref-topics">
       <xsl:with-param name="reffing-topics" select="$topics[datatype[@href]]"/>
     </xsl:call-template>
@@ -28,6 +32,7 @@
         </xsl:call-template>
       </policyLib>
     </xsl:if>
+-->
   </xsl:copy>
 </xsl:template>
 
@@ -72,6 +77,11 @@
   <xsl:choose>
     <xsl:when test="name() = 'datatype'">
       <xsl:attribute name="datatype">
+        <xsl:value-of select="substring-after(@href, '#')"/>
+      </xsl:attribute>
+    </xsl:when>
+    <xsl:when test="name() = 'type'">
+      <xsl:attribute name="type">
         <xsl:value-of select="substring-after(@href, '#')"/>
       </xsl:attribute>
     </xsl:when>
@@ -187,6 +197,39 @@
   </xsl:choose>
 </xsl:template>
 
+<xsl:template name="process-external-refs">
+  <xsl:param name="refs" select="//@href"/>
+  <xsl:param name="complete-refs" select="' '"/>
+  
+  <xsl:if test="$refs">
+    <xsl:variable name="ref" select="$refs[1]"/>
+    <xsl:variable name="model" select="substring-before($ref, '#')"/>
+    <xsl:variable name="id" select="substring-after($ref, '#')"/>
+    <xsl:if test="not(contains($complete-refs, $id))">
+      <xsl:for-each select="document($model)//*[@xmi:id = $id]">
+        <xsl:copy>
+          <xsl:attribute name="model">
+            <xsl:call-template name="modelname"/>
+          </xsl:attribute>
+          <xsl:if test="@name">
+            <xsl:variable name="scopename">
+              <xsl:call-template name="scopename"/>
+            </xsl:variable>
+            <xsl:attribute name="name">
+              <xsl:value-of select="concat($scopename, @name)"/>
+            </xsl:attribute>
+          </xsl:if>
+          <xsl:apply-templates select="@*[name() != 'name'] | node()"/>
+        </xsl:copy>
+      </xsl:for-each>
+    </xsl:if>
+    <xsl:call-template name="process-external-refs">
+      <xsl:with-param name="refs" select="$refs[position() &gt; 1]"/>
+      <xsl:with-param name="complete-refs" select="concat(' ', $id, ' ')"/>
+    </xsl:call-template>
+  </xsl:if>
+</xsl:template>
+
 <xsl:template name="process-external-ref-topics">
   <xsl:param name="reffing-topics"/>
   <xsl:param name="complete-types" select="' '"/>
@@ -201,7 +244,6 @@
         <xsl:variable name="modelname">
           <xsl:call-template name="modelname"/>
         </xsl:variable>
-<xsl:message>modelname is <xsl:value-of select="$modelname"/> </xsl:message>
         <xsl:variable name="scopename">
           <xsl:call-template name="scopename"/>
         </xsl:variable>
@@ -251,7 +293,6 @@
 
 <xsl:template name="modelname">
   <xsl:param name="target" select="."/>
-<xsl:message>checking modelname for <xsl:value-of select="name($target)"/> </xsl:message>
   <xsl:choose>
     <xsl:when test="name($target) = 'opendds:OpenDDSModel'">
       <xsl:value-of select="$target/@name"/>

@@ -13,15 +13,10 @@
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
 
-<xsl:variable name="newline">
-<xsl:text>
-</xsl:text>
-</xsl:variable>
-
 <!-- Node sets -->
 <xsl:variable name="participants" select="//participants"/>
 <xsl:variable name="topics"       select="//topics"/>
-<xsl:variable name="types"        select="//dataLib/types"/>
+<xsl:variable name="types"        select="//types"/>
 <xsl:variable name="publishers"   select="//publishers"/>
 <xsl:variable name="subscribers"  select="//subscribers"/>
 <xsl:variable name="writers"      select="//writers"/>
