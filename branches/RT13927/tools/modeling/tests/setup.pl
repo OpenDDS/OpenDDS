@@ -43,6 +43,7 @@ sub generate {
   my %modtimes;
   my $mtime = (stat $tmp)[9];
   my $pp = "../../plugins/org.opendds.modeling.sdk/xml/preprocess.xsl";
+  my $mpb = "../../plugins/org.opendds.modeling.sdk/xml/mpb.xsl";
   my $status;
 
   print "Running code generation on: $base.opendds\n";
@@ -63,6 +64,8 @@ sub generate {
     print "ERROR: Java CodeGenerator invocation failed with $status\n";
     exit($status >> 8);
   }
+  print "   generating mpb...\n";
+  $status = system("xsltproc --path . $mpb $tmp > model/$base.mpb");
 
 }
 
