@@ -1,3 +1,10 @@
+Wed Jan 12 14:40:35 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/figures/UmlPackageFig.java:
+
+          Place a limit on the size of the package head so looks reasonable when it
+          grows to accomodate libs and other packages.
+
 Wed Jan 12 13:49:54 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
@@ -6,7 +13,7 @@ Wed Jan 12 13:49:54 UTC 2011  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.trace:
         * tools/modeling/plugins/org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph:
 
-	  Added support for UML-like Packages to the main diagram.
+          Added support for UML-like Packages to the main diagram.
 
 Tue Jan 11 22:58:21 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
