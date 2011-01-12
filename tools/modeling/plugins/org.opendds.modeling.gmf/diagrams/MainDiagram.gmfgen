@@ -55,6 +55,279 @@
     <shortcutsProvidedFor>OpenDDS</shortcutsProvidedFor>
     <domainDiagramElement
         href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel"/>
+    <childNodes
+        visualID="3001"
+        editPartClassName="LibPackage2EditPart"
+        itemSemanticEditPolicyClassName="LibPackage2ItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="LibPackage2CanonicalEditPolicy"
+        compartments="//@diagram/@compartments.1"
+        graphicalNodeEditPolicyClassName="LibPackage2GraphicalNodeEditPolicy"
+        createCommandClassName="LibPackage2CreateCommand"
+        containers="//@diagram/@compartments.1 //@diagram/@compartments.0">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <elementType
+          xsi:type="gmfgen:SpecializationType"
+          metamodelType="//@diagram/@topLevelNodes.3/@elementType"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          layoutType="TOOLBAR_LAYOUT"
+          className="UmlPackageFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class UmlPackageFigure extends com.ociweb.gmf.figures.UmlPackageFig {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureUmlPackageNameLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public UmlPackageFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;&#xA;&#xA;&#xA;this.setBorder(new org.eclipse.draw2d.MarginBorder(getMapMode().DPtoLP(15)&#xA;, getMapMode().DPtoLP(0)&#xA;, getMapMode().DPtoLP(0)&#xA;, getMapMode().DPtoLP(0)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureUmlPackageNameLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureUmlPackageNameLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureUmlPackageNameLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureUmlPackageNameLabel() {&#xA;&#x9;&#x9;return fFigureUmlPackageNameLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;">
+        <attributes
+            xsi:type="gmfgen:DefaultSizeAttributes"
+            width="100"
+            height="50"/>
+      </viewmap>
+      <modelFacet>
+        <metaClass
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/LibPackage"/>
+        <containmentMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/LibPackage/packages"/>
+        <childMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/LibPackage/packages"/>
+      </modelFacet>
+      <labels
+          visualID="5018"
+          editPartClassName="LibPackageName2EditPart"
+          itemSemanticEditPolicyClassName="LibPackageName2ItemSemanticEditPolicy"
+          elementIcon="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureUmlPackageNameLabel"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/LibPackage/name"/>
+        </modelFacet>
+      </labels>
+    </childNodes>
+    <childNodes
+        visualID="3002"
+        editPartClassName="DataLib2EditPart"
+        itemSemanticEditPolicyClassName="DataLib2ItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="DataLib2CanonicalEditPolicy"
+        graphicalNodeEditPolicyClassName="DataLib2GraphicalNodeEditPolicy"
+        createCommandClassName="DataLib2CreateCommand"
+        containers="//@diagram/@compartments.1 //@diagram/@compartments.0">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <elementType
+          xsi:type="gmfgen:SpecializationType"
+          metamodelType="//@diagram/@topLevelNodes.2/@elementType"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          layoutType="TOOLBAR_LAYOUT"
+          className="StereotypedUmlPackageFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class StereotypedUmlPackageFigure extends com.ociweb.gmf.figures.UmlPackageFig {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureUmlPackageStereotypeLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureUmlPackageNameLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public StereotypedUmlPackageFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;&#xA;&#xA;&#xA;this.setBorder(new org.eclipse.draw2d.MarginBorder(getMapMode().DPtoLP(15)&#xA;, getMapMode().DPtoLP(0)&#xA;, getMapMode().DPtoLP(0)&#xA;, getMapMode().DPtoLP(0)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureUmlPackageStereotypeLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureUmlPackageStereotypeLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureUmlPackageStereotypeLabel);&#xA;&#xA;&#xA;&#xA;fFigureUmlPackageNameLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureUmlPackageNameLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureUmlPackageNameLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureUmlPackageStereotypeLabel() {&#xA;&#x9;&#x9;return fFigureUmlPackageStereotypeLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureUmlPackageNameLabel() {&#xA;&#x9;&#x9;return fFigureUmlPackageNameLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;">
+        <attributes
+            xsi:type="gmfgen:DefaultSizeAttributes"
+            width="100"
+            height="50"/>
+      </viewmap>
+      <behaviour
+          xsi:type="gmfgen:OpenDiagramBehaviour"
+          editPolicyClassName="OpenDiagramEditPolicyDataLib"
+          diagramKind="OpenDDS DataLib"
+          editorID="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID"/>
+      <modelFacet>
+        <metaClass
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//types/DataLib"/>
+        <containmentMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/LibPackage/libs"/>
+        <childMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/LibPackage/libs"/>
+      </modelFacet>
+      <labels
+          visualID="5020"
+          editPartClassName="DataLibName3EditPart"
+          itemSemanticEditPolicyClassName="DataLibName3ItemSemanticEditPolicy"
+          elementIcon="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureUmlPackageNameLabel"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSLib/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5021"
+          editPartClassName="DataLibName4EditPart"
+          itemSemanticEditPolicyClassName="DataLibName4ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureUmlPackageStereotypeLabel"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«dataLib»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSLib/name"/>
+        </modelFacet>
+      </labels>
+    </childNodes>
+    <childNodes
+        visualID="3003"
+        editPartClassName="DcpsLib2EditPart"
+        itemSemanticEditPolicyClassName="DcpsLib2ItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="DcpsLib2CanonicalEditPolicy"
+        graphicalNodeEditPolicyClassName="DcpsLib2GraphicalNodeEditPolicy"
+        createCommandClassName="DcpsLib2CreateCommand"
+        containers="//@diagram/@compartments.1 //@diagram/@compartments.0">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <elementType
+          xsi:type="gmfgen:SpecializationType"
+          metamodelType="//@diagram/@topLevelNodes.0/@elementType"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          layoutType="TOOLBAR_LAYOUT"
+          className="StereotypedUmlPackageFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class StereotypedUmlPackageFigure extends com.ociweb.gmf.figures.UmlPackageFig {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureUmlPackageStereotypeLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureUmlPackageNameLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public StereotypedUmlPackageFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;&#xA;&#xA;&#xA;this.setBorder(new org.eclipse.draw2d.MarginBorder(getMapMode().DPtoLP(15)&#xA;, getMapMode().DPtoLP(0)&#xA;, getMapMode().DPtoLP(0)&#xA;, getMapMode().DPtoLP(0)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureUmlPackageStereotypeLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureUmlPackageStereotypeLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureUmlPackageStereotypeLabel);&#xA;&#xA;&#xA;&#xA;fFigureUmlPackageNameLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureUmlPackageNameLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureUmlPackageNameLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureUmlPackageStereotypeLabel() {&#xA;&#x9;&#x9;return fFigureUmlPackageStereotypeLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureUmlPackageNameLabel() {&#xA;&#x9;&#x9;return fFigureUmlPackageNameLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;">
+        <attributes
+            xsi:type="gmfgen:DefaultSizeAttributes"
+            width="100"
+            height="50"/>
+      </viewmap>
+      <behaviour
+          xsi:type="gmfgen:OpenDiagramBehaviour"
+          editPolicyClassName="OpenDiagramEditPolicyDcpsLib"
+          diagramKind="OpenDDS DcpsLib"
+          editorID="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorID"/>
+      <modelFacet>
+        <metaClass
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/DcpsLib"/>
+        <containmentMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/LibPackage/libs"/>
+        <childMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/LibPackage/libs"/>
+      </modelFacet>
+      <labels
+          visualID="5022"
+          editPartClassName="DcpsLibName3EditPart"
+          itemSemanticEditPolicyClassName="DcpsLibName3ItemSemanticEditPolicy"
+          elementIcon="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureUmlPackageNameLabel"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSLib/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5023"
+          editPartClassName="DcpsLibName4EditPart"
+          itemSemanticEditPolicyClassName="DcpsLibName4ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureUmlPackageStereotypeLabel"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«dcpslib»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSLib/name"/>
+        </modelFacet>
+      </labels>
+    </childNodes>
+    <childNodes
+        visualID="3004"
+        editPartClassName="PolicyLib2EditPart"
+        itemSemanticEditPolicyClassName="PolicyLib2ItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="PolicyLib2CanonicalEditPolicy"
+        graphicalNodeEditPolicyClassName="PolicyLib2GraphicalNodeEditPolicy"
+        createCommandClassName="PolicyLib2CreateCommand"
+        containers="//@diagram/@compartments.1 //@diagram/@compartments.0">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <elementType
+          xsi:type="gmfgen:SpecializationType"
+          metamodelType="//@diagram/@topLevelNodes.1/@elementType"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          layoutType="TOOLBAR_LAYOUT"
+          className="StereotypedUmlPackageFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class StereotypedUmlPackageFigure extends com.ociweb.gmf.figures.UmlPackageFig {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureUmlPackageStereotypeLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureUmlPackageNameLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public StereotypedUmlPackageFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;&#xA;&#xA;&#xA;this.setBorder(new org.eclipse.draw2d.MarginBorder(getMapMode().DPtoLP(15)&#xA;, getMapMode().DPtoLP(0)&#xA;, getMapMode().DPtoLP(0)&#xA;, getMapMode().DPtoLP(0)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureUmlPackageStereotypeLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureUmlPackageStereotypeLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureUmlPackageStereotypeLabel);&#xA;&#xA;&#xA;&#xA;fFigureUmlPackageNameLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureUmlPackageNameLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureUmlPackageNameLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureUmlPackageStereotypeLabel() {&#xA;&#x9;&#x9;return fFigureUmlPackageStereotypeLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureUmlPackageNameLabel() {&#xA;&#x9;&#x9;return fFigureUmlPackageNameLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;">
+        <attributes
+            xsi:type="gmfgen:DefaultSizeAttributes"
+            width="100"
+            height="50"/>
+      </viewmap>
+      <behaviour
+          xsi:type="gmfgen:OpenDiagramBehaviour"
+          editPolicyClassName="OpenDiagramEditPolicyPolicyLib"
+          diagramKind="OpenDDS PolicyLib"
+          editorID="org.opendds.modeling.model.opendds.diagram.policylib.part.OpenDDSPolicyLibDiagramEditorID"/>
+      <modelFacet>
+        <metaClass
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/PolicyLib"/>
+        <containmentMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/LibPackage/libs"/>
+        <childMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/LibPackage/libs"/>
+      </modelFacet>
+      <labels
+          visualID="5024"
+          editPartClassName="PolicyLibName3EditPart"
+          itemSemanticEditPolicyClassName="PolicyLibName3ItemSemanticEditPolicy"
+          elementIcon="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureUmlPackageNameLabel"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSLib/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5025"
+          editPartClassName="PolicyLibName4EditPart"
+          itemSemanticEditPolicyClassName="PolicyLibName4ItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureUmlPackageStereotypeLabel"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«policyLib»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSLib/name"/>
+        </modelFacet>
+      </labels>
+    </childNodes>
     <topLevelNodes
         visualID="2007"
         editPartClassName="DcpsLibEditPart"
@@ -79,6 +352,7 @@
       </viewmap>
       <behaviour
           xsi:type="gmfgen:OpenDiagramBehaviour"
+          editPolicyClassName="OpenDiagramEditPolicyDcpsLib"
           diagramKind="OpenDDS DcpsLib"
           editorID="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorID"/>
       <modelFacet>
@@ -92,7 +366,8 @@
       <labels
           visualID="5012"
           editPartClassName="DcpsLibNameEditPart"
-          itemSemanticEditPolicyClassName="DcpsLibNameItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="DcpsLibNameItemSemanticEditPolicy"
+          elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -164,7 +439,8 @@
       <labels
           visualID="5014"
           editPartClassName="PolicyLibNameEditPart"
-          itemSemanticEditPolicyClassName="PolicyLibNameItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PolicyLibNameItemSemanticEditPolicy"
+          elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -236,7 +512,8 @@
       <labels
           visualID="5016"
           editPartClassName="DataLibNameEditPart"
-          itemSemanticEditPolicyClassName="DataLibNameItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="DataLibNameItemSemanticEditPolicy"
+          elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -270,6 +547,88 @@
         </modelFacet>
       </labels>
     </topLevelNodes>
+    <topLevelNodes
+        visualID="2010"
+        editPartClassName="LibPackageEditPart"
+        itemSemanticEditPolicyClassName="LibPackageItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="LibPackageCanonicalEditPolicy"
+        compartments="//@diagram/@compartments.0"
+        graphicalNodeEditPolicyClassName="LibPackageGraphicalNodeEditPolicy"
+        createCommandClassName="LibPackageCreateCommand">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <elementType
+          xsi:type="gmfgen:MetamodelType"
+          editHelperClassName="LibPackageEditHelper"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          layoutType="TOOLBAR_LAYOUT"
+          className="UmlPackageFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class UmlPackageFigure extends com.ociweb.gmf.figures.UmlPackageFig {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureUmlPackageNameLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public UmlPackageFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;&#xA;&#xA;&#xA;this.setBorder(new org.eclipse.draw2d.MarginBorder(getMapMode().DPtoLP(15)&#xA;, getMapMode().DPtoLP(0)&#xA;, getMapMode().DPtoLP(0)&#xA;, getMapMode().DPtoLP(0)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureUmlPackageNameLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureUmlPackageNameLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureUmlPackageNameLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureUmlPackageNameLabel() {&#xA;&#x9;&#x9;return fFigureUmlPackageNameLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;">
+        <attributes
+            xsi:type="gmfgen:DefaultSizeAttributes"
+            width="100"
+            height="50"/>
+      </viewmap>
+      <modelFacet>
+        <metaClass
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/LibPackage"/>
+        <containmentMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/packages"/>
+        <childMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSModel/packages"/>
+      </modelFacet>
+      <labels
+          visualID="5019"
+          editPartClassName="LibPackageNameEditPart"
+          itemSemanticEditPolicyClassName="LibPackageNameItemSemanticEditPolicy"
+          elementIcon="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureUmlPackageNameLabel"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/LibPackage/name"/>
+        </modelFacet>
+      </labels>
+    </topLevelNodes>
+    <compartments
+        visualID="7001"
+        editPartClassName="LibPackageUmlPackageCompartmentEditPart"
+        itemSemanticEditPolicyClassName="LibPackageUmlPackageCompartmentItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="LibPackageUmlPackageCompartmentCanonicalEditPolicy"
+        childNodes="//@diagram/@childNodes.0 //@diagram/@childNodes.1 //@diagram/@childNodes.2 //@diagram/@childNodes.3"
+        title="UmlPackageCompartment"
+        needsTitle="false"
+        node="//@diagram/@topLevelNodes.3"
+        listLayout="false">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <viewmap
+          xsi:type="gmfgen:FigureViewmap"
+          figureQualifiedClassName="org.eclipse.draw2d.RectangleFigure"/>
+    </compartments>
+    <compartments
+        visualID="7002"
+        editPartClassName="LibPackageUmlPackageCompartment2EditPart"
+        itemSemanticEditPolicyClassName="LibPackageUmlPackageCompartment2ItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="LibPackageUmlPackageCompartment2CanonicalEditPolicy"
+        childNodes="//@diagram/@childNodes.0 //@diagram/@childNodes.1 //@diagram/@childNodes.2 //@diagram/@childNodes.3"
+        title="UmlPackageCompartment"
+        needsTitle="false"
+        node="//@diagram/@childNodes.0"
+        listLayout="false">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <viewmap
+          xsi:type="gmfgen:FigureViewmap"
+          figureQualifiedClassName="org.eclipse.draw2d.RectangleFigure"/>
+    </compartments>
     <palette>
       <groups
           title="OpenDDS">
@@ -279,21 +638,28 @@
             description="Create new PolicyLib"
             largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/PolicyLib.gif"
             smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/PolicyLib.gif"
-            genNodes="//@diagram/@topLevelNodes.1"/>
+            genNodes="//@diagram/@topLevelNodes.1 //@diagram/@childNodes.3"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DcpsLib"
             description="Create new DcpsLib"
             largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DcpsLib.gif"
             smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DcpsLib.gif"
-            genNodes="//@diagram/@topLevelNodes.0"/>
+            genNodes="//@diagram/@topLevelNodes.0 //@diagram/@childNodes.2"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DataLib"
             description="Create new DataLib"
             largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataLib.gif"
             smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataLib.gif"
-            genNodes="//@diagram/@topLevelNodes.2"/>
+            genNodes="//@diagram/@topLevelNodes.2 //@diagram/@childNodes.1"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="Package"
+            description="Create new Package"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/LibPackage.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/LibPackage.gif"
+            genNodes="//@diagram/@topLevelNodes.3 //@diagram/@childNodes.0"/>
       </groups>
     </palette>
     <preferencePages
@@ -341,6 +707,33 @@
     <childReferences
         parent="//@diagram"
         child="//@diagram/@topLevelNodes.2"/>
+    <childReferences
+        parent="//@diagram/@childNodes.0"
+        child="//@diagram/@childNodes.0"/>
+    <childReferences
+        parent="//@diagram/@childNodes.0"
+        child="//@diagram/@childNodes.1"/>
+    <childReferences
+        parent="//@diagram/@childNodes.0"
+        child="//@diagram/@childNodes.2"/>
+    <childReferences
+        parent="//@diagram/@childNodes.0"
+        child="//@diagram/@childNodes.3"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.3"
+        child="//@diagram/@childNodes.0"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.3"
+        child="//@diagram/@childNodes.1"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.3"
+        child="//@diagram/@childNodes.2"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.3"
+        child="//@diagram/@childNodes.3"/>
+    <childReferences
+        parent="//@diagram"
+        child="//@diagram/@topLevelNodes.3"/>
   </navigator>
   <diagramUpdater/>
   <propertySheet>
@@ -376,7 +769,7 @@
       extensibleViaService="true">
     <implementations
         xsi:type="gmfgen:PredefinedParser"
-        uses="//@diagram/@topLevelNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.0/@labels.1/@modelFacet //@diagram/@topLevelNodes.1/@labels.0/@modelFacet //@diagram/@topLevelNodes.1/@labels.1/@modelFacet //@diagram/@topLevelNodes.2/@labels.0/@modelFacet //@diagram/@topLevelNodes.2/@labels.1/@modelFacet"/>
+        uses="//@diagram/@topLevelNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.0/@labels.1/@modelFacet //@diagram/@topLevelNodes.1/@labels.0/@modelFacet //@diagram/@topLevelNodes.1/@labels.1/@modelFacet //@diagram/@topLevelNodes.2/@labels.0/@modelFacet //@diagram/@topLevelNodes.2/@labels.1/@modelFacet //@diagram/@childNodes.1/@labels.0/@modelFacet //@diagram/@childNodes.1/@labels.1/@modelFacet //@diagram/@childNodes.2/@labels.0/@modelFacet //@diagram/@childNodes.2/@labels.1/@modelFacet //@diagram/@childNodes.3/@labels.0/@modelFacet //@diagram/@childNodes.3/@labels.1/@modelFacet //@diagram/@childNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.3/@labels.0/@modelFacet"/>
   </labelParsers>
   <contextMenus
       context="//@diagram">
