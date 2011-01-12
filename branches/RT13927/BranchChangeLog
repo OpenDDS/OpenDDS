@@ -1,9 +1,16 @@
+Wed Jan 12 15:59:19 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfmap:
+
+          Added validation rule to check that package names are not empty.
+
 Wed Jan 12 15:06:38 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts:
         * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics:
 
-	  Added auto-generated files to the svn:ignore property.
+          Added auto-generated files to the svn:ignore property.
 
 Wed Jan 12 14:40:35 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
