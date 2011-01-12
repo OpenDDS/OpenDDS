@@ -177,6 +177,19 @@
               href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib"/>
         </target>
       </audits>
+      <audits
+          name="Package Name Empty"
+          description="Package name should not be empty"
+          id="org.opendds.modeling.model.validation.error.package_name_blank"
+          message="Package name is empty">
+        <rule
+            body="not name.oclIsUndefined() and name &lt;> ''"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//LibPackage"/>
+        </target>
+      </audits>
     </childContainers>
   </audits>
 </gmfmap:Mapping>

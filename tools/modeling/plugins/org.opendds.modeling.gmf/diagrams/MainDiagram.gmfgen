@@ -16,7 +16,7 @@
         name="OpenDDSModel Errors"
         description="Detects modeling constructs that would result in invalid generated OpenDDS code."
         path="//@audits/@categories.0 //@audits/@categories.1"
-        audits="//@audits/@rules.0"/>
+        audits="//@audits/@rules.0 //@audits/@rules.1"/>
     <rules
         name="DcpsLib Name Empty"
         description="DcpsLib name should not be empty"
@@ -31,8 +31,22 @@
             href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/DcpsLib"/>
       </target>
     </rules>
+    <rules
+        name="Package Name Empty"
+        description="Package name should not be empty"
+        id="org.opendds.modeling.model.validation.error.package_name_blank"
+        rule="//@expressionProviders/@providers.0/@expressions.1"
+        message="Package name is empty"
+        category="//@audits/@categories.1">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/LibPackage"/>
+      </target>
+    </rules>
     <clientContexts
-        ruleTargets="//@audits/@rules.0/@target"/>
+        ruleTargets="//@audits/@rules.0/@target //@audits/@rules.1/@target"/>
   </audits>
   <diagram
       visualID="1000"
@@ -760,6 +774,9 @@
   <expressionProviders>
     <providers
         xsi:type="gmfgen:GenExpressionInterpreter">
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="not name.oclIsUndefined() and name &lt;> ''"/>
       <expressions
           xsi:type="gmfgen:GenConstraint"
           body="not name.oclIsUndefined() and name &lt;> ''"/>
