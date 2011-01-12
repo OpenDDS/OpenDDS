@@ -1,3 +1,34 @@
+Wed Jan 12 22:45:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/README.user:
+
+          Adjusted the update site URL and added some more instructions.
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+
+          Added org.opendds.modeling.help to the feature.
+
+        * tools/modeling/features/org.opendds.modeling.site/.project:
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+        * tools/modeling/features/org.opendds.modeling.site/index.html:
+        * tools/modeling/features/org.opendds.modeling.site/site.xml:
+        * tools/modeling/features/org.opendds.modeling.site/web/site.css:
+        * tools/modeling/features/org.opendds.modeling.site/web/site.xsl:
+
+          New Eclipse project for maintaining the update site.
+          See the README.txt for instructions.
+
+        * tools/modeling/plugins/org.opendds.modeling.common:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main:
+        * tools/modeling/plugins/org.opendds.modeling.help:
+
+          Set svn:ignore.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:
+
+          Committing this previously-generated file so that the New Wizard
+          gets placed in the same category with those from the other plugins.
+
 Wed Jan 12 19:08:50 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpb.xsl:
