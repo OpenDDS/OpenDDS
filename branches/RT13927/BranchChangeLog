@@ -1,3 +1,10 @@
+Wed Jan 12 15:06:38 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics:
+
+	  Added auto-generated files to the svn:ignore property.
+
 Wed Jan 12 14:40:35 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/figures/UmlPackageFig.java:
