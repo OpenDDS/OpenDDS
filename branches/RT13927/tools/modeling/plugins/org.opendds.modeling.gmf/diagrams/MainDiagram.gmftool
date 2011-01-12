@@ -47,6 +47,19 @@
             path="icons/full/obj16/DataLib.gif"
             bundle="org.opendds.modeling.model.edit"/>
       </tools>
+      <tools
+          xsi:type="gmftool:CreationTool"
+          title="Package"
+          description="Create new Package">
+        <smallIcon
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/LibPackage.gif"
+            bundle="org.opendds.modeling.model.edit"/>
+        <largeIcon
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/LibPackage.gif"
+            bundle="org.opendds.modeling.model.edit"/>
+      </tools>
     </tools>
   </palette>
 </gmftool:ToolRegistry>

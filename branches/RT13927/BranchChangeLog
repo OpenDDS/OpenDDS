@@ -1,3 +1,13 @@
+Wed Jan 12 13:49:54 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmftool:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.trace:
+        * tools/modeling/plugins/org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph:
+
+	  Added support for UML-like Packages to the main diagram.
+
 Tue Jan 11 22:58:21 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
@@ -27,7 +37,7 @@ Tue Jan 11 22:58:21 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_h.xsl:
 
           Normalize newline definition.
-          
+
         * tools/modeling/tests/DataLibRef/DataLibRef.opendds:
         * tools/modeling/tests/MessengerMixed/MessengerMixed.opendds:
 

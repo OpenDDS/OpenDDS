@@ -97,6 +97,55 @@
           href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#StereotypedUmlPackage"/>
     </ownedChild>
   </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//OpenDDSModel/packages"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//LibPackage"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping">
+        <diagramLabel
+            href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#UmlPackageName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//LibPackage/name"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="MainDiagram.gmftool#//@palette/@tools.0/@tools.3"/>
+      <diagramNode
+          href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#UmlPackage"/>
+      <children
+          compartment="//@nodes.3/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.3/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//LibPackage/packages"/>
+      </children>
+      <children
+          compartment="//@nodes.3/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.2/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//LibPackage/libs"/>
+      </children>
+      <children
+          compartment="//@nodes.3/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.0/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//LibPackage/libs"/>
+      </children>
+      <children
+          compartment="//@nodes.3/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.1/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//LibPackage/libs"/>
+      </children>
+      <compartments
+          children="//@nodes.3/@ownedChild/@children.0 //@nodes.3/@ownedChild/@children.1 //@nodes.3/@ownedChild/@children.2 //@nodes.3/@ownedChild/@children.3">
+        <compartment
+            href="../../org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph#UmlPackageCompartment"/>
+      </compartments>
+    </ownedChild>
+  </nodes>
   <diagram>
     <diagramCanvas
         href="../../org.opendds.modeling.graphics/diagrams/stereotypedFigure.gmfgraph#stereotypedelement"/>
