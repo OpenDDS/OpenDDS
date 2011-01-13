@@ -12,9 +12,9 @@
 int main(int argc, char** argv)
 {
   try {
-    DefaultInvalidNamesType model(argc, argv);
+    blankdcps::DefaultInvalidNamesType model(argc, argv);
 
-    using OpenDDS::Model::InvalidNames::Elements;
+    using OpenDDS::Model::blankdcps::Elements;
 
     DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer_1);
 

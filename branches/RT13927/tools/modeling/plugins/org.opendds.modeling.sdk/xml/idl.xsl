@@ -278,7 +278,6 @@
 
 <!-- Process individual union cases. -->
 <xsl:template match="branches">
-<xsl:message>branches</xsl:message>
   <!-- handle mulitple cases for the variant... -->
   <xsl:for-each select="cases">
     <xsl:if test="position() > 1">
@@ -435,9 +434,6 @@
 
 <xsl:template name="qname">
   <xsl:param name="target" select="."/>
-<xsl:message>
-qname looking up scopename for <xsl:value-of select="concat(name($target), ' ', $target/@name)"/>
-</xsl:message>
   <xsl:variable name="scopename">
     <xsl:call-template name="scopename">
       <xsl:with-param name="target" select="$target"/>

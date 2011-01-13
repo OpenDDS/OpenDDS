@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <generator:CodeGen xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:generator="http://www.opendds.org/modeling/schemas/Generator/1.0">
-  <source name="MessengerMC.opendds"/>
+  <source name="MultiDCPS.opendds"/>
   <target name="model"/>
   <instances>
     <instance name="default">
@@ -39,7 +39,7 @@
           <datalink_control_chunks value="32"/>
           <default_to_ipv6 value="false"/>
           <port_offset value="49400"/>
-          <group_address value="224.1.0.129:49401"/>
+          <group_address value="&quot;224.0.0.128&quot;"/>
           <reliable value="true"/>
           <syn_backoff value="2.0"/>
           <syn_interval value="250"/>
@@ -85,7 +85,7 @@
           <datalink_control_chunks value="32"/>
           <default_to_ipv6 value="false"/>
           <port_offset value="49400"/>
-          <group_address value="224.1.0.129:49401"/>
+          <group_address value="&quot;224.0.0.128&quot;"/>
           <reliable value="true"/>
           <syn_backoff value="2.0"/>
           <syn_interval value="250"/>

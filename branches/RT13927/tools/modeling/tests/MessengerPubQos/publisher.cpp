@@ -12,7 +12,7 @@
 int main(int argc, char** argv)
 {
   try {
-    DefaultMessengerPubQosType model(argc, argv);
+    MessengerPubQos::DefaultMessengerPubQosType model(argc, argv);
 
     using OpenDDS::Model::MessengerPubQos::Elements;
 

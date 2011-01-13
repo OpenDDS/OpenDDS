@@ -23,6 +23,8 @@
 <xsl:variable name="lut-policies" select="document('lut.xml')/*/lut:policies"/>
 
 <!-- Node sets -->
+<xsl:variable name="types"        select="//types"/>
+<!--
 <xsl:variable name="readers"      select="//readers"/>
 <xsl:variable name="writers"      select="//writers"/>
 <xsl:variable name="domains"      select="//domains"/>
@@ -31,7 +33,7 @@
 <xsl:variable name="policies"     select="//policies"/>
 <xsl:variable name="subscribers"  select="//subscribers"/>
 <xsl:variable name="topics"       select="//topics"/>
-<xsl:variable name="types"        select="//types"/>
+-->
 
 <!-- Indices (lookup tables are at the bottom of this document) -->
 <xsl:key
@@ -56,12 +58,6 @@
 
 <!-- Extract the name of the model once. -->
 <xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
-
-<!-- A unique set of remote type hrefs, containted in datatype elements 
-<xsl:variable name="uniq-type-refs" select="$topics/datatype[generate-id() = generate-id(key('remote-topic-types', @href)[1])]"/>
-
-<xsl:variable name="uniq-model-refs" select="$uniq-type-refs[generate-id() = generate-id(key('remote-models',substring-before(@href,'#'))[1])]"/>
--->
 
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
@@ -90,26 +86,43 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "model/Utilities.h"
 
-namespace OpenDDS { namespace Model { namespace </xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text> {
+namespace OpenDDS { namespace Model { 
+</xsl:text>
+  <xsl:apply-templates/>
+<xsl:text>
+} // End namespace Model
+} // End namespace OpenDDS
+</xsl:text>
+</xsl:template>
+<!-- End of main processing template. -->
 
+<xsl:template match="packages[.//dcpsLib]">
+  <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
+  <xsl:apply-templates/>
+  <xsl:value-of select="concat('} // End namespace ', @name, $newline)"/>
+</xsl:template>
+
+<xsl:template match="dcpsLib">
+  <xsl:variable name="lib-readers"      select=".//readers"/>
+  <xsl:variable name="lib-writers"      select=".//writers"/>
+  <xsl:variable name="lib-domains"      select=".//domains"/>
+  <xsl:variable name="lib-participants" select=".//participants"/>
+  <xsl:variable name="lib-publishers"   select=".//publishers"/>
+  <xsl:variable name="lib-policies"     select=".//policies"/>
+  <xsl:variable name="lib-subscribers"  select=".//subscribers"/>
+  <xsl:variable name="lib-topics"       select=".//topics"/>
+  <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
+  <xsl:text>
 inline
 Elements::Data::Data()
 { </xsl:text>
-<xsl:if test="$topics">
+<xsl:if test="$lib-topics">
   <xsl:text>
   for( int index = 0;
-       index &lt; OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Types::LAST_INDEX;
-       ++index
-  ) {
+       index &lt; Elements::Types::LAST_INDEX;
+       ++index) {
     this->typeNames_[ index] = 0;
   }
-</xsl:text>
-</xsl:if>
-<xsl:text>
 
   this->loadDomains();
   this->loadTopics();
@@ -126,12 +139,10 @@ Elements::Data::Data()
 inline
 Elements::Data::~Data()
 { </xsl:text>
-<xsl:if test="$topics">
+<xsl:if test="$lib-topics">
   <xsl:text>
   for( int index = 0;
-       index &lt; OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>::Elements::Types::LAST_INDEX;
+       index &lt; Elements::Types::LAST_INDEX;
        ++index
   ) {
     if( this->typeNames_[ index]) {
@@ -153,7 +164,7 @@ Elements::Data::registerType(
   switch( type) {
 </xsl:text>
   <!-- handle internal datatypes -->
-  <xsl:variable name="defined-types" select="$types[@xmi:id = $topics/@datatype]"/>
+  <xsl:variable name="defined-types" select="$types[@xmi:id = $lib-topics/@datatype]"/>
 
   <xsl:for-each select="$defined-types">
     <xsl:call-template name="output-registerType-case"/>
@@ -182,13 +193,13 @@ Elements::Data::loadDomains()
 {
 </xsl:text>
   <!-- '  this->domains_[ Participants::(domainParticipant/@name)] = (domainParticipant/@domain);\n' -->
-  <xsl:for-each select="$participants/@domain">
+  <xsl:for-each select="$lib-participants/@domain">
     <xsl:text>  this->domains_[ Participants::</xsl:text>
     <xsl:call-template name="normalize-identifier">
       <xsl:with-param name="identifier" select="../@name"/>
     </xsl:call-template>
     <xsl:text>] = </xsl:text>
-    <xsl:value-of select="$domains[@xmi:id = current()]/@domainId"/>
+    <xsl:value-of select="$lib-domains[@xmi:id = current()]/@domainId"/>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
@@ -201,7 +212,7 @@ Elements::Data::loadTopics()
   /// @TODO verify how we manage the model strings.
 </xsl:text>
   <!-- '  this->topicNames_[ Topics::(topic/@name)] = "(topic/@name)";\n' -->
-  <xsl:for-each select="$topics/@name">
+  <xsl:for-each select="$lib-topics/@name">
     <xsl:text>  this->topicNames_[ Topics::</xsl:text>
     <xsl:value-of select="translate(.,' ','_')"/>
     <xsl:text>] = "</xsl:text>
@@ -217,7 +228,7 @@ Elements::Data::loadMaps()
 {
 </xsl:text>
   <!-- '  this->publisherParticipants_[ Publishers::(publisher/@name)] = Participants::(publisher/../@name);\n' -->
-  <xsl:for-each select="$publishers">
+  <xsl:for-each select="$lib-publishers">
     <xsl:text>  this->publisherParticipants_[ Publishers::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
     <xsl:text>] = Participants::</xsl:text>
@@ -230,7 +241,7 @@ Elements::Data::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->subscriberParticipants_[ Subscribers::(subscriber/@name)] = Participants::(subscriber/../@name);\n' -->
-  <xsl:for-each select="$subscribers">
+  <xsl:for-each select="$lib-subscribers">
     <xsl:text>  this->subscriberParticipants_[ Subscribers::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
     <xsl:text>] = Participants::</xsl:text>
@@ -243,7 +254,7 @@ Elements::Data::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- defined types -->
-  <xsl:for-each select="$topics[@datatype]">
+  <xsl:for-each select="$lib-topics[@datatype]">
     <xsl:text>  this->types_[ Topics::</xsl:text>
     <xsl:value-of select="translate(@name,' ','_')"/>
     <xsl:text>] = Types::</xsl:text>
@@ -254,7 +265,7 @@ Elements::Data::loadMaps()
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
   <!-- referenced types 
-  <xsl:for-each select="$topics[datatype]">
+  <xsl:for-each select="$lib-topics[datatype]">
     <xsl:variable name="model-file" select="substring-before(datatype/@href,'#')"/>
     <xsl:variable name="model-id" select="substring-after(datatype/@href,'#')"/>
     <xsl:variable name="referred-type" select="document($model-file)//dataLib/types[@xmi:id = $model-id]"/>
@@ -272,12 +283,12 @@ Elements::Data::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->writerTopics[ DataWriters::(dataWriter/@name)] = Topics::(dataWriter/@topic);\n' -->
-  <xsl:for-each select="$writers">
+  <xsl:for-each select="$lib-writers">
     <xsl:text>  this->writerTopics_[ DataWriters::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
     <xsl:text>] = Topics::</xsl:text>
     <xsl:call-template name="normalize-identifier">
-      <xsl:with-param name="identifier" select="$topics[@xmi:id = current()/@topic]/@name"/>
+      <xsl:with-param name="identifier" select="$lib-topics[@xmi:id = current()/@topic]/@name"/>
     </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
@@ -285,12 +296,12 @@ Elements::Data::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->readerTopics[ DataReaders::(dataReader/@name)] = Topics::(dataReader/@topic);\n' -->
-  <xsl:for-each select="$readers">
+  <xsl:for-each select="$lib-readers">
     <xsl:text>  this->readerTopics_[ DataReaders::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
     <xsl:text>] = Topics::</xsl:text>
     <xsl:call-template name="normalize-identifier">
-      <xsl:with-param name="identifier" select="$topics[@xmi:id = current()/@topic]/@name"/>
+      <xsl:with-param name="identifier" select="$lib-topics[@xmi:id = current()/@topic]/@name"/>
     </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
@@ -298,7 +309,7 @@ Elements::Data::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->publishers_[ DataWriters::(dataWriter/@name)] = Publishers::(dataWriter/../@name);\n' -->
-  <xsl:for-each select="$writers">
+  <xsl:for-each select="$lib-writers">
     <xsl:text>  this->publishers_[ DataWriters::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
     <xsl:text>] = Publishers::</xsl:text>
@@ -311,7 +322,7 @@ Elements::Data::loadMaps()
   <xsl:value-of select="$newline"/>
 
   <!-- '  this->subscribers_[ DataReaders::(dataReader/@name)] = Subscribers::(dataReader/../@name);\n' -->
-  <xsl:for-each select="$readers">
+  <xsl:for-each select="$lib-readers">
     <xsl:text>  this->subscribers_[ DataReaders::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
     <xsl:text>] = Subscribers::</xsl:text>
@@ -325,7 +336,7 @@ Elements::Data::loadMaps()
 
   <!-- Assign Transport ID -->
   <!-- '  this->publisherTransports_[ Publishers::(publisher/@name)] = Transports::(publisher/@transport);\n' -->
-  <xsl:for-each select="$publishers">
+  <xsl:for-each select="$lib-publishers">
     <xsl:text>  this->publisherTransports_[ Publishers::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
     <xsl:value-of select="concat('] = ', @transportId, ';', $newline)"/>
@@ -334,7 +345,7 @@ Elements::Data::loadMaps()
 
   <!-- Assign Transport ID -->
   <!-- '  this->subscriberTransports_[ Subscribers::(subscriber/@name)] = Transports::(subscriber/@transport);\n' -->
-  <xsl:for-each select="$subscribers">
+  <xsl:for-each select="$lib-subscribers">
     <xsl:text>  this->subscriberTransports_[ Subscribers::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
     <xsl:value-of select="concat('] = ', @transportId, ';', $newline)"/>
@@ -348,7 +359,7 @@ Elements::Data::buildParticipantsQos()
   DomainParticipantQos participantQos;
   Participants::Values participant;
 </xsl:text>
-  <xsl:for-each select="$participants">
+  <xsl:for-each select="$lib-participants">
     <xsl:value-of select="$newline"/>
     <xsl:text>  participant = Participants::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
@@ -359,6 +370,7 @@ Elements::Data::buildParticipantsQos()
 
     <xsl:call-template name="process-policies">
       <xsl:with-param name="base"   select="'participantQos.'"/>
+      <xsl:with-param name="policies"   select="$lib-policies"/>
     </xsl:call-template>
     
 <!--
@@ -380,7 +392,7 @@ Elements::Data::buildTopicsQos()
   TopicQos       topicQos;
   Topics::Values topic;
 </xsl:text>
-  <xsl:for-each select="$topics">
+  <xsl:for-each select="$lib-topics">
     <xsl:value-of select="$newline"/>
     <xsl:text>  topic    = Topics::</xsl:text>
     <xsl:value-of select="translate(@name,' ','_')"/>
@@ -391,6 +403,7 @@ Elements::Data::buildTopicsQos()
     <!-- '  topicQos.(policyfield) = (value);\n' -->
     <xsl:call-template name="process-policies">
       <xsl:with-param name="base"   select="'topicQos.'"/>
+      <xsl:with-param name="policies"   select="$lib-policies"/>
     </xsl:call-template>
 <!--
     <xsl:call-template name="process-qos">
@@ -410,11 +423,11 @@ Elements::Data::buildPublishersQos()
 {
 </xsl:text>
 <xsl:choose>
-  <xsl:when test="$publishers">
+  <xsl:when test="$lib-publishers">
     <xsl:text>  PublisherQos       publisherQos;
   Publishers::Values publisher;
 </xsl:text>
-  <xsl:for-each select="$publishers">
+  <xsl:for-each select="$lib-publishers">
     <xsl:value-of select="$newline"/>
     <xsl:text>  publisher    = Publishers::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
@@ -424,6 +437,7 @@ Elements::Data::buildPublishersQos()
     <!-- '  publisherQos.(policyfield) = (value);\n' -->
     <xsl:call-template name="process-policies">
       <xsl:with-param name="base"   select="'publisherQos.'"/>
+      <xsl:with-param name="policies"   select="$lib-policies"/>
     </xsl:call-template>
 <!--
     <xsl:call-template name="process-qos">
@@ -449,12 +463,12 @@ Elements::Data::buildSubscribersQos()
 {
 </xsl:text>
   <xsl:choose>
-    <xsl:when test="$subscribers">
+    <xsl:when test="$lib-subscribers">
 
       <xsl:text>  SubscriberQos       subscriberQos;
   Subscribers::Values subscriber;
 </xsl:text>
-      <xsl:for-each select="$subscribers">
+      <xsl:for-each select="$lib-subscribers">
         <xsl:value-of select="$newline"/>
         <xsl:text>  subscriber    = Subscribers::</xsl:text>
         <xsl:call-template name="normalize-identifier"/>
@@ -464,6 +478,7 @@ Elements::Data::buildSubscribersQos()
         <!-- '  subscriberQos.(policyfield) = (value);\n' -->
         <xsl:call-template name="process-policies">
           <xsl:with-param name="base"   select="'subscriberQos.'"/>
+          <xsl:with-param name="policies"   select="$lib-policies"/>
         </xsl:call-template>
 <!--
         <xsl:call-template name="process-qos">
@@ -489,11 +504,11 @@ Elements::Data::buildPublicationsQos()
 {
 </xsl:text>
 <xsl:choose>
-  <xsl:when test="$writers">
+  <xsl:when test="$lib-writers">
     <xsl:text>  DataWriters::Values  writer;
   DataWriterQos        writerQos;
 </xsl:text>
-    <xsl:for-each select="$writers">
+    <xsl:for-each select="$lib-writers">
       <xsl:value-of select="$newline"/>
       <xsl:text>  writer    = DataWriters::</xsl:text>
       <xsl:call-template name="normalize-identifier"/>
@@ -503,6 +518,7 @@ Elements::Data::buildPublicationsQos()
     <!-- '  writerQos.(policyfield) = (value);\n' -->
       <xsl:call-template name="process-policies">
         <xsl:with-param name="base"   select="'writerQos.'"/>
+        <xsl:with-param name="policies"   select="$lib-policies"/>
       </xsl:call-template>
 <!--
       <xsl:call-template name="process-qos">
@@ -529,7 +545,7 @@ Elements::Data::buildSubscriptionsQos()
   DataReaders::Values  reader;
   DataReaderQos        readerQos;
 </xsl:text>
-  <xsl:for-each select="$readers">
+  <xsl:for-each select="$lib-readers">
     <xsl:value-of select="$newline"/>
     <xsl:text>  reader    = DataReaders::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
@@ -539,6 +555,7 @@ Elements::Data::buildSubscriptionsQos()
     <!-- '  readerQos.(policyfield) = (value);\n' -->
     <xsl:call-template name="process-policies">
       <xsl:with-param name="base"   select="'readerQos.'"/>
+      <xsl:with-param name="policies"   select="$lib-policies"/>
     </xsl:call-template>
 
     <xsl:text>  this->readersQos_[ reader] = readerQos;
@@ -558,7 +575,7 @@ Elements::Data::copyPublicationQos(
 
   switch( which) {
 </xsl:text>
-  <xsl:for-each select="$writers">
+  <xsl:for-each select="$lib-writers">
     <xsl:text>    case DataWriters::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
     <xsl:text>:</xsl:text>
@@ -567,6 +584,7 @@ Elements::Data::copyPublicationQos(
     <!-- '  writerQos.(policyfield) = (value);\n' -->
     <xsl:call-template name="process-policies">
       <xsl:with-param name="base"   select="'      writerQos.'"/>
+      <xsl:with-param name="policies"   select="$lib-policies"/>
     </xsl:call-template>
 <!--
     <xsl:call-template name="process-qos">
@@ -594,7 +612,7 @@ Elements::Data::copySubscriptionQos(
 
   switch( which) {
 </xsl:text>
-  <xsl:for-each select="$readers">
+  <xsl:for-each select="$lib-readers">
     <xsl:text>    case DataReaders::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
     <xsl:text>:</xsl:text>
@@ -603,6 +621,7 @@ Elements::Data::copySubscriptionQos(
     <!-- '  readerQos.(policyfield) = (value);\n' -->
     <xsl:call-template name="process-policies">
       <xsl:with-param name="base"   select="'readerQos.'"/>
+      <xsl:with-param name="policies"   select="$lib-policies"/>
     </xsl:call-template>
 
     <xsl:text>      break;</xsl:text>
@@ -613,17 +632,15 @@ Elements::Data::copySubscriptionQos(
       throw NoReaderException();
   }
 }
-
-} } } // End of namespace OpenDDS::Model::</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>
-
 </xsl:text>
+</xsl:if>
+
+  <xsl:value-of select="concat('} // End namespace ', @name, $newline)"/>
 </xsl:template>
-<!-- End of main processing template. -->
 
 <xsl:template name="process-policies">
   <xsl:param name="base"/>
+  <xsl:param name="policies"/>
 
   <!-- direct references -->
   <xsl:variable name="reffed-policies" select="$policies[@xmi:id = current()/@*]"/>
@@ -660,9 +677,6 @@ Elements::Data::copySubscriptionQos(
     </xsl:for-each>
   </xsl:variable>
 
-<!--
-<xsl:message>process-policy field <xsl:value-of select="$field"/> </xsl:message>
--->
   <!-- lookup whether to quote the value. -->
   <xsl:variable name="should-quote">
     <xsl:for-each select="$lut-policies"> <!-- Change context for lookup -->
@@ -959,7 +973,7 @@ Elements::Data::copySubscriptionQos(
   <xsl:call-template name="type-enum"/>
   <xsl:value-of select="concat(':', $newline, '      {', $newline, 
                                '        typedef ')"/>
-  <xsl:value-of select="concat($scopename, $type/@name)"/>
+  <xsl:value-of select="concat('::', $scopename, $type/@name)"/>
   <xsl:text>TypeSupportImpl TypeSupport;
 
         TypeSupport* typeSupport = new TypeSupport();
@@ -976,6 +990,8 @@ Elements::Data::copySubscriptionQos(
 
 </xsl:text>
 </xsl:template>
+
+<xsl:template match="text()"/>
 
 <!-- Lookup Table Magic.
 <lut:tables>

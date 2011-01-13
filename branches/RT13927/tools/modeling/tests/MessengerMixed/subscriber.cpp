@@ -62,7 +62,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    DefaultMessengerMixedType model(argc, argv);
+    MessengerMixed::DefaultMessengerMixedType model(argc, argv);
 
     using OpenDDS::Model::MessengerMixed::Elements;
 

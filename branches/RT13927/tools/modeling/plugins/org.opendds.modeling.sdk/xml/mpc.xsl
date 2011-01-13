@@ -23,9 +23,17 @@
 
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
+  <xsl:variable name="model-refs">
+    <xsl:call-template name="model-ref-names"/>
+  </xsl:variable>
   <xsl:text>project(</xsl:text>
   <xsl:value-of select="$modelname"/>
-  <xsl:text>): dcps {
+  <xsl:text>): dcps</xsl:text>
+  
+  <xsl:if test="string-length($model-refs) &gt; 0">
+    <xsl:value-of select="concat(', ', $model-refs)"/>
+  </xsl:if>
+  <xsl:text> {
   libout = .
   sharedname = </xsl:text>
   <xsl:value-of select="$modelname"/>

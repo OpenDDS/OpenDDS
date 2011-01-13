@@ -12,9 +12,9 @@
 int main(int argc, char** argv)
 {
   try {
-    DefaultPolicyLibType model(argc, argv);
+    data1::PolicyLib::DefaultPolicyLibType model(argc, argv);
 
-    using OpenDDS::Model::PolicyLib::Elements;
+    using OpenDDS::Model::data1::PolicyLib::Elements;
 
     DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
 

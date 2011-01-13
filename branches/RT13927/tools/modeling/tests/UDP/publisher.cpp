@@ -12,7 +12,7 @@
 int main(int argc, char** argv)
 {
   try {
-    DefaultUDPType model(argc, argv);
+    UDP::DefaultUDPType model(argc, argv);
 
     using OpenDDS::Model::UDP::Elements;
 
