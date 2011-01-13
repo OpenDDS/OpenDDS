@@ -1,3 +1,11 @@
+Thu Jan 13 20:55:57 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/MainDiagramTest.opendds:
+        * tools/modeling/testdata/MainDiagramTest.opendds_diagram:
+        * tools/modeling/testdata/MainDiagramTest_screenshot.png
+
+	  Added test for main diagram.
+
 Thu Jan 13 15:01:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/diagram_compartments_cluttered.png:
