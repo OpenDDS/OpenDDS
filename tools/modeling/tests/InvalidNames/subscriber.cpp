@@ -62,9 +62,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    DefaultInvalidNamesType model(argc, argv);
+    blankdcps::DefaultInvalidNamesType model(argc, argv);
 
-    using OpenDDS::Model::InvalidNames::Elements;
+    using OpenDDS::Model::blankdcps::Elements;
 
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader_2);
 

@@ -277,9 +277,6 @@
     <xsl:variable name="policy-ref" select="$policy-refs[1]"/>
     <xsl:variable name="external-id" select="substring-after($policy-ref/@href, '#')"/>
 
-<!--
-  <xsl:message>external policy: <xsl:value-of select="name($policy-ref)"/> </xsl:message>
--->
     <xsl:if test="not(contains($complete-policies, concat(' ',$external-id,' ')))">
       <xsl:variable name="external-model" select="substring-before($policy-ref/@href, '#')"/>
       <xsl:copy-of select="document($external-model)//*[@xmi:id = $external-id]"/>

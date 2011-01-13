@@ -7,14 +7,14 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerMCTraits.h"
+#include "model/MultiDCPSTraits.h"
 
 int main(int argc, char** argv)
 {
   try {
-    MessengerMC::DefaultMessengerMCType model(argc, argv);
+    packB::ZZ::DefaultMultiDCPSType model(argc, argv);
 
-    using OpenDDS::Model::MessengerMC::Elements;
+    using OpenDDS::Model::packB::ZZ::Elements;
 
     DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
 
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 
     DDS::ConditionSeq conditions;
     DDS::PublicationMatchedStatus matches = { 0, 0, 0, 0, 0 };
-    DDS::Duration_t timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+    DDS::Duration_t timeout = { 30, 0 };
 
     do {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {

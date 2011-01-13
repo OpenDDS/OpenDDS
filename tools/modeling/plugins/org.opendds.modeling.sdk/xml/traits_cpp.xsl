@@ -1,5 +1,6 @@
 <xsl:stylesheet version='1.0'
      xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
+     xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
      xmlns:lut='http://www.opendds.org/modeling/schemas/Lut/1.0'
      xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'
      xmlns:generator='http://www.opendds.org/modeling/schemas/Generator/1.0'>
@@ -17,8 +18,10 @@
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
 
-<!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "document(/generator:CodeGen/source/@name)/opendds:OpenDDSModel/@name"/>
+<!-- Extract values once. -->
+<xsl:variable name="model" select="document(/generator:CodeGen/source/@name)//opendds:OpenDDSModel"/>
+<xsl:variable name="modelname" select="$model/@name"/>
+<xsl:variable name="instances" select="//instance"/>
 
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
@@ -32,10 +35,24 @@
 #include "dds/DCPS/transport/udp/UdpConfiguration.h"
 #include &lt;stdexcept&gt;
 </xsl:text>
-  <xsl:apply-templates/>
+  <xsl:apply-templates select="$model"/>
 </xsl:template>
 
-<xsl:template match="//instance">
+<xsl:template match="packages[.//libs[@xsi:type='opendds:DcpsLib']]">
+  <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
+  <xsl:apply-templates/>
+  <xsl:value-of select="concat('}', $newline)"/>
+</xsl:template>
+
+<xsl:template match="libs[@xsi:type='opendds:DcpsLib']">
+  <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
+  <xsl:for-each select="$instances">
+    <xsl:call-template name="output-instance"/>
+  </xsl:for-each>
+  <xsl:value-of select="concat('}', $newline)"/>
+</xsl:template>
+
+<xsl:template name="output-instance">
   <xsl:variable name="Instname">
     <xsl:call-template name="capitalize">
       <xsl:with-param name="value" select="@name"/>
@@ -193,4 +210,6 @@
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>
+
+<xsl:template match="text()"/>
 </xsl:stylesheet>

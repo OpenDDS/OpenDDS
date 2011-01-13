@@ -12,9 +12,9 @@
 int main(int argc, char** argv)
 {
   try {
-    DefaultMessengerType model(argc, argv);
+    MessengerLib::DefaultMessengerType model(argc, argv);
 
-    using OpenDDS::Model::Messenger::Elements;
+    using OpenDDS::Model::MessengerLib::Elements;
 
     DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
 

@@ -62,9 +62,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    DefaultMessengerType model(argc, argv);
+    MessengerLib::DefaultMessengerType model(argc, argv);
 
-    using OpenDDS::Model::Messenger::Elements;
+    using OpenDDS::Model::MessengerLib::Elements;
 
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
 

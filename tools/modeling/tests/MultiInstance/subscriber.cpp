@@ -119,14 +119,14 @@ int main(int argc, char** argv)
   ACE_ARGV argv_copy(argc, argv);
   try {
     {
-      PrimaryMultiInstanceType primary_model(argc, argv);
+      MultiInstance::PrimaryMultiInstanceType primary_model(argc, argv);
       std::cout << "Running primary subscriber instance" << std::endl;
       result = run_instance(primary_model);
       std::cout << "Primary subscriber instance complete" << std::endl;
     }
     if (!result) {
       int argc_copy = argv_copy.argc();
-      SecondaryMultiInstanceType secondary_model(argc_copy, argv_copy.argv());
+      MultiInstance::SecondaryMultiInstanceType secondary_model(argc_copy, argv_copy.argv());
       std::cout << "Running secondary subscriber instance" << std::endl;
       result = run_instance(secondary_model);
       std::cout << "Secondary subscriber instance complete" << std::endl;

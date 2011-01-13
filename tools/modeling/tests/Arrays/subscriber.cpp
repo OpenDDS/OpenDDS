@@ -62,7 +62,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    DefaultArraysType model(argc, argv);
+    Arrays::DefaultArraysType model(argc, argv);
 
     using OpenDDS::Model::Arrays::Elements;
 

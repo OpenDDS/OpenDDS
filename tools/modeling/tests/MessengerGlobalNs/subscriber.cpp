@@ -62,7 +62,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    DefaultMessengerGlobalNsType model(argc, argv);
+    MessengerGlobalNs::DefaultMessengerGlobalNsType model(argc, argv);
 
     using OpenDDS::Model::MessengerGlobalNs::Elements;
 
