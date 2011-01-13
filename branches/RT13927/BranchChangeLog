@@ -1,3 +1,20 @@
+Thu Jan 13 15:01:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/diagram_compartments_cluttered.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/diagram_compartments_uncluttered.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/diagram_toolbar_positioning_buttons.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/main_diagram_packages.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/performingvalidations.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdatalib.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdcpslib.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdiagrams.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithopenddsmodels.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithpolicylib.html:
+
+          Updated to account for inclusion of Packages in the main diagram. Added discussion on how
+          to automatically arrange elements inside compartments and pointed to this in Package and
+          DcpsLib sections.
+
 Wed Jan 12 22:45:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/README.user:
