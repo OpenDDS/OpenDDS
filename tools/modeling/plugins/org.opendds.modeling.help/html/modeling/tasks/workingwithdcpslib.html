@@ -1,92 +1,117 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
 <html>
-   <head>
-      <title>Working with DCPS Libraries</title>
-      <link rel="stylesheet" type="text/css" href="../../styles.css" />
-   </head>
+<head>
+  <title>Working with DCPS Libraries</title>
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
 
-   <body>
-      <h2>Working with DCPS Libraries</h2>
-      
-      <p>The Data-Centric Publish-Subscribe (DCPS) Libraries are where you define
-      the entities that make up the publish/subscribe topology.</p>
-      
-      <h3>Creating DCPS Libraries</h3>
+<body>
+  <h2>Working with DCPS Libraries</h2>
 
-      <p>From the main diagram a DCPS Library can be created by either double-clicking on the
-      DataLib tool in the palette, or by clicking on the DataLib tool and then dragging the
-      region on the diagram surface that the DCPS Library figure should occupy. After that
-      specify the name to use for the library.</p>
-      
-      <p>The library can then be opened by double-clicking on the library. A new diagram editor
-      will be opened (using the same diagram file used for the main diagram).</p>
+  <p>The Data-Centric Publish-Subscribe (DCPS) Libraries are where
+  you define the entities that make up the publish/subscribe
+  topology.</p>
 
-	<h3>Working with QoS Policies</h3>
-	
-	<p>Many of the DCPS domain entities can have certain QoS Policies associated with them.
-	A policy can be a custom policy unique to that entity, or a shared policy defined in a policy library.</p>
+  <h3>Creating DCPS Libraries</h3>
 
-    <p>Do add a policy to an entity, right-click on the entity to bring up the context menu and
-    select "Add QoS Policy". From there you can select whether a custom policy should be created or
-    a reference to a policy from a library should be used.</p>
-    
-    <img alt="Policy menu" src="../images/dcpslib_policy_menu.png">
-    
-	<p>A collapsible compartment is used for custom policies and a collapsible compartment is used
-	for shared policies. If you are not sure which compartment is which, you can hover your mouse over any
-	compartment and the name of the compartment will appear.</p>
-	 
-     <h3>Create a Domain</h3>
-     
-     <p>At least one Domain element should be defined. This
-     can be done by adding the domain tool from the palette.</p>
-     
-     <h3>Setting the Topic</h3>
-     
-     <p>A DCPS library should have a Topic defined. A Topic can be created by selecting topic from
-     the palette.</p>
-     
-     <p>A Struct needs to be specified for the Topic's DataType. To pick from the allowed Structs,
-     right click on the Topic to bring up the context menu. Pick "Select DataType" to bring up
-     a dialog showing all the allowable Structs that you can pick from.</p>
-     
-     <h3>Creating a DomainParticipant</h3>
- 
- 	<p>To create a DomainParticipant, select DomainParticipant from the palette and add to the canvas.
- 	After giving the participant a name this would be a good time to connect the participant with
- 	its appropriate Domain (you may want to <a href="workingwithdiagrams.html#connecting_figures">
- 	reviewing connecting figures</a> at this point).</p>
- 
- 	<p>The DomainParticipant can have QoS policies associated with it.</p>
- 	
- 	<h3>Creating a Publisher</h3>
- 	
- 	<p>A Publisher can be added to a DomainParticipant. Click on Publisher from the palette
- 	and then click on the left side of the top-most compartment of the DomainParticipant as
- 	shown by the position of the mouse pointer below.</p>
- 	
- 	<img alt="Publisher/Subscriber creation" src="../images/dcpslib_pubsub_add.png">
+  <p>From the main diagram a DCPS Library can be created by either
+  double-clicking on the DataLib tool in the palette, or by
+  clicking on the DataLib tool and then dragging the region on the
+  diagram surface that the DCPS Library figure should occupy. After
+  that specify the name to use for the library.</p>
 
-	<p>QoS policies can be added to the publisher as needed.</p>
-	
-	<h3>Creating a DataWriter</h3>
-	
-	<p>A DataWriter is created by selecting a DataWriter from the palette and adding it to
-	the DataWriter compartment of a Publisher. QoS policies can be added to the DataWriter
-	as needed.</p>
-	
-	<img alt="DataWriter example" src="../images/dcps_datawriter_example.png"> 
+  <p>The library can then be opened by double-clicking on the
+  library. A new diagram editor will be opened (using the same
+  diagram file used for the main diagram).</p>
 
-    <h3>Creating Subscriber and DataReaders</h3>
-    
-    <p>Subscribers are created in a manner similar to Publishers. Subscribers contain
-    DataReaders similar to how Publishers contain DataWriters.</p>
-             
-     <h3>Validation of DCPS Types</h3>
-      
-      <p>Before using your DCPS Library you should perform validations first.
-      See <a href="performingvalidations.html">Performing Validations</a> to learn how
-      to do validations.</p>  
-    
-   </body>
+  <h3>Working with QoS Policies</h3>
+
+  <p>Many of the DCPS domain entities can have certain QoS Policies
+  associated with them. A policy can be a custom policy unique to
+  that entity, or a shared policy defined in a policy library.</p>
+
+  <p>To add a policy to an entity, right-click on the entity to
+  bring up the context menu and select "Add QoS Policy". From there
+  you can select whether a custom policy should be created or a
+  reference to a policy from a library should be used.</p><img alt=
+  "Policy menu" src="../images/dcpslib_policy_menu.png">
+
+  <p>A collapsible compartment is used for custom policies and a
+  collapsible compartment is used for shared policies. If you are
+  not sure which compartment is which, you can hover your mouse
+  over any compartment and the name of the compartment will
+  appear.</p>
+
+  <h3>Create a Domain</h3>
+
+  <p>At least one Domain element should be defined. This can be
+  done by adding the domain tool from the palette.</p>
+
+  <h3>Setting the Topic</h3>
+
+  <p>A DCPS library should have a Topic defined. A Topic can be
+  created by selecting topic from the palette.</p>
+
+  <p>A Struct needs to be specified for the Topic's DataType. To
+  pick from the allowed Structs, right click on the Topic to bring
+  up the context menu. Pick "Select DataType" to bring up a dialog
+  showing all the allowable Structs that you can pick from.</p>
+
+  <h3>Creating a DomainParticipant</h3>
+
+  <p>To create a DomainParticipant, select DomainParticipant from
+  the palette and add to the canvas. After giving the participant a
+  name this would be a good time to connect the participant with
+  its appropriate Domain (you may want to <a href=
+  "workingwithdiagrams.html#connecting_figures">reviewing
+  connecting figures</a> at this point).</p>
+
+  <p>The DomainParticipant can have QoS policies associated with
+  it.</p>
+
+  <h3>Creating a Publisher</h3>
+
+  <p>A Publisher can be added to a DomainParticipant. Click on
+  Publisher from the palette and then click on the left side of the
+  top-most compartment of the DomainParticipant as shown by the
+  position of the mouse pointer below.</p><img alt=
+  "Publisher/Subscriber creation" src=
+  "../images/dcpslib_pubsub_add.png">
+
+  <p>QoS policies can be added to the publisher as needed.</p>
+
+  <h3>Creating a DataWriter</h3>
+
+  <p>A DataWriter is created by selecting a DataWriter from the
+  palette and adding it to the DataWriter compartment of a
+  Publisher. QoS policies can be added to the DataWriter as
+  needed.</p><img alt="DataWriter example" src=
+  "../images/dcps_datawriter_example.png">
+
+  <h3>Creating Subscriber and DataReaders</h3>
+
+  <p>Subscribers are created in a manner similar to Publishers.
+  Subscribers contain DataReaders similar to how Publishers contain
+  DataWriters.</p>
+
+  <h3>Working with compartments within compartments</h3>
+
+  <p>As you drill down from a DomainParticipant to the DataReaders
+  and DataWriters with QoS policies, there will be numerous
+  compartments within compartments. To help maneuver around these,
+  you can collapse compartments not of interest at the moment, and
+  open compartments that you are interested in. In addition, you
+  may want to review <a href=
+  "workingwithdiagrams.html#arranging_figures">arranging figures</a>
+  on how to automatically resize and reposition elements in
+  compartments so they don't overlap.</p>
+
+  <h3>Validation of DCPS Types</h3>
+
+  <p>Before using your DCPS Library you should perform validations
+  first. See <a href="performingvalidations.html">Performing
+  Validations</a> to learn how to do validations.</p>
+</body>
 </html>
