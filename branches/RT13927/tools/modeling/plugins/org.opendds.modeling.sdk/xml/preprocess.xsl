@@ -21,40 +21,16 @@
     <external-refs>
       <xsl:call-template name="process-external-refs"/>
     </external-refs>
-<!--
-    <xsl:call-template name="process-external-ref-topics">
-      <xsl:with-param name="reffing-topics" select="$topics[datatype[@href]]"/>
-    </xsl:call-template>
-    <xsl:if test="$policy-refs">
-      <policyLib>
-        <xsl:call-template name="process-external-ref-policies">
-          <xsl:with-param name="policy-refs" select="//*[not(name() = 'datatype')][@href]"/>
-        </xsl:call-template>
-      </policyLib>
-    </xsl:if>
--->
   </xsl:copy>
 </xsl:template>
 
 <!--
-<xsl:template match="libs[@xsi:type='opendds:DcpsLib']">
-  <xsl:element name="dcpsLib">
-    <xsl:apply-templates select="@*|node()"/>
-  </xsl:element>
-</xsl:template>
--->
-
-<xsl:template match="libs[@xsi:type='opendds:PolicyLib']">
-  <xsl:element name="policyLib">
-    <xsl:apply-templates select="@*|node()"/>
-  </xsl:element>
-</xsl:template>
-
 <xsl:template match="libs[@xsi:type='types:DataLib']">
   <xsl:element name="dataLib">
     <xsl:apply-templates select="@*|node()"/>
   </xsl:element>
 </xsl:template>
+-->
 
 <xsl:template match="*[*[@href]]">
   <xsl:copy>
@@ -232,6 +208,7 @@
   </xsl:if>
 </xsl:template>
 
+<!--
 <xsl:template name="process-external-ref-topics">
   <xsl:param name="reffing-topics"/>
   <xsl:param name="complete-types" select="' '"/>
@@ -289,6 +266,7 @@
     </xsl:call-template>
   </xsl:if>
 </xsl:template>
+-->
 
 <xsl:template name="modelname">
   <xsl:param name="target" select="."/>
