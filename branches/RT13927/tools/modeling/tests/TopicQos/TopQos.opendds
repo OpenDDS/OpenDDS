@@ -27,7 +27,7 @@
       <names>right</names>
     </policies>
     <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_uvsboALlEeCRmKs-7z8NWA" name="doa">
-      <period xmi:id="_wfmnAAR6EeCsYqJtvYWomQ" nanosecond="105"/>
+      <period xmi:id="_wfmnAAR6EeCsYqJtvYWomQ" second="1" nanosecond="105"/>
     </policies>
     <policies xsi:type="opendds:destinationOrderQosPolicy" xmi:id="_2mVAsALlEeCRmKs-7z8NWA" name="source" kind="BY_SOURCE_TIMESTAMP"/>
     <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_BoO1oALrEeCRmKs-7z8NWA" name="localtrans" kind="TRANSIENT_LOCAL"/>
@@ -36,7 +36,7 @@
     <policies xsi:type="opendds:reliabilityQosPolicy" xmi:id="_n1lhgALrEeCRmKs-7z8NWA" name="old_reliable" kind="RELIABLE"/>
     <policies xsi:type="opendds:livelinessQosPolicy" xmi:id="_zAukQALrEeCRmKs-7z8NWA" name="mbt" kind="AUTOMATIC"/>
     <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_COBjIAMTEeCrTdheTycPFA" name="now_for_crying_out_loud">
-      <period xmi:id="_CJ--EAR7EeCsYqJtvYWomQ" nanosecond="25"/>
+      <period xmi:id="_CJ--EAR7EeCsYqJtvYWomQ" second="1" nanosecond="25"/>
     </policies>
     <policies xsi:type="opendds:dsQosPolicy" xmi:id="_5HPvYAMTEeCrTdheTycPFA" name="durable" history_depth="1" history_kind="KEEP_ALL" max_instances="20" max_samples="5" max_samples_per_instance="100"/>
     <policies xsi:type="opendds:dsQosPolicy" xmi:id="_5tsHgAMXEeCrTdheTycPFA" name="default" history_depth="1" history_kind="KEEP_LAST" max_instances="-1" max_samples="-1" max_samples_per_instance="-1"/>
