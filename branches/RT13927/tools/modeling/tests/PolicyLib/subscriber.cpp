@@ -62,7 +62,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    data1::PolicyLib::DefaultPolicyLibType model(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    data1::PolicyLib::DefaultPolicyLibType model(application, argc, argv);
 
     using OpenDDS::Model::data1::PolicyLib::Elements;
 

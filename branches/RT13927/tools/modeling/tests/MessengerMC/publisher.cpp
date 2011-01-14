@@ -12,7 +12,8 @@
 int main(int argc, char** argv)
 {
   try {
-    MessengerMC::DefaultMessengerMCType model(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    MessengerMC::DefaultMessengerMCType model(application, argc, argv);
 
     using OpenDDS::Model::MessengerMC::Elements;
 

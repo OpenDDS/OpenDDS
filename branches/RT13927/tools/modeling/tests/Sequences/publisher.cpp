@@ -12,7 +12,8 @@
 int main(int argc, char** argv)
 {
   try {
-    Sequences::DefaultSequencesType model(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    Sequences::DefaultSequencesType model(application, argc, argv);
 
     using OpenDDS::Model::Sequences::Elements;
 

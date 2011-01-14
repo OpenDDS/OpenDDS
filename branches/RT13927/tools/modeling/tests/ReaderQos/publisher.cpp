@@ -12,7 +12,8 @@
 int main(int argc, char** argv)
 {
   try {
-    ReaderQos::DefaultReaderQosType model(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    ReaderQos::DefaultReaderQosType model(application, argc, argv);
 
     using OpenDDS::Model::ReaderQos::Elements;
 

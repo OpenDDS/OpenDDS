@@ -12,7 +12,8 @@
 int main(int argc, char** argv)
 {
   try {
-    DataLibRef::DefaultDataLibRefType model(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    DataLibRef::DefaultDataLibRefType model(application, argc, argv);
 
     using OpenDDS::Model::DataLibRef::Elements;
 

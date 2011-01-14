@@ -12,7 +12,8 @@
 int main(int argc, char** argv)
 {
   try {
-    MessengerMixed::DefaultMessengerMixedType model(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    MessengerMixed::DefaultMessengerMixedType model(application, argc, argv);
 
     using OpenDDS::Model::MessengerMixed::Elements;
 

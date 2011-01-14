@@ -15,7 +15,7 @@
 #endif /* ! __ACE_INLINE__ */
 
 OpenDDS::Model::Entities::Entities(int& argc, ACE_TCHAR** argv)
-  : delegate_(argc, argv)
+  : delegate_()
   , config_(argc, argv)
 {
 }

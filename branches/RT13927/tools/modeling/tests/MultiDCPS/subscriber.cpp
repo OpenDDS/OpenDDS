@@ -62,7 +62,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    packB::ZZ::DefaultMultiDCPSType model(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    packB::ZZ::DefaultMultiDCPSType model(application, argc, argv);
 
     using OpenDDS::Model::packB::ZZ::Elements;
 

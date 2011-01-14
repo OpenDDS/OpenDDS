@@ -12,7 +12,8 @@
 int main(int argc, char** argv)
 {
   try {
-    MessengerGlobalNs::DefaultMessengerGlobalNsType model(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    MessengerGlobalNs::DefaultMessengerGlobalNsType model(application, argc, argv);
 
     using OpenDDS::Model::MessengerGlobalNs::Elements;
 

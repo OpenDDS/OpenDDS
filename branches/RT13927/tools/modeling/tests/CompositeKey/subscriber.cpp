@@ -62,7 +62,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    CompositeKey::DefaultCompositeKeyType model(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    CompositeKey::DefaultCompositeKeyType model(application, argc, argv);
 
     using OpenDDS::Model::CompositeKey::Elements;
 

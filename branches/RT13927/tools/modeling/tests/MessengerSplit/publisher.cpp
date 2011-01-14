@@ -12,7 +12,8 @@
 int main(int argc, char** argv)
 {
   try {
-    MessengerSplit::DefaultMessengerSplitType model(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    MessengerSplit::DefaultMessengerSplitType model(application, argc, argv);
 
     using OpenDDS::Model::MessengerSplit::Elements;
 
