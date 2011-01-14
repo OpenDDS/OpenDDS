@@ -36,11 +36,13 @@
   </xsl:copy>
 </xsl:template>
 
+<!--
 <xsl:template match="libs[@xsi:type='opendds:DcpsLib']">
   <xsl:element name="dcpsLib">
     <xsl:apply-templates select="@*|node()"/>
   </xsl:element>
 </xsl:template>
+-->
 
 <xsl:template match="libs[@xsi:type='opendds:PolicyLib']">
   <xsl:element name="policyLib">

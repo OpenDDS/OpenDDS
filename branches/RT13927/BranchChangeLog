@@ -1,3 +1,13 @@
+Fri Jan 14 20:02:34 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpc.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/preprocess.xsl:
+
+          Do NOT translate DCPS libs back to old dcpsLib serialization.
+
 Fri Jan 14 19:14:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Application.h:
