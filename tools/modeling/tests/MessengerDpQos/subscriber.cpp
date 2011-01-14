@@ -62,7 +62,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    MessengerDpQos::DefaultMessengerDpQosType model(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    MessengerDpQos::DefaultMessengerDpQosType model(application, argc, argv);
 
     using OpenDDS::Model::MessengerDpQos::Elements;
 

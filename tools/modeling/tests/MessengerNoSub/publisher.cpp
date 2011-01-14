@@ -12,7 +12,8 @@
 int main(int argc, char** argv)
 {
   try {
-    MessengerNoSub::DefaultMessengerNoSubType model(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    MessengerNoSub::DefaultMessengerNoSubType model(application, argc, argv);
 
     using OpenDDS::Model::MessengerNoSub::Elements;
 

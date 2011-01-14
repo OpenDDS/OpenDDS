@@ -12,7 +12,8 @@
 int main(int argc, char** argv)
 {
   try {
-    SubQos::DefaultSubQosType model(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    SubQos::DefaultSubQosType model(application, argc, argv);
 
     using OpenDDS::Model::SubQos::Elements;
 

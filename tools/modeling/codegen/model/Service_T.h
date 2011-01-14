@@ -19,6 +19,8 @@
 
 namespace OpenDDS { namespace Model {
 
+  class Application;
+
   template< typename ModelName, class InstanceTraits = DefaultInstanceTraits>
   class Service : public CopyQos, public Entities, public InstanceTraits {
     public:
@@ -32,7 +34,7 @@ namespace OpenDDS { namespace Model {
       typedef typename ModelName::DataWriters  DataWriters;
       typedef typename ModelName::DataReaders  DataReaders;
 
-      Service(int& argc, char** argv);
+      Service(const Application& application, int& argc, char** argv);
       ~Service();
 
       ///{ @name DDS API Entity accessors.
@@ -79,7 +81,8 @@ namespace OpenDDS { namespace Model {
                    );
       ///}
 
-      Data     modelData_;
+      const Application& application_;
+      Data modelData_;
 
       ///{@ The vectors are indexed by the corresponding enumeration,
       ///   for example Participants::Values for participants_, except

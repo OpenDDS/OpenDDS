@@ -8,16 +8,9 @@
 
 #include "dds/DCPS/Service_Participant.h"
 
-OpenDDS::Model::Delegate::Delegate(int& argc, char** argv)
+OpenDDS::Model::Delegate::Delegate()
   : service_(0)
 {
-  TheParticipantFactoryWithArgs(argc, argv);
-}
-
-OpenDDS::Model::Delegate::~Delegate()
-{
-  TheTransportFactory->release();
-  TheServiceParticipant->shutdown();
 }
 
 OpenDDS::Model::CopyQos*&

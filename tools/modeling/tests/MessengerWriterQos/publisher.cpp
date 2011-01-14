@@ -12,7 +12,8 @@
 int main(int argc, char** argv)
 {
   try {
-    MessengerWriterQos::DefaultMessengerWriterQosType model(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    MessengerWriterQos::DefaultMessengerWriterQosType model(application, argc, argv);
 
     using OpenDDS::Model::MessengerWriterQos::Elements;
 

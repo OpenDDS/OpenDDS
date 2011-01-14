@@ -117,16 +117,22 @@ int main(int argc, char** argv)
 {
   int result;
   ACE_ARGV argv_copy(argc, argv);
+  ACE_ARGV argv_copy2(argc, argv);
   try {
+    OpenDDS::Model::Application application(argc, argv);
     {
-      MultiInstance::PrimaryMultiInstanceType primary_model(argc, argv);
+      MultiInstance::PrimaryMultiInstanceType primary_model(application,
+                                                            argc, 
+                                                            argv_copy.argv());
       std::cout << "Running primary subscriber instance" << std::endl;
       result = run_instance(primary_model);
       std::cout << "Primary subscriber instance complete" << std::endl;
     }
     if (!result) {
       int argc_copy = argv_copy.argc();
-      MultiInstance::SecondaryMultiInstanceType secondary_model(argc_copy, argv_copy.argv());
+      MultiInstance::SecondaryMultiInstanceType secondary_model(application, 
+                                                                argc_copy, 
+                                                                argv_copy2.argv());
       std::cout << "Running secondary subscriber instance" << std::endl;
       result = run_instance(secondary_model);
       std::cout << "Secondary subscriber instance complete" << std::endl;

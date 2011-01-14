@@ -1,10 +1,15 @@
 
 #include "Service_T.h"
+#include "Application.h"
 
 template< typename ModelName, class InstanceTraits>
 inline
-OpenDDS::Model::Service<ModelName, InstanceTraits>::Service(int& argc, char** argv)
+OpenDDS::Model::Service<ModelName, InstanceTraits>::Service(
+  const Application& application, 
+  int& argc, 
+  char** argv)
   : Entities(argc, argv)
+  , application_(application)
   , modelData_()
   , participants_(Participants::LAST_INDEX)
   , types_(Participants::LAST_INDEX)

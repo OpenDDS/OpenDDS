@@ -62,7 +62,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
 int main(int argc, char** argv)
 {
   try {
-    UDP::DefaultUDPType model(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    UDP::DefaultUDPType model(application, argc, argv);
 
     using OpenDDS::Model::UDP::Elements;
 
