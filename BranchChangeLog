@@ -1,3 +1,9 @@
+Fri Jan 14 22:15:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/TopicQos/TopQos.opendds:
+
+          Extend deadline QOS policies, attempting to fix test failure.
+
 Fri Jan 14 21:52:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
