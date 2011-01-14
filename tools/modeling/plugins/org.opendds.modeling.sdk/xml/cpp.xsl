@@ -174,7 +174,7 @@ Elements::Data::registerType(
   <xsl:for-each select="$uniq-type-refs">
     <xsl:variable name="model-file" select="substring-before(@href, '#')"/>
     <xsl:variable name="model-id" select="substring-after(@href, '#')"/>
-    <xsl:variable name="remote-type" select="document($model-file)//dataLib/types[@xmi:id = $model-id]"/>
+    <xsl:variable name="remote-type" select="document($model-file)//libs[@xsi:type='opendds:DataLib']/types[@xmi:id = $model-id]"/>
     <xsl:call-template name="output-registerType-case">
       <xsl:with-param name="type" select="$remote-type"/>
     </xsl:call-template>

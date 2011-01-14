@@ -30,7 +30,7 @@
     </xsl:when>
     <xsl:when test="name($target) = 'external-refs'">
     </xsl:when>
-    <xsl:when test="name($target) = 'dataLib'">
+    <xsl:when test="name($target) = 'libs'">
       <xsl:call-template name="scopename">
         <xsl:with-param name="target" select="$target/.."/>
       </xsl:call-template>

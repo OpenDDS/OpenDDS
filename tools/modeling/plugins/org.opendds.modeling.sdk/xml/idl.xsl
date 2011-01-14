@@ -20,7 +20,7 @@
 
 <!-- All types -->
 <xsl:variable name="types"       select="//types"/>
-<xsl:variable name="local-types" select="//dataLib[not(@model)]/types"/>
+<xsl:variable name="local-types" select="//types[not(@model)]"/>
 
 <!-- Terminal user defined types are all unreferenced user defined types -->
 <xsl:variable name="terminals" select="$local-types[not
