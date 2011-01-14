@@ -100,9 +100,8 @@
     <xsl:when test="name($target) = 'opendds:OpenDDSModel'">
       <xsl:value-of select="concat('OpenDDS::Model::', $previous, '::Elements')"/>
     </xsl:when>
-    <xsl:when test="name($target) = 'dcpsLib' or
-                    (name($target) = 'libs' and 
-                     $target[@xsi:type = 'opendds:DcpsLib'])">
+    <xsl:when test="name($target) = 'libs' and 
+                    $target[@xsi:type = 'opendds:DcpsLib']">
       <xsl:call-template name="elements-qname">
         <xsl:with-param name="target" select="$target/.."/>
         <xsl:with-param name="previous" select="$target/@name"/>

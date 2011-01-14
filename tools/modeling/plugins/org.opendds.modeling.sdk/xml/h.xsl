@@ -1,5 +1,6 @@
 <xsl:stylesheet version='1.0'
      xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
+     xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
      xmlns:xmi='http://www.omg.org/XMI'
      xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'>
   <!--
@@ -96,13 +97,13 @@ namespace OpenDDS { namespace Model {
 </xsl:template>
 <!-- End of main processing template. -->
 
-<xsl:template match="packages[.//dcpsLib]" mode="declare">
+<xsl:template match="packages[.//libs[@xsi:type='opendds:DcpsLib']]" mode="declare">
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
   <xsl:apply-templates mode="declare"/>
   <xsl:value-of select="concat('} // End namespace ', @name, $newline)"/>
 </xsl:template>
 
-<xsl:template match="dcpsLib" mode="declare">
+<xsl:template match="libs[@xsi:type='opendds:DcpsLib']" mode="declare">
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
   <xsl:text> 
   class Elements {
@@ -275,7 +276,7 @@ namespace OpenDDS { namespace Model {
   <xsl:value-of select="concat('} // End namespace ', @name, $newline)"/>
 </xsl:template>
 
-<xsl:template match="dcpsLib" mode="define">
+<xsl:template match="libs[@xsi:type='opendds:DcpsLib']" mode="define">
   <xsl:variable name="lib-participants" select=".//participants"/>
   <xsl:variable name="lib-topics"       select=".//topics"/>
   <xsl:variable name="lib-publishers"   select=".//publishers"/>

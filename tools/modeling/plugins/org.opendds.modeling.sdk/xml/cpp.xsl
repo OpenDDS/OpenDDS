@@ -96,13 +96,13 @@ namespace OpenDDS { namespace Model {
 </xsl:template>
 <!-- End of main processing template. -->
 
-<xsl:template match="packages[.//dcpsLib]">
+<xsl:template match="packages[.//libs[@xsi:type='opendds:DcpsLib']]">
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
   <xsl:apply-templates/>
   <xsl:value-of select="concat('} // End namespace ', @name, $newline)"/>
 </xsl:template>
 
-<xsl:template match="dcpsLib">
+<xsl:template match="libs[@xsi:type='opendds:DcpsLib']">
   <xsl:variable name="lib-readers"      select=".//readers"/>
   <xsl:variable name="lib-writers"      select=".//writers"/>
   <xsl:variable name="lib-domains"      select=".//domains"/>
