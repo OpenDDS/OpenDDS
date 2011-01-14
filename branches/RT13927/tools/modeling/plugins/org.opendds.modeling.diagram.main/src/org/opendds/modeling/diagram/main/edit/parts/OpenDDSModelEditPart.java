@@ -6,6 +6,7 @@ package org.opendds.modeling.diagram.main.edit.parts;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gmf.runtime.diagram.ui.commands.ICommandProxy;
@@ -44,7 +45,7 @@ public class OpenDDSModelEditPart extends DiagramEditPart {
 	}
 
 	/**
-	 * @generated NOT
+	 * @generated
 	 */
 	protected void createDefaultEditPolicies() {
 		super.createDefaultEditPolicies();
@@ -89,8 +90,7 @@ public class OpenDDSModelEditPart extends DiagramEditPart {
 						return null;
 					}
 				});
-		// Disable showing the pop-up bar with shortcuts to palette tools.
-		removeEditPolicy(org.eclipse.gmf.runtime.diagram.ui.editpolicies.EditPolicyRoles.POPUPBAR_ROLE);
+		// removeEditPolicy(org.eclipse.gmf.runtime.diagram.ui.editpolicies.EditPolicyRoles.POPUPBAR_ROLE);
 	}
 
 }

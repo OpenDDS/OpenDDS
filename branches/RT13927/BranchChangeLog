@@ -1,3 +1,22 @@
+Fri Jan 14 14:52:17 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/edit/parts/DataLibEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DcpsLibEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/OpenDDSModelEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/PolicyLibEditPart.java:
+
+          Commit of "Mon Jan  3 20:51:11 UTC 2011" only applied to pop-up bars on the empty
+          portion of the canvas. It didn't apply to the figures themselves.
+          Removing these files from the repository as a solution covering all pop-ups was found.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/preferences/DiagramPreferenceInitializer.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/preferences/DiagramPreferenceInitializer.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/preferences/DiagramPreferenceInitializer.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/preferences/DiagramPreferenceInitializer.java:
+
+          Disable all pop-ups on the diagram.
+
 Thu Jan 13 23:22:13 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
@@ -9,7 +28,7 @@ Thu Jan 13 23:22:13 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_h.xsl:
 
           Qualify Elements class with packages/dcpsLib names.
-          
+
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpb.xsl:
 
           Don't show : when reffed-lib list is empty.

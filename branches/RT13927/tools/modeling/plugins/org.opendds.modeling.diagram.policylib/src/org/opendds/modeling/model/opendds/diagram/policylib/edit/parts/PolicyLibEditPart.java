@@ -32,7 +32,7 @@ public class PolicyLibEditPart extends DiagramEditPart {
 	}
 
 	/**
-	 * @generated NOT
+	 * @generated
 	 */
 	protected void createDefaultEditPolicies() {
 		super.createDefaultEditPolicies();
@@ -40,8 +40,7 @@ public class PolicyLibEditPart extends DiagramEditPart {
 				new PolicyLibItemSemanticEditPolicy());
 		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE,
 				new PolicyLibCanonicalEditPolicy());
-		// Disable showing the pop-up bar with shortcuts to palette tools.
-		removeEditPolicy(org.eclipse.gmf.runtime.diagram.ui.editpolicies.EditPolicyRoles.POPUPBAR_ROLE);
+		// removeEditPolicy(org.eclipse.gmf.runtime.diagram.ui.editpolicies.EditPolicyRoles.POPUPBAR_ROLE);
 	}
 
 }
