@@ -1,3 +1,9 @@
+Fri Jan 14 21:52:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+
+          Remove unused parts of stylesheet.
+
 Fri Jan 14 21:00:09 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
@@ -6,7 +12,7 @@ Fri Jan 14 21:00:09 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/preprocess.xsl:
 
           Do NOT translate Data libs or process libs back to old serialization.
-          
+
 Fri Jan 14 20:02:34 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
