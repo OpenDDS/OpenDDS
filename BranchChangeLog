@@ -1,3 +1,9 @@
+Mon Jan 17 13:14:12 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/preferences/DiagramPreferenceInitializer.java:
+
+          Inadvertently didn't get committed during "Fri Jan 14 14:52:17 UTC 2011" commit.
+
 Mon Jan 17 13:09:05 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/OpenDDSDiagramEditor.java:
@@ -116,7 +122,6 @@ Fri Jan 14 14:52:17 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/edit/parts/DataLibEditPart.java:
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DcpsLibEditPart.java:
-        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/OpenDDSModelEditPart.java:
         * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/edit/parts/PolicyLibEditPart.java:
 
           Commit of "Mon Jan  3 20:51:11 UTC 2011" only applied to pop-up bars on the empty
