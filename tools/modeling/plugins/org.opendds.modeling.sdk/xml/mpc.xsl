@@ -14,18 +14,20 @@
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
 
-<!-- Node sets -->
-<xsl:variable name="dcpslib" select="//libs[@xsi:type = 'opendds:DcpsLib']"/>
+<xsl:variable name="model" select="document(/generator:CodeGen/source/@name)//opendds:OpenDDSModel"/>
 
 <!-- Extract the name of the model once. -->
-<xsl:variable name="modelname" select="/opendds:OpenDDSModel/@name"/>
+<xsl:variable name="modelname" select="$model/@name"/>
 
 <xsl:variable name="MODELNAME" select="translate($modelname, $lower, $upper)"/>
 
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
+  <xsl:variable name="dcpslib" select="$model//libs[@xsi:type = 'opendds:DcpsLib']"/>
   <xsl:variable name="model-refs">
-    <xsl:call-template name="model-ref-names"/>
+    <xsl:call-template name="data-model-ref-names">
+      <xsl:with-param name="model-refs" select="$model//datatype/@href | $model//libs[@xsi:type='opendds:DataLib']//@href"/>
+    </xsl:call-template>
   </xsl:variable>
   <xsl:text>project(</xsl:text>
   <xsl:value-of select="$modelname"/>
@@ -91,6 +93,28 @@
 }
 </xsl:text>
 </xsl:template>
+<xsl:template name="data-model-ref-names">
+  <xsl:param name="model-refs"/>
+  <xsl:param name="complete-refs" select="''"/>
+
+  <xsl:if test="$model-refs">
+    <xsl:variable name="model-ref" select="$model-refs[1]"/>
+    <xsl:variable name="model-file" select="substring-before($model-ref, '#')"/>
+
+    <xsl:if test="not(contains($complete-refs, $model))">
+      <xsl:if test="string-length($complete-refs) &gt; 0">
+        <xsl:text>, </xsl:text>
+      </xsl:if>
+      <xsl:value-of select="document($model-file)//opendds:OpenDDSModel/@name"/>
+    </xsl:if>
+
+    <xsl:call-template name="data-model-ref-names">
+      <xsl:param name="model-refs" select="$model-refs[position() &gt; 1]"/>
+      <xsl:param name="complete-refs" select="concat($complete-refs, ' ', $model-file)"/>
+    </xsl:call-template>
+  </xsl:if>
+</xsl:template>
+
 <!-- End of main processing template. -->
 
 </xsl:stylesheet>

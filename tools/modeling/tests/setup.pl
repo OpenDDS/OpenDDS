@@ -19,7 +19,7 @@ if ($#ARGV + 1 > 0) {
 
 my $javapkg = 'org.opendds.modeling.sdk';
 my $subdir = 'model';
-my @suffixes = qw(.idl _T.h _T.cpp .mpc);
+my @suffixes = qw(.idl _T.h _T.cpp);
 my @xsls = glob "$DDS_ROOT/tools/modeling/plugins/$javapkg/xml/*.xsl $DDS_ROOT/tools/modeling/plugins/$javapkg/xml/lut.xml";
 
 sub generate_traits {
@@ -33,6 +33,8 @@ sub generate_traits {
                      "$generator > model/$base" . "Traits.h");
     $status = system("xsltproc ../../plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl " .
                      "$generator > model/$base" . "Traits.cpp");
+    $status = system("xsltproc ../../plugins/org.opendds.modeling.sdk/xml/mpc.xsl " .
+                     "$generator > model/$base" . ".mpc");
   }
 }
 
