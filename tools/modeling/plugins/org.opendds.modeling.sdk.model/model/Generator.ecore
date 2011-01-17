@@ -11,6 +11,8 @@
         eType="#//TargetDir" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="instances" ordered="false"
         eType="#//Instances" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="searchPaths" eType="#//Environment"
+        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ModelFile">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
@@ -19,6 +21,20 @@
   <eClassifiers xsi:type="ecore:EClass" name="TargetDir">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         defaultValueLiteral="&quot;&lt;none>&quot;"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Environment">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="location" upperBound="-1"
+        eType="#//Location"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Location">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="variable" eType="#//LocationVariable"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="path" eType="#//LocationPath"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="LocationVariable">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="LocationPath">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Instances">
     <eStructuralFeatures xsi:type="ecore:EReference" name="instance" upperBound="-1"
@@ -122,7 +138,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LocalAddressString">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        defaultValueLiteral="&quot;&quot;"/>
+        defaultValueLiteral=""/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EnableNagleAlgorithm">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
