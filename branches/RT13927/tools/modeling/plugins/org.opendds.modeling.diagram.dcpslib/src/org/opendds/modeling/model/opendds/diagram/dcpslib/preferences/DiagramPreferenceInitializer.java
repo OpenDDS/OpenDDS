@@ -27,7 +27,10 @@ public class DiagramPreferenceInitializer extends AbstractPreferenceInitializer 
 		// GMFGen file allows diagram preferences to be defined that includes turning off pop-up bars.
 		// However, with GMF 2.2.2 it was found that simply adding the preferences without changing any
 		// values resulted in figures with black background.
-		store.setDefault(org.eclipse.gmf.runtime.diagram.ui.preferences.IPreferenceConstants.PREF_SHOW_POPUP_BARS, false);
+		store
+				.setDefault(
+						org.eclipse.gmf.runtime.diagram.ui.preferences.IPreferenceConstants.PREF_SHOW_POPUP_BARS,
+						false);
 		// Custom code end
 	}
 
