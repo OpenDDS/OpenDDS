@@ -93,28 +93,6 @@
 }
 </xsl:text>
 </xsl:template>
-<xsl:template name="data-model-ref-names">
-  <xsl:param name="model-refs"/>
-  <xsl:param name="complete-refs" select="''"/>
-
-  <xsl:if test="$model-refs">
-    <xsl:variable name="model-ref" select="$model-refs[1]"/>
-    <xsl:variable name="model-file" select="substring-before($model-ref, '#')"/>
-
-    <xsl:if test="not(contains($complete-refs, $model))">
-      <xsl:if test="string-length($complete-refs) &gt; 0">
-        <xsl:text>, </xsl:text>
-      </xsl:if>
-      <xsl:value-of select="document($model-file)//opendds:OpenDDSModel/@name"/>
-    </xsl:if>
-
-    <xsl:call-template name="data-model-ref-names">
-      <xsl:param name="model-refs" select="$model-refs[position() &gt; 1]"/>
-      <xsl:param name="complete-refs" select="concat($complete-refs, ' ', $model-file)"/>
-    </xsl:call-template>
-  </xsl:if>
-</xsl:template>
-
 <!-- End of main processing template. -->
 
 </xsl:stylesheet>

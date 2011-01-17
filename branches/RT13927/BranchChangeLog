@@ -1,3 +1,14 @@
+Mon Jan 17 22:16:16 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpb.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpc.xsl:
+        * tools/modeling/tests/setup.pl:
+
+          Make mpb only inherit referenced models if it is a dataLib reference.
+          Build MPB against genfile (so it can share logic with MPC, which 
+          must generate against genfile).
+
 Mon Jan 17 21:56:15 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpc.xsl:
