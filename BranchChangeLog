@@ -1,3 +1,11 @@
+Mon Jan 17 17:34:58 UTC 2011  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * [r4114] 2011-01-17 17:09  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore:
+
+          Added Environment->Locations->LocationVariable/LocationPath for
+          generating MPB/MPC information.
+
 Mon Jan 17 16:37:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
