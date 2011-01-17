@@ -1,3 +1,12 @@
+Mon Jan 17 17:57:35 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgraph:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfmap:
+
+          Connector labels were used improperly resulting in a cluster of text in top-left corner
+          when Unions were connected to Branches or Branches connected to Cases.
+
 Mon Jan 17 17:34:58 UTC 2011  Mike Martinez  <martinez_m@lab.ociweb.com>
 
         * [r4114] 2011-01-17 17:09  martinezm

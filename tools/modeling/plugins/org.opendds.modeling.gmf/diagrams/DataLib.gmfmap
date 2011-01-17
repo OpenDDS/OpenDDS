@@ -690,7 +690,7 @@
           href="DataLib.gmfgraph#NamedConnectorCase"/>
     </labelMappings>
     <diagramLink
-        href="DataLib.gmfgraph#NamedLink"/>
+        href="DataLib.gmfgraph#CaseLink"/>
     <linkMetaFeature
         xsi:type="ecore:EReference"
         href="../../org.opendds.modeling.model/model/Types.ecore#//Branch/cases"/>
@@ -704,7 +704,7 @@
           href="DataLib.gmfgraph#NamedConnectorBranch"/>
     </labelMappings>
     <diagramLink
-        href="DataLib.gmfgraph#NamedLink"/>
+        href="DataLib.gmfgraph#BranchLink"/>
     <linkMetaFeature
         xsi:type="ecore:EReference"
         href="../../org.opendds.modeling.model/model/Types.ecore#//Union/branches"/>
@@ -718,7 +718,7 @@
           href="DataLib.gmfgraph#NamedConnectorSwitch"/>
     </labelMappings>
     <diagramLink
-        href="DataLib.gmfgraph#NamedLink"/>
+        href="DataLib.gmfgraph#SwitchLink"/>
     <linkMetaFeature
         xsi:type="ecore:EReference"
         href="../../org.opendds.modeling.model/model/Types.ecore#//Union/switch"/>

@@ -16,50 +16,6 @@
           targetDecoration="//@figures.0/@figures.0"/>
     </descriptors>
     <descriptors
-        name="NamedConnectorFigure">
-      <actualFigure
-          xsi:type="gmfgraph:PolylineConnection"
-          name="NamedConnectorFigure"
-          targetDecoration="//@figures.0/@figures.0">
-        <children
-            xsi:type="gmfgraph:Label"
-            name="NamedConnectorBranchLabel"
-            text="branch"/>
-        <children
-            xsi:type="gmfgraph:Label"
-            name="NamedConnectorDefaultLabel"
-            text="default"/>
-        <children
-            xsi:type="gmfgraph:Label"
-            name="NamedConnectorSwitchLabel"
-            text="switch"/>
-        <children
-            xsi:type="gmfgraph:Label"
-            name="NamedConnectorFieldLabel"
-            text="field"/>
-        <children
-            xsi:type="gmfgraph:Label"
-            name="NamedConnectorCaseLabel"
-            text="case"/>
-        <children
-            xsi:type="gmfgraph:Label"
-            name="NamedConnectorKeyLabel"
-            text="key"/>
-      </actualFigure>
-      <accessors
-          figure="//@figures.0/@descriptors.1/@actualFigure/@children.0"/>
-      <accessors
-          figure="//@figures.0/@descriptors.1/@actualFigure/@children.1"/>
-      <accessors
-          figure="//@figures.0/@descriptors.1/@actualFigure/@children.2"/>
-      <accessors
-          figure="//@figures.0/@descriptors.1/@actualFigure/@children.3"/>
-      <accessors
-          figure="//@figures.0/@descriptors.1/@actualFigure/@children.4"/>
-      <accessors
-          figure="//@figures.0/@descriptors.1/@actualFigure/@children.5"/>
-    </descriptors>
-    <descriptors
         name="TypeFigure">
       <actualFigure
           xsi:type="gmfgraph:Rectangle"
@@ -74,7 +30,7 @@
             text="&lt;...>"/>
       </actualFigure>
       <accessors
-          figure="//@figures.0/@descriptors.2/@actualFigure/@children.0"/>
+          figure="//@figures.0/@descriptors.1/@actualFigure/@children.0"/>
     </descriptors>
     <descriptors
         name="EnumFigure">
@@ -98,11 +54,11 @@
             text=""/>
       </actualFigure>
       <accessors
-          figure="//@figures.0/@descriptors.3/@actualFigure/@children.0"/>
+          figure="//@figures.0/@descriptors.2/@actualFigure/@children.0"/>
       <accessors
-          figure="//@figures.0/@descriptors.3/@actualFigure/@children.1"/>
+          figure="//@figures.0/@descriptors.2/@actualFigure/@children.1"/>
       <accessors
-          figure="//@figures.0/@descriptors.3/@actualFigure/@children.2"/>
+          figure="//@figures.0/@descriptors.2/@actualFigure/@children.2"/>
     </descriptors>
     <descriptors
         name="CollectionFigure">
@@ -123,9 +79,9 @@
             text="&lt;...>"/>
       </actualFigure>
       <accessors
-          figure="//@figures.0/@descriptors.4/@actualFigure/@children.0"/>
+          figure="//@figures.0/@descriptors.3/@actualFigure/@children.0"/>
       <accessors
-          figure="//@figures.0/@descriptors.4/@actualFigure/@children.1"/>
+          figure="//@figures.0/@descriptors.3/@actualFigure/@children.1"/>
     </descriptors>
     <descriptors
         name="NamedTypeFigure">
@@ -146,9 +102,9 @@
             text="&lt;...>"/>
       </actualFigure>
       <accessors
-          figure="//@figures.0/@descriptors.5/@actualFigure/@children.0"/>
+          figure="//@figures.0/@descriptors.4/@actualFigure/@children.0"/>
       <accessors
-          figure="//@figures.0/@descriptors.5/@actualFigure/@children.1"/>
+          figure="//@figures.0/@descriptors.4/@actualFigure/@children.1"/>
     </descriptors>
     <descriptors
         name="NoAttribsTypeFigure">
@@ -165,7 +121,7 @@
             text="&lt;...>"/>
       </actualFigure>
       <accessors
-          figure="//@figures.0/@descriptors.6/@actualFigure/@children.0"/>
+          figure="//@figures.0/@descriptors.5/@actualFigure/@children.0"/>
     </descriptors>
     <descriptors
         name="StructFigure">
@@ -190,11 +146,11 @@
             text="&lt;...>"/>
       </actualFigure>
       <accessors
-          figure="//@figures.0/@descriptors.7/@actualFigure/@children.0"/>
+          figure="//@figures.0/@descriptors.6/@actualFigure/@children.0"/>
       <accessors
-          figure="//@figures.0/@descriptors.7/@actualFigure/@children.1"/>
+          figure="//@figures.0/@descriptors.6/@actualFigure/@children.1"/>
       <accessors
-          figure="//@figures.0/@descriptors.7/@actualFigure/@children.2"/>
+          figure="//@figures.0/@descriptors.6/@actualFigure/@children.2"/>
     </descriptors>
     <descriptors
         name="KeyFigure">
@@ -215,9 +171,9 @@
             text="&lt;...>"/>
       </actualFigure>
       <accessors
-          figure="//@figures.0/@descriptors.8/@actualFigure/@children.1"/>
+          figure="//@figures.0/@descriptors.7/@actualFigure/@children.1"/>
       <accessors
-          figure="//@figures.0/@descriptors.8/@actualFigure/@children.0"/>
+          figure="//@figures.0/@descriptors.7/@actualFigure/@children.0"/>
     </descriptors>
     <descriptors
         name="CaseFigure">
@@ -238,9 +194,9 @@
             text="&lt;...>"/>
       </actualFigure>
       <accessors
-          figure="//@figures.0/@descriptors.9/@actualFigure/@children.0"/>
+          figure="//@figures.0/@descriptors.8/@actualFigure/@children.0"/>
       <accessors
-          figure="//@figures.0/@descriptors.9/@actualFigure/@children.1"/>
+          figure="//@figures.0/@descriptors.8/@actualFigure/@children.1"/>
     </descriptors>
     <descriptors
         name="CompartmentFigure">
@@ -262,6 +218,45 @@
             top="2"
             left="5"/>
       </actualFigure>
+    </descriptors>
+    <descriptors
+        name="BranchConnectorFigure">
+      <actualFigure
+          xsi:type="gmfgraph:PolylineConnection"
+          name="BranchConnectorFigure">
+        <children
+            xsi:type="gmfgraph:Label"
+            name="BranchConnectorLabel"
+            text="branch"/>
+      </actualFigure>
+      <accessors
+          figure="//@figures.0/@descriptors.11/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors
+        name="SwitchConnectorFigure">
+      <actualFigure
+          xsi:type="gmfgraph:PolylineConnection"
+          name="SwitchConnectorFigure">
+        <children
+            xsi:type="gmfgraph:Label"
+            name="SwitchConnectorLabel"
+            text="switch"/>
+      </actualFigure>
+      <accessors
+          figure="//@figures.0/@descriptors.12/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors
+        name="CaseConnectorFigure">
+      <actualFigure
+          xsi:type="gmfgraph:PolylineConnection"
+          name="CaseConnectorFigure">
+        <children
+            xsi:type="gmfgraph:Label"
+            name="CaseConnectorLabel"
+            text="case"/>
+      </actualFigure>
+      <accessors
+          figure="//@figures.0/@descriptors.13/@actualFigure/@children.0"/>
     </descriptors>
   </figures>
   <nodes
@@ -292,8 +287,14 @@
       name="Link"
       figure="ConnectorFigure"/>
   <connections
-      name="NamedLink"
-      figure="NamedConnectorFigure"/>
+      name="BranchLink"
+      figure="BranchConnectorFigure"/>
+  <connections
+      name="SwitchLink"
+      figure="SwitchConnectorFigure"/>
+  <connections
+      name="CaseLink"
+      figure="CaseConnectorFigure"/>
   <compartments
       name="Fields"
       figure="CompartmentFigure"/>
@@ -312,53 +313,53 @@
   <labels
       name="TypeName"
       figure="TypeFigure"
-      accessor="//@figures.0/@descriptors.2/@accessors.0"/>
+      accessor="//@figures.0/@descriptors.1/@accessors.0"/>
   <labels
       name="EnumTypeName"
       figure="EnumFigure"
-      accessor="//@figures.0/@descriptors.3/@accessors.0"/>
+      accessor="//@figures.0/@descriptors.2/@accessors.0"/>
   <labels
       name="EnumName"
       figure="EnumFigure"
       elementIcon="false"
-      accessor="//@figures.0/@descriptors.3/@accessors.1"/>
+      accessor="//@figures.0/@descriptors.2/@accessors.1"/>
   <labels
       name="EnumLiterals"
       figure="EnumFigure"
       elementIcon="false"
-      accessor="//@figures.0/@descriptors.3/@accessors.2"/>
+      accessor="//@figures.0/@descriptors.2/@accessors.2"/>
   <labels
       name="CollectionName"
       figure="CollectionFigure"
-      accessor="//@figures.0/@descriptors.4/@accessors.0"/>
+      accessor="//@figures.0/@descriptors.3/@accessors.0"/>
   <labels
       name="CollectionLength"
       figure="CollectionFigure"
       elementIcon="false"
-      accessor="//@figures.0/@descriptors.4/@accessors.1"/>
+      accessor="//@figures.0/@descriptors.3/@accessors.1"/>
   <labels
       name="NamedTypeTypeName"
       figure="NamedTypeFigure"
-      accessor="//@figures.0/@descriptors.5/@accessors.0"/>
+      accessor="//@figures.0/@descriptors.4/@accessors.0"/>
   <labels
       name="NamedTypeName"
       figure="NamedTypeFigure"
       elementIcon="false"
-      accessor="//@figures.0/@descriptors.5/@accessors.1"/>
+      accessor="//@figures.0/@descriptors.4/@accessors.1"/>
   <labels
       name="NoAttribsTypeName"
       figure="NoAttribsTypeFigure"
-      accessor="//@figures.0/@descriptors.6/@accessors.0"/>
+      accessor="//@figures.0/@descriptors.5/@accessors.0"/>
   <labels
       name="StructName"
       figure="StructFigure"
       elementIcon="false"
-      accessor="//@figures.0/@descriptors.7/@accessors.1"/>
+      accessor="//@figures.0/@descriptors.6/@accessors.1"/>
   <labels
       name="StructIsDcpsDataType"
       figure="StructFigure"
       elementIcon="false"
-      accessor="//@figures.0/@descriptors.7/@accessors.2"/>
+      accessor="//@figures.0/@descriptors.6/@accessors.2"/>
   <labels
       name="KeyName"
       figure="KeyFigure"/>
@@ -366,54 +367,39 @@
       name="KeyIndex"
       figure="KeyFigure"
       elementIcon="false"
-      accessor="//@figures.0/@descriptors.8/@accessors.0"/>
+      accessor="//@figures.0/@descriptors.7/@accessors.0"/>
   <labels
       name="CaseTypeName"
       figure="CaseFigure"
-      accessor="//@figures.0/@descriptors.9/@accessors.0"/>
+      accessor="//@figures.0/@descriptors.8/@accessors.0"/>
   <labels
       name="CaseLiteralName"
       figure="CaseFigure"
       elementIcon="false"
-      accessor="//@figures.0/@descriptors.9/@accessors.1"/>
+      accessor="//@figures.0/@descriptors.8/@accessors.1"/>
   <labels
       name="StructTypeName"
       figure="StructFigure"
-      accessor="//@figures.0/@descriptors.7/@accessors.0"/>
+      accessor="//@figures.0/@descriptors.6/@accessors.0"/>
   <labels
       name="KeyTypeName"
       figure="KeyFigure"
-      accessor="//@figures.0/@descriptors.8/@accessors.1"/>
+      accessor="//@figures.0/@descriptors.7/@accessors.1"/>
   <labels
       name="NamedConnectorBranch"
-      figure="NamedConnectorFigure"
+      figure="BranchConnectorFigure"
       elementIcon="false"
-      accessor="//@figures.0/@descriptors.1/@accessors.0"/>
-  <labels
-      name="NamedConnectorDefault"
-      figure="NamedConnectorFigure"
-      elementIcon="false"
-      accessor="//@figures.0/@descriptors.1/@accessors.1"/>
+      accessor="//@figures.0/@descriptors.11/@accessors.0"/>
   <labels
       name="NamedConnectorSwitch"
-      figure="NamedConnectorFigure"
+      figure="SwitchConnectorFigure"
       elementIcon="false"
-      accessor="//@figures.0/@descriptors.1/@accessors.2"/>
-  <labels
-      name="NamedConnectorField"
-      figure="NamedConnectorFigure"
-      elementIcon="false"
-      accessor="//@figures.0/@descriptors.1/@accessors.3"/>
+      accessor="//@figures.0/@descriptors.12/@accessors.0"/>
   <labels
       name="NamedConnectorCase"
-      figure="NamedConnectorFigure"
+      figure="CaseConnectorFigure"
       elementIcon="false"
-      accessor="//@figures.0/@descriptors.1/@accessors.4"/>
-  <labels
-      name="NamedConnectorKey"
-      figure="NamedConnectorFigure"
-      elementIcon="false"
-      accessor="//@figures.0/@descriptors.1/@accessors.5"/>
+      accessor="//@figures.0/@descriptors.13/@accessors.0"/>
   <labels
       name="ListItem"
       figure="ListItemLabel"
