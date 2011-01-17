@@ -466,27 +466,36 @@ inline
 void
 Elements::Data::buildSubscriptionsQos()
 {
-  DataReaders::Values  reader;
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$lib-readers">
+    <xsl:text>  DataReaders::Values  reader;
   DataReaderQos        readerQos;
 </xsl:text>
-  <xsl:for-each select="$lib-readers">
-    <xsl:value-of select="$newline"/>
-    <xsl:text>  reader    = DataReaders::</xsl:text>
-    <xsl:call-template name="normalize-identifier"/>
-    <xsl:text>;
+    <xsl:for-each select="$lib-readers">
+      <xsl:value-of select="$newline"/>
+      <xsl:text>  reader    = DataReaders::</xsl:text>
+      <xsl:call-template name="normalize-identifier"/>
+      <xsl:text>;
   readerQos = TheServiceParticipant->initial_DataReaderQos();
 </xsl:text>
     <!-- '  readerQos.(policyfield) = (value);\n' -->
-    <xsl:call-template name="process-policies">
-      <xsl:with-param name="base"   select="'readerQos.'"/>
-      <xsl:with-param name="policies"   select="$lib-policies"/>
-    </xsl:call-template>
+      <xsl:call-template name="process-policies">
+        <xsl:with-param name="base"   select="'readerQos.'"/>
+        <xsl:with-param name="policies"   select="$lib-policies"/>
+      </xsl:call-template>
 
-    <xsl:text>  this->readersQos_[ reader] = readerQos;
+      <xsl:text>  this->readersQos_[ reader] = readerQos;
   this->readerCopyTopicQos_[reader] = </xsl:text>
-    <xsl:value-of select="concat(@copyFromTopicQos, ';', $newline)"/>
-  </xsl:for-each>
-  <xsl:text>}
+      <xsl:value-of select="concat(@copyFromTopicQos, ';', $newline)"/>
+    </xsl:for-each>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  // No data readers were defined by this model
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
 
 inline
 void
