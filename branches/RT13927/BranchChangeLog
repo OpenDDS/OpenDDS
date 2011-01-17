@@ -1,3 +1,11 @@
+Mon Jan 17 13:09:05 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/OpenDDSDiagramEditor.java:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithopenddsmodels.html:
+
+          Allow Enter key to be used to open a sub-diagram since it can be cumbersome to double-click.
+
 Fri Jan 14 22:15:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/TopicQos/TopQos.opendds:
