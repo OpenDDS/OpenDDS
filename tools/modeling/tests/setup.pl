@@ -35,6 +35,8 @@ sub generate_traits {
                      "$generator > model/$base" . "Traits.cpp");
     $status = system("xsltproc ../../plugins/org.opendds.modeling.sdk/xml/mpc.xsl " .
                      "$generator > model/$base" . ".mpc");
+    $status = system("xsltproc ../../plugins/org.opendds.modeling.sdk/xml/mpb.xsl " .
+                     "$generator > model/$base" . ".mpb");
   }
 }
 
@@ -66,8 +68,6 @@ sub generate {
     print "ERROR: Java CodeGenerator invocation failed with $status\n";
     exit($status >> 8);
   }
-  print "   generating mpb...\n";
-  $status = system("xsltproc --path . $mpb $tmp > model/$base.mpb");
 
 }
 
