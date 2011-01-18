@@ -251,16 +251,16 @@
             <method name="getType()" value="OpenDDS DataLib"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-nodes">
-            <method name="getType()" value="2001,2023,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,3001,3002,3003,3004"/>
+            <method name="getType()" value="2001,2023,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2021,2022,3002,3005,3001,3006,3003,3004"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Edge" id="generated-links">
-            <method name="getType()" value="4001,4002,4003,4004,4005,4006"/>
+            <method name="getType()" value="4001,4002,4003,4006"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-labels">
-            <method name="getType()" value="5001,5034,5002,5003,5004,5005,5006,5007,5008,5009,5010,5011,5012,5013,5014,5015,5016,5017,5018,5019,5020,5021,5022,5023,5024,5025,5026,5027,5028,5029,5030,5031,5032,5033"/>
+            <method name="getType()" value="5001,5034,5002,5003,5004,5005,5006,5007,5008,5009,5010,5011,5012,5013,5014,5015,5016,5017,5018,5019,5020,5021,5022,5023,5024,5025,5029,5030,5031,5032,5033,5037,5035,5036"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-compartments">
-            <method name="getType()" value="7001,7002,7003,7004"/>
+            <method name="getType()" value="7002,7005,7006,7007,7003,7004"/>
          </object>
          <context views="generated-diagram,generated-nodes,generated-links,generated-labels,generated-compartments"/>
       </editpartProvider>
@@ -290,11 +290,9 @@
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.StringEditPart" id="String_2016"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.WStringEditPart" id="WString_2017"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.TypedefEditPart" id="Typedef_2018"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.CaseEditPart" id="Case_2019"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.BranchEditPart" id="Branch_2020"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.UnionEditPart" id="Union_2021"/>
          <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.StructEditPart" id="Struct_2022"/>
-         <context elements="DataLib_1000,Long_2001,LongDouble_2023,LongLong_2002,Short_2003,ULong_2004,ULongLong_2005,UShort_2006,Double_2007,Float_2008,Char_2009,WChar_2010,Octet_2011,Boolean_2012,Array_2013,Enum_2014,Sequence_2015,String_2016,WString_2017,Typedef_2018,Case_2019,Branch_2020,Union_2021,Struct_2022"/>
+         <context elements="DataLib_1000,Long_2001,LongDouble_2023,LongLong_2002,Short_2003,ULong_2004,ULongLong_2005,UShort_2006,Double_2007,Float_2008,Char_2009,WChar_2010,Octet_2011,Boolean_2012,Array_2013,Enum_2014,Sequence_2015,String_2016,WString_2017,Typedef_2018,Union_2021,Struct_2022"/>
       </modelingAssistantProvider>
    </extension>
 
@@ -516,26 +514,6 @@
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.Case_2019"
-               name="%metatype.name.Case_2019"
-               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
-               eclass="Case"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.CaseEditHelper">
-            <param name="semanticHint" value="2019"/>
-         </metamodelType>
-      </metamodel>
-      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
-         <metamodelType
-               id="org.opendds.modeling.diagram.datalib.Branch_2020"
-               name="%metatype.name.Branch_2020"
-               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
-               eclass="Branch"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.BranchEditHelper">
-            <param name="semanticHint" value="2020"/>
-         </metamodelType>
-      </metamodel>
-      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
-         <metamodelType
                id="org.opendds.modeling.diagram.datalib.Union_2021"
                name="%metatype.name.Union_2021"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
@@ -556,29 +534,49 @@
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.datalib.Field_3001"
-               name="%metatype.name.Field_3001"
+               id="org.opendds.modeling.diagram.datalib.Field_3002"
+               name="%metatype.name.Field_3002"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Field"
                edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.FieldEditHelper">
-            <param name="semanticHint" value="3001"/>
+            <param name="semanticHint" value="3002"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Branch_3005"
+               name="%metatype.name.Branch_3005"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Branch"
+               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.BranchEditHelper">
+            <param name="semanticHint" value="3005"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <specializationType
-               id="org.opendds.modeling.diagram.datalib.Field_3002"
-               name="%metatype.name.Field_3002"
+               id="org.opendds.modeling.diagram.datalib.Field_3001"
+               name="%metatype.name.Field_3001"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.opendds.modeling.diagram.datalib.Field_3001"/>
-            <param name="semanticHint" value="3002"/>
+            <specializes id="org.opendds.modeling.diagram.datalib.Field_3002"/>
+            <param name="semanticHint" value="3001"/>
          </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Case_3006"
+               name="%metatype.name.Case_3006"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Case"
+               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.CaseEditHelper">
+            <param name="semanticHint" value="3006"/>
+         </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
          <specializationType
                id="org.opendds.modeling.diagram.datalib.Field_3003"
                name="%metatype.name.Field_3003"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.opendds.modeling.diagram.datalib.Field_3001"/>
+            <specializes id="org.opendds.modeling.diagram.datalib.Field_3002"/>
             <param name="semanticHint" value="3003"/>
          </specializationType>
       </metamodel>
@@ -617,24 +615,6 @@
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
             <specializes id="org.eclipse.gmf.runtime.emf.type.core.null"/>
             <param name="semanticHint" value="4003"/>
-         </specializationType>
-      </metamodel>
-      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
-         <specializationType
-               id="org.opendds.modeling.diagram.datalib.BranchCases_4004"
-               name="%metatype.name.BranchCases_4004"
-               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.eclipse.gmf.runtime.emf.type.core.null"/>
-            <param name="semanticHint" value="4004"/>
-         </specializationType>
-      </metamodel>
-      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
-         <specializationType
-               id="org.opendds.modeling.diagram.datalib.UnionBranches_4005"
-               name="%metatype.name.UnionBranches_4005"
-               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.eclipse.gmf.runtime.emf.type.core.null"/>
-            <param name="semanticHint" value="4005"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
@@ -678,19 +658,17 @@
          <elementType ref="org.opendds.modeling.diagram.datalib.String_2016"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.WString_2017"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.Typedef_2018"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.Case_2019"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.Branch_2020"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.Union_2021"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.Struct_2022"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.Field_3001"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.Field_3002"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Branch_3005"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Field_3001"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Case_3006"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.Field_3003"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.Key_3004"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.ArraySubtype_4001"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.SequenceSubtype_4002"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.TypedefType_4003"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.BranchCases_4004"/>
-         <elementType ref="org.opendds.modeling.diagram.datalib.UnionBranches_4005"/>
          <elementType ref="org.opendds.modeling.diagram.datalib.UnionSwitch_4006"/>
          <advice ref="org.eclipse.gmf.runtime.diagram.core.advice.notationDepdendents"/>
       </binding>
@@ -1073,7 +1051,7 @@ switch.oclIsTypeOf(WChar)
       <decoratorProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibShortcutsDecoratorProvider">
          <Priority name="Lowest"/>
          <object class="org.eclipse.gmf.runtime.notation.Node(org.eclipse.gmf.runtime.notation)" id="generated-top-nodes">
-            <method name="getType()" value="2001,2023,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022"/>
+            <method name="getType()" value="2001,2023,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2021,2022"/>
          </object>
          <context decoratorTargets="generated-top-nodes"/>
       </decoratorProvider>

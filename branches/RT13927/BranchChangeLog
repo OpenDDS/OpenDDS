@@ -1,3 +1,23 @@
+Tue Jan 18 14:49:20 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgraph:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfmap:
+
+	  For consistency and to reduce clutter, Unions now have a compartment for
+	  Branches, and Branches have a compartment for Cases.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmftool:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.trace:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_union_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdatalib.html:
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds:
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds_diagram:
+        * tools/modeling/testdata/DataLib/DataLibTest_screenshot_1.png:
+
+	  Updates to account for changing graphical representation of Unions.
+
 Tue Jan 18 12:35:48 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:

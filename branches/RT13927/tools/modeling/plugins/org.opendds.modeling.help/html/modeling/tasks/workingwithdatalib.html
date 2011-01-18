@@ -98,12 +98,26 @@
 
   <h4>Unions</h4>
 
-  <p>Unions can consist of a number of sub-elements as shown in the
-  figure below.</p><img alt="Union Example" src=
+  <p>Unions contains Branches to hold a list of Cases along with a
+  Field to apply if any of the Case literals matches with switch
+  specification.</p>
+
+  <p>These Branches and Cases as placed in collapsable compartments
+  are shown in the example below.</p><img alt="Union Example" src=
   "../images/datalib_union_example.png">
 
-  <p>The Branch and Case elements are used to construct a
-  Union.</p>
+  <p>This example corresponds to the IDL:</p>
+  <pre>
+union U switch (char) {
+case 'L':
+    long long_mem;
+case 'c':
+case 'C':
+    char char_mem;
+default:
+    string string_mem;
+};
+</pre>
 
   <h3>Validation of Data Types</h3>
 
