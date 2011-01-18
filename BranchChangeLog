@@ -1,3 +1,11 @@
+Tue Jan 18 16:01:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
+
+          Disable initialization of sub-diagram file from .opendds file.
+
 Tue Jan 18 15:09:55 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/edit/policies:
