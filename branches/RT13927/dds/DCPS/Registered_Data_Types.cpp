@@ -96,7 +96,7 @@ DDS::ReturnCode_t Data_Types_Register::register_type(
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX, guard, lock_, retCode);
 
   if (0 == find(domains_, reinterpret_cast <void*>(domain_participant), supportHash)) {
-    int lookup = bind(*supportHash, type_name.c_str(), the_type);
+    int lookup = OpenDDS::DCPS::bind(*supportHash, type_name.c_str(), the_type);
 
     if (0 == lookup) {
       the_type->_add_ref();
@@ -122,8 +122,8 @@ DDS::ReturnCode_t Data_Types_Register::register_type(
     // new domain id!
     supportHash = new TypeSupportHash;
 
-    if (0 == bind(domains_, reinterpret_cast<void*>(domain_participant), supportHash)) {
-      if (0 == bind(*supportHash, type_name.c_str(), the_type)) {
+    if (0 == OpenDDS::DCPS::bind(domains_, reinterpret_cast<void*>(domain_participant), supportHash)) {
+      if (0 == OpenDDS::DCPS::bind(*supportHash, type_name.c_str(), the_type)) {
         the_type->_add_ref();
         retCode = DDS::RETCODE_OK;
       }

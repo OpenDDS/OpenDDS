@@ -1822,7 +1822,7 @@ void
                                                  handle));
 
     instance->instance_handle_ = handle;
-    int ret = bind(instances_, handle, instance);
+    int ret = OpenDDS::DCPS::bind(instances_, handle, instance);
 
     if (ret != 0)
     {

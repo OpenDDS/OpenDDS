@@ -175,7 +175,7 @@ module Xyz {
   };
 
 
-union BigUnion switch (long) {
+  union BigUnion switch (long) {
     case 1:
         double  f1;
     case 2:
@@ -277,6 +277,8 @@ union BigUnion switch (long) {
       SeqOfAStruct f91;
     case 92:
       ArrayOfAStruct v92;
+    case 93:
+      long double ld;
   };
 
   // for access to _dcps_* methods
@@ -316,6 +318,9 @@ union BigUnion switch (long) {
     BigUnionSeq theSeqOfBitUnion;
     float x;
     float y;
+    wchar theWChar;
+    wstring theWString;
+    long double theLongDouble;
   };
 
 };

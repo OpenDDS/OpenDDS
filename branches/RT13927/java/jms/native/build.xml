@@ -15,6 +15,12 @@
     <condition property="makefile" value="${basedir}/GNUmakefile">
         <os family="unix"/>
     </condition>
+    <condition property="makefile" value="${basedir}/opendds_jms_native.vcxproj">
+        <and>
+            <os family="windows"/>
+            <isset property="env.VS100COMNTOOLS"/>
+        </and>
+    </condition>
     <condition property="makefile" value="${basedir}/opendds_jms_native.vcproj">
         <os family="windows"/>
     </condition>
@@ -32,6 +38,12 @@
 
     <condition property="mwc.type" value="gnuace">
         <os family="unix"/>
+    </condition>
+    <condition property="mwc.type" value="vc10">
+        <and>
+            <os family="windows"/>
+            <isset property="env.VS100COMNTOOLS"/>
+        </and>
     </condition>
     <condition property="mwc.type" value="vc9">
         <and>
@@ -67,6 +79,12 @@
     <condition property="make.executable" value="make">
         <os family="unix"/>
     </condition>
+    <condition property="make.executable" value="msbuild">
+        <and>
+            <os family="windows"/>
+            <isset property="env.VS100COMNTOOLS"/>
+        </and>
+    </condition>
     <condition property="make.executable" value="vcbuild">
         <and>
             <os family="windows"/>
@@ -96,6 +114,13 @@
 
     <condition property="make.compile.arguments" value="">
         <os family="unix"/>
+    </condition>
+    <condition property="make.compile.arguments"
+               value="${makefile} /p:Configuration=${vcbuild.config}">
+        <and>
+            <os family="windows"/>
+            <isset property="env.VS100COMNTOOLS"/>
+        </and>
     </condition>
     <condition property="make.compile.arguments"
                value="${makefile} ${vcbuild.config}">

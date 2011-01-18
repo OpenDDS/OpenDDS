@@ -233,7 +233,7 @@ WriteDataContainer::register_instance(
 
     instance_handle = this->writer_->get_next_handle();
 
-    int const insert_attempt = bind(instances_, instance_handle, instance);
+    int const insert_attempt = OpenDDS::DCPS::bind(instances_, instance_handle, instance);
 
     if (0 != insert_attempt) {
       ACE_ERROR((LM_ERROR,
