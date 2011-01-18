@@ -1,3 +1,15 @@
+Tue Jan 18 18:26:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Codegen/NewCodegen.opendds.old:
+        * tools/modeling/tests/Codegen/aModel.opendds.old:
+
+          Renames.
+
+        * tools/modeling/tests/Codegen/NewCodegen.opendds:
+        * tools/modeling/tests/Codegen/aModel.opendds:
+
+          Removed these files.
+
 Tue Jan 18 18:15:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Codegen/Codegen.gen:
