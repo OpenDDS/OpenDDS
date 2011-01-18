@@ -304,7 +304,7 @@ OpenDDS::DCPS::TransportImpl::attach_interface(TransportInterface* transport_int
                      ATTACH_BAD_TRANSPORT);
   }
 
-  if (bind(interfaces_, transport_interface, transport_interface) != 0) {
+  if (OpenDDS::DCPS::bind(interfaces_, transport_interface, transport_interface) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: Cannot attach_listener() to TransportImpl "
                       "object because TransportImpl thinks the "
@@ -323,8 +323,7 @@ OpenDDS::DCPS::TransportImpl::register_publication(OpenDDS::DCPS::RepoId pub_id,
   DBG_ENTRY_LVL("TransportImpl","register_publication",6);
   GuardType guard(this->lock_);
 
-  int ret =
-    bind(dw_map_, pub_id, dw);
+  int ret = OpenDDS::DCPS::bind(dw_map_, pub_id, dw);
 
   if (ret != -1) {
     dw->_add_ref();
@@ -409,8 +408,7 @@ OpenDDS::DCPS::TransportImpl::register_subscription(OpenDDS::DCPS::RepoId sub_id
   DBG_ENTRY_LVL("TransportImpl","register_subscription",6);
   GuardType guard(this->lock_);
 
-  int ret =
-    bind(dr_map_, sub_id, dr);
+  int ret = OpenDDS::DCPS::bind(dr_map_, sub_id, dr);
 
   if (ret != -1) {
     dr->_add_ref();
@@ -510,7 +508,7 @@ OpenDDS::DCPS::TransportImpl::add_pending_association(
     AssociationInfoList* infos = new AssociationInfoList;
     infos->push_back(info);
 
-    if (bind(pending_association_sub_map_, local_id, infos) == -1) {
+    if (OpenDDS::DCPS::bind(pending_association_sub_map_, local_id, infos) == -1) {
       OpenDDS::DCPS::RepoIdConverter converter(local_id);
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: TransportImpl::add_pending_association: ")
