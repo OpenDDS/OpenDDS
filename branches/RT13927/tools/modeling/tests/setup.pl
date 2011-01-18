@@ -29,13 +29,13 @@ sub generate_traits {
     my $base = $generator;
     $base =~ s/\.gen$//;
     print "   building traits for $generator... \n";
-    $status = system("xsltproc ../../plugins/org.opendds.modeling.sdk/xml/traits_h.xsl " .
+    $status = system("xsltproc --path . ../../plugins/org.opendds.modeling.sdk/xml/traits_h.xsl " .
                      "$generator > model/$base" . "Traits.h");
-    $status = system("xsltproc ../../plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl " .
+    $status = system("xsltproc --path . ../../plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl " .
                      "$generator > model/$base" . "Traits.cpp");
-    $status = system("xsltproc ../../plugins/org.opendds.modeling.sdk/xml/mpc.xsl " .
+    $status = system("xsltproc --path . ../../plugins/org.opendds.modeling.sdk/xml/mpc.xsl " .
                      "$generator > model/$base" . ".mpc");
-    $status = system("xsltproc ../../plugins/org.opendds.modeling.sdk/xml/mpb.xsl " .
+    $status = system("xsltproc --path . ../../plugins/org.opendds.modeling.sdk/xml/mpb.xsl " .
                      "$generator > model/$base" . ".mpb");
   }
 }
