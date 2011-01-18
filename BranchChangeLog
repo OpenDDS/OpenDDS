@@ -1,3 +1,26 @@
+Tue Jan 18 22:52:59 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedModelFile.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedXmlFile.java:
+
+          Refactored the ParsedModelFile (for .opendds files) into a common
+          base class ParsedXmlFile, and a sibling class ParsedGeneratorFile for
+          .gen aka .codegen files.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGeneratorFactory.java:
+
+          Factory change for the ParsedModelFile refactoring.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java:
+
+          Added the new code generation targets (mpb, Traits.h, Traits.cpp).
+          sourceName param to generate() is now a .gen aka .codegen file.
+          New pre-processing step with preprocess.xsl.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
+
+          Fixed an xsl bug per Jeff's instructions.
+
 Tue Jan 18 18:26:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Codegen/NewCodegen.opendds.old:

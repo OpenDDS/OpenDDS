@@ -156,8 +156,8 @@
     </xsl:if>
 
     <xsl:call-template name="data-model-ref-names">
-      <xsl:param name="model-refs" select="$model-refs[position() &gt; 1]"/>
-      <xsl:param name="complete-refs" select="concat($complete-refs, ' ', $model-file)"/>
+      <xsl:with-param name="model-refs" select="$model-refs[position() &gt; 1]"/>
+      <xsl:with-param name="complete-refs" select="concat($complete-refs, ' ', $model-file)"/>
     </xsl:call-template>
   </xsl:if>
 </xsl:template>
