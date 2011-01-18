@@ -1,10 +1,16 @@
+Tue Jan 18 15:09:55 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/edit/policies:
+
+          Update svn:ignore property.
+
 Tue Jan 18 14:49:20 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgraph:
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfmap:
 
-	  For consistency and to reduce clutter, Unions now have a compartment for
-	  Branches, and Branches have a compartment for Cases.
+          For consistency and to reduce clutter, Unions now have a compartment for
+          Branches, and Branches have a compartment for Cases.
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
@@ -16,7 +22,7 @@ Tue Jan 18 14:49:20 UTC 2011  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/testdata/DataLib/DataLibTest.opendds_diagram:
         * tools/modeling/testdata/DataLib/DataLibTest_screenshot_1.png:
 
-	  Updates to account for changing graphical representation of Unions.
+          Updates to account for changing graphical representation of Unions.
 
 Tue Jan 18 12:35:48 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
