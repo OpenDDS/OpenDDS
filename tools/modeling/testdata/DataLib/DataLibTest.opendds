@@ -49,5 +49,6 @@
     <types xsi:type="types:Typedef" xmi:id="_RGVgoBN5EeCLmZr0-O4PNA" name="Struct2Typedef">
       <type xsi:type="types:Struct" href="DataLib2.opendds#_BwbDYBN1EeCZGfFbfO9QSA"/>
     </types>
+    <types xsi:type="types:UShort" xmi:id="_cKZ44CMNEeCFpfZ6Zl7cEQ"/>
   </libs>
 </opendds:OpenDDSModel>

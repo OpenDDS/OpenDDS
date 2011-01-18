@@ -255,15 +255,15 @@
         collapsible="true">
       <tools
           xsi:type="gmftool:CreationTool"
-          title="Case"
-          description="Create new Case">
+          title="Union"
+          description="Create new Union">
         <smallIcon
             xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/Case.gif"
+            path="icons/full/obj16/Union.gif"
             bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
             xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/Case.gif"
+            path="icons/full/obj16/Union.gif"
             bundle="org.opendds.modeling.model.edit"/>
       </tools>
       <tools
@@ -281,15 +281,15 @@
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
-          title="Union"
-          description="Create new Union">
+          title="Case"
+          description="Create new Case">
         <smallIcon
             xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/Union.gif"
+            path="icons/full/obj16/Case.gif"
             bundle="org.opendds.modeling.model.edit"/>
         <largeIcon
             xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/Union.gif"
+            path="icons/full/obj16/Case.gif"
             bundle="org.opendds.modeling.model.edit"/>
       </tools>
     </tools>

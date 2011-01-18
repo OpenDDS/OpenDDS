@@ -220,43 +220,18 @@
       </actualFigure>
     </descriptors>
     <descriptors
-        name="BranchConnectorFigure">
-      <actualFigure
-          xsi:type="gmfgraph:PolylineConnection"
-          name="BranchConnectorFigure">
-        <children
-            xsi:type="gmfgraph:Label"
-            name="BranchConnectorLabel"
-            text="branch"/>
-      </actualFigure>
-      <accessors
-          figure="//@figures.0/@descriptors.11/@actualFigure/@children.0"/>
-    </descriptors>
-    <descriptors
         name="SwitchConnectorFigure">
       <actualFigure
           xsi:type="gmfgraph:PolylineConnection"
-          name="SwitchConnectorFigure">
+          name="SwitchConnectorFigure"
+          targetDecoration="//@figures.0/@figures.0">
         <children
             xsi:type="gmfgraph:Label"
             name="SwitchConnectorLabel"
             text="switch"/>
       </actualFigure>
       <accessors
-          figure="//@figures.0/@descriptors.12/@actualFigure/@children.0"/>
-    </descriptors>
-    <descriptors
-        name="CaseConnectorFigure">
-      <actualFigure
-          xsi:type="gmfgraph:PolylineConnection"
-          name="CaseConnectorFigure">
-        <children
-            xsi:type="gmfgraph:Label"
-            name="CaseConnectorLabel"
-            text="case"/>
-      </actualFigure>
-      <accessors
-          figure="//@figures.0/@descriptors.13/@actualFigure/@children.0"/>
+          figure="//@figures.0/@descriptors.11/@actualFigure/@children.0"/>
     </descriptors>
   </figures>
   <nodes
@@ -287,14 +262,8 @@
       name="Link"
       figure="ConnectorFigure"/>
   <connections
-      name="BranchLink"
-      figure="BranchConnectorFigure"/>
-  <connections
       name="SwitchLink"
       figure="SwitchConnectorFigure"/>
-  <connections
-      name="CaseLink"
-      figure="CaseConnectorFigure"/>
   <compartments
       name="Fields"
       figure="CompartmentFigure"/>
@@ -309,6 +278,16 @@
   <compartments
       name="Keys"
       figure="CompartmentFigure"
+      needsTitle="true"/>
+  <compartments
+      name="Branches"
+      figure="CompartmentFigure"
+      collapsible="true"
+      needsTitle="true"/>
+  <compartments
+      name="Cases"
+      figure="CompartmentFigure"
+      collapsible="true"
       needsTitle="true"/>
   <labels
       name="TypeName"
@@ -386,20 +365,10 @@
       figure="KeyFigure"
       accessor="//@figures.0/@descriptors.7/@accessors.1"/>
   <labels
-      name="NamedConnectorBranch"
-      figure="BranchConnectorFigure"
-      elementIcon="false"
-      accessor="//@figures.0/@descriptors.11/@accessors.0"/>
-  <labels
       name="NamedConnectorSwitch"
       figure="SwitchConnectorFigure"
       elementIcon="false"
-      accessor="//@figures.0/@descriptors.12/@accessors.0"/>
-  <labels
-      name="NamedConnectorCase"
-      figure="CaseConnectorFigure"
-      elementIcon="false"
-      accessor="//@figures.0/@descriptors.13/@accessors.0"/>
+      accessor="//@figures.0/@descriptors.11/@accessors.0"/>
   <labels
       name="ListItem"
       figure="ListItemLabel"
