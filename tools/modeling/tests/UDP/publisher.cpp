@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 
     // Cannot wait for samples to be acknowledged - not supported in UDP
     std::cout << "publisher sleeping...." << std::endl;
-    sleep(2);
+    ACE_OS::sleep(2);
     std::cout << "publisher done sleeping" << std::endl;
 
     // END OF EXISTING MESSENGER EXAMPLE CODE
