@@ -35,11 +35,7 @@ public class SdkGeneratorFactory {
 		
 		return ParsedModelFile.create( fileProvider, errorHandler);
 	}
-	
-	public static ParsedModelFile createParsedModelFile( SdkGenerator.FileProvider provider, SdkGenerator.ErrorHandler handler) {
-		return ParsedModelFile.create( provider, handler);
-	}
-	
+		
 	public static SdkGenerator.FileProvider createFileProvider() {
 		return new SdkGenerator.FileProvider() {
 			@Override
