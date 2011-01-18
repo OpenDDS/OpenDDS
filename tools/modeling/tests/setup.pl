@@ -10,7 +10,7 @@ use strict;
 use Env qw(DDS_ROOT JAVA_HOME);
 use Cwd;
 
-my @dirs = qw(Arrays CompositeKey DataLibRef DomainZero ExternalPolicies InvalidNames Messenger MessengerDpQos MessengerGlobalNs MessengerMC MessengerMixed MessengerMulti MessengerNoPub MessengerNoSub MessengerPubQos MessengerSplit MessengerWriterQos MultiDCPS MultiInstance PolicyLib ReaderQos Sequences SubscriberQos TopicQos UDP);
+my @dirs = qw(Arrays Codegen CompositeKey DataLibRef DomainZero ExternalPolicies InvalidNames Messenger MessengerDpQos MessengerGlobalNs MessengerMC MessengerMixed MessengerMulti MessengerNoPub MessengerNoSub MessengerPubQos MessengerSplit MessengerWriterQos MultiDCPS MultiInstance PolicyLib ReaderQos Sequences SubscriberQos TopicQos UDP);
 
 if ($#ARGV + 1 > 0) {
   print "Overriding dir list\n";
