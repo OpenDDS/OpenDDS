@@ -62,6 +62,7 @@
       itemSemanticEditPolicyClassName="DcpsLibItemSemanticEditPolicy"
       canonicalEditPolicyClassName="DcpsLibCanonicalEditPolicy"
       iconProviderPriority="Low"
+      creationWizardIconPath="../org.opendds.modeling.model.edit/icons/full/obj16/DcpsLib.gif"
       validationProviderPriority="Low"
       validationEnabled="true"
       validationDecorators="true">

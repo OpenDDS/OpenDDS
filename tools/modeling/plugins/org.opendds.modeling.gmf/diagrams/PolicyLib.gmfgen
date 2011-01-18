@@ -41,6 +41,7 @@
       itemSemanticEditPolicyClassName="PolicyLibItemSemanticEditPolicy"
       canonicalEditPolicyClassName="PolicyLibCanonicalEditPolicy"
       iconProviderPriority="Low"
+      creationWizardIconPath="../org.opendds.modeling.model.edit/icons/full/obj16/PolicyLib.gif"
       validationProviderPriority="Low"
       validationEnabled="true"
       validationDecorators="true">
