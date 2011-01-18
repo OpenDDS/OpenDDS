@@ -1,3 +1,9 @@
+Tue Jan 18 23:18:43 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/setup.pl:
+
+          xsltproc invocations need "--path ." to resolve external documents.
+
 Tue Jan 18 23:08:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/UDP/publisher.cpp:
