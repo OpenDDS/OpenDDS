@@ -203,6 +203,7 @@
       itemSemanticEditPolicyClassName="DataLibItemSemanticEditPolicy"
       canonicalEditPolicyClassName="DataLibCanonicalEditPolicy"
       iconProviderPriority="Low"
+      creationWizardIconPath="../org.opendds.modeling.model.edit/icons/full/obj16/DataLib.gif"
       validationProviderPriority="Low"
       validationEnabled="true"
       validationDecorators="true">

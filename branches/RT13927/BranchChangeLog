@@ -1,3 +1,14 @@
+Tue Jan 18 12:35:48 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+          Make sub-diagram icon references similar to main diagram reference.
+
 Mon Jan 17 22:16:16 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
@@ -6,7 +17,7 @@ Mon Jan 17 22:16:16 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
         * tools/modeling/tests/setup.pl:
 
           Make mpb only inherit referenced models if it is a dataLib reference.
-          Build MPB against genfile (so it can share logic with MPC, which 
+          Build MPB against genfile (so it can share logic with MPC, which
           must generate against genfile).
 
 Mon Jan 17 21:56:15 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
