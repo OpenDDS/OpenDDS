@@ -49,19 +49,8 @@
    </extension>
 
    <extension point="org.eclipse.ui.popupMenus" id="init-diagram-action">
-      <?gmfgen generated="true"?>
-      <objectContribution
-            id="org.opendds.modeling.diagram.datalib.InitDiagram"
-            nameFilter="*.opendds"
-            objectClass="org.eclipse.core.resources.IFile">
-         <action
-               label="%initDiagramActionLabel"
-               class="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibInitDiagramFileAction"
-               menubarPath="additions"
-               enablesFor="1"
-               id="org.opendds.modeling.diagram.datalib.InitDiagramAction">
-         </action>
-      </objectContribution>
+      <?gmfgen generated="false"?>
+      <!-- Disable initialization of sub-diagram file from .opendds file -->
    </extension>
 	
    <extension point="org.eclipse.gmf.runtime.common.ui.services.action.globalActionHandlerProviders" id="global-actions">
