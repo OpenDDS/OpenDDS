@@ -1,3 +1,12 @@
+Tue Jan 18 18:15:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Codegen/Codegen.gen:
+        * tools/modeling/tests/Codegen/Codegen.mpc:
+        * tools/modeling/tests/Codegen/Codegen.opendds:
+        * tools/modeling/tests/Codegen/Codegen.opendds_diagram:
+
+          Codegen example.
+
 Tue Jan 18 17:21:27 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
 
           Merged trunk r4123 out to this branch.
