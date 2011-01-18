@@ -1,3 +1,9 @@
+Tue Jan 18 23:30:12 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpb.xsl:
+
+          Provide missing model refs param.
+
 Tue Jan 18 23:29:25 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerMixed/MessengerTypesMixed.gen:

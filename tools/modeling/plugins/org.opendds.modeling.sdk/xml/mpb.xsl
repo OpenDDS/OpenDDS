@@ -1,5 +1,6 @@
 <xsl:stylesheet version='1.0'
      xmlns:xsl='http://www.w3.org/1999/XSL/Transform'
+     xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
      xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'
      xmlns:generator='http://www.opendds.org/modeling/schemas/Generator/1.0'>
   <!--
@@ -20,7 +21,9 @@
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
   <xsl:variable name="model-refs">
-    <xsl:call-template name="data-model-ref-names"/>
+    <xsl:call-template name="data-model-ref-names">
+      <xsl:with-param name="model-refs" select="$model//datatype/@href | $model//libs[@xsi:type='opendds:DataLib']//@href"/>
+    </xsl:call-template>
   </xsl:variable>
   
   <xsl:text>project</xsl:text>
