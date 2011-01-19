@@ -81,7 +81,6 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//DatalinkControlChunks/value"/>
     </genClasses>
     <genClasses ecoreClass="Generator.ecore#//TcpConfig">
-      <genFeatures property="Readonly" createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//TcpConfig/transport_type"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TcpConfig/local_address_str"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TcpConfig/enable_nagle_algorithm"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//TcpConfig/conn_retry_initial_delay"/>
@@ -116,7 +115,6 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//PassiveConnectDuration/value"/>
     </genClasses>
     <genClasses ecoreClass="Generator.ecore#//MulticastConfig">
-      <genFeatures property="Readonly" createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//MulticastConfig/transport_type"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/default_to_ipv6"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/port_offset"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//MulticastConfig/group_address"/>
