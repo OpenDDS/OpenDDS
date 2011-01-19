@@ -1,3 +1,12 @@
+Wed Jan 19 19:05:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/modeling_tests.lst:
+        * tools/modeling/tests/setup.pl:
+
+          setup.pl now uses SdkGenerator.java to create all output files.
+          List of directories to search was moved from setup.pl to the lst file
+          since we need that anyway for running tests.
+
 Wed Jan 19 16:17:51 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpb.xsl:
@@ -5,7 +14,7 @@ Wed Jan 19 16:17:51 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl:
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_h.xsl:
 
-          To work in Xalan, avoid using document(<filename)// XPath 
+          To work in Xalan, avoid using document(<filename)// XPath
           references to match root node of external document.
 
 Wed Jan 19 15:48:09 UTC 2011  Adam Mitz  <mitza@ociweb.com>
