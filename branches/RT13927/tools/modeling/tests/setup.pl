@@ -7,106 +7,54 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # This should be run after ../build.pl and before MPC.
 
 use strict;
-use Env qw(DDS_ROOT JAVA_HOME);
 use Cwd;
+use Env qw(ACE_ROOT DDS_ROOT JAVA_HOME);
+use lib "$ACE_ROOT/bin", "$DDS_ROOT/bin";
+use PerlDDS::Run_Test;
 
-my @dirs = qw(Arrays Codegen CompositeKey DataLibRef DomainZero ExternalPolicies InvalidNames Messenger MessengerDpQos MessengerGlobalNs MessengerMC MessengerMixed MessengerMulti MessengerNoPub MessengerNoSub MessengerPubQos MessengerSplit MessengerWriterQos MultiDCPS MultiInstance PolicyLib ReaderQos Sequences SubscriberQos TopicQos UDP);
+my $dir = 'tools/modeling/tests';
+my $test_lst = "$DDS_ROOT/$dir/modeling_tests.lst";
 
-if ($#ARGV + 1 > 0) {
-  print "Overriding dir list\n";
-  @dirs = @ARGV;
-}
-
-my $javapkg = 'org.opendds.modeling.sdk';
-my $subdir = 'model';
-my @suffixes = qw(.idl _T.h _T.cpp);
-my @xsls = glob "$DDS_ROOT/tools/modeling/plugins/$javapkg/xml/*.xsl $DDS_ROOT/tools/modeling/plugins/$javapkg/xml/lut.xml";
-
-sub generate_traits {
-  my @generatorfiles = glob "*.gen";
-  my $status = 0;
-  foreach my $generator (@generatorfiles) {
-    my $base = $generator;
-    $base =~ s/\.gen$//;
-    print "   building traits for $generator... \n";
-    $status = system("xsltproc --path . ../../plugins/org.opendds.modeling.sdk/xml/traits_h.xsl " .
-                     "$generator > model/$base" . "Traits.h");
-    $status = system("xsltproc --path . ../../plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl " .
-                     "$generator > model/$base" . "Traits.cpp");
-    $status = system("xsltproc --path . ../../plugins/org.opendds.modeling.sdk/xml/mpc.xsl " .
-                     "$generator > model/$base" . ".mpc");
-    $status = system("xsltproc --path . ../../plugins/org.opendds.modeling.sdk/xml/mpb.xsl " .
-                     "$generator > model/$base" . ".mpb");
+sub get_dirs {
+  if ($#ARGV >= 0) {
+    print "Overriding dir list\n";
+    return @ARGV;
   }
+
+  my $config_list = new PerlACE::ConfigList;
+  $config_list->load($test_lst);
+  $config_list->add_one_config('COMPILE_ONLY');
+  return map {s/^$dir\/(.*)\/[^\/]*$/$1/; $_} $config_list->valid_entries();
 }
+
+my $javapkg = 'org.opendds.modeling.sdk'; # holds the .xsl files
+my $plugin = 'org.opendds.modeling.sdk.model.editor';
 
 sub generate {
   my $base = shift;
   my $cwd = getcwd();
-  my $tmp = "$base.tmp";
-  my %modtimes;
-  my $mtime = (stat $tmp)[9];
-  my $pp = "../../plugins/org.opendds.modeling.sdk/xml/preprocess.xsl";
-  my $mpb = "../../plugins/org.opendds.modeling.sdk/xml/mpb.xsl";
   my $status;
-
-  print "Running code generation on: $base.opendds\n";
-
-    print "   preprocessing...\n";
-    $status = system("xsltproc --path . $pp $base.opendds > $tmp");
-    if ($status > 0) {
-      print "ERROR: xsltproc failed with $status\n";
-      exit($status >> 8);
-    }
-
-  print "   transforming...\n";
+  print "Running code generation on: $base\n";
   $status = system("\"$JAVA_HOME/bin/java\" -classpath " .
-                   "$DDS_ROOT/tools/modeling/plugins/$javapkg/bin " .
-                   "$javapkg.codegen.CodeGenerator -o $subdir " .
-                   "$tmp \n");
+                   "$DDS_ROOT/tools/modeling/plugins/$plugin/bin $javapkg." .
+                   "model.GeneratorSpecification.Generator.SdkGenerator " .
+                   "$base\n");
   if ($status > 0) {
-    print "ERROR: Java CodeGenerator invocation failed with $status\n";
+    print "ERROR: Java SdkGenerator invocation failed with $status\n";
     exit($status >> 8);
   }
-
 }
 
 my $cwd = getcwd();
-foreach my $dir (@dirs) {
+foreach my $dir (get_dirs()) {
   chdir $cwd . '/' . $dir or die "Can't change to $dir\n";
-  my @ddsfiles = glob '*.opendds';
+  my @ddsfiles = glob '*.gen';
   if ($#ddsfiles == -1) {
-    die "Can't find an .opendds file in " . getcwd() . "\n";
+    die "Can't find a .gen file in " . getcwd() . "\n";
   }
 
-  INPUT: foreach my $base (@ddsfiles) {
+  foreach my $base (@ddsfiles) {
     #print "Considering $cwd/$dir/$base\n";
-    my $mtime = (stat $base)[9];
-    $base =~ s/\.opendds$//;
-
-    my @outputs = map {"$subdir/$base$_"} @suffixes;
-    my %modtimes;
-    foreach my $genfile (@outputs) {
-      next if -e $genfile && ($modtimes{$genfile} = (stat _)[9]) > $mtime;
-      #print "\tneed to generate it because it is newer than $genfile\n";
-      generate($base);
-      next INPUT;
-    }
-
-    foreach my $xsl (@xsls) {
-      foreach my $genfile (@outputs) {
-        my $mod = $modtimes{$genfile};
-        if (!defined $mod) {
-          $mod = $modtimes{$genfile} = (stat $genfile)[9];
-        }
-        if ((stat $xsl)[9] > $mod) {
-          #print "\t$xsl is newer than $genfile\n";
-          generate($base);
-          next INPUT;
-        }
-      }
-    }
+    generate($base);
   }
-
-  generate_traits();
 }

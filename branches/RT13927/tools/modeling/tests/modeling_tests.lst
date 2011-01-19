@@ -4,6 +4,7 @@ tools/modeling/tests/TopicQos/run_test.pl
 tools/modeling/tests/ExternalPolicies/run_test.pl
 tools/modeling/tests/MessengerGlobalNs/run_test.pl
 tools/modeling/tests/MultiInstance/run_test.pl
+tools/modeling/tests/MultiDCPS/run_test.pl
 tools/modeling/tests/MessengerMixed/run_test.pl
 tools/modeling/tests/CompositeKey/run_test.pl
 tools/modeling/tests/MessengerMC/run_test.pl
@@ -22,3 +23,4 @@ tools/modeling/tests/MessengerWriterQos/run_test.pl
 tools/modeling/tests/MessengerDpQos/run_test.pl
 tools/modeling/tests/UDP/run_test.pl
 tools/modeling/tests/DataLibRef/run_test.pl
+tools/modeling/tests/Codegen/run_test.pl: COMPILE_ONLY
