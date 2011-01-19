@@ -24,6 +24,7 @@
 
 <!-- Node sets -->
 <xsl:variable name="types"        select="//types"/>
+<xsl:variable name="policies"     select="//policies"/>
 
 <!-- Indices (lookup tables are at the bottom of this document) -->
 <xsl:key
@@ -51,8 +52,8 @@
   <xsl:text>TypeSupportImpl.h"</xsl:text>
   <xsl:value-of select="$newline"/>
 
-  <xsl:call-template name="include-referenced-models">
-    <xsl:with-param name="models" select="//@model"/>
+  <xsl:call-template name="include-referenced-data-models">
+    <xsl:with-param name="models" select="//types/@model"/>
   </xsl:call-template>
 
   <xsl:text>
@@ -88,7 +89,6 @@ namespace OpenDDS { namespace Model {
   <xsl:variable name="lib-domains"      select=".//domains"/>
   <xsl:variable name="lib-participants" select=".//participants"/>
   <xsl:variable name="lib-publishers"   select=".//publishers"/>
-  <xsl:variable name="lib-policies"     select=".//policies"/>
   <xsl:variable name="lib-subscribers"  select=".//subscribers"/>
   <xsl:variable name="lib-topics"       select=".//topics"/>
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
@@ -324,7 +324,6 @@ Elements::Data::buildParticipantsQos()
 
     <xsl:call-template name="process-policies">
       <xsl:with-param name="base"   select="'participantQos.'"/>
-      <xsl:with-param name="policies"   select="$lib-policies"/>
     </xsl:call-template>
     
     <xsl:text>  this->participantsQos_[ participant] = participantQos;</xsl:text>
@@ -350,7 +349,6 @@ Elements::Data::buildTopicsQos()
     <!-- '  topicQos.(policyfield) = (value);\n' -->
     <xsl:call-template name="process-policies">
       <xsl:with-param name="base"   select="'topicQos.'"/>
-      <xsl:with-param name="policies"   select="$lib-policies"/>
     </xsl:call-template>
 
     <xsl:text>  this->topicsQos_[ topic] = topicQos;</xsl:text>
@@ -378,7 +376,6 @@ Elements::Data::buildPublishersQos()
     <!-- '  publisherQos.(policyfield) = (value);\n' -->
     <xsl:call-template name="process-policies">
       <xsl:with-param name="base"   select="'publisherQos.'"/>
-      <xsl:with-param name="policies"   select="$lib-policies"/>
     </xsl:call-template>
 
     <xsl:text>  this->publishersQos_[ publisher] = publisherQos;</xsl:text>
@@ -413,7 +410,6 @@ Elements::Data::buildSubscribersQos()
         <!-- '  subscriberQos.(policyfield) = (value);\n' -->
         <xsl:call-template name="process-policies">
           <xsl:with-param name="base"   select="'subscriberQos.'"/>
-          <xsl:with-param name="policies"   select="$lib-policies"/>
         </xsl:call-template>
 
         <xsl:text>  this->subscribersQos_[ subscriber] = subscriberQos;</xsl:text>
@@ -447,7 +443,6 @@ Elements::Data::buildPublicationsQos()
     <!-- '  writerQos.(policyfield) = (value);\n' -->
       <xsl:call-template name="process-policies">
         <xsl:with-param name="base"   select="'writerQos.'"/>
-        <xsl:with-param name="policies"   select="$lib-policies"/>
       </xsl:call-template>
 
       <xsl:text>  this->writersQos_[ writer] = writerQos;
@@ -482,7 +477,6 @@ Elements::Data::buildSubscriptionsQos()
     <!-- '  readerQos.(policyfield) = (value);\n' -->
       <xsl:call-template name="process-policies">
         <xsl:with-param name="base"   select="'readerQos.'"/>
-        <xsl:with-param name="policies"   select="$lib-policies"/>
       </xsl:call-template>
 
       <xsl:text>  this->readersQos_[ reader] = readerQos;
@@ -517,7 +511,6 @@ Elements::Data::copyPublicationQos(
     <!-- '  writerQos.(policyfield) = (value);\n' -->
     <xsl:call-template name="process-policies">
       <xsl:with-param name="base"   select="'      writerQos.'"/>
-      <xsl:with-param name="policies"   select="$lib-policies"/>
     </xsl:call-template>
 
     <xsl:text>      break;</xsl:text>
@@ -549,7 +542,6 @@ Elements::Data::copySubscriptionQos(
     <!-- '  readerQos.(policyfield) = (value);\n' -->
     <xsl:call-template name="process-policies">
       <xsl:with-param name="base"   select="'readerQos.'"/>
-      <xsl:with-param name="policies"   select="$lib-policies"/>
     </xsl:call-template>
 
     <xsl:text>      break;</xsl:text>
@@ -568,7 +560,6 @@ Elements::Data::copySubscriptionQos(
 
 <xsl:template name="process-policies">
   <xsl:param name="base"/>
-  <xsl:param name="policies"/>
 
   <!-- direct references -->
   <xsl:variable name="reffed-policies" select="$policies[@xmi:id = current()/@*]"/>
@@ -680,7 +671,7 @@ Elements::Data::copySubscriptionQos(
   </xsl:choose>
 </xsl:template>
 
-<xsl:template name="include-referenced-models">
+<xsl:template name="include-referenced-data-models">
   <xsl:param name="models"/>
   <xsl:param name="completed-models" select="' '"/>
   
@@ -690,7 +681,7 @@ Elements::Data::copySubscriptionQos(
     <xsl:if test="not(contains($completed-models, $model))">
       <xsl:value-of select="concat('#include &quot;', $model, 'TypeSupportImpl.h&quot;', $newline)"/>
     </xsl:if>
-    <xsl:call-template name="include-referenced-models">
+    <xsl:call-template name="include-referenced-data-models">
       <xsl:with-param name="models" select="$models[position() &gt; 1]"/>
       <xsl:with-param name="completed-models" select="concat(' ', $model, ' ')"/>
     </xsl:call-template>

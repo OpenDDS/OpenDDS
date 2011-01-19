@@ -1,10 +1,6 @@
 
-#include "model/aModel_T.h"
 #include <iostream>
-
-struct myTraits : public OpenDDS::Model::DefaultInstanceTraits {
-  enum { transport_key_base = 8};
-};
+#include "model/CodegenTraits.h"
 
 int
 main( int argc, char** argv)
@@ -12,12 +8,13 @@ main( int argc, char** argv)
   int status = 0;
 
   try {
-    aModelType modelinstance1(argc, argv);
-    OpenDDS::Model::Service< OpenDDS::Model::aModel::Elements, myTraits> modelinstance2(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    Codegen::DefaultCodegenType modelinstance1(application, argc, argv);
+    Codegen::DefaultCodegenType modelinstance2(application, argc, argv);
 
-    using OpenDDS::Model::aModel::Elements;
+    using OpenDDS::Model::Codegen::Elements;
 
-    aModel::type1 data;
+    Codegen::type1 data;
     data.key  = 42;
     data.name = "fortytwo";
     data.value = 236;
@@ -48,9 +45,6 @@ main( int argc, char** argv)
 
     DDS::DataWriter_var writer3 = modelinstance2.writer( Elements::DataWriters::writer1);
     writer3->get_qos( writerQos);
-
-    modelinstance1.fini();
-    // modelinstance2.fini();
 
   } catch( const std::exception& ex) {
     std::cerr << "test: caught exception in main() - " << ex.what() << std::endl;
