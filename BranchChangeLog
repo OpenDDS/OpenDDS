@@ -1,3 +1,9 @@
+Wed Jan 19 23:07:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/.classpath:
+
+          Adding .classpath file needed for automated build.
+
 Wed Jan 19 23:08:07 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/modeling_tests.lst:
