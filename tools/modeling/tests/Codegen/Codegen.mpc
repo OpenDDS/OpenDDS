@@ -1,6 +1,6 @@
 project(*pub) : dcpsexe, dds_model {
-  after    += aModel
-  libs     += aModel
+  after    += Codegen
+  libs     += Codegen
   libpaths += model
 
   Source_Files {
@@ -9,8 +9,8 @@ project(*pub) : dcpsexe, dds_model {
 }
 
 project(*sub) : dcpsexe, dds_model {
-  after    += aModel
-  libs     += aModel
+  after    += Codegen
+  libs     += Codegen
   libpaths += model
 
   Source_Files {

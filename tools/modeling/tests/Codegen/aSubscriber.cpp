@@ -1,6 +1,6 @@
 
-#include "model/aModel_T.h"
 #include <iostream>
+#include "model/CodegenTraits.h"
 
 int
 main( int argc, char** argv)
@@ -8,12 +8,13 @@ main( int argc, char** argv)
   int status = 0;
 
   try {
-    aModelType modelinstance1(argc, argv);
-    //aModelType modelinstance2(argc, argv);
+    OpenDDS::Model::Application application(argc, argv);
+    Codegen::DefaultCodegenType modelinstance1(application, argc, argv);
 
-    using OpenDDS::Model::aModel::Elements;
 
-    aModel::type1 data;
+    using OpenDDS::Model::Codegen::Elements;
+
+    Codegen::type1 data;
     data.key  = 42;
     data.name = "fortytwo";
     data.value = 236;
@@ -41,9 +42,6 @@ main( int argc, char** argv)
 
     DDS::DataWriter_var writer2 = modelinstance1.writer( Elements::DataWriters::writer2);
     writer2->get_qos( writerQos);
-
-    modelinstance1.fini();
-    // modelinstance2.fini();
 
   } catch( const std::exception& ex) {
     std::cerr << "test: caught exception in main() - " << ex.what() << std::endl;
