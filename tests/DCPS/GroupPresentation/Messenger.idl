@@ -15,7 +15,7 @@ module Messenger {
   struct Message {
     string from;
     string subject;
-    long subject_id;
+    unsigned long long subject_id;
     string text;
     long   count;
   };

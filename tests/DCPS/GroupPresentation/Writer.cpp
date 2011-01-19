@@ -107,7 +107,7 @@ Writer::svc()
     }
 
     Messenger::Message message;
-    message.subject_id = CORBA::Long(thr_id);
+    message.subject_id = CORBA::ULongLong(thr_id);
 
     DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
