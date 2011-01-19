@@ -1,3 +1,13 @@
+Wed Jan 19 16:17:51 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpb.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpc.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_h.xsl:
+
+          To work in Xalan, avoid using document(<filename)// XPath 
+          references to match root node of external document.
+
 Wed Jan 19 15:48:09 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedGeneratorFile.java:

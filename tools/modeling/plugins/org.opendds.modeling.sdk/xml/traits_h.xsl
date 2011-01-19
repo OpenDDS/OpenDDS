@@ -19,7 +19,7 @@
 <xsl:strip-space elements="*"/>
 
 <!-- Extract the name of the model once. -->
-<xsl:variable name="model" select="document(/generator:CodeGen/source/@name)//opendds:OpenDDSModel"/>
+<xsl:variable name="model" select="document(/generator:CodeGen/source/@name)/opendds:OpenDDSModel"/>
 <xsl:variable name="modelname" select="$model/@name"/>
 <xsl:variable name="MODELNAME" select="translate($modelname, $lower, $upper)"/>
 <xsl:variable name="instances" select="//instance"/>
