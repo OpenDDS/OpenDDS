@@ -164,4 +164,25 @@ development model.
          install-size="0"
          version="0.0.0"/>
 
+   <plugin
+         id="org.opendds.modeling.sdk.model"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.opendds.modeling.sdk.model.edit"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.opendds.modeling.sdk.model.editor"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>

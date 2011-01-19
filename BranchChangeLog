@@ -1,3 +1,35 @@
+Wed Jan 19 22:01:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/build.pl:
+
+          Run EMF code generation steps for org.opendds.modeling.sdk.model.
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+
+          Added org.opendds.modeling.sdk.model* plugins to the feature.
+          These are needed for the automated build so that setup.pl can call
+          SdkGenerator.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/ant_custom.xml:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/build.properties:
+
+          Moved PDE Build customizations to the model.editor project.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedModelFile.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java:
+
+          Renamed the mis-named "dcpsLib" varaibles to "dataLib".
+          Create the target dir if it doesn't already exist.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
+
+          Removed references to non-existent transport_type property.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/ant_custom.xml:
+
+          Removed this file.
+
 Wed Jan 19 19:05:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/tests/modeling_tests.lst:

@@ -16,15 +16,15 @@ import org.w3c.dom.NodeList;
 public class ParsedModelFile extends ParsedXmlFile {
 	private static final String modelNameExpression = "//opendds:OpenDDSModel/@name";
 	private static final String transportIndexExpression = "//@transportId";
-	private static final String dcpsLibExpression = "//libs[@xsi:type='opendds:DataLib']";
+	private static final String dataLibExpression = "//libs[@xsi:type='opendds:DataLib']";
 
 	private static XPathExpression nameExpr;
 	private static XPathExpression transportIdExpr;
-	private static XPathExpression dcpsLibExpr;
+	private static XPathExpression dataLibExpr;
 
 	private String modelName;
 	private Set<Integer> transportIndices = new TreeSet<Integer>();
-	private Boolean hasDcpsLib;
+	private Boolean hasDataLib;
 
 	/**
 	 * Create a new object of the ParsedModelFile class.
@@ -45,7 +45,7 @@ public class ParsedModelFile extends ParsedXmlFile {
 	public void reset() {
 		this.modelName = null;
 		this.transportIndices.clear();
-		this.hasDcpsLib = null;
+		this.hasDataLib = null;
 		super.reset();
 	}
 
@@ -75,16 +75,16 @@ public class ParsedModelFile extends ParsedXmlFile {
 		return transportIdExpr;
 	}
 	
-	private XPathExpression getDcpsLibExpr() {
-		if (dcpsLibExpr == null) {
+	private XPathExpression getDataLibExpr() {
+		if (dataLibExpr == null) {
 			try {
-				dcpsLibExpr = getXpath().compile(dcpsLibExpression);
+				dataLibExpr = getXpath().compile(dataLibExpression);
 			} catch (XPathExpressionException e) {
-				errorHandler.error(Severity.ERROR, "getDcpsLibExpr",
-						"XPath expression not available to check for DcpsLibs.", e);
+				errorHandler.error(Severity.ERROR, "getDataLibExpr",
+						"XPath expression not available to check for DataLibs.", e);
 			}
 		}
-		return dcpsLibExpr;
+		return dataLibExpr;
 	}
 
 	public String getModelName() {
@@ -177,21 +177,21 @@ public class ParsedModelFile extends ParsedXmlFile {
 		return this.transportIndices;
 	}
 
-	public Boolean hasDcpsLib() {
-		return hasDcpsLib(null);
+	public Boolean hasDataLib() {
+		return hasDataLib(null);
 	}
 
-	public Boolean hasDcpsLib(String sourceName) {
+	public Boolean hasDataLib(String sourceName) {
 		setSourceName(sourceName);
 		if( this.sourceName == null) {
 			return null;
 		}
 
-		if (this.hasDcpsLib != null) {
-			return hasDcpsLib;
+		if (this.hasDataLib != null) {
+			return hasDataLib;
 		}
 
-		XPathExpression dcpsExpr = getDcpsLibExpr();
+		XPathExpression dcpsExpr = getDataLibExpr();
 		if (dcpsExpr == null) {
 			return null; // messages were generated in the get call.
 		}
@@ -204,11 +204,11 @@ public class ParsedModelFile extends ParsedXmlFile {
 		try {
 			Object result = dcpsExpr.evaluate(doc, XPathConstants.NODESET);
 			NodeList nodes = (NodeList) result;
-		    hasDcpsLib = new Boolean(nodes.getLength() > 0);
+		    hasDataLib = new Boolean(nodes.getLength() > 0);
 		} catch (XPathExpressionException e) {
-			errorHandler.error(Severity.ERROR, "hasDcpsLib",
-					"Problem finding DcpsLibs in the source file " + this.sourceName, e);
+			errorHandler.error(Severity.ERROR, "hasDataLib",
+					"Problem finding DataLibs in the source file " + this.sourceName, e);
 		}
-		return hasDcpsLib;
+		return hasDataLib;
 	}
 }

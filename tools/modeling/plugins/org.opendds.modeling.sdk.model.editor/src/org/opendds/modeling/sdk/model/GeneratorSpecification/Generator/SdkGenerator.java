@@ -225,9 +225,7 @@ public class SdkGenerator {
 		try {
 			File targetFolder = new File(fileProvider.fromWorkspace(targetDir).toURI());
 			if (!targetFolder.exists()) {
-				errorHandler.error(Severity.ERROR, which.dialogTitle(),
-						"Target folder " + targetDir + " does not exist.", null);
-				return;
+				targetFolder.mkdirs();
 			}
 
 			String modelname = parsedModelFile.getModelName(openddsFile);
@@ -236,9 +234,9 @@ public class SdkGenerator {
 			}
 			
 			if (which == TransformType.MPB) {
-				Boolean dcpsLib = parsedModelFile.hasDcpsLib();
-				if (dcpsLib != null && !dcpsLib.booleanValue()) {
-					return; // don't generate mpb if there's no dcpsLib
+				Boolean dataLib = parsedModelFile.hasDataLib();
+				if (dataLib != null && !dataLib.booleanValue()) {
+					return; // don't generate mpb if there's no dataLib
 				}
 			}
 
