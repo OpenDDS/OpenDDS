@@ -19,7 +19,7 @@
 <xsl:strip-space elements="*"/>
 
 <!-- Extract values once. -->
-<xsl:variable name="model" select="document(/generator:CodeGen/source/@name)//opendds:OpenDDSModel"/>
+<xsl:variable name="model" select="document(/generator:CodeGen/source/@name)/opendds:OpenDDSModel"/>
 <xsl:variable name="modelname" select="$model/@name"/>
 <xsl:variable name="instances" select="//instance"/>
 
