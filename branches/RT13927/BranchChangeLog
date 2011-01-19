@@ -1,3 +1,9 @@
+Wed Jan 19 23:08:07 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Run Codegen test.
+
 Wed Jan 19 22:57:18 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
