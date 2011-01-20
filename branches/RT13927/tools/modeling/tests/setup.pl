@@ -32,7 +32,6 @@ my $plugin = 'org.opendds.modeling.sdk.model.editor';
 
 sub generate {
   my $base = shift;
-  my $cwd = getcwd();
   my $status;
   print "Running code generation on: $base\n";
   $status = system("\"$JAVA_HOME/bin/java\" -classpath " .
