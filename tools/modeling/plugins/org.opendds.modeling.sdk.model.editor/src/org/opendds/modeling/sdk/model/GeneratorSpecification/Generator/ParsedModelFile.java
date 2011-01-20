@@ -16,7 +16,7 @@ import org.w3c.dom.NodeList;
 public class ParsedModelFile extends ParsedXmlFile {
 	private static final String modelNameExpression = "//opendds:OpenDDSModel/@name";
 	private static final String transportIndexExpression = "//@transportId";
-	private static final String dataLibExpression = "//libs[@xsi:type='opendds:DataLib']";
+	private static final String dataLibExpression = "//libs[@xsi:type='types:DataLib']";
 
 	private static XPathExpression nameExpr;
 	private static XPathExpression transportIdExpr;
