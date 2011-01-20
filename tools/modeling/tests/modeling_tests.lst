@@ -24,3 +24,4 @@ tools/modeling/tests/MessengerDpQos/run_test.pl
 tools/modeling/tests/UDP/run_test.pl
 tools/modeling/tests/DataLibRef/run_test.pl
 tools/modeling/tests/Codegen/run_test.pl:
+tools/modeling/tests/CopyTopicQos/run_test.pl:
