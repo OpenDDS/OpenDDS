@@ -11,6 +11,6 @@
                     generateJavaCode="true"
                     generateModelProject="true"
                     generateEditProject="true"
-                    generateEditorProject="true"/>
+                    generateEditorProject="false"/>
   </target>
 </project>
