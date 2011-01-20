@@ -218,6 +218,11 @@ public class GeneratorEditor
 	protected CustomizationTab treeViewer;
 
 	/**
+	 * This contains the controls to translate a model file to generated files.
+	 */
+	protected GeneratorTab generatorViewer;
+
+	/**
 	 * This keeps track of the active viewer pane, in the book.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -899,7 +904,7 @@ public class GeneratorEditor
 					new ViewerPane(getSite().getPage(), GeneratorEditor.this) {
 						@Override
 						public Viewer createViewer(Composite composite) {
-							return new CustomizationTab(composite);
+							return new GeneratorTab(composite);
 						}
 						@Override
 						public void requestActivation() {
@@ -908,6 +913,26 @@ public class GeneratorEditor
 						}
 					};
 				viewerPane.createControl(getContainer());
+				generatorViewer = (GeneratorTab)viewerPane.getViewer();
+				generatorViewer.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
+				generatorViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
+				
+				generatorViewer.addChangeListener(this);
+
+				// Add the model file and target dir model elements to the viewer.
+				//
+				EList<Resource> resources = editingDomain.getResourceSet().getResources();
+				if( resources.size() > 0) {
+					Resource resource = resources.get(0);
+					EList<EObject> contents = resource.getContents();
+					if( contents.size() > 0) {
+						EObject root = contents.get(0);
+						if( root instanceof CodeGen) {
+							generatorViewer.setSource( ((CodeGen)root).getSource());
+							generatorViewer.setTarget( ((CodeGen)root).getTarget());
+						}
+					}
+				}
 				
 				int pageIndex = addPage(viewerPane.getControl());
 				setPageText(pageIndex, getString("_UI_GenerateTab_label"));
@@ -967,6 +992,27 @@ public class GeneratorEditor
 				
 				int pageIndex = addPage(viewerPane.getControl());
 				setPageText(pageIndex, getString("_UI_CustomizationTab_label"));
+			}
+
+			// This is the page for deployment environment settings.
+			//
+			{
+				ViewerPane viewerPane =
+					new ViewerPane(getSite().getPage(), GeneratorEditor.this) {
+						@Override
+						public Viewer createViewer(Composite composite) {
+							return new DeploymentTab(composite);
+						}
+						@Override
+						public void requestActivation() {
+							super.requestActivation();
+							setCurrentViewerPane(this);
+						}
+					};
+				viewerPane.createControl(getContainer());
+				
+				int pageIndex = addPage(viewerPane.getControl());
+				setPageText(pageIndex, getString("_UI_DeploymentTab_label"));
 			}
 
 			getSite().getShell().getDisplay().asyncExec
