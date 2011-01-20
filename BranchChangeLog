@@ -1,3 +1,10 @@
+Thu Jan 20 21:05:25 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.opendds:
+        * tools/modeling/tests/MessengerDpQos/publisher.cpp:
+
+          Don't autoenable, and check QOS.
+
 Thu Jan 20 20:15:24 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/features/org.opendds.modeling.feature/feature.xml:

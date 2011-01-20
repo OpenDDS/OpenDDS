@@ -13,7 +13,7 @@
       </subscribers>
     </participants>
     <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
-    <policies xsi:type="opendds:efQosPolicy" xmi:id="_TwSSUAJKEeCBAfl9GiYbGg" name="manual" autoenable_created_entities="true"/>
+    <policies xsi:type="opendds:efQosPolicy" xmi:id="_TwSSUAJKEeCBAfl9GiYbGg" name="manual" autoenable_created_entities="false"/>
     <policies xsi:type="opendds:udQosPolicy" xmi:id="_X64DcAJKEeCBAfl9GiYbGg" name="seven" value="seven is 7"/>
   </libs>
   <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data1">
