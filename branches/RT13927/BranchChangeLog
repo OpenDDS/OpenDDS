@@ -1,3 +1,15 @@
+Thu Jan 20 18:21:28 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/CopyTopicQos:
+        * tools/modeling/tests/CopyTopicQos/CopyTopicQos.gen:
+        * tools/modeling/tests/CopyTopicQos/CopyTopicQos.mpc:
+        * tools/modeling/tests/CopyTopicQos/CopyTopicQos.opendds:
+        * tools/modeling/tests/CopyTopicQos/publisher.cpp:
+        * tools/modeling/tests/CopyTopicQos/subscriber.cpp:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          New test to check copy of topic Qos policies.
+
 Thu Jan 20 14:53:27 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/ant_codegen.xml:
@@ -6,16 +18,16 @@ Thu Jan 20 14:53:27 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
           files.  These are all checked in at this point and should not
           be regenerated.
 
-	* [r4141] 2011-01-20 14:42  martinezm
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/plugin.properties,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/DeploymentTab.java,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorActionBarContributor.java,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorTab.java:
+        * [r4141] 2011-01-20 14:42  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/plugin.properties,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/DeploymentTab.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorActionBarContributor.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorTab.java:
 
-	  Work in progress for code generation forms.
+          Work in progress for code generation forms.
 
 Wed Jan 19 23:07:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
