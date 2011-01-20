@@ -9,7 +9,7 @@
 
 #include "model/MessengerDpQosTraits.h"
 
-int main(int argc, char** argv)
+int ACE_TMAIN(int argc, char** argv)
 {
   try {
     OpenDDS::Model::Application application(argc, argv);
@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     if (part_qos.entity_factory.autoenable_created_entities == true) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
-                          ACE_TEXT(" entity has wrong qos value!\n")),
+                          ACE_TEXT(" participant has wrong autoenable value!\n")),
                          -1);
     } else {
       std::cout << "enabling publisher" << std::endl;
@@ -59,7 +59,16 @@ int main(int argc, char** argv)
         std::cout << "bad return code enabling writer" << std::endl;
       }
     }
-    // part_qos.user_data;
+/*
+    char* buff = (char*)part_qos.user_data.value.get_buffer();
+    std::cout << "User data is:" << buff << std::endl;
+    if (strcmp(buff, "seven is 7") != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" participant has wrong user_data value!\n")),
+                         -1);
+    }
+*/
     
     // Block until Subscriber is available
     DDS::StatusCondition_var condition = writer->get_statuscondition();

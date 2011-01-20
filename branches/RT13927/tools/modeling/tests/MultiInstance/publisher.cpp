@@ -23,7 +23,7 @@ int run_instance(ModelType& model, int subject_id) {
 
     if (CORBA::is_nil(message_writer.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: run_instance() -")
                           ACE_TEXT(" _narrow failed!\n")),
                          -1);
     }
@@ -42,14 +42,14 @@ int run_instance(ModelType& model, int subject_id) {
     do {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: run_instance() -")
                           ACE_TEXT(" wait failed!\n")),
                          -1);
       }
 
       if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: run_instance() -")
                           ACE_TEXT(" get_publication_matched_status failed!\n")),
                          -1);
       }
@@ -73,7 +73,7 @@ int run_instance(ModelType& model, int subject_id) {
 
       if (error != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                   ACE_TEXT("(%P|%t) ERROR: %N:%l: run_instance() -")
                    ACE_TEXT(" write returned %d!\n"), error));
       }
     }
@@ -81,7 +81,7 @@ int run_instance(ModelType& model, int subject_id) {
     // Wait for samples to be acknowledged
     if (message_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                        ACE_TEXT("(%P|%t) ERROR: %N:%l: run_instance() -")
                         ACE_TEXT(" wait_for_acknowledgments failed!\n")),
                        -1);
     }
@@ -89,7 +89,7 @@ int run_instance(ModelType& model, int subject_id) {
   return 0;
 }
 
-int main(int argc, char** argv)
+int ACE_TMAIN(int argc, char** argv)
 {
   int result;
   ACE_ARGV argv_copy(argc, argv);

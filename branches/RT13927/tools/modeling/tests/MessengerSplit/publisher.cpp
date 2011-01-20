@@ -9,7 +9,7 @@
 
 #include "model/MessengerSplitTraits.h"
 
-int main(int argc, char** argv)
+int ACE_TMAIN(int argc, char** argv)
 {
   try {
     OpenDDS::Model::Application application(argc, argv);

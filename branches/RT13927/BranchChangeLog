@@ -1,3 +1,86 @@
+Thu Jan 20 22:26:18 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Arrays/publisher.cpp:
+        * tools/modeling/tests/Arrays/subscriber.cpp:
+
+        * tools/modeling/tests/Codegen/aPublisher.cpp:
+        * tools/modeling/tests/Codegen/aSubscriber.cpp:
+
+        * tools/modeling/tests/CompositeKey/publisher.cpp:
+        * tools/modeling/tests/CompositeKey/subscriber.cpp:
+
+        * tools/modeling/tests/CopyTopicQos/publisher.cpp:
+        * tools/modeling/tests/CopyTopicQos/subscriber.cpp:
+
+        * tools/modeling/tests/DataLibRef/publisher.cpp:
+        * tools/modeling/tests/DataLibRef/subscriber.cpp:
+
+        * tools/modeling/tests/DomainZero/publisher.cpp:
+        * tools/modeling/tests/DomainZero/subscriber.cpp:
+
+        * tools/modeling/tests/ExternalPolicies/publisher.cpp:
+        * tools/modeling/tests/ExternalPolicies/subscriber.cpp:
+
+        * tools/modeling/tests/InvalidNames/publisher.cpp:
+        * tools/modeling/tests/InvalidNames/subscriber.cpp:
+
+        * tools/modeling/tests/Messenger/publisher.cpp:
+        * tools/modeling/tests/Messenger/subscriber.cpp:
+
+        * tools/modeling/tests/MessengerDpQos/publisher.cpp:
+        * tools/modeling/tests/MessengerDpQos/subscriber.cpp:
+
+        * tools/modeling/tests/MessengerGlobalNs/publisher.cpp:
+        * tools/modeling/tests/MessengerGlobalNs/subscriber.cpp:
+
+        * tools/modeling/tests/MessengerMC/publisher.cpp:
+        * tools/modeling/tests/MessengerMC/subscriber.cpp:
+
+        * tools/modeling/tests/MessengerMixed/publisher.cpp:
+        * tools/modeling/tests/MessengerMixed/subscriber.cpp:
+
+        * tools/modeling/tests/MessengerMulti/publisher.cpp:
+        * tools/modeling/tests/MessengerMulti/subscriber.cpp:
+
+        * tools/modeling/tests/MessengerNoPub/subscriber.cpp:
+
+        * tools/modeling/tests/MessengerNoSub/publisher.cpp:
+
+        * tools/modeling/tests/MessengerPubQos/publisher.cpp:
+        * tools/modeling/tests/MessengerPubQos/subscriber.cpp:
+
+        * tools/modeling/tests/MessengerSplit/publisher.cpp:
+        * tools/modeling/tests/MessengerSplit/subscriber.cpp:
+
+        * tools/modeling/tests/MessengerWriterQos/publisher.cpp:
+        * tools/modeling/tests/MessengerWriterQos/subscriber.cpp:
+
+        * tools/modeling/tests/MultiDCPS/publisher.cpp:
+        * tools/modeling/tests/MultiDCPS/subscriber.cpp:
+
+        * tools/modeling/tests/MultiInstance/publisher.cpp:
+        * tools/modeling/tests/MultiInstance/subscriber.cpp:
+
+        * tools/modeling/tests/PolicyLib/publisher.cpp:
+        * tools/modeling/tests/PolicyLib/subscriber.cpp:
+
+        * tools/modeling/tests/ReaderQos/publisher.cpp:
+        * tools/modeling/tests/ReaderQos/subscriber.cpp:
+
+        * tools/modeling/tests/Sequences/publisher.cpp:
+        * tools/modeling/tests/Sequences/subscriber.cpp:
+
+        * tools/modeling/tests/SubscriberQos/publisher.cpp:
+        * tools/modeling/tests/SubscriberQos/subscriber.cpp:
+
+        * tools/modeling/tests/TopicQos/publisher.cpp:
+        * tools/modeling/tests/TopicQos/subscriber.cpp:
+
+        * tools/modeling/tests/UDP/publisher.cpp:
+        * tools/modeling/tests/UDP/subscriber.cpp:
+
+          Prefer ACE_TMAIN() to main().
+
 Thu Jan 20 21:05:25 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerDpQos/MessengerDpQos.opendds:
