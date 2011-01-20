@@ -76,7 +76,7 @@ int run_instance(ModelType& model) {
 
     if (CORBA::is_nil(reader_i.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT("ERROR: %N:%l: run_instance() -")
                         ACE_TEXT(" _narrow failed!\n")),
                        -1);
     }
@@ -95,13 +95,13 @@ int run_instance(ModelType& model) {
     do {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT("ERROR: %N:%l: run_instance() -")
                           ACE_TEXT(" wait failed!\n")), -1);
       }
 
       if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT("ERROR: %N:%l: run_instance() -")
                           ACE_TEXT(" get_subscription_matched_status failed!\n")), -1);
       }
     } while (matches.current_count > 0);
@@ -113,7 +113,7 @@ int run_instance(ModelType& model) {
   return 0;
 }
 
-int main(int argc, char** argv)
+int ACE_TMAIN(int argc, char** argv)
 {
   int result;
   ACE_ARGV argv_copy(argc, argv);

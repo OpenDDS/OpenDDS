@@ -3,7 +3,7 @@
 #include "model/CodegenTraits.h"
 
 int
-main( int argc, char** argv)
+ACE_TMAIN( int argc, char** argv)
 {
   int status = 0;
 
