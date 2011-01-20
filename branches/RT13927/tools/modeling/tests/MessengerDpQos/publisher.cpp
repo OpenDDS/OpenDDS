@@ -18,6 +18,10 @@ int main(int argc, char** argv)
     using OpenDDS::Model::MessengerDpQos::Elements;
 
     DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
+    DDS::Publisher_var publisher = writer->get_publisher();
+    DDS::DomainParticipant_var participant = publisher->get_participant();
+
+    DDS::DomainParticipantQos part_qos;
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
@@ -31,6 +35,32 @@ int main(int argc, char** argv)
                          -1);
     }
 
+    if (participant->get_qos(part_qos) != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" get_qos failed!\n")),
+                         -1);
+    }
+    // was set to false for DP
+    if (part_qos.entity_factory.autoenable_created_entities == true) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" entity has wrong qos value!\n")),
+                         -1);
+    } else {
+      std::cout << "enabling publisher" << std::endl;
+      if (participant->enable() != DDS::RETCODE_OK) {
+        std::cout << "bad return code enabling participant" << std::endl;
+      }
+      if (publisher->enable() != DDS::RETCODE_OK) {
+        std::cout << "bad return code enabling publisher" << std::endl;
+      }
+      if (writer->enable() != DDS::RETCODE_OK) {
+        std::cout << "bad return code enabling writer" << std::endl;
+      }
+    }
+    // part_qos.user_data;
+    
     // Block until Subscriber is available
     DDS::StatusCondition_var condition = writer->get_statuscondition();
     condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
