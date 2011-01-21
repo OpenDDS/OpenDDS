@@ -45,7 +45,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 
@@ -179,7 +178,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		setWindowTitle(GeneratorEditorPlugin.INSTANCE.getString("_UI_Wizard_label"));
 		setDefaultPageImageDescriptor(ExtendedImageRegistry.INSTANCE.getImageDescriptor(GeneratorEditorPlugin.INSTANCE.getImage("full/wizban/" + Plugin.INSTANCE.imageMapping("NewGenerator"))));
 		parsedModelFile = SdkGeneratorFactory.createParsedModelFile(
-				(Window)this.workbench.getActiveWorkbenchWindow());
+				this.workbench.getActiveWorkbenchWindow().getShell());
 	}
 
 	/**
