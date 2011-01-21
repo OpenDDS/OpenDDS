@@ -1,3 +1,24 @@
+Fri Jan 21 22:23:15 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Deep:
+        * tools/modeling/tests/Deep/Down:
+        * tools/modeling/tests/Deep/Down/Reference:
+        * tools/modeling/tests/Deep/Down/Reference/DeepDownReference.gen:
+        * tools/modeling/tests/Deep/Down/Reference/DeepDownReference.mpc:
+        * tools/modeling/tests/Deep/Down/Reference/DeepDownReference.mwc:
+        * tools/modeling/tests/Deep/Down/Reference/DeepDownReference.opendds:
+        * tools/modeling/tests/Deep/Down/Reference/publisher.cpp:
+        * tools/modeling/tests/Deep/Down/Reference/run_test.pl:
+        * tools/modeling/tests/Deep/Down/Reference/subscriber.cpp:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          New test for non-peer model references.
+
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.mpc:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.mwc:
+
+          Modify to use paths relative to aggregate workspace.
+
 Fri Jan 21 21:19:16 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/ReferExternalProj:

@@ -26,3 +26,4 @@ tools/modeling/tests/DataLibRef/run_test.pl
 tools/modeling/tests/Codegen/run_test.pl:
 tools/modeling/tests/CopyTopicQos/run_test.pl:
 tools/modeling/tests/ReferExternalProj/run_test.pl:
+tools/modeling/tests/Deep/Down/Reference/run_test.pl:
