@@ -65,6 +65,7 @@ import org.eclipse.ui.part.CellEditorActionHandler;
  * @author gmftools (adapted some from ComboBoxDirectEditManager found in <a href="http://code.google.com/p/gmftools/wiki/ComboBoxLabels">ComboBoxLabels</a>)
  * @author harrisb@ociweb.com (adapted to handle EMF Enums)
  */
+@SuppressWarnings("restriction")
 public class EnumDirectEditManager
     extends DirectEditManager {
 
@@ -84,7 +85,7 @@ public class EnumDirectEditManager
      * Cache the font descriptor when a font is created so that it can be
      * disposed later.
      */
-    private List cachedFontDescriptors = new ArrayList();
+    private List<FontDescriptor> cachedFontDescriptors = new ArrayList<FontDescriptor>();
 
     private CellEditorActionHandler actionHandler;
 
@@ -112,7 +113,7 @@ public class EnumDirectEditManager
      * @param editorType
      * @param locator
      */
-    public EnumDirectEditManager(GraphicalEditPart source, Class editorType,
+    public EnumDirectEditManager(GraphicalEditPart source, Class<?> editorType,
     		Class<? extends Enum<?>> e) {
         super(source, editorType, EnumDirectEditManager.getTextCellEditorLocator((ITextAwareEditPart)source));
 
@@ -215,7 +216,7 @@ public class EnumDirectEditManager
      * @return the <code>Class</code> of the <code>CellEditor</code> to use
      *         for the text editing.
      */
-    public static Class getCellEditorClass() {
+    public static Class<ComboBoxCellEditor> getCellEditorClass() {
                 
         return ComboBoxCellEditor.class;
     }
@@ -318,8 +319,8 @@ public class EnumDirectEditManager
             }
         });
         
-        for (Iterator iter = cachedFontDescriptors.iterator(); iter.hasNext();) {
-            getResourceManager().destroyFont((FontDescriptor) iter.next());           
+        for (Iterator<FontDescriptor> iter = cachedFontDescriptors.iterator(); iter.hasNext();) {
+            getResourceManager().destroyFont(iter.next());           
         }
         cachedFontDescriptors.clear();
         

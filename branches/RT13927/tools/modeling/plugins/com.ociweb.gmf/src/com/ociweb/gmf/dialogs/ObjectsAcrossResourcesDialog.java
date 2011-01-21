@@ -40,7 +40,7 @@ public class ObjectsAcrossResourcesDialog <Obj extends EObject> extends Dialog
 
 	List<Button> checkboxes;
 
-	ObjectLabeler objectLabeler;
+	ObjectLabeler<Obj> objectLabeler;
 
 	/**
 	 * A widget selection listener used to tie checkbox selection
@@ -74,8 +74,8 @@ public class ObjectsAcrossResourcesDialog <Obj extends EObject> extends Dialog
 		this.dialogTitle = dialogTitle;
 		checkboxes = new ArrayList<Button>(objCandidates.size());
 		objectSelection = new HashMap<Obj, Boolean>(objCandidates.size());
-		for (EObject obj: objCandidates) {
-			objectSelection.put((Obj) obj, false);
+		for (Obj obj: objCandidates) {
+			objectSelection.put(obj, false);
 		}
 		objectLabeler = labeler;
 	}

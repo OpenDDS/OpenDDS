@@ -44,6 +44,9 @@ sub generate {
   }
 }
 
+open MWC, '>modeling_tests.mwc' or die "Can't write modeling_tests.mwc";
+print MWC "workspace {\n";
+
 my $cwd = getcwd();
 foreach my $dir (get_dirs()) {
   chdir $cwd . '/' . $dir or die "Can't change to $dir\n";
@@ -56,4 +59,11 @@ foreach my $dir (get_dirs()) {
     #print "Considering $cwd/$dir/$base\n";
     generate($base);
   }
+
+  foreach my $mwc (glob '*.mwc') {
+    print MWC '  ' . $dir . "/$mwc\n";
+  }
 }
+
+print MWC "}\n";
+close MWC;

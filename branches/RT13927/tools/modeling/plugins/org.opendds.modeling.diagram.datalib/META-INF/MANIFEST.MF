@@ -42,4 +42,6 @@ Require-Bundle: org.eclipse.core.runtime,
  com.ociweb.emf.util;bundle-version="1.0.0",
  org.eclipse.gmf.runtime.diagram.ui.printing,
  org.eclipse.gmf.runtime.diagram.ui.printing.render
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-LazyStart: true

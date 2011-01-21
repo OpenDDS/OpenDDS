@@ -1,3 +1,44 @@
+Fri Jan 21 23:08:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/EnumDirectEdit/EnumDirectEditManager.java:
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/EnumDirectEdit/EnumDirectEditPolicy.java:
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/dialogs/ObjectsAcrossResourcesDialog.java:
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/edit/parts/AbstractRefSelectionAction.java:
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/edit/parts/ModelChildrenFilter.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+
+          Fixed or suppressed Java and plug-in manifest warnings.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/.settings/org.eclipse.jdt.core.prefs:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/.settings/org.eclipse.jdt.core.prefs:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/.settings/org.eclipse.jdt.core.prefs:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/.settings/org.eclipse.jdt.core.prefs:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/.settings/org.eclipse.jdt.core.prefs:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model/.settings/org.eclipse.jdt.core.prefs:
+        * tools/modeling/plugins/org.opendds.modeling.model/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/.settings/org.eclipse.jdt.core.prefs:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/build.properties:
+
+          Set compiler options to not show warnings for harmless problems in
+          EMF or GMF generated code.
+
+        * tools/modeling/tests/Codegen/Codegen.opendds:
+        * tools/modeling/tests/Codegen/Codegen.opendds_diagram:
+
+          Added a use of long double in a struct.
+
+        * tools/modeling/tests/setup.pl:
+
+          Generate the modeling_tests.mwc workspace based on the test list.
+
 Fri Jan 21 22:49:44 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
@@ -115,7 +156,7 @@ Fri Jan 21 20:44:25 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Arrays/Arrays.mwc:
 
-          Start of worspace files for tests.
+          Start of workspace files for tests.
 
 Fri Jan 21 19:28:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
