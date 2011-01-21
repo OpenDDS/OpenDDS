@@ -40,7 +40,6 @@ public class CustomizationTab extends StructuredViewer {
 	public CustomizationTab( Composite parent) {
 		control = new Composite(parent, 0);
 		
-		// TODO Add the stuff to surround the actual tree viewer.
 		control.setLayout( new GridLayout( 2, true));
 		{
 			Composite panel = new Composite(control, 0);
@@ -79,6 +78,8 @@ public class CustomizationTab extends StructuredViewer {
 				label.setText("Selection Information");
 				GridData data = new GridData(SWT.CENTER, SWT.TOP, true, true);
 				label.setLayoutData(data);
+				
+				// TODO add content here
 			}
 		}
 		

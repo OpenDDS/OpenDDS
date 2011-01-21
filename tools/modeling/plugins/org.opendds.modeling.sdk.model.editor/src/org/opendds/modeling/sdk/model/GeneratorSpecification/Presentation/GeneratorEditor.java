@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EventObject;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -917,7 +918,7 @@ public class GeneratorEditor
 				generatorViewer.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
 				generatorViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
 				
-				generatorViewer.addChangeListener(this);
+				generatorViewer.setGeneratorEditor(this);
 
 				// Add the model file and target dir model elements to the viewer.
 				//
@@ -1092,6 +1093,10 @@ public class GeneratorEditor
 	@Override
 	protected void pageChange(int pageIndex) {
 		super.pageChange(pageIndex);
+
+		if (contentOutlinePage != null) {
+			handleContentOutlineSelection(contentOutlinePage.getSelection());
+		}
 	}
 
 	/**
@@ -1168,6 +1173,47 @@ public class GeneratorEditor
 		}
 
 		return contentOutlinePage;
+	}
+
+	/**
+	 * This deals with how we want selection in the outliner to affect the other views.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public void handleContentOutlineSelection(ISelection selection) {
+		if (currentViewerPane != null && !selection.isEmpty()
+				&& selection instanceof IStructuredSelection) {
+			Iterator<?> selectedElements = ((IStructuredSelection) selection)
+					.iterator();
+			if (selectedElements.hasNext()) {
+				// Get the first selected element.
+				//
+				Object selectedElement = selectedElements.next();
+
+				// If it's the Customization tab, apply the entire selection.
+				//
+				if (currentViewerPane.getViewer() == treeViewer) {
+					ArrayList<Object> selectionList = new ArrayList<Object>();
+					selectionList.add(selectedElement);
+					while (selectedElements.hasNext()) {
+						selectionList.add(selectedElements.next());
+					}
+
+					// Set the selection to the widget.
+					//
+					treeViewer.setSelection(new StructuredSelection(
+							selectionList));
+				} else {
+					// Set the input to the widget.
+					//
+					if (currentViewerPane.getViewer().getInput() != selectedElement) {
+						currentViewerPane.getViewer().setInput(selectedElement);
+						currentViewerPane.setTitle(selectedElement);
+					}
+				}
+			}
+		}
 	}
 
 	/**

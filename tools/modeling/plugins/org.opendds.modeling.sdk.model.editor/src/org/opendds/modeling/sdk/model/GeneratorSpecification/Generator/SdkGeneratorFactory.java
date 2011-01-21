@@ -13,12 +13,12 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Shell;
 
 public class SdkGeneratorFactory {
 	private static final String PLUGINNAME = "org.opendds.modeling.sdk.model";
 	
-	public static SdkGenerator createSdkGenerator( Window parent) {
+	public static SdkGenerator createSdkGenerator( Shell parent) {
 		SdkGenerator.FileProvider fileProvider = createFileProvider();
 		SdkGenerator.ErrorHandler errorHandler = createErrorHandler( parent);
 		
@@ -29,7 +29,7 @@ public class SdkGeneratorFactory {
 		return SdkGenerator.create( provider, handler);
 	}
 	
-	public static ParsedModelFile createParsedModelFile( Window parent) {
+	public static ParsedModelFile createParsedModelFile( Shell parent) {
 		SdkGenerator.FileProvider fileProvider = createFileProvider();
 		SdkGenerator.ErrorHandler errorHandler = createErrorHandler( parent);
 		
@@ -59,7 +59,7 @@ public class SdkGeneratorFactory {
 		};
 	}
 	
-	public static SdkGenerator.ErrorHandler createErrorHandler( final Window parent) {
+	public static SdkGenerator.ErrorHandler createErrorHandler( final Shell shell) {
 		return new SdkGenerator.ErrorHandler() {
 			@Override
 			public void error(Severity sev, String title, String message,
@@ -71,7 +71,7 @@ public class SdkGeneratorFactory {
 					case INFO: stat_sev = IStatus.INFO; break;
 					default: stat_sev = IStatus.OK;
 				}
-				ErrorDialog.openError(parent.getShell(), title,
+				ErrorDialog.openError(shell, title,
 					null /* use the message from Status object */,
 					new Status(stat_sev, PLUGINNAME, message, exception));
 			}
