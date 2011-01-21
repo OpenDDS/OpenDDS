@@ -30,8 +30,7 @@
     </xsl:call-template>
   </xsl:variable>
   <xsl:text>project(</xsl:text>
-  <xsl:value-of select="$modelname"/>
-  <xsl:text>): dcps</xsl:text>
+  <xsl:value-of select="concat($modelname, ') : dcps, ', $modelname, '_paths')"/>
   
   <xsl:if test="string-length($model-refs) &gt; 0">
     <xsl:value-of select="concat(', ', $model-refs)"/>
@@ -55,9 +54,8 @@
   <xsl:value-of select="$modelname"/>
   <xsl:text>_Export
   prebuild      += perl $(DDS_ROOT)/bin/expfile.pl </xsl:text>
-  <xsl:value-of select="$modelname"/>
+  <xsl:value-of select="concat($modelname, $newline, $newline)"/>
   <xsl:text>
-
   TypeSupport_Files {
     </xsl:text>
     <xsl:value-of select="$modelname"/>

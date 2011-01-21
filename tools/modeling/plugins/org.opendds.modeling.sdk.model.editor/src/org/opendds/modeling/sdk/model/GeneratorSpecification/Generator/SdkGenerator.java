@@ -31,6 +31,7 @@ public class SdkGenerator {
 	private static Transformer cppTransformer;
 	private static Transformer mpcTransformer;
 	private static Transformer mpbTransformer;
+	private static Transformer pathMpbTransformer;
 	private static Transformer traitsHTransformer;
 	private static Transformer traitsCppTransformer;
 	private static Transformer preprocTransformer;
@@ -79,6 +80,14 @@ public class SdkGenerator {
 		      public String dialogTitle() { return "Generate MPB"; }
 		      public String xslFilename() { return "xml/mpb.xsl"; }
 		  	  public String suffix() { return ".mpb"; }
+			  public boolean usesPreproc() { return false; }
+		    },
+		PATH_MPB { public Transformer getTransformer() { return pathMpbTransformer; }
+	          public void setTransformer(Transformer t) { pathMpbTransformer = t; }
+		      public void transform(Source s, Result r) throws TransformerException { pathMpbTransformer.transform(s, r); }
+		      public String dialogTitle() { return "Generate Paths MPB"; }
+		      public String xslFilename() { return "xml/paths_mpb.xsl"; }
+		  	  public String suffix() { return "_paths.mpb"; }
 			  public boolean usesPreproc() { return false; }
 		    },
 		TRH { public Transformer getTransformer() { return traitsHTransformer; }
@@ -231,13 +240,6 @@ public class SdkGenerator {
 			String modelname = parsedModelFile.getModelName(openddsFile);
 			if (modelname == null) {
 				return; // messages were generated in the get call.
-			}
-			
-			if (which == TransformType.MPB) {
-				Boolean dataLib = parsedModelFile.hasDataLib();
-				if (dataLib != null && !dataLib.booleanValue()) {
-					return; // don't generate mpb if there's no dataLib
-				}
 			}
 
 			File output = new File(targetFolder, modelname + which.suffix());
