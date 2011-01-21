@@ -1,3 +1,17 @@
+Fri Jan 21 21:19:16 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/ReferExternalProj:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.gen:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.mpc:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.mwc:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
+        * tools/modeling/tests/ReferExternalProj/publisher.cpp:
+        * tools/modeling/tests/ReferExternalProj/run_test.pl:
+        * tools/modeling/tests/ReferExternalProj/subscriber.cpp:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          New project referring to the external MessengerTypesMixed.opendds.
+
 Fri Jan 21 21:13:20 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/paths_mpb.xsl:
