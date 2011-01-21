@@ -4,15 +4,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.emf.common.notify.Adapter;
-import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.InternalEObject;
-import org.eclipse.emf.ecore.impl.ENotificationImpl;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.edit.command.SetCommand;
-import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -21,8 +13,6 @@ import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -33,8 +23,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
-import org.eclipse.ui.part.EditorPart;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.CodeGen;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorPackage;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.ModelFile;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.TargetDir;
@@ -333,6 +321,7 @@ public class GeneratorTab extends StructuredViewer {
 		
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected List getSelectionFromWidget() {
 		// TODO Auto-generated method stub
@@ -351,6 +340,7 @@ public class GeneratorTab extends StructuredViewer {
 		
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void setSelectionToWidget(List l, boolean reveal) {
 		// TODO Auto-generated method stub

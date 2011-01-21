@@ -10,6 +10,7 @@ workspace {
 
   exclude {
     contrib/wrapper
+    tools/modeling/tests
   }
 }
 

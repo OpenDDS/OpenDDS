@@ -1,3 +1,18 @@
+Fri Jan 21 19:28:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS.mwc:
+        * DDS_docgroup_TAO.mwc:
+        * DDS_no_tests.mwc:
+
+          Exclude tools/modeling/tests from the main .mwc files, it needs to
+          be handled separately since it depends on the generated code.
+
+        * tools/modeling/plugins/com.ociweb.emf.util/src/com/ociweb/emf/util/ReferencesFinder.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorTab.java:
+
+          Use Java annotations to suppress warnings, and Eclipse "organize
+          imports" to get rid of unused-import warnings.
+
 Fri Jan 21 00:15:35 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r4148] 2011-01-21 00:09  martinezm
