@@ -1,3 +1,18 @@
+Fri Jan 21 00:15:35 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r4148] 2011-01-21 00:09  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGeneratorFactory.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/CustomizationTab.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorTab.java:
+
+          Migrated error handler parameter to a shell from a window type.
+          Editor work in progress. Migrating to using EMF.Edit commands to
+          make changes to model elements. There are still some portions of the
+          notification chains in both directions that are not working
+          completely.
+
 Thu Jan 20 22:26:18 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Arrays/publisher.cpp:
