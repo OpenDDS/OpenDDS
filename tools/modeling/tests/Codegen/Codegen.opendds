@@ -73,6 +73,7 @@
         <fields xmi:id="_ihz_wCJxEeCdS4pBwQ6M_A" name="carol" type="_fVPWECJxEeCdS4pBwQ6M_A"/>
         <fields xmi:id="_wR_yICJxEeCdS4pBwQ6M_A" name="ted" type="_meyysCJxEeCdS4pBwQ6M_A"/>
         <fields xmi:id="_AVo04CJyEeCdS4pBwQ6M_A" name="aseqseq" type="_VhfkECJxEeCdS4pBwQ6M_A"/>
+        <fields xmi:id="_y3d18CWaEeCn652cDABhBg" name="alongdouble" type="_xp3aYCWaEeCn652cDABhBg"/>
         <keys xmi:id="_rjTY8CJyEeCdS4pBwQ6M_A" field="_ZNw28CJwEeCdS4pBwQ6M_A"/>
         <keys xmi:id="_yKkn4CJyEeCdS4pBwQ6M_A" field="_WoRl8CJxEeCdS4pBwQ6M_A"/>
       </types>
@@ -133,6 +134,7 @@
       <types xsi:type="types:Sequence" xmi:id="_uvvPwCMiEeCWY5IHYrridQ" subtype="_aqv84CJxEeCdS4pBwQ6M_A"/>
       <types xsi:type="types:Typedef" xmi:id="_wdxe4CMiEeCWY5IHYrridQ" type="_uvvPwCMiEeCWY5IHYrridQ" name="type1sequence"/>
       <types xsi:type="types:Typedef" xmi:id="_GlsYQCMjEeCWY5IHYrridQ" type="_Qk0rMCJwEeCdS4pBwQ6M_A" name="shorttypedef"/>
+      <types xsi:type="types:LongDouble" xmi:id="_xp3aYCWaEeCn652cDABhBg"/>
     </libs>
   </packages>
 </opendds:OpenDDSModel>

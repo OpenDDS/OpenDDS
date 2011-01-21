@@ -42,11 +42,13 @@ AddRefCommand extends AddReferenceCommand> implements IObjectActionDelegate {
 
 	private final Class<AddRefCommand> addRefCommandClass;
 	protected ShapeNodeEditPart selectedElement;
-	protected final Class referrerEditPart;
+
+	protected final Class<?> referrerEditPart;
+
 	protected IWorkbenchPart workbenchPart;
 
 	public AbstractRefSelectionAction(
-			Class referrerEditPart,
+			Class<?> referrerEditPart,
 			Class<AddRefCommand> addRefCommandClass) {
 		super();
 		this.referrerEditPart = referrerEditPart;
@@ -62,8 +64,9 @@ AddRefCommand extends AddReferenceCommand> implements IObjectActionDelegate {
 	 */
 	abstract protected String getCompartmentEditPartNameSubstring();
 
-	abstract protected Class getRefererrEditPartClass(EObject obj);
+	abstract protected Class<?> getRefererrEditPartClass(EObject obj);
 
+	@SuppressWarnings("unchecked")
 	protected <Type extends EObject> void addReferences(EObject domainElement,
 			Collection<Type> objsToRef) {
 		for (EObject obj: objsToRef) {
@@ -123,7 +126,7 @@ AddRefCommand extends AddReferenceCommand> implements IObjectActionDelegate {
 
 
 		try {
-			Class objEditPartClass = getRefererrEditPartClass(obj);
+			Class<?> objEditPartClass = getRefererrEditPartClass(obj);
 			Field refVisualId = objEditPartClass.getField("VISUAL_ID");
 			int visualId = refVisualId.getInt(null);
 			elementType = getElementType(visualId);

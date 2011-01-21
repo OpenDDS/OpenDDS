@@ -56,6 +56,7 @@ public class EnumDirectEditPolicy
 			this.view = view;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public Object getAdapter(Class adapter) {
 			Object o = super.getAdapter(adapter);

@@ -20,6 +20,7 @@ public class ModelChildrenFilter {
 	 * Filter out model children that reside in a different Resource than the
 	 * EditPart's model.
 	 */
+	@SuppressWarnings("unchecked")
 	public static List filterChildrenInDifferentResource(View editPartModel, List children) {
 		List childrenAll = new ArrayList(children);
 		EObject element = editPartModel.getElement();
@@ -41,6 +42,7 @@ public class ModelChildrenFilter {
 	 * Filter out model children that reside in a different Resource than the
 	 * EditPart's model.
 	 */
+	@SuppressWarnings("unchecked")
 	public static List filterChildrenInSameResource(View editPartModel, List children) {
 		List childrenAll = new ArrayList(children);
 		EObject element = editPartModel.getElement();
@@ -61,6 +63,7 @@ public class ModelChildrenFilter {
 	/**
 	 * Filter out children whose owner is of a particular type.
 	 */
+	@SuppressWarnings("unchecked")
 	public static List filterChildrenByOwner(EClass ownerClass, List children) {
 		List childrenAll = new ArrayList(children);
 		for (Object child: childrenAll) {
@@ -78,6 +81,7 @@ public class ModelChildrenFilter {
 	/**
 	 * Filter out children that don't have a particular object in their containment tree.
 	 */
+	@SuppressWarnings("unchecked")
 	public static List filterChildrenWithObjectNotInContainmentTree(EObject container, List children) {
 		List childrenAll = new ArrayList(children);
 		for (Object child: childrenAll) {
