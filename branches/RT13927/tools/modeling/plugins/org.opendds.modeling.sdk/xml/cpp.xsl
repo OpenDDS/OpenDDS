@@ -603,9 +603,9 @@ Elements::Data::copySubscriptionQos(
                    or ../@xsi:type = 'opendds:gdQosPolicy'">
         <xsl:variable name="value" select="concat($base, $field, '.value')"/>
         <xsl:value-of select="concat('  ', $value, '.replace(', $newline, 
-                                '      ', $value, '.length(),', $newline,
-                                '      ', $value, '.length(),', $newline,
-                                '      (CORBA::Octet*)&quot;', ., '&quot;);', $newline)"/>
+                                '      ', string-length(.) + 1, ',', $newline,
+                                '      ', string-length(.) + 1, ',', $newline,
+                                '      reinterpret_cast&lt;CORBA::Octet*&gt;(const_cast&lt;char *&gt;(&quot;', ., '&quot;)));', $newline)"/>
 
       </xsl:when>
       <xsl:otherwise>
