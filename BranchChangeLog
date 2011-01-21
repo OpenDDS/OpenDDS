@@ -1,3 +1,59 @@
+Fri Jan 21 21:09:12 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Codegen/Codegen.mwc:
+
+        * tools/modeling/tests/CompositeKey/CompositeKey.mwc:
+
+        * tools/modeling/tests/CopyTopicQos/CopyTopicQos.mwc:
+
+        * tools/modeling/tests/DataLibRef/DataLibRef.mwc:
+
+        * tools/modeling/tests/DomainZero/DomainZero.mwc:
+
+        * tools/modeling/tests/ExternalPolicies/ExternalPolicies.mwc:
+
+        * tools/modeling/tests/InvalidNames/InvalidNames.mwc:
+
+        * tools/modeling/tests/Messenger/Messenger.mwc:
+
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.mwc:
+
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.mwc:
+
+        * tools/modeling/tests/MessengerMC/MessengerMC.mwc:
+
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.mwc:
+
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.mwc:
+
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.mwc:
+
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.mwc:
+
+        * tools/modeling/tests/MessengerPubQos/MessengerPubQos.mwc:
+
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.mwc:
+
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.mwc:
+
+        * tools/modeling/tests/MultiDCPS/MultiDCPS.mwc:
+
+        * tools/modeling/tests/MultiInstance/MultiInstance.mwc:
+
+        * tools/modeling/tests/PolicyLib/PolicyLib.mwc:
+
+        * tools/modeling/tests/ReaderQos/ReaderQos.mwc:
+
+        * tools/modeling/tests/Sequences/Sequences.mwc:
+
+        * tools/modeling/tests/SubscriberQos/SubQos.mwc:
+
+        * tools/modeling/tests/TopicQos/TopQos.mwc:
+
+        * tools/modeling/tests/UDP/UDP.mwc:
+
+          workspace for each test
+
 Fri Jan 21 20:44:25 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Arrays/Arrays.mwc:
