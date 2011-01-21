@@ -1,7 +1,5 @@
-project(*xmlPublisher) : dcpsexe, dds_model, ReferExternalProj_paths {
+project(*xmlPublisher) : dcpsexe, dds_model, ReferExternalProj_paths, ReferExternalProj {
   exename   = publisher
-  libs     += ReferExternalProj
-  after    += ReferExternalProj
   libpaths += model
 
   Source_Files {
@@ -9,10 +7,8 @@ project(*xmlPublisher) : dcpsexe, dds_model, ReferExternalProj_paths {
   }
 }
 
-project(*xmlSubscriber) : dcpsexe, dds_model, ReferExternalProj_paths {
+project(*xmlSubscriber) : dcpsexe, dds_model, ReferExternalProj_paths, ReferExternalProj {
   exename   = subscriber
-  libs     += ReferExternalProj
-  after    += ReferExternalProj
   libpaths += model
 
   Source_Files {
