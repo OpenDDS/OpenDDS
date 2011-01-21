@@ -59,8 +59,7 @@ int ACE_TMAIN(int argc, char** argv)
         std::cout << "bad return code enabling writer" << std::endl;
       }
     }
-/*
-    char* buff = (char*)part_qos.user_data.value.get_buffer();
+    char* buff = reinterpret_cast<char*>(part_qos.user_data.value.get_buffer());
     std::cout << "User data is:" << buff << std::endl;
     if (strcmp(buff, "seven is 7") != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -68,7 +67,6 @@ int ACE_TMAIN(int argc, char** argv)
                           ACE_TEXT(" participant has wrong user_data value!\n")),
                          -1);
     }
-*/
     
     // Block until Subscriber is available
     DDS::StatusCondition_var condition = writer->get_statuscondition();
