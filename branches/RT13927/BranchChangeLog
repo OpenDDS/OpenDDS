@@ -1,3 +1,17 @@
+Fri Jan 21 21:13:20 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/paths_mpb.xsl:
+
+          New MPB file for external dependency paths for a library.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpc.xsl:
+
+          Have MPC interit paths MBP.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java:
+
+          generate paths MPB file.
+
 Fri Jan 21 21:09:12 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Codegen/Codegen.mwc:
