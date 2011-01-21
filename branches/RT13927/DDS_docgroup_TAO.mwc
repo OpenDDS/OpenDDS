@@ -22,5 +22,6 @@ workspace {
 
   exclude {
     java/jms
+    tools/modeling/tests
   }
 }

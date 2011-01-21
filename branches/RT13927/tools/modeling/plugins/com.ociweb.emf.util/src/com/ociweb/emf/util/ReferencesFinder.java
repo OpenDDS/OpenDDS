@@ -22,6 +22,7 @@ public class ReferencesFinder {
 	 * @param referrerObject The object that has the references
 	 * @return the list of references
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T extends EObject> EList<T> findInstancesOf(Class superType, EObject referrerObject) {
 		EList<T> refs = new BasicEList<T>();
 		for (EObject obj : referrerObject.eCrossReferences()) {
