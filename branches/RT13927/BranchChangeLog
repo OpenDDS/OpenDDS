@@ -1,3 +1,21 @@
+Mon Jan 24 23:43:42 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r4163] 2011-01-24 23:40  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/DeploymentTab.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorTab.java:
+
+          Migrated the null depoloyment tab to implement StructuredViewer.
+          Additional usability updates. Starting to attach modelfile
+          information to fields.
+
+        * [r4160] 2011-01-24 20:05  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorTab.java:
+
+          Fixed some of the update notification paths.
+          Added MPB and Traits file generation buttons.
+          Allowed the text entry fields to grab all available space rather
+          than sharing.
+
 Mon Jan 24 22:41:57 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/TopicQos/TopQos.opendds:
