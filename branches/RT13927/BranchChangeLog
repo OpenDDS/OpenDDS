@@ -1,3 +1,10 @@
+Mon Jan 24 18:51:10 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/SubscriberQos/SubQos.opendds:
+        * tools/modeling/tests/SubscriberQos/subscriber.cpp:
+
+         Validate subscriber QOS values.
+
 Mon Jan 24 18:23:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerPubQos/MessengerPubQos.opendds:

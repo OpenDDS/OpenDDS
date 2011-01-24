@@ -68,6 +68,7 @@ int ACE_TMAIN(int argc, char** argv)
     using OpenDDS::Model::SubQos::Elements;
 
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
+    DDS::Subscriber_var subscriber = reader->get_subscriber();
 
     DDS::DataReaderListener_var listener(new ReaderListener);
     reader->set_listener( listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -82,6 +83,72 @@ int ACE_TMAIN(int argc, char** argv)
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" _narrow failed!\n")),
                        -1);
+    }
+
+    DDS::SubscriberQos sub_qos;
+
+    if (subscriber->get_qos(sub_qos) != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" get_qos failed!\n")),
+                         -1);
+    }
+
+    // was set to false for Sub
+    if (sub_qos.entity_factory.autoenable_created_entities == true) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" subscriber has wrong autoenable value!\n")),
+                         -1);
+    } else {
+      if (subscriber->enable() != DDS::RETCODE_OK) {
+        std::cout << "bad return code enabling subscriber" << std::endl;
+      }
+      if (reader->enable() != DDS::RETCODE_OK) {
+        std::cout << "bad return code enabling reader" << std::endl;
+      }
+    }
+
+    char* buff = reinterpret_cast<char*>(sub_qos.group_data.value.get_buffer());
+    std::cout << "Group data is:" << buff << std::endl;
+    if (strcmp(buff, "eight is 8") != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" subscriber has wrong group_data value\n")),
+                         -1);
+    }
+
+    if (sub_qos.partition.name.length() != 1) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" subscriber has wrong # of partitions\n")),
+                         -1);
+    }
+
+    if (strcmp(sub_qos.partition.name[0], "*") != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" subscriber has wrong partition value\n")),
+                         -1);
+    }
+
+    if (sub_qos.presentation.access_scope != DDS::TOPIC_PRESENTATION_QOS) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" subscriber has wrong access scope\n")),
+                         -1);
+    }
+    if (sub_qos.presentation.coherent_access != true) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" subscriber has wrong choerent access\n")),
+                         -1);
+    }
+    if (sub_qos.presentation.ordered_access != true) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" subscriber has wrong ordered access\n")),
+                         -1);
     }
 
     // Block until Publisher completes
