@@ -33,9 +33,12 @@ public class GeneratorTab extends StructuredViewer {
 	protected Composite control;
 	
 	protected Label idlLabel;
-	protected Label cppLabel;
 	protected Label hLabel;
+	protected Label cppLabel;
+	protected Label trhLabel;
+	protected Label trcLabel;
 	protected Label mpcLabel;
+	protected Label mpbLabel;
 	
 	protected Text sourceText;
 	protected Text targetDir;
@@ -74,30 +77,14 @@ public class GeneratorTab extends StructuredViewer {
         sourceText.addFocusListener( new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent event) {
-                if( !sourceText.getText().equals(source.getName())) {
-                	  editor.getEditingDomain().getCommandStack().execute(
-                			  SetCommand.create(
-                					  editor.getEditingDomain(),
-                					  source,
-                					  GeneratorPackage.eINSTANCE.getModelFile_Name(),
-                					  sourceText.getText()
-                	  ));
-                }
+    			updateSource();
             }
         });
         sourceText.addKeyListener( new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent event) {
               if (event.character == '\r' || event.character == '\n') {
-                  if( !sourceText.getText().equals(source.getName())) {
-                	  editor.getEditingDomain().getCommandStack().execute(
-                			  SetCommand.create(
-                					  editor.getEditingDomain(),
-                					  source,
-                					  GeneratorPackage.eINSTANCE.getModelFile_Name(),
-                					  sourceText.getText()
-                	  ));
-                }
+      			updateSource();
               }
             }
         });
@@ -109,15 +96,7 @@ public class GeneratorTab extends StructuredViewer {
         		IPath modelPath = Utils.browseForModelFile( parent, new Path(sourceText.getText()));
         		if( modelPath != null) {
         			sourceText.setText( modelPath.toString());
-                    if( !sourceText.getText().equals(source.getName())) {
-                  	  editor.getEditingDomain().getCommandStack().execute(
-                  			  SetCommand.create(
-                  					  editor.getEditingDomain(),
-                  					  source,
-                  					  GeneratorPackage.eINSTANCE.getModelFile_Name(),
-                  					  sourceText.getText()
-                  	  ));
-                  }
+        			updateSource();
         		}
         	}
         });
@@ -134,30 +113,14 @@ public class GeneratorTab extends StructuredViewer {
         targetDir.addFocusListener( new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent event) {
-                if( !targetDir.getText().equals(target.getName())) {
-        			editor.getEditingDomain().getCommandStack().execute(
-        					SetCommand.create(
-        							editor.getEditingDomain(),
-        							target,
-        							GeneratorPackage.eINSTANCE.getTargetDir_Name(),
-        							targetDir.getText()
-        					));
-                }
+          	  updateTarget();
             }
         });
         targetDir.addKeyListener( new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent event) {
               if (event.character == '\r' || event.character == '\n') {
-                  if( !targetDir.getText().equals(target.getName())) {
-          			editor.getEditingDomain().getCommandStack().execute(
-          					SetCommand.create(
-          							editor.getEditingDomain(),
-          							target,
-          							GeneratorPackage.eINSTANCE.getTargetDir_Name(),
-          							targetDir.getText()
-          					));
-                  }
+            	  updateTarget();
               }
             }
         });
@@ -170,22 +133,14 @@ public class GeneratorTab extends StructuredViewer {
 				IPath targetPath = Utils.browseForTargetDir( parent, current);
 				if( targetPath != null) {
 					targetDir.setText(targetPath.toString());
-	                if( !targetDir.getText().equals(target.getName())) {
-	        			editor.getEditingDomain().getCommandStack().execute(
-	        					SetCommand.create(
-	        							editor.getEditingDomain(),
-	        							target,
-	        							GeneratorPackage.eINSTANCE.getTargetDir_Name(),
-	        							targetDir.getText()
-	        					));
-	                }
+	            	  updateTarget();
 				}
 			}
 		});
 		
 		// Right Panel
 		panel = new Composite(control, 0);
-		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gridData = new GridData(SWT.FILL, SWT.FILL, false, true);
 		panel.setLayoutData(gridData);
 		panel.setLayout( new GridLayout( 2, false));
 
@@ -214,7 +169,7 @@ public class GeneratorTab extends StructuredViewer {
 			}
 		});
 		hLabel =  new Label(panel, SWT.LEFT);
-		hLabel.setText("<model>.h");
+		hLabel.setText("<model>_T.h");
 		gridData = new GridData(SWT.CENTER, SWT.TOP, false, false);
 		hLabel.setLayoutData(gridData);
 
@@ -228,9 +183,37 @@ public class GeneratorTab extends StructuredViewer {
 			}
 		});
 		cppLabel =  new Label(panel, SWT.LEFT);
-		cppLabel.setText("<model>.cpp");
+		cppLabel.setText("<model>_T.cpp");
 		gridData = new GridData(SWT.CENTER, SWT.TOP, false, false);
 		cppLabel.setLayoutData(gridData);
+
+		button = new Button(panel, SWT.PUSH);
+		button.setText("Generate Traits C++ Header");
+		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
+		button.setLayoutData(gridData);
+		button.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				generator.generate(SdkGenerator.TransformType.TRH, source.getName());
+			}
+		});
+		trhLabel =  new Label(panel, SWT.LEFT);
+		trhLabel.setText("<model>Traits.h");
+		gridData = new GridData(SWT.CENTER, SWT.TOP, false, false);
+		trhLabel.setLayoutData(gridData);
+
+		button = new Button(panel, SWT.PUSH);
+		button.setText("Generate Traits C++ Body");
+		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
+		button.setLayoutData(gridData);
+		button.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				generator.generate(SdkGenerator.TransformType.TRC, source.getName());
+			}
+		});
+		trcLabel =  new Label(panel, SWT.LEFT);
+		trcLabel.setText("<model>Traits.cpp");
+		gridData = new GridData(SWT.CENTER, SWT.TOP, false, false);
+		trcLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
 		button.setText("Generate MPC File");
@@ -247,6 +230,20 @@ public class GeneratorTab extends StructuredViewer {
 		mpcLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
+		button.setText("Generate MPB File");
+		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
+		button.setLayoutData(gridData);
+		button.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				generator.generate(SdkGenerator.TransformType.MPB, source.getName());
+			}
+		});
+		mpbLabel =  new Label(panel, SWT.LEFT);
+		mpbLabel.setText("<model>.mpb");
+		gridData = new GridData(SWT.CENTER, SWT.TOP, false, false);
+		mpbLabel.setLayoutData(gridData);
+
+		button = new Button(panel, SWT.PUSH);
 		button.setText("Generate All");
 		gridData = new GridData(SWT.LEFT, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
@@ -255,9 +252,36 @@ public class GeneratorTab extends StructuredViewer {
 				generator.generate(SdkGenerator.TransformType.IDL, source.getName());
 				generator.generate(SdkGenerator.TransformType.H,   source.getName());
 				generator.generate(SdkGenerator.TransformType.CPP, source.getName());
+				generator.generate(SdkGenerator.TransformType.TRH, source.getName());
+				generator.generate(SdkGenerator.TransformType.TRC, source.getName());
 				generator.generate(SdkGenerator.TransformType.MPC, source.getName());
+				generator.generate(SdkGenerator.TransformType.MPB, source.getName());
 			}
 		});
+	}
+
+	protected void updateSource() {
+		if( !sourceText.getText().equals(source.getName())) {
+			editor.getEditingDomain().getCommandStack().execute(
+					SetCommand.create(
+							editor.getEditingDomain(),
+							source,
+							GeneratorPackage.eINSTANCE.getModelFile_Name(),
+							sourceText.getText()
+					));
+		}
+	}
+	
+	protected void updateTarget() {
+		if( !targetDir.getText().equals(target.getName())) {
+			editor.getEditingDomain().getCommandStack().execute(
+					SetCommand.create(
+							editor.getEditingDomain(),
+							target,
+							GeneratorPackage.eINSTANCE.getTargetDir_Name(),
+							targetDir.getText()
+					));
+		}
 	}
 
 	public void setSource(ModelFile source) {
@@ -287,6 +311,7 @@ public class GeneratorTab extends StructuredViewer {
 		if( targetDir != null && target != null) {
 			targetDir.setText(target.getName());
 		}
+		super.refresh();
 	}
 
 	@Override
@@ -305,20 +330,33 @@ public class GeneratorTab extends StructuredViewer {
 
 	@Override
 	protected Widget doFindInputItem(Object element) {
-		// TODO Auto-generated method stub
+		if( element == source) {
+			return sourceText;
+		} else if( element == target) {
+			return targetDir;
+		}
 		return null;
 	}
 
 	@Override
 	protected Widget doFindItem(Object element) {
-		// TODO Auto-generated method stub
-		return null;
+		return doFindInputItem( element);
 	}
 
 	@Override
 	protected void doUpdateItem(Widget item, Object element, boolean fullMap) {
-		// TODO Auto-generated method stub
-		
+		if( !fullMap) {
+			return;
+			
+		} else if( element == source) {
+			if( item == sourceText) {
+				sourceText.setText( source.getName());
+			}
+		} else if( element == target) {
+			if( item == targetDir) {
+				targetDir.setText( target.getName());
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")
