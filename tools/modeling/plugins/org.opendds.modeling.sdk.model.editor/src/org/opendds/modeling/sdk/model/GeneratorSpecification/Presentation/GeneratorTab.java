@@ -15,6 +15,7 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -143,10 +144,13 @@ public class GeneratorTab extends StructuredViewer {
 		gridData = new GridData(SWT.FILL, SWT.FILL, false, true);
 		panel.setLayoutData(gridData);
 		panel.setLayout( new GridLayout( 2, false));
+		
+		// Subsequent resizing can become incorrect if there is no initial text size.
+		final String uninitializedLabel = new String("unitialized");
 
 		// Code generation pushbuttons
 		button = new Button(panel, SWT.PUSH);
-		button.setText("Generate IDL");
+		button.setText(SdkGenerator.TransformType.IDL.dialogTitle());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -155,12 +159,12 @@ public class GeneratorTab extends StructuredViewer {
 			}
 		});
 		idlLabel =  new Label(panel, SWT.LEFT);
-		idlLabel.setText("<model>.idl");
-		gridData = new GridData(SWT.CENTER, SWT.TOP, false, false);
+		idlLabel.setText(uninitializedLabel);
+		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
 		idlLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
-		button.setText("Generate C++ Header");
+		button.setText(SdkGenerator.TransformType.H.dialogTitle());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -169,12 +173,12 @@ public class GeneratorTab extends StructuredViewer {
 			}
 		});
 		hLabel =  new Label(panel, SWT.LEFT);
-		hLabel.setText("<model>_T.h");
-		gridData = new GridData(SWT.CENTER, SWT.TOP, false, false);
+		hLabel.setText(uninitializedLabel);
+		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
 		hLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
-		button.setText("Generate C++ Body");
+		button.setText(SdkGenerator.TransformType.CPP.dialogTitle());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -183,12 +187,12 @@ public class GeneratorTab extends StructuredViewer {
 			}
 		});
 		cppLabel =  new Label(panel, SWT.LEFT);
-		cppLabel.setText("<model>_T.cpp");
-		gridData = new GridData(SWT.CENTER, SWT.TOP, false, false);
+		cppLabel.setText(uninitializedLabel);
+		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
 		cppLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
-		button.setText("Generate Traits C++ Header");
+		button.setText(SdkGenerator.TransformType.TRH.dialogTitle());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -197,12 +201,12 @@ public class GeneratorTab extends StructuredViewer {
 			}
 		});
 		trhLabel =  new Label(panel, SWT.LEFT);
-		trhLabel.setText("<model>Traits.h");
-		gridData = new GridData(SWT.CENTER, SWT.TOP, false, false);
+		trhLabel.setText(uninitializedLabel);
+		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
 		trhLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
-		button.setText("Generate Traits C++ Body");
+		button.setText(SdkGenerator.TransformType.TRC.dialogTitle());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -211,12 +215,12 @@ public class GeneratorTab extends StructuredViewer {
 			}
 		});
 		trcLabel =  new Label(panel, SWT.LEFT);
-		trcLabel.setText("<model>Traits.cpp");
-		gridData = new GridData(SWT.CENTER, SWT.TOP, false, false);
+		trcLabel.setText(uninitializedLabel);
+		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
 		trcLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
-		button.setText("Generate MPC File");
+		button.setText(SdkGenerator.TransformType.MPC.dialogTitle());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -225,12 +229,12 @@ public class GeneratorTab extends StructuredViewer {
 			}
 		});
 		mpcLabel =  new Label(panel, SWT.LEFT);
-		mpcLabel.setText("<model>.mpc");
-		gridData = new GridData(SWT.CENTER, SWT.TOP, false, false);
+		mpcLabel.setText(uninitializedLabel);
+		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
 		mpcLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
-		button.setText("Generate MPB File");
+		button.setText(SdkGenerator.TransformType.MPB.dialogTitle());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
 		button.addSelectionListener(new SelectionAdapter() {
@@ -239,8 +243,8 @@ public class GeneratorTab extends StructuredViewer {
 			}
 		});
 		mpbLabel =  new Label(panel, SWT.LEFT);
-		mpbLabel.setText("<model>.mpb");
-		gridData = new GridData(SWT.CENTER, SWT.TOP, false, false);
+		mpbLabel.setText(uninitializedLabel);
+		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
 		mpbLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
@@ -269,6 +273,7 @@ public class GeneratorTab extends StructuredViewer {
 							GeneratorPackage.eINSTANCE.getModelFile_Name(),
 							sourceText.getText()
 					));
+			updateModelnameLabels();
 		}
 	}
 	
@@ -283,11 +288,67 @@ public class GeneratorTab extends StructuredViewer {
 					));
 		}
 	}
+	
+	protected void updateModelnameLabels() {
+		String basename = null;// getModelName();
+		if( basename == null) {
+			final String invalidLabel = new String("Invalid model file");
+
+			idlLabel.setText(invalidLabel);
+
+			// The size should be the same for all labels with the same message.
+			Point invalidSize = idlLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+			idlLabel.setSize(invalidSize);
+			
+			hLabel.setText(invalidLabel);
+			hLabel.setSize(invalidSize);
+			
+			cppLabel.setText(invalidLabel);
+			cppLabel.setSize(invalidSize);
+			
+			trhLabel.setText(invalidLabel);
+			trhLabel.setSize(invalidSize);
+			
+			trcLabel.setText(invalidLabel);
+			trcLabel.setSize(invalidSize);
+			
+			mpcLabel.setText(invalidLabel);
+			mpcLabel.setSize(invalidSize);
+			
+			mpbLabel.setText(invalidLabel);
+			mpbLabel.setSize(invalidSize);
+
+		} else {
+			idlLabel.setText(basename + SdkGenerator.TransformType.IDL.suffix());
+			idlLabel.setSize(idlLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+			
+			hLabel.setText(basename + SdkGenerator.TransformType.H.suffix());
+			hLabel.setSize(hLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+			
+			cppLabel.setText(basename + SdkGenerator.TransformType.CPP.suffix());
+			cppLabel.setSize(cppLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+			
+			trhLabel.setText(basename + SdkGenerator.TransformType.TRH.suffix());
+			trhLabel.setSize(trhLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+			
+			trcLabel.setText(basename + SdkGenerator.TransformType.TRC.suffix());
+			trcLabel.setSize(trcLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+			
+			mpcLabel.setText(basename + SdkGenerator.TransformType.MPC.suffix());
+			mpcLabel.setSize(mpcLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+			
+			mpbLabel.setText(basename + SdkGenerator.TransformType.MPB.suffix());
+			mpbLabel.setSize(mpbLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+		}
+		
+		control.layout(true);
+	}
 
 	public void setSource(ModelFile source) {
 		this.source = source;
 		if( sourceText != null && source != null) {
   			sourceText.setText(source.getName());
+			updateModelnameLabels();
 		}
 	}
 
