@@ -18,6 +18,9 @@ int ACE_TMAIN(int argc, char** argv)
     using OpenDDS::Model::MessengerPubQos::Elements;
 
     DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
+    DDS::Publisher_var publisher = writer->get_publisher();
+
+    DDS::PublisherQos pub_qos;
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
@@ -28,6 +31,76 @@ int ACE_TMAIN(int argc, char** argv)
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
                           ACE_TEXT(" _narrow failed!\n")),
+                         -1);
+    }
+
+    if (publisher->get_qos(pub_qos) != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" get_qos failed!\n")),
+                         -1);
+    }
+
+    // was set to false for Pub
+    if (pub_qos.entity_factory.autoenable_created_entities == true) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" publisher has wrong autoenable value!\n")),
+                         -1);
+    } else {
+      if (publisher->enable() != DDS::RETCODE_OK) {
+        std::cout << "bad return code enabling publisher" << std::endl;
+      }
+      if (writer->enable() != DDS::RETCODE_OK) {
+        std::cout << "bad return code enabling writer" << std::endl;
+      }
+    }
+
+    char* buff = reinterpret_cast<char*>(pub_qos.group_data.value.get_buffer());
+    std::cout << "Group data is:" << buff << std::endl;
+    if (strcmp(buff, "eight is 8") != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" publisher has wrong group_data value\n")),
+                         -1);
+    }
+
+    if (pub_qos.partition.name.length() != 2) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" publisher has wrong # of partitions\n")),
+                         -1);
+    }
+
+    if (strcmp(pub_qos.partition.name[0], "left") != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" publisher has wrong partition value\n")),
+                         -1);
+    }
+    if (strcmp(pub_qos.partition.name[1], "right") != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" publisher has wrong partition value\n")),
+                         -1);
+    }
+    
+    if (pub_qos.presentation.access_scope != DDS::TOPIC_PRESENTATION_QOS) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" publisher has wrong access scope\n")),
+                         -1);
+    }
+    if (pub_qos.presentation.coherent_access != true) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" publisher has wrong choerent access\n")),
+                         -1);
+    }
+    if (pub_qos.presentation.ordered_access != true) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" publisher has wrong ordered access\n")),
                          -1);
     }
 
