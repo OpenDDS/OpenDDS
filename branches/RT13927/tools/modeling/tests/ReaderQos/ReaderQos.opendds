@@ -9,7 +9,7 @@
     </participants>
     <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part27" domain="_bs2RIPDvEd-I4rwicuuPOw" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" user_data="_X64DcAJKEeCBAfl9GiYbGg">
       <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" group_data="_os3bUAKJEeCwwtlMwl8TGw" presentation="_wwhIsAKJEeCwwtlMwl8TGw" partition="_WR3isQQVEeCsYqJtvYWomQ" transportId="3">
-        <readers xsi:type="opendds:dataReader" xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" deadline="_uvsboALlEeCRmKs-7z8NWA" destination_order="_2mVAsALlEeCRmKs-7z8NWA" durability="_qyi6YAR2EeCsYqJtvYWomQ" history="_VML9cALrEeCRmKs-7z8NWA" latency_budget="_CeUPoAMYEeCrTdheTycPFA" liveliness="_zAukQALrEeCRmKs-7z8NWA" ownership="_M2EAAALrEeCRmKs-7z8NWA" reliability="_n1lhgALrEeCRmKs-7z8NWA" resource_limits="_Y8bbcAMYEeCrTdheTycPFA" user_data="_X64DcAJKEeCBAfl9GiYbGg" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+        <readers xsi:type="opendds:dataReader" xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" deadline="_uvsboALlEeCRmKs-7z8NWA" destination_order="_2mVAsALlEeCRmKs-7z8NWA" durability="_qyi6YAR2EeCsYqJtvYWomQ" history="_VML9cALrEeCRmKs-7z8NWA" latency_budget="_CeUPoAMYEeCrTdheTycPFA" liveliness="_zAukQALrEeCRmKs-7z8NWA" ownership="_M2EAAALrEeCRmKs-7z8NWA" reliability="_n1lhgALrEeCRmKs-7z8NWA" resource_limits="_Y8bbcAMYEeCrTdheTycPFA" user_data="_X64DcAJKEeCBAfl9GiYbGg" copyFromTopicQos="false" reader_data_lifecycle="_o9T74AQaEeCsYqJtvYWomQ" time_based_filter="_NdzdUAQbEeCsYqJtvYWomQ" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </subscribers>
     </participants>
     <participants xmi:id="_4VZKwQMKEeCrTdheTycPFA" name="part3" domain="_bs2RIPDvEd-I4rwicuuPOw">
@@ -26,13 +26,15 @@
       <names>left</names>
       <names>right</names>
     </policies>
-    <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_uvsboALlEeCRmKs-7z8NWA" name="doa"/>
+    <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_uvsboALlEeCRmKs-7z8NWA" name="doa">
+      <period xmi:id="_ECuMkCgCEeCySrIVS40zlQ" nanosecond="4" second="2"/>
+    </policies>
     <policies xsi:type="opendds:destinationOrderQosPolicy" xmi:id="_2mVAsALlEeCRmKs-7z8NWA" name="source" kind="BY_SOURCE_TIMESTAMP"/>
     <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_BoO1oALrEeCRmKs-7z8NWA" name="localtrans" kind="TRANSIENT_LOCAL"/>
     <policies xsi:type="opendds:ownershipQosPolicy" xmi:id="_M2EAAALrEeCRmKs-7z8NWA" name="exclusive" kind="EXCLUSIVE"/>
     <policies xsi:type="opendds:historyQosPolicy" xmi:id="_VML9cALrEeCRmKs-7z8NWA" name="keep_last_fourteen" depth="14" kind="KEEP_LAST"/>
     <policies xsi:type="opendds:reliabilityQosPolicy" xmi:id="_n1lhgALrEeCRmKs-7z8NWA" name="old_reliable" kind="RELIABLE"/>
-    <policies xsi:type="opendds:livelinessQosPolicy" xmi:id="_zAukQALrEeCRmKs-7z8NWA" name="mbt" kind="AUTOMATIC"/>
+    <policies xsi:type="opendds:livelinessQosPolicy" xmi:id="_zAukQALrEeCRmKs-7z8NWA" name="mbt" kind="MANUAL_BY_TOPIC"/>
     <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_COBjIAMTEeCrTdheTycPFA" name="now_for_crying_out_loud"/>
     <policies xsi:type="opendds:dsQosPolicy" xmi:id="_5HPvYAMTEeCrTdheTycPFA" name="durable" history_depth="1" history_kind="KEEP_ALL" max_instances="20" max_samples="5" max_samples_per_instance="100"/>
     <policies xsi:type="opendds:dsQosPolicy" xmi:id="_5tsHgAMXEeCrTdheTycPFA" name="default" history_depth="1" history_kind="KEEP_LAST" max_instances="-1" max_samples="-1" max_samples_per_instance="-1"/>
@@ -45,8 +47,13 @@
     <policies xsi:type="opendds:partitionQosPolicy" xmi:id="_WR3isQQVEeCsYqJtvYWomQ" name="all">
       <names>*</names>
     </policies>
-    <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_o9T74AQaEeCsYqJtvYWomQ" name="nine"/>
-    <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_NdzdUAQbEeCsYqJtvYWomQ" name="tbf_8"/>
+    <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_o9T74AQaEeCsYqJtvYWomQ" name="nine">
+      <autopurge_nowriter_samples_delay xmi:id="_-4cqoCgCEeCySrIVS40zlQ" nanosecond="11" second="12"/>
+      <autopurge_disposed_samples_delay xmi:id="_hfohECgDEeCySrIVS40zlQ" nanosecond="13" second="14"/>
+    </policies>
+    <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_NdzdUAQbEeCsYqJtvYWomQ" name="tbf_8">
+      <minimum_separation xmi:id="_2goOoCgDEeCySrIVS40zlQ" nanosecond="3"/>
+    </policies>
     <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_mYIE4ARzEeCsYqJtvYWomQ" name="vol" kind="VOLATILE"/>
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_0lhFwAR1EeCsYqJtvYWomQ" name="strong" value="10"/>
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_2rViwAR1EeCsYqJtvYWomQ" name="weak" value="5"/>

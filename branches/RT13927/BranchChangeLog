@@ -1,3 +1,10 @@
+Mon Jan 24 22:01:38 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/ReaderQos/ReaderQos.opendds:
+        * tools/modeling/tests/ReaderQos/subscriber.cpp:
+
+         Validate reader QOS values.
+
 Mon Jan 24 18:51:10 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/SubscriberQos/SubQos.opendds:
