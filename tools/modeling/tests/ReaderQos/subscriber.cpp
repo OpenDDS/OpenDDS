@@ -68,6 +68,7 @@ int ACE_TMAIN(int argc, char** argv)
     using OpenDDS::Model::ReaderQos::Elements;
 
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
+    DDS::DataReaderQos reader_qos;
 
     DDS::DataReaderListener_var listener(new ReaderListener);
     reader->set_listener( listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -82,6 +83,119 @@ int ACE_TMAIN(int argc, char** argv)
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" _narrow failed!\n")),
                        -1);
+    }
+
+    if (reader->get_qos(reader_qos) != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" get_qos failed!\n")),
+                         -1);
+    }
+
+    if (reader_qos.deadline.period.sec != 2) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong deadline!\n")),
+                         -1);
+    }
+    if (reader_qos.deadline.period.nanosec != 4) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong deadline!\n")),
+                         -1);
+    }
+    if (reader_qos.destination_order.kind !=
+            DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong destination order!\n")),
+                         -1);
+    }
+    if (reader_qos.durability.kind != DDS::PERSISTENT_DURABILITY_QOS) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong durability !\n")),
+                         -1);
+    }
+    if (reader_qos.history.kind != DDS::KEEP_LAST_HISTORY_QOS) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong history kind\n")),
+                         -1);
+    }
+    if (reader_qos.history.depth != 14) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong history depth\n")),
+                         -1);
+    }
+    if (reader_qos.latency_budget.duration.sec != 1) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong latency budget!\n")),
+                         -1);
+    }
+    if (reader_qos.latency_budget.duration.nanosec != 10) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong latency budget!\n")),
+                         -1);
+    }
+    if (reader_qos.liveliness.kind != DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong liveliness!\n")),
+                         -1);
+    }
+    if (reader_qos.ownership.kind != DDS::EXCLUSIVE_OWNERSHIP_QOS) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong ownership!\n")),
+                         -1);
+    }
+    if (reader_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec != 12) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong rdl!\n")),
+                         -1);
+    }
+    if (reader_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec != 11) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong rdl!\n")),
+                         -1);
+    }
+    if (reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec != 14) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong rdl!\n")),
+                         -1);
+    }
+    if (reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec != 13) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong rdl!\n")),
+                         -1);
+    }
+    if (reader_qos.time_based_filter.minimum_separation.sec != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong rdl!\n")),
+                         -1);
+    }
+    if (reader_qos.time_based_filter.minimum_separation.nanosec != 3) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong rdl!\n")),
+                         -1);
+    }
+    char* buff = reinterpret_cast<char*>(reader_qos.user_data.value.get_buffer());
+    std::cout << "User data is:" << buff << std::endl;
+    if (strcmp(buff, "seven is 7") != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" reader has wrong user_data value\n")),
+                         -1);
     }
 
     // Block until Publisher completes
