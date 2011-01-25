@@ -1,3 +1,14 @@
+Tue Jan 25 19:18:34 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+
+          handle empty DCPS lib.
+
+        * tools/modeling/tests/EmptyLibs/ELTypes.gen:
+        * tools/modeling/tests/EmptyLibs/EmptyLibs.opendds:
+
+          create an Empty DCPS and policy lib.
+
 Tue Jan 25 16:49:57 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
