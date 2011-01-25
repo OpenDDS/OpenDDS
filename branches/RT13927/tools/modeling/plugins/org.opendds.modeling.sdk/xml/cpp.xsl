@@ -102,8 +102,9 @@ Elements::Data::Data()
        index &lt; Elements::Types::LAST_INDEX;
        ++index) {
     this->typeNames_[ index] = 0;
-  }
-
+  }</xsl:text>
+</xsl:if>
+  <xsl:text>
   this->loadDomains();
   this->loadTopics();
   this->loadMaps(); /// MUST precede the QoS loading.
@@ -553,7 +554,6 @@ Elements::Data::copySubscriptionQos(
   }
 }
 </xsl:text>
-</xsl:if>
 
   <xsl:value-of select="concat('} // End namespace ', @name, $newline)"/>
 </xsl:template>
