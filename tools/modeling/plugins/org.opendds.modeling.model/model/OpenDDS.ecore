@@ -47,6 +47,8 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="packages" upperBound="-1"
         eType="#//LibPackage" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="simpleTypes" eType="#//SimpleTypes"
+        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LibPackage">
     <eStructuralFeatures xsi:type="ecore:EReference" name="packages" upperBound="-1"
@@ -75,5 +77,12 @@
         <details key="documentation" value="This is an extension to the DDS Profile specification to allow domain entities policies to be either from a policy lib or custom to the entity. If custom, then the owner of the policy is the DCPS lib."/>
       </eAnnotations>
     </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SimpleTypes">
+    <eAnnotations source="GenModel">
+      <details key="documentation" value="To avoid the user needing to explicitly create simple types on a DataLib diagram when defining Field types, instances of this class will contain these Simple types on demand if they are needed. The Field type will then refer the type in the instance of this class."/>
+    </eAnnotations>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="types" upperBound="-1"
+        eType="ecore:EClass Types.ecore#//Simple" containment="true"/>
   </eClassifiers>
 </ecore:EPackage>

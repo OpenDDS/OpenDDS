@@ -23,6 +23,7 @@ import org.eclipse.emf.transaction.util.TransactionUtil;
 import org.eclipse.emf.workspace.util.WorkspaceSynchronizer;
 import org.eclipse.gmf.runtime.common.core.command.CommandResult;
 import org.eclipse.gmf.runtime.common.core.command.ICommand;
+import org.eclipse.gmf.runtime.common.core.command.ICompositeCommand;
 import org.eclipse.gmf.runtime.common.core.service.AbstractProvider;
 import org.eclipse.gmf.runtime.common.core.service.IOperation;
 import org.eclipse.gmf.runtime.common.ui.services.parser.GetParserOperation;
@@ -31,6 +32,7 @@ import org.eclipse.gmf.runtime.common.ui.services.parser.IParserEditStatus;
 import org.eclipse.gmf.runtime.common.ui.services.parser.IParserProvider;
 import org.eclipse.gmf.runtime.common.ui.services.parser.ParserEditStatus;
 import org.eclipse.gmf.runtime.emf.commands.core.command.AbstractTransactionalCommand;
+import org.eclipse.gmf.runtime.emf.commands.core.command.CompositeTransactionalCommand;
 import org.eclipse.gmf.runtime.emf.ui.services.parser.ISemanticParser;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 
@@ -53,6 +55,35 @@ import org.opendds.modeling.model.types.Type;
 public class FieldParserProvider extends AbstractProvider implements IParserProvider {
 
 	private final class FieldParser implements ISemanticParser {
+
+		private final class FieldSetCommand extends
+				AbstractTransactionalCommand {
+			private final String name;
+			private final String newString;
+			private final Type type;
+			private final Field field;
+
+			private FieldSetCommand(TransactionalEditingDomain domain,
+					String label, List affectedFiles, String name,
+					String newString, Type type, Field field) {
+				super(domain, label, affectedFiles);
+				this.name = name;
+				this.newString = newString;
+				this.type = type;
+				this.field = field;
+			}
+
+			@Override
+			protected CommandResult doExecuteWithResult(IProgressMonitor monitor, IAdaptable info) throws ExecutionException {
+				if (newString.length() == 0) {
+					return CommandResult.newErrorCommandResult("Invalid input");
+				}
+				field.setName(name);
+				field.setType(type);
+				return CommandResult.newOKCommandResult();
+			}
+		}
+
 		public IContentAssistProcessor getCompletionProcessor(IAdaptable element) {
 			return null;
 		}
@@ -86,19 +117,12 @@ public class FieldParserProvider extends AbstractProvider implements IParserProv
 			final Type type = findType(typeName, field);
 
 			TransactionalEditingDomain editingDomain = TransactionUtil.getEditingDomain(field);
-			return new AbstractTransactionalCommand(editingDomain, "", Collections.singletonList(WorkspaceSynchronizer.getFile(field.eResource()))) {
+			ICompositeCommand cc = new CompositeTransactionalCommand(editingDomain, "Field Set");
 
-				@Override
-				protected CommandResult doExecuteWithResult(IProgressMonitor monitor, IAdaptable info) throws ExecutionException {
-					if (newString.length() == 0) {
-						return CommandResult.newErrorCommandResult("Invalid input");
-					}
-					field.setName(name);
-					field.setType(type);
-					return CommandResult.newOKCommandResult();
-				}
+			FieldSetCommand fieldSetCommand = new FieldSetCommand(editingDomain, "", Collections.singletonList(WorkspaceSynchronizer.getFile(field.eResource())), name, newString, type,
+					field);
 
-			};
+			return fieldSetCommand;
 		}
 
 		private Type findType(final String typeName, final Field field) {
