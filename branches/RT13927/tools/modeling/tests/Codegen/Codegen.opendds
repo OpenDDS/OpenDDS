@@ -4,13 +4,11 @@
     <domains xmi:id="_yHC38CJgEeCdS4pBwQ6M_A" name="domain1" domainId="0"/>
     <participants xmi:id="_uQ_MYCJgEeCdS4pBwQ6M_A" name="part1" domain="_yHC38CJgEeCdS4pBwQ6M_A" entity_factory="_l4w9MCJgEeCdS4pBwQ6M_A" user_data="_fMRQACJgEeCdS4pBwQ6M_A">
       <publishers xsi:type="opendds:publisher" xmi:id="_3rh0MCJgEeCdS4pBwQ6M_A" name="pub1" entity_factory="_UIBl0CJoEeCdS4pBwQ6M_A" group_data="_itM78CJnEeCdS4pBwQ6M_A" presentation="_BcjpYCJhEeCdS4pBwQ6M_A" partition="_bMIXMCJnEeCdS4pBwQ6M_A" transportId="1">
-        <writers xsi:type="opendds:dataWriter" xmi:id="_ySAbsCJpEeCdS4pBwQ6M_A" name="writer1" deadline="_Qrp6sCJqEeCdS4pBwQ6M_A" destination_order="_qDv5cCJsEeCdS4pBwQ6M_A" durability="_9chMUCJpEeCdS4pBwQ6M_A" history="_v2sIcCJsEeCdS4pBwQ6M_A" latency_budget="_2uzFMCJrEeCdS4pBwQ6M_A" liveliness="_Cg9EoCJsEeCdS4pBwQ6M_A" ownership="_ZPrp4CJtEeCdS4pBwQ6M_A" reliability="_HpzNwCJsEeCdS4pBwQ6M_A" resource_limits="_1lgscCJsEeCdS4pBwQ6M_A" user_data="_fMRQACJgEeCdS4pBwQ6M_A" copyFromTopicQos="false" durability_service="_FgVRwCJqEeCdS4pBwQ6M_A" ownership_strength="_dkvloCJtEeCdS4pBwQ6M_A" transport_priority="_KBdMMCJtEeCdS4pBwQ6M_A" lifespan="_Nt3zkCJtEeCdS4pBwQ6M_A" topic="_1ADWUCJpEeCdS4pBwQ6M_A">
-          <writer_data_lifecycle xsi:type="opendds:wdlQosPolicy" xmi:id="_hhgWICJtEeCdS4pBwQ6M_A" name="writer1lifecycle" autodispose_unregistered_instances="true"/>
+        <writers xsi:type="opendds:dataWriter" xmi:id="_ySAbsCJpEeCdS4pBwQ6M_A" name="writer1" deadline="_Qrp6sCJqEeCdS4pBwQ6M_A" destination_order="_qDv5cCJsEeCdS4pBwQ6M_A" durability="_9chMUCJpEeCdS4pBwQ6M_A" history="_v2sIcCJsEeCdS4pBwQ6M_A" latency_budget="_2uzFMCJrEeCdS4pBwQ6M_A" liveliness="_Cg9EoCJsEeCdS4pBwQ6M_A" ownership="_ZPrp4CJtEeCdS4pBwQ6M_A" reliability="_HpzNwCJsEeCdS4pBwQ6M_A" resource_limits="_1lgscCJsEeCdS4pBwQ6M_A" user_data="_fMRQACJgEeCdS4pBwQ6M_A" copyFromTopicQos="false" durability_service="_FgVRwCJqEeCdS4pBwQ6M_A" ownership_strength="_dkvloCJtEeCdS4pBwQ6M_A" transport_priority="_KBdMMCJtEeCdS4pBwQ6M_A" lifespan="_Nt3zkCJtEeCdS4pBwQ6M_A" topic="_1ADWUCJpEeCdS4pBwQ6M_A" writer_data_lifecycle="_hhgWICJtEeCdS4pBwQ6M_A">
         </writers>
       </publishers>
       <publishers xsi:type="opendds:publisher" xmi:id="_Ic7T4CQZEeCooMBoZQ9mbQ" name="pub3" entity_factory="_UIBl0CJoEeCdS4pBwQ6M_A" group_data="_itM78CJnEeCdS4pBwQ6M_A" presentation="_BcjpYCJhEeCdS4pBwQ6M_A" partition="_bMIXMCJnEeCdS4pBwQ6M_A" transportId="1">
-        <writers xsi:type="opendds:dataWriter" xmi:id="_Ic7T4SQZEeCooMBoZQ9mbQ" name="writer2" deadline="_Qrp6sCJqEeCdS4pBwQ6M_A" destination_order="_qDv5cCJsEeCdS4pBwQ6M_A" durability="_9chMUCJpEeCdS4pBwQ6M_A" history="_v2sIcCJsEeCdS4pBwQ6M_A" latency_budget="_2uzFMCJrEeCdS4pBwQ6M_A" liveliness="_Cg9EoCJsEeCdS4pBwQ6M_A" ownership="_ZPrp4CJtEeCdS4pBwQ6M_A" reliability="_HpzNwCJsEeCdS4pBwQ6M_A" resource_limits="_1lgscCJsEeCdS4pBwQ6M_A" user_data="_fMRQACJgEeCdS4pBwQ6M_A" copyFromTopicQos="false" durability_service="_FgVRwCJqEeCdS4pBwQ6M_A" ownership_strength="_dkvloCJtEeCdS4pBwQ6M_A" transport_priority="_KBdMMCJtEeCdS4pBwQ6M_A" lifespan="_Nt3zkCJtEeCdS4pBwQ6M_A" topic="_1ADWUCJpEeCdS4pBwQ6M_A">
-          <writer_data_lifecycle xsi:type="opendds:wdlQosPolicy" xmi:id="_Ic7T4iQZEeCooMBoZQ9mbQ" name="writer1lifecycle" autodispose_unregistered_instances="true"/>
+        <writers xsi:type="opendds:dataWriter" xmi:id="_Ic7T4SQZEeCooMBoZQ9mbQ" name="writer2" deadline="_Qrp6sCJqEeCdS4pBwQ6M_A" destination_order="_qDv5cCJsEeCdS4pBwQ6M_A" durability="_9chMUCJpEeCdS4pBwQ6M_A" history="_v2sIcCJsEeCdS4pBwQ6M_A" latency_budget="_2uzFMCJrEeCdS4pBwQ6M_A" liveliness="_Cg9EoCJsEeCdS4pBwQ6M_A" ownership="_ZPrp4CJtEeCdS4pBwQ6M_A" reliability="_HpzNwCJsEeCdS4pBwQ6M_A" resource_limits="_1lgscCJsEeCdS4pBwQ6M_A" user_data="_fMRQACJgEeCdS4pBwQ6M_A" copyFromTopicQos="false" durability_service="_FgVRwCJqEeCdS4pBwQ6M_A" ownership_strength="_dkvloCJtEeCdS4pBwQ6M_A" transport_priority="_KBdMMCJtEeCdS4pBwQ6M_A" lifespan="_Nt3zkCJtEeCdS4pBwQ6M_A" topic="_1ADWUCJpEeCdS4pBwQ6M_A" writer_data_lifecycle="_Ic7T4iQZEeCooMBoZQ9mbQ">
         </writers>
       </publishers>
       <subscribers xsi:type="opendds:subscriber" xmi:id="_39e7YCQXEeCooMBoZQ9mbQ" name="sub1" transportId="3">
@@ -62,6 +60,8 @@
     </policies>
     <policies xsi:type="opendds:gdQosPolicy" xmi:id="_bGeicCMoEeCWY5IHYrridQ" name="pub3groupdata" datavalue="pub3groupdata"/>
     <policies xsi:type="opendds:efQosPolicy" xmi:id="_jy9KYCMoEeCWY5IHYrridQ" name="pub3entityfactory" autoenable_created_entities="true"/>
+    <policies xsi:type="opendds:wdlQosPolicy" xmi:id="_hhgWICJtEeCdS4pBwQ6M_A" name="writer1lifecycle" autodispose_unregistered_instances="true"/>
+    <policies xsi:type="opendds:wdlQosPolicy" xmi:id="_Ic7T4iQZEeCooMBoZQ9mbQ" name="writer2lifecycle" autodispose_unregistered_instances="true"/>
   </libs>
   <packages xmi:id="_rz5TYCQXEeCooMBoZQ9mbQ" name="Codegen">
     <libs xsi:type="types:DataLib" xmi:id="_6-dmwCJvEeCdS4pBwQ6M_A" name="data1">
