@@ -26,22 +26,22 @@
 <xsl:variable name="types"        select="//types"/>
 <xsl:variable name="policies"     select="//policies"/>
 
-<!-- Indices (lookup tables are at the bottom of this document) -->
+<!-- Indices -->
+<!--
 <xsl:key
      name  = "policies"
      match = "//opendds:policy"
      use   = "@xmi:id"/>
+-->
 
 <xsl:key
      name  = "lut-qos-field"
      match = "qos-field"
      use   = "@type"/>
 
-<!-- Extract the name of the model once. -->
-<xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
-
 <!-- process the entire model document to produce the C++ code. -->
 <xsl:template match="/">
+  <xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
   <xsl:text>
 #include "</xsl:text>
   <xsl:value-of select="$modelname"/>
@@ -77,12 +77,14 @@ namespace OpenDDS { namespace Model {
 </xsl:template>
 <!-- End of main processing template. -->
 
+<!-- Output a namespace for a package containing a DCPSLib -->
 <xsl:template match="packages[.//libs[@xsi:type='opendds:DcpsLib']]">
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
   <xsl:apply-templates/>
   <xsl:value-of select="concat('} // End namespace ', @name, $newline)"/>
 </xsl:template>
 
+<!-- Output a namespace for a DCPSLib -->
 <xsl:template match="libs[@xsi:type='opendds:DcpsLib']">
   <xsl:variable name="lib-readers"      select=".//readers"/>
   <xsl:variable name="lib-writers"      select=".//writers"/>
@@ -558,6 +560,7 @@ Elements::Data::copySubscriptionQos(
   <xsl:value-of select="concat('} // End namespace ', @name, $newline)"/>
 </xsl:template>
 
+<!-- Process all the policies referenced by base -->
 <xsl:template name="process-policies">
   <xsl:param name="base"/>
 
@@ -571,6 +574,7 @@ Elements::Data::copySubscriptionQos(
   </xsl:for-each>
 </xsl:template>
 
+<!-- Process an individual policy referenced by base -->
 <xsl:template name="process-policy">
   <xsl:param name="base"/>
   <xsl:variable name="policy-type" select="@xsi:type"/>
@@ -671,6 +675,7 @@ Elements::Data::copySubscriptionQos(
   </xsl:choose>
 </xsl:template>
 
+<!-- For each referenced data model, add #include statement -->
 <xsl:template name="include-referenced-data-models">
   <xsl:param name="models"/>
   <xsl:param name="completed-models" select="' '"/>
@@ -723,6 +728,7 @@ Elements::Data::copySubscriptionQos(
 </xsl:text>
 </xsl:template>
 
+<!-- Ignore text -->
 <xsl:template match="text()"/>
 
 </xsl:stylesheet>
