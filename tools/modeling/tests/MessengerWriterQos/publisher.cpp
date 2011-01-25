@@ -21,6 +21,8 @@ int ACE_TMAIN(int argc, char** argv)
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
+    DDS::DataWriterQos writer_qos;
+
     MessageDataWriter_var message_writer =
       MessageDataWriter::_narrow(writer.in());
 
@@ -30,6 +32,168 @@ int ACE_TMAIN(int argc, char** argv)
                           ACE_TEXT(" _narrow failed!\n")),
                          -1);
     }
+
+    if (writer->get_qos(writer_qos) != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" get_qos failed!\n")),
+                         -1);
+    }
+
+    if (writer_qos.deadline.period.sec != 2) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong deadline!\n")),
+                         -1);
+    }
+    if (writer_qos.deadline.period.nanosec != 1) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong deadline!\n")),
+                         -1);
+    }
+    if (writer_qos.destination_order.kind != 
+            DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong destination order!\n")),
+                         -1);
+    }
+    if (writer_qos.durability.kind != DDS::PERSISTENT_DURABILITY_QOS) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong durability !\n")),
+                         -1);
+    }
+    if (writer_qos.durability_service.history_kind != DDS::KEEP_LAST_HISTORY_QOS) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong durability_service history_kind\n")),
+                         -1);
+    }
+    if (writer_qos.durability_service.history_depth != 5) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong durability_service history_depth\n")),
+                         -1);
+    }
+    if (writer_qos.durability_service.max_instances != 20) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong durability_service max_instances\n")),
+                         -1);
+    }
+    if (writer_qos.durability_service.max_samples != 500) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong durability_service max_samples\n")),
+                         -1);
+    }
+    if (writer_qos.durability_service.max_samples_per_instance != 100) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong durability_service max_samples_per_instance\n")),
+                         -1);
+    }
+    if (writer_qos.history.kind != DDS::KEEP_LAST_HISTORY_QOS) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong history kind\n")),
+                         -1);
+    }
+    if (writer_qos.history.depth != 14) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong history depth\n")),
+                         -1);
+    }
+    if (writer_qos.latency_budget.duration.sec != 1) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong latency budget!\n")),
+                         -1);
+    }
+    if (writer_qos.latency_budget.duration.nanosec != 10) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong latency budget!\n")),
+                         -1);
+    }
+    if (writer_qos.lifespan.duration.sec != 8) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong lifespan!\n")),
+                         -1);
+    }
+    if (writer_qos.lifespan.duration.nanosec != 7) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong lifespan!\n")),
+                         -1);
+    }
+    if (writer_qos.liveliness.kind != DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong liveliness!\n")),
+                         -1);
+    }
+    if (writer_qos.ownership.kind != DDS::EXCLUSIVE_OWNERSHIP_QOS) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong ownership!\n")),
+                         -1);
+    }
+    if (writer_qos.ownership_strength.value != 9) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong ownership strength!\n")),
+                         -1);
+    }
+    if (writer_qos.reliability.kind != DDS::RELIABLE_RELIABILITY_QOS) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong reliability\n")),
+                         -1);
+    }
+    if (writer_qos.resource_limits.max_instances != 5) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong resource_limits\n")),
+                         -1);
+    }
+    if (writer_qos.resource_limits.max_samples != 1000) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong resource_limits\n")),
+                         -1);
+    }
+    if (writer_qos.resource_limits.max_samples_per_instance != 100) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong resource_limits\n")),
+                         -1);
+    }
+    if (writer_qos.transport_priority.value != 3) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong transport priority\n")),
+                         -1);
+    }
+    char* buff = reinterpret_cast<char*>(writer_qos.user_data.value.get_buffer());
+    std::cout << "User data is:" << buff << std::endl;
+    if (strcmp(buff, "seven is 7") != 0) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" writer has wrong user_data value\n")),
+                         -1);
+    }
+    if (writer_qos.writer_data_lifecycle.autodispose_unregistered_instances != false) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wrong writer data lifecycle\n")),
+                         -1);
+    }
+
 
     // Block until Subscriber is available
     DDS::StatusCondition_var condition = writer->get_statuscondition();
