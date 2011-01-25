@@ -23,7 +23,8 @@ tools/modeling/tests/MessengerWriterQos/run_test.pl
 tools/modeling/tests/MessengerDpQos/run_test.pl
 tools/modeling/tests/UDP/run_test.pl
 tools/modeling/tests/DataLibRef/run_test.pl
-tools/modeling/tests/Codegen/run_test.pl:
-tools/modeling/tests/CopyTopicQos/run_test.pl:
-tools/modeling/tests/ReferExternalProj/run_test.pl:
-tools/modeling/tests/Deep/Down/Reference/run_test.pl:
+tools/modeling/tests/Codegen/run_test.pl
+tools/modeling/tests/CopyTopicQos/run_test.pl
+tools/modeling/tests/ReferExternalProj/run_test.pl
+tools/modeling/tests/Deep/Down/Reference/run_test.pl
+tools/modeling/tests/EmptyLibs/run_test.pl
