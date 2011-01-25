@@ -1,3 +1,8 @@
+Tue Jan 25 21:57:46 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/common.xsl:
+
+          Added comments.
 Tue Jan 25 20:08:25 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/EmptyLibs/EmptyLibs.opendds:

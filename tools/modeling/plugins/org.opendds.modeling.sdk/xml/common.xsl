@@ -18,7 +18,8 @@
 </xsl:variable>
 
 <!--
-  A::B::C::D::name
+  Given a target, will return A::B::C::D::name using ancestor 
+  package and DCPS lib names.
 -->
 <xsl:template name="scopename">
   <xsl:param name="target" select="."/>
@@ -51,11 +52,13 @@
   </xsl:choose>
 </xsl:template>
 
+<!-- Normalize an identifier, taking out invalid chars -->
 <xsl:template name="normalize-identifier">
   <xsl:param name="identifier" select="@name"/>
   <xsl:value-of select="translate($identifier, ' -:', '___')"/>
 </xsl:template>
 
+<!-- Normalize an type enumeration identifier -->
 <xsl:template name="type-enum">
   <xsl:param name="type" select="."/>
   <xsl:call-template name="normalize-identifier">
@@ -63,6 +66,7 @@
   </xsl:call-template>
 </xsl:template>
 
+<!-- Capitalize the first letter of a value -->
 <xsl:template name="capitalize">
   <xsl:param name="value"/>
   <xsl:variable name="first" select="substring($value, 1, 1)"/>
@@ -71,6 +75,8 @@
   <xsl:value-of select="concat($FIRST, $rest)"/>
 </xsl:template>
 
+<!-- Utility to replace all occurances of parameter "replace"
+     in "text" with "by" -->
  <xsl:template name="string-replace-all">
     <xsl:param name="text" />
     <xsl:param name="replace" />
@@ -92,6 +98,11 @@
     </xsl:choose>
   </xsl:template>
 
+<!-- Determine the qualified name of a target element.
+     Different from scopename in that it has OpenDDS::Model at the 
+     outermost layer.  This is used for referencing the Elements
+     class defined in *_T.h
+ -->
 <xsl:template name="elements-qname">
   <xsl:param name="target" select="."/>
   <xsl:param name="previous" select="''"/>
@@ -116,11 +127,13 @@
   </xsl:choose>
 </xsl:template>
 
+<!-- Determine the qualified name of the Elements::Data class -->
 <xsl:template name="data-qname">
   <xsl:call-template name="elements-qname"/>
   <xsl:text>::Data</xsl:text>
 </xsl:template>
 
+<!-- Determine the names of models referenced by this model. -->
 <xsl:template name="data-model-ref-names">
   <xsl:param name="model-refs"/>
   <xsl:param name="complete-refs" select="''"/>
