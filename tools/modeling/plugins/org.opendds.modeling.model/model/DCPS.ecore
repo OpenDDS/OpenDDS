@@ -67,7 +67,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="ownership_strength" eType="ecore:EClass QoS.ecore#//OwnershipStrengthQosPolicy"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="transport_priority" eType="ecore:EClass QoS.ecore#//TransportPriorityQosPolicy"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="writer_data_lifecycle"
-        eType="ecore:EClass QoS.ecore#//WriterDataLifecycleQosPolicy" containment="true"/>
+        eType="ecore:EClass QoS.ecore#//WriterDataLifecycleQosPolicy"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="lifespan" eType="ecore:EClass QoS.ecore#//LifespanQosPolicy"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="topic" lowerBound="1" eType="ecore:EClass Topics.ecore#//Topic"/>
   </eClassifiers>
