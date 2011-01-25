@@ -14,6 +14,7 @@
 <xsl:variable name="topics"      select="//topics"/>
 <xsl:variable name="policy-refs" select="//*[not(name() = 'datatype')]/@href"/>
 
+<!-- Copy the model element, adding external-refs subelelement -->
 <xsl:template match="opendds:OpenDDSModel">
   <xsl:copy>
     <xsl:apply-templates select="@*"/>
@@ -24,14 +25,15 @@
   </xsl:copy>
 </xsl:template>
 
-<!--
-<xsl:template match="libs[@xsi:type='types:DataLib']">
-  <xsl:element name="dataLib">
-    <xsl:apply-templates select="@*|node()"/>
-  </xsl:element>
-</xsl:template>
+<!-- For any elemement with a child element with href attribute, 
+     replace the href parent with a local reference to the element.
+     For example:
+         <abc>
+           <def href="model.opendds#xyz"/>
+         </abc>
+     Becomes:
+         <abc def="xyz"/>
 -->
-
 <xsl:template match="*[*[@href]]">
   <xsl:copy>
     <xsl:apply-templates select="@*"/>
@@ -42,15 +44,20 @@
   </xsl:copy>
 </xsl:template>
 
+<!-- copy values -->
 <xsl:template match="@*|node()">
   <xsl:copy>
     <xsl:apply-templates select="@*|node()"/>
   </xsl:copy>
 </xsl:template>
 
+<!-- don't copy href attributes -->
 <xsl:template match="@href">
 </xsl:template>
 
+<!-- href replacing logic.  Would be nice here if an 
+     attribute could include a xpath expression.
+-->
 <xsl:template name="replace-href">
   <xsl:choose>
     <xsl:when test="name() = 'datatype'">
@@ -175,6 +182,11 @@
   </xsl:choose>
 </xsl:template>
 
+<!-- Copy external elements into the result set, with the following
+     changes:
+     1) make name a qualified name
+     2) add the name of model in a new model attribute.
+-->
 <xsl:template name="process-external-refs">
   <xsl:param name="refs" select="//@href"/>
   <xsl:param name="complete-refs" select="' '"/>
@@ -208,66 +220,7 @@
   </xsl:if>
 </xsl:template>
 
-<!--
-<xsl:template name="process-external-ref-topics">
-  <xsl:param name="reffing-topics"/>
-  <xsl:param name="complete-types" select="' '"/>
-
-  <xsl:if test="$reffing-topics">
-    <xsl:variable name="topic" select="$reffing-topics[1]"/>
-    <xsl:variable name="external-id" select="substring-after($topic/datatype/@href, '#')"/>
-    <xsl:if test="not(contains($complete-types, concat(' ',$external-id,' ')))">
-      <xsl:variable name="external-model" select="substring-before($topic/datatype/@href, '#')"/>
-      <xsl:for-each select="document($external-model)//types[@xmi:id = $external-id]">
-
-        <xsl:variable name="modelname">
-          <xsl:call-template name="modelname"/>
-        </xsl:variable>
-        <xsl:variable name="scopename">
-          <xsl:call-template name="scopename"/>
-        </xsl:variable>
-        <xsl:element name="dataLib">
-          <xsl:attribute name="model">
-            <xsl:value-of select="$modelname"/>
-          </xsl:attribute>
-          <xsl:apply-templates select="../@name"/>
-          <xsl:copy>
-            <xsl:attribute name="name">
-              <xsl:value-of select="concat($scopename, @name)"/>
-            </xsl:attribute>
-            <xsl:apply-templates select="@xmi:id"/>
-          </xsl:copy>
-        </xsl:element>
-      </xsl:for-each>
-    </xsl:if>
-
-    <xsl:call-template name="process-external-ref-topics">
-      <xsl:with-param name="reffing-topics" select="$reffing-topics[position() > 1]"/>
-      <xsl:with-param name="complete-types" select="concat($complete-types, ' ', $external-id, ' ')"/>
-    </xsl:call-template>
-  </xsl:if>
-</xsl:template>
-
-<xsl:template name="process-external-ref-policies">
-  <xsl:param name="policy-refs"/>
-  <xsl:param name="complete-policies" select="' '"/>
-
-  <xsl:if test="$policy-refs">
-    <xsl:variable name="policy-ref" select="$policy-refs[1]"/>
-    <xsl:variable name="external-id" select="substring-after($policy-ref/@href, '#')"/>
-
-    <xsl:if test="not(contains($complete-policies, concat(' ',$external-id,' ')))">
-      <xsl:variable name="external-model" select="substring-before($policy-ref/@href, '#')"/>
-      <xsl:copy-of select="document($external-model)//*[@xmi:id = $external-id]"/>
-    </xsl:if>
-    <xsl:call-template name="process-external-ref-policies">
-      <xsl:with-param name="policy-refs" select="$policy-refs[position() > 1]"/>
-      <xsl:with-param name="complete-policies" select="concat($complete-policies, ' ', $external-id, ' ')"/>
-    </xsl:call-template>
-  </xsl:if>
-</xsl:template>
--->
-
+<!-- Determine the name of a model -->
 <xsl:template name="modelname">
   <xsl:param name="target" select="."/>
   <xsl:choose>
