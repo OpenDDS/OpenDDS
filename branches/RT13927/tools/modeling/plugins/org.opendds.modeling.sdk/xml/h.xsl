@@ -14,14 +14,8 @@
 <xsl:output method="text"/>
 <xsl:strip-space elements="*"/>
 
-<!-- Node sets -->
-<xsl:variable name="participants" select="//participants"/>
+<!-- Global node sets -->
 <xsl:variable name="types"        select="//types"/>
-<xsl:variable name="topics"       select="//topics"/>
-<xsl:variable name="publishers"   select="//publishers"/>
-<xsl:variable name="subscribers"  select="//subscribers"/>
-<xsl:variable name="writers"      select="//writers"/>
-<xsl:variable name="readers"      select="//readers"/>
 
 <!-- Extract the name of the model once. -->
 <xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
@@ -97,18 +91,21 @@ namespace OpenDDS { namespace Model {
 </xsl:template>
 <!-- End of main processing template. -->
 
+<!-- For a package containing a DCPSlib, output a namespace -->
 <xsl:template match="packages[.//libs[@xsi:type='opendds:DcpsLib']]" mode="declare">
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
   <xsl:apply-templates mode="declare"/>
   <xsl:value-of select="concat('} // End namespace ', @name, $newline)"/>
 </xsl:template>
 
+<!-- For a DCPSlib, output a namespace and the Elements class -->
 <xsl:template match="libs[@xsi:type='opendds:DcpsLib']" mode="declare">
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
   <xsl:text> 
   class Elements {
     public:
 </xsl:text>
+  <!-- Match within the DCPSlib -->
   <xsl:variable name="lib-participants" select=".//participants"/>
   <xsl:variable name="lib-topics"       select=".//topics"/>
   <xsl:variable name="lib-publishers"   select=".//publishers"/>
@@ -276,6 +273,7 @@ namespace OpenDDS { namespace Model {
   <xsl:value-of select="concat('} // End namespace ', @name, $newline)"/>
 </xsl:template>
 
+<!-- Output the template implementations for the DCPSlib -->
 <xsl:template match="libs[@xsi:type='opendds:DcpsLib']" mode="define">
   <xsl:variable name="lib-participants" select=".//participants"/>
   <xsl:variable name="lib-topics"       select=".//topics"/>
@@ -820,6 +818,7 @@ OpenDDS::DCPS::TransportIdType
 </xsl:text>
 </xsl:template>
 
+<!-- Output enumeration within Elements class -->
 <xsl:template name="generate-enum">
   <xsl:param name="class" />
   <xsl:param name="values" />
@@ -830,6 +829,7 @@ OpenDDS::DCPS::TransportIdType
   </xsl:call-template>
 </xsl:template>
 
+<!-- Output enumeration values within Elements class -->
 <xsl:template name="generate-enum-values">
   <xsl:param name="values" />
     <xsl:text>
@@ -847,6 +847,7 @@ OpenDDS::DCPS::TransportIdType
 </xsl:text>
 </xsl:template>
 
+<!-- Ignore text -->
 <xsl:template match="text()" mode="declare"/>
 <xsl:template match="text()" mode="define"/>
 
