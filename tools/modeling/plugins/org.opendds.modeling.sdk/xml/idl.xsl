@@ -56,15 +56,12 @@
 </xsl:template>
 <!-- End of main processing template. -->
 
-<!-- TODO: HANDLE FORWARD DECS IN PACKAGES -->
-
+<!-- For packages containing named types, output a module -->
 <xsl:template match="packages[.//types[@name]]" mode="declare">
   <xsl:value-of select="concat('module ', @name, ' {', $newline)"/>
   <xsl:apply-templates mode="declare"/>
   <xsl:value-of select="concat('};', $newline)"/>
 </xsl:template>
-
-<!-- End of main processing template. -->
 
 <!-- Depth first traversal of type nodes processing predecessors first. -->
 <xsl:template name="generate-idl">
@@ -146,6 +143,11 @@
 <xsl:template match="text()" mode="declare">
 </xsl:template>
 
+<!-- Output an IDL module wrapper for packages containing target 
+     This is done as a named template rather than a matched 
+     template because the output order does not match the
+     document order.
+  -->
 <xsl:template name="module-wrapper">
   <xsl:param name="target" select="."/>
   <xsl:choose>
@@ -165,6 +167,7 @@
   </xsl:choose>
 </xsl:template>
 
+<!-- Close the IDL module wrapper for packages containing target -->
 <xsl:template name="close-module-wrapper">
   <xsl:param name="target" select="."/>
   <xsl:choose>
@@ -184,6 +187,7 @@
   </xsl:choose>
 </xsl:template>
 
+<!-- turn a qualified name into module wrappers -->
 <xsl:template name="module-wrapped-qname">
   <xsl:param name="name" select="@name"/>
   <xsl:param name="closing"/>
@@ -342,6 +346,7 @@
                         '&quot;',$newline)"/>
 </xsl:template>
 
+<!-- Output typedef -->
 <xsl:template name="define-type">
   <xsl:param name="targetid"/>
   <xsl:param name="name"/>
@@ -356,6 +361,7 @@
   <xsl:value-of select="concat(';',$newline)"/>
 </xsl:template>
 
+<!--
 <xsl:template name="ref-scopename">
   <xsl:param name="target"/>
   <xsl:param name="referrer" select="."/>
@@ -380,7 +386,9 @@
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>
+-->
 
+<!-- Determine the name of a type -->
 <xsl:template name="typename">
   <xsl:param name="target"/>
   <xsl:variable name="targetname" select="$target/@name"/>
@@ -432,6 +440,7 @@
   </xsl:choose>
 </xsl:template>
 
+<!--
 <xsl:template name="qname">
   <xsl:param name="target" select="."/>
   <xsl:variable name="scopename">
@@ -441,7 +450,12 @@
   </xsl:variable>
   <xsl:value-of select="concat($scopename, $target/@name)"/>
 </xsl:template>
+-->
 
+<!-- Size of a type 
+     You may ask why this is not used for Sequences.  I'm 
+     wondering that myself...
+  -->
 <xsl:template name="typesize">
   <xsl:param name="target"/>
   <xsl:if test="$target/@xsi:type = 'types:Array'">
@@ -482,6 +496,8 @@
   </xsl:choose>
 </xsl:template>
 
+<!-- For sequences of intrinsic types, #include the 
+     corresponding .pidl file -->
 <xsl:template name="processIntrinsicSequences">
 
   <!-- pull tests to output each include only once -->
@@ -552,6 +568,7 @@
   <xsl:value-of select="$newline"/>
 </xsl:template>
 
+<!-- #include external models -->
 <xsl:template name="processExternalModels">
   <xsl:param name="lib-refs" select="//types[@model]/@model"/>
   <xsl:param name="completed"/>
