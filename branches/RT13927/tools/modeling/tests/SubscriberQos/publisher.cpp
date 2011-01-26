@@ -19,6 +19,14 @@ int ACE_TMAIN(int argc, char** argv)
 
     DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
 
+    DDS::Publisher_var publisher = writer->get_publisher();
+    if (publisher->enable() != DDS::RETCODE_OK) {
+      std::cout << "bad return code enabling publisher" << std::endl;
+    }
+    if (writer->enable() != DDS::RETCODE_OK) {
+      std::cout << "bad return code enabling writer" << std::endl;
+    }
+
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
     MessageDataWriter_var message_writer =
