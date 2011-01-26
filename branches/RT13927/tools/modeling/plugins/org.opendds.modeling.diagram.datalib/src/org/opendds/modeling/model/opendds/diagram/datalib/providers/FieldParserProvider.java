@@ -36,6 +36,7 @@ import org.eclipse.gmf.runtime.emf.commands.core.command.CompositeTransactionalC
 import org.eclipse.gmf.runtime.emf.ui.services.parser.ISemanticParser;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 
+import org.opendds.modeling.model.opendds.OpenDDSModel;
 import org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.Field2EditPart;
 import org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.Field3EditPart;
 import org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.FieldEditPart;
@@ -56,11 +57,40 @@ public class FieldParserProvider extends AbstractProvider implements IParserProv
 
 	private final class FieldParser implements ISemanticParser {
 
+		private ICommand basicTypesCreateCommand = null;
+		private String basicTypeCreatedName = null;
+
+		/**
+		 * Because the Ecore will be modified to add basic types, an EMF Command must
+		 * be used since all Ecore changes must done through Commands managed by an EditingDomain
+		 * (see for example the EMF book, section 3.3.3).
+		 * This Command must be executed before FieldSetCommand so that FieldSetCommand
+		 * can use the results of this command for setting the Field.
+		 */
+		private final class BasicTypesCreateCommand extends AbstractTransactionalCommand {
+
+			private OpenDDSModel openDDSModel;
+
+			private BasicTypesCreateCommand(TransactionalEditingDomain domain,
+					String label, List affectedFiles, OpenDDSModel openDDSModel) {
+				super(domain, label, affectedFiles);
+				this.openDDSModel = openDDSModel;
+			}
+
+			@Override
+			protected CommandResult doExecuteWithResult(
+					IProgressMonitor monitor, IAdaptable info)
+					throws ExecutionException {
+				Type dataTypeCreated = BasicTypesSupplier.create(openDDSModel, basicTypeCreatedName);
+				return CommandResult.newOKCommandResult(dataTypeCreated);
+			}
+		}
+
 		private final class FieldSetCommand extends
 				AbstractTransactionalCommand {
 			private final String name;
 			private final String newString;
-			private final Type type;
+			private Type type;
 			private final Field field;
 
 			private FieldSetCommand(TransactionalEditingDomain domain,
@@ -79,6 +109,10 @@ public class FieldParserProvider extends AbstractProvider implements IParserProv
 					return CommandResult.newErrorCommandResult("Invalid input");
 				}
 				field.setName(name);
+				if (type == null && basicTypesCreateCommand != null) {
+					CommandResult createResult = basicTypesCreateCommand.getCommandResult();
+					type = (Type) createResult.getReturnValue();
+				}
 				field.setType(type);
 				return CommandResult.newOKCommandResult();
 			}
@@ -91,7 +125,23 @@ public class FieldParserProvider extends AbstractProvider implements IParserProv
 		@Override
 		public String getEditString(IAdaptable element, int flags) {
 			Field field = getField(element);
-			return field.getName() != null ? field.getName() + " : " + (field.getType() != null ? getTypeName(field.getType()) : "") : "";
+			String editString = "";
+			if (field.getName() != null) {
+				editString = field.getName() + " : ";
+			}
+
+			Type fieldType = field.getType();
+			if (fieldType != null) {
+				String fieldName = "";
+				if (BasicTypesSupplier.isBasic(fieldType.eClass())) {
+					fieldName = fieldType.eClass().getName();
+				}
+				else {
+					fieldName = getTypeName(field.getType());
+				}
+				editString += fieldName;
+			}
+			return editString;
 		}
 
 		@Override
@@ -119,23 +169,48 @@ public class FieldParserProvider extends AbstractProvider implements IParserProv
 			TransactionalEditingDomain editingDomain = TransactionUtil.getEditingDomain(field);
 			ICompositeCommand cc = new CompositeTransactionalCommand(editingDomain, "Field Set");
 
+			if (basicTypesCreateCommand != null) {
+				cc.add(basicTypesCreateCommand);
+			}
+
 			FieldSetCommand fieldSetCommand = new FieldSetCommand(editingDomain, "", Collections.singletonList(WorkspaceSynchronizer.getFile(field.eResource())), name, newString, type,
 					field);
+			cc.add(fieldSetCommand);
 
-			return fieldSetCommand;
+			return cc;
 		}
 
 		private Type findType(final String typeName, final Field field) {
-			Type type = null;
-			if (typeName.length() > 0) {
+			basicTypesCreateCommand = null;
+			basicTypeCreatedName = null;
+			if (typeName.length() == 0) {
+				return null;
+			}
+
+			// For basic types, always use a type instance in OpenDDSModel.basicTypes
+			if (BasicTypesSupplier.getTypeClass(typeName) != null) {
+				EObject rootContainer = com.ociweb.emf.util.ObjectsFinder.findRootContainerObject(field);
+				assert rootContainer instanceof OpenDDSModel;
+				OpenDDSModel openDDSModel = (OpenDDSModel) rootContainer;
+				Type basicType = BasicTypesSupplier.getType(openDDSModel, typeName);
+				if (basicType == null) {
+					TransactionalEditingDomain editingDomain = TransactionUtil.getEditingDomain(field);
+					basicTypesCreateCommand = new BasicTypesCreateCommand(editingDomain, null, null, openDDSModel);
+					basicTypeCreatedName = typeName;
+				}
+				else {
+					return basicType;
+				}
+			}
+			else {
 				EList<Type> reachableTypes = getReachableTypes(field);
 				for (Type typeCandidate: reachableTypes) {
 					if (typeName.equals(getTypeName(typeCandidate))) {
-						type = typeCandidate;
+						return typeCandidate;
 					}
 				}
 			}
-			return type;
+			return null;
 		}
 
 		/**
@@ -214,7 +289,6 @@ public class FieldParserProvider extends AbstractProvider implements IParserProv
 		
 		/**
 		 * Determine the name for allowable Types to be referenced by a Field.
-		 * For primitive types (Simple, String, WString), return the name of the EClass itself.
 		 * @param type
 		 * @return
 		 */
@@ -233,18 +307,6 @@ public class FieldParserProvider extends AbstractProvider implements IParserProv
 					}
 				}
 			}
-			
-			EPackage typesPackage = EPackage.Registry.INSTANCE.getEPackage(TypesPackage.eNS_URI);
-
-			// Determine if type is a "basic" type (does not contain a name attribute). If so, use name of type.
-			String[] basicClassNames = {"Simple", "String", "WString"};
-			for (String basicClassName: basicClassNames) {
-				EClass basicClass = (EClass) typesPackage.getEClassifier(basicClassName);
-				if (basicClass.isSuperTypeOf(typeClass)) {
-					return typeClass.getName();
-				}
-			}
-
 			return name;
 		}
 	}
