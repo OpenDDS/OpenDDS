@@ -54,6 +54,9 @@
   <xsl:value-of select="concat('}', $newline)"/>
 </xsl:template>
 
+<!-- Output class method definitions for an instance.
+     These are uniquely qualified by their containing namespace.
+  -->
 <xsl:template name="output-instance">
   <xsl:variable name="Instname">
     <xsl:call-template name="capitalize">
@@ -88,6 +91,8 @@
 
 </xsl:template>
 
+<!-- Transports for the instance, ouput case which creates and
+     registers configuration... -->
 <xsl:template match="transport">
   <xsl:variable name="type">
     <xsl:call-template name="transport-type"/>
@@ -107,6 +112,7 @@
                                @value, ';', $newline)"/>
 </xsl:template>
 
+<!-- Output general configuration settings -->
 <xsl:template match="queue_messages_per_pool 
                    | queue_initial_pools
                    | max_packet_size
@@ -119,6 +125,7 @@
                                @value, ';', $newline)"/>
 </xsl:template>
 
+<!-- Handle TCP-specific configuration parameters -->
 <xsl:template match="TCPTransport">
   <xsl:text>        {
           OpenDDS::DCPS::SimpleTcpConfiguration* specific_config =
@@ -129,6 +136,7 @@
 </xsl:text>
 </xsl:template>
 
+<!-- Handle Multicast-specific configuration parameters -->
 <xsl:template match="MulticastTransport">
   <xsl:text>        {
           OpenDDS::DCPS::MulticastConfiguration* specific_config =
@@ -139,6 +147,7 @@
 </xsl:text>
 </xsl:template>
 
+<!-- Handle UDP-specific configuration parameters -->
 <xsl:template match="UDPTransport">
   <xsl:text>        {
           OpenDDS::DCPS::UdpConfiguration* specific_config =
@@ -149,6 +158,7 @@
 </xsl:text>
 </xsl:template>
 
+<!-- Ouput IP address conversion for local address -->
 <xsl:template match="local_address_str">
   <xsl:variable name="value">
     <xsl:call-template name="str-value"/>
@@ -158,6 +168,7 @@
                                ';', $newline)"/>
 </xsl:template>
 
+<!-- Output type-specific configuration settings -->
 <xsl:template match="enable_nagle_algorithm
                    | conn_retry_initial_delay
                    | conn_retry_backoff_multiplier
@@ -181,6 +192,7 @@
                                @value, ';', $newline)"/>
 </xsl:template>
 
+<!-- Ouput IP address conversion for group address -->
 <xsl:template match="group_address">
   <xsl:variable name="value">
     <xsl:call-template name="str-value"/>
@@ -190,6 +202,7 @@
                                ';', $newline)"/>
 </xsl:template>
 
+<!-- Map subelements to transport type string -->
 <xsl:template name="transport-type">
   <xsl:choose>
     <xsl:when test="TCPTransport">SimpleTcp</xsl:when>
@@ -201,6 +214,7 @@
   </xsl:choose>
 </xsl:template>
 
+<!-- Handle string values with and without quotes -->
 <xsl:template name="str-value">
   <xsl:param name="value" select="@value"/>
   <xsl:choose>
@@ -213,5 +227,6 @@
   </xsl:choose>
 </xsl:template>
 
+<!-- Ignore text -->
 <xsl:template match="text()"/>
 </xsl:stylesheet>
