@@ -18,7 +18,7 @@
 <xsl:variable name="model" select="document(/generator:CodeGen/source/@name)/opendds:OpenDDSModel"/>
 <xsl:variable name="modelname" select="$model//@name"/>
 
-<!-- process the entire model document to produce the C++ code. -->
+<!-- process the entire genfile document to produce the MPC base. -->
 <xsl:template match="/">
   <xsl:variable name="model-refs">
     <xsl:call-template name="data-model-ref-names">

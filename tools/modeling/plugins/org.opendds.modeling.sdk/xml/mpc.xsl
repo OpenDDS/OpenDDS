@@ -21,7 +21,7 @@
 
 <xsl:variable name="MODELNAME" select="translate($modelname, $lower, $upper)"/>
 
-<!-- process the entire model document to produce the C++ code. -->
+<!-- process the entire genfile document to produce the MPC file. -->
 <xsl:template match="/">
   <xsl:variable name="dcpslib" select="$model//libs[@xsi:type = 'opendds:DcpsLib']"/>
   <xsl:variable name="model-refs">

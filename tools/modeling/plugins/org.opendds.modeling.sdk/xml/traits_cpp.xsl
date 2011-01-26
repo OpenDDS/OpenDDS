@@ -23,7 +23,7 @@
 <xsl:variable name="modelname" select="$model/@name"/>
 <xsl:variable name="instances" select="//instance"/>
 
-<!-- process the entire model document to produce the C++ code. -->
+<!-- process the entire genfile document to produce the C++ code. -->
 <xsl:template match="/">
   <xsl:value-of select="concat('#include &quot;', $modelname, 'Traits.h&quot;', 
                                $newline)"/>
@@ -38,12 +38,14 @@
   <xsl:apply-templates select="$model"/>
 </xsl:template>
 
+<!-- For packages containing a DCPS lib, output a namespace -->
 <xsl:template match="packages[.//libs[@xsi:type='opendds:DcpsLib']]">
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
   <xsl:apply-templates/>
   <xsl:value-of select="concat('}', $newline)"/>
 </xsl:template>
 
+<!-- For a DCPS lib, output a namespace, then each instance -->
 <xsl:template match="libs[@xsi:type='opendds:DcpsLib']">
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
   <xsl:for-each select="$instances">
