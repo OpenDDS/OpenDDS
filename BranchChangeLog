@@ -1,3 +1,10 @@
+Wed Jan 26 22:10:32 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerMC/fs_signal.h:
+        * tools/modeling/tests/MessengerMC/fs_signal.cpp:
+
+          File System signaling class.
+
 Wed Jan 26 19:57:20 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl:
