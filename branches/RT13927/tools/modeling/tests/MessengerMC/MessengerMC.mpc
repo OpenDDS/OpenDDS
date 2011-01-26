@@ -6,6 +6,7 @@ project(*xmlPublisher) : dcpsexe, dds_model {
 
   Source_Files {
     publisher.cpp
+    fs_signal.cpp
   }
 }
 
@@ -17,6 +18,7 @@ project(*xmlSubscriber) : dcpsexe, dds_model {
 
   Source_Files {
     subscriber.cpp
+    fs_signal.cpp
   }
 }
 

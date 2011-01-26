@@ -7,6 +7,8 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
+#include "fs_signal.h"
+
 #include "model/MessengerMCTraits.h"
 #include <model/NullReaderListener.h>
 
@@ -48,6 +50,10 @@ ACE_THROW_SPEC((CORBA::SystemException))
                 << "         count      = " << message.count        << std::endl
                 << "         text       = " << message.text.in()    << std::endl;
 
+      if (message.count == 9) {
+        // Signal completion to publisher
+        FileSystemSignal(2).signal();
+      }
     }
 
   } else {
@@ -84,32 +90,10 @@ int ACE_TMAIN(int argc, char** argv)
                        -1);
     }
 
-    // Block until Publisher completes
-    DDS::StatusCondition_var condition = reader->get_statuscondition();
-    condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
+    ACE_OS::sleep(3);
 
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-
-    DDS::ConditionSeq conditions;
-    DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0 };
-    DDS::Duration_t timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-
-    do {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" wait failed!\n")), -1);
-      }
-
-      if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" get_subscription_matched_status failed!\n")), -1);
-      }
-    } while (matches.current_count > 0);
-
-    ws->detach_condition(condition);
+    // Signal readiness to publisher
+    FileSystemSignal(1).signal();
 
     // END OF EXISTING MESSENGER EXAMPLE CODE
 

@@ -7,6 +7,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
+#include "fs_signal.h"
 #include "model/MessengerMCTraits.h"
 
 int ACE_TMAIN(int argc, char** argv)
@@ -32,34 +33,7 @@ int ACE_TMAIN(int argc, char** argv)
     }
 
     // Block until Subscriber is available
-    DDS::StatusCondition_var condition = writer->get_statuscondition();
-    condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-
-    DDS::ConditionSeq conditions;
-    DDS::PublicationMatchedStatus matches = { 0, 0, 0, 0, 0 };
-    DDS::Duration_t timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-
-    do {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
-                          ACE_TEXT(" wait failed!\n")),
-                         -1);
-      }
-
-      if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
-                          ACE_TEXT(" get_publication_matched_status failed!\n")),
-                         -1);
-      }
-
-    } while (matches.current_count < 1);
-
-    ws->detach_condition(condition);
+    FileSystemSignal(1).wait_forever();
 
     // Write samples
     data1::Message message;
@@ -70,6 +44,7 @@ int ACE_TMAIN(int argc, char** argv)
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
     message.count      = 0;
 
+    std::cout << "pub sending" << std::endl;
     for (int i = 0; i < 10; i++) {
       DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
       ++message.count;
@@ -82,13 +57,9 @@ int ACE_TMAIN(int argc, char** argv)
     }
 
     // Wait for samples to be acknowledged
-    if (message_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
-                        ACE_TEXT(" wait_for_acknowledgments failed!\n")),
-                       -1);
-    }
-
+    std::cout << "pub waiting for ack signal" << std::endl;
+    FileSystemSignal(2).wait_forever();
+    
     // END OF EXISTING MESSENGER EXAMPLE CODE
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
@@ -102,6 +73,7 @@ int ACE_TMAIN(int argc, char** argv)
                      -1);
   }
 
+  std::cout << "pub exiting" << std::endl;
   return 0;
 }
 
