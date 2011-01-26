@@ -1,3 +1,14 @@
+Wed Jan 26 19:23:39 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpb.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/mpc.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/paths_mpb.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_h.xsl:
+
+          Additional documentation.
+
 Wed Jan 26 19:22:57 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/EmptyLibs/EmptyLibs.mpc:

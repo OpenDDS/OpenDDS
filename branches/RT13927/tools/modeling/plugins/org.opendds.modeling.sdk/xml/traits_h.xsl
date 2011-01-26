@@ -24,6 +24,7 @@
 <xsl:variable name="MODELNAME" select="translate($modelname, $lower, $upper)"/>
 <xsl:variable name="instances" select="//instance"/>
 
+<!-- process the entire genfile document to produce the C++ header. -->
 <xsl:template match="/">
   <xsl:value-of select="concat('#ifndef ', $MODELNAME, '_TRAITS_H', $newline)"/>
   <xsl:value-of select="concat('#define ', $MODELNAME, '_TRAITS_H', $newline)"/>

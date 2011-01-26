@@ -17,7 +17,7 @@
 <xsl:variable name="model" select="document(/generator:CodeGen/source/@name)/opendds:OpenDDSModel"/>
 <xsl:variable name="modelname" select="$model//@name"/>
 
-<!-- process the entire model document to produce the C++ code. -->
+<!-- process the entire model document to produce the MPC base for external paths. -->
 <xsl:template match="/">
   <xsl:value-of select="concat('project {', $newline)"/>
   <xsl:for-each select="/generator:CodeGen/searchPaths/location">

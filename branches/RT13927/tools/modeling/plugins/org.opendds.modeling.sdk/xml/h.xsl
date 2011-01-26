@@ -21,7 +21,7 @@
 <xsl:variable name = "modelname" select = "/opendds:OpenDDSModel/@name"/>
 <xsl:variable name = "MODELNAME" select = "translate($modelname, $lower, $upper)"/>
 
-<!-- process the entire model document to produce the C++ code. -->
+<!-- process the entire model document to produce the C++ header. -->
 <xsl:template match="/">
 
   <xsl:text>#ifndef </xsl:text>
