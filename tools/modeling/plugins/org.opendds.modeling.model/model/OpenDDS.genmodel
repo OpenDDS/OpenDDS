@@ -46,7 +46,7 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute OpenDDS.ecore#//OpenDDSModel/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/libs"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/packages"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/simpleTypes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//OpenDDSModel/basicTypes"/>
     </genClasses>
     <genClasses ecoreClass="OpenDDS.ecore#//LibPackage">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//LibPackage/packages"/>
@@ -65,8 +65,8 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DcpsLib/topics"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DcpsLib/policies"/>
     </genClasses>
-    <genClasses ecoreClass="OpenDDS.ecore#//SimpleTypes">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//SimpleTypes/types"/>
+    <genClasses ecoreClass="OpenDDS.ecore#//BasicTypes">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//BasicTypes/types"/>
     </genClasses>
   </genPackages>
   <genPackages prefix="Core" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"

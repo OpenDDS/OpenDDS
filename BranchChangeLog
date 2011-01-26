@@ -1,3 +1,31 @@
+Wed Jan 26 19:40:44 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+
+          Changed name of SimpleTypes to BasicTypes to avoid confusion as String and WString will
+          also be included in the mix.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/providers/BasicTypesSupplier.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/providers/FieldParserProvider.java:
+
+          Updated Field parser to use OpenDDSModel.basicTypes when user specifies a basic type for a Struct or Union Field type.
+          Thus it is no longer necessary for the user to create a basic type before it specified as a Field type.
+
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds:
+
+          Updated to include a BasicTypes instance and Field types now refer to instances under
+          BasicTypes.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/impl:
+
+          Updated to svn:ignore newly auto-generated files.
+
 Wed Jan 26 19:23:39 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
