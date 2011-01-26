@@ -502,7 +502,7 @@
 
   <!-- pull tests to output each include only once -->
   <xsl:variable name="sequence-defs" select="$local-types[@xsi:type = 'types:Sequence']"/>
-  <xsl:variable name="sequence-types" select="$local-types[@xmi:id = $sequence-defs/@subtype]"/>
+  <xsl:variable name="sequence-types" select="$types[@xmi:id = $sequence-defs/@subtype]"/>
 
   <xsl:if test="$sequence-types[@xsi:type = 'types:Boolean']">
     <xsl:text>#include &lt;tao/BooleanSeq.pidl&gt;

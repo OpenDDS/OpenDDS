@@ -1,3 +1,9 @@
+Wed Jan 26 22:38:02 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/idl.xsl:
+
+          match remote types for sequences.
+
 Wed Jan 26 22:32:38 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerMC/MessengerMC.mpc:
@@ -5,7 +11,7 @@ Wed Jan 26 22:32:38 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
         * tools/modeling/tests/MessengerMC/run_test.pl:
         * tools/modeling/tests/MessengerMC/subscriber.cpp:
 
-          Fix issues in running multicast: can't rely on publication 
+          Fix issues in running multicast: can't rely on publication
           matched, subscription matched, or wait for acknowledgements.
 
 Wed Jan 26 22:10:32 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
