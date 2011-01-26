@@ -1,3 +1,10 @@
+Wed Jan 26 19:57:20 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/traits_h.xsl:
+
+          Additional documentation.
+
 Wed Jan 26 19:40:44 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:

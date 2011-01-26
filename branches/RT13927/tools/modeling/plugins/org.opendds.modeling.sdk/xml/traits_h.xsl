@@ -36,12 +36,14 @@
 </xsl:text>
 </xsl:template>
 
+<!-- For packages containing DCPS lib, output a namespace -->
 <xsl:template match="packages[.//libs[@xsi:type='opendds:DcpsLib']]">
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
   <xsl:apply-templates/>
   <xsl:value-of select="concat('}', $newline)"/>
 </xsl:template>
 
+<!-- For DCPS lib, output a namespace -->
 <xsl:template match="libs[@xsi:type='opendds:DcpsLib']">
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
   <xsl:variable name="elements-qname">
@@ -57,6 +59,7 @@
   <xsl:value-of select="concat('}', $newline)"/>
 </xsl:template>
 
+<!-- For a given instance, output class declaration -->
 <xsl:template name="output-instance">
   <xsl:param name="instance"/>
   <xsl:param name="elements-qname"/>
@@ -88,6 +91,7 @@
   )"/>
 </xsl:template>
 
+<!-- Ignore text -->
 <xsl:template match="text()"/>
 
 </xsl:stylesheet>
