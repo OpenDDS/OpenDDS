@@ -23,7 +23,8 @@
                                 debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bootclasspath}" source="1.6"
                                 target="1.6" errorProperty="compilation.error.occured" sourcepath="" srcdir="src">
                         <compilerarg line="${compilerArg}" compiler="${build.compiler}"/>
-                        <include name="org/opendds/modeling/sdk/codegen/CodeGenerator.java"/>
+                        <include name="org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java"/>
+                        <include name="org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/Parsed*File.java"/>
                         <compilerarg value="@${basedir}/javaCompiler...args" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/>
                         <compilerarg line="-log '${build.result.folder}/bin${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/>
                 </javac>

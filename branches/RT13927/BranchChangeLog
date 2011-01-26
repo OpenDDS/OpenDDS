@@ -1,3 +1,11 @@
+Wed Jan 26 17:18:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/ant_custom.xml:
+
+          Fixed the paths to the *.java files that need to be compiled for
+          setup.pl to work.  Previously this was referencing the old files
+          from org.opendds.modeling.sdk.
+
 Wed Jan 26 17:16:20 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/EmptyLibs/ELTypes.opendds:
