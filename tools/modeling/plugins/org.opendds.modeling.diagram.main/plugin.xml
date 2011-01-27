@@ -47,7 +47,7 @@
   	  <wizard
   	     name="%newWizardName"
   	     icon="icons/obj16/OpenDDSDiagramFile.gif"
-  	     category="org.eclipse.ui.Examples"
+  	     category="org.opendds.modeling.Wizard.category.ID"
   	     class="org.opendds.modeling.diagram.main.part.OpenDDSCreationWizard"
   	     id="org.opendds.modeling.diagram.main.part.OpenDDSCreationWizardID">
   	  	 <description>%newWizardDesc</description>  

@@ -1,3 +1,16 @@
+Thu Jan 27 17:34:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:
+
+          Set the NewWizard's category ID to the same one we use for the emf
+          model, instead of the Eclipse Examples category.
+
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/.settings:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/build.properties:
+
+          Added common settings for Java compiler warnings (copied from
+          org.opendds.modeling.model.edit).
+
 Thu Jan 27 16:27:01 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerMC/publisher.cpp:
