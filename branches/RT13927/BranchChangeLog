@@ -1,3 +1,11 @@
+Thu Jan 27 16:27:01 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerMC/publisher.cpp:
+        * tools/modeling/tests/MessengerMC/run_test.pl:
+        * tools/modeling/tests/MessengerMC/subscriber.cpp:
+
+          Give up on checking results of multicast.  Its unreliable.
+
 Thu Jan 27 15:06:25 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
