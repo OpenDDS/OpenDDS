@@ -1,3 +1,17 @@
+Thu Jan 27 15:06:25 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+
+          Didn't complete changes from commit "Mon Dec 27 15:23:53 UTC 2010" related
+          to diagrams generated from Ecore models.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:
+
+          There haven't been problems seen for the main diagram when generating
+          diagrams from Ecore models, but applied change used in other diagrams
+          in case there's an edge condition that fires off the bug.
+
 Thu Jan 27 14:13:30 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:

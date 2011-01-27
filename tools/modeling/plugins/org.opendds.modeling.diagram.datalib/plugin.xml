@@ -228,7 +228,7 @@
          <!-- Emptied semanticHints according to workaround for diagram reload bug 281014,
          https://bugs.eclipse.org/bugs/show_bug.cgi?id=281014 -->
          <context viewClass="org.eclipse.gmf.runtime.notation.Node" semanticHints=""/>
-         <context viewClass="org.eclipse.gmf.runtime.notation.Edge" semanticHints="4001,4002,4003,4004,4005,4006"/>
+         <context viewClass="org.eclipse.gmf.runtime.notation.Edge" semanticHints=""/>
       </viewProvider>
    </extension>
 
