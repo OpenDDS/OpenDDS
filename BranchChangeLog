@@ -1,3 +1,9 @@
+Thu Jan 27 19:04:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/CopyTopicQos/publisher.cpp:
+
+          Wait for 2 matches before sending - there are 2 readers.
+
 Thu Jan 27 17:34:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:

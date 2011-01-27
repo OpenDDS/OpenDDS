@@ -1,4 +1,3 @@
-
 #include <ace/Log_Msg.h>
 
 #include <dds/DCPS/WaitSet.h>
@@ -78,6 +77,7 @@ int ACE_TMAIN(int argc, char** argv)
     DDS::Duration_t timeout = { 30, 0 };
 
     do {
+      std::cout << "publisher checking matches" << std::endl;
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
@@ -91,8 +91,10 @@ int ACE_TMAIN(int argc, char** argv)
                           ACE_TEXT(" get_publication_matched_status failed!\n")),
                          -1);
       }
+      std::cout << "publisher matches " << matches.current_count << std::endl;
 
-    } while (matches.current_count < 1);
+    } while (matches.current_count < 2);  // Two readers in this case.
+    std::cout << "publisher matched"  << std::endl;
 
     ws->detach_condition(condition);
 
@@ -105,6 +107,7 @@ int ACE_TMAIN(int argc, char** argv)
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
     message.count      = 0;
 
+    std::cout << "publisher sending"  << std::endl;
     for (int i = 0; i < 10; i++) {
       DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
       ++message.count;
@@ -115,6 +118,8 @@ int ACE_TMAIN(int argc, char** argv)
                    ACE_TEXT(" write returned %d!\n"), error));
       }
     }
+
+    std::cout << "publisher waiting for ackknowledgements"  << std::endl;
 
     // Wait for samples to be acknowledged
     if (message_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
@@ -137,6 +142,7 @@ int ACE_TMAIN(int argc, char** argv)
                      -1);
   }
 
+  std::cout << "publisher exiting" << std::endl;
   return 0;
 }
 
