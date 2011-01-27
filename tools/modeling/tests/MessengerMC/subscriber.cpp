@@ -13,10 +13,18 @@
 #include <model/NullReaderListener.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
-  virtual void on_data_available(
-    DDS::DataReader_ptr reader)
+  
+  public:
+    ReaderListener(bool& complete_flag);
+  private:
+  virtual void on_data_available(DDS::DataReader_ptr reader)
   ACE_THROW_SPEC((CORBA::SystemException));
+
+    bool& _complete;
 };
+
+ReaderListener::ReaderListener(bool& complete_flag) : _complete(complete_flag) {
+}
 
 // START OF EXISTING MESSENGER EXAMPLE LISTENER CODE
 
@@ -53,6 +61,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
       if (message.count == 9) {
         // Signal completion to publisher
         FileSystemSignal(2).signal();
+        _complete = true;
       }
     }
 
@@ -67,6 +76,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 int ACE_TMAIN(int argc, char** argv)
 {
+  bool complete = false;
   try {
     OpenDDS::Model::Application application(argc, argv);
     MessengerMC::DefaultMessengerMCType model(application, argc, argv);
@@ -75,7 +85,7 @@ int ACE_TMAIN(int argc, char** argv)
 
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
 
-    DDS::DataReaderListener_var listener(new ReaderListener);
+    DDS::DataReaderListener_var listener(new ReaderListener(complete));
     reader->set_listener( listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
@@ -90,8 +100,9 @@ int ACE_TMAIN(int argc, char** argv)
                        -1);
     }
 
-    ACE_OS::sleep(3);
+    ACE_OS::sleep(2);
 
+    std::cout << "sub signaling ready" << std::endl;
     // Signal readiness to publisher
     FileSystemSignal(1).signal();
 
@@ -109,5 +120,8 @@ int ACE_TMAIN(int argc, char** argv)
                      -1);
   }
 
+  ACE_OS::sleep(5);
+
+  std::cout << "sub exiting" << std::endl;
   return 0;
 }
