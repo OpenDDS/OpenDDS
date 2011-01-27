@@ -1,3 +1,16 @@
+Thu Jan 27 19:42:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerSimpleTypes:
+        * tools/modeling/tests/MessengerSimpleTypes/MessengerSimpleTypes.gen:
+        * tools/modeling/tests/MessengerSimpleTypes/MessengerSimpleTypes.mpc:
+        * tools/modeling/tests/MessengerSimpleTypes/MessengerSimpleTypes.mwc:
+        * tools/modeling/tests/MessengerSimpleTypes/MessengerSimpleTypes.opendds:
+        * tools/modeling/tests/MessengerSimpleTypes/publisher.cpp:
+        * tools/modeling/tests/MessengerSimpleTypes/subscriber.cpp:
+        * tools/modeling/tests/MessengerSimpleTypes/run_test.pl
+
+          New test for basic types (was called simple types when I created it).
+
 Thu Jan 27 19:11:20 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
