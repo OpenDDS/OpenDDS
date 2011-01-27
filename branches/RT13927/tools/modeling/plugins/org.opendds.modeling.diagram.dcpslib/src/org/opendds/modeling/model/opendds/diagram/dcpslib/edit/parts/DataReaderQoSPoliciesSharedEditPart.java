@@ -26,7 +26,7 @@ public class DataReaderQoSPoliciesSharedEditPart extends
 	/**
 	 * @generated
 	 */
-	public static final int VISUAL_ID = 7031;
+	public static final int VISUAL_ID = 7044;
 
 	/**
 	 * @generated

@@ -1,3 +1,26 @@
+Thu Jan 27 19:11:20 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+
+          Add Feature Seq Initializers for creating DataReader/DataWriter when
+          Subscriber/Publisher is created. To get this to work had to use
+          DataReader/DataWriter instead of dataReader/dataWriter for mapping.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DataReaderQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DataReaderQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DataWriterQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DataWriterQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.trace:
+
+          Updates due to changes in DcpsLib.gmfmap.
+
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds_diagram:
+
+          Re-generated diagram since visual IDs have changed as a consequence of mapping change.
+
 Thu Jan 27 19:04:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/CopyTopicQos/publisher.cpp:

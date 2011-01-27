@@ -28,7 +28,7 @@
         name="Domain Entity Name Empty"
         description="Domain entity names should not be empty"
         id="org.opendds.modeling.model.dcps.validation.error.domain_entity_name_blank"
-        rule="//@expressionProviders/@providers.0/@expressions.18"
+        rule="//@expressionProviders/@providers.0/@expressions.20"
         message="Domain entity name is empty"
         category="//@audits/@categories.1">
       <target
@@ -42,7 +42,7 @@
         name="DomainParticipant Empty"
         description="DomainParticipant should have a Publisher or Subscriber"
         id="org.opendds.modeling.model.dcps.validation.warning.domainparticipant_empty"
-        rule="//@expressionProviders/@providers.0/@expressions.19"
+        rule="//@expressionProviders/@providers.0/@expressions.21"
         message="A DomainParticipant should have at least one Publisher or Subscriber"
         severity="WARNING"
         category="//@audits/@categories.2">
@@ -106,6 +106,22 @@
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DomainParticipant/publishers"/>
         <childMetaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DomainParticipant/publishers"/>
+        <modelElementInitializer
+            xsi:type="gmfgen:GenFeatureSeqInitializer">
+          <initializers
+              xsi:type="gmfgen:GenReferenceNewElementSpec">
+            <feature
+                href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/Publisher/writers"/>
+            <newElementInitializers>
+              <initializers
+                  xsi:type="gmfgen:GenFeatureValueSpec"
+                  value="//@expressionProviders/@providers.0/@expressions.0">
+                <feature
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
+              </initializers>
+            </newElementInitializers>
+          </initializers>
+        </modelElementInitializer>
       </modelFacet>
       <labels
           visualID="5006"
@@ -166,7 +182,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3003"
+        visualID="3059"
         editPartClassName="DataWriterEditPart"
         itemSemanticEditPolicyClassName="DataWriterItemSemanticEditPolicy"
         canonicalEditPolicyClassName="DataWriterCanonicalEditPolicy"
@@ -186,14 +202,14 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class DataReaderWriterFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDataReaderWriterStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDataReaderWriterNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDataReaderWriterCopyFromTopicQosFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public DataReaderWriterFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureDataReaderWriterStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDataReaderWriterStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDataReaderWriterStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureDataReaderWriterNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDataReaderWriterNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDataReaderWriterNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureDataReaderWriterCopyFromTopicQosFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDataReaderWriterCopyFromTopicQosFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureDataReaderWriterCopyFromTopicQosFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDataReaderWriterStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureDataReaderWriterStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDataReaderWriterNameFigure() {&#xA;&#x9;&#x9;return fFigureDataReaderWriterNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDataReaderWriterCopyFromTopicQosFigure() {&#xA;&#x9;&#x9;return fFigureDataReaderWriterCopyFromTopicQosFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/dataWriter"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DataWriter"/>
         <containmentMetaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/Publisher/writers"/>
         <childMetaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/Publisher/writers"/>
       </modelFacet>
       <labels
-          visualID="5010"
+          visualID="5252"
           editPartClassName="DataWriterNameEditPart"
           itemSemanticEditPolicyClassName="DataWriterNameItemSemanticEditPolicy"
           elementIcon="true">
@@ -211,7 +227,7 @@
         </modelFacet>
       </labels>
       <labels
-          visualID="5131"
+          visualID="5253"
           editPartClassName="DataWriterName2EditPart"
           itemSemanticEditPolicyClassName="DataWriterName2ItemSemanticEditPolicy"
           readOnly="true">
@@ -230,7 +246,7 @@
         </modelFacet>
       </labels>
       <labels
-          visualID="5242"
+          visualID="5254"
           editPartClassName="DataWriterCopyFromTopicQosEditPart"
           itemSemanticEditPolicyClassName="DataWriterCopyFromTopicQosItemSemanticEditPolicy">
         <diagramRunTimeClass
@@ -285,13 +301,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.0">
+                  value="//@expressionProviders/@providers.0/@expressions.1">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.1">
+                  value="//@expressionProviders/@providers.0/@expressions.2">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
@@ -523,13 +539,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.2">
+                  value="//@expressionProviders/@providers.0/@expressions.3">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.3">
+                  value="//@expressionProviders/@providers.0/@expressions.4">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
@@ -881,13 +897,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.4">
+                  value="//@expressionProviders/@providers.0/@expressions.5">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.5">
+                  value="//@expressionProviders/@providers.0/@expressions.6">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
@@ -1036,13 +1052,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.6">
+                  value="//@expressionProviders/@providers.0/@expressions.7">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.7">
+                  value="//@expressionProviders/@providers.0/@expressions.8">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
@@ -1191,13 +1207,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.8">
+                  value="//@expressionProviders/@providers.0/@expressions.9">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.9">
+                  value="//@expressionProviders/@providers.0/@expressions.10">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
@@ -1533,13 +1549,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.10">
+                  value="//@expressionProviders/@providers.0/@expressions.11">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.11">
+                  value="//@expressionProviders/@providers.0/@expressions.12">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
@@ -2167,13 +2183,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.0">
+                  value="//@expressionProviders/@providers.0/@expressions.1">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.1">
+                  value="//@expressionProviders/@providers.0/@expressions.2">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
@@ -2338,13 +2354,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.2">
+                  value="//@expressionProviders/@providers.0/@expressions.3">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.3">
+                  value="//@expressionProviders/@providers.0/@expressions.4">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
@@ -2713,13 +2729,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.4">
+                  value="//@expressionProviders/@providers.0/@expressions.5">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.5">
+                  value="//@expressionProviders/@providers.0/@expressions.6">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
@@ -2801,13 +2817,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.6">
+                  value="//@expressionProviders/@providers.0/@expressions.7">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.7">
+                  value="//@expressionProviders/@providers.0/@expressions.8">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
@@ -2889,13 +2905,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.8">
+                  value="//@expressionProviders/@providers.0/@expressions.9">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.9">
+                  value="//@expressionProviders/@providers.0/@expressions.10">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
@@ -3164,13 +3180,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.10">
+                  value="//@expressionProviders/@providers.0/@expressions.11">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.11">
+                  value="//@expressionProviders/@providers.0/@expressions.12">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
@@ -4270,6 +4286,22 @@
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DomainParticipant/subscribers"/>
         <childMetaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DomainParticipant/subscribers"/>
+        <modelElementInitializer
+            xsi:type="gmfgen:GenFeatureSeqInitializer">
+          <initializers
+              xsi:type="gmfgen:GenReferenceNewElementSpec">
+            <feature
+                href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/Subscriber/readers"/>
+            <newElementInitializers>
+              <initializers
+                  xsi:type="gmfgen:GenFeatureValueSpec"
+                  value="//@expressionProviders/@providers.0/@expressions.13">
+                <feature
+                    href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
+              </initializers>
+            </newElementInitializers>
+          </initializers>
+        </modelElementInitializer>
       </modelFacet>
       <labels
           visualID="5008"
@@ -4330,7 +4362,7 @@
       </labels>
     </childNodes>
     <childNodes
-        visualID="3004"
+        visualID="3060"
         editPartClassName="DataReaderEditPart"
         itemSemanticEditPolicyClassName="DataReaderItemSemanticEditPolicy"
         canonicalEditPolicyClassName="DataReaderCanonicalEditPolicy"
@@ -4350,14 +4382,14 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class DataReaderWriterFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDataReaderWriterStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDataReaderWriterNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDataReaderWriterCopyFromTopicQosFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public DataReaderWriterFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureDataReaderWriterStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDataReaderWriterStereotypeFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDataReaderWriterStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureDataReaderWriterNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDataReaderWriterNameFigure.setText(&quot;&lt;...>&quot;);&#xA;&#xA;this.add(fFigureDataReaderWriterNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureDataReaderWriterCopyFromTopicQosFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDataReaderWriterCopyFromTopicQosFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureDataReaderWriterCopyFromTopicQosFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDataReaderWriterStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureDataReaderWriterStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDataReaderWriterNameFigure() {&#xA;&#x9;&#x9;return fFigureDataReaderWriterNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDataReaderWriterCopyFromTopicQosFigure() {&#xA;&#x9;&#x9;return fFigureDataReaderWriterCopyFromTopicQosFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/dataReader"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DataReader"/>
         <containmentMetaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/Subscriber/readers"/>
         <childMetaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/Subscriber/readers"/>
       </modelFacet>
       <labels
-          visualID="5011"
+          visualID="5255"
           editPartClassName="DataReaderNameEditPart"
           itemSemanticEditPolicyClassName="DataReaderNameItemSemanticEditPolicy"
           elementIcon="true">
@@ -4375,7 +4407,7 @@
         </modelFacet>
       </labels>
       <labels
-          visualID="5239"
+          visualID="5256"
           editPartClassName="DataReaderName2EditPart"
           itemSemanticEditPolicyClassName="DataReaderName2ItemSemanticEditPolicy"
           readOnly="true">
@@ -4394,7 +4426,7 @@
         </modelFacet>
       </labels>
       <labels
-          visualID="5249"
+          visualID="5257"
           editPartClassName="DataReaderCopyFromTopicQosEditPart"
           itemSemanticEditPolicyClassName="DataReaderCopyFromTopicQosItemSemanticEditPolicy">
         <diagramRunTimeClass
@@ -4449,13 +4481,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.12">
+                  value="//@expressionProviders/@providers.0/@expressions.14">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.13">
+                  value="//@expressionProviders/@providers.0/@expressions.15">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
@@ -4468,13 +4500,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.14">
+                  value="//@expressionProviders/@providers.0/@expressions.16">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.15">
+                  value="//@expressionProviders/@providers.0/@expressions.17">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
@@ -4689,13 +4721,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.16">
+                  value="//@expressionProviders/@providers.0/@expressions.18">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.17">
+                  value="//@expressionProviders/@providers.0/@expressions.19">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
@@ -4927,13 +4959,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.12">
+                  value="//@expressionProviders/@providers.0/@expressions.14">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.13">
+                  value="//@expressionProviders/@providers.0/@expressions.15">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
@@ -4946,13 +4978,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.14">
+                  value="//@expressionProviders/@providers.0/@expressions.16">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.15">
+                  value="//@expressionProviders/@providers.0/@expressions.17">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
@@ -5033,13 +5065,13 @@
             <newElementInitializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.16">
+                  value="//@expressionProviders/@providers.0/@expressions.18">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/nanosecond"/>
               </initializers>
               <initializers
                   xsi:type="gmfgen:GenFeatureValueSpec"
-                  value="//@expressionProviders/@providers.0/@expressions.17">
+                  value="//@expressionProviders/@providers.0/@expressions.19">
                 <feature
                     href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//enumerations/Period/second"/>
               </initializers>
@@ -5588,7 +5620,7 @@
           figureQualifiedClassName="org.eclipse.draw2d.RectangleFigure"/>
     </compartments>
     <compartments
-        visualID="7015"
+        visualID="7041"
         editPartClassName="DataWriterQoSPoliciesCustomEditPart"
         itemSemanticEditPolicyClassName="DataWriterQoSPoliciesCustomItemSemanticEditPolicy"
         canonicalEditPolicyClassName="DataWriterQoSPoliciesCustomCanonicalEditPolicy"
@@ -5603,7 +5635,7 @@
           figureQualifiedClassName="org.eclipse.draw2d.RectangleFigure"/>
     </compartments>
     <compartments
-        visualID="7016"
+        visualID="7042"
         editPartClassName="DataWriterQoSPoliciesSharedEditPart"
         itemSemanticEditPolicyClassName="DataWriterQoSPoliciesSharedItemSemanticEditPolicy"
         canonicalEditPolicyClassName="DataWriterQoSPoliciesSharedCanonicalEditPolicy"
@@ -5851,7 +5883,7 @@
           figureQualifiedClassName="org.eclipse.draw2d.RectangleFigure"/>
     </compartments>
     <compartments
-        visualID="7030"
+        visualID="7043"
         editPartClassName="DataReaderQoSPoliciesCustomEditPart"
         itemSemanticEditPolicyClassName="DataReaderQoSPoliciesCustomItemSemanticEditPolicy"
         canonicalEditPolicyClassName="DataReaderQoSPoliciesCustomCanonicalEditPolicy"
@@ -5866,7 +5898,7 @@
           figureQualifiedClassName="org.eclipse.draw2d.RectangleFigure"/>
     </compartments>
     <compartments
-        visualID="7031"
+        visualID="7044"
         editPartClassName="DataReaderQoSPoliciesSharedEditPart"
         itemSemanticEditPolicyClassName="DataReaderQoSPoliciesSharedItemSemanticEditPolicy"
         canonicalEditPolicyClassName="DataReaderQoSPoliciesSharedCanonicalEditPolicy"
@@ -6628,7 +6660,7 @@
     <providers
         xsi:type="gmfgen:GenExpressionInterpreter">
       <expressions
-          body="0"/>
+          body="'writer'"/>
       <expressions
           body="0"/>
       <expressions
@@ -6651,6 +6683,10 @@
           body="0"/>
       <expressions
           body="0"/>
+      <expressions
+          body="0"/>
+      <expressions
+          body="'reader'"/>
       <expressions
           body="0"/>
       <expressions
