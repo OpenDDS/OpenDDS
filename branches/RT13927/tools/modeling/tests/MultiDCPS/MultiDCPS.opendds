@@ -27,12 +27,12 @@
       <domains xmi:id="_g5IRMR6AEeC3oaOqq23VNw" name="" domainId="42"/>
       <participants xmi:id="_g5IRMh6AEeC3oaOqq23VNw" name="part1" domain="_g5IRMR6AEeC3oaOqq23VNw">
         <publishers xsi:type="opendds:publisher" xmi:id="_g5IRMx6AEeC3oaOqq23VNw" name="pub" transportId="1">
-          <writers xsi:type="opendds:dataWriter" xmi:id="_g5IRNB6AEeC3oaOqq23VNw" name="writer" copyFromTopicQos="false" topic="_g5IROB6AEeC3oaOqq23VNw"/>
+          <writers xmi:id="_g5IRNB6AEeC3oaOqq23VNw" name="writer" copyFromTopicQos="false" topic="_g5IROB6AEeC3oaOqq23VNw"/>
         </publishers>
       </participants>
       <participants xmi:id="_g5IRNR6AEeC3oaOqq23VNw" name="part2" domain="_g5IRMR6AEeC3oaOqq23VNw">
         <subscribers xsi:type="opendds:subscriber" xmi:id="_g5IRNh6AEeC3oaOqq23VNw" name="sub" transportId="3">
-          <readers xsi:type="opendds:dataReader" xmi:id="_g5IRNx6AEeC3oaOqq23VNw" name="reader" copyFromTopicQos="true" topic="_g5IROB6AEeC3oaOqq23VNw"/>
+          <readers xmi:id="_g5IRNx6AEeC3oaOqq23VNw" name="reader" copyFromTopicQos="true" topic="_g5IROB6AEeC3oaOqq23VNw"/>
         </subscribers>
       </participants>
       <topics xmi:id="_g5IROB6AEeC3oaOqq23VNw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
@@ -43,12 +43,12 @@
       <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="" domainId="42"/>
       <participants xmi:id="_esFCYPDvEd-I4rwicuuPOw" name="part1" domain="_bs2RIPDvEd-I4rwicuuPOw">
         <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" transportId="1">
-          <writers xsi:type="opendds:dataWriter" xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+          <writers xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
         </publishers>
       </participants>
       <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
         <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportId="3">
-          <readers xsi:type="opendds:dataReader" xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+          <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
         </subscribers>
       </participants>
       <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_OWlpcB6IEeC3oaOqq23VNw"/>
@@ -57,12 +57,12 @@
       <domains xmi:id="_-2WvYR5_EeC3oaOqq23VNw" name="" domainId="42"/>
       <participants xmi:id="_-2WvYh5_EeC3oaOqq23VNw" name="part3" domain="_-2WvYR5_EeC3oaOqq23VNw">
         <publishers xsi:type="opendds:publisher" xmi:id="_-2WvYx5_EeC3oaOqq23VNw" name="pub" transportId="1">
-          <writers xsi:type="opendds:dataWriter" xmi:id="_-2WvZB5_EeC3oaOqq23VNw" name="writer" copyFromTopicQos="false" topic="_-2WvaB5_EeC3oaOqq23VNw"/>
+          <writers xmi:id="_-2WvZB5_EeC3oaOqq23VNw" name="writer" copyFromTopicQos="false" topic="_-2WvaB5_EeC3oaOqq23VNw"/>
         </publishers>
       </participants>
       <participants xmi:id="_-2WvZR5_EeC3oaOqq23VNw" name="part4" domain="_-2WvYR5_EeC3oaOqq23VNw">
         <subscribers xsi:type="opendds:subscriber" xmi:id="_-2WvZh5_EeC3oaOqq23VNw" name="sub" transportId="3">
-          <readers xsi:type="opendds:dataReader" xmi:id="_-2WvZx5_EeC3oaOqq23VNw" name="reader" copyFromTopicQos="true" topic="_-2WvaB5_EeC3oaOqq23VNw"/>
+          <readers xmi:id="_-2WvZx5_EeC3oaOqq23VNw" name="reader" copyFromTopicQos="true" topic="_-2WvaB5_EeC3oaOqq23VNw"/>
         </subscribers>
       </participants>
       <topics xmi:id="_-2WvaB5_EeC3oaOqq23VNw" name="Movie Discussion List2" datatype="_5STIgPDuEd-I4rwicuuPOw"/>

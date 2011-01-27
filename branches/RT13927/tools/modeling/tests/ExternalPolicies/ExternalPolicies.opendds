@@ -8,7 +8,7 @@
         <group_data href="ExtPolicies.opendds#_os3bUAKJEeCwwtlMwl8TGw"/>
         <presentation href="ExtPolicies.opendds#_wwhIsAKJEeCwwtlMwl8TGw"/>
         <partition href="ExtPolicies.opendds#_2V9HMAKJEeCwwtlMwl8TGw"/>
-        <writers xsi:type="opendds:dataWriter" xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw">
+        <writers xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw">
           <deadline href="ExtPolicies.opendds#_uvsboALlEeCRmKs-7z8NWA"/>
           <destination_order href="ExtPolicies.opendds#_2mVAsALlEeCRmKs-7z8NWA"/>
           <durability href="ExtPolicies.opendds#_BoO1oALrEeCRmKs-7z8NWA"/>
@@ -34,7 +34,7 @@
         <group_data href="ExtPolicies.opendds#_os3bUAKJEeCwwtlMwl8TGw"/>
         <presentation href="ExtPolicies.opendds#_wwhIsAKJEeCwwtlMwl8TGw"/>
         <partition href="ExtPolicies.opendds#_2V9HMAKJEeCwwtlMwl8TGw"/>
-        <readers xsi:type="opendds:dataReader" xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw">
+        <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw">
           <deadline href="ExtPolicies.opendds#_uvsboALlEeCRmKs-7z8NWA"/>
           <destination_order href="ExtPolicies.opendds#_2mVAsALlEeCRmKs-7z8NWA"/>
           <durability href="ExtPolicies.opendds#_BoO1oALrEeCRmKs-7z8NWA"/>
@@ -54,7 +54,7 @@
     </participants>
     <participants xmi:id="_4VZKwQMKEeCrTdheTycPFA" name="part3" domain="_bs2RIPDvEd-I4rwicuuPOw">
       <publishers xsi:type="opendds:publisher" xmi:id="_7YHU4AMKEeCrTdheTycPFA" name="pub3" transportId="1">
-        <writers xsi:type="opendds:dataWriter" xmi:id="_9_r0EAMKEeCrTdheTycPFA" name="writer3" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+        <writers xmi:id="_9_r0EAMKEeCrTdheTycPFA" name="writer3" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </publishers>
     </participants>
     <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw">
