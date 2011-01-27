@@ -1,3 +1,11 @@
+Thu Jan 27 14:13:30 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfmap:
+
+          When creating a Union on a diagram, automatically generate a Branch
+          and Case for the Branch.
+
 Wed Jan 26 23:57:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/tests/MessengerMC/fs_signal.cpp:

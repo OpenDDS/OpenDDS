@@ -470,6 +470,33 @@
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/Types.ecore#//Union"/>
+      <domainInitializer
+          xsi:type="gmfmap:FeatureSeqInitializer">
+        <initializers
+            xsi:type="gmfmap:ReferenceNewElementSpec">
+          <feature
+              xsi:type="ecore:EReference"
+              href="../../org.opendds.modeling.model/model/Types.ecore#//Union/branches"/>
+          <newElementInitializers>
+            <initializers
+                xsi:type="gmfmap:ReferenceNewElementSpec">
+              <feature
+                  xsi:type="ecore:EReference"
+                  href="../../org.opendds.modeling.model/model/Types.ecore#//Branch/cases"/>
+              <newElementInitializers>
+                <initializers
+                    xsi:type="gmfmap:FeatureValueSpec">
+                  <feature
+                      xsi:type="ecore:EAttribute"
+                      href="../../org.opendds.modeling.model/model/Types.ecore#//Case/literal"/>
+                  <value
+                      body="''"/>
+                </initializers>
+              </newElementInitializers>
+            </initializers>
+          </newElementInitializers>
+        </initializers>
+      </domainInitializer>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"
