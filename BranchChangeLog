@@ -1,3 +1,71 @@
+Thu Jan 27 22:56:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Arrays/Arrays.opendds:
+
+        * tools/modeling/tests/Codegen:
+
+        * tools/modeling/tests/Codegen/Codegen.opendds:
+
+        * tools/modeling/tests/CompositeKey/CompositeKey.opendds:
+
+        * tools/modeling/tests/CopyTopicQos/CopyTopicQos.opendds:
+
+        * tools/modeling/tests/DataLibRef/DataLibRef.opendds:
+
+        * tools/modeling/tests/Deep/Down/Reference/DeepDownReference.opendds:
+
+        * tools/modeling/tests/DomainZero/DomainZero.opendds:
+
+        * tools/modeling/tests/EmptyLibs/EmptyLibs.opendds:
+
+        * tools/modeling/tests/ExternalPolicies/ExternalPolicies.opendds:
+
+        * tools/modeling/tests/InvalidNames/InvalidNames.opendds:
+
+        * tools/modeling/tests/Messenger/Messenger.opendds:
+
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.opendds:
+
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.opendds:
+
+        * tools/modeling/tests/MessengerMC/MessengerMC.opendds:
+
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.opendds:
+
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.opendds:
+
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.opendds:
+
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.opendds:
+
+        * tools/modeling/tests/MessengerPubQos/MessengerPubQos.opendds:
+
+        * tools/modeling/tests/MessengerSimpleTypes/MessengerSimpleTypes.opendds:
+
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.opendds:
+
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.opendds:
+
+        * tools/modeling/tests/MultiDCPS/MultiDCPS.opendds:
+
+        * tools/modeling/tests/MultiInstance/MultiInstance.opendds:
+
+        * tools/modeling/tests/PolicyLib/PolicyLib.opendds:
+
+        * tools/modeling/tests/ReaderQos/ReaderQos.opendds:
+
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
+
+        * tools/modeling/tests/Sequences/Sequences.opendds:
+
+        * tools/modeling/tests/SubscriberQos/SubQos.opendds:
+
+        * tools/modeling/tests/TopicQos/TopQos.opendds:
+
+        * tools/modeling/tests/UDP/UDP.opendds:
+
+          Adjust readers and writers serialization.
+
 Thu Jan 27 19:42:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MessengerSimpleTypes:
