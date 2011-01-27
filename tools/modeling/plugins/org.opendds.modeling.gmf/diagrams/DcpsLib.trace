@@ -95,44 +95,6 @@
         queryText="true"/>
   </childNodeTraces>
   <childNodeTraces
-      visualID="3003"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'dataWriter') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'Publisher') and _containmentMF_.name = 'writers')">
-    <nodeLabelTraces
-        visualID="5010"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5131"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5242"
-        queryText="true"/>
-    <compartmentTraces
-        visualID="7015"
-        queryText="true"/>
-    <compartmentTraces
-        visualID="7016"
-        queryText="true"/>
-  </childNodeTraces>
-  <childNodeTraces
-      visualID="3004"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'dataReader') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'Subscriber') and _containmentMF_.name = 'readers')">
-    <nodeLabelTraces
-        visualID="5011"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5239"
-        queryText="true"/>
-    <nodeLabelTraces
-        visualID="5249"
-        queryText="true"/>
-    <compartmentTraces
-        visualID="7030"
-        queryText="true"/>
-    <compartmentTraces
-        visualID="7031"
-        queryText="true"/>
-  </childNodeTraces>
-  <childNodeTraces
       visualID="3005"
       queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Enumerations/1.0' and _eClass_.name = 'Period') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/QoS/1.0' and _eClass_.name = 'DeadlineQosPolicy') and _containmentMF_.name = 'period')">
     <nodeLabelTraces
@@ -861,6 +823,44 @@
         queryText="true"/>
     <nodeLabelTraces
         visualID="5251"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3059"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'DataWriter') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'Publisher') and _containmentMF_.name = 'writers')">
+    <nodeLabelTraces
+        visualID="5252"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5253"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5254"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7041"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7042"
+        queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces
+      visualID="3060"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'DataReader') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'Subscriber') and _containmentMF_.name = 'readers')">
+    <nodeLabelTraces
+        visualID="5255"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5256"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5257"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7043"
+        queryText="true"/>
+    <compartmentTraces
+        visualID="7044"
         queryText="true"/>
   </childNodeTraces>
   <linkTraces

@@ -6,12 +6,12 @@
   </libs>
   <libs xsi:type="opendds:DcpsLib" xmi:id="_LoyzAAOYEeC_KbIBROAyfA" name="DcpsLibTest">
     <domains xmi:id="_PsEbMAOYEeC_KbIBROAyfA" name="MessageDomain" domainId="0"/>
-    <participants xmi:id="_ylf4MAOYEeC_KbIBROAyfA" name="TestParticipant" entity_factory="_doUToAOYEeC_KbIBROAyfA" user_data="_6TDZwAOYEeC_KbIBROAyfA">
+    <participants xmi:id="_ylf4MAOYEeC_KbIBROAyfA" name="TestParticipant" domain="_PsEbMAOYEeC_KbIBROAyfA" entity_factory="_doUToAOYEeC_KbIBROAyfA" user_data="_6TDZwAOYEeC_KbIBROAyfA">
       <publishers xsi:type="opendds:publisher" xmi:id="_BG7hUAOZEeC_KbIBROAyfA" name="TestParticipant" transportId="-1">
-        <writers xsi:type="opendds:dataWriter" xmi:id="_H2fwoAOZEeC_KbIBROAyfA" name="TestWriter" user_data="_msWf8AOYEeC_KbIBROAyfA" copyFromTopicQos="false" topic="_0rzkMBHMEeCilrwN-NFn_g"/>
+        <writers xmi:id="_gz0dYCpHEeCSdIszrfle9A" name="TestWriter" copyFromTopicQos="false" topic="_0rzkMBHMEeCilrwN-NFn_g"/>
       </publishers>
       <subscribers xsi:type="opendds:subscriber" xmi:id="_SZZusAOZEeC_KbIBROAyfA" name="TestSubscriber" entity_factory="_doUToAOYEeC_KbIBROAyfA" transportId="-1">
-        <readers xsi:type="opendds:dataReader" xmi:id="_U47FIAOZEeC_KbIBROAyfA" name="TestReader" copyFromTopicQos="false" topic="_0rzkMBHMEeCilrwN-NFn_g"/>
+        <readers xmi:id="_j0AQ4CpHEeCSdIszrfle9A" name="TestReader" copyFromTopicQos="false" topic="_0rzkMBHMEeCilrwN-NFn_g"/>
       </subscribers>
     </participants>
     <topics xmi:id="_0rzkMBHMEeCilrwN-NFn_g" name="Message" deadline="_2Z42oBHMEeCilrwN-NFn_g"/>

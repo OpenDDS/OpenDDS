@@ -43,6 +43,25 @@
         <ownedChild>
           <domainMetaElement
               href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//publisher"/>
+          <domainInitializer
+              xsi:type="gmfmap:FeatureSeqInitializer">
+            <initializers
+                xsi:type="gmfmap:ReferenceNewElementSpec">
+              <feature
+                  xsi:type="ecore:EReference"
+                  href="../../org.opendds.modeling.model/model/DCPS.ecore#//Publisher/writers"/>
+              <newElementInitializers>
+                <initializers
+                    xsi:type="gmfmap:FeatureValueSpec">
+                  <feature
+                      xsi:type="ecore:EAttribute"
+                      href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+                  <value
+                      body="'writer'"/>
+                </initializers>
+              </newElementInitializers>
+            </initializers>
+          </domainInitializer>
           <labelMappings
               xsi:type="gmfmap:FeatureLabelMapping">
             <diagramLabel
@@ -81,7 +100,7 @@
                 href="../../org.opendds.modeling.model/model/DCPS.ecore#//Publisher/writers"/>
             <ownedChild>
               <domainMetaElement
-                  href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//dataWriter"/>
+                  href="../../org.opendds.modeling.model/model/DCPS.ecore#//DataWriter"/>
               <labelMappings
                   xsi:type="gmfmap:FeatureLabelMapping">
                 <diagramLabel
@@ -1327,6 +1346,25 @@
         <ownedChild>
           <domainMetaElement
               href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//subscriber"/>
+          <domainInitializer
+              xsi:type="gmfmap:FeatureSeqInitializer">
+            <initializers
+                xsi:type="gmfmap:ReferenceNewElementSpec">
+              <feature
+                  xsi:type="ecore:EReference"
+                  href="../../org.opendds.modeling.model/model/DCPS.ecore#//Subscriber/readers"/>
+              <newElementInitializers>
+                <initializers
+                    xsi:type="gmfmap:FeatureValueSpec">
+                  <feature
+                      xsi:type="ecore:EAttribute"
+                      href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+                  <value
+                      body="'reader'"/>
+                </initializers>
+              </newElementInitializers>
+            </initializers>
+          </domainInitializer>
           <labelMappings
               xsi:type="gmfmap:FeatureLabelMapping">
             <diagramLabel
@@ -1365,7 +1403,7 @@
                 href="../../org.opendds.modeling.model/model/DCPS.ecore#//Subscriber/readers"/>
             <ownedChild>
               <domainMetaElement
-                  href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//dataReader"/>
+                  href="../../org.opendds.modeling.model/model/DCPS.ecore#//DataReader"/>
               <labelMappings
                   xsi:type="gmfmap:FeatureLabelMapping">
                 <diagramLabel

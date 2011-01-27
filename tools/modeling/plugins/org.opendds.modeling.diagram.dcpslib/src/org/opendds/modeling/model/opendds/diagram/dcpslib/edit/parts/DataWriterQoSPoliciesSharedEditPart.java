@@ -26,7 +26,7 @@ public class DataWriterQoSPoliciesSharedEditPart extends
 	/**
 	 * @generated
 	 */
-	public static final int VISUAL_ID = 7016;
+	public static final int VISUAL_ID = 7042;
 
 	/**
 	 * @generated
