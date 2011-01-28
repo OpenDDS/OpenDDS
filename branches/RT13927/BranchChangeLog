@@ -1,3 +1,18 @@
+Fri Jan 28 20:51:50 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DomainParticipantEditPart.java:
+
+          Extend the region in the DomainParticipant which can be clicked on to add a pub or sub
+          to include the top portion of the DP figure containing the stereotype and name label.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdcpslib.html:
+
+          Updated to account for above change.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/dcpslib_pubsub_add.png:
+
+          Removed this file.
+
 Fri Jan 28 16:07:37 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
