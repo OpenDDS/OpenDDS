@@ -93,6 +93,7 @@ namespace OpenDDS { namespace Model {
   <xsl:variable name="lib-publishers"   select=".//publishers"/>
   <xsl:variable name="lib-subscribers"  select=".//subscribers"/>
   <xsl:variable name="lib-topics"       select=".//topics"/>
+  <xsl:variable name="defined-types" select="$types[@xmi:id = $lib-topics/@datatype]"/>
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
   <xsl:text>
 inline
@@ -141,13 +142,12 @@ inline
 void
 Elements::Data::registerType(
   Types::Values      type,
-  DomainParticipant* participant
-)
+  DomainParticipant* </xsl:text>
+  <xsl:if test="$defined-types">participant</xsl:if>
+<xsl:text>)
 {
   switch( type) {
 </xsl:text>
-  <!-- handle internal datatypes -->
-  <xsl:variable name="defined-types" select="$types[@xmi:id = $lib-topics/@datatype]"/>
 
   <xsl:for-each select="$defined-types">
     <xsl:call-template name="output-registerType-case"/>
@@ -313,9 +313,12 @@ inline
 void
 Elements::Data::buildParticipantsQos()
 {
-  DomainParticipantQos participantQos;
-  Participants::Values participant;
 </xsl:text>
+  <xsl:if test="$lib-participants">
+    <xsl:text>  DomainParticipantQos participantQos;
+  Participants::Values participant;
+    </xsl:text>
+  </xsl:if>
   <xsl:for-each select="$lib-participants">
     <xsl:value-of select="$newline"/>
     <xsl:text>  participant = Participants::</xsl:text>
@@ -338,9 +341,12 @@ inline
 void
 Elements::Data::buildTopicsQos()
 {
-  TopicQos       topicQos;
-  Topics::Values topic;
 </xsl:text>
+  <xsl:if test="$lib-topics">
+    <xsl:text>  TopicQos       topicQos;
+  Topics::Values topic;
+    </xsl:text>
+  </xsl:if>
   <xsl:for-each select="$lib-topics">
     <xsl:value-of select="$newline"/>
     <xsl:text>  topic    = Topics::</xsl:text>
