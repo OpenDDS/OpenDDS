@@ -86,6 +86,7 @@ development model.
       <import plugin="org.eclipse.gmf.runtime.emf.type.core"/>
       <import plugin="org.eclipse.gmf.runtime.notation"/>
       <import plugin="org.eclipse.swt"/>
+      <import plugin="org.eclipse.emf.codegen.ecore"/>
    </requires>
 
    <plugin

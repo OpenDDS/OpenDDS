@@ -1,3 +1,13 @@
+Mon Jan 31 23:37:20 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+
+          Update dependency list.
+
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+
+          Added note on our policy for version numbers of our plugins.
+
 Fri Jan 28 20:51:50 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DomainParticipantEditPart.java:

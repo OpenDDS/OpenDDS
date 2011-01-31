@@ -9,6 +9,9 @@ list is up to date.
 
 2. If existing users' installs should be updated, the version number needs to
 be incremented (per-plugin) -- the "qualifier" change is not enough.
+  * Our policy is to increment the version numbers of all plugins together in
+    lock step, even though some plugins may not be changing.  This reduces
+    the potential for user confusion by keeping a single version number.
 
 3. Open site.xml from org.opendds.modeling.site and click the "Build All" button
 inside the site.xml editor.
