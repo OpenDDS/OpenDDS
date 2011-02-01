@@ -18,7 +18,7 @@ public class QosPolicyLabeler extends com.ociweb.gmf.dialogs.ObjectLabeler<QosPo
 			policyName = ((PolicyLib) policyOwner).getName() + ".";
 		}
 		policyName += policy.getName();
-		return "«" + policy.eClass().getName() + "» " + policyName;
+		return "\u00ab" + policy.eClass().getName() + "\u00bb " + policyName;
 	}
 
 }
