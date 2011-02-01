@@ -1,3 +1,21 @@
+Tue Feb  1 14:20:11 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Topics.ecore:
+
+          Added reference to ContentFilteredTopic named related_topic of type Topic
+          this is missing from the DDS Profile spec.
+
+        * tools/modeling/docs/design_notes/images/Topics.png:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Topics.ecore_diagram:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics/impl/ContentFilteredTopicImpl.java
+
+          Updates due to adding the reference to Topics.ecore.
+
 Tue Feb  1 13:33:07 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/images/DCPS.png:
