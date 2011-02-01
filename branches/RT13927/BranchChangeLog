@@ -1,3 +1,11 @@
+Tue Feb  1 13:33:07 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/images/DCPS.png:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DCPS.ecore_diagram:
+
+          Update of diagram to include DataWriter-Topic and DataReader-TopicDescription
+          relationships.
+
 Mon Jan 31 23:37:20 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
