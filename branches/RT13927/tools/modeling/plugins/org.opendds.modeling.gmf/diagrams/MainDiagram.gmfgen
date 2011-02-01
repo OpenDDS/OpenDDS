@@ -54,6 +54,7 @@
       itemSemanticEditPolicyClassName="OpenDDSModelItemSemanticEditPolicy"
       canonicalEditPolicyClassName="OpenDDSModelCanonicalEditPolicy"
       iconProviderPriority="Low"
+      creationWizardCategoryID="org.opendds.modeling.Wizard.category.ID"
       validationProviderPriority="Low"
       validationEnabled="true"
       validationDecorators="true">
