@@ -1,3 +1,11 @@
+Tue Feb  1 20:04:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+
+          Set the New Wizard category ID so that GMF code generation doesn't
+          clobber the correct ID that's in plugin.xml since last Thursday's
+          commit.
+
 Tue Feb  1 19:40:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/QosPolicyLabeler.java:
