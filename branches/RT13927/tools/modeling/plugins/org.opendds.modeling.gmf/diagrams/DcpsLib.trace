@@ -32,22 +32,22 @@
         queryText="true"/>
   </nodeTraces>
   <nodeTraces
-      visualID="2003"
-      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'topic') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'topics')">
+      visualID="2004"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'topic') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'topicDescriptions')">
     <nodeLabelTraces
-        visualID="5003"
+        visualID="5258"
         queryText="true"/>
     <nodeLabelTraces
-        visualID="5012"
+        visualID="5259"
         queryText="true"/>
     <compartmentTraces
-        visualID="7032"
+        visualID="7045"
         queryText="true"/>
     <compartmentTraces
-        visualID="7033"
+        visualID="7046"
         queryText="true"/>
     <compartmentTraces
-        visualID="7040"
+        visualID="7047"
         queryText="true"/>
   </nodeTraces>
   <childNodeTraces

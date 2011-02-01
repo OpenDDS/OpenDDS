@@ -35,7 +35,7 @@
           <readers xmi:id="_g5IRNx6AEeC3oaOqq23VNw" name="reader" copyFromTopicQos="true" topic="_g5IROB6AEeC3oaOqq23VNw"/>
         </subscribers>
       </participants>
-      <topics xmi:id="_g5IROB6AEeC3oaOqq23VNw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
+      <topicDescriptions xsi:type="opendds:topic" xmi:id="_g5IROB6AEeC3oaOqq23VNw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
     </libs>
   </packages>
   <packages xmi:id="_dlhV8B6BEeC3oaOqq23VNw" name="packA">
@@ -51,7 +51,7 @@
           <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
         </subscribers>
       </participants>
-      <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_OWlpcB6IEeC3oaOqq23VNw"/>
+      <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_OWlpcB6IEeC3oaOqq23VNw"/>
     </libs>
     <libs xsi:type="opendds:DcpsLib" xmi:id="_-2WvYB5_EeC3oaOqq23VNw" name="YY">
       <domains xmi:id="_-2WvYR5_EeC3oaOqq23VNw" name="" domainId="42"/>
@@ -65,7 +65,7 @@
           <readers xmi:id="_-2WvZx5_EeC3oaOqq23VNw" name="reader" copyFromTopicQos="true" topic="_-2WvaB5_EeC3oaOqq23VNw"/>
         </subscribers>
       </participants>
-      <topics xmi:id="_-2WvaB5_EeC3oaOqq23VNw" name="Movie Discussion List2" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
+      <topicDescriptions xsi:type="opendds:topic" xmi:id="_-2WvaB5_EeC3oaOqq23VNw" name="Movie Discussion List2" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
     </libs>
   </packages>
   <packages xmi:id="_SmgG0B6FEeC3oaOqq23VNw" name="nil"/>

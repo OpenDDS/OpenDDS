@@ -12,7 +12,7 @@
         <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </subscribers>
     </participants>
-    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List">
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List">
       <datatype href="../../../MessengerMixed/MessengerTypesMixed.opendds#_5STIgPDuEd-I4rwicuuPOw"/>
     </topics>
   </libs>

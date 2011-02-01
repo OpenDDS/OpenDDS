@@ -17,7 +17,7 @@
         <writers xmi:id="_9_r0EAMKEeCrTdheTycPFA" name="writer 3" ownership="_M2EAAALrEeCRmKs-7z8NWA" copyFromTopicQos="false" ownership_strength="_2rViwAR1EeCsYqJtvYWomQ" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </publishers>
     </participants>
-    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw" durability="_qyi6YAR2EeCsYqJtvYWomQ"/>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw" durability="_qyi6YAR2EeCsYqJtvYWomQ"/>
     <policies xsi:type="opendds:efQosPolicy" xmi:id="_TwSSUAJKEeCBAfl9GiYbGg" name="auto 1" autoenable_created_entities="true"/>
     <policies xsi:type="opendds:udQosPolicy" xmi:id="_X64DcAJKEeCBAfl9GiYbGg" name="seven name" value="seven is 7"/>
     <policies xsi:type="opendds:gdQosPolicy" xmi:id="_os3bUAKJEeCwwtlMwl8TGw" name="group8" datavalue="eight is 8"/>
