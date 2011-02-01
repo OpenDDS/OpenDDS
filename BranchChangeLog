@@ -1,3 +1,14 @@
+Tue Feb  1 19:40:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/QosPolicyLabeler.java:
+
+          Use unicode escape sequences because the encoding
+          of the source file is platform-dependent.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithopenddsmodels.html:
+
+          Very minor edit for clarity.
+
 Tue Feb  1 14:20:11 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/Topics.ecore:
