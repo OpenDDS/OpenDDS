@@ -14,6 +14,6 @@
     </participants>
     <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List">
       <datatype href="../MessengerMixed/MessengerTypesMixed.opendds#_5STIgPDuEd-I4rwicuuPOw"/>
-    </topics>
+    </topicDescriptions>
   </libs>
 </opendds:OpenDDSModel>
