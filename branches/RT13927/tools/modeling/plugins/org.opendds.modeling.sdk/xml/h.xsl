@@ -107,7 +107,8 @@ namespace OpenDDS { namespace Model {
 </xsl:text>
   <!-- Match within the DCPSlib -->
   <xsl:variable name="lib-participants" select=".//participants"/>
-  <xsl:variable name="lib-topics"       select=".//topics"/>
+  <xsl:variable name="lib-topics"       select=".//topicDescriptions"/>
+  <xsl:variable name="lib-cf-topics"    select=".//topicDescriptions[@xsi:type='topics:ContentFilteredTopic']"/>
   <xsl:variable name="lib-publishers"   select=".//publishers"/>
   <xsl:variable name="lib-subscribers"  select=".//subscribers"/>
   <xsl:variable name="lib-writers"      select=".//writers"/>
@@ -119,7 +120,6 @@ namespace OpenDDS { namespace Model {
   </xsl:call-template>
 
   <xsl:value-of select="concat('      class Types {', $newline)"/>
-
   <xsl:value-of select="concat('        public: enum Values {', $newline)"/>
   <xsl:for-each select="$types[@xmi:id = $lib-topics/@datatype]">
     <xsl:variable name="enum">
@@ -127,15 +127,18 @@ namespace OpenDDS { namespace Model {
     </xsl:variable>
     <xsl:value-of select="concat('          ', $enum, ',', $newline)"/>
   </xsl:for-each>
-
   <xsl:value-of select="concat('          LAST_INDEX', $newline)"/>
-
   <xsl:value-of select="concat('        };', $newline)"/>
   <xsl:value-of select="concat('      };', $newline)"/>
 
   <xsl:call-template name="generate-enum">
     <xsl:with-param name="class" select="'Topics'"/>
     <xsl:with-param name="values" select="$lib-topics"/>
+  </xsl:call-template>
+
+  <xsl:call-template name="generate-enum">
+    <xsl:with-param name="class" select="'ContentFilteredTopics'"/>
+    <xsl:with-param name="values" select="$lib-cf-topics"/>
   </xsl:call-template>
 
   <xsl:call-template name="generate-enum">
@@ -158,8 +161,7 @@ namespace OpenDDS { namespace Model {
     <xsl:with-param name="values" select="$lib-readers"/>
   </xsl:call-template>
 
-<xsl:text>
-      class Data {
+<xsl:text>      class Data {
         public:
           Data();
           ~Data();
@@ -200,6 +202,7 @@ namespace OpenDDS { namespace Model {
           Types::Values        type(Topics::Values which);
           Topics::Values       topic(DataWriters::Values which);
           Topics::Values       topic(DataReaders::Values which);
+          Topics::Values       relatedTopic(ContentFilteredTopics::Values which);
           Publishers::Values   publisher(DataWriters::Values which);
           Subscribers::Values  subscriber(DataReaders::Values which);
           OpenDDS::DCPS::TransportIdType transport(Publishers::Values which);
@@ -261,10 +264,17 @@ namespace OpenDDS { namespace Model {
 </xsl:if>
 <xsl:if test="$lib-topics">
 <xsl:text>
-          Types::Values             types_[                  Topics::LAST_INDEX];
-          const char*               topicNames_[             Topics::LAST_INDEX];
-          DDS::TopicQos             topicsQos_[              Topics::LAST_INDEX];
-          char*                     typeNames_[              Types::LAST_INDEX];
+          Types::Values                 types_[     Topics::LAST_INDEX];
+          const char*                   topicNames_[Topics::LAST_INDEX];
+          DDS::TopicQos                 topicsQos_[ Topics::LAST_INDEX];
+          char*                         typeNames_[ Types::LAST_INDEX];
+          ContentFilteredTopics::Values cfTopics_[  Topics::LAST_INDEX];
+</xsl:text>
+</xsl:if>
+<xsl:if test="$lib-cf-topics">
+<xsl:text>
+          Topics::Values relatedTopics_    [ContentFilteredTopics::LAST_INDEX];
+          char*          filterExpressions_[ContentFilteredTopics::LAST_INDEX];
 </xsl:text>
 </xsl:if><xsl:text>
       }; // End class Data
@@ -276,7 +286,8 @@ namespace OpenDDS { namespace Model {
 <!-- Output the template implementations for the DCPSlib -->
 <xsl:template match="libs[@xsi:type='opendds:DcpsLib']" mode="define">
   <xsl:variable name="lib-participants" select=".//participants"/>
-  <xsl:variable name="lib-topics"       select=".//topics"/>
+  <xsl:variable name="lib-topics"       select=".//topicDescriptions"/>
+  <xsl:variable name="lib-cf-topics"    select=".//topicDescriptions[@xsi:type = 'topics:ContentFilteredTopic']"/>
   <xsl:variable name="lib-publishers"   select=".//publishers"/>
   <xsl:variable name="lib-subscribers"  select=".//subscribers"/>
   <xsl:variable name="lib-writers"      select=".//writers"/>
@@ -719,6 +730,30 @@ inline
   </xsl:when>
   <xsl:otherwise>
     <xsl:text>  return Topics::LAST_INDEX; // not valid when no data readers defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
+
+inline
+</xsl:text>
+  <xsl:value-of select="$elements-qname"/>
+  <xsl:text>::Topics::Values
+</xsl:text>
+  <xsl:value-of select="$data-qname"/>
+  <xsl:text>::relatedTopic(ContentFilteredTopics::Values which)
+{
+  if(which &lt; 0 || which >= ContentFilteredTopics::LAST_INDEX) {
+    throw OutOfBoundsException();
+  }
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$lib-cf-topics">
+    <xsl:text>  return this->relatedTopics_[which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return Topics::LAST_INDEX; // not valid when no topics defined
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>

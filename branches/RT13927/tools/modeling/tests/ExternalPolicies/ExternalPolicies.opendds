@@ -70,7 +70,7 @@
       <resource_limits href="ExtPolicies.opendds#_Y8bbcAMYEeCrTdheTycPFA"/>
       <transport_priority href="ExtPolicies.opendds#_qJC4cAMYEeCrTdheTycPFA"/>
       <lifespan href="ExtPolicies.opendds#_JIkhIAMYEeCrTdheTycPFA"/>
-    </topics>
+    </topicDescriptions>
   </libs>
   <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data1">
     <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw" name="Message" isDcpsDataType="true">

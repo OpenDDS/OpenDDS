@@ -12,8 +12,8 @@
         <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="true" topic="_j6pGgS2LEeCFILu-MgN-Wg"/>
       </subscribers>
     </participants>
-    <topics xsi:type="topics:ContentFilteredTopic" xmi:id="_j6pGgS2LEeCFILu-MgN-Wg" name="MiddleTopics" filter_expression="count BETWEEN '2' and '7'" related_topic="_lgOkQC2LEeCFILu-MgN-Wg"/>
-    <topics xsi:type="opendds:topic" xmi:id="_lgOkQC2LEeCFILu-MgN-Wg" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
+    <topicDescriptions xsi:type="topics:ContentFilteredTopic" xmi:id="_j6pGgS2LEeCFILu-MgN-Wg" name="MiddleTopics" filter_expression="count BETWEEN '2' and '7'" related_topic="_lgOkQC2LEeCFILu-MgN-Wg"/>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_lgOkQC2LEeCFILu-MgN-Wg" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
   </libs>
   <packages xmi:id="_e-kHsS2DEeCBif6TmA07vg" name="data1">
     <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="datalib1">

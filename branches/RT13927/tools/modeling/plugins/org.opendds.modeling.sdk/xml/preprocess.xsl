@@ -11,7 +11,6 @@
     -->
 <xsl:include href="common.xsl"/>
 
-<xsl:variable name="topics"      select="//topics"/>
 <xsl:variable name="policy-refs" select="//*[not(name() = 'datatype')]/@href"/>
 
 <!-- Copy the model element, adding external-refs subelelement -->

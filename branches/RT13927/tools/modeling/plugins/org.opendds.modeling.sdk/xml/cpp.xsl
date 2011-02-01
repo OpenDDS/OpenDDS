@@ -92,7 +92,8 @@ namespace OpenDDS { namespace Model {
   <xsl:variable name="lib-participants" select=".//participants"/>
   <xsl:variable name="lib-publishers"   select=".//publishers"/>
   <xsl:variable name="lib-subscribers"  select=".//subscribers"/>
-  <xsl:variable name="lib-topics"       select=".//topics"/>
+  <xsl:variable name="lib-topics"       select=".//topicDescriptions"/>
+  <xsl:variable name="lib-cf-topics"    select=".//topicDescriptions[@xsi:type='topics:ContentFilteredTopic']"/>
   <xsl:variable name="defined-types" select="$types[@xmi:id = $lib-topics/@datatype]"/>
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
   <xsl:text>
@@ -104,7 +105,12 @@ Elements::Data::Data()
   for( int index = 0;
        index &lt; Elements::Types::LAST_INDEX;
        ++index) {
-    this->typeNames_[ index] = 0;
+    this->typeNames_[index] = 0;
+  }
+  for( int index = 0;
+       index &lt; Elements::ContentFilteredTopics::LAST_INDEX;
+       ++index) {
+    this->filterExpressions_[index] = 0;
   }</xsl:text>
 </xsl:if>
   <xsl:text>
@@ -125,13 +131,23 @@ Elements::Data::~Data()
 { </xsl:text>
 <xsl:if test="$lib-topics">
   <xsl:text>
-  for( int index = 0;
-       index &lt; Elements::Types::LAST_INDEX;
-       ++index
-  ) {
-    if( this->typeNames_[ index]) {
-      free( this->typeNames_[ index]); // Was created by CORBA::string_dup()
-      this->typeNames_[ index] = 0;
+  for(int index = 0;
+      index &lt; Elements::Types::LAST_INDEX;
+      ++index) {
+    if(this->typeNames_[index]) {
+      free(this->typeNames_[index]); // Created by CORBA::string_dup()
+      this->typeNames_[index] = 0;
+    }
+  }</xsl:text>
+</xsl:if>
+<xsl:if test="$lib-cf-topics">
+  <xsl:text>
+  for(int index = 0;
+      index &lt; Elements::ContentFilteredTopics::LAST_INDEX;
+      ++index) {
+    if( this->filterExpressions_[index]) {
+      free(this->filterExpressions_[index]); // Created by CORBA::string_dup()
+      this->filterExpressions_[ index] = 0;
     }
   }
 </xsl:text>
@@ -181,16 +197,38 @@ inline
 void
 Elements::Data::loadTopics()
 {
-  /// @TODO verify how we manage the model strings.
 </xsl:text>
-  <!-- '  this->topicNames_[ Topics::(topic/@name)] = "(topic/@name)";\n' -->
-  <xsl:for-each select="$lib-topics/@name">
-    <xsl:text>  this->topicNames_[ Topics::</xsl:text>
-    <xsl:value-of select="translate(.,' ','_')"/>
-    <xsl:text>] = "</xsl:text>
-    <xsl:value-of select="."/>
-    <xsl:text>";</xsl:text>
-    <xsl:value-of select="$newline"/>
+  <xsl:for-each select="$lib-topics">
+    <xsl:text>  this->topicNames_[Topics::</xsl:text>
+    <xsl:call-template name="normalize-identifier"/>
+    <xsl:value-of select="concat('] = &quot;', @name, '&quot;;', $newline)"/>
+    <xsl:text>  this->topicKinds_[Topics::</xsl:text>
+    <xsl:call-template name="normalize-identifier"/>
+    <xsl:text>] = </xsl:text>
+    <xsl:choose>
+      <xsl:when test="@xsi:type='topics:ContentFilteredTopic'">
+        <xsl:text>TopicKinds::content_filtered_topic;
+</xsl:text>
+      </xsl:when>
+      <xsl:when test="@xsi:type='topics:ContentFilteredTopic'">
+        <xsl:text>TopicKinds::multitopic;
+</xsl:text>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:text>TopicKinds::topic;
+</xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:for-each>
+  <xsl:for-each select="$lib-cf-topics">
+    <xsl:variable name="cf-topic-name">
+      <xsl:call-template name="normalize-identifier"/>
+    </xsl:variable>
+    <xsl:value-of select="concat('  this->filterExpressions_[',
+                                 'ContentFilteredTopics::',
+                                 $cf-topic-name, '] = ', 
+                                 'CORBA::string_dup(&quot;',
+                                 @filter_expression, '&quot;);', $newline)"/>
   </xsl:for-each>
   <xsl:text>}
 
@@ -228,13 +266,26 @@ Elements::Data::loadMaps()
   <!-- defined types -->
   <xsl:for-each select="$lib-topics[@datatype]">
     <xsl:text>  this->types_[ Topics::</xsl:text>
-    <xsl:value-of select="translate(@name,' ','_')"/>
+    <xsl:call-template name="normalize-identifier"/>
     <xsl:text>] = Types::</xsl:text>
     <xsl:call-template name="type-enum">
       <xsl:with-param name="type" select="$types[@xmi:id = current()/@datatype]"/>
     </xsl:call-template>
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
+  </xsl:for-each>
+  <xsl:for-each select="$lib-cf-topics">
+    <xsl:variable name="cf-topic-name">
+      <xsl:call-template name="normalize-identifier"/>
+    </xsl:variable>
+    <xsl:value-of select="concat('  this->relatedTopics_[',
+                                 'ContentFilteredTopics::',
+                                 $cf-topic-name, '] = Topics::')"/>
+    <xsl:call-template name="normalize-identifier">
+      <xsl:with-param name="identifier" select="$lib-topics[@xmi:id = current()/@related_topic]/@name"/>
+    </xsl:call-template>
+    <xsl:text>;
+</xsl:text>
   </xsl:for-each>
 
   <xsl:value-of select="$newline"/>
@@ -350,7 +401,7 @@ Elements::Data::buildTopicsQos()
   <xsl:for-each select="$lib-topics">
     <xsl:value-of select="$newline"/>
     <xsl:text>  topic    = Topics::</xsl:text>
-    <xsl:value-of select="translate(@name,' ','_')"/>
+    <xsl:call-template name="normalize-identifier"/>
     <xsl:text>;
   topicQos = TheServiceParticipant->initial_TopicQos();
     
