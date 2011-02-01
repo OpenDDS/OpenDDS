@@ -142,6 +142,11 @@ namespace OpenDDS { namespace Model {
   </xsl:call-template>
 
   <xsl:call-template name="generate-enum">
+    <xsl:with-param name="class" select="'MultiTopics'"/>
+    <xsl:with-param name="values" select="$lib-cf-topics[false()]"/>
+  </xsl:call-template>
+
+  <xsl:call-template name="generate-enum">
     <xsl:with-param name="class" select="'Publishers'"/>
     <xsl:with-param name="values" select="$lib-publishers"/>
   </xsl:call-template>
