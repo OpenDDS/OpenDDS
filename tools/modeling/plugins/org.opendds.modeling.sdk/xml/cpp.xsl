@@ -106,7 +106,10 @@ Elements::Data::Data()
        index &lt; Elements::Types::LAST_INDEX;
        ++index) {
     this->typeNames_[index] = 0;
-  }
+  }</xsl:text>
+</xsl:if>
+<xsl:if test="$lib-cf-topics">
+  <xsl:text>
   for( int index = 0;
        index &lt; Elements::ContentFilteredTopics::LAST_INDEX;
        ++index) {
@@ -202,23 +205,6 @@ Elements::Data::loadTopics()
     <xsl:text>  this->topicNames_[Topics::</xsl:text>
     <xsl:call-template name="normalize-identifier"/>
     <xsl:value-of select="concat('] = &quot;', @name, '&quot;;', $newline)"/>
-    <xsl:text>  this->topicKinds_[Topics::</xsl:text>
-    <xsl:call-template name="normalize-identifier"/>
-    <xsl:text>] = </xsl:text>
-    <xsl:choose>
-      <xsl:when test="@xsi:type='topics:ContentFilteredTopic'">
-        <xsl:text>TopicKinds::content_filtered_topic;
-</xsl:text>
-      </xsl:when>
-      <xsl:when test="@xsi:type='topics:ContentFilteredTopic'">
-        <xsl:text>TopicKinds::multitopic;
-</xsl:text>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:text>TopicKinds::topic;
-</xsl:text>
-      </xsl:otherwise>
-    </xsl:choose>
   </xsl:for-each>
   <xsl:for-each select="$lib-cf-topics">
     <xsl:variable name="cf-topic-name">

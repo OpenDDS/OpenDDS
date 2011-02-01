@@ -1,3 +1,9 @@
+Tue Feb  1 23:06:47 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+
+          Make some content-filtered references conditional.
+
 Tue Feb  1 22:50:43 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
@@ -12,7 +18,7 @@ Tue Feb  1 22:50:43 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
         * tools/modeling/tests/MessengerSplit/MessengerSplit.opendds:
         * tools/modeling/tests/ReferExternalProj/ReferExternalProj.opendds:
 
-          Fix topics tags missed in previous revision.  Adapt stylesheets to 
+          Fix topics tags missed in previous revision.  Adapt stylesheets to
           new serialization format.
 
 Tue Feb  1 21:13:30 UTC 2011  Byron Harris  <harrisb@ociweb.com>
