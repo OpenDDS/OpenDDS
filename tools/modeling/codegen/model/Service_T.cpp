@@ -58,8 +58,8 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::topic(
   typename Topics::Values       topic
 )
 {
-  if( !this->topics_[ participant][ topic]) {
-    this->createTopic( participant, topic);
+  if(!this->topics_[ participant][ topic]) {
+    this->createTopicDescription(participant, topic);
   }
   return DDS::Topic::_duplicate(this->topics_[ participant][ topic]);
 }
@@ -125,6 +125,30 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createParticipant(
 template< typename ModelName, class InstanceTraits>
 inline
 void
+OpenDDS::Model::Service< ModelName, InstanceTraits>::createTopicDescription(
+  typename Participants::Values participant,
+  typename Topics::Values       topic
+)
+{
+  typename Topics::ContentFilteredTopics::Values cfTopic = 
+               this->modelData_.contentFilteredTopic(topic);
+  typename Topics::MultiTopics::Values multiTopic = 
+               this->modelData_.multiTopic(topic);
+  // If this is a content-filtered topic
+  if (cfTopic != ContentFilteredTopics::LAST_INDEX) {
+    createMultiTopic(participant, cfTopic);
+  // Else if this is a multitopic
+  } else if (multiTopic != MultiTopics::LAST_INDEX) {
+    createMultiTopic(participant, multiTopic);
+  // Else this is a standard topic
+  } else {
+    createTopic(participant, topic);
+  }
+}
+
+template< typename ModelName, class InstanceTraits>
+inline
+void
 OpenDDS::Model::Service< ModelName, InstanceTraits>::createTopic(
   typename Participants::Values participant,
   typename Topics::Values       topic
@@ -140,13 +164,34 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createTopic(
     this->types_[ participant][ type] = true;
   }
 
-  this->topics_[ participant][ topic] = this->delegate_.createTopic(
-    this->participants_[ participant],
-    this->modelData_.topicName( topic),
-    this->modelData_.typeName( type),
-    this->modelData_.qos( topic),
-    this->modelData_.mask( topic)
+  this->topics_[participant][topic] = this->delegate_.createTopic(
+    this->participants_[participant],
+    this->modelData_.topicName(topic),
+    this->modelData_.typeName(type),
+    this->modelData_.qos(topic),
+    this->modelData_.mask(topic)
   );
+}
+
+template< typename ModelName, class InstanceTraits>
+inline
+void
+OpenDDS::Model::Service< ModelName, InstanceTraits>::createContentFilteredTopic(
+  typename Participants::Values          participant,
+  typename ContentFilteredTopics::Values topic
+)
+{
+  const char* topic_name = this->modelData_.topicName(topic);
+  typename Topics::Values target_topic = this->modelData_.relatedTopic(topic);
+  DDS::Topic_var related_topic = this->topic(participant, target_topic);
+  const char* filter_expression = this->modelData_.filterExpression(topic);
+  DDS::DomainParticipant_var domain_participant = this->participant(participant);
+  // TODO: Should this be moved to Delegate?
+  this->topics_[participant][topic] = 
+        domain_participant->create_contentfilteredtopic(topic_name,
+                                                        related_topic,
+                                                        filter_expression,
+                                                        StringSeq());
 }
 
 template< typename ModelName, class InstanceTraits>
