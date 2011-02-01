@@ -57,7 +57,7 @@
         <writers xmi:id="_9_r0EAMKEeCrTdheTycPFA" name="writer3" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </publishers>
     </participants>
-    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw">
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw">
       <deadline href="ExtPolicies.opendds#_uvsboALlEeCRmKs-7z8NWA"/>
       <destination_order href="ExtPolicies.opendds#_2mVAsALlEeCRmKs-7z8NWA"/>
       <durability href="ExtPolicies.opendds#_BoO1oALrEeCRmKs-7z8NWA"/>

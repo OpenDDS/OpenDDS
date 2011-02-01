@@ -12,7 +12,7 @@
         <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </subscribers>
     </participants>
-    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
     <policies xsi:type="opendds:efQosPolicy" xmi:id="_TwSSUAJKEeCBAfl9GiYbGg" name="manual" autoenable_created_entities="false"/>
     <policies xsi:type="opendds:udQosPolicy" xmi:id="_X64DcAJKEeCBAfl9GiYbGg" name="seven" value="seven is 7"/>
     <policies xsi:type="opendds:gdQosPolicy" xmi:id="_os3bUAKJEeCwwtlMwl8TGw" name="group8" datavalue="eight is 8"/>

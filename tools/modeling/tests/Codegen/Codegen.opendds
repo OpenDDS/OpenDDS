@@ -15,7 +15,7 @@
         <readers xmi:id="_5MMKMCQXEeCooMBoZQ9mbQ" name="reader1" copyFromTopicQos="false" topic="_1ADWUCJpEeCdS4pBwQ6M_A"/>
       </subscribers>
     </participants>
-    <topics xmi:id="_1ADWUCJpEeCdS4pBwQ6M_A" name="topic1" datatype="_aqv84CJxEeCdS4pBwQ6M_A"/>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_1ADWUCJpEeCdS4pBwQ6M_A" name="topic1" datatype="_aqv84CJxEeCdS4pBwQ6M_A"/>
   </libs>
   <libs xsi:type="opendds:PolicyLib" xmi:id="_aaDeMCJgEeCdS4pBwQ6M_A" name="policies">
     <policies xsi:type="opendds:udQosPolicy" xmi:id="_fMRQACJgEeCdS4pBwQ6M_A" name="part1userdata" value="participant1ud"/>

@@ -12,13 +12,13 @@
         <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" topic="_mcVnwPDxEd-I4rwicuuPOw" copyFromTopicQos="false"/>
       </subscribers>
     </participants>
-    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List">
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List">
       <datatype href="MessengerTypes.opendds#_5STIgPDuEd-I4rwicuuPOw"/>
     </topics>
-    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw2" name="Movie Discussion Responses">
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw2" name="Movie Discussion Responses">
       <datatype href="MessengerTypes.opendds#_5STIgPDuEd-I4rwicuuPOw2"/>
     </topics>
-    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw2" name="Movie Discussion Replay">
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw2" name="Movie Discussion Replay">
       <datatype href="MessengerTypes.opendds#_5STIgPDuEd-I4rwicuuPOw"/>
     </topics>
   </libs>

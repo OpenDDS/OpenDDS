@@ -5400,7 +5400,7 @@
       </labels>
     </topLevelNodes>
     <topLevelNodes
-        visualID="2003"
+        visualID="2004"
         editPartClassName="TopicEditPart"
         itemSemanticEditPolicyClassName="TopicItemSemanticEditPolicy"
         canonicalEditPolicyClassName="TopicCanonicalEditPolicy"
@@ -5425,12 +5425,12 @@
         <metaClass
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/topic"/>
         <containmentMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/topics"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/topicDescriptions"/>
         <childMetaFeature
-            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/topics"/>
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/topicDescriptions"/>
       </modelFacet>
       <labels
-          visualID="5003"
+          visualID="5258"
           editPartClassName="TopicNameEditPart"
           itemSemanticEditPolicyClassName="TopicNameItemSemanticEditPolicy"
           elementIcon="true">
@@ -5449,7 +5449,7 @@
         </modelFacet>
       </labels>
       <labels
-          visualID="5012"
+          visualID="5259"
           editPartClassName="TopicName2EditPart"
           itemSemanticEditPolicyClassName="TopicName2ItemSemanticEditPolicy"
           readOnly="true">
@@ -6009,7 +6009,7 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class PeriodFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodSecondFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigurePeriodNanosecondFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public PeriodFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.FlowLayout layoutThis = new org.eclipse.draw2d.FlowLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#xA;&#x9;layoutThis.setMajorAlignment(org.eclipse.draw2d.FlowLayout.ALIGN_LEFTTOP&#xA;);&#xA;&#x9;layoutThis.setMajorSpacing(5);&#xA;&#x9;layoutThis.setMinorSpacing(5);&#xA;&#x9;layoutThis.setHorizontal(false);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigurePeriodSecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodSecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodSecondFigure);&#xA;&#xA;&#xA;&#xA;fFigurePeriodNanosecondFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigurePeriodNanosecondFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigurePeriodNanosecondFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodSecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodSecondFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigurePeriodNanosecondFigure() {&#xA;&#x9;&#x9;return fFigurePeriodNanosecondFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
     </compartments>
     <compartments
-        visualID="7032"
+        visualID="7045"
         editPartClassName="TopicDataTypeEditPart"
         itemSemanticEditPolicyClassName="TopicDataTypeItemSemanticEditPolicy"
         canonicalEditPolicyClassName="TopicDataTypeCanonicalEditPolicy"
@@ -6024,7 +6024,7 @@
           figureQualifiedClassName="org.eclipse.draw2d.RectangleFigure"/>
     </compartments>
     <compartments
-        visualID="7033"
+        visualID="7046"
         editPartClassName="TopicQoSPoliciesCustomEditPart"
         itemSemanticEditPolicyClassName="TopicQoSPoliciesCustomItemSemanticEditPolicy"
         canonicalEditPolicyClassName="TopicQoSPoliciesCustomCanonicalEditPolicy"
@@ -6039,7 +6039,7 @@
           figureQualifiedClassName="org.eclipse.draw2d.RectangleFigure"/>
     </compartments>
     <compartments
-        visualID="7040"
+        visualID="7047"
         editPartClassName="TopicQoSPoliciesSharedEditPart"
         itemSemanticEditPolicyClassName="TopicQoSPoliciesSharedItemSemanticEditPolicy"
         canonicalEditPolicyClassName="TopicQoSPoliciesSharedCanonicalEditPolicy"

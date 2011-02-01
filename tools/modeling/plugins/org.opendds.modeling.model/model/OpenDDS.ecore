@@ -69,8 +69,8 @@
         eType="#//domain" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="participants" upperBound="-1"
         eType="#//domainParticipant" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="topics" upperBound="-1"
-        eType="#//topic" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="topicDescriptions" upperBound="-1"
+        eType="ecore:EClass Topics.ecore#//TopicDescription" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="policies" upperBound="-1"
         eType="#//qosPolicy" containment="true">
       <eAnnotations source="GenModel">

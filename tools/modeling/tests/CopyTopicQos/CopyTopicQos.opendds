@@ -24,7 +24,7 @@
         <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </subscribers>
     </participants>
-    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw" destination_order="_HBtS4CP0EeCKso1NOi-MDw"/>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw" destination_order="_HBtS4CP0EeCKso1NOi-MDw"/>
   </libs>
   <libs xsi:type="opendds:PolicyLib" xmi:id="__uJtECPwEeCKso1NOi-MDw" name="Policy">
     <policies xsi:type="opendds:destinationOrderQosPolicy" xmi:id="_HBtS4CP0EeCKso1NOi-MDw" name="source" kind="BY_SOURCE_TIMESTAMP"/>

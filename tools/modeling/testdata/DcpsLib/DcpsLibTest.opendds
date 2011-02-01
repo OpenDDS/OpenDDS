@@ -14,7 +14,7 @@
         <readers xmi:id="_j0AQ4CpHEeCSdIszrfle9A" name="TestReader" copyFromTopicQos="false" topic="_0rzkMBHMEeCilrwN-NFn_g"/>
       </subscribers>
     </participants>
-    <topics xmi:id="_0rzkMBHMEeCilrwN-NFn_g" name="Message" deadline="_2Z42oBHMEeCilrwN-NFn_g"/>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_0rzkMBHMEeCilrwN-NFn_g" name="Message" deadline="_2Z42oBHMEeCilrwN-NFn_g"/>
     <policies xsi:type="opendds:udQosPolicy" xmi:id="_6TDZwAOYEeC_KbIBROAyfA" name="CustomUserData" value="custom data"/>
     <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_2Z42oBHMEeCilrwN-NFn_g" name="messageDeadline">
       <period xmi:id="_2Z42oRHMEeCilrwN-NFn_g" second="10"/>

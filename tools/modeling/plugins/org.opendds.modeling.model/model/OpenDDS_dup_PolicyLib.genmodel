@@ -62,7 +62,7 @@
     <genClasses ecoreClass="OpenDDS.ecore#//DcpsLib">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DcpsLib/domains"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DcpsLib/participants"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DcpsLib/topics"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DcpsLib/topicDescriptions"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference OpenDDS.ecore#//DcpsLib/policies"/>
     </genClasses>
     <genClasses ecoreClass="OpenDDS.ecore#//BasicTypes">

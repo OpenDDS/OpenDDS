@@ -1986,7 +1986,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/topics"/>
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/topicDescriptions"/>
     <ownedChild>
       <domainMetaElement
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//topic"/>

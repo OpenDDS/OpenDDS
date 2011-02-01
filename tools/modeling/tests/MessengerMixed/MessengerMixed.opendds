@@ -12,11 +12,11 @@
         <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </subscribers>
     </participants>
-    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List">
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List">
       <datatype href="MessengerTypesMixed.opendds#_5STIgPDuEd-I4rwicuuPOw"/>
     </topics>
-    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw2" name="Movie Discussion Responses" datatype="_5STIgPDuEd-I4rwicuuPOw27"/>
-    <topics xmi:id="_mcVnwPDxEd-I4rwicuuPOw2" name="Movie Discussion Replay" datatype="_H1e6wB0FEeC07OZrGTNj1A"/>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw2" name="Movie Discussion Responses" datatype="_5STIgPDuEd-I4rwicuuPOw27"/>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw2" name="Movie Discussion Replay" datatype="_H1e6wB0FEeC07OZrGTNj1A"/>
   </libs>
   <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw7" name="data1">
     <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw27" name="Response" isDcpsDataType="true">
