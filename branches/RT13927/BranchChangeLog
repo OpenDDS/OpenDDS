@@ -1,3 +1,11 @@
+Wed Feb  2 19:32:51 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+          populate mappings between Topics::Values and the corresponding
+          ContentFilteredTopics::Values and MultiTopics::Values
+
 Wed Feb  2 15:09:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Service_T.h:

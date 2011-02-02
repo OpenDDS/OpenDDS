@@ -109,6 +109,7 @@ namespace OpenDDS { namespace Model {
   <xsl:variable name="lib-participants" select=".//participants"/>
   <xsl:variable name="lib-topics"       select=".//topicDescriptions"/>
   <xsl:variable name="lib-cf-topics"    select=".//topicDescriptions[@xsi:type='topics:ContentFilteredTopic']"/>
+  <xsl:variable name="lib-multitopics"  select=".//topicDescriptions[@xsi:type='topics:MultiTopic']"/>
   <xsl:variable name="lib-publishers"   select=".//publishers"/>
   <xsl:variable name="lib-subscribers"  select=".//subscribers"/>
   <xsl:variable name="lib-writers"      select=".//writers"/>
@@ -143,7 +144,7 @@ namespace OpenDDS { namespace Model {
 
   <xsl:call-template name="generate-enum">
     <xsl:with-param name="class" select="'MultiTopics'"/>
-    <xsl:with-param name="values" select="$lib-cf-topics[false()]"/>
+    <xsl:with-param name="values" select="$lib-multitopics"/>
   </xsl:call-template>
 
   <xsl:call-template name="generate-enum">
@@ -208,7 +209,7 @@ namespace OpenDDS { namespace Model {
           Topics::Values       topic(DataWriters::Values which);
           Topics::Values       topic(DataReaders::Values which);
           ContentFilteredTopics::Values contentFilteredTopic(Topics::Values which);
-          MultiTopics::Values multiTopic(Topics::Values which);
+          MultiTopics::Values  multiTopic(Topics::Values which);
           Topics::Values       relatedTopic(ContentFilteredTopics::Values which);
           Publishers::Values   publisher(DataWriters::Values which);
           Subscribers::Values  subscriber(DataReaders::Values which);
@@ -271,11 +272,12 @@ namespace OpenDDS { namespace Model {
 </xsl:if>
 <xsl:if test="$lib-topics">
 <xsl:text>
-          Types::Values                 types_[     Topics::LAST_INDEX];
-          const char*                   topicNames_[Topics::LAST_INDEX];
-          DDS::TopicQos                 topicsQos_[ Topics::LAST_INDEX];
-          char*                         typeNames_[ Types::LAST_INDEX];
-          ContentFilteredTopics::Values cfTopics_[  Topics::LAST_INDEX];
+          Types::Values                 types_[      Topics::LAST_INDEX];
+          const char*                   topicNames_[ Topics::LAST_INDEX];
+          DDS::TopicQos                 topicsQos_[  Topics::LAST_INDEX];
+          char*                         typeNames_[   Types::LAST_INDEX];
+          ContentFilteredTopics::Values cfTopics_[   Topics::LAST_INDEX];
+          MultiTopics::Values           multiTopics_[Topics::LAST_INDEX];
 </xsl:text>
 </xsl:if>
 <xsl:if test="$lib-cf-topics">
@@ -745,6 +747,54 @@ inline
 inline
 </xsl:text>
   <xsl:value-of select="$elements-qname"/>
+  <xsl:text>::ContentFilteredTopics::Values
+</xsl:text>
+  <xsl:value-of select="$data-qname"/>
+  <xsl:text>::contentFilteredTopic(Topics::Values which)
+{
+  if(which &lt; 0 || which >= Topics::LAST_INDEX) {
+    throw OutOfBoundsException();
+  }
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$lib-topics">
+    <xsl:text>  return this->cfTopics_[which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return ContentFilteredTopics::LAST_INDEX; // not valid when no topics defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
+
+inline
+</xsl:text>
+  <xsl:value-of select="$elements-qname"/>
+  <xsl:text>::MultiTopics::Values
+</xsl:text>
+  <xsl:value-of select="$data-qname"/>
+  <xsl:text>::multiTopic(Topics::Values which)
+{
+  if(which &lt; 0 || which >= Topics::LAST_INDEX) {
+    throw OutOfBoundsException();
+  }
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$lib-topics">
+    <xsl:text>  return this->multiTopics_[which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return MultiTopics::LAST_INDEX; // not valid when no topics defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
+
+inline
+</xsl:text>
+  <xsl:value-of select="$elements-qname"/>
   <xsl:text>::Topics::Values
 </xsl:text>
   <xsl:value-of select="$data-qname"/>
@@ -760,7 +810,7 @@ inline
 </xsl:text>
   </xsl:when>
   <xsl:otherwise>
-    <xsl:text>  return Topics::LAST_INDEX; // not valid when no topics defined
+    <xsl:text>  return Topics::LAST_INDEX; // not valid when no CF topics defined
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>

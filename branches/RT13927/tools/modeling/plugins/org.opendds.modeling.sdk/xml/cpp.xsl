@@ -94,6 +94,7 @@ namespace OpenDDS { namespace Model {
   <xsl:variable name="lib-subscribers"  select=".//subscribers"/>
   <xsl:variable name="lib-topics"       select=".//topicDescriptions"/>
   <xsl:variable name="lib-cf-topics"    select=".//topicDescriptions[@xsi:type='topics:ContentFilteredTopic']"/>
+  <xsl:variable name="lib-multitopics"  select=".//topicDescriptions[@xsi:type='topics:MultiTopic']"/>
   <xsl:variable name="defined-types" select="$types[@xmi:id = $lib-topics/@datatype]"/>
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
   <xsl:text>
@@ -202,9 +203,39 @@ Elements::Data::loadTopics()
 {
 </xsl:text>
   <xsl:for-each select="$lib-topics">
+    <xsl:variable name="enum">
+      <xsl:call-template name="normalize-identifier"/>
+    </xsl:variable>
     <xsl:text>  this->topicNames_[Topics::</xsl:text>
-    <xsl:call-template name="normalize-identifier"/>
-    <xsl:value-of select="concat('] = &quot;', @name, '&quot;;', $newline)"/>
+    <xsl:value-of select="concat($enum, '] = &quot;', @name, '&quot;;', $newline)"/>
+    <xsl:choose>
+      <xsl:when test="$lib-cf-topics[@xmi:id = current()/@xmi:id]">
+        <xsl:text>  this->cfTopics_[</xsl:text>
+        <xsl:value-of select="concat('Topics::', $enum, 
+                                     '] = ContentFilteredTopics::', $enum,
+                                     ';', $newline)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:text>  this->cfTopics_[</xsl:text>
+        <xsl:value-of select="concat('Topics::', $enum, 
+                                     '] = ContentFilteredTopics::LAST_INDEX;',
+                                     $newline)"/>
+      </xsl:otherwise>
+    </xsl:choose>
+    <xsl:choose>
+      <xsl:when test="$lib-multitopics[@xmi:id = current()/@xmi:id]">
+        <xsl:text>  this->multiTopics_[</xsl:text>
+        <xsl:value-of select="concat('Topics::', $enum, 
+                                     '] = MultiTopics::', $enum,
+                                     ';', $newline)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:text>  this->multiTopics_[</xsl:text>
+        <xsl:value-of select="concat('Topics::', $enum, 
+                                     '] = MultiTopics::LAST_INDEX;',
+                                     $newline)"/>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:for-each>
   <xsl:for-each select="$lib-cf-topics">
     <xsl:variable name="cf-topic-name">
