@@ -52,16 +52,16 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::participant( typename Parti
 
 template< typename ModelName, class InstanceTraits>
 inline
-DDS::Topic_var
+DDS::TopicDescription_var
 OpenDDS::Model::Service< ModelName, InstanceTraits>::topic(
   typename Participants::Values participant,
   typename Topics::Values       topic
 )
 {
   if(!this->topics_[ participant][ topic]) {
-    this->createTopic(participant, topic);
+    this->createTopicDescription(participant, topic);
   }
-  return DDS::Topic::_duplicate(this->topics_[ participant][ topic]);
+  return DDS::TopicDescription::_duplicate(this->topics_[ participant][ topic]);
 }
 
 template< typename ModelName, class InstanceTraits>
@@ -134,9 +134,10 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createTopicDescription(
                this->modelData_.contentFilteredTopic(topic);
   typename MultiTopics::Values multiTopic = 
                this->modelData_.multiTopic(topic);
+  const char* topicName = this->modelData_.topicName(topic);
   // If this is a content-filtered topic
   if (cfTopic != ContentFilteredTopics::LAST_INDEX) {
-    createContentFilteredTopic(participant, cfTopic);
+    createContentFilteredTopic(participant, cfTopic, topicName);
   // Else if this is a multitopic
   } else if (multiTopic != MultiTopics::LAST_INDEX) {
     createMultiTopic(participant, multiTopic);
@@ -178,13 +179,14 @@ inline
 void
 OpenDDS::Model::Service< ModelName, InstanceTraits>::createContentFilteredTopic(
   typename Participants::Values          participant,
-  typename ContentFilteredTopics::Values topic
+  typename ContentFilteredTopics::Values topic,
+  const char*                            topic_name
 )
 {
-  const char* topic_name = this->modelData_.topicName(topic);
   typename Topics::Values target_topic = this->modelData_.relatedTopic(topic);
-  DDS::Topic_var related_topic = this->topic(participant, target_topic);
-  const char* filter_expression = this->modelData_.filterExpression(topic);
+  DDS::Topic_var related_topic = 
+        dynamic_cast<DDS::Topic*>(this->topic(participant, target_topic).ptr());
+  char* filter_expression = this->modelData_.filterExpression(topic);
   DDS::DomainParticipant_var domain_participant = this->participant(participant);
   // TODO: Should this be moved to Delegate?
   this->topics_[participant][topic] = 
@@ -269,10 +271,11 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createPublication( typename
     this->createTopic( participant, topic);
   }
 
+  // TODO: Figure out how to get this as a Topic*
   this->writers_[writer] = this->delegate_.createPublication(
     writer,
     this->publishers_[publisher],
-    this->topics_[participant][topic],
+    dynamic_cast<DDS::Topic*>(this->topics_[participant][topic]),
     this->modelData_.qos(writer),
     this->modelData_.mask(writer),
     this->modelData_.copyTopicQos(writer)
@@ -292,7 +295,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscription( typenam
     this->createSubscriber( subscriber);
   }
   if( !this->topics_[ participant][ topic]) {
-    this->createTopic( participant, topic);
+    this->createTopicDescription(participant, topic);
   }
 
   this->readers_[reader] = this->delegate_.createSubscription(

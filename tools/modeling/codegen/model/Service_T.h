@@ -41,8 +41,8 @@ namespace OpenDDS { namespace Model {
 
       ///{ @name DDS API Entity accessors.
       DDS::DomainParticipant_var participant(typename Participants::Values participant);
-      DDS::Topic_var topic(typename Participants::Values participant,
-                           typename Topics::Values       topic);
+      DDS::TopicDescription_var topic(typename Participants::Values participant,
+                                      typename Topics::Values       topic);
       DDS::Publisher_var publisher(typename Publishers::Values publisher);
       DDS::Subscriber_var subscriber(typename Subscribers::Values subscriber);
       DDS::DataWriter_var writer(typename DataWriters::Values writer);
@@ -64,7 +64,8 @@ namespace OpenDDS { namespace Model {
            );
       void createContentFilteredTopic(
              typename Participants::Values          participant,
-             typename ContentFilteredTopics::Values cftopic
+             typename ContentFilteredTopics::Values cftopic,
+             const char* topic_name
            );
       void createMultiTopic(
              typename Participants::Values participant,
@@ -103,7 +104,7 @@ namespace OpenDDS { namespace Model {
       ///   for the special cases (vectors-of-vectors) which are noted.
       std::vector<DDS::DomainParticipant*>       participants_;
       std::vector<std::vector<bool> >            types_;  // [part][type]
-      std::vector<std::vector<DDS::Topic*> >     topics_; // [part][topic]
+      std::vector<std::vector<DDS::TopicDescription*> > topics_; // [part][topic]
       std::vector<DDS::Publisher*>               publishers_;
       std::vector<DDS::Subscriber*>              subscribers_;
       std::vector<DDS::DataWriter*>              writers_;

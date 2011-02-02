@@ -162,22 +162,30 @@ OpenDDS::Model::Delegate::createWriter(
 
 DDS::DataReader*
 OpenDDS::Model::Delegate::createSubscription(
-  unsigned int       which,
-  DDS::Subscriber*   subscriber,
-  DDS::Topic*        topic,
-  DDS::DataReaderQos readerQos,
-  DDS::StatusMask    mask,
-  bool               copyQosFromTopic
+  unsigned int           which,
+  DDS::Subscriber*       subscriber,
+  DDS::TopicDescription* topic,
+  DDS::DataReaderQos     readerQos,
+  DDS::StatusMask        mask,
+  bool                   copyQosFromTopic
 )
 {
   if( !this->service_) {
     return 0;
   }
 
-  DDS::TopicQos topicQos = TheServiceParticipant->initial_TopicQos();
-  topic->get_qos( topicQos);
   subscriber->get_default_datareader_qos( readerQos);
   if (copyQosFromTopic) {
+    // Per the DDS Spec, copy from related topic for CF topic,
+    // Error if copy from mulitopic
+    DDS::TopicQos topicQos = TheServiceParticipant->initial_TopicQos();
+    DDS::Topic* qosTopic;
+    DDS::ContentFilteredTopic* qosCfTopic;
+    if ((qosTopic = dynamic_cast<DDS::Topic*>(topic)) != NULL) {
+      qosTopic->get_qos(topicQos);
+    } else if ((qosCfTopic = dynamic_cast<DDS::ContentFilteredTopic*>(topic)) != NULL) {
+      qosCfTopic->get_related_topic()->get_qos(topicQos);
+    }
     subscriber->copy_from_topic_qos(readerQos, topicQos);
   }
   this->service_->copySubscriptionQos( which, readerQos);
@@ -192,10 +200,10 @@ OpenDDS::Model::Delegate::createSubscription(
 
 DDS::DataReader*
 OpenDDS::Model::Delegate::createReader(
-  DDS::Subscriber*   subscriber,
-  DDS::Topic*        topic,
-  DDS::DataReaderQos readerQos,
-  DDS::StatusMask    mask
+  DDS::Subscriber*       subscriber,
+  DDS::TopicDescription* topic,
+  DDS::DataReaderQos     readerQos,
+  DDS::StatusMask        mask
 )
 {
   return subscriber->create_datareader(
