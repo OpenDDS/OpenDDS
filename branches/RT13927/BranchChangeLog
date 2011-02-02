@@ -1,3 +1,20 @@
+Wed Feb  2 23:08:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Change from Topic* to TopicDescription* where required.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+          Define filterExpression()
+
+        * tools/modeling/tests/CfTopic/CfTopic.opendds:
+
+          Don't use BETWEEN operator.
+
 Wed Feb  2 19:32:51 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:

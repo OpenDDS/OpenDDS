@@ -209,6 +209,7 @@ namespace OpenDDS { namespace Model {
           Topics::Values       topic(DataWriters::Values which);
           Topics::Values       topic(DataReaders::Values which);
           ContentFilteredTopics::Values contentFilteredTopic(Topics::Values which);
+          char*                filterExpression(ContentFilteredTopics::Values which);
           MultiTopics::Values  multiTopic(Topics::Values which);
           Topics::Values       relatedTopic(ContentFilteredTopics::Values which);
           Publishers::Values   publisher(DataWriters::Values which);
@@ -811,6 +812,28 @@ inline
   </xsl:when>
   <xsl:otherwise>
     <xsl:text>  return Topics::LAST_INDEX; // not valid when no CF topics defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
+
+inline
+char* 
+</xsl:text>
+  <xsl:value-of select="$data-qname"/>
+  <xsl:text>::filterExpression(ContentFilteredTopics::Values which)
+{
+  if(which &lt; 0 || which >= ContentFilteredTopics::LAST_INDEX) {
+    throw OutOfBoundsException();
+  }
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$lib-cf-topics">
+    <xsl:text>  return this->filterExpressions_[which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return 0; // not valid when no CF topics defined
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>

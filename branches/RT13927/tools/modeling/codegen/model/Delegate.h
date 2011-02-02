@@ -16,6 +16,7 @@
 namespace DDS {
   class DomainParticipant;
   class Topic;
+  class TopicDescription;
   class Publisher;
   class Subscriber;
   class DataWriter;
@@ -85,20 +86,20 @@ namespace OpenDDS { namespace Model {
 
       DDS::DataReader*
       createSubscription(
-        unsigned int       which,
-        DDS::Subscriber*   subscriber,
-        DDS::Topic*        topic,
-        DDS::DataReaderQos readerQos,
-        DDS::StatusMask    mask,
-        bool               copyQosFromTopic
+        unsigned int           which,
+        DDS::Subscriber*       subscriber,
+        DDS::TopicDescription* topic,
+        DDS::DataReaderQos     readerQos,
+        DDS::StatusMask        mask,
+        bool                   copyQosFromTopic
       );
 
       DDS::DataReader*
       createReader(
-        DDS::Subscriber*   subscriber,
-        DDS::Topic*        topic,
-        DDS::DataReaderQos readerQos,
-        DDS::StatusMask    mask
+        DDS::Subscriber*       subscriber,
+        DDS::TopicDescription* topic,
+        DDS::DataReaderQos     readerQos,
+        DDS::StatusMask        mask
       );
 
       CopyQos*& service();
