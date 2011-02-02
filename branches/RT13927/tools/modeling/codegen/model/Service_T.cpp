@@ -59,7 +59,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::topic(
 )
 {
   if(!this->topics_[ participant][ topic]) {
-    this->createTopicDescription(participant, topic);
+    this->createTopic(participant, topic);
   }
   return DDS::Topic::_duplicate(this->topics_[ participant][ topic]);
 }
@@ -130,13 +130,13 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createTopicDescription(
   typename Topics::Values       topic
 )
 {
-  typename Topics::ContentFilteredTopics::Values cfTopic = 
+  typename ContentFilteredTopics::Values cfTopic = 
                this->modelData_.contentFilteredTopic(topic);
-  typename Topics::MultiTopics::Values multiTopic = 
+  typename MultiTopics::Values multiTopic = 
                this->modelData_.multiTopic(topic);
   // If this is a content-filtered topic
   if (cfTopic != ContentFilteredTopics::LAST_INDEX) {
-    createMultiTopic(participant, cfTopic);
+    createContentFilteredTopic(participant, cfTopic);
   // Else if this is a multitopic
   } else if (multiTopic != MultiTopics::LAST_INDEX) {
     createMultiTopic(participant, multiTopic);
@@ -192,6 +192,17 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createContentFilteredTopic(
                                                         related_topic,
                                                         filter_expression,
                                                         StringSeq());
+}
+
+template< typename ModelName, class InstanceTraits>
+inline
+void
+OpenDDS::Model::Service< ModelName, InstanceTraits>::createMultiTopic(
+  typename Participants::Values          participant,
+  typename MultiTopics::Values topic
+)
+{
+  // TODO: Implement
 }
 
 template< typename ModelName, class InstanceTraits>
