@@ -207,6 +207,8 @@ namespace OpenDDS { namespace Model {
           Types::Values        type(Topics::Values which);
           Topics::Values       topic(DataWriters::Values which);
           Topics::Values       topic(DataReaders::Values which);
+          ContentFilteredTopics::Values contentFilteredTopic(Topics::Values which);
+          MultiTopics::Values multiTopic(Topics::Values which);
           Topics::Values       relatedTopic(ContentFilteredTopics::Values which);
           Publishers::Values   publisher(DataWriters::Values which);
           Subscribers::Values  subscriber(DataReaders::Values which);

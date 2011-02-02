@@ -31,7 +31,6 @@ namespace OpenDDS { namespace Model {
       typedef typename ModelName::Topics       Topics;
       typedef typename ModelName::ContentFilteredTopics   ContentFilteredTopics;
       typedef typename ModelName::MultiTopics             MultiTopics;
-      typedef typename ModelName::TopicKinds   TopicKinds;
       typedef typename ModelName::Publishers   Publishers;
       typedef typename ModelName::Subscribers  Subscribers;
       typedef typename ModelName::DataWriters  DataWriters;
@@ -68,8 +67,8 @@ namespace OpenDDS { namespace Model {
              typename ContentFilteredTopics::Values cftopic
            );
       void createMultiTopic(
-             typename Participants::Values          participant,
-             typename ContentFilteredTopics::Values cftopic
+             typename Participants::Values participant,
+             typename MultiTopics::Values  cftopic
            );
       void createPublisher(
              typename Publishers::Values publisher
@@ -104,7 +103,7 @@ namespace OpenDDS { namespace Model {
       ///   for the special cases (vectors-of-vectors) which are noted.
       std::vector<DDS::DomainParticipant*>       participants_;
       std::vector<std::vector<bool> >            types_;  // [part][type]
-      std::vector<std::vector<DDS::TopicDescription*> > topics_; // [part][topic]
+      std::vector<std::vector<DDS::Topic*> >     topics_; // [part][topic]
       std::vector<DDS::Publisher*>               publishers_;
       std::vector<DDS::Subscriber*>              subscribers_;
       std::vector<DDS::DataWriter*>              writers_;

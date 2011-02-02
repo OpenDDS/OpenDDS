@@ -1,3 +1,14 @@
+Wed Feb  2 15:09:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+          Fix build errors.  Don't call createTopicDescription.
+
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Added CfTopic test
 Tue Feb  1 23:22:36 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Service_T.h:

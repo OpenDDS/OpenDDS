@@ -29,3 +29,4 @@ tools/modeling/tests/ReferExternalProj/run_test.pl
 tools/modeling/tests/Deep/Down/Reference/run_test.pl
 tools/modeling/tests/EmptyLibs/run_test.pl
 tools/modeling/tests/MessengerSimpleTypes/run_test.pl
+tools/modeling/tests/CfTopic/run_test.pl
