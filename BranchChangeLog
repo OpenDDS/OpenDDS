@@ -1,3 +1,19 @@
+Thu Feb  3 23:29:25 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/README.dev:
+
+          Minor updates.  Tested one-time setup steps from a fresh Eclipse
+          install.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/ant_custom.xml:
+
+          Updated list of .java files needed for scripted code generation.
+
+        * tools/modeling/tests/setup.pl:
+
+          Added the ability to run the Java compiler (javac) directly from
+          setup.pl in order to compile SdkGenerator.java and related classes.
+
 Thu Feb  3 22:12:01 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
 
         * [r4213] 2011-02-03 22:05  martinezm

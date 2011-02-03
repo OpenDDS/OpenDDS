@@ -10,7 +10,6 @@ One-time developer setup
    all available repositories):
      EMF - Eclipse Modeling Framework SDK
      Graphical Modeling Framework SDK
-     Eclipse XSL Developer Tools
      EMF Validation Framework OCL Integration
    Also, to run a scripted build from the command line, add a new update site
    for http://www.eclipticalsoftware.com/updates and install their feature:
@@ -41,7 +40,7 @@ II. Generate GMF code
 ************************************************************************
 Automated code generation steps
 
-1. Close Eclipse so the workspace isn't open concurrently in the scripts
+1. Close Eclipse so the workspace isn't open concurrently with the scripts
 
 2. Read the note at the top of $DDS_ROOT/tools/modeling/build.pl for
    instructions on setting the ECLIPSE_HOME and ECLIPSE_WORKSPACE variables.
