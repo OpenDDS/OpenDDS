@@ -64,12 +64,13 @@ namespace OpenDDS { namespace Model {
            );
       void createContentFilteredTopic(
              typename Participants::Values          participant,
-             typename ContentFilteredTopics::Values cftopic,
-             const char* topic_name
+             typename Topics::Values                topic,
+             typename ContentFilteredTopics::Values cfTopic
            );
       void createMultiTopic(
              typename Participants::Values participant,
-             typename MultiTopics::Values  cftopic
+             typename Topics::Values       topic,
+             typename MultiTopics::Values  multiTopic
            );
       void createPublisher(
              typename Publishers::Values publisher

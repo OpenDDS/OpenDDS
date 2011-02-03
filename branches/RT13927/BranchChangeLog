@@ -1,3 +1,27 @@
+Thu Feb  3 21:53:30 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Support creation of multitopics.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk/xml/h.xsl:
+
+          Support creation of multitopics.
+
+        * tools/modeling/tests/MultiTopic:
+        * tools/modeling/tests/MultiTopic/MultiTopic.gen:
+        * tools/modeling/tests/MultiTopic/MultiTopic.mpc:
+        * tools/modeling/tests/MultiTopic/MultiTopic.mwc:
+        * tools/modeling/tests/MultiTopic/MultiTopic.opendds:
+        * tools/modeling/tests/MultiTopic/publisher.cpp:
+        * tools/modeling/tests/MultiTopic/run_test.pl:
+        * tools/modeling/tests/MultiTopic/subscriber.cpp:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Test multitopics.
+
 Thu Feb  3 15:54:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

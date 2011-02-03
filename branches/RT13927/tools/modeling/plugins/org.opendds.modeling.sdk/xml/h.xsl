@@ -210,6 +210,7 @@ namespace OpenDDS { namespace Model {
           Topics::Values       topic(DataReaders::Values which);
           ContentFilteredTopics::Values contentFilteredTopic(Topics::Values which);
           char*                filterExpression(ContentFilteredTopics::Values which);
+          char*                topicExpression(MultiTopics::Values which);
           MultiTopics::Values  multiTopic(Topics::Values which);
           Topics::Values       relatedTopic(ContentFilteredTopics::Values which);
           Publishers::Values   publisher(DataWriters::Values which);
@@ -286,7 +287,13 @@ namespace OpenDDS { namespace Model {
           Topics::Values relatedTopics_    [ContentFilteredTopics::LAST_INDEX];
           char*          filterExpressions_[ContentFilteredTopics::LAST_INDEX];
 </xsl:text>
-</xsl:if><xsl:text>
+</xsl:if>
+<xsl:if test="$lib-multitopics">
+<xsl:text>
+          char*          topicExpressions_[MultiTopics::LAST_INDEX];
+</xsl:text>
+</xsl:if>
+<xsl:text>
       }; // End class Data
   }; // End class Elements
 </xsl:text>
@@ -298,6 +305,7 @@ namespace OpenDDS { namespace Model {
   <xsl:variable name="lib-participants" select=".//participants"/>
   <xsl:variable name="lib-topics"       select=".//topicDescriptions"/>
   <xsl:variable name="lib-cf-topics"    select=".//topicDescriptions[@xsi:type = 'topics:ContentFilteredTopic']"/>
+  <xsl:variable name="lib-multitopics"  select=".//topicDescriptions[@xsi:type = 'topics:MultiTopic']"/>
   <xsl:variable name="lib-publishers"   select=".//publishers"/>
   <xsl:variable name="lib-subscribers"  select=".//subscribers"/>
   <xsl:variable name="lib-writers"      select=".//writers"/>
@@ -834,6 +842,28 @@ char*
   </xsl:when>
   <xsl:otherwise>
     <xsl:text>  return 0; // not valid when no CF topics defined
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>}
+
+inline
+char* 
+</xsl:text>
+  <xsl:value-of select="$data-qname"/>
+  <xsl:text>::topicExpression(MultiTopics::Values which)
+{
+  if(which &lt; 0 || which >= MultiTopics::LAST_INDEX) {
+    throw OutOfBoundsException();
+  }
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$lib-multitopics">
+    <xsl:text>  return this->topicExpressions_[which];
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>  return 0; // not valid when no multitopics defined
 </xsl:text>
   </xsl:otherwise>
 </xsl:choose>
