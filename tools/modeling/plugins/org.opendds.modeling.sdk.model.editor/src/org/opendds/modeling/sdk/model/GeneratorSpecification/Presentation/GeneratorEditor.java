@@ -918,22 +918,7 @@ public class GeneratorEditor
 				generatorViewer.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
 				generatorViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
 				
-				generatorViewer.setGeneratorEditor(this);
-
-				// Add the model file and target dir model elements to the viewer.
-				//
-				EList<Resource> resources = editingDomain.getResourceSet().getResources();
-				if( resources.size() > 0) {
-					Resource resource = resources.get(0);
-					EList<EObject> contents = resource.getContents();
-					if( contents.size() > 0) {
-						EObject root = contents.get(0);
-						if( root instanceof CodeGen) {
-							generatorViewer.setSource( ((CodeGen)root).getSource());
-							generatorViewer.setTarget( ((CodeGen)root).getTarget());
-						}
-					}
-				}
+				generatorViewer.setEditingDomain( getEditingDomain());
 				
 				int pageIndex = addPage(viewerPane.getControl());
 				setPageText(pageIndex, getString("_UI_GenerateTab_label"));

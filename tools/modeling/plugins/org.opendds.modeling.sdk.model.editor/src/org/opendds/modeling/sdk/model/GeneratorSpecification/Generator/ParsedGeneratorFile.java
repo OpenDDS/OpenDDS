@@ -1,156 +1,215 @@
 package org.opendds.modeling.sdk.model.GeneratorSpecification.Generator;
 
-import javax.xml.xpath.XPathConstants;
+import javax.xml.transform.Source;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGenerator.ErrorHandler;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGenerator.FileProvider;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGenerator.ErrorHandler.Severity;
-import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-public class ParsedGeneratorFile extends ParsedXmlFile {
+public class ParsedGeneratorFile extends ParsedXmlFile implements IGeneratorModel {
 	private static final String sourceExpression = "//generator:CodeGen/source/@name";
 	private static final String targetExpression = "//generator:CodeGen/target/@name";
 
-	private static XPathExpression sourceExpr;
-	private static XPathExpression targetExpr;
+	protected static XPathExpression sourceExpr;
+	protected static XPathExpression targetExpr;
 
-	private String source;
-	private String target;
+	/**
+	 *  Only needed when there is no EMF model to delegate to.
+	 */
+	protected String targetDirName;
+
+	/**
+	 *  Delegate to EMF implementation if we can.
+	 */
+	protected IGeneratorModel generatorModel = null;
+	
+	/**
+	 *  This holds the reference to the ParsedModelFile since it 'owns' the model.
+	 */
+	protected ParsedModelFile parsedModelFile;
+	
+	protected Source source = null;
 
 	/**
 	 * Create a new object of the ParsedGeneratorFile class.
 	 * This is the correct way to obtain new instances of this class.
 	 * 
-	 * @param fp - FileProvider to be used by a ParsedGeneratorFile object.
-	 * @param eh - ErrorHandler to be used by a ParsedGeneratorFile object.
+	 * @param fp - IFileProvider to be used by a ParsedGeneratorFile object.
+	 * @param eh - IErrorHandler to be used by a ParsedGeneratorFile object.
 	 * @return   - ParsedGeneratorFile object.
 	 */
-	public static ParsedGeneratorFile create(FileProvider fp, ErrorHandler eh) {
+	public static ParsedGeneratorFile create(IFileProvider fp, IErrorHandler eh) {
 		return new ParsedGeneratorFile(fp, eh);
 	}
 
-	private ParsedGeneratorFile(FileProvider fp, ErrorHandler eh) {
+	protected ParsedGeneratorFile(IFileProvider fp, IErrorHandler eh) {
 		super(fp, eh);
+		parsedModelFile = ParsedModelFile.create(fp, eh);
+	}
+	
+	public void setGeneratorModel( IGeneratorModel generatorModel) {
+		if( generatorModel != null) {
+			this.generatorModel = generatorModel;
+			this.generatorModel.setParsedModelFile(parsedModelFile);
+		}
 	}
 
+	@Override
 	public void reset() {
-		source = target = null;
+		source = null;
+		setTargetDirName( null);
+		parsedModelFile.reset();
 		super.reset();
 	}
+	
+	@Override
+	public void setEditingDomain( Object editingDomain) {
+		if( generatorModel != null) {
+			generatorModel.setEditingDomain(editingDomain);
+		}
+	}
 
-	private XPathExpression getSourceExpr() {
+	@Override
+	public void setParsedModelFile(ParsedModelFile parsedModelFile) {
+		if( parsedModelFile != null && parsedModelFile != this.parsedModelFile) {
+			this.parsedModelFile = parsedModelFile;
+		}
+	}
+	
+	@Override
+	public boolean isModelSource( Object element) {
+		if( generatorModel != null) {
+			return generatorModel.isModelSource(element);
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean isModelTarget( Object element) {
+		if( generatorModel != null) {
+			return generatorModel.isModelTarget(element);
+		}
+		return false;
+	}
+	
+	@Override
+	public String getModelName() {
+		if( generatorModel != null) {
+			return generatorModel.getModelName();
+		} else {
+			return parsedModelFile.getModelName();
+		}
+	}
+	
+	@Override
+	public String getModelFileName() {
+		if( generatorModel != null) {
+			return generatorModel.getModelFileName();
+		} else {
+			return parsedModelFile.getSourceName();
+		}
+	}
+	
+	@Override
+	public void setModelFileName( String modelFileName) {
+		if( generatorModel != null) {
+			generatorModel.setModelFileName( modelFileName);
+		} else {
+			parsedModelFile.setSourceName(modelFileName);
+		}
+	}
+	
+	@Override
+	public String getTargetDirName() {
+		if( generatorModel != null) {
+			return generatorModel.getTargetDirName();
+		} else {
+			return targetDirName;
+		}
+	}
+	
+	@Override
+	public void setTargetDirName( String targetDirName) {
+		if( generatorModel != null) {
+			generatorModel.setTargetDirName( targetDirName);
+
+		} else {
+			this.targetDirName = targetDirName;
+		}
+	}
+
+	@Override
+	public void setSourceName( String sourceName) {
+		super.setSourceName(sourceName);
+
+		if( parsedModelFile.getSourceName() == null) {
+			// Parse the file.
+		    setModelFileName( resultFromNodeList( parseExpression( getSourceExpr()), "source"));
+		}
+		
+		if( getTargetDirName() == null) {
+			// Parse the file.
+		    setTargetDirName( resultFromNodeList( parseExpression( getTargetExpr()), "target"));
+		}
+	}
+
+	@Override
+	public Source getSource( SdkTransformer transformer) {
+		if( generatorModel != null) {
+			// Grab the transformation input from the EMF model if we can.
+			return generatorModel.getSource(transformer);
+
+		} else {
+			if( transformer != null) {
+				// Grab the transformation input from the pre-processed OpenDDS model.
+				return parsedModelFile.getSource(transformer);
+				
+			} else {
+				// Grab the transformation input from our own serialized document.
+				return super.getSource(transformer);
+			}
+		}
+	}
+
+	protected XPathExpression getSourceExpr() {
 		if (sourceExpr == null) {
 			try {
 				sourceExpr = getXpath().compile(sourceExpression);
 
 			} catch (XPathExpressionException e) {
-				errorHandler.error(Severity.ERROR, "getSourceExpr",
+				errorHandler.error(IErrorHandler.Severity.ERROR, "getSourceExpr",
 						"XPath expression not available to obtain the source .opendds document.", e);
 			}
 		}
 		return sourceExpr;
 	}
 
-	private XPathExpression getTargetExpr() {
+	protected XPathExpression getTargetExpr() {
 		if (targetExpr == null) {
 			try {
 				targetExpr = getXpath().compile(targetExpression);
 
 			} catch (XPathExpressionException e) {
-				errorHandler.error(Severity.ERROR, "getTargetExpr",
+				errorHandler.error(IErrorHandler.Severity.ERROR, "getTargetExpr",
 						"XPath expression not available to obtain the target directory.", e);
 			}
 		}
 		return targetExpr;
 	}
 
-	public String getSource() {
-		return getSource(null);
-	}
-
-	public String getSource(String sourceName) {
-		setSourceName(sourceName);
-		if (this.sourceName == null) {
-			return null;
-		}
-
-		if (this.source != null) {
-			return source;
-		}
-
-		XPathExpression sourceExpr = getSourceExpr();
-		if (sourceExpr == null) {
-			return null; // messages were generated in the get call.
-		}
-
-		Document doc = getModelDocument();
-		if (doc == null) {
-			return null; // messages were generated in the get call.
-		}
-		
-		try {
-			Object result = sourceExpr.evaluate(doc, XPathConstants.NODESET);
-			NodeList nodes = (NodeList) result;
-		    source = resultFromNodeList(nodes, "source");
-
-		} catch (XPathExpressionException e) {
-			errorHandler.error(Severity.ERROR, "getSource",
-					"Problem finding source in the generator file " + this.sourceName, e);
-		}
-		return source;
-	}
-
-	public String getTarget() {
-		return getTarget(null);
-	}
-
-	public String getTarget(String sourceName) {
-		setSourceName(sourceName);
-		if (this.sourceName == null) {
-			return null;
-		}
-
-		if (this.target != null) {
-			return target;
-		}
-
-		XPathExpression targetExpr = getTargetExpr();
-		if (targetExpr == null) {
-			return null; // messages were generated in the get call.
-		}
-
-		Document doc = getModelDocument();
-		if (doc == null) {
-			return null; // messages were generated in the get call.
-		}
-		
-		try {
-			Object result = targetExpr.evaluate(doc, XPathConstants.NODESET);
-			NodeList nodes = (NodeList) result;
-		    target = resultFromNodeList(nodes, "target");
-		} catch (XPathExpressionException e) {
-			errorHandler.error(Severity.ERROR, "getTarget",
-					"Problem finding target in the generator file " + this.sourceName, e);
-		}
-		return target;
-	}
-
-	private String resultFromNodeList(NodeList nodes, String attr) {
+	protected String resultFromNodeList(NodeList nodes, String attr) {
 		switch (nodes.getLength()) {
 		case 1:
 			return nodes.item(0).getNodeValue();
 
 		case 0:
-			errorHandler.error(Severity.ERROR, "resultFromNodeList",
+			errorHandler.error(IErrorHandler.Severity.ERROR, "resultFromNodeList",
 					"Could not find any " + attr + " in the file " + this.sourceName,
 					null);
 			return null;
 
 		default:
-			errorHandler.error(Severity.ERROR, "resultFromNodeList",
+			errorHandler.error(IErrorHandler.Severity.ERROR, "resultFromNodeList",
 					"Found " + nodes.getLength() + " candidate " + attr + "s in the file "
 					+ this.sourceName + ", which is too many!", null);
 			return null;

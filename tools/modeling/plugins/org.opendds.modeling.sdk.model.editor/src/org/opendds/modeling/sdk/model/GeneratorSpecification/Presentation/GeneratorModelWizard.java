@@ -222,7 +222,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 
 		if( modelFileName != null) {
 			// Load the default instance with a transport for each index found in the model.
-			Set<Integer> transportIndices = parsedModelFile.getTransportIds(modelFile.getName());
+			Set<Integer> transportIndices = parsedModelFile.getTransportIds();
 			for( Integer current : transportIndices) {
 				Transport transport = generatorFactory.createTransport();
 				transport.setTransportIndex(current);

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.emf.edit.command.SetCommand;
+import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -24,11 +24,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorPackage;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.ModelFile;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.TargetDir;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGenerator;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGeneratorFactory;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkTransformer;
 
 public class GeneratorTab extends StructuredViewer {
 	protected Composite control;
@@ -40,12 +38,10 @@ public class GeneratorTab extends StructuredViewer {
 	protected Label trcLabel;
 	protected Label mpcLabel;
 	protected Label mpbLabel;
+	protected Label pathMpbLabel;
 	
 	protected Text sourceText;
 	protected Text targetDir;
-
-	protected ModelFile source;
-	protected TargetDir target;
 
 	protected SdkGenerator generator;
 
@@ -146,16 +142,16 @@ public class GeneratorTab extends StructuredViewer {
 		panel.setLayout( new GridLayout( 2, false));
 		
 		// Subsequent resizing can become incorrect if there is no initial text size.
-		final String uninitializedLabel = new String("unitialized");
+		final String uninitializedLabel = new String("uninitialized");
 
 		// Code generation pushbuttons
 		button = new Button(panel, SWT.PUSH);
-		button.setText(SdkGenerator.TransformType.IDL.dialogTitle());
+		button.setText(SdkTransformer.TransformType.IDL.getText());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkGenerator.TransformType.IDL, source.getName());
+				generator.generate(SdkTransformer.TransformType.IDL);
 			}
 		});
 		idlLabel =  new Label(panel, SWT.LEFT);
@@ -164,12 +160,12 @@ public class GeneratorTab extends StructuredViewer {
 		idlLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
-		button.setText(SdkGenerator.TransformType.H.dialogTitle());
+		button.setText(SdkTransformer.TransformType.H.getText());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkGenerator.TransformType.H, source.getName());
+				generator.generate(SdkTransformer.TransformType.H);
 			}
 		});
 		hLabel =  new Label(panel, SWT.LEFT);
@@ -178,12 +174,12 @@ public class GeneratorTab extends StructuredViewer {
 		hLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
-		button.setText(SdkGenerator.TransformType.CPP.dialogTitle());
+		button.setText(SdkTransformer.TransformType.CPP.getText());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkGenerator.TransformType.CPP, source.getName());
+				generator.generate(SdkTransformer.TransformType.CPP);
 			}
 		});
 		cppLabel =  new Label(panel, SWT.LEFT);
@@ -192,12 +188,12 @@ public class GeneratorTab extends StructuredViewer {
 		cppLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
-		button.setText(SdkGenerator.TransformType.TRH.dialogTitle());
+		button.setText(SdkTransformer.TransformType.TRH.getText());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkGenerator.TransformType.TRH, source.getName());
+				generator.generate(SdkTransformer.TransformType.TRH);
 			}
 		});
 		trhLabel =  new Label(panel, SWT.LEFT);
@@ -206,12 +202,12 @@ public class GeneratorTab extends StructuredViewer {
 		trhLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
-		button.setText(SdkGenerator.TransformType.TRC.dialogTitle());
+		button.setText(SdkTransformer.TransformType.TRC.getText());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkGenerator.TransformType.TRC, source.getName());
+				generator.generate(SdkTransformer.TransformType.TRC);
 			}
 		});
 		trcLabel =  new Label(panel, SWT.LEFT);
@@ -220,12 +216,12 @@ public class GeneratorTab extends StructuredViewer {
 		trcLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
-		button.setText(SdkGenerator.TransformType.MPC.dialogTitle());
+		button.setText(SdkTransformer.TransformType.MPC.getText());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkGenerator.TransformType.MPC, source.getName());
+				generator.generate(SdkTransformer.TransformType.MPC);
 			}
 		});
 		mpcLabel =  new Label(panel, SWT.LEFT);
@@ -234,12 +230,12 @@ public class GeneratorTab extends StructuredViewer {
 		mpcLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
-		button.setText(SdkGenerator.TransformType.MPB.dialogTitle());
+		button.setText(SdkTransformer.TransformType.MPB.getText());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkGenerator.TransformType.MPB, source.getName());
+				generator.generate(SdkTransformer.TransformType.MPB);
 			}
 		});
 		mpbLabel =  new Label(panel, SWT.LEFT);
@@ -248,49 +244,41 @@ public class GeneratorTab extends StructuredViewer {
 		mpbLabel.setLayoutData(gridData);
 
 		button = new Button(panel, SWT.PUSH);
+		button.setText(SdkTransformer.TransformType.PATH_MPB.getText());
+		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
+		button.setLayoutData(gridData);
+		button.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				generator.generate(SdkTransformer.TransformType.PATH_MPB);
+			}
+		});
+		pathMpbLabel =  new Label(panel, SWT.LEFT);
+		pathMpbLabel.setText(uninitializedLabel);
+		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
+		pathMpbLabel.setLayoutData(gridData);
+
+		button = new Button(panel, SWT.PUSH);
 		button.setText("Generate All");
 		gridData = new GridData(SWT.LEFT, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkGenerator.TransformType.IDL, source.getName());
-				generator.generate(SdkGenerator.TransformType.H,   source.getName());
-				generator.generate(SdkGenerator.TransformType.CPP, source.getName());
-				generator.generate(SdkGenerator.TransformType.TRH, source.getName());
-				generator.generate(SdkGenerator.TransformType.TRC, source.getName());
-				generator.generate(SdkGenerator.TransformType.MPC, source.getName());
-				generator.generate(SdkGenerator.TransformType.MPB, source.getName());
+				generator.generateAll();
 			}
 		});
 	}
 
 	protected void updateSource() {
-		if( !sourceText.getText().equals(source.getName())) {
-			editor.getEditingDomain().getCommandStack().execute(
-					SetCommand.create(
-							editor.getEditingDomain(),
-							source,
-							GeneratorPackage.eINSTANCE.getModelFile_Name(),
-							sourceText.getText()
-					));
-			updateModelnameLabels();
-		}
+		generator.setModelFileName( sourceText.getText());
+		updateModelnameLabels();
 	}
 	
 	protected void updateTarget() {
-		if( !targetDir.getText().equals(target.getName())) {
-			editor.getEditingDomain().getCommandStack().execute(
-					SetCommand.create(
-							editor.getEditingDomain(),
-							target,
-							GeneratorPackage.eINSTANCE.getTargetDir_Name(),
-							targetDir.getText()
-					));
-		}
+		generator.setTargetDirName( targetDir.getText());
 	}
 	
 	protected void updateModelnameLabels() {
-		String basename = null;// getModelName();
+		String basename = generator.getModelName();
 		if( basename == null) {
 			final String invalidLabel = new String("Invalid model file");
 
@@ -319,44 +307,29 @@ public class GeneratorTab extends StructuredViewer {
 			mpbLabel.setSize(invalidSize);
 
 		} else {
-			idlLabel.setText(basename + SdkGenerator.TransformType.IDL.suffix());
+			idlLabel.setText(basename + SdkTransformer.TransformType.IDL.getSuffix());
 			idlLabel.setSize(idlLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 			
-			hLabel.setText(basename + SdkGenerator.TransformType.H.suffix());
+			hLabel.setText(basename + SdkTransformer.TransformType.H.getSuffix());
 			hLabel.setSize(hLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 			
-			cppLabel.setText(basename + SdkGenerator.TransformType.CPP.suffix());
+			cppLabel.setText(basename + SdkTransformer.TransformType.CPP.getSuffix());
 			cppLabel.setSize(cppLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 			
-			trhLabel.setText(basename + SdkGenerator.TransformType.TRH.suffix());
+			trhLabel.setText(basename + SdkTransformer.TransformType.TRH.getSuffix());
 			trhLabel.setSize(trhLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 			
-			trcLabel.setText(basename + SdkGenerator.TransformType.TRC.suffix());
+			trcLabel.setText(basename + SdkTransformer.TransformType.TRC.getSuffix());
 			trcLabel.setSize(trcLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 			
-			mpcLabel.setText(basename + SdkGenerator.TransformType.MPC.suffix());
+			mpcLabel.setText(basename + SdkTransformer.TransformType.MPC.getSuffix());
 			mpcLabel.setSize(mpcLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 			
-			mpbLabel.setText(basename + SdkGenerator.TransformType.MPB.suffix());
+			mpbLabel.setText(basename + SdkTransformer.TransformType.MPB.getSuffix());
 			mpbLabel.setSize(mpbLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		}
 		
 		control.layout(true);
-	}
-
-	public void setSource(ModelFile source) {
-		this.source = source;
-		if( sourceText != null && source != null) {
-  			sourceText.setText(source.getName());
-			updateModelnameLabels();
-		}
-	}
-
-	public void setTarget(TargetDir target) {
-		this.target = target;
-		if( targetDir != null && target != null) {
-			targetDir.setText(target.getName());
-		}
 	}
 
 	@Override
@@ -366,11 +339,13 @@ public class GeneratorTab extends StructuredViewer {
 
 	@Override
 	public void refresh() {
-		if( sourceText != null && source != null) {
-			sourceText.setText(source.getName());
+		if( sourceText != null && generator != null) {
+			String name = generator.getModelFileName();
+			sourceText.setText(name == null? "": name);
 		}
-		if( targetDir != null && target != null) {
-			targetDir.setText(target.getName());
+		if( targetDir != null && generator != null) {
+			String name = generator.getTargetDirName();
+			targetDir.setText(name == null? "": name);
 		}
 		super.refresh();
 	}
@@ -385,15 +360,16 @@ public class GeneratorTab extends StructuredViewer {
 		this.selection = selection;
 	}
 
-	public void setGeneratorEditor(GeneratorEditor generatorEditor) {
-		editor = generatorEditor;
+	public void setEditingDomain(EditingDomain editingDomain) {
+		generator.setEditingDomain( editingDomain);
+		// refresh() ?
 	}
 
 	@Override
 	protected Widget doFindInputItem(Object element) {
-		if( element == source) {
+		if( generator.isModelSource(element)) {
 			return sourceText;
-		} else if( element == target) {
+		} else if( generator.isModelTarget(element)) {
 			return targetDir;
 		}
 		return null;
@@ -409,13 +385,14 @@ public class GeneratorTab extends StructuredViewer {
 		if( !fullMap) {
 			return;
 			
-		} else if( element == source) {
+		} else if( generator.isModelSource(element)) {
 			if( item == sourceText) {
-				sourceText.setText( source.getName());
+				sourceText.setText( generator.getModelFileName());
 			}
-		} else if( element == target) {
+			
+		} else if( generator.isModelTarget(element)) {
 			if( item == targetDir) {
-				targetDir.setText( target.getName());
+				targetDir.setText( generator.getTargetDirName());
 			}
 		}
 	}
