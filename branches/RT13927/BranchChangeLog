@@ -1,3 +1,14 @@
+Thu Feb  3 15:54:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          With DCPSDebugLevel, need to check for a null instance pointer
+          in case the sample was filtered-out due to content filtering.
+
+        * tools/modeling/README.dev:
+
+          Document developer notes (setup, build, etc.).
+
 Thu Feb  3 15:49:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/CfTopic/CfTopic.opendds:

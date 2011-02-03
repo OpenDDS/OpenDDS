@@ -1307,7 +1307,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
                   ACE_TEXT("instance %d is_new_instance %d filtered %d \n"),
                   std::string(reader_converter).c_str(),
                   std::string(writer_converter).c_str(),
-                  instance->instance_handle_, is_new_instance, filtered));
+                  instance ? instance->instance_handle_ : 0,
+                  is_new_instance, filtered));
     }
 
     if (filtered) break; // sample filtered from instance
