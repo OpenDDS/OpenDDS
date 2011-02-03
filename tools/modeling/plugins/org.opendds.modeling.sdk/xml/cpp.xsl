@@ -117,6 +117,14 @@ Elements::Data::Data()
     this->filterExpressions_[index] = 0;
   }</xsl:text>
 </xsl:if>
+<xsl:if test="$lib-multitopics">
+  <xsl:text>
+  for( int index = 0;
+       index &lt; Elements::MultiTopics::LAST_INDEX;
+       ++index) {
+    this->topicExpressions_[index] = 0;
+  }</xsl:text>
+</xsl:if>
   <xsl:text>
   this->loadDomains();
   this->loadTopics();
@@ -152,6 +160,18 @@ Elements::Data::~Data()
     if( this->filterExpressions_[index]) {
       free(this->filterExpressions_[index]); // Created by CORBA::string_dup()
       this->filterExpressions_[ index] = 0;
+    }
+  }
+</xsl:text>
+</xsl:if>
+<xsl:if test="$lib-multitopics">
+  <xsl:text>
+  for(int index = 0;
+      index &lt; Elements::MultiTopics::LAST_INDEX;
+      ++index) {
+    if( this->topicExpressions_[index]) {
+      free(this->topicExpressions_[index]); // Created by CORBA::string_dup()
+      this->topicExpressions_[ index] = 0;
     }
   }
 </xsl:text>
@@ -246,6 +266,16 @@ Elements::Data::loadTopics()
                                  $cf-topic-name, '] = ', 
                                  'CORBA::string_dup(&quot;',
                                  @filter_expression, '&quot;);', $newline)"/>
+  </xsl:for-each>
+  <xsl:for-each select="$lib-multitopics">
+    <xsl:variable name="multitopic-name">
+      <xsl:call-template name="normalize-identifier"/>
+    </xsl:variable>
+    <xsl:value-of select="concat('  this->topicExpressions_[',
+                                 'MultiTopics::',
+                                 $multitopic-name, '] = ', 
+                                 'CORBA::string_dup(&quot;',
+                                 @subscription_expression, '&quot;);', $newline)"/>
   </xsl:for-each>
   <xsl:text>}
 
