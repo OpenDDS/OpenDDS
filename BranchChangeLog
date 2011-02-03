@@ -1,3 +1,9 @@
+Thu Feb  3 15:49:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/CfTopic/CfTopic.opendds:
+
+          Use BETWEEN operator again.
+
 Thu Feb  3 14:58:55 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Codegen/aPublisher.cpp:
