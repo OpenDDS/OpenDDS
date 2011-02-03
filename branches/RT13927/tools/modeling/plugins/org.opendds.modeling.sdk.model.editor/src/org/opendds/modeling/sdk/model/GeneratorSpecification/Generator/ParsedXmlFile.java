@@ -12,13 +12,18 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGenerator.ErrorHandler;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGenerator.FileProvider;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGenerator.ErrorHandler.Severity;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkTransformer.TransformType;
 import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public abstract class ParsedXmlFile {
@@ -27,12 +32,14 @@ public abstract class ParsedXmlFile {
 	private static XPath xpath;
 	private Document modelDocument;
 	private DocumentBuilder documentBuilder;
-	protected String sourceName;
-	protected ErrorHandler errorHandler;
-	protected FileProvider fileProvider;
 	private long timestamp;
+	
+	protected String sourceName;
+	protected Source source = null;
+	protected IErrorHandler errorHandler;
+	protected IFileProvider fileProvider;
 
-	protected ParsedXmlFile(FileProvider fp, ErrorHandler eh) {
+	protected ParsedXmlFile(IFileProvider fp, IErrorHandler eh) {
 		fileProvider = fp;
 		errorHandler = eh;
 	}
@@ -60,13 +67,12 @@ public abstract class ParsedXmlFile {
 				return modelFile.exists();
 	
 			} catch (MalformedURLException e) {
-				errorHandler.error(Severity.INFO, "exists",
+				errorHandler.error(IErrorHandler.Severity.INFO, "exists",
 						"Unable to parse URL for file " + sourceName, e);
 	
 			} catch (URISyntaxException e) {
-				errorHandler.error(Severity.INFO, "exists",
+				errorHandler.error(IErrorHandler.Severity.INFO, "exists",
 						"Badly formed URI for file " + sourceName, e);
-	
 			}
 		}
 		return false;
@@ -77,19 +83,41 @@ public abstract class ParsedXmlFile {
 	}
 
 	public void setSourceName(String sourceName) {
-		if( sourceName != null && !sourceName.equals(this.sourceName)) {
+		if( sourceName == null
+		 || (sourceName != null && !sourceName.equals(this.sourceName))) {
 			reset();
 			this.sourceName = sourceName;
 		}
 	}
+	
+	/**
+	 * Return the contained OpenDDS model in a form suitable for transformation.
+	 * 
+	 * @param transformer engine for transforming the model into a resolve model.
+	 * 
+	 * @return Source suitable for transformation.
+	 */
+	public Source getSource( SdkTransformer transformer) {
+		if( source == null) {
+			Document doc = getModelDocument();
+			if (doc == null) {
+				return null; // messages were generated in the get call.
+			}
 
-	public Document getModelDocument() {
-		return getModelDocument(null);
+			source = new DOMSource( doc);
+			if( transformer != null) {
+					DOMResult resolved = new DOMResult();
+					transformer.transform(TransformType.RESOLVED, source, resolved);
+
+					source = new DOMSource( resolved.getNode());
+			}
+		}
+
+		return source;
 	}
 
-	public Document getModelDocument(String sourceName) {		
-		setSourceName(sourceName);
-		if( this.sourceName == null) {
+	protected Document getModelDocument() {
+		if( sourceName == null || sourceName.isEmpty()) {
 			return null;
 		}
 	
@@ -101,7 +129,7 @@ public abstract class ParsedXmlFile {
 			URL modelUrl = fileProvider.fromWorkspace(this.sourceName);
 			File modelFile = new File(modelUrl.toURI());
 			if (!modelFile.exists()) {
-				errorHandler.error(Severity.ERROR, "getModelDocument",
+				errorHandler.error(IErrorHandler.Severity.ERROR, "getModelDocument",
 						"Model file " + this.sourceName + " does not exist.", null);
 				return null;
 			}
@@ -115,7 +143,7 @@ public abstract class ParsedXmlFile {
 					documentBuilder = docFactory.newDocumentBuilder();
 	
 				} catch (ParserConfigurationException e) {
-					errorHandler.error(Severity.ERROR, "getModelDocument",
+					errorHandler.error(IErrorHandler.Severity.ERROR, "getModelDocument",
 							"Problem configuring the parser for file " + this.sourceName, e);
 					return null;
 				}
@@ -124,13 +152,13 @@ public abstract class ParsedXmlFile {
 			modelDocument = documentBuilder.parse(modelFile);
 	
 		} catch (SAXException e) {
-			errorHandler.error(Severity.ERROR, "getModelDocument",
+			errorHandler.error(IErrorHandler.Severity.ERROR, "getModelDocument",
 					"Problem parsing the source file " + this.sourceName, e);
 		} catch (IOException e) {
-			errorHandler.error(Severity.ERROR, "getModelDocument",
+			errorHandler.error(IErrorHandler.Severity.ERROR, "getModelDocument",
 					"Problem reading the source file " + this.sourceName, e);
 		} catch (URISyntaxException e) {
-			errorHandler.error(Severity.ERROR, "getModelDocument",
+			errorHandler.error(IErrorHandler.Severity.ERROR, "getModelDocument",
 					"Problem reading the source file " + this.sourceName, e);
 		}
 		return modelDocument;
@@ -142,13 +170,34 @@ public abstract class ParsedXmlFile {
 		this.timestamp = 0;
 	}
 	
+	protected NodeList parseExpression( XPathExpression expression) {
+		if( expression == null) {
+			return null; // messages were generated earlier.
+		}
+
+		Document doc = getModelDocument();
+		if (doc == null) {
+			return null; // messages were generated in the get call.
+		}
+		
+		try {
+			Object result = expression.evaluate(doc, XPathConstants.NODESET);
+			return (NodeList) result;
+
+		} catch (XPathExpressionException e) {
+			errorHandler.error(IErrorHandler.Severity.ERROR, "Xpath expression",
+					"Problem parsing expression in the generator file " + sourceName, e);
+		}
+		return null;
+	}
+	
 	public long getTimestamp() {
 		return timestamp;
 	}
 
 	public static class OpenDDSNamespaceContext implements NamespaceContext {
-		private static final String openDDSNamespace = "http://www.opendds.org/modeling/schemas/OpenDDS/1.0",
-			generatorNamespace = "http://www.opendds.org/modeling/schemas/Generator/1.0";
+		private static final String openDDSNamespace = "http://www.opendds.org/modeling/schemas/OpenDDS/1.0";
+		private static final String generatorNamespace = "http://www.opendds.org/modeling/schemas/Generator/1.0";
 
 		public String getNamespaceURI(String prefix) {
 	        if (prefix == null) throw new NullPointerException("Null prefix");

@@ -19,25 +19,27 @@ public class SdkGeneratorFactory {
 	private static final String PLUGINNAME = "org.opendds.modeling.sdk.model";
 	
 	public static SdkGenerator createSdkGenerator( Shell parent) {
-		SdkGenerator.FileProvider fileProvider = createFileProvider();
-		SdkGenerator.ErrorHandler errorHandler = createErrorHandler( parent);
+		IFileProvider fileProvider = createFileProvider();
+		IErrorHandler errorHandler = createErrorHandler( parent);
 		
 		return createSdkGenerator( fileProvider, errorHandler);
 	}
 	
-	public static SdkGenerator createSdkGenerator( SdkGenerator.FileProvider provider, SdkGenerator.ErrorHandler handler) {
-		return SdkGenerator.create( provider, handler);
+	public static SdkGenerator createSdkGenerator( IFileProvider provider, IErrorHandler handler) {
+		SdkGenerator generator = SdkGenerator.create(provider, handler);
+		generator.setGeneratorModel(new EmfGeneratorModel());
+		return generator;
 	}
 	
 	public static ParsedModelFile createParsedModelFile( Shell parent) {
-		SdkGenerator.FileProvider fileProvider = createFileProvider();
-		SdkGenerator.ErrorHandler errorHandler = createErrorHandler( parent);
+		IFileProvider fileProvider = createFileProvider();
+		IErrorHandler errorHandler = createErrorHandler( parent);
 		
 		return ParsedModelFile.create( fileProvider, errorHandler);
 	}
 		
-	public static SdkGenerator.FileProvider createFileProvider() {
-		return new SdkGenerator.FileProvider() {
+	public static IFileProvider createFileProvider() {
+		return new IFileProvider() {
 			@Override
 			public URL fromWorkspace(String fileName) throws MalformedURLException {
 				IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
@@ -59,8 +61,8 @@ public class SdkGeneratorFactory {
 		};
 	}
 	
-	public static SdkGenerator.ErrorHandler createErrorHandler( final Shell shell) {
-		return new SdkGenerator.ErrorHandler() {
+	public static IErrorHandler createErrorHandler( final Shell shell) {
+		return new IErrorHandler() {
 			@Override
 			public void error(Severity sev, String title, String message,
 					Throwable exception) {
