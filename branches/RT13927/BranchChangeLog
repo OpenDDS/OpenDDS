@@ -1,3 +1,10 @@
+Thu Feb  3 14:58:55 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Codegen/aPublisher.cpp:
+        * tools/modeling/tests/Codegen/aSubscriber.cpp:
+
+          Fix build errors.
+
 Wed Feb  2 23:08:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Delegate.h:
