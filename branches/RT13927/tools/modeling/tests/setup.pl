@@ -33,11 +33,28 @@ my $plugin = 'org.opendds.modeling.sdk.model.editor';
 sub generate {
   my $base = shift;
   my $status;
+
+  my $bin = "$DDS_ROOT/tools/modeling/plugins/$plugin/bin";
+  my $jclass = "$javapkg.model.GeneratorSpecification.Generator.SdkGenerator";
+  my $classfile = $jclass;
+  $classfile =~ s!\.!/!g;
+  $classfile .= '.class';
+  if (! -r "$bin/$classfile") {
+    print "Compiling Java SdkGenerator\n";
+    my $cwd = getcwd();
+    chdir "$bin/../src";
+    $classfile =~ s/\.class$/.java/;
+    mkdir '../bin' unless -d '../bin';
+    $status = system("\"$JAVA_HOME/bin/javac\" -g -d ../bin $classfile");
+    if ($status > 0) {
+      print "ERROR: Java compiler invocation failed with $status\n";
+      exit($status >> 8);
+    }
+    chdir $cwd;
+  }
+
   print "Running code generation on: $base\n";
-  $status = system("\"$JAVA_HOME/bin/java\" -classpath " .
-                   "$DDS_ROOT/tools/modeling/plugins/$plugin/bin $javapkg." .
-                   "model.GeneratorSpecification.Generator.SdkGenerator " .
-                   "$base\n");
+  $status = system("\"$JAVA_HOME/bin/java\" -classpath $bin $jclass $base");
   if ($status > 0) {
     print "ERROR: Java SdkGenerator invocation failed with $status\n";
     exit($status >> 8);
