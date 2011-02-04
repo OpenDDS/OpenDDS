@@ -178,26 +178,38 @@ Elements::Data::~Data()
 </xsl:if>
 <xsl:text>}
 
-inline
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$defined-types">
+    <xsl:text>inline
 void
 Elements::Data::registerType(
   Types::Values      type,
-  DomainParticipant* </xsl:text>
-  <xsl:if test="$defined-types">participant</xsl:if>
-<xsl:text>)
+  DomainParticipant* participant)
 {
-  switch( type) {
+  switch(type) {
 </xsl:text>
-
-  <xsl:for-each select="$defined-types">
-    <xsl:call-template name="output-registerType-case"/>
-  </xsl:for-each>
-
-  <xsl:text>    default:
-      throw NoTypeException();
-      break;
+    <xsl:for-each select="$defined-types">
+      <xsl:call-template name="output-registerType-case"/>
+    </xsl:for-each>
+    <xsl:text>  default:
+    throw NoTypeException();
+    break;
   }
-}
+}</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>inline
+void
+Elements::Data::registerType(
+  Types::Values,
+  DomainParticipant*)
+{
+  throw NoTypeException();  // No DCPS data types defined in model
+}</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
+<xsl:text>
 
 inline
 void

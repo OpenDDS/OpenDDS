@@ -71,7 +71,7 @@
 
   try {
     config = TheTransportFactory->get_configuration(id);
-  } catch (OpenDDS::DCPS::Transport::NotConfigured&amp; nc) {
+  } catch (OpenDDS::DCPS::Transport::NotConfigured&amp;) {
     // Create configuration for this transport ID
     switch (id) {
 </xsl:text>
