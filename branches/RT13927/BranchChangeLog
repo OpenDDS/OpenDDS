@@ -1,3 +1,12 @@
+Fri Feb  4 18:52:50 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/DomainParticipantEditPart.java:
+
+          GMF code generation is non-deterministic in some cases
+          (see http://www.eclipse.org/forums/index.php?t=tree&th=163165&S=a5cf20a0410745c00ee33a0a9b8cbfd2).
+          Check in version that agrees with what nightly build server generates most of the time
+          to minimize occurances of diffs with repo.
+
 Fri Feb  4 18:21:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/part:
