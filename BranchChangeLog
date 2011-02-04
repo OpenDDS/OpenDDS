@@ -1,3 +1,12 @@
+Fri Feb  4 22:48:06 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkTransformer.java:
+        * tools/modeling/tests/setup.pl:
+
+          Implemented timestamp checking for code generation.  If the output
+          file is already newer than the input files, it will be skipped.
+
 Fri Feb  4 20:53:38 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
