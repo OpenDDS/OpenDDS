@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import javax.xml.transform.Result;
@@ -20,6 +21,7 @@ public class SdkGenerator {
 	protected IFileProvider fileProvider;
 	protected SdkTransformer transformer;
 	protected ParsedGeneratorFile parsedGeneratorFile;
+	private long newestXslTimestamp;
 		
 	/**
 	 * Create a new instance of the SDK code generation class.
@@ -149,6 +151,11 @@ public class SdkGenerator {
 			}
 
 			File output = new File( targetFolder, modelname + which.getSuffix());
+
+			if (output.exists() && !outOfDate(output)) {
+				return; // no need to re-generate
+			}
+
 			result = new StreamResult(new BufferedOutputStream(new FileOutputStream(output)));
 
 		} catch (Exception e) {
@@ -172,7 +179,46 @@ public class SdkGenerator {
 					"Unable to refresh output folder " + getTargetDirName(), e);
 		}
 	}
-	
+
+	/// is the output file out-of-date with respect to the inputs?
+	private boolean outOfDate(File output) {
+		long outputTimestamp = output.lastModified();
+		return (outputTimestamp < parsedGeneratorFile.getTimestamp())
+			|| (outputTimestamp < parsedGeneratorFile.parsedModelFile.getTimestamp())
+			|| xslOutOfDate(outputTimestamp);
+	}
+
+	private boolean xslOutOfDate(long outputTimestamp) {
+		String prop = System.getProperty("opendds.checkXslTimestamps");
+		if (prop == null || "false".equalsIgnoreCase(prop)) {
+			return false;
+		}
+
+		if (newestXslTimestamp == 0) { // only need to compute this once, xsl won't change in-session
+			try {
+				for (SdkTransformer.TransformType tt : SdkTransformer.TransformType.values()) {
+					URL xsl = fileProvider.fromBundle(tt.xslFilename());
+					long time = new File(xsl.toURI()).lastModified();
+					if (time > newestXslTimestamp) {
+						newestXslTimestamp = time;
+					}
+				}
+				for (String other : SdkTransformer.UTIL_FILES) {
+					URL xsl = fileProvider.fromBundle(other);
+					long time = new File(xsl.toURI()).lastModified();
+					if (time > newestXslTimestamp) {
+						newestXslTimestamp = time;
+					}					
+				}
+			} catch (MalformedURLException e) {
+				return true; // assume it's out of date if we can't get the xsl
+			} catch (URISyntaxException e) {
+				return true; // assume it's out of date if we can't get the xsl
+			}
+		}
+		return outputTimestamp < newestXslTimestamp;
+	}
+
 	protected URIResolver getResolverFor( String path) {
 		final String start = path != null && path.contains("/") ?
 				path.substring(0, path.lastIndexOf("/")) :

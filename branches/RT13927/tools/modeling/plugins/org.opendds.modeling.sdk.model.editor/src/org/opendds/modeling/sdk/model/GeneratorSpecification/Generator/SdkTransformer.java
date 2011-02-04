@@ -23,6 +23,9 @@ public class SdkTransformer {
 	private IFileProvider fileProvider;
 	private URIResolver resolver;
 
+	// files that are utilities used by the various xslFilename() files
+	static final String[] UTIL_FILES = {"xml/lut.xml", "xml/common.xsl"};
+
 	public static enum TransformType {
 		IDL { public String getText() { return "Generate IDL"; }
 			  public String xslFilename() { return "xml/idl.xsl"; }
