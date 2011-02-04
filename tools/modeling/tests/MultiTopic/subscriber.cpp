@@ -11,13 +11,9 @@
 #include <model/NullReaderListener.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
-  public: ReaderListener(bool& complete_flag) : complete_(complete_flag)
-  { }
   virtual void on_data_available(
     DDS::DataReader_ptr reader)
   ACE_THROW_SPEC((CORBA::SystemException));
-  private:
-    bool& complete_;
 };
 
 
@@ -49,11 +45,11 @@ ACE_THROW_SPEC((CORBA::SystemException))
     if (info.valid_data) {
       std::cout << "AnnotatedTrade: " << std::endl
                 << "         symbol  = " << trade.symbol   << std::endl
+                << "         name    = " << trade.name     << std::endl
                 << "         seq     = " << trade.seq      << std::endl
                 << "         last    = " << trade.last     << std::endl
                 << "         qty     = " << trade.quantity << std::endl;
 
-      complete_ = (trade.seq == 9);
     }
 
   } else {
@@ -67,17 +63,19 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 int ACE_TMAIN(int argc, char** argv)
 {
-  bool complete = false;
   try {
     OpenDDS::Model::Application application(argc, argv);
     MultiTopicLib::DefaultMultiTopicType model(application, argc, argv);
 
     using OpenDDS::Model::MultiTopicLib::Elements;
 
-    DDS::TopicDescription_var tv(model.topic(Elements::Participants::part2, Elements::Topics::trades));
+    DDS::TopicDescription_var tdv(model.topic(Elements::Participants::part2, 
+                                             Elements::Topics::trades));
+    DDS::TopicDescription_var rdv(model.topic(Elements::Participants::part2, 
+                                             Elements::Topics::reference_data));
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
 
-    DDS::DataReaderListener_var listener(new ReaderListener(complete));
+    DDS::DataReaderListener_var listener(new ReaderListener);
     reader->set_listener( listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
@@ -93,10 +91,21 @@ int ACE_TMAIN(int argc, char** argv)
     }
 
     // We do not get subscription matched notifications on the multitopic
-    while (!complete) {
-      ACE_OS::sleep(1);
-    } 
+    // so waiting for DISPOSED condition
+    //DDS::Duration_t infinite = {DDS::DURATION_INFINITE_SEC, 
+                                //DDS::DURATION_INFINITE_NSEC};
+    DDS::WaitSet_var ws = new DDS::WaitSet;
+    DDS::ReadCondition_var rc = 
+         reader->create_readcondition(DDS::ANY_SAMPLE_STATE,
+                                      DDS::ANY_VIEW_STATE,
+                                      DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+    ws->attach_condition(rc);
+    DDS::ConditionSeq active;
 
+    std::cout << "sub waiting" << std::endl;
+    ACE_OS::sleep(10);
+    //ret = ws->wait(active, infinite);
+    std::cout << "sub exiting" << std::endl;
     // END OF EXISTING MESSENGER EXAMPLE CODE
 
   } catch (const CORBA::Exception& e) {

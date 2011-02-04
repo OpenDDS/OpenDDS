@@ -14,8 +14,8 @@
       </subscribers>
     </participants>
     <topicDescriptions xsi:type="opendds:topic" xmi:id="_VxdLoC-3EeC7XLK-xwFiuA" name="trades" datatype="_RNA3cC-0EeC7XLK-xwFiuA"/>
-    <topicDescriptions xsi:type="opendds:topic" xmi:id="_h0uJMC-3EeC7XLK-xwFiuA" name="reference_data" datatype="_FIcc4C-1EeC7XLK-xwFiuA" durability="_AejuYC-6EeC7XLK-xwFiuA"/>
-    <topicDescriptions xsi:type="topics:MultiTopic" xmi:id="_w-EG4C-3EeC7XLK-xwFiuA" name="annotated_trade" datatype="_77lkYC-3EeC7XLK-xwFiuA" subscription_expression="SELECT symbol, last, quantity, seq FROM trades"/>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_h0uJMC-3EeC7XLK-xwFiuA" name="reference_data" datatype="_FIcc4C-1EeC7XLK-xwFiuA"/>
+    <topicDescriptions xsi:type="topics:MultiTopic" xmi:id="_w-EG4C-3EeC7XLK-xwFiuA" name="annotated_trade" datatype="_77lkYC-3EeC7XLK-xwFiuA" subscription_expression="SELECT symbol, name, last, quantity, seq FROM trades INNER NATURAL JOIN reference_data"/>
   </libs>
   <libs xsi:type="opendds:PolicyLib" xmi:id="_-sAysC-5EeC7XLK-xwFiuA" name="policies">
     <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_AejuYC-6EeC7XLK-xwFiuA" name="persist" kind="PERSISTENT"/>
@@ -43,6 +43,7 @@
         <fields xmi:id="_MR_LEC-4EeC7XLK-xwFiuA" name="new_hi" type="_bdHOQC-0EeC7XLK-xwFiuA"/>
         <fields xmi:id="_NVJRMC-4EeC7XLK-xwFiuA" name="new_lo" type="_bdHOQC-0EeC7XLK-xwFiuA"/>
         <fields xmi:id="_wv7u0C-4EeC7XLK-xwFiuA" name="seq" type="_bdH1US-0EeC7XLK-xwFiuA"/>
+        <fields xmi:id="_AyONADCFEeCFJO53nTLWog" name="name" type="_bdIcYS-0EeC7XLK-xwFiuA"/>
         <keys xmi:id="_yd33UC-4EeC7XLK-xwFiuA" field="_wv7u0C-4EeC7XLK-xwFiuA"/>
       </types>
     </libs>
