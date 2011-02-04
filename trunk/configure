@@ -4,7 +4,6 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
     if 0;
 
 # configure script for OpenDDS
-# Copyright 2010 Object Computing, Inc.
 # Distributed under the OpenDDS License.
 # See: http://www.opendds.org/license.html
 

@@ -1,3 +1,11 @@
+Fri Feb  4 22:44:29 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * many files
+
+          Removed per-file copyright statements to avoid the need for massive
+          updates every year.  The OpenDDS distribution as a whole has
+          copyright info in the top-level LICENSE file.
+
 Wed Jan 19 22:23:03 UTC 2011  Chris Cleeland  <cleeland@ociweb.com>
 
         * tests/DCPS/GroupPresentation/Messenger.idl:
