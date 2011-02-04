@@ -39,7 +39,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.validation;visibility:=reexport,
  org.eclipse.emf.validation.ocl;visibility:=reexport,
  org.eclipse.gef;visibility:=reexport,
- com.ociweb.emf.util;bundle-version="1.0.0",
+ com.ociweb.emf.util,
+ com.ociweb.gmf,
  org.eclipse.gmf.runtime.diagram.ui.printing,
  org.eclipse.gmf.runtime.diagram.ui.printing.render
 Bundle-ActivationPolicy: lazy

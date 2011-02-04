@@ -1,3 +1,22 @@
+Fri Feb  4 17:31:28 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/part/SaveOnDeactivationListener.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram/datalib/part/OpenDDSDataLibDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/OpenDDSDcpsLibDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/OpenDDSDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram/policylib/part/OpenDDSPolicyLibDiagramEditor.java:
+
+          Do a save automatically when a diagram editor is deactivated as a workaround for
+          avoiding resource change conflicts that can occur when making changes in different
+          editors that use the same resources.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdiagrams.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithopenddsmodels.html:
+
+          Updated to warn about the automatic saving.
+
 Fri Feb  4 15:47:37 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk/xml/cpp.xsl:
