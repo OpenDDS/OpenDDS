@@ -610,6 +610,10 @@ Elements::Data::buildSubscriptionsQos()
 </xsl:choose>
 <xsl:text>}
 
+</xsl:text>
+<xsl:choose>
+  <xsl:when test="$lib-writers">
+    <xsl:text>
 inline
 void
 Elements::Data::copyPublicationQos(
@@ -619,28 +623,47 @@ Elements::Data::copyPublicationQos(
 {
   do{}while(&amp;writerQos==0); // In case we define no properties.
 
-  switch( which) {
+  switch(which) {
 </xsl:text>
-  <xsl:for-each select="$lib-writers">
-    <xsl:text>    case DataWriters::</xsl:text>
-    <xsl:call-template name="normalize-identifier"/>
-    <xsl:text>:</xsl:text>
-    <xsl:value-of select="$newline"/>
+    <xsl:for-each select="$lib-writers">
+      <xsl:text>    case DataWriters::</xsl:text>
+      <xsl:call-template name="normalize-identifier"/>
+      <xsl:text>:</xsl:text>
+      <xsl:value-of select="$newline"/>
 
-    <!-- '  writerQos.(policyfield) = (value);\n' -->
-    <xsl:call-template name="process-policies">
-      <xsl:with-param name="base"   select="'      writerQos.'"/>
-    </xsl:call-template>
+      <!-- '  writerQos.(policyfield) = (value);\n' -->
+      <xsl:call-template name="process-policies">
+        <xsl:with-param name="base"   select="'      writerQos.'"/>
+      </xsl:call-template>
 
-    <xsl:text>      break;</xsl:text>
-    <xsl:value-of select="$newline"/>
-    <xsl:value-of select="$newline"/>
-  </xsl:for-each>
+      <xsl:text>      break;</xsl:text>
+      <xsl:value-of select="$newline"/>
+      <xsl:value-of select="$newline"/>
+    </xsl:for-each>
 <xsl:text>    default:
       throw NoWriterException();
   }
 }
+</xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>
+inline
+void
+Elements::Data::copyPublicationQos(
+  DataWriters::Values,
+  DataWriterQos&amp;
+)
+{
+  throw NoWriterException();
+}
+</xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
 
+<xsl:choose>
+  <xsl:when test="$lib-readers">
+    <xsl:text>
 inline
 void
 Elements::Data::copySubscriptionQos(
@@ -650,7 +673,7 @@ Elements::Data::copySubscriptionQos(
 {
   do{}while(&amp;readerQos==0); // In case we define no properties.
 
-  switch( which) {
+  switch(which) {
 </xsl:text>
   <xsl:for-each select="$lib-readers">
     <xsl:text>    case DataReaders::</xsl:text>
@@ -672,6 +695,21 @@ Elements::Data::copySubscriptionQos(
   }
 }
 </xsl:text>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:text>
+inline
+void
+Elements::Data::copySubscriptionQos(
+  DataReaders::Values,
+  DataReaderQos&amp;
+)
+{
+  throw NoReaderException();
+}
+    </xsl:text>
+  </xsl:otherwise>
+</xsl:choose>
 
   <xsl:value-of select="concat('} // End namespace ', @name, $newline)"/>
 </xsl:template>
