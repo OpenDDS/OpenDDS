@@ -52,7 +52,7 @@ if ($PublisherResult != 0) {
     $status = 1;
 }
 
-$SubscriberResult = $Subscriber->WaitKill (300);
+$SubscriberResult = $Subscriber->WaitKill (15);
 if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult \n";
     $status = 1;
