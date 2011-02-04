@@ -11,8 +11,6 @@
 </head>
 
 <body>
-  <a name="connecting_figures" id="connecting_figures"></a>
-
   <h2>Working with Diagrams</h2>
 
   <h3>Setting element attributes</h3>
@@ -42,7 +40,8 @@
 
   <p>After editing you should see the name of the attribute
   followed by it's value:</p><img alt="Attribute defined" src=
-  "../images/attribute_defined_example.png">
+  "../images/attribute_defined_example.png"> <a name=
+  "connecting_figures" id="connecting_figures"></a>
 
   <h3>Connecting Figures</h3>
 
@@ -96,7 +95,8 @@
   <p>Once connected, the target figure will have the arrow
   connected to it. An example connection is shown
   below.</p><img alt="Connected figures" src=
-  "../images/diagram_connected_figures.png">
+  "../images/diagram_connected_figures.png"> <a name=
+  "moving_between_diagrams" id="moving_between_diagrams"></a>
 
   <h3>Moving between diagrams</h3>
 
@@ -104,10 +104,23 @@
   OpenDDS SDK model, you may find yourself with numerous diagram
   edit windows open. To make it easy to move and forth between
   these windows you can use the Back and Forward buttons on the
-  Eclipse toolbar that are shown below.</p><img alt=
-  "Back forward buttons" src=
+  Eclipse toolbar that are shown below.</p>
+
+  <p><img alt="Back forward buttons" src=
   "../images/diagram_back_forward_buttons.png"> <a name=
-  "arranging_figures" id="arranging_figures"></a>
+  "arranging_figures" id="arranging_figures"></a></p>
+
+  <div id="caution">
+    <p>If you are making changes in a diagram and activate another
+    diagram, or any other window in your Eclipse session, the model
+    and diagram files will automatically be saved. This is done to
+    avoid conflicts that can occur when changes are made in
+    different diagram editors that refer to the same files.</p>
+
+    <p>Note that undo spans file saving so that you can undo
+    changes that were saved if you later decide you did not want to
+    save them.</p>
+  </div>
 
   <h3>Arranging Figures</h3>
 

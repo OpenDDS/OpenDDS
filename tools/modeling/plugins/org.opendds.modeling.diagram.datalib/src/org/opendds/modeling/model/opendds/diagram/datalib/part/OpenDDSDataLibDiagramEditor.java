@@ -1,7 +1,7 @@
 /*
  * (c) Copyright Object Computing, Incorporated.  2005,2010.  All rights reserved.
  */
-package org.opendds.modeling.diagram.main.part;
+package org.opendds.modeling.model.opendds.diagram.datalib.part;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,28 +61,28 @@ import org.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
-import org.opendds.modeling.diagram.main.navigator.OpenDDSNavigatorItem;
+import org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibNavigatorItem;
 
 /**
  * @generated
  */
-public class OpenDDSDiagramEditor extends DiagramDocumentEditor implements
-		IGotoMarker {
+public class OpenDDSDataLibDiagramEditor extends DiagramDocumentEditor
+		implements IGotoMarker {
 
 	/**
 	 * @generated
 	 */
-	public static final String ID = "org.opendds.modeling.diagram.main.part.OpenDDSDiagramEditorID"; //$NON-NLS-1$
+	public static final String ID = "org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID"; //$NON-NLS-1$
 
 	/**
 	 * @generated
 	 */
-	public static final String CONTEXT_ID = "org.opendds.modeling.diagram.main.ui.diagramContext"; //$NON-NLS-1$
+	public static final String CONTEXT_ID = "org.opendds.modeling.model.opendds.diagram.datalib.ui.diagramContext"; //$NON-NLS-1$
 
 	/**
 	 * @generated
 	 */
-	public OpenDDSDiagramEditor() {
+	public OpenDDSDataLibDiagramEditor() {
 		super(true);
 	}
 
@@ -98,7 +98,7 @@ public class OpenDDSDiagramEditor extends DiagramDocumentEditor implements
 	 */
 	protected PaletteRoot createPaletteRoot(PaletteRoot existingPaletteRoot) {
 		PaletteRoot root = super.createPaletteRoot(existingPaletteRoot);
-		new OpenDDSPaletteFactory().fillPalette(root);
+		new OpenDDSDataLibPaletteFactory().fillPalette(root);
 		return root;
 	}
 
@@ -106,14 +106,14 @@ public class OpenDDSDiagramEditor extends DiagramDocumentEditor implements
 	 * @generated
 	 */
 	protected PreferencesHint getPreferencesHint() {
-		return OpenDDSDiagramEditorPlugin.DIAGRAM_PREFERENCES_HINT;
+		return OpenDDSDataLibDiagramEditorPlugin.DIAGRAM_PREFERENCES_HINT;
 	}
 
 	/**
 	 * @generated
 	 */
 	public String getContributorId() {
-		return OpenDDSDiagramEditorPlugin.ID;
+		return OpenDDSDataLibDiagramEditorPlugin.ID;
 	}
 
 	/**
@@ -136,7 +136,7 @@ public class OpenDDSDiagramEditor extends DiagramDocumentEditor implements
 	protected IDocumentProvider getDocumentProvider(IEditorInput input) {
 		if (input instanceof IFileEditorInput
 				|| input instanceof URIEditorInput) {
-			return OpenDDSDiagramEditorPlugin.getInstance()
+			return OpenDDSDataLibDiagramEditorPlugin.getInstance()
 					.getDocumentProvider();
 		}
 		return super.getDocumentProvider(input);
@@ -160,7 +160,7 @@ public class OpenDDSDiagramEditor extends DiagramDocumentEditor implements
 	protected void setDocumentProvider(IEditorInput input) {
 		if (input instanceof IFileEditorInput
 				|| input instanceof URIEditorInput) {
-			setDocumentProvider(OpenDDSDiagramEditorPlugin.getInstance()
+			setDocumentProvider(OpenDDSDataLibDiagramEditorPlugin.getInstance()
 					.getDocumentProvider());
 		} else {
 			super.setDocumentProvider(input);
@@ -209,8 +209,8 @@ public class OpenDDSDiagramEditor extends DiagramDocumentEditor implements
 		}
 		if (provider.isDeleted(input) && original != null) {
 			String message = NLS.bind(
-					Messages.OpenDDSDiagramEditor_SavingDeletedFile, original
-							.getName());
+					Messages.OpenDDSDataLibDiagramEditor_SavingDeletedFile,
+					original.getName());
 			dialog.setErrorMessage(null);
 			dialog.setMessage(message, IMessageProvider.WARNING);
 		}
@@ -238,9 +238,11 @@ public class OpenDDSDiagramEditor extends DiagramDocumentEditor implements
 				.getEditorReferences();
 		for (int i = 0; i < editorRefs.length; i++) {
 			if (matchingStrategy.matches(editorRefs[i], newInput)) {
-				MessageDialog.openWarning(shell,
-						Messages.OpenDDSDiagramEditor_SaveAsErrorTitle,
-						Messages.OpenDDSDiagramEditor_SaveAsErrorMessage);
+				MessageDialog
+						.openWarning(
+								shell,
+								Messages.OpenDDSDataLibDiagramEditor_SaveAsErrorTitle,
+								Messages.OpenDDSDataLibDiagramEditor_SaveAsErrorMessage);
 				return;
 			}
 		}
@@ -255,9 +257,9 @@ public class OpenDDSDiagramEditor extends DiagramDocumentEditor implements
 			IStatus status = x.getStatus();
 			if (status == null || status.getSeverity() != IStatus.CANCEL) {
 				ErrorDialog.openError(shell,
-						Messages.OpenDDSDiagramEditor_SaveErrorTitle,
-						Messages.OpenDDSDiagramEditor_SaveErrorMessage, x
-								.getStatus());
+						Messages.OpenDDSDataLibDiagramEditor_SaveErrorTitle,
+						Messages.OpenDDSDataLibDiagramEditor_SaveErrorMessage,
+						x.getStatus());
 			}
 		} finally {
 			provider.changed(newInput);
@@ -288,8 +290,8 @@ public class OpenDDSDiagramEditor extends DiagramDocumentEditor implements
 		Diagram diagram = document.getDiagram();
 		IFile file = WorkspaceSynchronizer.getFile(diagram.eResource());
 		if (file != null) {
-			OpenDDSNavigatorItem item = new OpenDDSNavigatorItem(diagram, file,
-					false);
+			OpenDDSDataLibNavigatorItem item = new OpenDDSDataLibNavigatorItem(
+					diagram, file, false);
 			return new StructuredSelection(item);
 		}
 		return StructuredSelection.EMPTY;
@@ -307,26 +309,9 @@ public class OpenDDSDiagramEditor extends DiagramDocumentEditor implements
 				provider, getDiagramGraphicalViewer());
 
 		// Custom code begin
-		// Allow Enter key to open a figure's sub-diagram as with GMF 2.2.2 it has been found
-		// to be cumbersome to double-click on the figure.
-		org.eclipse.gmf.runtime.diagram.ui.internal.actions.OpenAction action = new org.eclipse.gmf.runtime.diagram.ui.internal.actions.OpenAction(
-				((org.eclipse.ui.IWorkbenchPart) this).getSite().getPage());
-		action.init();
-		org.eclipse.gef.ui.actions.ActionRegistry registry = getActionRegistry();
-		registry.registerAction(action);
-		getSelectionActions().add(action.getId());
-		getKeyHandler().put(
-				org.eclipse.gef.KeyStroke.getPressed(org.eclipse.swt.SWT.CR,
-						'\r', 0), action);
-		getKeyHandler().put(
-				org.eclipse.gef.KeyStroke.getPressed(org.eclipse.swt.SWT.CR,
-						org.eclipse.swt.SWT.KEYPAD_CR, 0), action);
-		// Custom code end
-
-		// Custom code begin
 		org.eclipse.ui.IWorkbenchPage page = getSite().getPage();
 		org.eclipse.ui.IPartListener2 listener = new com.ociweb.gmf.part.SaveOnDeactivationListener(
-				this, ID, OpenDDSDiagramEditorPlugin.getInstance());
+				this, ID, OpenDDSDataLibDiagramEditorPlugin.getInstance());
 		page.addPartListener(listener);
 		// Custom code end
 	}
@@ -381,8 +366,8 @@ public class OpenDDSDiagramEditor extends DiagramDocumentEditor implements
 				IStructuredSelection selection = (IStructuredSelection) transferedObject;
 				for (Iterator it = selection.iterator(); it.hasNext();) {
 					Object nextSelectedObject = it.next();
-					if (nextSelectedObject instanceof OpenDDSNavigatorItem) {
-						View view = ((OpenDDSNavigatorItem) nextSelectedObject)
+					if (nextSelectedObject instanceof OpenDDSDataLibNavigatorItem) {
+						View view = ((OpenDDSDataLibNavigatorItem) nextSelectedObject)
 								.getView();
 						nextSelectedObject = view.getElement();
 					} else if (nextSelectedObject instanceof IAdaptable) {

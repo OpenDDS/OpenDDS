@@ -47,7 +47,8 @@ Export-Package: com.ociweb.gmf.EnumDirectEdit,
  com.ociweb.gmf.dialogs,
  com.ociweb.gmf.edit.commands,
  com.ociweb.gmf.edit.parts,
- com.ociweb.gmf.figures
+ com.ociweb.gmf.figures,
+ com.ociweb.gmf.part
 Require-Bundle: org.eclipse.jface,
  com.ociweb.emf.util,
  org.eclipse.gmf.runtime.emf.commands.core,
