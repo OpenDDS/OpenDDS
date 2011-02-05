@@ -128,14 +128,14 @@ public class SdkGenerator {
 			return; // messages were generated in the get call.
 		}
 
-		String targetName = getTargetDirName();
-		if( targetName == null || targetName.isEmpty()) {
+		String targetDirName = getTargetDirName();
+		if( targetDirName == null || targetDirName.isEmpty()) {
 			return; // messages were generated in the get call.
 		}
 
 		Result result = null;
 		try {
-			URL targetUrl = fileProvider.fromWorkspace(targetName);
+			URL targetUrl = fileProvider.fromWorkspace(targetDirName);
 			if( targetUrl == null) {
 				return;
 			}
@@ -147,7 +147,9 @@ public class SdkGenerator {
 
 			String modelname = getModelName();
 			if (modelname == null) {
-				return; // messages were generated in the get call.
+				errorHandler.error(IErrorHandler.Severity.ERROR, which.getText(),
+						"Invalid target directory specified: " + targetDirName, null);
+				return;
 			}
 
 			File output = new File( targetFolder, modelname + which.getSuffix());
@@ -233,12 +235,14 @@ public class SdkGenerator {
 						String file = fname.substring(0, 5).equals("file:")
 							? fname.substring(5) : "xml" + File.separatorChar + fname;
 						resource = fileProvider.fromBundle(file);
+						
 					} else {
 						// This is a model reference, assume relative to the source file
 						String file = start + File.separatorChar + fname;
 						resource = fileProvider.fromWorkspace(file);
 					}
 					return new StreamSource(resource.openStream());
+
 				} catch (IOException use) {
 					throw new TransformerException("Custom resolver with start " + start + " could not open " + fname);
 				}
