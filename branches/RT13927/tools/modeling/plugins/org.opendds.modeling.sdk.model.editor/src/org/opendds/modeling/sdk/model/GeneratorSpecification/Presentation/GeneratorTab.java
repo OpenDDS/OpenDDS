@@ -305,6 +305,9 @@ public class GeneratorTab extends StructuredViewer {
 			
 			mpbLabel.setText(invalidLabel);
 			mpbLabel.setSize(invalidSize);
+			
+			pathMpbLabel.setText(invalidLabel);
+			pathMpbLabel.setSize(invalidSize);
 
 		} else {
 			idlLabel.setText(basename + SdkTransformer.TransformType.IDL.getSuffix());
@@ -327,6 +330,9 @@ public class GeneratorTab extends StructuredViewer {
 			
 			mpbLabel.setText(basename + SdkTransformer.TransformType.MPB.getSuffix());
 			mpbLabel.setSize(mpbLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+			
+			pathMpbLabel.setText(basename + SdkTransformer.TransformType.PATH_MPB.getSuffix());
+			pathMpbLabel.setSize(pathMpbLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		}
 		
 		control.layout(true);
@@ -341,12 +347,17 @@ public class GeneratorTab extends StructuredViewer {
 	public void refresh() {
 		if( sourceText != null && generator != null) {
 			String name = generator.getModelFileName();
-			sourceText.setText(name == null? "": name);
+			if( name != null) {
+				sourceText.setText( name);
+			}
 		}
 		if( targetDir != null && generator != null) {
 			String name = generator.getTargetDirName();
-			targetDir.setText(name == null? "": name);
+			if( name != null) {
+				targetDir.setText( name);
+			}
 		}
+		updateModelnameLabels();
 		super.refresh();
 	}
 
@@ -362,7 +373,7 @@ public class GeneratorTab extends StructuredViewer {
 
 	public void setEditingDomain(EditingDomain editingDomain) {
 		generator.setEditingDomain( editingDomain);
-		// refresh() ?
+		refresh();
 	}
 
 	@Override

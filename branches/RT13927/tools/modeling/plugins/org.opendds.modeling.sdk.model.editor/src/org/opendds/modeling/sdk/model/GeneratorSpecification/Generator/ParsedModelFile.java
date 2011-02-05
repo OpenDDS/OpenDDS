@@ -39,37 +39,21 @@ public class ParsedModelFile extends ParsedXmlFile {
 
 	@Override
 	public void reset() {
-		this.modelName = null;
-		this.transportIndices.clear();
-		this.hasDataLib = null;
+		modelName = null;
+		transportIndices.clear();
+		hasDataLib = null;
 		super.reset();
 	}
 
 	public String getModelName() {
-		if( this.sourceName == null) {
+		if( sourceName == null) {
 			return null;
 		}
 
-		if( this.modelName == null) {
+		if( modelName == null) {
 			NodeList nodes = parseExpression( getNameExpr());
-			if( nodes != null) {
-				switch(nodes.getLength()) {
-				case 1:
-					modelName = nodes.item(0).getNodeValue();
-					break;
-
-				case 0:
-					errorHandler.error(IErrorHandler.Severity.ERROR, "getModelName",
-							"Could not find any model name in the source file " + this.sourceName,
-							null);
-					break;
-
-				default:
-					errorHandler.error(IErrorHandler.Severity.ERROR, "getModelName",
-							"Found " + nodes.getLength() + " candidate model names in the source file "
-							+ this.sourceName + ", which is too many!", null);
-					break;
-				}
+			if( nodes != null && nodes.getLength() > 0) {
+				modelName = nodes.item(0).getNodeValue();
 			}
 		}
 

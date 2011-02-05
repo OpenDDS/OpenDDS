@@ -83,10 +83,11 @@ public class EmfGeneratorModel implements IGeneratorModel {
 					EObject root = contents.get(0);
 					if( root instanceof CodeGen) {
 						modelSource = ((CodeGen)root).getSource();
-						setModelFileName( modelSource.getName());
+						if( parsedModelFile != null) {
+							parsedModelFile.setSourceName(modelSource.getName());
+						}
 						
 						modelTarget = ((CodeGen)root).getTarget();
-						setTargetDirName(modelTarget.getName());
 					}
 				}
 			}
@@ -97,20 +98,24 @@ public class EmfGeneratorModel implements IGeneratorModel {
 	public void setParsedModelFile( ParsedModelFile parsedModelFile) {
 		if( parsedModelFile != null) {
 			this.parsedModelFile = parsedModelFile;
+			if( modelSource != null) {
+				parsedModelFile.setSourceName(modelSource.getName());
+				
+			}
 		}
 	}
 
 	@Override
 	public void setModelFileName(String modelFileName) {
+		String oldName = parsedModelFile.getSourceName();
+		if( (modelFileName != null && oldName != null
+		     && modelFileName.equals(parsedModelFile.getSourceName()))
+		 || (modelFileName == null && oldName == null)) {
+			// Don't update if no change.
+			return;
+		}
+
 		if( parsedModelFile != null) {
-			String oldName = parsedModelFile.getSourceName();
-			if( (modelFileName != null && oldName != null
-			     && modelFileName.equals(parsedModelFile.getSourceName()))
-			 || (modelFileName == null && oldName == null)) {
-				// Don't update if no change.
-				return;
-			}
-			
 			parsedModelFile.setSourceName(modelFileName);
 		}
 		
@@ -127,15 +132,15 @@ public class EmfGeneratorModel implements IGeneratorModel {
 
 	@Override
 	public void setTargetDirName(String targetDirName) {
+		String oldName = modelTarget.getName();
+		if( (targetDirName != null && modelTarget.getName() != null
+ 	         && targetDirName.equals(modelTarget.getName()))
+ 	     || (targetDirName == null && oldName == null)) {
+			// Don't update if no change.
+			return;
+		}
+		
 		if( editingDomain != null && modelTarget != null) {
-			String oldName = modelTarget.getName();
-			if( (targetDirName != null && modelTarget.getName() != null
-	 	         && targetDirName.equals(modelTarget.getName()))
-	 	     || (targetDirName == null && oldName == null)) {
-				// Don't update if no change.
-				return;
-			}
-			
 			editingDomain.getCommandStack().execute(
 					SetCommand.create(
 							editingDomain,

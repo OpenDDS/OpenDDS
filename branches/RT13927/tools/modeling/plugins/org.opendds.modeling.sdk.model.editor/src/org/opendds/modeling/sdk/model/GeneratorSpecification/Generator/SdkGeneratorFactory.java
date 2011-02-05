@@ -1,13 +1,16 @@
 package org.opendds.modeling.sdk.model.GeneratorSpecification.Generator;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -42,8 +45,17 @@ public class SdkGeneratorFactory {
 		return new IFileProvider() {
 			@Override
 			public URL fromWorkspace(String fileName) throws MalformedURLException {
+				String resourceName = "/resource/" + fileName;
+				IPath resourcePath = new Path( resourceName);
+
 				IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
-				return workspace.getFile(new Path(fileName)).getLocationURI().toURL();
+//				IResource resource = workspace.getFile(resourcePath);
+				IFile resource = workspace.getFile(resourcePath);
+				URI uri = resource.getLocationURI();
+				URL url = uri.toURL();
+				return url;
+				
+//				return workspace.getFile( resourcePath).getLocationURI().toURL();
 			}
 			@Override
 			public URL fromBundle(String fileName) {
