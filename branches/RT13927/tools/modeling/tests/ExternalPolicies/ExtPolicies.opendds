@@ -33,6 +33,6 @@
     <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_mYIE4ARzEeCsYqJtvYWomQ" name="vol" kind="VOLATILE"/>
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_0lhFwAR1EeCsYqJtvYWomQ" name="strong" value="10"/>
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_2rViwAR1EeCsYqJtvYWomQ" name="weak" value="5"/>
-    <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_qyi6YAR2EeCsYqJtvYWomQ" name="persist" kind="PERSISTENT"/>
+    <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_qyi6YAR2EeCsYqJtvYWomQ" name="persist" kind="TRANSIENT_LOCAL"/>
   </libs>
 </opendds:OpenDDSModel>

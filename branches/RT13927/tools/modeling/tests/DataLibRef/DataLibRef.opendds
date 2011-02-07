@@ -25,7 +25,6 @@
         <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_5STIgPDuEd-I4rwicuuPOw4"/>
         <fields xmi:id="_DJeIYBm0EeCiwqO3ASSQ8g" name="pos" type="_4C6qsBmzEeCiwqO3ASSQ8g"/>
         <fields xmi:id="_jHKqoB0CEeC07OZrGTNj1A" name="more" type="_nMvY4B0CEeC07OZrGTNj1A"/>
-        <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_M8mv8PDvEd-I4rwicuuPOw"/>
       </types>
       <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw"/>
       <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw"/>
@@ -33,7 +32,7 @@
     </libs>
     <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data4">
       <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw4" name="CountType" isDcpsDataType="true">
-        <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+        <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw2" name="count" type="_PXgFEPDvEd-I4rwicuuPOw"/>
       </types>
       <types xsi:type="types:Union" xmi:id="_q4a14B0BEeC07OZrGTNj1A" name="JeffUnion" switch="_PXgFEPDvEd-I4rwicuuPOw">
         <branches xmi:id="_wGv78B0BEeC07OZrGTNj1A">

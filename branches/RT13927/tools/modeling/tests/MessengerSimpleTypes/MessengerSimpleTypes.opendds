@@ -22,7 +22,7 @@
         <fields xmi:id="_M8mv8PDvEd-I4rwicuuPOw" name="subject_id" type="_H7y_gCl5EeCfEZi8MOXc9w"/>
         <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw" name="text" type="_E8F2IPDvEd-I4rwicuuPOw"/>
         <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_H7y_gCl5EeCfEZi8MOXc9w"/>
-        <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_M8mv8PDvEd-I4rwicuuPOw"/>
+        <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_VLcZoPDvEd-I4rwicuuPOw"/>
       </types>
     </libs>
   </packages>
