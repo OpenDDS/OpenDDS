@@ -5,7 +5,8 @@ Bundle-SymbolicName: org.opendds.modeling.common;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.emf.common;visibility:=reexport
+ org.eclipse.emf.common;visibility:=reexport,
+ org.eclipse.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.opendds.modeling.common
