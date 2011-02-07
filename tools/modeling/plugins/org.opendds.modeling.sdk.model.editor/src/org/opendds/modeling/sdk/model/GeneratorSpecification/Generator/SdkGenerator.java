@@ -259,7 +259,7 @@ public class SdkGenerator {
 		String inputFile = args[0];
 		SdkGenerator cg = SdkGenerator.create( new IFileProvider() {
 			private final String bundle = System.getenv("DDS_ROOT")
-				+ "/tools/modeling/plugins/org.opendds.modeling.sdk";
+				+ "/tools/modeling/plugins/org.opendds.modeling.sdk.model";
 			@Override
 			public void refresh(String targetFolder) {
 			}
