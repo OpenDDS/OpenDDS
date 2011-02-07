@@ -18,7 +18,7 @@
     <topicDescriptions xsi:type="topics:MultiTopic" xmi:id="_w-EG4C-3EeC7XLK-xwFiuA" name="annotated_trade" datatype="_77lkYC-3EeC7XLK-xwFiuA" subscription_expression="SELECT symbol, name, last, quantity, seq FROM trades INNER NATURAL JOIN reference_data"/>
   </libs>
   <libs xsi:type="opendds:PolicyLib" xmi:id="_-sAysC-5EeC7XLK-xwFiuA" name="policies">
-    <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_AejuYC-6EeC7XLK-xwFiuA" name="persist" kind="PERSISTENT"/>
+    <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_AejuYC-6EeC7XLK-xwFiuA" name="persist" kind="TRANSIENT_LOCAL"/>
   </libs>
   <packages xmi:id="_mbd4kC-8EeC7XLK-xwFiuA" name="data1">
     <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="datalib1">

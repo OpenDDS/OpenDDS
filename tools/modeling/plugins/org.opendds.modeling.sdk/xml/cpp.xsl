@@ -621,8 +621,6 @@ Elements::Data::copyPublicationQos(
   DataWriterQos&amp;  writerQos
 )
 {
-  do{}while(&amp;writerQos==0); // In case we define no properties.
-
   switch(which) {
 </xsl:text>
     <xsl:for-each select="$lib-writers">
@@ -671,8 +669,6 @@ Elements::Data::copySubscriptionQos(
   DataReaderQos&amp;  readerQos
 )
 {
-  do{}while(&amp;readerQos==0); // In case we define no properties.
-
   switch(which) {
 </xsl:text>
   <xsl:for-each select="$lib-readers">

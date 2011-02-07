@@ -8,7 +8,7 @@
         <fields xmi:id="_M8mv8PDvEd-I4rwicuuPOw" name="subject_id" type="_PXgFEPDvEd-I4rwicuuPOw"/>
         <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw" name="text" type="_E8F2IPDvEd-I4rwicuuPOw"/>
         <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_PXgFEPDvEd-I4rwicuuPOw"/>
-        <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_M8mv8PDvEd-I4rwicuuPOw"/>
+        <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_VLcZoPDvEd-I4rwicuuPOw"/>
       </types>
       <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw2" name="Response">
         <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw2" name="text" type="_E8F2IPDvEd-I4rwicuuPOw"/>

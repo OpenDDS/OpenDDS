@@ -61,7 +61,7 @@
     <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_mYIE4ARzEeCsYqJtvYWomQ" name="vol" kind="VOLATILE"/>
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_0lhFwAR1EeCsYqJtvYWomQ" name="strong" value="10"/>
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_2rViwAR1EeCsYqJtvYWomQ" name="weak" value="5"/>
-    <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_qyi6YAR2EeCsYqJtvYWomQ" name="persist" kind="PERSISTENT"/>
+    <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_qyi6YAR2EeCsYqJtvYWomQ" name="persist" kind="TRANSIENT_LOCAL"/>
     <policies xsi:type="opendds:tdQosPolicy" xmi:id="__6rtkAR9EeCsYqJtvYWomQ" name="nine" value="nine is 9"/>
   </libs>
   <packages xmi:id="_ktLTwCgGEeCySrIVS40zlQ" name="data1">
@@ -72,7 +72,7 @@
         <fields xmi:id="_M8mv8PDvEd-I4rwicuuPOw" name="subject_id" type="_PXgFEPDvEd-I4rwicuuPOw"/>
         <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw" name="text" type="_E8F2IPDvEd-I4rwicuuPOw"/>
         <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_PXgFEPDvEd-I4rwicuuPOw"/>
-        <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_M8mv8PDvEd-I4rwicuuPOw"/>
+        <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_VLcZoPDvEd-I4rwicuuPOw"/>
       </types>
       <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw"/>
       <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw"/>

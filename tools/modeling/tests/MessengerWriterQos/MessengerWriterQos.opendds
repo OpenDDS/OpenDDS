@@ -51,7 +51,7 @@
       <duration xmi:id="_Xtm9cCfvEeCySrIVS40zlQ" nanosecond="11" second="1"/>
     </policies>
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_IJFDICfwEeCySrIVS40zlQ" name="strong" value="9"/>
-    <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_D9GgACfyEeCySrIVS40zlQ" name="persist" kind="PERSISTENT"/>
+    <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_D9GgACfyEeCySrIVS40zlQ" name="persist" kind="TRANSIENT_LOCAL"/>
     <policies xsi:type="opendds:wdlQosPolicy" xmi:id="_7VgMgCf7EeCySrIVS40zlQ" name="manual" autodispose_unregistered_instances="false"/>
   </libs>
   <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data1">
@@ -61,7 +61,7 @@
       <fields xmi:id="_M8mv8PDvEd-I4rwicuuPOw" name="subject_id" type="_PXgFEPDvEd-I4rwicuuPOw"/>
       <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw" name="text" type="_E8F2IPDvEd-I4rwicuuPOw"/>
       <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_PXgFEPDvEd-I4rwicuuPOw"/>
-      <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_M8mv8PDvEd-I4rwicuuPOw"/>
+      <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_VLcZoPDvEd-I4rwicuuPOw"/>
     </types>
     <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw"/>
     <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw"/>
