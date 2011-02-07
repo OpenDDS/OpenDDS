@@ -5468,6 +5468,175 @@
         </modelFacet>
       </labels>
     </topLevelNodes>
+    <topLevelNodes
+        visualID="2005"
+        editPartClassName="ContentFilteredTopicEditPart"
+        itemSemanticEditPolicyClassName="ContentFilteredTopicItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="ContentFilteredTopicCanonicalEditPolicy"
+        graphicalNodeEditPolicyClassName="ContentFilteredTopicGraphicalNodeEditPolicy"
+        createCommandClassName="ContentFilteredTopicCreateCommand">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <elementType
+          xsi:type="gmfgen:MetamodelType"
+          editHelperClassName="ContentFilteredTopicEditHelper"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          layoutType="TOOLBAR_LAYOUT"
+          className="ContentFilteredTopicFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ContentFilteredTopicFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureContentFilteredTopicStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureContentFilteredTopicNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureContentFilteredTopicFilterExpressionFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ContentFilteredTopicFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureContentFilteredTopicStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureContentFilteredTopicStereotypeFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureContentFilteredTopicStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureContentFilteredTopicNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureContentFilteredTopicNameFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureContentFilteredTopicNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureContentFilteredTopicFilterExpressionFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureContentFilteredTopicFilterExpressionFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureContentFilteredTopicFilterExpressionFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureContentFilteredTopicStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureContentFilteredTopicStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureContentFilteredTopicNameFigure() {&#xA;&#x9;&#x9;return fFigureContentFilteredTopicNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureContentFilteredTopicFilterExpressionFigure() {&#xA;&#x9;&#x9;return fFigureContentFilteredTopicFilterExpressionFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+      <modelFacet>
+        <metaClass
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//topics/ContentFilteredTopic"/>
+        <containmentMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/topicDescriptions"/>
+        <childMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/topicDescriptions"/>
+      </modelFacet>
+      <labels
+          visualID="5260"
+          editPartClassName="ContentFilteredTopicNameEditPart"
+          itemSemanticEditPolicyClassName="ContentFilteredTopicNameItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureContentFilteredTopicStereotypeFigure"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«contentFilteredTopic»">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5261"
+          editPartClassName="ContentFilteredTopicName2EditPart"
+          itemSemanticEditPolicyClassName="ContentFilteredTopicName2ItemSemanticEditPolicy"
+          elementIcon="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureContentFilteredTopicNameFigure"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern=""
+            editPattern="">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5262"
+          editPartClassName="ContentFilteredTopicFilter_expressionEditPart"
+          itemSemanticEditPolicyClassName="ContentFilteredTopicFilter_expressionItemSemanticEditPolicy">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureContentFilteredTopicFilterExpressionFigure"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="filter_expression: {0}"
+            editorPattern="{0}"
+            editPattern="{0}">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//topics/ContentFilteredTopic/filter_expression"/>
+        </modelFacet>
+      </labels>
+    </topLevelNodes>
+    <topLevelNodes
+        visualID="2006"
+        editPartClassName="MultiTopicEditPart"
+        itemSemanticEditPolicyClassName="MultiTopicItemSemanticEditPolicy"
+        canonicalEditPolicyClassName="MultiTopicCanonicalEditPolicy"
+        graphicalNodeEditPolicyClassName="MultiTopicGraphicalNodeEditPolicy"
+        createCommandClassName="MultiTopicCreateCommand">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <elementType
+          xsi:type="gmfgen:MetamodelType"
+          editHelperClassName="MultiTopicEditHelper"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          layoutType="TOOLBAR_LAYOUT"
+          className="MultiTopicFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class MultiTopicFigure extends org.eclipse.draw2d.RectangleFigure {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureMultiTopicStereotypeFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureMultiTopicNameFigure; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureMultiTopicSubscriptionExpressionFigure; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public MultiTopicFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(false);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_TOPLEFT&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(5);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureMultiTopicStereotypeFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureMultiTopicStereotypeFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureMultiTopicStereotypeFigure);&#xA;&#xA;&#xA;&#xA;fFigureMultiTopicNameFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureMultiTopicNameFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureMultiTopicNameFigure);&#xA;&#xA;&#xA;&#xA;fFigureMultiTopicSubscriptionExpressionFigure = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureMultiTopicSubscriptionExpressionFigure.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureMultiTopicSubscriptionExpressionFigure);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureMultiTopicStereotypeFigure() {&#xA;&#x9;&#x9;return fFigureMultiTopicStereotypeFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureMultiTopicNameFigure() {&#xA;&#x9;&#x9;return fFigureMultiTopicNameFigure;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureMultiTopicSubscriptionExpressionFigure() {&#xA;&#x9;&#x9;return fFigureMultiTopicSubscriptionExpressionFigure;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+      <modelFacet>
+        <metaClass
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//topics/MultiTopic"/>
+        <containmentMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/topicDescriptions"/>
+        <childMetaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//opendds/DcpsLib/topicDescriptions"/>
+      </modelFacet>
+      <labels
+          visualID="5263"
+          editPartClassName="MultiTopicNameEditPart"
+          itemSemanticEditPolicyClassName="MultiTopicNameItemSemanticEditPolicy"
+          readOnly="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureMultiTopicStereotypeFigure"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="«MultiTopic»"
+            editPattern="">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5264"
+          editPartClassName="MultiTopicName2EditPart"
+          itemSemanticEditPolicyClassName="MultiTopicName2ItemSemanticEditPolicy"
+          elementIcon="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureMultiTopicNameFigure"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//core/Entity/name"/>
+        </modelFacet>
+      </labels>
+      <labels
+          visualID="5265"
+          editPartClassName="MultiTopicSubscription_expressionEditPart"
+          itemSemanticEditPolicyClassName="MultiTopicSubscription_expressionItemSemanticEditPolicy">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureMultiTopicSubscriptionExpressionFigure"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="subscription_expression: {0}"
+            editorPattern="{0}"
+            editPattern="{0}">
+          <metaFeatures
+              href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//topics/MultiTopic/subscription_expression"/>
+        </modelFacet>
+      </labels>
+    </topLevelNodes>
     <links
         visualID="4005"
         editPartClassName="DataReaderTopicEditPart"
@@ -5526,6 +5695,26 @@
           xsi:type="gmfgen:FeatureLinkModelFacet">
         <metaFeature
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DomainParticipant/domain"/>
+      </modelFacet>
+    </links>
+    <links
+        visualID="4008"
+        editPartClassName="ContentFilteredTopicRelated_topicEditPart"
+        itemSemanticEditPolicyClassName="ContentFilteredTopicRelated_topicItemSemanticEditPolicy"
+        createCommandClassName="ContentFilteredTopicRelated_topicCreateCommand"
+        reorientCommandClassName="ContentFilteredTopicRelated_topicReorientCommand">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Edge"/>
+      <elementType
+          xsi:type="gmfgen:SpecializationType"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          className="ClassChildrenFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class ClassChildrenFigure extends org.eclipse.gmf.runtime.draw2d.ui.figures.PolylineConnectionEx {&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public ClassChildrenFigure() {&#xA;&#x9;&#x9;this.setLineWidth(1);&#xA;&#xA;&#x9;&#x9;setTargetDecoration(createTargetDecoration());&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.draw2d.RotatableDecoration createTargetDecoration() {&#xA;&#x9;&#x9;org.eclipse.draw2d.PolylineDecoration df = new org.eclipse.draw2d.PolylineDecoration();&#xA;df.setLineWidth(1);&#xA;&#x9;&#x9;return df;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
+      <modelFacet
+          xsi:type="gmfgen:FeatureLinkModelFacet">
+        <metaFeature
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//topics/ContentFilteredTopic/related_topic"/>
       </modelFacet>
     </links>
     <compartments
@@ -6125,6 +6314,20 @@
             largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Topic.gif"
             smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Topic.gif"
             genNodes="//@diagram/@topLevelNodes.2"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="ContentFilteredTopic"
+            description="Create New ContentFilteredTopic"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/ContentFilteredTopic.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/ContentFilteredTopic.gif"
+            genNodes="//@diagram/@topLevelNodes.3"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="MultiTopic"
+            description="Create New MultiTopic"
+            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/MultiTopic.gif"
+            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/MultiTopic.gif"
+            genNodes="//@diagram/@topLevelNodes.4"/>
       </groups>
     </palette>
     <preferencePages
@@ -6548,6 +6751,12 @@
         child="//@diagram/@topLevelNodes.2"/>
     <childReferences
         parent="//@diagram"
+        child="//@diagram/@topLevelNodes.3"/>
+    <childReferences
+        parent="//@diagram"
+        child="//@diagram/@topLevelNodes.4"/>
+    <childReferences
+        parent="//@diagram"
         child="//@diagram/@links.0"
         groupName="links"
         groupIcon="icons/linksNavigatorGroup.gif"/>
@@ -6559,6 +6768,30 @@
         groupIcon="icons/linkTargetNavigatorGroup.gif"/>
     <childReferences
         parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@links.0"
+        referenceType="in_source"
+        groupName="incoming links"
+        groupIcon="icons/incomingLinksNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@links.0"
+        child="//@diagram/@topLevelNodes.3"
+        referenceType="out_target"
+        groupName="target"
+        groupIcon="icons/linkTargetNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.3"
+        child="//@diagram/@links.0"
+        referenceType="in_source"
+        groupName="incoming links"
+        groupIcon="icons/incomingLinksNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@links.0"
+        child="//@diagram/@topLevelNodes.4"
+        referenceType="out_target"
+        groupName="target"
+        groupIcon="icons/linkTargetNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.4"
         child="//@diagram/@links.0"
         referenceType="in_source"
         groupName="incoming links"
@@ -6630,6 +6863,35 @@
     <childReferences
         parent="//@diagram/@topLevelNodes.0"
         child="//@diagram/@links.2"
+        referenceType="out_target"
+        groupName="outgoing links"
+        groupIcon="icons/outgoingLinksNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram"
+        child="//@diagram/@links.3"
+        groupName="links"
+        groupIcon="icons/linksNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@links.3"
+        child="//@diagram/@topLevelNodes.2"
+        referenceType="out_target"
+        groupName="target"
+        groupIcon="icons/linkTargetNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.2"
+        child="//@diagram/@links.3"
+        referenceType="in_source"
+        groupName="incoming links"
+        groupIcon="icons/incomingLinksNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@links.3"
+        child="//@diagram/@topLevelNodes.3"
+        referenceType="in_source"
+        groupName="source"
+        groupIcon="icons/linkSourceNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.3"
+        child="//@diagram/@links.3"
         referenceType="out_target"
         groupName="outgoing links"
         groupIcon="icons/outgoingLinksNavigatorGroup.gif"/>
@@ -6711,7 +6973,7 @@
       extensibleViaService="true">
     <implementations
         xsi:type="gmfgen:PredefinedParser"
-        uses="//@diagram/@childNodes.3/@labels.0/@modelFacet //@diagram/@childNodes.3/@labels.1/@modelFacet //@diagram/@childNodes.2/@labels.0/@modelFacet //@diagram/@childNodes.2/@labels.1/@modelFacet //@diagram/@childNodes.4/@labels.0/@modelFacet //@diagram/@childNodes.4/@labels.1/@modelFacet //@diagram/@childNodes.4/@labels.2/@modelFacet //@diagram/@childNodes.6/@labels.0/@modelFacet //@diagram/@childNodes.6/@labels.1/@modelFacet //@diagram/@childNodes.5/@labels.0/@modelFacet //@diagram/@childNodes.5/@labels.1/@modelFacet //@diagram/@childNodes.5/@labels.2/@modelFacet //@diagram/@childNodes.5/@labels.3/@modelFacet //@diagram/@childNodes.5/@labels.4/@modelFacet //@diagram/@childNodes.5/@labels.5/@modelFacet //@diagram/@childNodes.5/@labels.6/@modelFacet //@diagram/@childNodes.7/@labels.0/@modelFacet //@diagram/@childNodes.7/@labels.1/@modelFacet //@diagram/@childNodes.7/@labels.2/@modelFacet //@diagram/@childNodes.7/@labels.3/@modelFacet //@diagram/@childNodes.9/@labels.0/@modelFacet //@diagram/@childNodes.9/@labels.1/@modelFacet //@diagram/@childNodes.8/@labels.0/@modelFacet //@diagram/@childNodes.8/@labels.1/@modelFacet //@diagram/@childNodes.11/@labels.0/@modelFacet //@diagram/@childNodes.11/@labels.1/@modelFacet //@diagram/@childNodes.10/@labels.0/@modelFacet //@diagram/@childNodes.10/@labels.1/@modelFacet //@diagram/@childNodes.13/@labels.0/@modelFacet //@diagram/@childNodes.13/@labels.1/@modelFacet //@diagram/@childNodes.12/@labels.0/@modelFacet //@diagram/@childNodes.12/@labels.1/@modelFacet //@diagram/@childNodes.12/@labels.2/@modelFacet //@diagram/@childNodes.14/@labels.0/@modelFacet //@diagram/@childNodes.14/@labels.1/@modelFacet //@diagram/@childNodes.14/@labels.2/@modelFacet //@diagram/@childNodes.15/@labels.0/@modelFacet //@diagram/@childNodes.15/@labels.1/@modelFacet //@diagram/@childNodes.15/@labels.2/@modelFacet //@diagram/@childNodes.17/@labels.0/@modelFacet //@diagram/@childNodes.17/@labels.1/@modelFacet //@diagram/@childNodes.16/@labels.0/@modelFacet //@diagram/@childNodes.16/@labels.1/@modelFacet //@diagram/@childNodes.16/@labels.2/@modelFacet //@diagram/@childNodes.18/@labels.0/@modelFacet //@diagram/@childNodes.18/@labels.1/@modelFacet //@diagram/@childNodes.18/@labels.2/@modelFacet //@diagram/@childNodes.18/@labels.3/@modelFacet //@diagram/@childNodes.18/@labels.4/@modelFacet //@diagram/@childNodes.19/@labels.0/@modelFacet //@diagram/@childNodes.19/@labels.1/@modelFacet //@diagram/@childNodes.19/@labels.2/@modelFacet //@diagram/@childNodes.20/@labels.0/@modelFacet //@diagram/@childNodes.20/@labels.1/@modelFacet //@diagram/@childNodes.20/@labels.2/@modelFacet //@diagram/@childNodes.21/@labels.0/@modelFacet //@diagram/@childNodes.21/@labels.1/@modelFacet //@diagram/@childNodes.21/@labels.2/@modelFacet //@diagram/@childNodes.22/@labels.0/@modelFacet //@diagram/@childNodes.22/@labels.1/@modelFacet //@diagram/@childNodes.22/@labels.2/@modelFacet //@diagram/@childNodes.23/@labels.0/@modelFacet //@diagram/@childNodes.23/@labels.1/@modelFacet //@diagram/@childNodes.24/@labels.0/@modelFacet //@diagram/@childNodes.24/@labels.1/@modelFacet //@diagram/@childNodes.24/@labels.2/@modelFacet //@diagram/@childNodes.25/@labels.0/@modelFacet //@diagram/@childNodes.25/@labels.1/@modelFacet //@diagram/@childNodes.25/@labels.2/@modelFacet //@diagram/@childNodes.25/@labels.3/@modelFacet //@diagram/@childNodes.25/@labels.4/@modelFacet //@diagram/@childNodes.25/@labels.5/@modelFacet //@diagram/@childNodes.25/@labels.6/@modelFacet //@diagram/@childNodes.26/@labels.0/@modelFacet //@diagram/@childNodes.26/@labels.1/@modelFacet //@diagram/@childNodes.26/@labels.2/@modelFacet //@diagram/@childNodes.27/@labels.0/@modelFacet //@diagram/@childNodes.27/@labels.1/@modelFacet //@diagram/@childNodes.27/@labels.2/@modelFacet //@diagram/@childNodes.27/@labels.3/@modelFacet //@diagram/@childNodes.28/@labels.0/@modelFacet //@diagram/@childNodes.28/@labels.1/@modelFacet //@diagram/@childNodes.29/@labels.0/@modelFacet //@diagram/@childNodes.29/@labels.1/@modelFacet //@diagram/@childNodes.30/@labels.0/@modelFacet //@diagram/@childNodes.30/@labels.1/@modelFacet //@diagram/@childNodes.30/@labels.2/@modelFacet //@diagram/@childNodes.31/@labels.0/@modelFacet //@diagram/@childNodes.31/@labels.1/@modelFacet //@diagram/@childNodes.31/@labels.2/@modelFacet //@diagram/@childNodes.32/@labels.0/@modelFacet //@diagram/@childNodes.32/@labels.1/@modelFacet //@diagram/@childNodes.32/@labels.2/@modelFacet //@diagram/@childNodes.33/@labels.0/@modelFacet //@diagram/@childNodes.33/@labels.1/@modelFacet //@diagram/@childNodes.33/@labels.2/@modelFacet //@diagram/@childNodes.34/@labels.0/@modelFacet //@diagram/@childNodes.34/@labels.1/@modelFacet //@diagram/@childNodes.34/@labels.2/@modelFacet //@diagram/@childNodes.34/@labels.3/@modelFacet //@diagram/@childNodes.34/@labels.4/@modelFacet //@diagram/@childNodes.35/@labels.0/@modelFacet //@diagram/@childNodes.35/@labels.1/@modelFacet //@diagram/@childNodes.35/@labels.2/@modelFacet //@diagram/@childNodes.36/@labels.0/@modelFacet //@diagram/@childNodes.36/@labels.1/@modelFacet //@diagram/@childNodes.36/@labels.2/@modelFacet //@diagram/@childNodes.1/@labels.0/@modelFacet //@diagram/@childNodes.1/@labels.1/@modelFacet //@diagram/@childNodes.1/@labels.2/@modelFacet //@diagram/@childNodes.37/@labels.0/@modelFacet //@diagram/@childNodes.37/@labels.1/@modelFacet //@diagram/@childNodes.37/@labels.2/@modelFacet //@diagram/@childNodes.38/@labels.0/@modelFacet //@diagram/@childNodes.38/@labels.1/@modelFacet //@diagram/@childNodes.38/@labels.2/@modelFacet //@diagram/@childNodes.39/@labels.0/@modelFacet //@diagram/@childNodes.39/@labels.1/@modelFacet //@diagram/@childNodes.40/@labels.0/@modelFacet //@diagram/@childNodes.40/@labels.1/@modelFacet //@diagram/@childNodes.40/@labels.2/@modelFacet //@diagram/@childNodes.40/@labels.3/@modelFacet //@diagram/@childNodes.40/@labels.4/@modelFacet //@diagram/@childNodes.41/@labels.0/@modelFacet //@diagram/@childNodes.41/@labels.1/@modelFacet //@diagram/@childNodes.41/@labels.2/@modelFacet //@diagram/@childNodes.42/@labels.0/@modelFacet //@diagram/@childNodes.42/@labels.1/@modelFacet //@diagram/@childNodes.42/@labels.2/@modelFacet //@diagram/@childNodes.43/@labels.0/@modelFacet //@diagram/@childNodes.43/@labels.1/@modelFacet //@diagram/@childNodes.44/@labels.0/@modelFacet //@diagram/@childNodes.44/@labels.1/@modelFacet //@diagram/@childNodes.44/@labels.2/@modelFacet //@diagram/@childNodes.44/@labels.3/@modelFacet //@diagram/@childNodes.44/@labels.4/@modelFacet //@diagram/@childNodes.0/@labels.0/@modelFacet //@diagram/@childNodes.0/@labels.1/@modelFacet //@diagram/@childNodes.0/@labels.2/@modelFacet //@diagram/@childNodes.48/@labels.0/@modelFacet //@diagram/@childNodes.48/@labels.1/@modelFacet //@diagram/@childNodes.49/@labels.0/@modelFacet //@diagram/@childNodes.49/@labels.1/@modelFacet //@diagram/@childNodes.47/@labels.0/@modelFacet //@diagram/@childNodes.47/@labels.1/@modelFacet //@diagram/@childNodes.51/@labels.0/@modelFacet //@diagram/@childNodes.51/@labels.1/@modelFacet //@diagram/@childNodes.50/@labels.0/@modelFacet //@diagram/@childNodes.50/@labels.1/@modelFacet //@diagram/@childNodes.52/@labels.0/@modelFacet //@diagram/@childNodes.52/@labels.1/@modelFacet //@diagram/@childNodes.52/@labels.2/@modelFacet //@diagram/@childNodes.53/@labels.0/@modelFacet //@diagram/@childNodes.53/@labels.1/@modelFacet //@diagram/@childNodes.54/@labels.0/@modelFacet //@diagram/@childNodes.54/@labels.1/@modelFacet //@diagram/@childNodes.55/@labels.0/@modelFacet //@diagram/@childNodes.55/@labels.1/@modelFacet //@diagram/@childNodes.55/@labels.2/@modelFacet //@diagram/@childNodes.46/@labels.0/@modelFacet //@diagram/@childNodes.46/@labels.1/@modelFacet //@diagram/@childNodes.46/@labels.2/@modelFacet //@diagram/@childNodes.45/@labels.0/@modelFacet //@diagram/@childNodes.45/@labels.1/@modelFacet //@diagram/@childNodes.45/@labels.2/@modelFacet //@diagram/@topLevelNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.0/@labels.1/@modelFacet //@diagram/@topLevelNodes.1/@labels.0/@modelFacet //@diagram/@topLevelNodes.1/@labels.1/@modelFacet //@diagram/@childNodes.56/@labels.0/@modelFacet //@diagram/@childNodes.56/@labels.1/@modelFacet //@diagram/@topLevelNodes.2/@labels.0/@modelFacet //@diagram/@topLevelNodes.2/@labels.1/@modelFacet"/>
+        uses="//@diagram/@childNodes.3/@labels.0/@modelFacet //@diagram/@childNodes.3/@labels.1/@modelFacet //@diagram/@childNodes.2/@labels.0/@modelFacet //@diagram/@childNodes.2/@labels.1/@modelFacet //@diagram/@childNodes.4/@labels.0/@modelFacet //@diagram/@childNodes.4/@labels.1/@modelFacet //@diagram/@childNodes.4/@labels.2/@modelFacet //@diagram/@childNodes.6/@labels.0/@modelFacet //@diagram/@childNodes.6/@labels.1/@modelFacet //@diagram/@childNodes.5/@labels.0/@modelFacet //@diagram/@childNodes.5/@labels.1/@modelFacet //@diagram/@childNodes.5/@labels.2/@modelFacet //@diagram/@childNodes.5/@labels.3/@modelFacet //@diagram/@childNodes.5/@labels.4/@modelFacet //@diagram/@childNodes.5/@labels.5/@modelFacet //@diagram/@childNodes.5/@labels.6/@modelFacet //@diagram/@childNodes.7/@labels.0/@modelFacet //@diagram/@childNodes.7/@labels.1/@modelFacet //@diagram/@childNodes.7/@labels.2/@modelFacet //@diagram/@childNodes.7/@labels.3/@modelFacet //@diagram/@childNodes.9/@labels.0/@modelFacet //@diagram/@childNodes.9/@labels.1/@modelFacet //@diagram/@childNodes.8/@labels.0/@modelFacet //@diagram/@childNodes.8/@labels.1/@modelFacet //@diagram/@childNodes.11/@labels.0/@modelFacet //@diagram/@childNodes.11/@labels.1/@modelFacet //@diagram/@childNodes.10/@labels.0/@modelFacet //@diagram/@childNodes.10/@labels.1/@modelFacet //@diagram/@childNodes.13/@labels.0/@modelFacet //@diagram/@childNodes.13/@labels.1/@modelFacet //@diagram/@childNodes.12/@labels.0/@modelFacet //@diagram/@childNodes.12/@labels.1/@modelFacet //@diagram/@childNodes.12/@labels.2/@modelFacet //@diagram/@childNodes.14/@labels.0/@modelFacet //@diagram/@childNodes.14/@labels.1/@modelFacet //@diagram/@childNodes.14/@labels.2/@modelFacet //@diagram/@childNodes.15/@labels.0/@modelFacet //@diagram/@childNodes.15/@labels.1/@modelFacet //@diagram/@childNodes.15/@labels.2/@modelFacet //@diagram/@childNodes.17/@labels.0/@modelFacet //@diagram/@childNodes.17/@labels.1/@modelFacet //@diagram/@childNodes.16/@labels.0/@modelFacet //@diagram/@childNodes.16/@labels.1/@modelFacet //@diagram/@childNodes.16/@labels.2/@modelFacet //@diagram/@childNodes.18/@labels.0/@modelFacet //@diagram/@childNodes.18/@labels.1/@modelFacet //@diagram/@childNodes.18/@labels.2/@modelFacet //@diagram/@childNodes.18/@labels.3/@modelFacet //@diagram/@childNodes.18/@labels.4/@modelFacet //@diagram/@childNodes.19/@labels.0/@modelFacet //@diagram/@childNodes.19/@labels.1/@modelFacet //@diagram/@childNodes.19/@labels.2/@modelFacet //@diagram/@childNodes.20/@labels.0/@modelFacet //@diagram/@childNodes.20/@labels.1/@modelFacet //@diagram/@childNodes.20/@labels.2/@modelFacet //@diagram/@childNodes.21/@labels.0/@modelFacet //@diagram/@childNodes.21/@labels.1/@modelFacet //@diagram/@childNodes.21/@labels.2/@modelFacet //@diagram/@childNodes.22/@labels.0/@modelFacet //@diagram/@childNodes.22/@labels.1/@modelFacet //@diagram/@childNodes.22/@labels.2/@modelFacet //@diagram/@childNodes.23/@labels.0/@modelFacet //@diagram/@childNodes.23/@labels.1/@modelFacet //@diagram/@childNodes.24/@labels.0/@modelFacet //@diagram/@childNodes.24/@labels.1/@modelFacet //@diagram/@childNodes.24/@labels.2/@modelFacet //@diagram/@childNodes.25/@labels.0/@modelFacet //@diagram/@childNodes.25/@labels.1/@modelFacet //@diagram/@childNodes.25/@labels.2/@modelFacet //@diagram/@childNodes.25/@labels.3/@modelFacet //@diagram/@childNodes.25/@labels.4/@modelFacet //@diagram/@childNodes.25/@labels.5/@modelFacet //@diagram/@childNodes.25/@labels.6/@modelFacet //@diagram/@childNodes.26/@labels.0/@modelFacet //@diagram/@childNodes.26/@labels.1/@modelFacet //@diagram/@childNodes.26/@labels.2/@modelFacet //@diagram/@childNodes.27/@labels.0/@modelFacet //@diagram/@childNodes.27/@labels.1/@modelFacet //@diagram/@childNodes.27/@labels.2/@modelFacet //@diagram/@childNodes.27/@labels.3/@modelFacet //@diagram/@childNodes.28/@labels.0/@modelFacet //@diagram/@childNodes.28/@labels.1/@modelFacet //@diagram/@childNodes.29/@labels.0/@modelFacet //@diagram/@childNodes.29/@labels.1/@modelFacet //@diagram/@childNodes.30/@labels.0/@modelFacet //@diagram/@childNodes.30/@labels.1/@modelFacet //@diagram/@childNodes.30/@labels.2/@modelFacet //@diagram/@childNodes.31/@labels.0/@modelFacet //@diagram/@childNodes.31/@labels.1/@modelFacet //@diagram/@childNodes.31/@labels.2/@modelFacet //@diagram/@childNodes.32/@labels.0/@modelFacet //@diagram/@childNodes.32/@labels.1/@modelFacet //@diagram/@childNodes.32/@labels.2/@modelFacet //@diagram/@childNodes.33/@labels.0/@modelFacet //@diagram/@childNodes.33/@labels.1/@modelFacet //@diagram/@childNodes.33/@labels.2/@modelFacet //@diagram/@childNodes.34/@labels.0/@modelFacet //@diagram/@childNodes.34/@labels.1/@modelFacet //@diagram/@childNodes.34/@labels.2/@modelFacet //@diagram/@childNodes.34/@labels.3/@modelFacet //@diagram/@childNodes.34/@labels.4/@modelFacet //@diagram/@childNodes.35/@labels.0/@modelFacet //@diagram/@childNodes.35/@labels.1/@modelFacet //@diagram/@childNodes.35/@labels.2/@modelFacet //@diagram/@childNodes.36/@labels.0/@modelFacet //@diagram/@childNodes.36/@labels.1/@modelFacet //@diagram/@childNodes.36/@labels.2/@modelFacet //@diagram/@childNodes.1/@labels.0/@modelFacet //@diagram/@childNodes.1/@labels.1/@modelFacet //@diagram/@childNodes.1/@labels.2/@modelFacet //@diagram/@childNodes.37/@labels.0/@modelFacet //@diagram/@childNodes.37/@labels.1/@modelFacet //@diagram/@childNodes.37/@labels.2/@modelFacet //@diagram/@childNodes.38/@labels.0/@modelFacet //@diagram/@childNodes.38/@labels.1/@modelFacet //@diagram/@childNodes.38/@labels.2/@modelFacet //@diagram/@childNodes.39/@labels.0/@modelFacet //@diagram/@childNodes.39/@labels.1/@modelFacet //@diagram/@childNodes.40/@labels.0/@modelFacet //@diagram/@childNodes.40/@labels.1/@modelFacet //@diagram/@childNodes.40/@labels.2/@modelFacet //@diagram/@childNodes.40/@labels.3/@modelFacet //@diagram/@childNodes.40/@labels.4/@modelFacet //@diagram/@childNodes.41/@labels.0/@modelFacet //@diagram/@childNodes.41/@labels.1/@modelFacet //@diagram/@childNodes.41/@labels.2/@modelFacet //@diagram/@childNodes.42/@labels.0/@modelFacet //@diagram/@childNodes.42/@labels.1/@modelFacet //@diagram/@childNodes.42/@labels.2/@modelFacet //@diagram/@childNodes.43/@labels.0/@modelFacet //@diagram/@childNodes.43/@labels.1/@modelFacet //@diagram/@childNodes.44/@labels.0/@modelFacet //@diagram/@childNodes.44/@labels.1/@modelFacet //@diagram/@childNodes.44/@labels.2/@modelFacet //@diagram/@childNodes.44/@labels.3/@modelFacet //@diagram/@childNodes.44/@labels.4/@modelFacet //@diagram/@childNodes.0/@labels.0/@modelFacet //@diagram/@childNodes.0/@labels.1/@modelFacet //@diagram/@childNodes.0/@labels.2/@modelFacet //@diagram/@childNodes.48/@labels.0/@modelFacet //@diagram/@childNodes.48/@labels.1/@modelFacet //@diagram/@childNodes.49/@labels.0/@modelFacet //@diagram/@childNodes.49/@labels.1/@modelFacet //@diagram/@childNodes.47/@labels.0/@modelFacet //@diagram/@childNodes.47/@labels.1/@modelFacet //@diagram/@childNodes.51/@labels.0/@modelFacet //@diagram/@childNodes.51/@labels.1/@modelFacet //@diagram/@childNodes.50/@labels.0/@modelFacet //@diagram/@childNodes.50/@labels.1/@modelFacet //@diagram/@childNodes.52/@labels.0/@modelFacet //@diagram/@childNodes.52/@labels.1/@modelFacet //@diagram/@childNodes.52/@labels.2/@modelFacet //@diagram/@childNodes.53/@labels.0/@modelFacet //@diagram/@childNodes.53/@labels.1/@modelFacet //@diagram/@childNodes.54/@labels.0/@modelFacet //@diagram/@childNodes.54/@labels.1/@modelFacet //@diagram/@childNodes.55/@labels.0/@modelFacet //@diagram/@childNodes.55/@labels.1/@modelFacet //@diagram/@childNodes.55/@labels.2/@modelFacet //@diagram/@childNodes.46/@labels.0/@modelFacet //@diagram/@childNodes.46/@labels.1/@modelFacet //@diagram/@childNodes.46/@labels.2/@modelFacet //@diagram/@childNodes.45/@labels.0/@modelFacet //@diagram/@childNodes.45/@labels.1/@modelFacet //@diagram/@childNodes.45/@labels.2/@modelFacet //@diagram/@topLevelNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.0/@labels.1/@modelFacet //@diagram/@topLevelNodes.1/@labels.0/@modelFacet //@diagram/@topLevelNodes.1/@labels.1/@modelFacet //@diagram/@childNodes.56/@labels.0/@modelFacet //@diagram/@childNodes.56/@labels.1/@modelFacet //@diagram/@topLevelNodes.2/@labels.0/@modelFacet //@diagram/@topLevelNodes.2/@labels.1/@modelFacet //@diagram/@topLevelNodes.3/@labels.0/@modelFacet //@diagram/@topLevelNodes.3/@labels.1/@modelFacet //@diagram/@topLevelNodes.3/@labels.2/@modelFacet //@diagram/@topLevelNodes.4/@labels.0/@modelFacet //@diagram/@topLevelNodes.4/@labels.1/@modelFacet //@diagram/@topLevelNodes.4/@labels.2/@modelFacet"/>
   </labelParsers>
   <contextMenus
       context="//@diagram">
