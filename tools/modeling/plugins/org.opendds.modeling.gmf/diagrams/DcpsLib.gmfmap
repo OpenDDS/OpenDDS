@@ -2215,6 +2215,87 @@
       </compartments>
     </ownedChild>
   </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/topicDescriptions"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Topics.ecore#//ContentFilteredTopic"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«contentFilteredTopic»">
+        <diagramLabel
+            href="DcpsLib.gmfgraph#ContentFilteredTopicStereotype"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern=""
+          editPattern="">
+        <diagramLabel
+            href="DcpsLib.gmfgraph#ContentFilteredTopicName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="filter_expression: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DcpsLib.gmfgraph#ContentFilteredTopicFilterExpression"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Topics.ecore#//ContentFilteredTopic/filter_expression"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DcpsLib.gmftool#//@palette/@tools.0/@tools.12"/>
+      <diagramNode
+          href="DcpsLib.gmfgraph#ContentFilteredTopic"/>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/topicDescriptions"/>
+    <ownedChild>
+      <domainMetaElement
+          href="../../org.opendds.modeling.model/model/Topics.ecore#//MultiTopic"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          readOnly="true"
+          viewPattern="«MultiTopic»"
+          editPattern="">
+        <diagramLabel
+            href="DcpsLib.gmfgraph#MultiTopicStereotype"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping">
+        <diagramLabel
+            href="DcpsLib.gmfgraph#MultiTopicName"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="subscription_expression: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DcpsLib.gmfgraph#MultiTopicSubscriptionExpression"/>
+        <features
+            href="../../org.opendds.modeling.model/model/Topics.ecore#//MultiTopic/subscription_expression"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="DcpsLib.gmftool#//@palette/@tools.0/@tools.13"/>
+      <diagramNode
+          href="DcpsLib.gmfgraph#MultiTopic"/>
+    </ownedChild>
+  </nodes>
   <links>
     <tool
         xsi:type="gmftool:CreationTool"
@@ -2241,6 +2322,13 @@
     <linkMetaFeature
         xsi:type="ecore:EReference"
         href="../../org.opendds.modeling.model/model/DCPS.ecore#//DomainParticipant/domain"/>
+  </links>
+  <links>
+    <diagramLink
+        href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassChildren"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="../../org.opendds.modeling.model/model/Topics.ecore#//ContentFilteredTopic/related_topic"/>
   </links>
   <diagram>
     <diagramCanvas

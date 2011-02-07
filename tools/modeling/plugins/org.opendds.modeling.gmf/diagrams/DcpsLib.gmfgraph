@@ -91,6 +91,58 @@
       <accessors
           figure="//@figures.0/@descriptors.2/@actualFigure/@children.1"/>
     </descriptors>
+    <descriptors
+        name="ContentFilteredTopicFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Rectangle"
+          name="ContentFilteredTopicFigure">
+        <layout
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"
+            forceSingleLine="true"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="ContentFilteredTopicStereotypeFigure"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="ContentFilteredTopicNameFigure"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="ContentFilteredTopicFilterExpressionFigure"/>
+      </actualFigure>
+      <accessors
+          figure="//@figures.0/@descriptors.3/@actualFigure/@children.0"/>
+      <accessors
+          figure="//@figures.0/@descriptors.3/@actualFigure/@children.1"/>
+      <accessors
+          figure="//@figures.0/@descriptors.3/@actualFigure/@children.2"/>
+    </descriptors>
+    <descriptors
+        name="MultiTopicFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Rectangle"
+          name="MultiTopicFigure">
+        <layout
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"
+            forceSingleLine="true"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="MultiTopicStereotypeFigure"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="MultiTopicNameFigure"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="MultiTopicSubscriptionExpressionFigure"/>
+      </actualFigure>
+      <accessors
+          figure="//@figures.0/@descriptors.4/@actualFigure/@children.0"/>
+      <accessors
+          figure="//@figures.0/@descriptors.4/@actualFigure/@children.1"/>
+      <accessors
+          figure="//@figures.0/@descriptors.4/@actualFigure/@children.2"/>
+    </descriptors>
   </figures>
   <nodes
       name="PubSub"
@@ -101,6 +153,12 @@
   <nodes
       name="Struct"
       figure="StructFigure"/>
+  <nodes
+      name="ContentFilteredTopic"
+      figure="ContentFilteredTopicFigure"/>
+  <nodes
+      name="MultiTopic"
+      figure="MultiTopicFigure"/>
   <compartments
       name="DataWriters"
       collapsible="true"
@@ -160,4 +218,32 @@
       figure="StructFigure"
       elementIcon="false"
       accessor="//@figures.0/@descriptors.2/@accessors.1"/>
+  <labels
+      name="ContentFilteredTopicStereotype"
+      figure="ContentFilteredTopicFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.3/@accessors.0"/>
+  <labels
+      name="ContentFilteredTopicName"
+      figure="ContentFilteredTopicFigure"
+      accessor="//@figures.0/@descriptors.3/@accessors.1"/>
+  <labels
+      name="ContentFilteredTopicFilterExpression"
+      figure="ContentFilteredTopicFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.3/@accessors.2"/>
+  <labels
+      name="MultiTopicStereotype"
+      figure="MultiTopicFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.4/@accessors.0"/>
+  <labels
+      name="MultiTopicName"
+      figure="MultiTopicFigure"
+      accessor="//@figures.0/@descriptors.4/@accessors.1"/>
+  <labels
+      name="MultiTopicSubscriptionExpression"
+      figure="MultiTopicFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.4/@accessors.2"/>
 </gmfgraph:Canvas>

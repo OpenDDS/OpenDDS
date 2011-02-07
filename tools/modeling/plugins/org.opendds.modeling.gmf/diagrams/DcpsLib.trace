@@ -50,6 +50,32 @@
         visualID="7047"
         queryText="true"/>
   </nodeTraces>
+  <nodeTraces
+      visualID="2005"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Topics/1.0' and _eClass_.name = 'ContentFilteredTopic') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'topicDescriptions')">
+    <nodeLabelTraces
+        visualID="5260"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5261"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5262"
+        queryText="true"/>
+  </nodeTraces>
+  <nodeTraces
+      visualID="2006"
+      queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Topics/1.0' and _eClass_.name = 'MultiTopic') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'DcpsLib') and _containmentMF_.name = 'topicDescriptions')">
+    <nodeLabelTraces
+        visualID="5263"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5264"
+        queryText="true"/>
+    <nodeLabelTraces
+        visualID="5265"
+        queryText="true"/>
+  </nodeTraces>
   <childNodeTraces
       visualID="3001"
       queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/OpenDDS/1.0' and _eClass_.name = 'publisher') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'DomainParticipant') and _containmentMF_.name = 'publishers')">
@@ -872,4 +898,7 @@
   <linkTraces
       visualID="4007"
       queryText="modelFacet.oclIsKindOf(gmfgen::FeatureLinkModelFacet) and (let _feature_:ecore::EStructuralFeature = modelFacet.oclAsType(gmfgen::FeatureLinkModelFacet).metaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _feature_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/DCPS/1.0' and _eClass_.name = 'DomainParticipant') and _feature_.name = 'domain')"/>
+  <linkTraces
+      visualID="4008"
+      queryText="modelFacet.oclIsKindOf(gmfgen::FeatureLinkModelFacet) and (let _feature_:ecore::EStructuralFeature = modelFacet.oclAsType(gmfgen::FeatureLinkModelFacet).metaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _feature_.eContainingClass in _eClass_.ePackage.nsURI = 'http://www.opendds.org/modeling/schemas/Topics/1.0' and _eClass_.name = 'ContentFilteredTopic') and _feature_.name = 'related_topic')"/>
 </trace:TraceModel>

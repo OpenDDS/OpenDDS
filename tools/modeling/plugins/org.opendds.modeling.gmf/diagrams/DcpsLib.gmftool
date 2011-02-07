@@ -131,6 +131,32 @@
             path="icons/full/obj16/Topic.gif"
             bundle="org.opendds.modeling.model.edit"/>
       </tools>
+      <tools
+          xsi:type="gmftool:CreationTool"
+          title="ContentFilteredTopic"
+          description="Create New ContentFilteredTopic">
+        <smallIcon
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/ContentFilteredTopic.gif"
+            bundle="org.opendds.modeling.model.edit"/>
+        <largeIcon
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/ContentFilteredTopic.gif"
+            bundle="org.opendds.modeling.model.edit"/>
+      </tools>
+      <tools
+          xsi:type="gmftool:CreationTool"
+          title="MultiTopic"
+          description="Create New MultiTopic">
+        <smallIcon
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/MultiTopic.gif"
+            bundle="org.opendds.modeling.model.edit"/>
+        <largeIcon
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/MultiTopic.gif"
+            bundle="org.opendds.modeling.model.edit"/>
+      </tools>
     </tools>
   </palette>
 </gmftool:ToolRegistry>
