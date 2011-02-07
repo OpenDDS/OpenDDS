@@ -32,7 +32,7 @@ OpenDDS::Model::WriterSync::wait_match(DDS::DataWriter_var& writer)
   do {
     std::cout << "waiting for pub matched" << std::endl;
     stat = writer->get_publication_matched_status(ms);
-    if ((stat != DDS::RETCODE_OK) && (stat != DDS::RETCODE_TIMEOUT)) {
+    if (stat != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((
                   LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() -")
@@ -140,7 +140,7 @@ OpenDDS::Model::ReaderSync::wait_unmatch(DDS::DataReader_var& reader)
   do {
     std::cout << "sub checking unmatched" << std::endl;
     stat = reader->get_subscription_matched_status(ms);
-    if ((stat != DDS::RETCODE_OK) && (stat != DDS::RETCODE_TIMEOUT)) {
+    if (stat != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((
                   LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_unmatch() -")
