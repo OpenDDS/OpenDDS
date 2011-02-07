@@ -1,3 +1,19 @@
+Mon Feb  7 23:15:55 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Arrays/publisher.cpp:
+        * tools/modeling/tests/InvalidNames/publisher.cpp:
+        * tools/modeling/tests/InvalidNames/subscriber.cpp:
+        * tools/modeling/tests/Messenger/publisher.cpp:
+        * tools/modeling/tests/Messenger/subscriber.cpp:
+        * tools/modeling/tests/PolicyLib/publisher.cpp:
+        * tools/modeling/tests/PolicyLib/subscriber.cpp:
+
+          Use new ReaderSync/WriterSync untilities.
+
+        * tools/modeling/tests/PolicyLib/run_test.pl:
+
+          Clean up durability dir.
+
 Mon Feb  7 23:18:07 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
 
 	* [r4237] 2011-02-07 22:59  martinezm
