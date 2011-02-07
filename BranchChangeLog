@@ -1,3 +1,15 @@
+Mon Feb  7 18:00:21 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Remove medium and high thrasher tests.  They don't work and no 
+          action being taken.
+
+        * tools/modeling/codegen/model/Sync.h:
+        * tools/modeling/codegen/model/Sync.cpp:
+
+          Utilities for synching between pub and sub in a test.
+
 Mon Feb  7 17:56:05 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts:
