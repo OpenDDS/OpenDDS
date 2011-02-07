@@ -1,3 +1,12 @@
+Mon Feb  7 13:07:35 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/commands:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/policies:
+        * tools/modeling/testdata/DcpsLib:
+
+	  svn:ignore newly auto generated files.
+
 Mon Feb  7 13:04:35 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
