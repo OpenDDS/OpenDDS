@@ -19,6 +19,7 @@ use strict;
 use Env qw(ECLIPSE_HOME ECLIPSE_WORKSPACE ECLIPSE_EXTRA_PLUGINS);
 use Cwd;
 use File::Temp qw(tempdir);
+use File::Path;
 
 my $suffix = ($^O eq 'MSWin32') ? 'c' : '';
 my $cwd = getcwd();
@@ -57,6 +58,9 @@ foreach my $s (@steps) {
   }
   if ($s->{'args'}) {
     push(@args, $s->{'args'});
+    if ($s->{'args'} eq 'clean') {     # extra 'clean' step to remove bin dirs
+      rmtree([glob('../../plugins/*/bin')]);  # current dir is the $feature_dir
+    }
   }
 
   my $cmd = "\"$ECLIPSE_HOME/eclipse$suffix\" -nosplash -data " .
