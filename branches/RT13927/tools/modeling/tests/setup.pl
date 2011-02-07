@@ -27,7 +27,7 @@ sub get_dirs {
   return map {s/^$dir\/(.*)\/[^\/]*$/$1/; $_} $config_list->valid_entries();
 }
 
-my $javapkg = 'org.opendds.modeling.sdk'; # holds the .xsl files
+my $javapkg = 'org.opendds.modeling.sdk';
 my $plugin = 'org.opendds.modeling.sdk.model.editor';
 
 sub generate {

@@ -1,3 +1,14 @@
+Mon Feb  7 23:26:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkTransformer.java:
+
+          Updated for new path to *.xsl files.
+
+        * tools/modeling/tests/setup.pl:
+
+          Removed old comment.
+
 Mon Feb  7 23:15:55 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Arrays/publisher.cpp:
@@ -16,41 +27,41 @@ Mon Feb  7 23:15:55 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
 Mon Feb  7 23:18:07 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
 
-	* [r4237] 2011-02-07 22:59  martinezm
+        * [r4237] 2011-02-07 22:59  martinezm
 
-	  tools/modeling/features/org.opendds.modeling.feature/feature.xml,
-	  tools/modeling/plugins/org.opendds.modeling.common/about.html,
-	  tools/modeling/plugins/org.opendds.modeling.common/about.ini,
-	  tools/modeling/plugins/org.opendds.modeling.common/about.properties,
-	  tools/modeling/plugins/org.opendds.modeling.common/images,
-	  tools/modeling/plugins/org.opendds.modeling.common/images/codegen-16x16.gif,
-	  tools/modeling/plugins/org.opendds.modeling.common/images/codegen-32x32.gif,
-	  tools/modeling/plugins/org.opendds.modeling.common/images/logo-16x16.gif,
-	  tools/modeling/plugins/org.opendds.modeling.common/images/logo-32x32-text.gif,
-	  tools/modeling/plugins/org.opendds.modeling.common/images/logo-32x32.gif,
-	  tools/modeling/plugins/org.opendds.modeling.common/images/logo-large-notext.gif,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/plugin.properties,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/plugin.xml,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorActionBarContributor.java,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/common.xsl,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/h.xsl,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/lut.xml,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/mpb.xsl,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/mpc.xsl,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/paths_mpb.xsl,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl,
-	  tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_h.xsl,
-	  tools/modeling/plugins/org.opendds.modeling.sdk/plugin.xml:
+          tools/modeling/features/org.opendds.modeling.feature/feature.xml,
+          tools/modeling/plugins/org.opendds.modeling.common/about.html,
+          tools/modeling/plugins/org.opendds.modeling.common/about.ini,
+          tools/modeling/plugins/org.opendds.modeling.common/about.properties,
+          tools/modeling/plugins/org.opendds.modeling.common/images,
+          tools/modeling/plugins/org.opendds.modeling.common/images/codegen-16x16.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/images/codegen-32x32.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/images/logo-16x16.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/images/logo-32x32-text.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/images/logo-32x32.gif,
+          tools/modeling/plugins/org.opendds.modeling.common/images/logo-large-notext.gif,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/plugin.properties,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/plugin.xml,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorActionBarContributor.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/common.xsl,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/h.xsl,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/lut.xml,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/mpb.xsl,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/mpc.xsl,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/paths_mpb.xsl,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl,
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_h.xsl,
+          tools/modeling/plugins/org.opendds.modeling.sdk/plugin.xml:
 
-	  Migrating from org.opendds.modeling.sdk to
-	  org.opendds.modeling.sdk.model.editor and org.opendds.common.
+          Migrating from org.opendds.modeling.sdk to
+          org.opendds.modeling.sdk.model.editor and org.opendds.common.
 
 Mon Feb  7 23:11:17 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 

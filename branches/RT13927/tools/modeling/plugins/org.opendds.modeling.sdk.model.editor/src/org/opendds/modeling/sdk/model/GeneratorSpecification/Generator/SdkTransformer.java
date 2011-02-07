@@ -24,52 +24,52 @@ public class SdkTransformer {
 	private URIResolver resolver;
 
 	// files that are utilities used by the various xslFilename() files
-	static final String[] UTIL_FILES = {"xml/lut.xml", "xml/common.xsl"};
+	static final String[] UTIL_FILES = {"xsl/lut.xml", "xsl/common.xsl"};
 
 	public static enum TransformType {
 		IDL { public String getText() { return "Generate IDL"; }
-			  public String xslFilename() { return "xml/idl.xsl"; }
+			  public String xslFilename() { return "xsl/idl.xsl"; }
 			  public String getSuffix() { return ".idl"; }
 		      public boolean needsResolvedModel() { return true; }
 		},
 		H   { public String getText() { return "Generate C++ Header"; }
-		      public String xslFilename() { return "xml/h.xsl"; }
+		      public String xslFilename() { return "xsl/h.xsl"; }
 		      public String getSuffix() { return "_T.h"; }
 		      public boolean needsResolvedModel() { return true; }
 		},
 		CPP { public String getText() { return "Generate C++ Body"; }
-	          public String xslFilename() { return "xml/cpp.xsl"; }
+	          public String xslFilename() { return "xsl/cpp.xsl"; }
 	          public String getSuffix() { return "_T.cpp"; }
 		      public boolean needsResolvedModel() { return true; }
 		},
 		MPC { public String getText() { return "Generate MPC"; }
-	          public String xslFilename() { return "xml/mpc.xsl"; }
+	          public String xslFilename() { return "xsl/mpc.xsl"; }
 	          public String getSuffix() { return ".mpc"; }
 		      public boolean needsResolvedModel() { return false; }
 		},
 		MPB { public String getText() { return "Generate MPB"; }
-	          public String xslFilename() { return "xml/mpb.xsl"; }
+	          public String xslFilename() { return "xsl/mpb.xsl"; }
 	          public String getSuffix() { return ".mpb"; }
 		      public boolean needsResolvedModel() { return false; }
 		},
 		PATH_MPB { public String getText() { return "Generate Paths MPB"; }
-		      public String xslFilename() { return "xml/paths_mpb.xsl"; }
+		      public String xslFilename() { return "xsl/paths_mpb.xsl"; }
 		      public String getSuffix() { return "_paths.mpb"; }
 		      public boolean needsResolvedModel() { return false; }
 		},
 		TRH { public String getText() { return "Generate Traits Header"; }
-	          public String xslFilename() { return "xml/traits_h.xsl"; }
+	          public String xslFilename() { return "xsl/traits_h.xsl"; }
 	          public String getSuffix() { return "Traits.h"; }
 		      public boolean needsResolvedModel() { return false; }
 		},
 		TRC { public String getText() { return "Generate Traits Body"; }
-		      public String xslFilename() { return "xml/traits_cpp.xsl"; }
+		      public String xslFilename() { return "xsl/traits_cpp.xsl"; }
 		      public String getSuffix() { return "Traits.cpp"; }
 		      public boolean needsResolvedModel() { return false; }
 		},
 		RESOLVED { 
 		      public String getText() { return "Preprocessor to resolve external references"; }
-		      public String xslFilename() { return "xml/preprocess.xsl"; }
+		      public String xslFilename() { return "xsl/preprocess.xsl"; }
 		      public String getSuffix() { return ".openddsx"; }
 		      public boolean needsResolvedModel() { return false; }
 		};
