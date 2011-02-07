@@ -233,7 +233,7 @@
             <method name="getType()" value="5001,5004,5002,5005,5258,5259,5260,5261,5262,5263,5264,5265,5006,5007,5240,5252,5253,5254,5132,5133,5013,5014,5134,5135,5136,5137,5138,5139,5140,5141,5142,5143,5020,5021,5144,5145,5146,5147,5148,5149,5042,5043,5150,5151,5046,5047,5152,5153,5154,5050,5051,5155,5156,5157,5158,5159,5160,5161,5162,5163,5071,5072,5164,5165,5166,5167,5168,5169,5170,5171,5172,5173,5174,5175,5176,5177,5102,5103,5104,5178,5179,5180,5181,5182,5183,5184,5185,5186,5187,5188,5189,5190,5191,5192,5193,5194,5195,5196,5197,5198,5199,5200,5201,5202,5203,5204,5205,5206,5207,5208,5209,5210,5211,5212,5213,5214,5215,5216,5217,5218,5219,5220,5128,5129,5130,5099,5100,5101,5105,5106,5107,5108,5109,5110,5111,5112,5113,5114,5115,5116,5117,5118,5119,5120,5121,5122,5123,5124,5125,5126,5127,5008,5009,5241,5255,5256,5257,5221,5222,5243,5244,5245,5246,5224,5225,5247,5248,5227,5228,5229,5230,5231,5233,5234,5236,5237,5238,5250,5251"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-compartments">
-            <method name="getType()" value="7001,7008,7011,7009,7012,7014,7041,7042,7017,7018,7019,7020,7021,7022,7023,7024,7025,7026,7027,7028,7010,7013,7029,7043,7044,7034,7035,7036,7037,7038,7039,7045,7046,7047"/>
+            <method name="getType()" value="7001,7008,7011,7009,7012,7014,7041,7042,7017,7018,7019,7020,7021,7022,7023,7024,7025,7026,7027,7028,7010,7013,7029,7043,7044,7034,7035,7036,7037,7038,7039,7045,7046,7047,7048,7049"/>
          </object>
          <context views="generated-diagram,generated-nodes,generated-links,generated-labels,generated-compartments"/>
       </editpartProvider>
@@ -1206,7 +1206,7 @@
          <action
                class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionPublisher"
                enablesFor="1"
-               id="org.opendds.modeling.popup.PublisherCreateFeatureActionID"
+               id="org.opendds.modeling.popup.PublisherCreatePolicyActionID"
                label="Add &amp;custom QoS Policy"
                menubarPath="PublisherInsert/group1">
          </action>
@@ -1233,7 +1233,7 @@
          <action
                class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionDataWriter"
                enablesFor="1"
-               id="org.opendds.modeling.popup.DataWriterCreateFeatureActionID"
+               id="org.opendds.modeling.popup.DataWriterCreatePolicyActionID"
                label="Add &amp;custom QoS Policy"
                menubarPath="DataWriterInsert/group1">
          </action>
@@ -1260,7 +1260,7 @@
           <action
                class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionSubscriber"
                enablesFor="1"
-               id="org.opendds.modeling.popup.SubscriberCreateFeatureActionID"
+               id="org.opendds.modeling.popup.SubscriberCreatePolicyActionID"
                label="Add &amp;custom QoS Policy"
                menubarPath="SubscriberInsert/group1">
          </action>
@@ -1287,7 +1287,7 @@
          <action
                class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionDataReader"
                enablesFor="1"
-               id="org.opendds.modeling.popup.DataReaderCreateFeatureActionID"
+               id="org.opendds.modeling.popup.DataReaderCreatePolicyActionID"
                label="Add &amp;custom QoS Policy"
                menubarPath="DataReaderInsert/group1">
          </action>
@@ -1299,7 +1299,7 @@
             id="org.opendds.modeling.diagram.ui.objectContribution.TopicEditPart"
             objectClass="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.TopicEditPart">
          <menu 
-            id="TopicInsert" 
+            id="TopicPolicyInsert" 
             label="&amp;Add &amp;QoS Policy" 
             path="additions"> 
             <separator name="group1"/>
@@ -1309,14 +1309,14 @@
                enablesFor="1"
                id="TopicRefQosPolicyAdd"
                label="Add &amp;reference to library QoS Policy"
-               menubarPath="TopicInsert/group1">
+               menubarPath="TopicPolicyInsert/group1">
          </action>
          <action
                class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionTopic"
                enablesFor="1"
-               id="org.opendds.modeling.popup.TopicCreateFeatureActionID"
+               id="org.opendds.modeling.popup.TopicCreatePolicyActionID"
                label="Add &amp;custom QoS Policy"
-               menubarPath="TopicInsert/group1">
+               menubarPath="TopicPolicyInsert/group1">
          </action>
          <menu
                id="TopicDataTypeSelect"
@@ -1331,6 +1331,41 @@
          </action>
       </objectContribution>
 
+       <!-- ContentFilteredTopic -->
+      <objectContribution
+            adaptable="false"
+            id="org.opendds.modeling.diagram.ui.objectContribution.ContentFilteredTopicEditPart"
+            objectClass="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.ContentFilteredTopicEditPart">
+         <menu
+               id="ContentFilteredTopicDataTypeSelect"
+               label="Select &amp;Struct">
+        </menu>
+         <action
+               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibRefTypeActionContentFilteredTopic"
+               enablesFor="1"
+               id="ContentFilteredTopicDataTypeSelect"
+               label="Select DataType"
+               menubarPath="ContentFilteredTopicDataTypeSelect">
+         </action>
+      </objectContribution>
+
+       <!-- MultiTopic -->
+      <objectContribution
+            adaptable="false"
+            id="org.opendds.modeling.diagram.ui.objectContribution.MultiTopicEditPart"
+            objectClass="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.MultiTopicEditPart">
+         <menu
+               id="MultiTopicDataTypeSelect"
+               label="Select &amp;Struct">
+        </menu>
+         <action
+               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibRefTypeActionMultiTopic"
+               enablesFor="1"
+               id="MultiTopicDataTypeSelect"
+               label="Select DataType"
+               menubarPath="MultiTopicDataTypeSelect">
+         </action>
+      </objectContribution>
 
     </extension>
 <extension point="org.eclipse.gmf.runtime.common.ui.services.markerNavigationProviders" id="markers-navigation">

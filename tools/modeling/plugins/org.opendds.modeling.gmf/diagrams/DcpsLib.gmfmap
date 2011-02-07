@@ -2254,6 +2254,17 @@
           href="DcpsLib.gmftool#//@palette/@tools.0/@tools.12"/>
       <diagramNode
           href="DcpsLib.gmfgraph#ContentFilteredTopic"/>
+      <children
+          compartment="//@nodes.3/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.2/@ownedChild/@children.26/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
+      </children>
+      <compartments
+          children="//@nodes.3/@ownedChild/@children.0">
+        <compartment
+            href="DcpsLib.gmfgraph#DataType"/>
+      </compartments>
     </ownedChild>
   </nodes>
   <nodes>
@@ -2294,6 +2305,17 @@
           href="DcpsLib.gmftool#//@palette/@tools.0/@tools.13"/>
       <diagramNode
           href="DcpsLib.gmfgraph#MultiTopic"/>
+      <children
+          compartment="//@nodes.4/@ownedChild/@compartments.0"
+          referencedChild="//@nodes.2/@ownedChild/@children.26/@ownedChild">
+        <containmentFeature
+            href="../../org.opendds.modeling.model/model/Types.ecore#//DataLib/types"/>
+      </children>
+      <compartments
+          children="//@nodes.4/@ownedChild/@children.0">
+        <compartment
+            href="DcpsLib.gmfgraph#DataType"/>
+      </compartments>
     </ownedChild>
   </nodes>
   <links>
