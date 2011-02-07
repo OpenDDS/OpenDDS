@@ -23,6 +23,7 @@ $sub_opts = "$opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile subs
 $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
+unlink "OpenDDS-durable-data-dir";
 
 PerlDDS::add_lib_path("./model");
 
@@ -52,7 +53,7 @@ if ($PublisherResult != 0) {
     $status = 1;
 }
 
-$SubscriberResult = $Subscriber->WaitKill (15);
+$SubscriberResult = $Subscriber->WaitKill (300);
 if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult \n";
     $status = 1;
