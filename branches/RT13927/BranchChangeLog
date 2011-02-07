@@ -1,3 +1,22 @@
+Mon Feb  7 17:51:05 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/OpenDDSDcpsLibRefTypeActionContentFilteredTopic.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/OpenDDSDcpsLibRefTypeActionMultiTopic.java:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.trace:
+
+          Add support for specifying ContentFilteredTopic and MultiTopic datatype similar to how Topic
+          datatype is specified.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdcpslib.html:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds_diagram:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest_screenshot_2.png:
+
+	  Updates to account for addition of ContentFilteredTopic and MultiTopic figures.
+
 Mon Feb  7 13:07:35 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/commands:
@@ -5,7 +24,7 @@ Mon Feb  7 13:07:35 UTC 2011  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/policies:
         * tools/modeling/testdata/DcpsLib:
 
-	  svn:ignore newly auto generated files.
+          svn:ignore newly auto generated files.
 
 Mon Feb  7 13:04:35 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 

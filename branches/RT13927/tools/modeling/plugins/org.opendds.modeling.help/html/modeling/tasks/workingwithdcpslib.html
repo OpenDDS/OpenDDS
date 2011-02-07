@@ -49,16 +49,6 @@
   <p>At least one Domain element should be defined. This can be
   done by adding the domain tool from the palette.</p>
 
-  <h3>Setting the Topic</h3>
-
-  <p>A DCPS library should have a Topic defined. A Topic can be
-  created by selecting topic from the palette.</p>
-
-  <p>A Struct needs to be specified for the Topic's DataType. To
-  pick from the allowed Structs, right click on the Topic to bring
-  up the context menu. Pick "Select DataType" to bring up a dialog
-  showing all the allowable Structs that you can pick from.</p>
-
   <h3>Creating a DomainParticipant</h3>
 
   <p>To create a DomainParticipant, select DomainParticipant from
@@ -94,6 +84,29 @@
   Subscribers contain DataReaders similar to how Publishers contain
   DataWriters.</p>
 
+  <h3>Working with Topics</h3>
+
+  <p>A DCPS library should have at least one Topic defined. A Topic
+  can be created by selecting topic from the palette.</p>
+
+  <p>A Struct needs to be specified for the Topic's DataType. To
+  pick from the allowed Structs, right click on the Topic to bring
+  up the context menu. Pick "Select DataType" to bring up a dialog
+  showing all the allowable Structs that you can pick from.</p>
+
+  <h4>ContentFilteredTopic</h4>
+
+  <p>A DataReader can optionally connect to a ContentFilteredTopic.
+  Each ContentFilteredTopic must be connected to a Topic. Similar
+  to a Topic, a ContentFilteredTopic must have a Struct specified
+  for its DataType.</p>
+
+  <h4>MultiTopic</h4>
+
+  <p>A DataReader can optionally connect to a MultiTopic. Similar
+  to a Topic, a ContentFilteredTopic must have a Struct specified
+  for its DataType.</p>
+
   <h3>Working with compartments within compartments</h3>
 
   <p>As you drill down from a DomainParticipant to the DataReaders
@@ -102,9 +115,9 @@
   you can collapse compartments not of interest at the moment, and
   open compartments that you are interested in. In addition, you
   may want to review <a href=
-  "workingwithdiagrams.html#arranging_figures">arranging figures</a>
-  on how to automatically resize and reposition elements in
-  compartments so they don't overlap.</p>
+  "workingwithdiagrams.html#arranging_figures">arranging
+  figures</a> on how to automatically resize and reposition
+  elements in compartments so they don't overlap.</p>
 
   <h3>Validation of DCPS Types</h3>
 
