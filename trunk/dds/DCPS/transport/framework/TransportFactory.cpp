@@ -356,7 +356,7 @@ OpenDDS::DCPS::TransportFactory::get_or_create_factory(FactoryIdType factory_id)
 
   } else {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) TransportFactory::get_or_create_factory: transport (type=%s) is not registered.\n "),
+               ACE_TEXT("(%P|%t) ERROR: TransportFactory::get_or_create_factory: transport (type=%s) is not registered.\n "),
                factory_id.c_str()));
     throw Transport::NotFound();
   }

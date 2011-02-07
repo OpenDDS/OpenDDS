@@ -1,3 +1,76 @@
+Mon Feb  7 14:21:54 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added "ERROR:" to error messages.
+
+        * dds/DCPS/InstanceState.cpp:
+
+          Changed handle_timeout() for autopurging samples to only
+          generate debug message DCPS_debug_level > 0 and changed
+          the message from LM_WARNING to LM_NOTICE.  Did this because
+          a warning infers to some that the software isn't working
+          correctly. However, autopurging is a condition where the
+          software is working correctly, but that may require special
+          handling.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Changed messages that command line option is being used
+          in attempt to make them clearer and that they are notices.
+          Changed from (DCPSDebugLevel is the option in this example):
+            ignore DCPSDebugLevel config value, use command option.
+          Changed to:
+            NOTICE: using DCPSDebugLevel value from command option
+            (overrides value if it's in config file)
+
+          Changed debug message for get_data_durability_cache() from
+          LM_ERROR to LM_WARNING because it's a debug level 1 warning
+          and failing to create persistet cache falls back on transient
+          behaviour.
+
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+
+          Changed "max_samples_per_packet is adjusted from %u to %u" 
+          debug message from LM_WARNING to LM_NOTICE and added "NOTICE:"
+          to beginning of message.
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Changed debug warning messages of the type " <option> 
+          is not defined in config - using code default." from 
+          LM_WARNING to LM_NOTICE and added "NOTICE" to beginning 
+          of message.
+
+          Changed debug warning messages of the type " missing 
+          VALUE for "<option>" in config file - using code default."
+          to "WARNING: "<option>" is defined in config file, but is
+          missing a value - using code default."
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Added "ERROR:" to error message when get_or_create_factory()
+          encounters a transport that is not registered.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+          Changed multiple debug messages to LM_NOTICE for similar
+          reasons as noted above.
+
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+          Corrected typo.
+
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+
+          Changed "WARNING: file configuration test not implemented"
+          to "NOTICE: file configuration test not implemented".        
+
 Fri Feb  4 23:09:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * svn:ignore properties

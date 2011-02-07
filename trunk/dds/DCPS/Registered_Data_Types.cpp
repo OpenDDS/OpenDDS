@@ -160,7 +160,7 @@ DDS::ReturnCode_t Data_Types_Register::unregister_participant(
     }
 
     if (0 != unbind(domains_, reinterpret_cast <void*>(domain_participant))) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) Data_Types_Register::unregister_participant failed to unbind domain_participant for %d\n", domain_participant->get_domain_id()));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Data_Types_Register::unregister_participant failed to unbind domain_participant for %d\n", domain_participant->get_domain_id()));
     }
 
     delete supportHash;
