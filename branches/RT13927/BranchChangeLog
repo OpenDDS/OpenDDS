@@ -1,3 +1,10 @@
+Mon Feb  7 17:56:05 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/policies:
+
+          svn:ignore newly auto generated files.
+
 Mon Feb  7 17:51:05 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
@@ -15,7 +22,7 @@ Mon Feb  7 17:51:05 UTC 2011  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds_diagram:
         * tools/modeling/testdata/DcpsLib/DcpsLibTest_screenshot_2.png:
 
-	  Updates to account for addition of ContentFilteredTopic and MultiTopic figures.
+          Updates to account for addition of ContentFilteredTopic and MultiTopic figures.
 
 Mon Feb  7 13:07:35 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
