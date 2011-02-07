@@ -233,7 +233,7 @@ public class SdkGenerator {
 					if (fname.endsWith(".xsl") || fname.endsWith(".xml")) {
 						// Force XSL and XML files to be located in the 'xml' subdirectory.
 						String file = fname.substring(0, 5).equals("file:")
-							? fname.substring(5) : "xml" + File.separatorChar + fname;
+							? fname.substring(5) : "xsl" + File.separatorChar + fname;
 						resource = fileProvider.fromBundle(file);
 						
 					} else {

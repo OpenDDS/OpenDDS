@@ -6,7 +6,7 @@
       <editor
             class="org.opendds.modeling.sdk.codegen.CodeGenEditor"
             contributorClass="org.opendds.modeling.sdk.codegen.CodeGenEditorContributor"
-            extensions="codegen"
+            extensions="codegenNOT"
             icon="images/codegen-16x16.gif"
             id="org.opendds.modeling.sdk.codegen.CodeGenEditor"
             name="OpenDDS Code Generator">

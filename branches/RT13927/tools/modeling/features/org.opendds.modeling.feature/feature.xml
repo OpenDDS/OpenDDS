@@ -4,7 +4,7 @@
       label="OpenDDS Modeling SDK Feature Bundle"
       version="1.0.0.qualifier"
       provider-name="Object Computing, Inc."
-      plugin="org.opendds.modeling.sdk">
+      plugin="org.opendds.modeling.common">
 
    <description url="http://www.opendds.org/">
       This is the OpenDDS Modeling SDK.  It provides the ability to
@@ -105,13 +105,6 @@ development model.
 
    <plugin
          id="org.opendds.modeling.model.editor"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.opendds.modeling.sdk"
          download-size="0"
          install-size="0"
          version="0.0.0"
