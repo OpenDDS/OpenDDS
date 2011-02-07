@@ -110,7 +110,7 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(void const * act, bool timer_cal
     }
 
   } else {
-    ACE_ERROR((LM_ERROR, "(%P|%t) OfferedDeadlineWatchdog::execute: "
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: OfferedDeadlineWatchdog::execute: "
                "the current timer should not be invalid for instance %X\n",
                instance));
   }

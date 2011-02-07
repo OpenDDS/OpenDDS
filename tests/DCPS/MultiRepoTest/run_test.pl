@@ -65,7 +65,7 @@ if ($ARGV[0] eq 'fileconfig') {
                   . "-WriterDomain $sys1_sub_domain -ReaderDomain $sys1_pub_domain "
                   . "-WriterDomain $sys2_sub_domain -ReaderDomain $sys2_pub_domain "
                   . "-WriterDomain $sys3_sub_domain -ReaderDomain $sys3_pub_domain ";
-  print STDERR "WARNING: file configuration test not implemented\n";
+  print STDERR "NOTICE: file configuration test not implemented\n";
 
 } elsif ($ARGV[0] eq '') {
   # Default: Command line configuration test.
