@@ -11,15 +11,12 @@
 <plugin>
 
    <extension point="org.eclipse.ui.newWizards">
-      <category
-            id="org.eclipse.emf.ecore.Wizard.category.ID"
-            name="%_UI_Wizard_category"/>
       <wizard
             id="org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation.GeneratorModelWizardID"
             name="%_UI_GeneratorModelWizard_label"
             class="org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation.GeneratorModelWizard"
             category="org.opendds.modeling.Wizard.category.ID"
-            icon="icons/full/obj16/GeneratorModelFile.gif">
+            icon="images/codegen-16x16.gif">
          <description>%_UI_GeneratorModelWizard_description</description>
          <selection class="org.eclipse.core.resources.IResource"/>
       </wizard>
@@ -29,8 +26,8 @@
       <editor
             id="org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation.GeneratorEditorID"
             name="%_UI_GeneratorEditor_label"
-            icon="icons/full/obj16/GeneratorModelFile.gif"
-            extensions="gen"
+            icon="images/codegen-16x16.gif"
+            extensions="codegen"
             class="org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation.GeneratorEditor"
             contributorClass="org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation.GeneratorActionBarContributor">
       </editor>

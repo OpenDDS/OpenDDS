@@ -11,5 +11,6 @@ Export-Package: org.opendds.modeling.sdk.model.GeneratorSpecification,
  org.opendds.modeling.sdk.model.GeneratorSpecification.Util
 Require-Bundle: org.eclipse.emf.ecore.xmi,
  org.eclipse.emf.codegen.ecore,
- org.opendds.modeling.common;visibility:=reexport
+ org.opendds.modeling.common;visibility:=reexport,
+ org.eclipse.ui
 Bundle-ActivationPolicy: lazy
