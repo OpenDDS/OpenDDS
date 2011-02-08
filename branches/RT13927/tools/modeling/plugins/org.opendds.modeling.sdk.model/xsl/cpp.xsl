@@ -613,16 +613,17 @@ Elements::Data::buildSubscriptionsQos()
 </xsl:text>
 <xsl:choose>
   <xsl:when test="$lib-writers">
+    <xsl:variable name="param-name">
+      <xsl:if test="$policies[@xmi:id = $lib-writers/@*]">writerQos</xsl:if>
+    </xsl:variable>
     <xsl:text>
 inline
 void
 Elements::Data::copyPublicationQos(
   DataWriters::Values which,
-  DataWriterQos&amp;  writerQos
+  DataWriterQos&amp;  </xsl:text><xsl:value-of select="$param-name"/><xsl:text>
 )
 {
-  do{}while(&amp;writerQos==0); // In case we define no properties.
-
   switch(which) {
 </xsl:text>
     <xsl:for-each select="$lib-writers">
@@ -663,16 +664,17 @@ Elements::Data::copyPublicationQos(
 
 <xsl:choose>
   <xsl:when test="$lib-readers">
+    <xsl:variable name="param-name">
+      <xsl:if test="$policies[@xmi:id = $lib-readers/@*]">readerQos</xsl:if>
+    </xsl:variable>
     <xsl:text>
 inline
 void
 Elements::Data::copySubscriptionQos(
   DataReaders::Values which,
-  DataReaderQos&amp;  readerQos
+  DataReaderQos&amp;  </xsl:text><xsl:value-of select="$param-name"/><xsl:text>
 )
 {
-  do{}while(&amp;readerQos==0); // In case we define no properties.
-
   switch(which) {
 </xsl:text>
   <xsl:for-each select="$lib-readers">

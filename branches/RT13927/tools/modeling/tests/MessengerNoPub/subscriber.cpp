@@ -9,7 +9,6 @@
 
 #include "model/MessengerNoPubTraits.h"
 #include <model/NullReaderListener.h>
-#include <model/Sync.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
   virtual void on_data_available(
@@ -84,8 +83,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
                         ACE_TEXT(" _narrow failed!\n")),
                        -1);
     }
-
-    OpenDDS::Model::ReaderSync rs(reader);
 
     // END OF EXISTING MESSENGER EXAMPLE CODE
 
