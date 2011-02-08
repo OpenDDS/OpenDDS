@@ -55,7 +55,7 @@ int run_instance(ModelType& model, int subject_id) {
   return 0;
 }
 
-int ACE_TMAIN(int argc, char** argv)
+int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   int result;
   ACE_ARGV argv_copy(argc, argv);

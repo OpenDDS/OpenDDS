@@ -60,7 +60,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
 // END OF EXISTING MESSENGER EXAMPLE LISTENER CODE
 
-int ACE_TMAIN(int argc, char** argv)
+int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   try {
     OpenDDS::Model::Application application(argc, argv);

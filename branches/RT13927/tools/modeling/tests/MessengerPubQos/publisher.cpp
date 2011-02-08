@@ -10,7 +10,7 @@
 #include "model/MessengerPubQosTraits.h"
 #include <model/Sync.h>
 
-int ACE_TMAIN(int argc, char** argv)
+int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   try {
     OpenDDS::Model::Application application(argc, argv);
