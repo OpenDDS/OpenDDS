@@ -171,6 +171,14 @@ public class ParsedGeneratorFile extends ParsedXmlFile implements IGeneratorMode
 		}
 	}
 
+	@Override
+	public long getTimestamp() {
+		if (generatorModel != null) {
+			return generatorModel.getTimestamp();
+		}
+		return super.getTimestamp();
+	}
+
 	protected XPathExpression getSourceExpr() {
 		if (sourceExpr == null) {
 			try {

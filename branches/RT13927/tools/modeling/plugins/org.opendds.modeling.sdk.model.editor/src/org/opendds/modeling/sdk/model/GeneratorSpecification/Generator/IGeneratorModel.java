@@ -79,4 +79,6 @@ public interface IGeneratorModel {
 	 * @return String containing the name of the model extracted from the model file.
 	 */
 	public abstract String getModelName();
+
+	public abstract long getTimestamp();
 }

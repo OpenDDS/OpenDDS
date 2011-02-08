@@ -1,10 +1,18 @@
 package org.opendds.modeling.sdk.model.GeneratorSpecification.Generator;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.emf.edit.command.SetCommand;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.CodeGen;
@@ -157,19 +165,24 @@ public class EmfGeneratorModel implements IGeneratorModel {
 			return parsedModelFile.getSource( transformer);
 		}
 
-		return null;
+		Resource res = editingDomain.getResourceSet().getResources().get(0);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final Map<Object, Object> saveOptions = new HashMap<Object, Object>();
+		saveOptions.put(Resource.OPTION_SAVE_ONLY_IF_CHANGED,
+				Resource.OPTION_SAVE_ONLY_IF_CHANGED_MEMORY_BUFFER);
+		saveOptions.put(XMLResource.OPTION_KEEP_DEFAULT_CONTENT, Boolean.TRUE);
+		try {
+			res.save(baos, saveOptions);
+		} catch (IOException e) {
+			// No actual I/O is happening because it's a ByteArrayOutputStream
+		}
+		return new StreamSource(new ByteArrayInputStream(baos.toByteArray()));
+	}
 
-		// TODO Implement this.
-//		if( source == null) {
-//			Document doc = getModelDocument();
-//			if (doc == null) {
-//				return null; // messages were generated in the get call.
-//			}
-//
-//			source = new DOMSource( doc);
-//		}
-//
-//		return source;
+	@Override
+	public long getTimestamp() {
+		// TODO: implement time stamp
+		return 0;
 	}
 
 }

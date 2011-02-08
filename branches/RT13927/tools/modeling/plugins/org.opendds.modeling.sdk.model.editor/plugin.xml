@@ -27,7 +27,7 @@
             id="org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation.GeneratorEditorID"
             name="%_UI_GeneratorEditor_label"
             icon="images/codegen-16x16.gif"
-            extensions="codegen"
+            extensions="gen"
             class="org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation.GeneratorEditor"
             contributorClass="org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation.GeneratorActionBarContributor">
       </editor>
