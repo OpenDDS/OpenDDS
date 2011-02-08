@@ -29,9 +29,8 @@ my @steps = (
    'script' => 'ant_codegen.xml'},
   {'dir' => 'plugins/org.opendds.modeling.sdk.model',
    'script' => 'ant_codegen.xml'},
-#  {'dir' => 'plugins/org.opendds.modeling.gmf',
-#   'script' => 'ant_codegen.xml'}
-);
+  {'dir' => 'plugins/org.opendds.modeling.gmf',
+   'script' => 'ant_codegen.xml'});
 
 if (scalar @ARGV && $ARGV[0] =~ /^-?-automated/) {
   unshift(@steps,
