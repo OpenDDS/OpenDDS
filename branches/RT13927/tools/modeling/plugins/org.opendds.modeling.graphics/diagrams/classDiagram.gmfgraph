@@ -71,8 +71,8 @@
     <facets
         xsi:type="gmfgraph:DefaultSizeFacet">
       <defaultSize
-          dx="100"
-          dy="50"/>
+          dx="200"
+          dy="150"/>
     </facets>
   </nodes>
   <compartments
