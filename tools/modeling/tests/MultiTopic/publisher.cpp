@@ -98,7 +98,7 @@ int send_trade_data(MultiTopicLib::DefaultMultiTopicType& model)
   return 0;
 }
 
-int ACE_TMAIN(int argc, char** argv)
+int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   int rc = 0;
   try {
