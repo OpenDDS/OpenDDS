@@ -1,3 +1,9 @@
+Tue Feb  8 23:03:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/EmfGeneratorModel.java:
+
+          Implemented timestamps for the EmfGeneratorModel.
+
 Tue Feb  8 22:38:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/plugin.xml:

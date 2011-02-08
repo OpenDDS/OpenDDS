@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
+import org.eclipse.emf.common.command.BasicCommandStack;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -76,6 +77,14 @@ public class EmfGeneratorModel implements IGeneratorModel {
 		return element == modelTarget;
 	}
 
+	private Resource getCodegenResource() {
+		EList<Resource> resources = editingDomain.getResourceSet().getResources();
+		if (resources.size() > 0) {
+			return resources.get(0);
+		}
+		return null;
+	}
+
 	@Override
 	public void setEditingDomain(Object editingDomain) {
 		if( editingDomain != null && editingDomain instanceof EditingDomain) {
@@ -83,9 +92,8 @@ public class EmfGeneratorModel implements IGeneratorModel {
 
 			// Extract the model file and target dir model elements.
 			//
-			EList<Resource> resources = this.editingDomain.getResourceSet().getResources();
-			if( resources.size() > 0) {
-				Resource resource = resources.get(0);
+			Resource resource = getCodegenResource();
+			if (resource != null) {
 				EList<EObject> contents = resource.getContents();
 				if( contents.size() > 0) {
 					EObject root = contents.get(0);
@@ -165,14 +173,18 @@ public class EmfGeneratorModel implements IGeneratorModel {
 			return parsedModelFile.getSource( transformer);
 		}
 
-		Resource res = editingDomain.getResourceSet().getResources().get(0);
+		Resource resource = getCodegenResource();
+		if (resource == null) {
+			return null;
+		}
+
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		final Map<Object, Object> saveOptions = new HashMap<Object, Object>();
 		saveOptions.put(Resource.OPTION_SAVE_ONLY_IF_CHANGED,
 				Resource.OPTION_SAVE_ONLY_IF_CHANGED_MEMORY_BUFFER);
 		saveOptions.put(XMLResource.OPTION_KEEP_DEFAULT_CONTENT, Boolean.TRUE);
 		try {
-			res.save(baos, saveOptions);
+			resource.save(baos, saveOptions);
 		} catch (IOException e) {
 			// No actual I/O is happening because it's a ByteArrayOutputStream
 		}
@@ -181,8 +193,11 @@ public class EmfGeneratorModel implements IGeneratorModel {
 
 	@Override
 	public long getTimestamp() {
-		// TODO: implement time stamp
-		return 0;
+		if (((BasicCommandStack) editingDomain.getCommandStack()).isSaveNeeded()) {
+			return 0; // understood by SdkGenerator to indicate an unknown timestamp
+		}
+		Resource resource = getCodegenResource();
+		return resource == null ? 0 : resource.getTimeStamp();
 	}
 
 }
