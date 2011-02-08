@@ -1,3 +1,19 @@
+Tue Feb  8 19:29:12 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Sync.h:
+        * tools/modeling/codegen/model/Sync.cpp:
+
+          Remove reader construtor sync.  Comment out couts.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
+
+          Remove extraneous do/while loops, and handle warning conditions.
+
+        * tools/modeling/tests/MessengerNoPub/subscriber.cpp:
+        * tools/modeling/tests/MessengerNoSub/publisher.cpp:
+
+          Don't use sync - nothing on other side.
+
 Tue Feb  8 17:57:35 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Arrays/subscriber.cpp:

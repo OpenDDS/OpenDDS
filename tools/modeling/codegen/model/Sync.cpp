@@ -30,7 +30,7 @@ OpenDDS::Model::WriterSync::wait_match(DDS::DataWriter_var& writer)
   DDS::Duration_t timeout = { 3, 0 };
   DDS::ReturnCode_t stat;
   do {
-    std::cout << "waiting for pub matched" << std::endl;
+    // std::cout << "waiting for pub matched" << std::endl;
     stat = writer->get_publication_matched_status(ms);
     if (stat != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((
@@ -50,7 +50,7 @@ OpenDDS::Model::WriterSync::wait_match(DDS::DataWriter_var& writer)
                        -1);
     }
   } while (true);
-  std::cout << "pub matched" << std::endl;
+  // std::cout << "pub matched" << std::endl;
   ws->detach_condition(condition);
   return 0;
 }
@@ -60,7 +60,7 @@ OpenDDS::Model::WriterSync::wait_ack(DDS::DataWriter_var& writer)
 {
   DDS::ReturnCode_t stat;
   DDS::Duration_t timeout = { 30, 0 };
-  std::cout << "waiting for acks" << std::endl;
+  // std::cout << "waiting for acks" << std::endl;
   stat = writer->wait_for_acknowledgments(timeout);
   if ((stat != DDS::RETCODE_OK) && (stat != DDS::RETCODE_TIMEOUT)) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -68,16 +68,13 @@ OpenDDS::Model::WriterSync::wait_ack(DDS::DataWriter_var& writer)
                       ACE_TEXT(" wait_for_acknowledgments failed!\n")),
                      -1);
   }
-  std::cout << "Acks received" << std::endl;
+  // std::cout << "Acks received" << std::endl;
   return 0;
 }
 
 OpenDDS::Model::ReaderSync::ReaderSync(DDS::DataReader_var& reader) : 
 reader_(reader) 
 {
-  if (wait_match(reader_)) {
-    throw std::runtime_error("wait_match failure");
-  }
 }
 
 OpenDDS::Model::ReaderSync::~ReaderSync() 
@@ -85,45 +82,6 @@ OpenDDS::Model::ReaderSync::~ReaderSync()
   if (wait_unmatch(reader_)) {
     throw std::runtime_error("wait_unmatch failure");
   }
-}
-
-int 
-OpenDDS::Model::ReaderSync::wait_match(DDS::DataReader_var& reader) 
-{
-/*
-  DDS::StatusCondition_var condition = reader->get_statuscondition();
-  condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-  DDS::WaitSet_var ws = new DDS::WaitSet;
-  ws->attach_condition(condition);
-  DDS::ConditionSeq conditions;
-  DDS::SubscriptionMatchedStatus ms = { 0, 0, 0, 0, 0 };
-  DDS::Duration_t timeout = { 3, 0 };
-  DDS::ReturnCode_t stat;
-  do {
-    std::cout << "waiting for sub matched" << std::endl;
-    stat = reader->get_subscription_matched_status(ms);
-    if ((stat != DDS::RETCODE_OK) && (stat != DDS::RETCODE_TIMEOUT)) {
-      ACE_ERROR_RETURN((
-                  LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() -")
-                  ACE_TEXT(" get_subscription_matched_status failed!\n")),
-                 -1);
-    } else if (ms.current_count > 0) {
-      break;  // matched
-    }
-    // wait for a change
-    stat = ws->wait(conditions, timeout);
-    if ((stat != DDS::RETCODE_OK) && (stat != DDS::RETCODE_TIMEOUT)) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() -")
-                        ACE_TEXT(" wait failed!\n")),
-                       -1);
-    }
-  } while (true);
-  ws->detach_condition(condition);
-  std::cout << "sub matched" << std::endl;
-*/
-  return 0;
 }
 
 int 
@@ -138,7 +96,7 @@ OpenDDS::Model::ReaderSync::wait_unmatch(DDS::DataReader_var& reader)
   DDS::SubscriptionMatchedStatus ms = { 0, 0, 0, 0, 0 };
   DDS::Duration_t timeout = { 1, 0 };
   do {
-    std::cout << "sub checking unmatched" << std::endl;
+    // std::cout << "sub checking unmatched" << std::endl;
     stat = reader->get_subscription_matched_status(ms);
     if (stat != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((
@@ -149,8 +107,8 @@ OpenDDS::Model::ReaderSync::wait_unmatch(DDS::DataReader_var& reader)
     } else if (ms.current_count == 0 && ms.total_count > 0) {
       break;  // unmatched
     }
-    std::cout << "sub match count " << ms.current_count 
-              <<    " total count " << ms.total_count << std::endl;
+    // std::cout << "sub match count " << ms.current_count 
+    //           <<    " total count " << ms.total_count << std::endl;
     // wait for a change
     stat = ws->wait(conditions, timeout);
     if ((stat != DDS::RETCODE_OK) && (stat != DDS::RETCODE_TIMEOUT)) {
@@ -161,7 +119,7 @@ OpenDDS::Model::ReaderSync::wait_unmatch(DDS::DataReader_var& reader)
     }
   } while (true);
   ws->detach_condition(condition);
-  std::cout << "sub unmatched" << std::endl;
+  // std::cout << "sub unmatched" << std::endl;
   return 0;
 }
 

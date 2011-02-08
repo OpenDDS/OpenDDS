@@ -20,7 +20,6 @@ namespace OpenDDS {
     public:
       ReaderSync(DDS::DataReader_var& reader);
       ~ReaderSync();
-      static int wait_match(DDS::DataReader_var& reader);
       static int wait_unmatch(DDS::DataReader_var& reader);
     private:
       DDS::DataReader_var& reader_;
