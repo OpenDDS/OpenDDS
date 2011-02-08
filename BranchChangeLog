@@ -1,3 +1,9 @@
+Tue Feb  8 15:27:08 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/MessengerWriterQos/publisher.cpp:
+        * tools/modeling/tests/TopicQos/publisher.cpp:
+
+          Check for TRANSIENT_LOCAL, rather than PERSISTENT durability
 Tue Feb  8 13:23:53 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:

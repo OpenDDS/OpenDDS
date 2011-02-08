@@ -59,7 +59,7 @@ int ACE_TMAIN(int argc, char** argv)
                           ACE_TEXT(" wrong destination order!\n")),
                          -1);
     }
-    if (writer_qos.durability.kind != DDS::PERSISTENT_DURABILITY_QOS) {
+    if (writer_qos.durability.kind != DDS::TRANSIENT_LOCAL_DURABILITY_QOS) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
                           ACE_TEXT(" wrong durability !\n")),
