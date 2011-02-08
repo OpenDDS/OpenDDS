@@ -10,6 +10,7 @@
 
 #include "model/MessengerTraits.h"
 #include <model/NullReaderListener.h>
+#include <model/Sync.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
   virtual void on_data_available(
