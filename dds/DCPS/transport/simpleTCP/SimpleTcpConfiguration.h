@@ -27,7 +27,7 @@ public:
                    ACE_Configuration_Heap& cf);
 
   /// Diagnostic aid.
-  virtual void dump();
+  virtual void dump(std::ostream& os);
 
   /// Describes the local endpoint to be used to accept
   /// passive connections.

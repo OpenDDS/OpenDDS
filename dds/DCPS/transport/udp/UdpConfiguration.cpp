@@ -11,6 +11,7 @@
 
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
+#include <iostream>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -58,21 +59,12 @@ UdpConfiguration::load(const TransportIdType& id,
 }
 
 void
-UdpConfiguration::dump()
+UdpConfiguration::dump(std::ostream& os)
 {
-  // Acquire lock on the log so the entire dump is output as a block
-  // (at least for each process).
-  ACE_Log_Msg::instance()->acquire();
-
-  TransportConfiguration::dump();
-
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) UdpConfiguration::dump() - ")
-             ACE_TEXT("local_address: %C:%d.\n\n"),
-             this->local_address_.get_host_addr(),
-             this->local_address_.get_port_number()));
-
-  ACE_Log_Msg::instance()->release();
+  TransportConfiguration::dump(os);
+ 
+  os << formatNameForDump("local_address") << this->local_address_.get_host_addr()
+                                           << ":" << this->local_address_.get_port_number() << std::endl;
 }
 
 } // namespace DCPS

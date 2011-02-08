@@ -138,8 +138,13 @@ public:
   /// datawriter will be notified, otherwise the status of the pending
   /// associations will be marked as FULLTY_ASSOCIATED.
   void check_fully_association();
+  
+  /// Diagnostic aid.
+  void dump();
+  void dump(ostream& os);
 
   TransportIdType get_transport_id();
+  ACE_TString get_transport_id_description();
   void set_transport_id(const TransportIdType& tid);
   const FactoryIdType& get_factory_id();
   void set_factory_id(const FactoryIdType& fid);

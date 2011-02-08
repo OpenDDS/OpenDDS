@@ -68,7 +68,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink(
             const_cast<AssociationData*> (remote_association)->network_order_address_.addr_.c_str(),
             remote_address.get_host_name(),
             remote_address.get_port_number(),
-            priority,is_loopback, active),
+            priority, is_loopback, active),
             2);
 
   SimpleTcpDataLink_rch link;
@@ -105,8 +105,11 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink(
 
       }
 
-      VDBG_LVL((LM_DEBUG, "(%P|%t)  Found existing connection,"
-                " No need for passive connection establishment.\n"), 5);
+      if (DCPS_debug_level >= 5) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Found existing connection,"
+          " No need for passive connection establishment, transport id: %C.\n", 
+          this->get_transport_id_description().c_str()));
+      }
       return link._retn();
 
     } else if (this->pending_release_links_.find(key, link) == 0) {
@@ -171,11 +174,12 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink(
                  "(%P|%t) ERROR: Failed to make passive connection.\n"));
 
       if (OpenDDS::DCPS::Transport_debug_level > 0) {
+        std::stringstream os;
+        dump(os);
+
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) SimpleTcpTransport::find_or_create_datalink() - ")
-                   ACE_TEXT("transport_id: 0x%x.\n"),
-                   this->get_transport_id()));
-        this->get_configuration()->dump();
+                   ACE_TEXT("(%P|%t) SimpleTcpTransport::find_or_create_datalink() -\n%C"),
+                   os.str().c_str()));
       }
     }
   }
@@ -477,13 +481,15 @@ OpenDDS::DCPS::SimpleTcpTransport::passive_connection
   SimpleTcpConnection_rch connection_obj = connection;
 
   if (DCPS_debug_level > 9) {
+    std::stringstream os;
+    dump(os);
+
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) SimpleTcpTransport::passive_connection() - ")
-               ACE_TEXT("established with %C:%d.\n"),
+               ACE_TEXT("established with %C:%d.\n%C"),
                remote_address.get_host_name(),
-               remote_address.get_port_number()));
-
-    this->get_configuration()->dump();
+               remote_address.get_port_number(),
+               os.str().c_str()));
   }
 
   {
@@ -606,12 +612,12 @@ OpenDDS::DCPS::SimpleTcpTransport::make_passive_connection
       if ((abs_timeout != ACE_Time_Value::zero)
           && (abs_timeout <= ACE_OS::gettimeofday())) {
         // This doesn't necessarily represent an error.
-        // It could just be a delay on teh remote side. More a QOS issue.
+        // It could just be a delay on the remote side. More a QOS issue.
         VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: Passive connection timedout.\n"), 5);
         return -1;
       }
 
-      // check if theres already a connection waiting
+      // check if there's already a connection waiting
       ConnectionMap::iterator position = this->connections_.find(key);
 
       if (position != this->connections_.end()) {

@@ -101,7 +101,7 @@ if ($ARGV[0] eq 'fileconfig') {
                   . "-InfoRepo file://$dcpsrepo3_ior "
                   . "-WriterDomain $sys3_sub_domain -ReaderDomain $sys3_pub_domain ";
 
-  $svc_conf = "../../../tools/odds_monitor/monitor.conf ";
+  $svc_conf = "../../../tools/monitor/monitor.conf ";
   $samples = 10000;
   $sample_interval = 5;
 }
@@ -183,7 +183,6 @@ $System1 = PerlDDS::create_process ("system", $sys1_parameters);
 $System2 = PerlDDS::create_process ("system", $sys2_parameters);
 
 $System3 = PerlDDS::create_process ("system", $sys3_parameters);
-
 
 $Monitor = PerlDDS::create_process ("monitor", $monitor_parameters);
 
