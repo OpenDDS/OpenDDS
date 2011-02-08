@@ -9,6 +9,7 @@
 #endif
 
 #include "model/MessengerTraits.h"
+#include <model/Sync.h>
 
 int ACE_TMAIN(int argc, char** argv)
 {

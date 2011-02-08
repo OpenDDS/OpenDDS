@@ -9,6 +9,7 @@
 
 #include "model/DomainZeroTraits.h"
 #include <model/NullReaderListener.h>
+#include <model/Sync.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
   virtual void on_data_available(
@@ -84,32 +85,7 @@ int ACE_TMAIN(int argc, char** argv)
                        -1);
     }
 
-    // Block until Publisher completes
-    DDS::StatusCondition_var condition = reader->get_statuscondition();
-    condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
-
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-
-    DDS::ConditionSeq conditions;
-    DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0 };
-    DDS::Duration_t timeout = { 30, 0 }; // 30 seconds
-
-    do {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" wait failed!\n")), -1);
-      }
-
-      if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" get_subscription_matched_status failed!\n")), -1);
-      }
-    } while (matches.current_count > 0);
-
-    ws->detach_condition(condition);
+    OpenDDS::Model::ReaderSync rs(reader);
 
     // END OF EXISTING MESSENGER EXAMPLE CODE
 

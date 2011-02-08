@@ -9,6 +9,7 @@
 
 #include "model/MultiTopicTraits.h"
 #include <model/NullReaderListener.h>
+#include <model/Sync.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
   virtual void on_data_available(
@@ -92,19 +93,9 @@ int ACE_TMAIN(int argc, char** argv)
 
     // We do not get subscription matched notifications on the multitopic
     // so waiting for DISPOSED condition
-    //DDS::Duration_t infinite = {DDS::DURATION_INFINITE_SEC, 
-                                //DDS::DURATION_INFINITE_NSEC};
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    DDS::ReadCondition_var rc = 
-         reader->create_readcondition(DDS::ANY_SAMPLE_STATE,
-                                      DDS::ANY_VIEW_STATE,
-                                      DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-    ws->attach_condition(rc);
-    DDS::ConditionSeq active;
 
     std::cout << "sub waiting" << std::endl;
     ACE_OS::sleep(10);
-    //ret = ws->wait(active, infinite);
     std::cout << "sub exiting" << std::endl;
     // END OF EXISTING MESSENGER EXAMPLE CODE
 

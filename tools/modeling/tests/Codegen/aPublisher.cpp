@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include "model/CodegenTraits.h"
+#include <model/Sync.h>
 
 int
 ACE_TMAIN( int argc, char** argv)

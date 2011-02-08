@@ -7,6 +7,7 @@
 #endif
 
 #include "model/CopyTopicQosTraits.h"
+#include <model/Sync.h>
 
 int ACE_TMAIN(int argc, char** argv)
 {
@@ -65,68 +66,28 @@ int ACE_TMAIN(int argc, char** argv)
                          -1);
     }
 
-    // Block until Subscriber is available
-    DDS::StatusCondition_var condition = writer->get_statuscondition();
-    condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+    OpenDDS::Model::WriterSync ws(writer);
+    {
+      // Write samples
+      data1::Message message;
+      message.subject_id = 99;
 
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
+      message.from       = CORBA::string_dup("Comic Book Guy");
+      message.subject    = CORBA::string_dup("Review");
+      message.text       = CORBA::string_dup("Worst. Movie. Ever.");
+      message.count      = 0;
 
-    DDS::ConditionSeq conditions;
-    DDS::PublicationMatchedStatus matches = { 0, 0, 0, 0, 0 };
-    DDS::Duration_t timeout = { 30, 0 };
+      std::cout << "publisher sending"  << std::endl;
+      for (int i = 0; i < 10; i++) {
+        DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
+        ++message.count;
 
-    do {
-      std::cout << "publisher checking matches" << std::endl;
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
-                          ACE_TEXT(" wait failed!\n")),
-                         -1);
+        if (error != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
+                     ACE_TEXT(" write returned %d!\n"), error));
+        }
       }
-
-      if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
-                          ACE_TEXT(" get_publication_matched_status failed!\n")),
-                         -1);
-      }
-      std::cout << "publisher matches " << matches.current_count << std::endl;
-
-    } while (matches.current_count < 2);  // Two readers in this case.
-    std::cout << "publisher matched"  << std::endl;
-
-    ws->detach_condition(condition);
-
-    // Write samples
-    data1::Message message;
-    message.subject_id = 99;
-
-    message.from       = CORBA::string_dup("Comic Book Guy");
-    message.subject    = CORBA::string_dup("Review");
-    message.text       = CORBA::string_dup("Worst. Movie. Ever.");
-    message.count      = 0;
-
-    std::cout << "publisher sending"  << std::endl;
-    for (int i = 0; i < 10; i++) {
-      DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
-      ++message.count;
-
-      if (error != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
-                   ACE_TEXT(" write returned %d!\n"), error));
-      }
-    }
-
-    std::cout << "publisher waiting for ackknowledgements"  << std::endl;
-
-    // Wait for samples to be acknowledged
-    if (message_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
-                        ACE_TEXT(" wait_for_acknowledgments failed!\n")),
-                       -1);
     }
 
     // END OF EXISTING MESSENGER EXAMPLE CODE
