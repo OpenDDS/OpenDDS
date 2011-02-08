@@ -138,7 +138,7 @@ for my $index ( 1 .. $repoCount) {
 
 if ($for_monitor_test == 1) {
     $svc_config = new PerlACE::ConfigList->check_config ('STATIC') ? ''
-      : "-ORBSvcConf ../../../tools/odds_monitor/monitor.conf ";
+      : "-ORBSvcConf ../../../tools/monitor/monitor.conf ";
 }
 
 my $appOpts = "$svc_config ";

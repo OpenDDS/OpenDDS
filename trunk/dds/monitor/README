@@ -28,6 +28,6 @@ executable that subscribes to each of these topics.  See the code
 there for details on how to subscribe to and process these samples.
 
 There is also a graphical monitor application in
-$DDS_ROOT/tools/odds_monitor.
+$DDS_ROOT/tools/monitor.
 
 Note: The periodic monitor topics are not currently supported.

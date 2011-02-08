@@ -11,6 +11,7 @@
 #include "ThreadSynchStrategy.h"
 #include "EntryExit.h"
 
+#include <iomanip>
 #include <sstream>
 
 #if !defined (__ACE_INLINE__)
@@ -61,44 +62,38 @@ OpenDDS::DCPS::TransportConfiguration::load(const TransportIdType& id
 void
 OpenDDS::DCPS::TransportConfiguration::dump()
 {
+  std::stringstream os;
+  dump(os);
+
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
-             ACE_TEXT("swap_bytes: %C.\n"),
-             (this->swap_bytes_ ? "true" : "false")));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
-             ACE_TEXT("queue_messages_per_pool: %d.\n"),
-             this->queue_messages_per_pool_));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
-             ACE_TEXT("queue_initial_pools: %d.\n"),
-             this->queue_initial_pools_));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
-             ACE_TEXT("max_packet_size: %d.\n"),
-             this->max_packet_size_));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
-             ACE_TEXT("max_samples_per_packet: %d.\n"),
-             this->max_samples_per_packet_));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
-             ACE_TEXT("optimum_packet_size: %d.\n"),
-             this->optimum_packet_size_));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
-             ACE_TEXT("transport_type: %C.\n"),
-             this->transport_type_.c_str()));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
-             ACE_TEXT("thread_per_connection: %C.\n"),
-             (this->thread_per_connection_ ? "true" : "false")));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
-             ACE_TEXT("datalink_release_delay: %u.\n"),
-             this->datalink_release_delay_));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) TransportConfiguration::dump() - ")
-             ACE_TEXT("datalink_control_chunks: %d.\n"),
-             this->datalink_control_chunks_));
+             ACE_TEXT("\n(%P|%t) TransportImpl::dump() -\n%C"),
+             os.str().c_str()));
+}
+
+namespace {
+  static const int NAME_INDENT(3);
+  static const int NAME_WIDTH(30); // Includes ":"
+}
+
+ACE_TString 
+OpenDDS::DCPS::TransportConfiguration::formatNameForDump(const std::string& name) 
+{
+  std::basic_ostringstream<ACE_TCHAR> oss;
+  oss << std::setw(NAME_INDENT) << "" << std::setw(NAME_WIDTH) << std::left << name + ":" << " ";
+  return oss.str().c_str();
+}
+
+void
+OpenDDS::DCPS::TransportConfiguration::dump(std::ostream& os)
+{ 
+  os << formatNameForDump("transport_type")          << this->transport_type_ << std::endl;
+  os << formatNameForDump("swap_bytes")              << (this->swap_bytes_ ? "true" : "false") << std::endl;
+  os << formatNameForDump("queue_messages_per_pool") << this->queue_messages_per_pool_ << std::endl;
+  os << formatNameForDump("queue_initial_pools")     << this->queue_initial_pools_ << std::endl;
+  os << formatNameForDump("max_packet_size")         << this->max_packet_size_ << std::endl;
+  os << formatNameForDump("max_samples_per_packet:") << this->max_samples_per_packet_ << std::endl;
+  os << formatNameForDump("optimum_packet_size")     << this->optimum_packet_size_ << std::endl;
+  os << formatNameForDump("thread_per_connection")   << (this->thread_per_connection_ ? "true" : "false") << std::endl;
+  os << formatNameForDump("datalink_release_delay")  << this->datalink_release_delay_ << std::endl;
+  os << formatNameForDump("datalink_control_chunks") << this->datalink_control_chunks_ << std::endl;
 }

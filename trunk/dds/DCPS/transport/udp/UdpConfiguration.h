@@ -31,7 +31,7 @@ public:
                    ACE_Configuration_Heap& config);
 
   /// Diagnostic aid.
-  virtual void dump();
+  virtual void dump(std::ostream& os);
 };
 
 } // namespace DCPS

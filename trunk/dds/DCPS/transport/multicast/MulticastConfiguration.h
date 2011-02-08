@@ -97,7 +97,7 @@ public:
                    ACE_Configuration_Heap& config);
 
   /// Diagnostic aid.
-  virtual void dump();
+  virtual void dump(std::ostream& os);
 
 private:
   void default_group_address(ACE_INET_Addr& group_address,

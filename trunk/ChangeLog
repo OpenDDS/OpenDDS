@@ -1,3 +1,56 @@
+Tue Feb  8 16:36:38 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/udp/UdpConfiguration.h:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.cpp:
+
+          Refactored dump of transport configuration parameters so that all parameters
+          are logged as one block so they're not spread out in the debug output.
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Added get_transport_id_description() for use in debug output.
+          It adds a description to the transport id when the id is for a default
+          transport id or BIT transport. 
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Added process and thread to debug messages.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Added dump of transport parameters to error and debug messages.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Corrected spelling errors.
+
+        * dds/monitor/README:
+        * tests/DCPS/Federation/run_test.pl:
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+
+          Changed remaining references to odds_monitor to monitor.
+
+        * tests/DCPS/MultiRepoTest/DataWriterListenerImpl.h:
+
+          Added \n to end of debug message.
+
+        * tests/DCPS/MultiRepoTest/DataWriterListenerImpl.cpp:
+
+          Corrected class name in comment.
+
 Mon Feb  7 14:21:54 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/AssociationData.h:
@@ -35,18 +88,18 @@ Mon Feb  7 14:21:54 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportConfiguration.inl:
 
-          Changed "max_samples_per_packet is adjusted from %u to %u" 
+          Changed "max_samples_per_packet is adjusted from %u to %u"
           debug message from LM_WARNING to LM_NOTICE and added "NOTICE:"
           to beginning of message.
 
         * dds/DCPS/transport/framework/TransportDefs.h:
 
-          Changed debug warning messages of the type " <option> 
-          is not defined in config - using code default." from 
-          LM_WARNING to LM_NOTICE and added "NOTICE" to beginning 
+          Changed debug warning messages of the type " <option>
+          is not defined in config - using code default." from
+          LM_WARNING to LM_NOTICE and added "NOTICE" to beginning
           of message.
 
-          Changed debug warning messages of the type " missing 
+          Changed debug warning messages of the type " missing
           VALUE for "<option>" in config file - using code default."
           to "WARNING: "<option>" is defined in config file, but is
           missing a value - using code default."
@@ -69,7 +122,7 @@ Mon Feb  7 14:21:54 UTC 2011  Don Hudson  <hudsond@ociweb.com>
         * tests/DCPS/MultiRepoTest/run_test.pl:
 
           Changed "WARNING: file configuration test not implemented"
-          to "NOTICE: file configuration test not implemented".        
+          to "NOTICE: file configuration test not implemented".
 
 Fri Feb  4 23:09:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
