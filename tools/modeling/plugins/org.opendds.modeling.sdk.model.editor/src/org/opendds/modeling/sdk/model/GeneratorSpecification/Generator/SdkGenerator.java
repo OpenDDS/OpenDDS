@@ -184,9 +184,14 @@ public class SdkGenerator {
 
 	/// is the output file out-of-date with respect to the inputs?
 	private boolean outOfDate(File output) {
+		long genfileTimestamp = parsedGeneratorFile.getTimestamp(),
+			modelTimestamp = parsedGeneratorFile.parsedModelFile.getTimestamp();
+		if (genfileTimestamp == 0 || modelTimestamp == 0) {
+			return true; // assume out-of-date if either timestamp is unknown
+		}
 		long outputTimestamp = output.lastModified();
-		return (outputTimestamp < parsedGeneratorFile.getTimestamp())
-			|| (outputTimestamp < parsedGeneratorFile.parsedModelFile.getTimestamp())
+		return (outputTimestamp < genfileTimestamp)
+			|| (outputTimestamp < modelTimestamp)
 			|| xslOutOfDate(outputTimestamp);
 	}
 
@@ -231,7 +236,7 @@ public class SdkGenerator {
 				try {
 					URL resource;
 					if (fname.endsWith(".xsl") || fname.endsWith(".xml")) {
-						// Force XSL and XML files to be located in the 'xml' subdirectory.
+						// Force XSL and XML files to be located in the 'xsl' subdirectory.
 						String file = fname.substring(0, 5).equals("file:")
 							? fname.substring(5) : "xsl" + File.separatorChar + fname;
 						resource = fileProvider.fromBundle(file);
