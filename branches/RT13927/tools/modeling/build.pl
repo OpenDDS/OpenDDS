@@ -37,8 +37,7 @@ if (scalar @ARGV && $ARGV[0] =~ /^-?-automated/) {
           {'dir' => $feature_dir,
            'args' => 'clean'}) if -r $feature_dir . '/build.xml';
   push(@steps,
-       {'extra_plugins' => 1,
-        'copy_icons' => 1},
+       {'extra_plugins' => 1},
        {'dir' => $feature_dir});
 }
 
@@ -78,15 +77,6 @@ foreach my $s (@steps) {
   if ($status > 0) {
     print "ERROR: Eclipse antRunner invocation failed with $status\n";
     exit($status >> 8);
-  }
-
-  if ($s->{'copy_icons'}) {
-    chdir $cwd . '/icons';
-    my $status = system("$^X copy-icons-to-plugins.pl");
-    if ($status > 0) {
-      print "ERROR: copy-icons-to-plugins.pl invocation failed with $status\n";
-      exit($status >> 8);
-    }
   }
 
 }

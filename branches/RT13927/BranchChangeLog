@@ -1,3 +1,9 @@
+Wed Feb  9 18:53:14 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/build.pl:
+
+          Removing copying of icons.
+
 Wed Feb  9 18:49:43 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/icons/DataLib-icon-to-element.txt:
