@@ -33,6 +33,18 @@ public class Plugin extends EMFPlugin {
 	protected static final String STRING_IMAGE_NAME          = "string";
 	protected static final String GENERATOR_IMAGE_NAME       = "generator";
 	protected static final String GENERATOR_LARGE_IMAGE_NAME = "generator-large";
+	
+	// EMF model and GMF diagrams
+    protected static final String DATATYPE_IMAGE_NAME        = "DataType";
+    protected static final String DCPS_IMAGE_NAME            = "Dcps";
+    protected static final String INPUTPIN_IMAGE_NAME        = "InputPin";
+    protected static final String OPENDDS_DIAGRAM_FILE_IMAGE_NAME = "OpenDDSDiagramFile";
+    protected static final String OPENDDS_MODEL_FILE_IMAGE_NAME = "OpenDDSModelFile";
+    protected static final String OPENDDS_SDK_LIB_IMAGE_NAME = "OpenDDSSdkLib";
+    protected static final String OUTPUTPIN_IMAGE_NAME       = "OutputPin";
+    protected static final String QOSPOLICY_IMAGE_NAME       = "QosPolicy";
+    protected static final String CLOCK_IMAGE_NAME           = "clock";
+    protected static final String UMLPACKAGE_IMAGE_NAME      = "UmlPackage";
 
 	/**
 	 * Image mappings.
@@ -89,6 +101,105 @@ public class Plugin extends EMFPlugin {
 		// org.opendds.modeling.sdk.model.editor		
 		imageMappings.put("GeneratorModelFile",         GENERATOR_IMAGE_NAME);
 		imageMappings.put("NewGenerator",               GENERATOR_LARGE_IMAGE_NAME);
+		
+		// OpenDDSModel
+		imageMappings.put("DataLib",                    OPENDDS_SDK_LIB_IMAGE_NAME);
+		imageMappings.put("DcpsLib",                    OPENDDS_SDK_LIB_IMAGE_NAME);
+		imageMappings.put("PolicyLib",                  OPENDDS_SDK_LIB_IMAGE_NAME);
+		imageMappings.put("OpenDDSModel",               OPENDDS_MODEL_FILE_IMAGE_NAME);
+		imageMappings.put("LibPackage",                 UMLPACKAGE_IMAGE_NAME);
+
+		// DataLib
+		imageMappings.put("Array",                      DATATYPE_IMAGE_NAME);
+		imageMappings.put("BasicTypes",                 DATATYPE_IMAGE_NAME);
+		imageMappings.put("Boolean",                    DATATYPE_IMAGE_NAME);
+		imageMappings.put("Branch",                     DATATYPE_IMAGE_NAME);
+		imageMappings.put("Case",                       DATATYPE_IMAGE_NAME);
+		imageMappings.put("Char",                       DATATYPE_IMAGE_NAME);
+		imageMappings.put("Double",                     DATATYPE_IMAGE_NAME);
+		imageMappings.put("Enum",                       DATATYPE_IMAGE_NAME);
+		imageMappings.put("Field",                      DATATYPE_IMAGE_NAME);
+		imageMappings.put("Float",                      DATATYPE_IMAGE_NAME);
+		imageMappings.put("Key",                        DATATYPE_IMAGE_NAME);
+		imageMappings.put("Long",                       DATATYPE_IMAGE_NAME);
+		imageMappings.put("LongDouble",                 DATATYPE_IMAGE_NAME);
+		imageMappings.put("LongLong",                   DATATYPE_IMAGE_NAME);
+		imageMappings.put("Octet",                      DATATYPE_IMAGE_NAME);
+		imageMappings.put("Sequence",                   DATATYPE_IMAGE_NAME);
+		imageMappings.put("Short",                      DATATYPE_IMAGE_NAME);
+		imageMappings.put("String",                     DATATYPE_IMAGE_NAME);
+		imageMappings.put("Struct",                     DATATYPE_IMAGE_NAME);
+		imageMappings.put("Typedef",                    DATATYPE_IMAGE_NAME);
+		imageMappings.put("ULong",                      DATATYPE_IMAGE_NAME);
+		imageMappings.put("ULongLong",                  DATATYPE_IMAGE_NAME);
+		imageMappings.put("UShort",                     DATATYPE_IMAGE_NAME);
+		imageMappings.put("Union",                      DATATYPE_IMAGE_NAME);
+		imageMappings.put("WChar",                      DATATYPE_IMAGE_NAME);
+		imageMappings.put("WString",                    DATATYPE_IMAGE_NAME);
+
+		// DcpsLib
+		imageMappings.put("ContentFilteredTopic",       DCPS_IMAGE_NAME);
+		imageMappings.put("domain",                     DCPS_IMAGE_NAME);
+		imageMappings.put("Domain",                     DCPS_IMAGE_NAME);
+		imageMappings.put("domainParticipant",          DCPS_IMAGE_NAME);
+		imageMappings.put("DomainParticipant",          DCPS_IMAGE_NAME);
+		imageMappings.put("MultiTopic",                 DCPS_IMAGE_NAME);
+		imageMappings.put("topic",                      DCPS_IMAGE_NAME);
+		imageMappings.put("Topic",                      DCPS_IMAGE_NAME);
+		imageMappings.put("dataReader",                 INPUTPIN_IMAGE_NAME);
+		imageMappings.put("DataReader",                 INPUTPIN_IMAGE_NAME);
+		imageMappings.put("subscriber",                 INPUTPIN_IMAGE_NAME);
+		imageMappings.put("Subscriber",                 INPUTPIN_IMAGE_NAME);
+		imageMappings.put("dataWriter",                 OUTPUTPIN_IMAGE_NAME);
+		imageMappings.put("DataWriter",                 OUTPUTPIN_IMAGE_NAME);
+		imageMappings.put("publisher",                  OUTPUTPIN_IMAGE_NAME);
+		imageMappings.put("Publisher",                  OUTPUTPIN_IMAGE_NAME);
+
+		// PolicyLib
+		imageMappings.put("deadlineQosPolicy",          QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("DeadlineQosPolicy",          QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("destinationOrderQosPolicy",  QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("DestinationOrderQosPolicy",  QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("dsQosPolicy",                QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("durabilityQosPolicy",        QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("DurabilityQosPolicy",        QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("DurabilityServiceQosPolicy", QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("efQosPolicy",                QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("EntityFactoryQosPolicy",     QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("gdQosPolicy",                QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("GroupDataQosPolicy",         QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("historyQosPolicy",           QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("HistoryQosPolicy",           QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("LatencyBudgetQosPolicy",     QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("lbQosPolicy",                QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("lifespanQosPolicy",          QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("LifespanQosPolicy",          QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("livelinessQosPolicy",        QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("LivelinessQosPolicy",        QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("osQosPolicy",                QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("ownershipQosPolicy",         QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("OwnershipQosPolicy",         QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("OwnershipStrengthQosPolicy", QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("partitionQosPolicy",         QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("PartitionQosPolicy",         QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("presentationQosPolicy",      QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("rdlQosPolicy",               QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("ReaderDataLifecycleQosPolicy", QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("reliabilityQosPolicy",       QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("ReliabilityQosPolicy",       QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("ResourceLimitsQosPolicy",    QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("rlQosPolicy",                QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("tbfQosPolicy",               QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("tdQosPolicy",                QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("TimeBasedFilterQosPolicy",   QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("TopicDataQosPolicy",         QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("tpQosPolicy",                QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("TransportPriorityQosPolicy", QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("udQosPolicy",                QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("UserDataQosPolicy",          QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("wdlQosPolicy",               QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("WriterDataLifecycleQosPolicy", QOSPOLICY_IMAGE_NAME);
+		imageMappings.put("Period",                     CLOCK_IMAGE_NAME);
 	}
 
 	/**
