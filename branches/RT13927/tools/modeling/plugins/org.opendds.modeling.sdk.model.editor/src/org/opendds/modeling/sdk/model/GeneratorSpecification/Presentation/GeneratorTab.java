@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Widget;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGenerator;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGeneratorFactory;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkTransformer;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkTransformer.TransformType;
 
 public class GeneratorTab extends StructuredViewer {
 	protected Composite control;
@@ -49,8 +50,9 @@ public class GeneratorTab extends StructuredViewer {
 	
 	protected ISelection selection = StructuredSelection.EMPTY;
 
-	public GeneratorTab( final Composite parent) {
+	public GeneratorTab(final Composite parent, GeneratorEditor generatorEditor) {
 		generator = SdkGeneratorFactory.createSdkGenerator(parent.getShell());
+		editor = generatorEditor;
 		
 		control = new Composite( parent, 0);
 		control.setLayout( new GridLayout( 2, false));
@@ -149,11 +151,7 @@ public class GeneratorTab extends StructuredViewer {
 		button.setText(SdkTransformer.TransformType.IDL.getText());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
-		button.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkTransformer.TransformType.IDL);
-			}
-		});
+		button.addSelectionListener(new GenerateButtonListener(SdkTransformer.TransformType.IDL));
 		idlLabel =  new Label(panel, SWT.LEFT);
 		idlLabel.setText(uninitializedLabel);
 		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
@@ -163,11 +161,7 @@ public class GeneratorTab extends StructuredViewer {
 		button.setText(SdkTransformer.TransformType.H.getText());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
-		button.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkTransformer.TransformType.H);
-			}
-		});
+		button.addSelectionListener(new GenerateButtonListener(SdkTransformer.TransformType.H));
 		hLabel =  new Label(panel, SWT.LEFT);
 		hLabel.setText(uninitializedLabel);
 		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
@@ -177,11 +171,7 @@ public class GeneratorTab extends StructuredViewer {
 		button.setText(SdkTransformer.TransformType.CPP.getText());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
-		button.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkTransformer.TransformType.CPP);
-			}
-		});
+		button.addSelectionListener(new GenerateButtonListener(SdkTransformer.TransformType.CPP));
 		cppLabel =  new Label(panel, SWT.LEFT);
 		cppLabel.setText(uninitializedLabel);
 		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
@@ -191,11 +181,7 @@ public class GeneratorTab extends StructuredViewer {
 		button.setText(SdkTransformer.TransformType.TRH.getText());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
-		button.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkTransformer.TransformType.TRH);
-			}
-		});
+		button.addSelectionListener(new GenerateButtonListener(SdkTransformer.TransformType.TRH));
 		trhLabel =  new Label(panel, SWT.LEFT);
 		trhLabel.setText(uninitializedLabel);
 		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
@@ -205,11 +191,7 @@ public class GeneratorTab extends StructuredViewer {
 		button.setText(SdkTransformer.TransformType.TRC.getText());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
-		button.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkTransformer.TransformType.TRC);
-			}
-		});
+		button.addSelectionListener(new GenerateButtonListener(SdkTransformer.TransformType.TRC));
 		trcLabel =  new Label(panel, SWT.LEFT);
 		trcLabel.setText(uninitializedLabel);
 		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
@@ -219,11 +201,7 @@ public class GeneratorTab extends StructuredViewer {
 		button.setText(SdkTransformer.TransformType.MPC.getText());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
-		button.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkTransformer.TransformType.MPC);
-			}
-		});
+		button.addSelectionListener(new GenerateButtonListener(SdkTransformer.TransformType.MPC));
 		mpcLabel =  new Label(panel, SWT.LEFT);
 		mpcLabel.setText(uninitializedLabel);
 		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
@@ -233,11 +211,7 @@ public class GeneratorTab extends StructuredViewer {
 		button.setText(SdkTransformer.TransformType.MPB.getText());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
-		button.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkTransformer.TransformType.MPB);
-			}
-		});
+		button.addSelectionListener(new GenerateButtonListener(SdkTransformer.TransformType.MPB));
 		mpbLabel =  new Label(panel, SWT.LEFT);
 		mpbLabel.setText(uninitializedLabel);
 		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
@@ -247,11 +221,7 @@ public class GeneratorTab extends StructuredViewer {
 		button.setText(SdkTransformer.TransformType.PATH_MPB.getText());
 		gridData = new GridData(SWT.FILL, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
-		button.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				generator.generate(SdkTransformer.TransformType.PATH_MPB);
-			}
-		});
+		button.addSelectionListener(new GenerateButtonListener(SdkTransformer.TransformType.PATH_MPB));
 		pathMpbLabel =  new Label(panel, SWT.LEFT);
 		pathMpbLabel.setText(uninitializedLabel);
 		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
@@ -261,11 +231,25 @@ public class GeneratorTab extends StructuredViewer {
 		button.setText("Generate All");
 		gridData = new GridData(SWT.LEFT, SWT.TOP, false, false);
 		button.setLayoutData(gridData);
-		button.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
+		button.addSelectionListener(new GenerateButtonListener(null));
+	}
+
+	private final class GenerateButtonListener extends SelectionAdapter {
+		private TransformType whichTransform;
+
+		/// @param which transform output, or null to generate all
+		public GenerateButtonListener(TransformType which) {
+			whichTransform = which;
+		}
+
+		public void widgetSelected(SelectionEvent e) {
+			editor.getSite().getPage().saveEditor(editor, true /*confirm*/);
+			if (whichTransform == null) {
 				generator.generateAll();
+			} else {
+				generator.generate(whichTransform);
 			}
-		});
+		}
 	}
 
 	protected void updateSource() {

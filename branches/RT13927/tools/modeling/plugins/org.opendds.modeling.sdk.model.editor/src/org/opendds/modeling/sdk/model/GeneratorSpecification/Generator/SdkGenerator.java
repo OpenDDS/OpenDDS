@@ -18,11 +18,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
-import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.impl.EPackageImpl;
-import org.eclipse.emf.ecore.impl.EcorePackageImpl;
-import org.eclipse.emf.ecore.util.Diagnostician;
-import org.eclipse.xsd.ecore.EcoreXMLSchemaBuilder;
 import org.xml.sax.SAXException;
 
 public class SdkGenerator {
@@ -192,6 +187,7 @@ public class SdkGenerator {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private boolean isXSDValid(String filename) {
         // 1. Lookup a factory for the W3C XML Schema language
         SchemaFactory factory = 

@@ -1029,7 +1029,7 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 						GeneratorEditor.this) {
 					@Override
 					public Viewer createViewer(Composite composite) {
-						return new GeneratorTab(composite);
+						return new GeneratorTab(composite, GeneratorEditor.this);
 					}
 
 					@Override
