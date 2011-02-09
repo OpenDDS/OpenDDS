@@ -17,7 +17,7 @@
       <wizard
             category="org.opendds.modeling.Wizard.category.ID"
             class="org.opendds.modeling.model.opendds.presentation.OpenDDSModelWizard"
-            icon="icons/full/obj16/OpenDDSModelFile.gif"
+            icon="../org.opendds.modeling.common/icons/full/obj16/OpenDDSModelFile.gif"
             id="OpenDDS.presentation.OpenDDSModelWizardID"
             name="%_UI_OpenDDSModelWizard_label">
          <description>%_UI_OpenDDSModelWizard_description</description>

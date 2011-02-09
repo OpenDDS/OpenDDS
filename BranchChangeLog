@@ -1,3 +1,18 @@
+Wed Feb  9 19:56:05 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/plugin.xml:
+
+	  Wizard icon now points to icon under common plugin.
+
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/icons:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/icons/full:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/icons/full/obj16:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/icons/full/obj16/OpenDDSModelFile.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/icons/full/wizban:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/icons/full/wizban/NewOpenDDS.gif:
+
+          Removed these files.
+
 Wed Feb  9 18:53:14 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/build.pl:
