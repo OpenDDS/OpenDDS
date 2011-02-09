@@ -1,3 +1,23 @@
+Wed Feb  9 18:49:43 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/icons/DataLib-icon-to-element.txt:
+        * tools/modeling/icons/DcpsLib-icon-to-element.txt:
+        * tools/modeling/icons/MainDiagram-icon-to-element.txt:
+        * tools/modeling/icons/PolicyLib-icon-to-element.txt:
+        * tools/modeling/icons/copy-icons-to-plugins.pl:
+
+        * tools/modeling/icons/obj16/DataType.gif:
+        * tools/modeling/icons/obj16/Dcps.gif:
+        * tools/modeling/icons/obj16/InputPin.gif:
+        * tools/modeling/icons/obj16/OpenDDSDiagramFile.gif:
+        * tools/modeling/icons/obj16/OpenDDSModelFile.gif:
+        * tools/modeling/icons/obj16/OpenDDSSdkLib.gif:
+        * tools/modeling/icons/obj16/OutputPin.gif:
+        * tools/modeling/icons/obj16/QosPolicy.gif:
+        * tools/modeling/icons/obj16/UmlPackage.gif:
+
+          Removed these files. Icons from org.opendds.modeling.common now used.
+
 Wed Feb  9 18:39:38 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/DataType.gif:
