@@ -16,4 +16,5 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.edit.ui;visibility:=reexport,
  org.eclipse.ui.ide;visibility:=reexport
 Bundle-ActivationPolicy: lazy
-Import-Package: org.eclipse.core.filesystem
+Import-Package: org.eclipse.core.filesystem,
+ org.eclipse.xsd.ecore
