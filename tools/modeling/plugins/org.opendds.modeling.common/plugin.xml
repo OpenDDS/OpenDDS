@@ -5,9 +5,9 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.opendds.modeling.common.PerspectiveFactory"
-            icon="icons/full/obj16/generator.gif"
+            icon="icons/full/obj16/OpenDDSDiagramFile.gif"
             id="org.opendds.modeling.common.perspective"
-            name="OpenDDS Modeling SDK">
+            name="OpenDDS Modeling">
       </perspective>
    </extension>
 
