@@ -2031,7 +2031,8 @@
   </diagram>
   <plugin
       iD="org.opendds.modeling.diagram.datalib"
-      provider="Object Computing, Inc"
+      name="OpenDDS DataLib Plugin"
+      provider="Object Computing, Inc."
       printingEnabled="true">
     <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
     <requiredPlugins>org.eclipse.gmf.runtime.draw2d.ui</requiredPlugins>

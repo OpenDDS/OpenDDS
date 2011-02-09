@@ -38,7 +38,7 @@ development model.
    </license>
 
    <url>
-      <update label="OpenDDS Modeling SDK" url="https://extranet.ociweb.com/navair/estel/plugins/"/>
+      <update label="OpenDDS Modeling SDK" url="http://www.opendds.org/modeling/eclipse"/>
    </url>
 
    <requires>

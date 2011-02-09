@@ -647,7 +647,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 					parsedModelFile.setSourceName(
 									selectedResource
 									.getFullPath()
-									.toOSString());
+									.toString());
 					selectedResource = selectedResource.getParent();
 				}
 

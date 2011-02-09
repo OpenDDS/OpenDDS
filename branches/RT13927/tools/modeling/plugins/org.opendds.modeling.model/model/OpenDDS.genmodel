@@ -2,7 +2,7 @@
 <genmodel:GenModel xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
     xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/org.opendds.modeling.model/src"
-    modelPluginID="org.opendds.modeling.model" templateDirectory="org.opendds.modeling.common/templates"
+    creationIcons="false" modelPluginID="org.opendds.modeling.model" templateDirectory="org.opendds.modeling.common/templates"
     dynamicTemplates="true" modelName="OpenDDS" codeFormatting="true" importerID="org.eclipse.emf.importer.ecore"
     complianceLevel="6.0" copyrightFields="false">
   <foreignModel>OpenDDS.ecore</foreignModel>
