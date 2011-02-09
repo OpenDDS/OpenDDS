@@ -76,7 +76,7 @@ namespace {
 }
 
 ACE_TString 
-OpenDDS::DCPS::TransportConfiguration::formatNameForDump(const std::string& name) 
+OpenDDS::DCPS::TransportConfiguration::formatNameForDump(const ACE_TString& name) 
 {
   std::basic_ostringstream<ACE_TCHAR> oss;
   oss << std::setw(NAME_INDENT) << "" << std::setw(NAME_WIDTH) << std::left << name + ":" << " ";

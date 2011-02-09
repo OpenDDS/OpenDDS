@@ -77,7 +77,7 @@ public:
 
   /// Format name of transport configuration parameter for use in 
   /// conjunction with dump(std::ostream& os).
-  static ACE_TString formatNameForDump(const std::string& name);
+  static ACE_TString formatNameForDump(const ACE_TString& name);
 
   /// Flag used to marshall/demarshall bytes sent/received.
   bool swap_bytes_;
