@@ -1,3 +1,10 @@
+Wed Feb  9 14:53:48 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+
+        Changed formatNameForDump() method to take a ACE_TString.
+
 Tue Feb  8 16:36:38 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportConfiguration.h:
@@ -21,7 +28,7 @@ Tue Feb  8 16:36:38 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
           Added get_transport_id_description() for use in debug output.
           It adds a description to the transport id when the id is for a default
-          transport id or BIT transport. 
+          transport id or BIT transport.
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
 
