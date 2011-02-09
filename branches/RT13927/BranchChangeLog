@@ -1,3 +1,21 @@
+Wed Feb  9 18:25:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/templates:
+
+          Move templates from org.opendds.modeling.sdk.model so they can be reused
+          by other plug-ins.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/templates:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/templates/edit:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/templates/edit/ItemProvider.javajet:
+
+          Removed these files.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
+
+          Update to account for moving of templates directory.
+
+
 Wed Feb  9 16:05:12 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/MultiInstance/publisher.cpp:
