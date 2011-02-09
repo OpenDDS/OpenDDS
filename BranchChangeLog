@@ -1,3 +1,9 @@
+Wed Feb  9 23:13:15 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+
+          Removed the org.eclipse.xsd.ecore package import -- no longer used.
+
 Wed Feb  9 23:02:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/PerspectiveFactory.java:
