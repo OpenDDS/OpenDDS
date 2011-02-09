@@ -1,3 +1,10 @@
+Wed Feb  9 23:48:56 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed further WCHAR problems.
+
 Wed Feb  9 22:24:04 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportConfiguration.cpp:
@@ -6,8 +13,8 @@ Wed Feb  9 22:24:04 UTC 2011  Don Hudson  <hudsond@ociweb.com>
         * dds/DCPS/transport/udp/UdpConfiguration.cpp:
         * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.cpp:
 
-          Wrapped name parameter in ACE_TEXT when calling formatNameForDump().     
-                
+          Wrapped name parameter in ACE_TEXT when calling formatNameForDump().
+
         * dds/DCPS/transport/framework/TransportImpl.cpp:
 
           Removed part of debug message that shouldn't have been committed.
@@ -17,7 +24,7 @@ Wed Feb  9 14:53:48 UTC 2011  Don Hudson  <hudsond@ociweb.com>
         * dds/DCPS/transport/framework/TransportConfiguration.h:
         * dds/DCPS/transport/framework/TransportConfiguration.cpp:
 
-        Changed formatNameForDump() method to take a ACE_TString.
+          Changed formatNameForDump() method to take a ACE_TString.
 
 Tue Feb  8 16:36:38 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
@@ -104,7 +111,7 @@ Mon Feb  7 14:21:54 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
           Changed debug message for get_data_durability_cache() from
           LM_ERROR to LM_WARNING because it's a debug level 1 warning
-          and failing to create persistet cache falls back on transient
+          and failing to create persistent cache falls back on transient
           behaviour.
 
         * dds/DCPS/transport/framework/TransportConfiguration.inl:
