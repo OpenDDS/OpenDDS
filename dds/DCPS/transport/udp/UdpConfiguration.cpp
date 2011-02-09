@@ -63,8 +63,8 @@ UdpConfiguration::dump(std::ostream& os)
 {
   TransportConfiguration::dump(os);
  
-  os << formatNameForDump("local_address") << this->local_address_.get_host_addr()
-                                           << ":" << this->local_address_.get_port_number() << std::endl;
+  os << formatNameForDump(ACE_TEXT("local_address")) << this->local_address_.get_host_addr()
+                                                     << ":" << this->local_address_.get_port_number() << std::endl;
 }
 
 } // namespace DCPS

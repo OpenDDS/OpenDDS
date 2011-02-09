@@ -1,3 +1,17 @@
+Wed Feb  9 22:24:04 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.cpp:
+
+          Wrapped name parameter in ACE_TEXT when calling formatNameForDump().     
+                
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Removed part of debug message that shouldn't have been committed.
+
 Wed Feb  9 14:53:48 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportConfiguration.h:

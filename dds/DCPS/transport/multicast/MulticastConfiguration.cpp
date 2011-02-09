@@ -160,21 +160,21 @@ MulticastConfiguration::dump(std::ostream& os)
 {
   TransportConfiguration::dump(os);
 
-  os << formatNameForDump("group_address")       << this->group_address_.get_host_addr() 
-                                                 << ":" << this->group_address_.get_port_number() << std::endl;
-  os << formatNameForDump("default_to_ipv6")     << (this->default_to_ipv6_ ? "true" : "false") << std::endl;
-  os << formatNameForDump("port_offset")         << this->port_offset_ << std::endl;
-  os << formatNameForDump("reliable")            << (this->reliable_ ? "true" : "false") << std::endl;
-  os << formatNameForDump("syn_backoff")         << this->syn_backoff_ << std::endl;
-  os << formatNameForDump("syn_interval")        << this->syn_interval_.msec() << std::endl;
-  os << formatNameForDump("syn_timeout")         << this->syn_timeout_.msec() << std::endl;
-  os << formatNameForDump("nak_depth")           << this->nak_depth_ << std::endl;
-  os << formatNameForDump("nak_interval")        << this->nak_interval_.msec() << std::endl;
-  os << formatNameForDump("nak_delay_intervals") << this->nak_delay_intervals_ << std::endl;
-  os << formatNameForDump("nak_max")             << this->nak_max_ << std::endl;
-  os << formatNameForDump("nak_timeout")         << this->nak_timeout_.msec() << std::endl;
-  os << formatNameForDump("ttl")                 << this->ttl_ << std::endl;
-  os << formatNameForDump("rcv_buffer_size"); 
+  os << formatNameForDump(ACE_TEXT("group_address"))       << this->group_address_.get_host_addr() 
+                                                           << ":" << this->group_address_.get_port_number() << std::endl;
+  os << formatNameForDump(ACE_TEXT("default_to_ipv6"))     << (this->default_to_ipv6_ ? "true" : "false") << std::endl;
+  os << formatNameForDump(ACE_TEXT("port_offset"))         << this->port_offset_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("reliable"))            << (this->reliable_ ? "true" : "false") << std::endl;
+  os << formatNameForDump(ACE_TEXT("syn_backoff"))         << this->syn_backoff_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("syn_interval"))        << this->syn_interval_.msec() << std::endl;
+  os << formatNameForDump(ACE_TEXT("syn_timeout"))         << this->syn_timeout_.msec() << std::endl;
+  os << formatNameForDump(ACE_TEXT("nak_depth"))           << this->nak_depth_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("nak_interval"))        << this->nak_interval_.msec() << std::endl;
+  os << formatNameForDump(ACE_TEXT("nak_delay_intervals")) << this->nak_delay_intervals_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("nak_max"))             << this->nak_max_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("nak_timeout"))         << this->nak_timeout_.msec() << std::endl;
+  os << formatNameForDump(ACE_TEXT("ttl"))                 << this->ttl_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("rcv_buffer_size"));
 
   if (this->rcv_buffer_size_ == 0) {
     os << "System Default Value" << std::endl;
