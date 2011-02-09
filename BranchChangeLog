@@ -1,8 +1,16 @@
+Wed Feb  9 21:51:51 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java:
+
+          Fix error message for no model name.  Add useless schema validation
+          code which hopefully someday will be useful.
+
 Wed Feb  9 19:56:05 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model.editor/plugin.xml:
 
-	  Wizard icon now points to icon under common plugin.
+          Wizard icon now points to icon under common plugin.
 
         * tools/modeling/plugins/org.opendds.modeling.model.editor/icons:
         * tools/modeling/plugins/org.opendds.modeling.model.editor/icons/full:

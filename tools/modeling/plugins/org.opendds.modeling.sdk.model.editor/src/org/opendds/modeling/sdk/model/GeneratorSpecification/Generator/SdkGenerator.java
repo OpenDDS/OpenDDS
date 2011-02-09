@@ -14,6 +14,16 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+
+import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.impl.EPackageImpl;
+import org.eclipse.emf.ecore.impl.EcorePackageImpl;
+import org.eclipse.emf.ecore.util.Diagnostician;
+import org.eclipse.xsd.ecore.EcoreXMLSchemaBuilder;
+import org.xml.sax.SAXException;
 
 public class SdkGenerator {
 
@@ -148,7 +158,7 @@ public class SdkGenerator {
 			String modelname = getModelName();
 			if (modelname == null) {
 				errorHandler.error(IErrorHandler.Severity.ERROR, which.getText(),
-						"Invalid target directory specified: " + targetDirName, null);
+						"Model name not specified", null);
 				return;
 			}
 
@@ -180,6 +190,45 @@ public class SdkGenerator {
 			errorHandler.error(IErrorHandler.Severity.WARNING, which.getText(),
 					"Unable to refresh output folder " + getTargetDirName(), e);
 		}
+	}
+
+	private boolean isXSDValid(String filename) {
+        // 1. Lookup a factory for the W3C XML Schema language
+        SchemaFactory factory = 
+            SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
+        
+        // 2. Compile the schema. 
+        // Here the schema is loaded from a java.io.File, but you could use 
+        // a java.net.URL or a javax.xml.transform.Source instead.
+        File schemaLocation = new File("../../plugins/org.opendds.modeling.model/model/OpenDDSXMI.xsd");
+        try {
+          Schema schema = factory.newSchema(schemaLocation);
+          // 3. Get a validator from the schema.
+          Validator validator = schema.newValidator();
+          
+          // 4. Parse the document you want to check.
+          Source source = new StreamSource(filename);
+          
+          // 5. Check the document
+          try {
+              validator.validate(source);
+              System.out.println(filename + " is valid.");
+          }
+          catch (IOException ioe) {
+              System.out.println(filename + " could not be loaded.");
+        	  
+          }
+          catch (SAXException ex) {
+              System.out.println(filename + " is not valid because ");
+              System.out.println(ex.getMessage());
+          }  
+
+        } catch (SAXException se) {
+        	System.out.println("Schema SAXException");
+            System.out.println(se.getMessage());
+        	return false;
+        }
+        return true;
 	}
 
 	/// is the output file out-of-date with respect to the inputs?
