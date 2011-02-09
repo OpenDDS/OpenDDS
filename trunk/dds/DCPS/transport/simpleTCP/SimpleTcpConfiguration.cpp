@@ -78,12 +78,12 @@ OpenDDS::DCPS::SimpleTcpConfiguration::dump(std::ostream& os)
 {
   TransportConfiguration::dump(os);
 
-  os << formatNameForDump("local_address")                 << this->local_address_str_ << std::endl;
-  os << formatNameForDump("enable_nagle_algorithm")        << (this->enable_nagle_algorithm_ ? "true" : "false") << std::endl;
-  os << formatNameForDump("conn_retry_initial_delay")      << this->conn_retry_initial_delay_ << std::endl;
-  os << formatNameForDump("conn_retry_backoff_multiplier") << this->conn_retry_backoff_multiplier_ << std::endl;
-  os << formatNameForDump("conn_retry_attempts")           << this->conn_retry_attempts_ << std::endl;
-  os << formatNameForDump("passive_reconnect_duration")    << this->passive_reconnect_duration_ << std::endl;
-  os << formatNameForDump("passive_connect_duration")      << this->passive_connect_duration_ << std::endl;
-  os << formatNameForDump("max_output_pause_period")       << this->max_output_pause_period_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("local_address"))                 << this->local_address_str_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("enable_nagle_algorithm"))        << (this->enable_nagle_algorithm_ ? "true" : "false") << std::endl;
+  os << formatNameForDump(ACE_TEXT("conn_retry_initial_delay"))      << this->conn_retry_initial_delay_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("conn_retry_backoff_multiplier")) << this->conn_retry_backoff_multiplier_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("conn_retry_attempts"))           << this->conn_retry_attempts_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("passive_reconnect_duration"))    << this->passive_reconnect_duration_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("passive_connect_duration"))      << this->passive_connect_duration_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("max_output_pause_period"))       << this->max_output_pause_period_ << std::endl;
 }

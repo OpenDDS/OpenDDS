@@ -180,7 +180,7 @@ OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
     dump(os);
 
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("\n(%P|%t) TransportImpl::configure() - successfully configured transport\n%C"),
+               ACE_TEXT("\n(%P|%t) TransportImpl::configure()\n%C"),
                os.str().c_str()));
   }
 
