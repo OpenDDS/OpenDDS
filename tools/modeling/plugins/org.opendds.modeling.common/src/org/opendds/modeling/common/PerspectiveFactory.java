@@ -43,6 +43,7 @@ public class PerspectiveFactory implements IPerspectiveFactory {
                 "bottomRight", IPageLayout.BOTTOM, (float) 0.66,//$NON-NLS-1$
                 editorArea);
 
+		bottomRight.addView(IPageLayout.ID_PROBLEM_VIEW);
 		bottomRight.addView(IPageLayout.ID_PROP_SHEET);
 		bottomRight.addView(IPageLayout.ID_TASK_LIST);
 	}
