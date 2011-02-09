@@ -63,6 +63,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
   try {
     OpenDDS::Model::Application application(argc, argv);
     {
+      std::cout << "Creating primary publisher instance" << std::endl;
       MultiInstance::PrimaryMultiInstanceType primary_model(application,
                                                             argc, 
                                                             argv_copy.argv());
@@ -71,7 +72,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
       std::cout << "Primary publisher instance complete" << std::endl;
     }
     if (!result) {
+      ACE_OS::sleep(5);
       int argc_copy = argv_copy.argc();
+      std::cout << "Creating secondary publisher instance" << std::endl;
       MultiInstance::SecondaryMultiInstanceType secondary_model(application,
                                                                 argc_copy, 
                                                                 argv_copy2.argv());
@@ -92,6 +95,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
                       ex.what()),
                      -1);
   }
+  std::cout << "Publisher exiting" << std::endl;
   return result;
 }
 

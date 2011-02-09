@@ -97,6 +97,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
   try {
     OpenDDS::Model::Application application(argc, argv);
     {
+      std::cout << "Creating primary subscriber instance" << std::endl;
       MultiInstance::PrimaryMultiInstanceType primary_model(application,
                                                             argc, 
                                                             argv_copy.argv());
@@ -106,6 +107,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
     if (!result) {
       int argc_copy = argv_copy.argc();
+      std::cout << "Creating secondary subscriber instance" << std::endl;
       MultiInstance::SecondaryMultiInstanceType secondary_model(application, 
                                                                 argc_copy, 
                                                                 argv_copy2.argv());
@@ -125,5 +127,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
                      -1);
   }
 
+  std::cout << "Subscriber exiting" << std::endl;
   return result;
 }
