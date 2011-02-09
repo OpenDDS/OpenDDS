@@ -1,3 +1,29 @@
+Wed Feb  9 18:39:38 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/DataType.gif:
+        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/Dcps.gif:
+        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/InputPin.gif:
+        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/OpenDDSDiagramFile.gif:
+        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/OpenDDSModelFile.gif:
+        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/OpenDDSSdkLib.gif:
+        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/OutputPin.gif:
+        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/QosPolicy.gif:
+        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/UmlPackage.gif:
+        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/clock.gif:
+
+          Icons used by model EMF and GMF editors.
+
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/Plugin.java:
+
+          Added EMF/GMF icons to imageMap.
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/src/org/opendds/modeling/model/opendds/provider/OpenDDSEditPlugin.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+          Updates to use icons in common plug-in.
+
 Wed Feb  9 18:25:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.common/templates:
