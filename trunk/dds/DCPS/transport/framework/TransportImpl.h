@@ -138,7 +138,7 @@ public:
   /// datawriter will be notified, otherwise the status of the pending
   /// associations will be marked as FULLTY_ASSOCIATED.
   void check_fully_association();
-  
+
   /// Diagnostic aid.
   void dump();
   void dump(ostream& os);

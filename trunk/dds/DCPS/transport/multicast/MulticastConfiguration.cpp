@@ -160,7 +160,7 @@ MulticastConfiguration::dump(std::ostream& os)
 {
   TransportConfiguration::dump(os);
 
-  os << formatNameForDump(ACE_TEXT("group_address"))       << this->group_address_.get_host_addr() 
+  os << formatNameForDump(ACE_TEXT("group_address"))       << this->group_address_.get_host_addr()
                                                            << ":" << this->group_address_.get_port_number() << std::endl;
   os << formatNameForDump(ACE_TEXT("default_to_ipv6"))     << (this->default_to_ipv6_ ? "true" : "false") << std::endl;
   os << formatNameForDump(ACE_TEXT("port_offset"))         << this->port_offset_ << std::endl;
