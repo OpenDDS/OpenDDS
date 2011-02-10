@@ -45,6 +45,8 @@ if (!defined $ECLIPSE_WORKSPACE) {
   $ECLIPSE_WORKSPACE = tempdir();
 }
 
+$ENV{'LANG'} = 'en_US.UTF-8';
+
 foreach my $s (@steps) {
   chdir $cwd . ($s->{'dir'} ? '/' . $s->{'dir'} : '');
 

@@ -1,3 +1,27 @@
+Thu Feb 10 22:03:15 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/build.pl:
+
+          Set the LANG environment variable so the nightly build's GMF
+          generation step can use UTF-8 characters in the genereated Java files.
+
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/build.properties:
+
+          Moved plugin and provider names to the manifest instead of having
+          them in plugin.properties, since the feature branding doesn't seem
+          to look in plugin.properties.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/plugin.properties:
+
+          Commit these files instead of just having EMF generate them, they
+          contain our plugin and provider names as well as version numbers.
+
+        * tools/modeling/plugins/org.opendds.modeling.common/plugin.properties:
+
+          Removed this file.
+
 Thu Feb 10 18:54:49 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.common/build.properties:
