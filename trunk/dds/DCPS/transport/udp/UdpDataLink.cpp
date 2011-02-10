@@ -9,6 +9,7 @@
 #include "UdpDataLink.h"
 #include "UdpTransport.h"
 
+#include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
 
 #ifndef __ACE_INLINE__
@@ -40,6 +41,35 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
   if (!this->active_) {
     local_address = this->config_->local_address_;
   }
+
+#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+  int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
+  int rcv_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
+
+  if (this->socket_.set_option(SOL_SOCKET,
+                              SO_SNDBUF,
+                              (void *) &snd_size,
+                              sizeof(snd_size)) < 0
+      && errno != ENOTSUP) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("UdpDataLink::open: failed to set the send buffer size to %d errno %m\n"),
+                      snd_size),
+                     false);
+  }
+
+  if (this->socket_.set_option(SOL_SOCKET,
+                              SO_RCVBUF,
+                              (void *) &rcv_size,
+                              sizeof(int)) < 0
+      && errno != ENOTSUP) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("UdpDataLink::open: failed to set the receive buffer size to %d errno %m \n"),
+                      rcv_size),
+                     false);
+  }
+#endif /* ACE_DEFAULT_MAX_SOCKET_BUFSIZ */
 
   if (this->socket_.open(local_address) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
