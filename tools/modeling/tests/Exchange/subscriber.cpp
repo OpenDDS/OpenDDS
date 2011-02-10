@@ -9,12 +9,16 @@
 
 #include "model/ExchangeTraits.h"
 #include <model/NullReaderListener.h>
-#include <model/Sync.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
+  public: 
+    ReaderListener(bool& disposed) : _disposed(disposed)
+    { }
   virtual void on_data_available(
     DDS::DataReader_ptr reader)
   ACE_THROW_SPEC((CORBA::SystemException));
+  private:
+    bool& _disposed;
 };
 
 // START OF EXISTING MESSENGER EXAMPLE LISTENER CODE
@@ -23,7 +27,6 @@ void
 ReaderListener::on_data_available(DDS::DataReader_ptr reader)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  std::cout << "sub on_data_available" << std::endl;
   TMQDataReader_var reader_i =
     TMQDataReader::_narrow(reader);
 
@@ -37,31 +40,44 @@ ACE_THROW_SPEC((CORBA::SystemException))
   TMQ message;
   DDS::SampleInfo info;
 
-  DDS::ReturnCode_t error = reader_i->take_next_sample(message, info);
+  while (true) {
+    DDS::ReturnCode_t error = reader_i->take_next_sample(message, info);
+    std::cout << "take status = " << error << std::endl;
+    if (error == DDS::RETCODE_OK) {
+      std::cout << "SampleInfo.sample_rank = " << info.sample_rank << std::endl;
+      std::cout << "SampleInfo.instance_state = " << info.instance_state << std::endl;
 
-  if (error == DDS::RETCODE_OK) {
-    std::cout << "SampleInfo.sample_rank = " << info.sample_rank << std::endl;
-    std::cout << "SampleInfo.instance_state = " << info.instance_state << std::endl;
+      if (info.valid_data) {
+        std::cout << "TMQ:   symbol     = " << message.symbol.in() << std::endl
+                  << "       ask        = " << message.ask         << std::endl
+                  << "       price      = " << message.price       << std::endl
+                  << "       bid        = " << message.bid         << std::endl;
 
-    if (info.valid_data) {
-      std::cout << "TMQ:   symbol     = " << message.symbol.in() << std::endl
-                << "       ask        = " << message.ask         << std::endl
-                << "       price      = " << message.price       << std::endl
-                << "       bid        = " << message.bid         << std::endl;
-
+      } else if (info.instance_state & DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+        std::cout << "subscriber detected instance disposed" << std::endl;
+        _disposed = true;
+        break;
+      }
+    } else if (error != DDS::RETCODE_NO_DATA) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("ERROR: %N:%l: on_data_available() -")
+                 ACE_TEXT(" take_next_sample failed!\n")));
+    } else {
+      if (info.instance_state & DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+        std::cout << "subscriber detected instance disposed" << std::endl;
+        _disposed = true;
+      }
+      break;
     }
-
-  } else {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("ERROR: %N:%l: on_data_available() -")
-               ACE_TEXT(" take_next_sample failed!\n")));
   }
+  std::cout << "on_data_available, exiting" << std::endl;
 }
 
 // END OF EXISTING MESSENGER EXAMPLE LISTENER CODE
 
 int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
+  bool disposed = false;
   try {
     std::cout << "subscriber running" << std::endl;
     OpenDDS::Model::Application application(argc, argv);
@@ -75,7 +91,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
                                              Elements::Topics::Quotes));
     DDS::DataReader_var reader = model.reader(Elements::DataReaders::MatchReader);
 
-    DDS::DataReaderListener_var listener(new ReaderListener);
+    DDS::DataReaderListener_var listener(new ReaderListener(disposed));
     reader->set_listener( listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
@@ -89,8 +105,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
                        -1);
     }
 
-    //OpenDDS::Model::ReaderSync rs(reader);
-    ACE_OS::sleep(5);
+    while (!disposed) {
+      ACE_OS::sleep(1);
+    }
     // END OF EXISTING MESSENGER EXAMPLE CODE
 
   } catch (const CORBA::Exception& e) {

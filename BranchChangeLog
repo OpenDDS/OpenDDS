@@ -1,3 +1,162 @@
+Thu Feb 10 23:40:19 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Add Exchange test (don't run yet).
+
+        * tools/modeling/tests/setup.pl:
+
+          Use codegen files, rather than gen files.
+
+        * tools/modeling/tests/Arrays/Arrays.codegen:
+
+        * tools/modeling/tests/CfTopic/CfTopic.codegen:
+
+        * tools/modeling/tests/Codegen/Codegen.codegen:
+
+        * tools/modeling/tests/CompositeKey/CompositeKey.codegen:
+
+        * tools/modeling/tests/CopyTopicQos/CopyTopicQos.codegen:
+
+        * tools/modeling/tests/DataLibRef/DataLibRef.codegen:
+
+        * tools/modeling/tests/Deep/Down/Reference/DeepDownReference.codegen:
+
+        * tools/modeling/tests/DomainZero/DomainZero.codegen:
+
+        * tools/modeling/tests/EmptyLibs/ELTypes.codegen:
+        * tools/modeling/tests/EmptyLibs/EmptyLibs.codegen:
+
+        * tools/modeling/tests/Exchange/Exchange.codegen:
+
+        * tools/modeling/tests/ExternalPolicies/ExternalPolicies.codegen:
+
+        * tools/modeling/tests/InvalidNames/InvalidNames.codegen:
+
+        * tools/modeling/tests/Messenger/Messenger.codegen:
+
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.codegen:
+
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.codegen:
+
+        * tools/modeling/tests/MessengerMC/MessengerMC.codegen:
+
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.codegen:
+        * tools/modeling/tests/MessengerMixed/MessengerTypesMixed.codegen:
+
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.codegen:
+
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.codegen:
+
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.codegen:
+
+        * tools/modeling/tests/MessengerPubQos/MessengerPubQos.codegen:
+
+        * tools/modeling/tests/MessengerSimpleTypes/MessengerSimpleTypes.codegen:
+
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.codegen:
+        * tools/modeling/tests/MessengerSplit/MessengerTypes.codegen:
+
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.codegen:
+
+        * tools/modeling/tests/MultiDCPS/MultiDCPS.codegen:
+
+        * tools/modeling/tests/MultiInstance/MultiInstance.codegen:
+
+        * tools/modeling/tests/MultiTopic/MultiTopic.codegen:
+
+        * tools/modeling/tests/PolicyLib/PolicyLib.codegen:
+
+        * tools/modeling/tests/ReaderQos/ReaderQos.codegen:
+
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.codegen:
+
+        * tools/modeling/tests/Sequences/Sequences.codegen:
+
+        * tools/modeling/tests/SubscriberQos/SubQos.codegen:
+
+        * tools/modeling/tests/TopicQos/TopQos.codegen:
+
+        * tools/modeling/tests/UDP/UDP.codegen:
+
+        * tools/modeling/tests/Arrays/Arrays.gen:
+
+        * tools/modeling/tests/CfTopic/CfTopic.gen:
+
+        * tools/modeling/tests/Codegen/Codegen.gen:
+
+        * tools/modeling/tests/CompositeKey/CompositeKey.gen:
+
+        * tools/modeling/tests/CopyTopicQos/CopyTopicQos.gen:
+
+        * tools/modeling/tests/DataLibRef/DataLibRef.gen:
+
+        * tools/modeling/tests/Deep/Down/Reference/DeepDownReference.gen:
+
+        * tools/modeling/tests/DomainZero/DomainZero.gen:
+
+        * tools/modeling/tests/EmptyLibs/ELTypes.gen:
+        * tools/modeling/tests/EmptyLibs/EmptyLibs.gen:
+
+        * tools/modeling/tests/Exchange/Exchange.gen:
+
+        * tools/modeling/tests/ExternalPolicies/ExternalPolicies.gen:
+
+        * tools/modeling/tests/InvalidNames/InvalidNames.gen:
+
+        * tools/modeling/tests/Messenger/Messenger.gen:
+
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.gen:
+
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.gen:
+
+        * tools/modeling/tests/MessengerMC/MessengerMC.gen:
+
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.gen:
+        * tools/modeling/tests/MessengerMixed/MessengerTypesMixed.gen:
+
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.gen:
+
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.gen:
+
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.gen:
+
+        * tools/modeling/tests/MessengerPubQos/MessengerPubQos.gen:
+
+        * tools/modeling/tests/MessengerSimpleTypes/MessengerSimpleTypes.gen:
+
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.gen:
+        * tools/modeling/tests/MessengerSplit/MessengerTypes.gen:
+
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.gen:
+
+        * tools/modeling/tests/MultiDCPS/MultiDCPS.gen:
+
+        * tools/modeling/tests/MultiInstance/MultiInstance.gen:
+
+        * tools/modeling/tests/MultiTopic/MultiTopic.gen:
+
+        * tools/modeling/tests/PolicyLib/PolicyLib.gen:
+
+        * tools/modeling/tests/ReaderQos/ReaderQos.gen:
+
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.gen:
+
+        * tools/modeling/tests/Sequences/Sequences.gen:
+
+        * tools/modeling/tests/SubscriberQos/SubQos.gen:
+
+        * tools/modeling/tests/TopicQos/TopQos.gen:
+
+        * tools/modeling/tests/UDP/UDP.gen:
+
+          Renamed gen files to codegen files.
+
+        * tools/modeling/tests/Exchange/publisher.cpp:
+        * tools/modeling/tests/Exchange/subscriber.cpp:
+
+          Diagnostic changes.
+
 Thu Feb 10 22:28:15 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/build.properties:
