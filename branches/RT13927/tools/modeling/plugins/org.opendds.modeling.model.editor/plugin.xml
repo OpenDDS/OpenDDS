@@ -29,7 +29,7 @@
       <editor
             id="OpenDDS.presentation.OpenDDSEditorID"
             name="%_UI_OpenDDSEditor_label"
-            icon="icons/full/obj16/OpenDDSModelFile.gif"
+            icon="../org.opendds.modeling.common/icons/full/obj16/OpenDDSModelFile.gif"
             extensions="opendds"
             class="org.opendds.modeling.model.opendds.presentation.OpenDDSEditor"
             contributorClass="org.opendds.modeling.model.opendds.presentation.OpenDDSActionBarContributor">
