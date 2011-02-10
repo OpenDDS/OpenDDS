@@ -1,3 +1,12 @@
+Thu Feb 10 12:38:21 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/OpenDDS.gif:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling/model/opendds/presentation/OpenDDSModelWizard.java:
+
+          Use icon under common project for NewWizard.
+
 Thu Feb 10 00:09:48 UTC 2011  Mike Martinez  <martinez_m@lab.ociweb.com>
 
         * [r4269] 2011-02-10 00:07  martinezm
