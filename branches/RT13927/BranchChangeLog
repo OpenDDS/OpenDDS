@@ -1,3 +1,12 @@
+Thu Feb 10 14:14:39 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
+
+        * [r4273] 2011-02-10 14:11  martinezm
+          tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore:
+
+          Model changes to indicate containment for the environment variables.
+          This is needed in order to create the EMF model and edit it in a
+          tree view.
+
 Thu Feb 10 12:43:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model.edit/src/org/opendds/modeling/model:
