@@ -17,37 +17,29 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.eclipse.emf.common.util.URI;
-
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-
-import org.eclipse.emf.ecore.EObject;
-
-import org.eclipse.emf.ecore.xmi.XMLResource;
-
-import org.eclipse.emf.edit.ui.provider.ExtendedImageRegistry;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-
+import org.eclipse.core.runtime.Path;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.xmi.XMLResource;
+import org.eclipse.emf.edit.ui.provider.ExtendedImageRegistry;
 import org.eclipse.jface.dialogs.MessageDialog;
-
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -62,36 +54,29 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
-
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
-
-import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
-
-import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.part.ISetSelectionTarget;
-
-import org.opendds.modeling.common.Plugin;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.CodeGen;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorFactory;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorPackage;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.ParsedModelFile;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGeneratorFactory;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Instance;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Instances;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.ModelFile;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.TargetDir;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Transport;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.TransportOffset;
-
-
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
+import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.part.ISetSelectionTarget;
+import org.opendds.modeling.common.Plugin;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.CodeGen;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Environment;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorFactory;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorPackage;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Instance;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Instances;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Location;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.LocationVariable;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.ModelFile;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.TargetDir;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Transport;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.TransportOffset;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.ParsedModelFile;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGeneratorFactory;
 
 
 /**
@@ -231,6 +216,17 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		}
 
 		instances.getInstance().add(instance);
+		
+		Environment searchPaths = generatorFactory.createEnvironment();
+		codeGen.setSearchPaths(searchPaths);
+		
+		Location location = generatorFactory.createLocation();
+		
+		LocationVariable locationVariable = generatorFactory.createLocationVariable();
+		locationVariable.setValue("DDS_ROOT");
+		location.setVariable(locationVariable);
+
+		searchPaths.getLocation().add(location);
 		
 		return codeGen;
 	}
