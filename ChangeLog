@@ -1,3 +1,15 @@
+Thu Feb 10 16:42:18 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Set send buffer to ACE_DEFAULT_MAX_SOCKET_BUFSIZ if it's defined
+          (receive buffer is already configurable).
+
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+
+          Set send and receive buffers to ACE_DEFAULT_MAX_SOCKET_BUFSIZ
+          if it's defined.
+
 Thu Feb 10 15:58:54 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportConfiguration.h:
