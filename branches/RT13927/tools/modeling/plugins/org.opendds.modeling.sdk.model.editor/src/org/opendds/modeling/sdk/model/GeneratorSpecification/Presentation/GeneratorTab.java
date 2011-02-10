@@ -243,7 +243,10 @@ public class GeneratorTab extends StructuredViewer {
 		}
 
 		public void widgetSelected(SelectionEvent e) {
-			editor.getSite().getPage().saveEditor(editor, true /*confirm*/);
+			if (!editor.getSite().getPage().saveEditor(editor, true /*confirm*/)) {
+				// user canceled
+				return;
+			}
 			if (whichTransform == null) {
 				generator.generateAll();
 			} else {
