@@ -24,11 +24,13 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Environment">
     <eStructuralFeatures xsi:type="ecore:EReference" name="location" upperBound="-1"
-        eType="#//Location"/>
+        eType="#//Location" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Location">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="variable" eType="#//LocationVariable"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="path" eType="#//LocationPath"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="variable" eType="#//LocationVariable"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="path" eType="#//LocationPath"
+        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LocationVariable">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
