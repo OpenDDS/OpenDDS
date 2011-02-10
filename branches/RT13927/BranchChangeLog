@@ -1,3 +1,9 @@
+Thu Feb 10 18:54:49 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/build.properties:
+
+          Add new items (icons, etc.) to the bin.includes.
+
 Thu Feb 10 17:57:10 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Exchange:
