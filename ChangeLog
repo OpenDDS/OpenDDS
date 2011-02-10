@@ -1,3 +1,14 @@
+Thu Feb 10 15:58:54 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+
+          Removed trailing white space.
+
 Wed Feb  9 23:48:56 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportConfiguration.cpp:

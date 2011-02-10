@@ -75,18 +75,18 @@ namespace {
   static const int NAME_WIDTH(30); // Includes ":"
 }
 
-ACE_TString 
-OpenDDS::DCPS::TransportConfiguration::formatNameForDump(const ACE_TString& name) 
+ACE_TString
+OpenDDS::DCPS::TransportConfiguration::formatNameForDump(const ACE_TString& name)
 {
   std::basic_ostringstream<ACE_TCHAR> oss;
   oss << std::setw(NAME_INDENT) << "" << std::setw(NAME_WIDTH) << std::left
-      << name.c_str() << ": "; 
+      << name.c_str() << ": ";
   return oss.str().c_str();
 }
 
 void
 OpenDDS::DCPS::TransportConfiguration::dump(std::ostream& os)
-{ 
+{
   os << formatNameForDump(ACE_TEXT("transport_type"))          << this->transport_type_ << std::endl;
   os << formatNameForDump(ACE_TEXT("swap_bytes"))              << (this->swap_bytes_ ? "true" : "false") << std::endl;
   os << formatNameForDump(ACE_TEXT("queue_messages_per_pool")) << this->queue_messages_per_pool_ << std::endl;

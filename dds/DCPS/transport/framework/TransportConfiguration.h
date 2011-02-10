@@ -75,7 +75,7 @@ public:
   void dump();
   virtual void dump(std::ostream& os);
 
-  /// Format name of transport configuration parameter for use in 
+  /// Format name of transport configuration parameter for use in
   /// conjunction with dump(std::ostream& os).
   static ACE_TString formatNameForDump(const ACE_TString& name);
 

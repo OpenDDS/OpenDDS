@@ -107,7 +107,7 @@ OpenDDS::DCPS::SimpleTcpTransport::find_or_create_datalink(
 
       if (DCPS_debug_level >= 5) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) Found existing connection,"
-          " No need for passive connection establishment, transport id: %C.\n", 
+          " No need for passive connection establishment, transport id: %C.\n",
           this->get_transport_id_description().c_str()));
       }
       return link._retn();
