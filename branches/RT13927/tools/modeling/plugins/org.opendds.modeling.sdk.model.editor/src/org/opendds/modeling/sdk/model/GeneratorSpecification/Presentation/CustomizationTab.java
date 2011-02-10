@@ -28,11 +28,11 @@ import org.eclipse.swt.widgets.Widget;
  *
  */
 public class CustomizationTab extends StructuredViewer {
-	// A TreeViewer with the pretected abstract StructuredViewer methods
+	// A TreeViewer with the protected abstract StructuredViewer methods
 	// exposed so that we can simply delegate to them.
-	TreeViewerDelegate treeViewer;
+	protected TreeViewerDelegate treeViewer;
 	
-	Composite control;
+	protected Composite control;
 
 	/**
 	 * 
