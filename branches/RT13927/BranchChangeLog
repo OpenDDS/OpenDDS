@@ -1,3 +1,14 @@
+Thu Feb 10 12:43:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/src/org/opendds/modeling/model:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/src/org/opendds/modeling/model/opendds/provider:
+
+          svn:ignore newly auto generated files.
+
+        * tools/modeling/plugins/org.opendds.modeling.model.editor:
+
+          svn:ignore icons directory.
+
 Thu Feb 10 12:38:21 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/OpenDDS.gif:
