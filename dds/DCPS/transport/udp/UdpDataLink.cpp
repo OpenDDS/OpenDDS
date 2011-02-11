@@ -45,7 +45,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
   if (this->socket_.open(local_address) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("UdpDataLink::open: open failed: %p\n")),
+                      ACE_TEXT("UdpDataLink::open: open failed: %m\n")),
                      false);
   }
 
