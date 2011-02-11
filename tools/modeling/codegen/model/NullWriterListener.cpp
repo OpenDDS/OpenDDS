@@ -54,7 +54,7 @@ OpenDDS::Model::NullWriterListener::on_liveliness_lost(
                ACE_TEXT("(%P|%t) NullWriterListener::on_liveliness_lost()\n")));
   }
 }
-  
+
 void
 OpenDDS::Model::NullWriterListener::on_publication_matched(
   DDS::DataWriter_ptr /* writer */,

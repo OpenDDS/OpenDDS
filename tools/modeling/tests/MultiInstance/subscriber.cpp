@@ -99,7 +99,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     {
       std::cout << "Creating primary subscriber instance" << std::endl;
       MultiInstance::PrimaryMultiInstanceType primary_model(application,
-                                                            argc, 
+                                                            argc,
                                                             argv_copy.argv());
       std::cout << "Running primary subscriber instance" << std::endl;
       result = run_instance(primary_model);
@@ -108,8 +108,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     if (!result) {
       int argc_copy = argv_copy.argc();
       std::cout << "Creating secondary subscriber instance" << std::endl;
-      MultiInstance::SecondaryMultiInstanceType secondary_model(application, 
-                                                                argc_copy, 
+      MultiInstance::SecondaryMultiInstanceType secondary_model(application,
+                                                                argc_copy,
                                                                 argv_copy2.argv());
       std::cout << "Running secondary subscriber instance" << std::endl;
       result = run_instance(secondary_model);

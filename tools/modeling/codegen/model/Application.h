@@ -9,6 +9,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include <ace/ace_wchar.h>
 #include "model_export.h"
 
 namespace DDS {
@@ -29,7 +30,7 @@ namespace OpenDDS { namespace Model {
 
   class OpenDDS_Model_Export Application {
     public:
-      Application(int& argc, char** argv);
+      Application(int& argc, ACE_TCHAR *argv[]);
       ~Application();
   };
 

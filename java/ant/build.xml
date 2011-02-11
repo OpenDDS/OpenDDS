@@ -13,7 +13,7 @@
     <property name="test.dir" value="${basedir}/test"/>
 
     <property environment="env"/>
-    
+
     <property file="${basedir}/build.properties"/>
 
     <!--
@@ -43,7 +43,7 @@
     <target name="init">
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.dir}/classes"/>
-        
+
         <uptodate property="project.uptodate"
                   targetfile="${build.dir}/${ant.project.name}.jar">
             <srcfiles dir="${src.dir}"/>

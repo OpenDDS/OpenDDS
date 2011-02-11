@@ -8,7 +8,7 @@
 
 #include "dds/DCPS/Service_Participant.h"
 
-OpenDDS::Model::Application::Application(int& argc, char** argv) 
+OpenDDS::Model::Application::Application(int& argc, ACE_TCHAR *argv[])
 {
   TheParticipantFactoryWithArgs(argc, argv);
 }

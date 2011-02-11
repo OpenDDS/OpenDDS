@@ -3,23 +3,23 @@
 #include <iostream>
 #include <stdexcept>
 
-OpenDDS::Model::WriterSync::WriterSync(DDS::DataWriter_var& writer) : 
-writer_(writer) 
+OpenDDS::Model::WriterSync::WriterSync(DDS::DataWriter_var& writer) :
+writer_(writer)
 {
   if (wait_match(writer_)) {
     throw std::runtime_error("wait_match failure");
   }
 }
 
-OpenDDS::Model::WriterSync::~WriterSync() 
+OpenDDS::Model::WriterSync::~WriterSync()
 {
   if (wait_ack(writer_)) {
     throw std::runtime_error("wait_ack failure");
   }
 }
 
-int 
-OpenDDS::Model::WriterSync::wait_match(DDS::DataWriter_var& writer) 
+int
+OpenDDS::Model::WriterSync::wait_match(DDS::DataWriter_var& writer)
 {
   DDS::StatusCondition_var condition = writer->get_statuscondition();
   condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
@@ -55,8 +55,8 @@ OpenDDS::Model::WriterSync::wait_match(DDS::DataWriter_var& writer)
   return 0;
 }
 
-int 
-OpenDDS::Model::WriterSync::wait_ack(DDS::DataWriter_var& writer) 
+int
+OpenDDS::Model::WriterSync::wait_ack(DDS::DataWriter_var& writer)
 {
   DDS::ReturnCode_t stat;
   DDS::Duration_t timeout = { 30, 0 };
@@ -72,20 +72,20 @@ OpenDDS::Model::WriterSync::wait_ack(DDS::DataWriter_var& writer)
   return 0;
 }
 
-OpenDDS::Model::ReaderSync::ReaderSync(DDS::DataReader_var& reader) : 
-reader_(reader) 
+OpenDDS::Model::ReaderSync::ReaderSync(DDS::DataReader_var& reader) :
+reader_(reader)
 {
 }
 
-OpenDDS::Model::ReaderSync::~ReaderSync() 
+OpenDDS::Model::ReaderSync::~ReaderSync()
 {
   if (wait_unmatch(reader_)) {
     throw std::runtime_error("wait_unmatch failure");
   }
 }
 
-int 
-OpenDDS::Model::ReaderSync::wait_unmatch(DDS::DataReader_var& reader) 
+int
+OpenDDS::Model::ReaderSync::wait_unmatch(DDS::DataReader_var& reader)
 {
   DDS::ReturnCode_t stat;
   DDS::StatusCondition_var condition = reader->get_statuscondition();
@@ -107,7 +107,7 @@ OpenDDS::Model::ReaderSync::wait_unmatch(DDS::DataReader_var& reader)
     } else if (ms.current_count == 0 && ms.total_count > 0) {
       break;  // unmatched
     }
-    // std::cout << "sub match count " << ms.current_count 
+    // std::cout << "sub match count " << ms.current_count
     //           <<    " total count " << ms.total_count << std::endl;
     // wait for a change
     stat = ws->wait(conditions, timeout);

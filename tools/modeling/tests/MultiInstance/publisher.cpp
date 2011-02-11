@@ -65,7 +65,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     {
       std::cout << "Creating primary publisher instance" << std::endl;
       MultiInstance::PrimaryMultiInstanceType primary_model(application,
-                                                            argc, 
+                                                            argc,
                                                             argv_copy.argv());
       std::cout << "Running primary publisher instance" << std::endl;
       result = run_instance(primary_model, 86);
@@ -76,7 +76,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
       int argc_copy = argv_copy.argc();
       std::cout << "Creating secondary publisher instance" << std::endl;
       MultiInstance::SecondaryMultiInstanceType secondary_model(application,
-                                                                argc_copy, 
+                                                                argc_copy,
                                                                 argv_copy2.argv());
       std::cout << "Running secondary publisher instance" << std::endl;
       result = run_instance(secondary_model, 99);

@@ -16,7 +16,7 @@ namespace OpenDDS { namespace Model {
 
   class OpenDDS_Model_Export NullSubscriberListener
     : public virtual OpenDDS::DCPS::LocalObject<DDS::SubscriberListener> {
-    
+
   public:
     NullSubscriberListener();
 
