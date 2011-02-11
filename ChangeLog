@@ -1,3 +1,14 @@
+Fri Feb 11 16:41:08 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * DDS_TAO.mwc:
+
+          Exclude tools/modeling/tests.
+
+        * configure:
+
+          If CIAO_ROOT is not set, set it to a non-existent path so that
+          MPC.cfg doesn't add /MPC/config to its include path.
+
 Fri Feb 11 15:48:09 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * Merged the branch "RT13927", which includes the implementation
