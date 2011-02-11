@@ -5,8 +5,8 @@
 template< typename ModelName, class InstanceTraits>
 inline
 OpenDDS::Model::Service<ModelName, InstanceTraits>::Service(
-  const Application& application, 
-  int& argc, 
+  const Application& application,
+  int& argc,
   char** argv)
   : Entities(argc, argv)
   , application_(application)
@@ -130,9 +130,9 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createTopicDescription(
   typename Topics::Values       topic
 )
 {
-  typename ContentFilteredTopics::Values cfTopic = 
+  typename ContentFilteredTopics::Values cfTopic =
                this->modelData_.contentFilteredTopic(topic);
-  typename MultiTopics::Values multiTopic = 
+  typename MultiTopics::Values multiTopic =
                this->modelData_.multiTopic(topic);
   // If this is a content-filtered topic
   if (cfTopic != ContentFilteredTopics::LAST_INDEX) {
@@ -184,12 +184,12 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createContentFilteredTopic(
 {
   const char* topicName = this->modelData_.topicName(topic);
   typename Topics::Values target_topic = this->modelData_.relatedTopic(cfTopic);
-  DDS::Topic_var related_topic = 
+  DDS::Topic_var related_topic =
         dynamic_cast<DDS::Topic*>(this->topic(participant, target_topic).ptr());
   char* filter_expression = this->modelData_.filterExpression(cfTopic);
   DDS::DomainParticipant_var domain_participant = this->participant(participant);
   // TODO: Should this be moved to Delegate?
-  this->topics_[participant][topic] = 
+  this->topics_[participant][topic] =
         domain_participant->create_contentfilteredtopic(topicName,
                                                         related_topic,
                                                         filter_expression,
@@ -215,7 +215,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createMultiTopic(
     this->types_[participant][type] = true;
   }
   // TODO: Should this be moved to Delegate?
-  this->topics_[participant][topic] = 
+  this->topics_[participant][topic] =
         domain_participant->create_multitopic(topicName,
                                               this->modelData_.typeName(type),
                                               topicExpression,

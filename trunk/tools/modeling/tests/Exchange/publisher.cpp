@@ -45,9 +45,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
 
     {
-      OpenDDS::Model::WriterSync td_ws(trd_writer); 
+      OpenDDS::Model::WriterSync td_ws(trd_writer);
       {
-        OpenDDS::Model::WriterSync qt_ws(qt_writer); 
+        OpenDDS::Model::WriterSync qt_ws(qt_writer);
 
         // Write samples
         trd_message.symbol = CORBA::string_dup("MSFT");

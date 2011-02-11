@@ -33,7 +33,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
                          -1);
     }
 
-    OpenDDS::Model::WriterSync ws(writer); 
+    OpenDDS::Model::WriterSync ws(writer);
     {
       // Write samples
       data1::Message message;

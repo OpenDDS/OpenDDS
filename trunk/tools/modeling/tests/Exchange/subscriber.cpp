@@ -11,7 +11,7 @@
 #include <model/NullReaderListener.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
-  public: 
+  public:
     ReaderListener(bool& disposed) : _disposed(disposed)
     { }
   virtual void on_data_available(

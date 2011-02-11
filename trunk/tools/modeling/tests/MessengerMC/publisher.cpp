@@ -60,7 +60,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     // Wait for samples to be acknowledged
     std::cout << "pub done, waiting for ack signal" << std::endl;
     FileSystemSignal(2).wait_timeout(10);
-    
+
     // END OF EXISTING MESSENGER EXAMPLE CODE
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");

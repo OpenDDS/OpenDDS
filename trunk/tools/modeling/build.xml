@@ -7,7 +7,7 @@
             <pathelement path="${extra.plugins}"/>
         </path>
         <echo>${toString:pluginpath}</echo>
-        <eclipse.buildScript elements="feature@org.opendds.modeling.feature" 
+        <eclipse.buildScript elements="feature@org.opendds.modeling.feature"
                              buildDirectory="${basedir}"
                              pluginPath="${toString:pluginpath}"/>
     </target>

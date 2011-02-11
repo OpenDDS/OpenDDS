@@ -20,11 +20,11 @@ OpenDDS::Model::NullSubscriberListener::~NullSubscriberListener()
   }
 }
 
-void 
+void
 OpenDDS::Model::NullSubscriberListener::on_data_on_readers(
   DDS::Subscriber_ptr /* subs */
 ) ACE_THROW_SPEC((CORBA::SystemException))
-{  
+{
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) NullSubscriberListener::on_data_on_readers()\n")));

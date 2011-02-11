@@ -13,7 +13,7 @@
 #include <model/NullReaderListener.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
-  
+
   public:
     ReaderListener(bool& complete_flag);
   private:

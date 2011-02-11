@@ -85,7 +85,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
                           ACE_TEXT(" publisher has wrong partition value\n")),
                          -1);
     }
-    
+
     if (pub_qos.presentation.access_scope != DDS::TOPIC_PRESENTATION_QOS) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")

@@ -72,7 +72,7 @@ OpenDDS::Model::Entities::participant( const std::string& name)
     ));
     return 0;
   }
-  
+
   // Create it.
   ParticipantProfile* profile = where->second;
   if( OpenDDS::DCPS::DCPS_debug_level>1) {

@@ -134,7 +134,7 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
                          sizeof(snd_size)) < 0
       && errno != ENOTSUP) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")  
+                      ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastDataLink::join: ")
                       ACE_TEXT("ACE_OS::setsockopt SNDBUF failed to set the send buffer size to %d errno %m\n"),
                       snd_size),
