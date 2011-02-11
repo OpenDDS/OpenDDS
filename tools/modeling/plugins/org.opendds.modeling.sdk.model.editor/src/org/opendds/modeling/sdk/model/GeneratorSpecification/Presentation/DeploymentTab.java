@@ -17,13 +17,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Widget;
 
 public class DeploymentTab extends StructuredViewer {
-	// A TreeViewer with the protected abstract StructuredViewer methods
+	// A TableViewer with protected abstract methods
 	// exposed so that we can simply delegate to them.
-	protected TreeViewerDelegate treeViewer;
+	protected TableViewerDelegate viewer;
 
 	protected Composite control;
 
@@ -46,11 +46,11 @@ public class DeploymentTab extends StructuredViewer {
 		label.setText("Deployment Environment Variables");
 		label.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
 
-		Composite treePane = new Composite(panel,0);
-		treePane.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
+		Composite listPane = new Composite(panel,0);
+		listPane.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		treePane.setLayout( new FillLayout(SWT.VERTICAL));
-		treeViewer = new TreeViewerDelegate( treePane);
+		listPane.setLayout( new FillLayout(SWT.VERTICAL));
+		viewer = new TableViewerDelegate( listPane);
 		
 		// Right Panel
 		panel = new Composite(control, 0);
@@ -70,7 +70,7 @@ public class DeploymentTab extends StructuredViewer {
 	 */
 	@Override
 	public void addDragSupport(int operations, Transfer[] transferTypes, DragSourceListener listener) {
-		treeViewer.addDragSupport(operations, transferTypes, listener);
+		viewer.addDragSupport(operations, transferTypes, listener);
 	}
 
 	/* (non-Javadoc)
@@ -78,7 +78,7 @@ public class DeploymentTab extends StructuredViewer {
 	 */
 	@Override
 	public void addDropSupport(int operations, Transfer[] transferTypes, final DropTargetListener listener) {
-		treeViewer.addDropSupport(operations, transferTypes, listener);
+		viewer.addDropSupport(operations, transferTypes, listener);
 	}
 
 	/*
@@ -86,7 +86,7 @@ public class DeploymentTab extends StructuredViewer {
 	 */
 	@Override
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
-		treeViewer.addSelectionChangedListener(listener);
+		viewer.addSelectionChangedListener(listener);
 	}
 
 	/* (non-Javadoc)
@@ -94,7 +94,7 @@ public class DeploymentTab extends StructuredViewer {
 	 */
 	@Override
 	protected Widget doFindInputItem(Object element) {
-		return treeViewer.doFindInputItem(element);
+		return viewer.doFindInputItem(element);
 	}
 
 	/* (non-Javadoc)
@@ -102,7 +102,7 @@ public class DeploymentTab extends StructuredViewer {
 	 */
 	@Override
 	protected Widget doFindItem(Object element) {
-		return treeViewer.doFindItem(element);
+		return viewer.doFindItem(element);
 	}
 
 	/* (non-Javadoc)
@@ -110,7 +110,7 @@ public class DeploymentTab extends StructuredViewer {
 	 */
 	@Override
 	protected void doUpdateItem(Widget item, Object element, boolean fullMap) {
-		treeViewer.doUpdateItem(item, element, fullMap);
+		viewer.doUpdateItem(item, element, fullMap);
 	}
 
 	/*
@@ -118,7 +118,7 @@ public class DeploymentTab extends StructuredViewer {
 	 */
 	@Override
 	public ISelection getSelection() {
-		return treeViewer.getSelection();
+		return viewer.getSelection();
 	}
 
 	/* (non-Javadoc)
@@ -126,7 +126,7 @@ public class DeploymentTab extends StructuredViewer {
 	 */
 	@Override
 	protected List<?> getSelectionFromWidget() {
-		return treeViewer.getSelectionFromWidget();
+		return viewer.getSelectionFromWidget();
 	}
 
 	/* (non-Javadoc)
@@ -134,7 +134,7 @@ public class DeploymentTab extends StructuredViewer {
 	 */
 	@Override
 	protected void inputChanged(Object input, Object oldInput) {
-		treeViewer.inputChanged(input, oldInput);
+		viewer.inputChanged(input, oldInput);
 	}
 
 	/* (non-Javadoc)
@@ -142,7 +142,7 @@ public class DeploymentTab extends StructuredViewer {
 	 */
 	@Override
 	protected void internalRefresh(Object element) {
-		treeViewer.internalRefresh(element);
+		viewer.internalRefresh(element);
 	}
 	
 	/*
@@ -150,7 +150,7 @@ public class DeploymentTab extends StructuredViewer {
 	 */
 	@Override
     public void removeSelectionChangedListener( ISelectionChangedListener listener) {
-    	treeViewer.removeSelectionChangedListener(listener);
+    	viewer.removeSelectionChangedListener(listener);
     }
 
 	/* (non-Javadoc)
@@ -158,7 +158,7 @@ public class DeploymentTab extends StructuredViewer {
 	 */
 	@Override
 	public void reveal(Object element) {
-		treeViewer.reveal( element);
+		viewer.reveal( element);
 
 	}
 
@@ -170,7 +170,7 @@ public class DeploymentTab extends StructuredViewer {
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void setSelectionToWidget(List l, boolean reveal) {
-		treeViewer.setSelectionToWidget(l, reveal);
+		viewer.setSelectionToWidget(l, reveal);
 	}
 
 	/* (non-Javadoc)
@@ -181,8 +181,8 @@ public class DeploymentTab extends StructuredViewer {
 		return control;
 	}
 	
-	public Control getTreeControl() {
-		return treeViewer.getControl();
+	public Control getTableControl() {
+		return viewer.getControl();
 	}
 
 	// From TreeViewer
@@ -192,14 +192,14 @@ public class DeploymentTab extends StructuredViewer {
 	 */
 	@Override
 	public void setContentProvider(IContentProvider provider) {
-		treeViewer.setContentProvider(provider);
+		viewer.setContentProvider(provider);
 	}
 
 	// Cannot override the final StructuredViewer implementation.  This
 	// may cause some unforseen issues if code using the StructuredViewer
 	// interfaces uses this tab form instead.
-	public void setTreeInput(Object input) {
-		treeViewer.setInput(input);
+	public void setTableInput(Object input) {
+		viewer.setInput(input);
 	}
 
 	
@@ -208,7 +208,11 @@ public class DeploymentTab extends StructuredViewer {
 	 */
 	@Override
 	public void setLabelProvider(IBaseLabelProvider labelProvider) {
-		treeViewer.setLabelProvider(labelProvider);
+		viewer.setLabelProvider(labelProvider);
+	}
+
+	public void setColumnProperties(String[] strings) {
+		viewer.setColumnProperties(strings);
 	}
 
 	/*
@@ -216,10 +220,10 @@ public class DeploymentTab extends StructuredViewer {
 	 */
 	@Override
 	public void setSelection( ISelection selection) {
-		treeViewer.setSelection( selection);
+		viewer.setSelection( selection);
 	}
 	
-	public Tree getTree() {
-		return treeViewer.getTree();
+	public Table getTable() {
+		return viewer.getTable();
 	}
 }
