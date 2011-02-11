@@ -139,6 +139,7 @@ public class SdkGenerator {
 		}
 
 		Result result = null;
+		BufferedOutputStream bos = null;
 		try {
 			URL targetUrl = fileProvider.fromWorkspace(targetDirName, true);
 			if( targetUrl == null) {
@@ -163,7 +164,7 @@ public class SdkGenerator {
 				return; // no need to re-generate
 			}
 
-			result = new StreamResult(new BufferedOutputStream(new FileOutputStream(output)));
+			result = new StreamResult(bos = new BufferedOutputStream(new FileOutputStream(output)));
 
 		} catch (Exception e) {
 			errorHandler.error(IErrorHandler.Severity.ERROR, which.getText(),
@@ -174,6 +175,13 @@ public class SdkGenerator {
 		Source source = parsedGeneratorFile.getSource( which.needsResolvedModel()? transformer: null);
 		if( source != null) {
 			transformer.transform(which, source, result);
+			try {
+				bos.close();
+			} catch (IOException ioe) {
+				errorHandler.error(IErrorHandler.Severity.ERROR, ioe.getMessage(),
+						"Unable to close the output file: " , ioe);
+				return;				
+			}
 		}
 		
 		try {
