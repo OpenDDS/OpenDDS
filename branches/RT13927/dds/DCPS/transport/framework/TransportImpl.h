@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
@@ -140,7 +139,12 @@ public:
   /// associations will be marked as FULLTY_ASSOCIATED.
   void check_fully_association();
 
+  /// Diagnostic aid.
+  void dump();
+  void dump(ostream& os);
+
   TransportIdType get_transport_id();
+  ACE_TString get_transport_id_description();
   void set_transport_id(const TransportIdType& tid);
   const FactoryIdType& get_factory_id();
   void set_factory_id(const FactoryIdType& fid);

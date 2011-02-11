@@ -1,3 +1,205 @@
+Thu Feb 10 16:42:18 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Set send buffer to ACE_DEFAULT_MAX_SOCKET_BUFSIZ if it's defined
+          (receive buffer is already configurable).
+
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+
+          Set send and receive buffers to ACE_DEFAULT_MAX_SOCKET_BUFSIZ
+          if it's defined.
+
+Thu Feb 10 15:58:54 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+
+          Removed trailing white space.
+
+Wed Feb  9 23:48:56 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed further WCHAR problems.
+
+Wed Feb  9 22:24:04 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.cpp:
+
+          Wrapped name parameter in ACE_TEXT when calling formatNameForDump().
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Removed part of debug message that shouldn't have been committed.
+
+Wed Feb  9 14:53:48 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+
+          Changed formatNameForDump() method to take a ACE_TString.
+
+Tue Feb  8 16:36:38 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/udp/UdpConfiguration.h:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.cpp:
+
+          Refactored dump of transport configuration parameters so that all parameters
+          are logged as one block so they're not spread out in the debug output.
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Added get_transport_id_description() for use in debug output.
+          It adds a description to the transport id when the id is for a default
+          transport id or BIT transport.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Added process and thread to debug messages.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Added dump of transport parameters to error and debug messages.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Corrected spelling errors.
+
+        * dds/monitor/README:
+        * tests/DCPS/Federation/run_test.pl:
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+
+          Changed remaining references to odds_monitor to monitor.
+
+        * tests/DCPS/MultiRepoTest/DataWriterListenerImpl.h:
+
+          Added \n to end of debug message.
+
+        * tests/DCPS/MultiRepoTest/DataWriterListenerImpl.cpp:
+
+          Corrected class name in comment.
+
+Mon Feb  7 14:21:54 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added "ERROR:" to error messages.
+
+        * dds/DCPS/InstanceState.cpp:
+
+          Changed handle_timeout() for autopurging samples to only
+          generate debug message DCPS_debug_level > 0 and changed
+          the message from LM_WARNING to LM_NOTICE.  Did this because
+          a warning infers to some that the software isn't working
+          correctly. However, autopurging is a condition where the
+          software is working correctly, but that may require special
+          handling.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Changed messages that command line option is being used
+          in attempt to make them clearer and that they are notices.
+          Changed from (DCPSDebugLevel is the option in this example):
+            ignore DCPSDebugLevel config value, use command option.
+          Changed to:
+            NOTICE: using DCPSDebugLevel value from command option
+            (overrides value if it's in config file)
+
+          Changed debug message for get_data_durability_cache() from
+          LM_ERROR to LM_WARNING because it's a debug level 1 warning
+          and failing to create persistent cache falls back on transient
+          behaviour.
+
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+
+          Changed "max_samples_per_packet is adjusted from %u to %u"
+          debug message from LM_WARNING to LM_NOTICE and added "NOTICE:"
+          to beginning of message.
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Changed debug warning messages of the type " <option>
+          is not defined in config - using code default." from
+          LM_WARNING to LM_NOTICE and added "NOTICE" to beginning
+          of message.
+
+          Changed debug warning messages of the type " missing
+          VALUE for "<option>" in config file - using code default."
+          to "WARNING: "<option>" is defined in config file, but is
+          missing a value - using code default."
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Added "ERROR:" to error message when get_or_create_factory()
+          encounters a transport that is not registered.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+          Changed multiple debug messages to LM_NOTICE for similar
+          reasons as noted above.
+
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+          Corrected typo.
+
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+
+          Changed "WARNING: file configuration test not implemented"
+          to "NOTICE: file configuration test not implemented".
+
+Fri Feb  4 23:09:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * svn:ignore properties
+
+          Set svn:ignore for generated source files, as not all users will
+          have the same svn config value for global-ignores with patterns like
+          *C.h, *C.cpp, etc.
+
+Fri Feb  4 22:44:29 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * many files
+
+          Removed per-file copyright statements to avoid the need for massive
+          updates every year.  The OpenDDS distribution as a whole has
+          copyright info in the top-level LICENSE file.
+
+Wed Jan 19 22:23:03 UTC 2011  Chris Cleeland  <cleeland@ociweb.com>
+
+        * tests/DCPS/GroupPresentation/Messenger.idl:
+        * tests/DCPS/GroupPresentation/Writer.cpp:
+
+          Changed IDL to use "unsigned long long" for subject_id since the
+          thread ID is what is used as subject_id value, and on 64-bit
+          platforms the thread ID can overflow a long.
+
 Mon Jan 10 23:44:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/FilterEvaluator.h:
@@ -82,7 +284,7 @@ Wed Dec 15 01:01:54 UTC 2010  Adam Mitz  <mitza@ociweb.com>
         * dds/idl/marshal_generator.cpp:
         * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
 
-          Fixed a bug where opendds_idl would generate uncompilable code for
+          Fixed a bug where opendds_idl would generate noncompilable code for
           boolean-discriminated unions.
           Added regression tests for both this issue and one fixed in the
           previous commit.

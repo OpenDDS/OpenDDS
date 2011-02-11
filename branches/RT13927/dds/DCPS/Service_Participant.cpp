@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
@@ -285,8 +284,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
         if (config_fname == ACE_TEXT("")) {
           if (DCPS_debug_level) {
-            ACE_DEBUG((LM_INFO,
-                       ACE_TEXT("(%P|%t) INFO: not using file configuration - no configuration ")
+            ACE_DEBUG((LM_NOTICE,
+                       ACE_TEXT("(%P|%t) NOTICE: not using file configuration - no configuration ")
                        ACE_TEXT("file specified.\n")));
           }
 
@@ -297,8 +296,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
                                    ACE_TEXT("r"));
 
           if (!in) {
-            ACE_DEBUG((LM_INFO,
-                       ACE_TEXT("(%P|%t) INFO: not using file configuration - ")
+            ACE_DEBUG((LM_WARNING,
+                       ACE_TEXT("(%P|%t) WARNING: not using file configuration - ")
                        ACE_TEXT("can not open \"%s\" for reading. %p\n"),
                        config_fname.c_str(), ACE_TEXT("fopen")));
 
@@ -307,7 +306,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
             if (this->load_configuration() != 0) {
               ACE_ERROR((LM_ERROR,
-                         ACE_TEXT("(%P|%t) Service_Participant::get_domain_participant_factory: ")
+                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: ")
                          ACE_TEXT("load_configuration() failed.\n")));
               return DDS::DomainParticipantFactory::_nil();
             }
@@ -630,8 +629,8 @@ Service_Participant::initializeScheduling()
   //
   if (this->schedulerString_.length() == 0) {
     if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) INFO: Service_Participant::intializeScheduling() - ")
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::intializeScheduling() - ")
                  ACE_TEXT("no scheduling policy specified, not setting policy.\n")));
     }
 
@@ -665,8 +664,8 @@ Service_Participant::initializeScheduling()
     // Attempt to set the scheduling policy.
     //
 #ifdef ACE_WIN32
-    ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: Service_Participant::initializeScheduling() - ")
+    ACE_DEBUG((LM_NOTICE,
+               ACE_TEXT("(%P|%t) NOTICE: Service_Participant::initializeScheduling() - ")
                ACE_TEXT("scheduling is not implemented on Win32.\n")));
 #else
     ACE_Sched_Params params(
@@ -1255,7 +1254,7 @@ Service_Participant::load_configuration()
 
   if ((status = this->cf_.open()) != 0)
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Service_Participant::load_configuration ")
+                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
                       ACE_TEXT("open() returned %d\n"),
                       status),
                      -1);
@@ -1265,7 +1264,7 @@ Service_Participant::load_configuration()
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t)Service_Participant::load_configuration ")
+                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
                       ACE_TEXT("import_config () returned %d\n"),
                       status),
                      -1);
@@ -1275,7 +1274,7 @@ Service_Participant::load_configuration()
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Service_Participant::load_configuration ")
+                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
                       ACE_TEXT("load_common_configuration () returned %d\n"),
                       status),
                      -1);
@@ -1285,7 +1284,7 @@ Service_Participant::load_configuration()
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Service_Participant::load_configuration ")
+                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
                       ACE_TEXT("load_domain_configuration () returned %d\n"),
                       status),
                      -1);
@@ -1295,7 +1294,7 @@ Service_Participant::load_configuration()
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Service_Participant::load_configuration ")
+                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
                       ACE_TEXT("load_repo_configuration () returned %d\n"),
                       status),
                      -1);
@@ -1305,7 +1304,7 @@ Service_Participant::load_configuration()
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) Service_Participant::load_configuration ")
+                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
                       ACE_TEXT("load_transport_configuration () returned %d\n"),
                       status),
                      -1);
@@ -1324,8 +1323,8 @@ Service_Participant::load_common_configuration()
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // a common section. The code default configuration will be used.
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t)Service_Participant::load_common_configuration ")
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_common_configuration ")
                  ACE_TEXT("failed to open section %s\n"),
                  COMMON_SECTION_NAME));
     }
@@ -1334,17 +1333,15 @@ Service_Participant::load_common_configuration()
 
   } else {
     if (got_debug_level) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) ignore DCPSDebugLevel config value, use command option.\n")));
-
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSDebugLevel value from command option (overrides value if it's in config file).\n")));
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSDebugLevel"), DCPS_debug_level, int)
     }
 
     if (got_info) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) ignore DCPSInfoRepo config value, use command option.\n")));
-
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSInfoRepo value from command option (overrides value if it's in config file).\n")));
     } else {
       ACE_TString value;
       GET_CONFIG_STRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSInfoRepo"), value)
@@ -1352,57 +1349,50 @@ Service_Participant::load_common_configuration()
     }
 
     if (got_chunks) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) ignore DCPSChunks config value, use command option.\n")));
-
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSChunks value from command option (overrides value if it's in config file).\n")));
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSChunks"), this->n_chunks_, size_t)
     }
 
     if (got_chunk_association_multiplier) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) ignore DCPSChunkAssociationMutltiplier config value, use command option.\n")));
-
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSChunkAssociationMutltiplier value from command option (overrides value if it's in config file).\n")));
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSChunkAssociationMutltiplier"), this->association_chunk_multiplier_, size_t)
     }
 
     if (got_bit_transport_port) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) ignore DCPSBitTransportPort config value, use command option.\n")));
-
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSBitTransportPort value from command option (overrides value if it's in config file).\n")));
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSBitTransportPort"), this->bitTransportPortMap_[ DEFAULT_REPO], int)
     }
 
     if (got_bit_transport_ip) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) ignore DCPSBitTransportIPAddress config value, use command option.\n")));
-
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSBitTransportIPAddress value from command option (overrides value if it's in config file).\n")));
     } else {
       GET_CONFIG_STRING_VALUE(this->cf_, sect, ACE_TEXT("DCPSBitTransportIPAddress"), this->bitTransportIpMap_[ DEFAULT_REPO])
     }
 
     if (got_liveliness_factor) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) ignore DCPSLivelinessFactor config value, use command option.\n")));
-
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSLivelinessFactor value from command option (overrides value if it's in config file).\n")));
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSLivelinessFactor"), this->liveliness_factor_, int)
     }
 
     if (got_bit_lookup_duration_msec) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) ignore DCPSBitLookupDurationMsec config value, use command option.\n")));
-
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSBitLookupDurationMsec value from command option (overrides value if it's in config file).\n")));
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSBitLookupDurationMsec"), this->bit_lookup_duration_msec_, int)
     }
 
     if (got_bit_flag) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) ignore DCPSBit config value, use command option.\n")));
-
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSBit value from command option (overrides value if it's in config file).\n")));
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSBit"), this->bit_enabled_, int)
     }
@@ -1439,9 +1429,9 @@ Service_Participant::load_domain_configuration()
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any domain (sub)section. The code default configuration will be used.
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration ")
-                 ACE_TEXT("failed to open [%s] section.\n"),
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_configuration ")
+                 ACE_TEXT("failed to open [%s] section - using code default.\n"),
                  DOMAIN_SECTION_NAME));
     }
 
@@ -1461,7 +1451,7 @@ Service_Participant::load_domain_configuration()
 
       if (0 != this->cf_.open_section(domainKey, sectionName.c_str(), 0, sectionKey)) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration ")
+                   ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_domain_configuration ")
                    ACE_TEXT("Unable to open [%s] section.\n"),
                    sectionName.c_str()));
         continue;
@@ -1471,7 +1461,7 @@ Service_Participant::load_domain_configuration()
 
       if (0 != this->cf_.get_string_value(sectionKey, ACE_TEXT("DomainId"), domainIdString)) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration ")
+                   ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_domain_configuration ")
                    ACE_TEXT("Unable to obtain value for DomainId in [%s] section\n"),
                    sectionName.c_str()));
         continue;
@@ -1490,7 +1480,7 @@ Service_Participant::load_domain_configuration()
 
       if (0 != this->cf_.get_string_value(sectionKey, ACE_TEXT("DomainRepoKey"), keyString)) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration ")
+                   ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_domain_configuration ")
                    ACE_TEXT("Unable to obtain value for DomainRepoKey in [%s] section\n"),
                    sectionName.c_str()));
         continue;
@@ -1527,8 +1517,8 @@ Service_Participant::load_repo_configuration()
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any domain (sub)section. The code default configuration will be used.
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration ")
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_repo_configuration ")
                  ACE_TEXT("failed to open [%s] section.\n"),
                  REPO_SECTION_NAME));
     }
@@ -1549,7 +1539,7 @@ Service_Participant::load_repo_configuration()
 
       if (0 != this->cf_.open_section(domainKey, sectionName.c_str(), 0, sectionKey)) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration ")
+                   ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_repo_configuration ")
                    ACE_TEXT("Unable to open [%s] section.\n"),
                    sectionName.c_str()));
         continue;
@@ -1559,7 +1549,7 @@ Service_Participant::load_repo_configuration()
 
       if (0 != this->cf_.get_string_value(sectionKey, ACE_TEXT("RepositoryKey"), keyString)) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration ")
+                   ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_repo_configuration ")
                    ACE_TEXT("Unable to obtain value for RepositoryKey in [%s] section\n"),
                    sectionName.c_str()));
         continue;
@@ -1578,7 +1568,7 @@ Service_Participant::load_repo_configuration()
 
       if (0 != this->cf_.get_string_value(sectionKey, ACE_TEXT("RepositoryIor"), repoIor)) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) Service_Participant::load_repo_configuration ")
+                   ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_repo_configuration ")
                    ACE_TEXT("Unable to obtain value for RepositoryIor in [%s] section\n"),
                    sectionName.c_str()));
         continue;
@@ -1662,8 +1652,8 @@ Service_Participant::get_data_durability_cache(
 
       } catch (const std::exception& ex) {
         if (DCPS_debug_level > 0) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) Service_Participant::get_data_durability_cache ")
+          ACE_ERROR((LM_WARNING,
+                     ACE_TEXT("(%P|%t) WARNING: Service_Participant::get_data_durability_cache ")
                      ACE_TEXT("failed to create PERSISTENT cache, falling back on ")
                      ACE_TEXT("TRANSIENT behavior: %C\n"), ex.what()));
         }

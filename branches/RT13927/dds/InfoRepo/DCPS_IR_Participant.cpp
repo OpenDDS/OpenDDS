@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
@@ -211,8 +210,8 @@ int DCPS_IR_Participant::add_publication(DCPS_IR_Publication* pub)
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       OpenDDS::DCPS::RepoIdConverter part_converter(id_);
       OpenDDS::DCPS::RepoIdConverter pub_converter(pubId);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Participant::add_publication: ")
+      ACE_ERROR((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: DCPS_IR_Participant::add_publication: ")
                  ACE_TEXT("participant %C attempted to add existing publication %C.\n"),
                  std::string(part_converter).c_str(),
                  std::string(pub_converter).c_str()));
@@ -331,8 +330,8 @@ int DCPS_IR_Participant::add_subscription(DCPS_IR_Subscription* sub)
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       OpenDDS::DCPS::RepoIdConverter part_converter(id_);
       OpenDDS::DCPS::RepoIdConverter sub_converter(subId);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Participant::add_subscription: ")
+      ACE_ERROR((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: DCPS_IR_Participant::add_subscription: ")
                  ACE_TEXT("participant %C attempted to add existing subscription %C.\n"),
                  std::string(part_converter).c_str(),
                  std::string(sub_converter).c_str()));
@@ -451,8 +450,8 @@ int DCPS_IR_Participant::add_topic_reference(DCPS_IR_Topic* topic)
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       OpenDDS::DCPS::RepoIdConverter part_converter(id_);
       OpenDDS::DCPS::RepoIdConverter topic_converter(topicId);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) WARNING: DCPS_IR_Participant::add_topic_reference: ")
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: DCPS_IR_Participant::add_topic_reference: ")
                  ACE_TEXT("participant %C attempted to add existing topic %C.\n"),
                  std::string(part_converter).c_str(),
                  std::string(topic_converter).c_str()));

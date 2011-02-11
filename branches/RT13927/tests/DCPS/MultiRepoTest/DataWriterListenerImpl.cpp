@@ -18,7 +18,7 @@ DataWriterListenerImpl::DataWriterListenerImpl ( OpenDDS::DCPS::Service_Particip
 DataWriterListenerImpl::~DataWriterListenerImpl (void)
   {
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::~DataWriterListenerImpl Repo[ %d] "),
+      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::~DataWriterListenerImpl Repo[ %d]\n"),
       this->repo_
     ));
   }

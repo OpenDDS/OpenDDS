@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
@@ -107,7 +106,7 @@ Writer::svc()
     }
 
     Messenger::Message message;
-    message.subject_id = CORBA::Long(thr_id);
+    message.subject_id = CORBA::ULongLong(thr_id);
 
     DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 

@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
@@ -1877,7 +1876,7 @@ OpenDDS::DCPS::TransportSendStrategy::non_blocking_send(const iovec iov[], int n
 
   if (result == -1) {
     if ((errno == EWOULDBLOCK) || (errno == ENOBUFS)) {
-      VDBG((LM_DEBUG,"DBG:   "
+      VDBG((LM_DEBUG,"(%P|%t) DBG:   "
             "Backpressure encountered.\n"));
       // Set the back-pressure flag to true
       bp = 1;
@@ -1895,7 +1894,7 @@ OpenDDS::DCPS::TransportSendStrategy::non_blocking_send(const iovec iov[], int n
     }
   }
 
-  VDBG_LVL((LM_DEBUG,"DBG:   "
+  VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   "
             "The sendv() returned [%d].\n", result), 5);
 
   ACE::restore_non_blocking_mode(handle, val);

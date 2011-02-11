@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
@@ -18,6 +17,7 @@
 #include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
 #include "ace/os_include/netinet/os_tcp.h"
 #include "ace/OS_NS_arpa_inet.h"
+#include <sstream>
 
 #if !defined (__ACE_INLINE__)
 #include "SimpleTcpConnection.inl"
@@ -365,9 +365,12 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
   ACE_SOCK_Connector connector;
 
   if (connector.connect(this->peer(), remote_address) != 0) {
+    std::stringstream os;
+    this->tcp_config_->dump(os);
+
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Failed to connect. %p\n"),
-                      ACE_TEXT("connect")),
+                      ACE_TEXT("(%P|%t) ERROR: Failed to connect. %p\n")
+                      ACE_TEXT("connect\n%C"), os.str().c_str()),
                      -1);
 
   } else {
@@ -613,12 +616,14 @@ OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_i()
 
     if (ret == -1) {
       if (this->tcp_config_->conn_retry_attempts_ > 0) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) we tried and failed to re-establish connection to %C:%d.\n",
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) we tried and failed to re-establish connection on transport: %C to %C:%d.\n",
+                   this->link_->get_transport_impl()->get_transport_id_description().c_str(),
                    this->remote_address_.get_host_addr(),
                    this->remote_address_.get_port_number()));
 
       } else {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) we did not try to re-establish connection to %C:%d.\n",
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) we did not try to re-establish connection on transport: %C to %C:%d.\n",
+                   this->link_->get_transport_impl()->get_transport_id_description().c_str(),
                    this->remote_address_.get_host_addr(),
                    this->remote_address_.get_port_number()));
       }
@@ -628,7 +633,8 @@ OpenDDS::DCPS::SimpleTcpConnection::active_reconnect_i()
       this->send_strategy_->terminate_send();
 
     } else {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) re-established connection to %C:%d.\n",
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) re-established connection on transport: %C to %C:%d.\n",
+                 this->link_->get_transport_impl()->get_transport_id_description().c_str(),
                  this->remote_address_.get_host_addr(),
                  this->remote_address_.get_port_number()));
       this->reconnect_state_ = RECONNECTED_STATE;

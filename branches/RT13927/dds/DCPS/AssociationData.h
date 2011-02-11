@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
@@ -31,7 +30,7 @@ struct AssociationData {
       ACE_InputCDR cdr((const char*)remote_data_.data.get_buffer(), remote_data_.data.length());
 
       if (cdr >> this->network_order_address_ == 0) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) AssociationData::get_remote_address failed "
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: AssociationData::get_remote_address failed "
                   "to de-serialize the NetworkAddress\n"));
       }
       else {
