@@ -1,3 +1,20 @@
+Fri Feb 11 21:17:59 UTC 2011  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+          [r4291] 2011-02-11 20:40  martinezm
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/DeploymentTab.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore:
+
+          Work-in-progress. Implementing table view of the environment search
+          path variables.
+
+          [r4292] 2011-02-11 20:59  martinezm
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
+
+          Remove use of stale model artifacts.
+
 Fri Feb 11 20:22:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
