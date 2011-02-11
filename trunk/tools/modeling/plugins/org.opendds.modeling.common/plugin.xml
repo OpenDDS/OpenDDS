@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.opendds.modeling.common.PerspectiveFactory"
+            icon="icons/full/obj16/OpenDDSDiagramFile.gif"
+            id="org.opendds.modeling.common.perspective"
+            name="OpenDDS Modeling">
+      </perspective>
+   </extension>
+
+
+</plugin>

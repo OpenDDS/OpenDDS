@@ -1,0 +1,11 @@
+project(*xmlSubscriber) : dcpsexe, dds_model {
+  exename   = subscriber
+  after    += MessengerNoPub
+  libs     += MessengerNoPub
+  libpaths += model
+
+  Source_Files {
+    subscriber.cpp
+  }
+}
+

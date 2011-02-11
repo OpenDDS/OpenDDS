@@ -10,6 +10,9 @@ while (<SVN>) {
   chomp;
   next unless /^\?\s+(\S+)/;
   my @fp = fileparse $1;
+  if (scalar @ARGV) {
+    $fp[0] =~ s/$ARGV[0]/*/g;
+  }
   push(@{$dirs{$fp[1]}}, $fp[0]);
 }
 close SVN;

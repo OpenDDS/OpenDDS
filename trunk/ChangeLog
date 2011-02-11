@@ -1,3 +1,10 @@
+Fri Feb 11 15:48:09 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged the branch "RT13927", which includes the implementation
+          of the Eclipse-based OpenDDS Modeling SDK.
+          For details see the branch-specific change log at
+          docs/history/ChangeLog-RT13927.
+
 Fri Feb 11 13:16:02 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/udp/UdpDataLink.cpp:

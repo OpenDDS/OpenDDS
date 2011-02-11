@@ -1,0 +1,62 @@
+<lut:tables
+     xmlns:lut='http://www.opendds.org/modeling/schemas/Lut/1.0'>
+  <!--
+    ** $Id$
+    **
+    ** lookup type information
+    **
+    -->
+
+<!-- Lookup Table Magic. -->
+<lut:types>
+  <type type="Boolean"    cpptype="bool"            corbatype="boolean"/>
+  <type type="Char"       cpptype="char"            corbatype="char"/>
+  <type type="Octet"      cpptype="unsigned char"   corbatype="octet"/>
+  <type type="Double"     cpptype="double"          corbatype="double"/>
+  <type type="LongDouble" cpptype="long double"     corbatype="long double"/>
+  <type type="Float"      cpptype="float"           corbatype="float"/>
+  <type type="Short"      cpptype="short"           corbatype="short"/>
+  <type type="Integer"    cpptype="int"             corbatype="long"/>
+  <type type="Long"       cpptype="long"            corbatype="long"/>
+  <type type="LongLong"   cpptype="long long"       corbatype="long long"/>
+  <type type="UShort"     cpptype="unsigned short"  corbatype="unsigned short"/>
+  <type type="UInteger"   cpptype="unsigned int"    corbatype="unsigned long"/>
+  <type type="ULong"      cpptype="unsigned long"   corbatype="unsigned long"/>
+  <type type="ULongLong"  cpptype="unsigned long long" corbatype="unsigned long long"/>
+  <type type="String"     cpptype="char*"           corbatype="string"/>
+  <type type="Array"                                corbatype="array"/>
+  <type type="Sequence"                             corbatype="sequence"/>
+  <type type="Union"                                corbatype="union"/>
+  <type type="Enum"                                 corbatype="enum"/>
+  <type type="Struct"                               corbatype="struct"/>
+  <type type="WChar"                                corbatype="wchar"/>
+  <type type="WString"                              corbatype="wstring"/>
+</lut:types>
+
+<lut:policies>
+  <qos-field type="opendds:udQosPolicy" quote="true">user_data</qos-field>
+  <qos-field type="opendds:tdQosPolicy" quote="true">topic_data</qos-field>
+  <qos-field type="opendds:gdQosPolicy" quote="true">group_data</qos-field>
+  <qos-field type="opendds:efQosPolicy">entity_factory</qos-field>
+  <qos-field type="opendds:durabilityQosPolicy" kind_suffix="_DURABILITY_QOS">durability</qos-field>
+  <qos-field type="opendds:dsQosPolicy" history_kind_suffix="_HISTORY_QOS">durability_service</qos-field>
+  <qos-field type="opendds:deadlineQosPolicy">deadline</qos-field>
+  <qos-field type="opendds:lbQosPolicy">latency_budget</qos-field>
+  <qos-field type="opendds:livelinessQosPolicy" kind_suffix="_LIVELINESS_QOS">liveliness</qos-field>
+  <qos-field type="opendds:reliabilityQosPolicy" kind_suffix="_RELIABILITY_QOS">reliability</qos-field>
+  <qos-field type="opendds:destinationOrderQosPolicy" kind_suffix="_DESTINATIONORDER_QOS">destination_order</qos-field>
+  <qos-field type="opendds:historyQosPolicy" kind_suffix="_HISTORY_QOS">history</qos-field>
+  <qos-field type="opendds:rlQosPolicy">resource_limits</qos-field>
+  <qos-field type="opendds:tpQosPolicy">transport_priority</qos-field>
+  <qos-field type="opendds:lifespanQosPolicy">lifespan</qos-field>
+  <qos-field type="opendds:ownershipQosPolicy" kind_suffix="_OWNERSHIP_QOS">ownership</qos-field>
+  <qos-field type="opendds:osQosPolicy">ownership_strength</qos-field>
+  <qos-field type="opendds:presentationQosPolicy" access_scope_suffix="_PRESENTATION_QOS">presentation</qos-field>
+  <qos-field type="opendds:partitionQosPolicy" quote="true">partition</qos-field>
+  <qos-field type="opendds:tbfQosPolicy">time_based_filter</qos-field>
+  <qos-field type="opendds:wdlQosPolicy">writer_data_lifecycle</qos-field>
+  <qos-field type="opendds:rdlQosPolicy">reader_data_lifecycle</qos-field>
+</lut:policies>
+
+</lut:tables>
+
