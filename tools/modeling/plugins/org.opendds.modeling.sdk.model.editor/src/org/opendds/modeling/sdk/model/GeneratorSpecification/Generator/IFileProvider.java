@@ -7,6 +7,9 @@ import java.net.URL;
 public interface IFileProvider {
 
 	public abstract URL fromWorkspace(String fileName)
+	throws MalformedURLException;
+
+	public abstract URL fromWorkspace(String fileName, boolean directory)
 			throws MalformedURLException;
 
 	public abstract URL fromBundle(String fileName)

@@ -3,47 +3,69 @@ package org.opendds.modeling.sdk.model.GeneratorSpecification.Generator;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
 
 public class SdkGeneratorFactory {
 	private static final String PLUGINNAME = "org.opendds.modeling.sdk.model";
 	
-	public static SdkGenerator createSdkGenerator( Shell parent) {
-		IFileProvider fileProvider = createFileProvider();
-		IErrorHandler errorHandler = createErrorHandler( parent);
+	public static SdkGenerator createSdkGenerator(Shell parent, IEditorPart editor) {
+		IFileProvider fileProvider = createFileProvider(editor);
+		IErrorHandler errorHandler = createErrorHandler(parent);
 		
 		return createSdkGenerator( fileProvider, errorHandler);
 	}
 	
-	public static SdkGenerator createSdkGenerator( IFileProvider provider, IErrorHandler handler) {
+	public static SdkGenerator createSdkGenerator(IFileProvider provider, IErrorHandler handler) {
 		SdkGenerator generator = SdkGenerator.create(provider, handler);
 		generator.setGeneratorModel(new EmfGeneratorModel());
 		return generator;
 	}
 	
-	public static ParsedModelFile createParsedModelFile( Shell parent) {
-		IFileProvider fileProvider = createFileProvider();
-		IErrorHandler errorHandler = createErrorHandler( parent);
+	public static ParsedModelFile createParsedModelFile(Shell parent, IEditorPart editor) {
+		IFileProvider fileProvider = createFileProvider(editor);
+		IErrorHandler errorHandler = createErrorHandler(parent);
 		
 		return ParsedModelFile.create( fileProvider, errorHandler);
 	}
 		
-	public static IFileProvider createFileProvider() {
+	public static IFileProvider createFileProvider(final IEditorPart editor) {
 		return new IFileProvider() {
 			@Override
 			public URL fromWorkspace(String fileName) throws MalformedURLException {
-				IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
-				return workspace.getFile(new Path(fileName)).getLocationURI().toURL();
+				return fromWorkspace(fileName, false);
+			}
+			@Override
+			public URL fromWorkspace(String fileName, boolean directory) throws MalformedURLException {
+				return getResource(fileName, directory).getLocationURI().toURL();
+			}
+			private IResource getResource(String file, boolean directory) {
+				IPath path = new Path(file);
+				if (path.isAbsolute() || editor == null) {
+					IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
+					return workspace.getFile(path);
+				} else {
+					IEditorInput input = editor.getEditorInput();
+					IFileEditorInput fei = (IFileEditorInput) input;
+					IFile activeFile = fei.getFile();
+					IContainer parent = activeFile.getParent();
+					return directory ? parent.getFolder(path) : parent.getFile(path);
+				}
 			}
 			@Override
 			public URL fromBundle(String fileName) {
@@ -51,9 +73,8 @@ public class SdkGeneratorFactory {
 			}
 			@Override
 			public void refresh(String targetFolder) {
-				IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
 				try {
-					workspace.getFolder(new Path(targetFolder)).refreshLocal(IFile.DEPTH_ONE, null);
+					getResource(targetFolder, true).refreshLocal(IFile.DEPTH_ONE, null);
 				} catch (CoreException e) {
 					throw new RuntimeException(e);
 				}

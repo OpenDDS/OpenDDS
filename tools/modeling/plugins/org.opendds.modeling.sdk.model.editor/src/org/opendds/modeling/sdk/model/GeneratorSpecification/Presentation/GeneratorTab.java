@@ -51,9 +51,9 @@ public class GeneratorTab extends StructuredViewer {
 	protected ISelection selection = StructuredSelection.EMPTY;
 
 	public GeneratorTab(final Composite parent, GeneratorEditor generatorEditor) {
-		generator = SdkGeneratorFactory.createSdkGenerator(parent.getShell());
+		generator = SdkGeneratorFactory.createSdkGenerator(parent.getShell(), generatorEditor);
 		editor = generatorEditor;
-		
+
 		control = new Composite( parent, 0);
 		control.setLayout( new GridLayout( 2, false));
 
