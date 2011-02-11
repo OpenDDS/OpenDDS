@@ -135,7 +135,7 @@ private:
                   ACE_TEXT("(%P|%t) ERROR: ")
                   ACE_TEXT("DataLinkWatchdog::schedule_i: ")
                   ACE_TEXT("failed to register timer %p!\n"),
-                  "schedule_timer"), false);
+                  ACE_TEXT("schedule_timer")), false);
       }
     }
 

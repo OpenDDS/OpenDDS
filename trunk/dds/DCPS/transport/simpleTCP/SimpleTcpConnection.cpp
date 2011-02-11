@@ -365,12 +365,12 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
   ACE_SOCK_Connector connector;
 
   if (connector.connect(this->peer(), remote_address) != 0) {
-    std::stringstream os;
+    std::ostringstream os;
     this->tcp_config_->dump(os);
 
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Failed to connect. %p\n")
-                      ACE_TEXT("connect\n%C"), os.str().c_str()),
+                      ACE_TEXT("(%P|%t) ERROR: Failed to connect. %p\n%C"),
+                      ACE_TEXT("connect"), os.str().c_str()),
                      -1);
 
   } else {
