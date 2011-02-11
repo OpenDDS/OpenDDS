@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
@@ -37,8 +36,8 @@ class ACE_Data_Block;
     {                                                                            \
       if (OpenDDS::DCPS::Transport_debug_level > 0)                            \
       {                                                                          \
-        ACE_DEBUG ((LM_WARNING,                                                  \
-                    ACE_TEXT ("(%P|%t) \"%s\" is not defined in config ")         \
+        ACE_DEBUG ((LM_NOTICE,                                                   \
+                    ACE_TEXT ("(%P|%t) NOTICE: \"%s\" is not defined in config ")\
                     ACE_TEXT ("file - using code default.\n"),                   \
                     KEY));                                                       \
       }                                                                          \
@@ -48,8 +47,8 @@ class ACE_Data_Block;
       if (OpenDDS::DCPS::Transport_debug_level > 0)                            \
       {                                                                          \
         ACE_DEBUG ((LM_WARNING,                                                  \
-                    ACE_TEXT ("(%P|%t) missing VALUE for \"%s\" in config ")      \
-                    ACE_TEXT ("file - using code default.\n"),                   \
+                    ACE_TEXT ("(%P|%t) WARNING: \"%s\" is defined in config ")   \
+                    ACE_TEXT ("file, but is missing value - using code default.\n"), \
                     KEY));                                                       \
       }                                                                          \
     }                                                                            \
@@ -68,8 +67,8 @@ class ACE_Data_Block;
     {                                                                            \
       if (OpenDDS::DCPS::Transport_debug_level > 0)                              \
       {                                                                          \
-        ACE_DEBUG ((LM_WARNING,                                                  \
-                    ACE_TEXT ("(%P|%t) \"%s\" is not defined in config ")         \
+        ACE_DEBUG ((LM_NOTICE,                                                   \
+                    ACE_TEXT ("(%P|%t) NOTICE: \"%s\" is not defined in config ") \
                     ACE_TEXT ("file - using code default.\n"),                   \
                     KEY));                                                       \
       }                                                                          \
@@ -79,8 +78,8 @@ class ACE_Data_Block;
       if (OpenDDS::DCPS::Transport_debug_level > 0)                            \
       {                                                                          \
         ACE_DEBUG ((LM_WARNING,                                                  \
-                    ACE_TEXT ("(%P|%t) missing VALUE for \"%s\" in config ")      \
-                    ACE_TEXT ("file - using code default.\n"),                   \
+                    ACE_TEXT ("(%P|%t) WARNING: \"%s\" is defined in config ")   \
+                    ACE_TEXT ("file, but is missing value - using code default.\n"), \
                     KEY));                                                       \
       }                                                                          \
     }                                                                            \
@@ -97,8 +96,8 @@ class ACE_Data_Block;
     {                                                                            \
       if (OpenDDS::DCPS::Transport_debug_level > 0)                            \
       {                                                                          \
-        ACE_DEBUG ((LM_WARNING,                                                  \
-                    ACE_TEXT ("(%P|%t) \"%s\" is not defined in config ")         \
+        ACE_DEBUG ((LM_NOTICE,                                                   \
+                    ACE_TEXT ("(%P|%t) NOTICE: \"%s\" is not defined in config ") \
                     ACE_TEXT ("file - using code default.\n"),                   \
                     KEY));                                                       \
       }                                                                          \
@@ -108,8 +107,8 @@ class ACE_Data_Block;
       if (OpenDDS::DCPS::Transport_debug_level > 0)                            \
       {                                                                          \
         ACE_DEBUG ((LM_WARNING,                                                  \
-                    ACE_TEXT ("(%P|%t) missing VALUE for \"%s\" in config ")      \
-                    ACE_TEXT ("file - using code default.\n"),                   \
+                    ACE_TEXT ("(%P|%t) WARNING: \"%s\" is defined in config ")   \
+                    ACE_TEXT ("file, but is missing value - using code default.\n"), \
                     KEY));                                                       \
       }                                                                          \
     }                                                                            \

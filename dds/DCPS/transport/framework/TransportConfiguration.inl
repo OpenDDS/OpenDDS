@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
@@ -65,8 +64,8 @@ OpenDDS::DCPS::TransportConfiguration::adjust_config_value()
 
   if ((2 * max_samples_per_packet_ + 1) > MAX_SEND_BLOCKS) {
     max_samples_per_packet_ = (MAX_SEND_BLOCKS + 1) / 2 - 1;
-    ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("(%P|%t) \"max_samples_per_packet\" is adjusted from %u to %u\n"),
+    ACE_DEBUG((LM_NOTICE,
+               ACE_TEXT("(%P|%t) NOTICE: \"max_samples_per_packet\" is adjusted from %u to %u\n"),
                old_value, max_samples_per_packet_));
   }
 }

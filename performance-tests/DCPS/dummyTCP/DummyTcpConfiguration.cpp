@@ -3,7 +3,7 @@
 // $Id$
 #include "DummyTcp_pch.h"
 #include "DummyTcpConfiguration.h"
-
+#include <iostream>
 
 #if !defined (__ACE_INLINE__)
 #include "DummyTcpConfiguration.inl"
@@ -70,46 +70,16 @@ OpenDDS::DCPS::DummyTcpConfiguration::load (const TransportIdType& id,
 }
 
 void
-OpenDDS::DCPS::DummyTcpConfiguration::dump()
+OpenDDS::DCPS::DummyTcpConfiguration::dump(std::ostream& os)
 {
-  // Acquire lock on the log so the entire dump is output as a block
-  // (at least for each process).
-  ACE_Log_Msg::instance()->acquire();
+  TransportConfiguration::dump(os);
 
-  TransportConfiguration::dump();
-
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
-             ACE_TEXT("local_address: %C.\n"),
-             this->local_address_str_.c_str()));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
-             ACE_TEXT("enable_nagle_algorithm: %C.\n"),
-             (this->enable_nagle_algorithm_ ? "true" : "false")));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
-             ACE_TEXT("conn_retry_initial_delay: %d.\n"),
-             this->conn_retry_initial_delay_));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
-             ACE_TEXT("conn_retry_backoff_multiplier: %d.\n"),
-             this->conn_retry_backoff_multiplier_));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
-             ACE_TEXT("conn_retry_attempts: %d.\n"),
-            this->conn_retry_attempts_));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
-             ACE_TEXT("passive_reconnect_duration: %d.\n"),
-             this->passive_reconnect_duration_));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
-             ACE_TEXT("passive_connect_duration: %d.\n"),
-             this->passive_connect_duration_));
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) DummyTcpConfiguration::dump() - ")
-             ACE_TEXT("max_output_pause_period: %d.\n\n"),
-             this->max_output_pause_period_));
-
-  ACE_Log_Msg::instance()->acquire();
+  os << formatNameForDump(ACE_TEXT("local_address"))                 << this->local_address_str_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("enable_nagle_algorithm"))        << (this->enable_nagle_algorithm_ ? "true" : "false") << std::endl;
+  os << formatNameForDump(ACE_TEXT("conn_retry_initial_delay"))      << this->conn_retry_initial_delay_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("conn_retry_backoff_multiplier")) << this->conn_retry_backoff_multiplier_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("conn_retry_attempts"))           << this->conn_retry_attempts_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("passive_reconnect_duration"))    << this->passive_reconnect_duration_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("passive_connect_duration"))      << this->passive_connect_duration_ << std::endl;
+  os << formatNameForDump(ACE_TEXT("max_output_pause_period"))       << this->max_output_pause_period_ << std::endl;
 }

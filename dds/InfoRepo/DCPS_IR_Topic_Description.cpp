@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
@@ -403,7 +402,7 @@ void DCPS_IR_Topic_Description::associate(DCPS_IR_Publication* publication,
   publication->add_associated_subscription(subscription);
   subscription->add_associated_publication(publication);
 
-  //TBD - these called methods currenlty tell the associated publication and
+  //TBD - these called methods currently tell the associated publication and
   //      subscription about the association immediately.
   //      It would be better if the associations were sent after all
   //      associations were added.  This way the publication(s) and

@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
@@ -28,7 +27,7 @@ public:
                    ACE_Configuration_Heap& cf);
 
   /// Diagnostic aid.
-  virtual void dump();
+  virtual void dump(std::ostream& os);
 
   /// Describes the local endpoint to be used to accept
   /// passive connections.

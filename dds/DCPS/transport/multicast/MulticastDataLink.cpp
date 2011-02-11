@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
@@ -12,6 +11,7 @@
 #include "MulticastSessionFactory.h"
 #include "MulticastTransport.h"
 
+#include "ace/Default_Constants.h"
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
 #include "ace/Truncate.h"
@@ -110,7 +110,7 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
                       ACE_TEXT("MulticastDataLink::join: ")
                       ACE_TEXT("ACE_OS::setsockopt TTL failed.\n")),
                      false);
-        }
+  }
 
   int rcv_buffer_size = ACE_Utils::truncate_cast<int>(this->config_->rcv_buffer_size_);
   if (rcv_buffer_size != 0
@@ -123,7 +123,24 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
                       ACE_TEXT("MulticastDataLink::join: ")
                       ACE_TEXT("ACE_OS::setsockopt RCVBUF failed.\n")),
                      false);
-        }
+  }
+
+#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+  int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
+
+  if (ACE_OS::setsockopt(handle, SOL_SOCKET,
+                         SO_SNDBUF,
+                         (char *) &snd_size,
+                         sizeof(snd_size)) < 0
+      && errno != ENOTSUP) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")  
+                      ACE_TEXT("MulticastDataLink::join: ")
+                      ACE_TEXT("ACE_OS::setsockopt SNDBUF failed to set the send buffer size to %d errno %m\n"),
+                      snd_size),
+                     false);
+  }
+#endif /* ACE_DEFAULT_MAX_SOCKET_BUFSIZ */
 
   if (start(this->send_strategy_.in(), this->recv_strategy_.in()) != 0) {
     this->socket_.close();

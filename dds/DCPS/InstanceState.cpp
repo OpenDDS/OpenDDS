@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
@@ -82,12 +81,13 @@ OpenDDS::DCPS::InstanceState::handle_timeout(const ACE_Time_Value& /* current_ti
                    this->lock_,
                    0);
 
-  ACE_DEBUG((LM_WARNING,
-             ACE_TEXT("(%P|%t) WARNING:")
-             ACE_TEXT(" InstanceState::handle_timeout:")
-             ACE_TEXT(" autopurging samples with instance handle 0x%x!\n"),
-             this->handle_));
-
+  if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_NOTICE,
+               ACE_TEXT("(%P|%t) NOTICE:")
+               ACE_TEXT(" InstanceState::handle_timeout:")
+               ACE_TEXT(" autopurging samples with instance handle 0x%x!\n"),
+               this->handle_));
+  }
   this->release();
 
   return 0;

@@ -27,7 +27,7 @@ namespace OpenDDS
                           ACE_Configuration_Heap& cf);
 
         /// Diagnostic aid.
-        virtual void dump();
+        virtual void dump(std::ostream& os);
 
         /// Describes the local endpoint to be used to accept
         /// passive connections.
@@ -72,11 +72,11 @@ namespace OpenDDS
         /// The default is 2 seconds (2000 millseconds).
         int passive_reconnect_duration_;
 
-      /// The time period in milliseconds for the acceptor side
-      /// of a connection to wait for the connection.
-      /// The default is 0 (wait forever)
-      /// This currently doesn't apply to passive reconnections.
-      unsigned long passive_connect_duration_;
+        /// The time period in milliseconds for the acceptor side
+        /// of a connection to wait for the connection.
+        /// The default is 0 (wait forever)
+        /// This currently doesn't apply to passive reconnections.
+        unsigned long passive_connect_duration_;
     };
 
   } /* namespace DCPS */

@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
@@ -10,6 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportImpl.h"
 #include "DataLink.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
@@ -147,12 +147,7 @@ OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
   // Let our subclass take a shot at the configuration object.
   if (this->configure_i(config) == -1) {
     if (OpenDDS::DCPS::Transport_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("\n(%P|%t) TransportImpl::configure() - ")
-                 ACE_TEXT("transport_id: 0x%x.\n"),
-                 this->get_transport_id()));
-
-      config->dump();
+      dump();
     }
 
     // The subclass rejected the configuration attempt.
@@ -181,11 +176,12 @@ OpenDDS::DCPS::TransportImpl::configure(TransportConfiguration* config)
   }
 
   if (OpenDDS::DCPS::Transport_debug_level > 0) {
+    std::stringstream os;
+    dump(os);
+
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("\n(%P|%t) TransportImpl::configure() - ")
-               ACE_TEXT("transport_id: 0x%x.\n"),
-               this->get_transport_id()));
-    config->dump();
+               ACE_TEXT("\n(%P|%t) TransportImpl::configure()\n%C"),
+               os.str().c_str()));
   }
 
   return 0;
@@ -712,6 +708,38 @@ OpenDDS::DCPS::TransportImpl::get_transport_id()
   return this->transport_id_;
 }
 
+ACE_TString
+OpenDDS::DCPS::TransportImpl::get_transport_id_description()
+{
+  std::basic_ostringstream<ACE_TCHAR> oss;
+
+  oss << std::hex << this->transport_id_ << std::dec;
+  if (this->transport_id_ > BIT_ALL_TRAFFIC && this->transport_id_ < BIT_ALL_TRAFFIC + 10000) {
+    oss << " (BIT Transport Id for domain: " << this->transport_id_ - BIT_ALL_TRAFFIC << ")";
+  } else {
+    switch (this->transport_id_) {
+    case DEFAULT_SIMPLE_TCP_ID:
+      oss << " (Default Simple TCP Transport Id)";
+      break;
+    case DEFAULT_DUMMY_TCP_ID:
+      oss << " (Default Dummy TCP Transport Id)";
+      break;
+    case DEFAULT_UDP_ID:
+      oss << " (Default UDP Transport Id)";
+      break;
+    case DEFAULT_MULTICAST_ID:
+      oss << " (Default Multicast Transport Id)";
+      break;
+    case BIT_ALL_TRAFFIC:
+      oss << " (BIT Transport Id)";
+      break;
+    default:
+      ;
+    }
+  }
+  return oss.str().c_str();
+}
+
 void
 OpenDDS::DCPS::TransportImpl::set_transport_id(const TransportIdType& tid)
 {
@@ -736,4 +764,23 @@ OpenDDS::DCPS::TransportImpl::report()
   if (this->monitor_) {
     this->monitor_->report();
   }
+}
+
+void
+OpenDDS::DCPS::TransportImpl::dump()
+{
+  std::stringstream os;
+  dump(os);
+
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("\n(%P|%t) TransportImpl::dump() -\n%C"),
+             os.str().c_str()));
+}
+
+void
+OpenDDS::DCPS::TransportImpl::dump(ostream& os)
+{
+  os << TransportConfiguration::formatNameForDump(ACE_TEXT("id"))
+     << get_transport_id_description() << std::endl;
+  this->config_->dump(os);
 }

@@ -1,7 +1,6 @@
 /*
  * $Id$
  *
- * Copyright 2010 Object Computing, Inc.
  *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
@@ -69,11 +68,16 @@ public:
 
   /// Overwrite the default configurations with the configuration for the
   /// give transport_id in ACE_Configuration_Heap object.
-  virtual int  load(const TransportIdType& id,
-                    ACE_Configuration_Heap& config);
+  virtual int load(const TransportIdType& id,
+                   ACE_Configuration_Heap& config);
 
   /// Diagnostic aid.
-  virtual void dump();
+  void dump();
+  virtual void dump(std::ostream& os);
+
+  /// Format name of transport configuration parameter for use in
+  /// conjunction with dump(std::ostream& os).
+  static ACE_TString formatNameForDump(const ACE_TString& name);
 
   /// Flag used to marshall/demarshall bytes sent/received.
   bool swap_bytes_;
