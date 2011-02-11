@@ -1,3 +1,9 @@
+Fri Feb 11 13:16:02 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+
+          Moved setting of socket options to after socket is opened.
+
 Thu Feb 10 16:42:18 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.cpp:

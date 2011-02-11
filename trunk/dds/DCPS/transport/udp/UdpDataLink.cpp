@@ -42,6 +42,13 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     local_address = this->config_->local_address_;
   }
 
+  if (this->socket_.open(local_address) != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("UdpDataLink::open: open failed: %p\n")),
+                     false);
+  }
+
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
   int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
   int rcv_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
@@ -70,13 +77,6 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
                      false);
   }
 #endif /* ACE_DEFAULT_MAX_SOCKET_BUFSIZ */
-
-  if (this->socket_.open(local_address) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("UdpDataLink::open: open failed: %p\n")),
-                     false);
-  }
 
   if (start(this->send_strategy_.in(), this->recv_strategy_.in()) != 0) {
     stop_i();
