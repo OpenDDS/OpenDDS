@@ -11,7 +11,7 @@
         eType="#//TargetDir" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="instances" ordered="false"
         eType="#//Instances" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="searchPaths" eType="#//Environment"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="searchPaths" eType="#//SearchPaths"
         containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ModelFile">
@@ -22,11 +22,11 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         defaultValueLiteral="&quot;&lt;none>&quot;"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Environment">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="location" upperBound="-1"
-        eType="#//Location" containment="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="SearchPaths">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="searchLocation" upperBound="-1"
+        eType="#//SearchLocation" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Location">
+  <eClassifiers xsi:type="ecore:EClass" name="SearchLocation">
     <eStructuralFeatures xsi:type="ecore:EReference" name="variable" eType="#//LocationVariable"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="path" eType="#//LocationPath"

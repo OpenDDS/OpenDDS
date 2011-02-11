@@ -77,6 +77,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -85,6 +86,7 @@ import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -97,6 +99,8 @@ import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -1113,10 +1117,33 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				environmentViewer.setLabelProvider(new AdapterFactoryLabelProvider(
 						adapterFactory));
 
-				new AdapterFactoryTreeEditor(environmentViewer.getTree(),
-						adapterFactory);
+//				new AdapterFactoryListEditor(environmentViewer.getList(),
+//						adapterFactory);
 
-				// Do this specifically for the contained tree viewer here,
+				Table table = environmentViewer.getTable();
+				TableLayout layout = new TableLayout();
+				table.setLayout(layout);
+				table.setHeaderVisible(true);
+				table.setLinesVisible(true);
+
+				TableColumn variableColumn = new TableColumn(table, SWT.NONE);
+				layout.addColumnData(new ColumnWeightData(2, 100, true));
+				variableColumn.setText(getString("_UI_VariableColumn_label"));
+				variableColumn.setResizable(true);
+
+				TableColumn valueColumn = new TableColumn(table, SWT.NONE);
+				layout.addColumnData(new ColumnWeightData(3, 100, true));
+				valueColumn.setText(getString("_UI_PathColumn_label"));
+				valueColumn.setResizable(true);
+
+				environmentViewer.setColumnProperties(new String[] { "Variable", "Value" });
+				environmentViewer
+						.setContentProvider(new AdapterFactoryContentProvider(
+								adapterFactory));
+				environmentViewer.setLabelProvider(new AdapterFactoryLabelProvider(
+						adapterFactory));
+
+				// Do this specifically for the contained table viewer here,
 				// since we don't want the containing widget to intercept.
 				//
 				MenuManager contextMenu = new MenuManager("#PopUp");
@@ -1124,8 +1151,8 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				contextMenu.setRemoveAllWhenShown(true);
 				contextMenu.addMenuListener(this);
 				Menu menu = contextMenu.createContextMenu(environmentViewer
-						.getTreeControl());
-				environmentViewer.getTreeControl().setMenu(menu);
+						.getTableControl());
+				environmentViewer.getTableControl().setMenu(menu);
 				getSite().registerContextMenu(contextMenu,
 						new UnwrappingSelectionProvider(environmentViewer));
 
@@ -1162,7 +1189,7 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				if (root instanceof CodeGen) {
 					customizationViewer.setTreeInput(((CodeGen) root)
 							.getInstances());
-					environmentViewer.setTreeInput(((CodeGen) root)
+					environmentViewer.setTableInput(((CodeGen) root)
 							.getSearchPaths());
 				}
 			}

@@ -64,14 +64,15 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.opendds.modeling.common.Plugin;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.CodeGen;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Environment;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorFactory;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorPackage;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Instance;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Instances;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.Location;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.LocationPath;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.LocationVariable;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.ModelFile;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.SearchLocation;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.SearchPaths;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.TargetDir;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Transport;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.TransportOffset;
@@ -217,16 +218,21 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 
 		instances.getInstance().add(instance);
 		
-		Environment searchPaths = generatorFactory.createEnvironment();
+		SearchPaths searchPaths = generatorFactory.createSearchPaths();
 		codeGen.setSearchPaths(searchPaths);
 		
-		Location location = generatorFactory.createLocation();
+		SearchLocation searchLocation = generatorFactory.createSearchLocation();
+		searchLocation.setName("PROJECT_ROOT");
 		
 		LocationVariable locationVariable = generatorFactory.createLocationVariable();
-		locationVariable.setValue("DDS_ROOT");
-		location.setVariable(locationVariable);
+		locationVariable.setValue("PROJECT_ROOT");
+		searchLocation.setVariable(locationVariable);
+		
+		LocationPath locationPath = generatorFactory.createLocationPath();
+		locationPath.setValue(".");
+		searchLocation.setPath(locationPath);
 
-		searchPaths.getLocation().add(location);
+		searchPaths.getSearchLocation().add(searchLocation);
 		
 		return codeGen;
 	}
