@@ -1,3 +1,9 @@
+Fri Feb 11 21:45:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/plugin.properties:
+
+          Committing newly generated properties from EMF code generation.
+
 Fri Feb 11 21:23:49 UTC 2011  Mike Martinez  <martinez_m@lab.ociweb.com>
 
           [r4294] 2011-02-11 21:22  martinezm
