@@ -605,6 +605,10 @@ if ($needmpc) {
 
   my $static = ($opts{'static'} && $slash ne '/') ? '-static' : '';
 
+  if (!defined $ENV{'CIAO_ROOT'}) {
+    setenv('CIAO_ROOT', 'dont_use_ciao'); # otherwise MPC.cfg includes /MPC 
+  }
+
   print 'Running MPC to generate ', ($needmpc eq 'gnuace' ? 'makefiles' :
                                      'project files'), ".\n";
   print "mwc command line: -type $needmpc $feat $ws $static\n"
