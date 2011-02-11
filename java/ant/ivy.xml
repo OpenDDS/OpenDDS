@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+-->
+<ivy-module version="2.0">
+    <info organisation="opendds" module="org.opendds.ant"/>
+
+    <publications>
+        <artifact name="opendds-ant" type="jar"/>
+    </publications>
+</ivy-module>

@@ -5,7 +5,7 @@
     Author:  Steven Stallion
     Version: $Revision$
 -->
-<project name="opendds-ant" default="jar" basedir=".">
+<project name="opendds-ant" default="archive" basedir=".">
     <property name="build.dir" value="${basedir}/build"/>
     <property name="doc.dir" value="${basedir}/doc"/>
     <property name="lib.dir" value="${basedir}/lib"/>
@@ -13,7 +13,8 @@
     <property name="test.dir" value="${basedir}/test"/>
 
     <property environment="env"/>
-    <property file="build.properties"/>
+    
+    <property file="${basedir}/build.properties"/>
 
     <!--
         Project Paths
@@ -31,8 +32,8 @@
     <!--
         Project Targets
     -->
-    <target name="all" depends="clean, test, deploy"
-            description="Meta target for: clean, test, deploy"/>
+    <target name="all" depends="clean, test, archive"
+            description="Meta-target for: clean, test, archive"/>
 
     <target name="clean" depends="test.clean"
             description="Delete all build artifacts">
@@ -42,9 +43,14 @@
     <target name="init">
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.dir}/classes"/>
+        
+        <uptodate property="project.uptodate"
+                  targetfile="${build.dir}/${ant.project.name}.jar">
+            <srcfiles dir="${src.dir}"/>
+        </uptodate>
     </target>
 
-    <target name="compile" depends="init"
+    <target name="compile" depends="init" unless="project.uptodate"
             description="Compile classes under src/">
         <javac srcdir="${src.dir}"
                destdir="${build.dir}/classes"
@@ -56,7 +62,7 @@
         </javac>
     </target>
 
-    <target name="jar" depends="compile"
+    <target name="archive" depends="compile" unless="project.uptodate"
             description="Archive compiled classes and resources">
         <jar destfile="${build.dir}/${ant.project.name}.jar"
              compress="${jar.compress}"
@@ -66,12 +72,6 @@
                 <exclude name="**/*.java"/>
             </fileset>
         </jar>
-    </target>
-
-    <target name="deploy" depends="jar"
-            description="Deploy project JAR to interested sub-projects">
-        <copy file="${build.dir}/${ant.project.name}.jar"
-              todir="${env.DDS_ROOT}/java/jms/lib"/>
     </target>
 
     <target name="test.clean">
@@ -106,7 +106,7 @@
                 </fileset>
             </batchtest>
             <classpath refid="project.classpath"/>
-            <jvmarg value="-ea"/> <!-- enable assertions -->
+            <jvmarg value="-ea"/>   <!-- enable assertions -->
         </junit>
     </target>
 </project>

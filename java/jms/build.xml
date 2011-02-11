@@ -61,7 +61,7 @@
         Project Targets
     -->
     <target name="all" depends="clean, test, rar"
-            description="Meta target for: clean, test, rar"/>
+            description="Meta-target for: clean, test, rar"/>
 
     <target name="clean" depends="javadoc.clean, test.clean, native.clean"
             description="Delete all build artifacts">

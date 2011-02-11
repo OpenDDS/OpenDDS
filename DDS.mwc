@@ -8,9 +8,9 @@ workspace {
     java/jms
   }
 
-  // Exclude external contributions by default:
   exclude {
     contrib/wrapper
+    tools/modeling/tests
   }
 }
 
