@@ -222,7 +222,6 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		codeGen.setSearchPaths(searchPaths);
 		
 		SearchLocation searchLocation = generatorFactory.createSearchLocation();
-		searchLocation.setName("PROJECT_ROOT");
 		
 		LocationVariable locationVariable = generatorFactory.createLocationVariable();
 		locationVariable.setValue("PROJECT_ROOT");
