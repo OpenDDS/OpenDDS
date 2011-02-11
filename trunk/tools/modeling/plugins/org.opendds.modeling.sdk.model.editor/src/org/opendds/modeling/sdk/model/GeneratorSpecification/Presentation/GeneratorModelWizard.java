@@ -163,7 +163,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		setWindowTitle(GeneratorEditorPlugin.INSTANCE.getString("_UI_Wizard_label"));
 		setDefaultPageImageDescriptor(ExtendedImageRegistry.INSTANCE.getImageDescriptor(GeneratorEditorPlugin.INSTANCE.getImage("full/wizban/" + Plugin.INSTANCE.imageMapping("NewGenerator"))));
 		parsedModelFile = SdkGeneratorFactory.createParsedModelFile(
-				this.workbench.getActiveWorkbenchWindow().getShell());
+				this.workbench.getActiveWorkbenchWindow().getShell(), null /* no editor */);
 	}
 
 	/**

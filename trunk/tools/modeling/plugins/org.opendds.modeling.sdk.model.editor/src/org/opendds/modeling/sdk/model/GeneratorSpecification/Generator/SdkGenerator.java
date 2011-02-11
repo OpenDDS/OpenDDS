@@ -140,7 +140,7 @@ public class SdkGenerator {
 
 		Result result = null;
 		try {
-			URL targetUrl = fileProvider.fromWorkspace(targetDirName);
+			URL targetUrl = fileProvider.fromWorkspace(targetDirName, true);
 			if( targetUrl == null) {
 				return;
 			}
@@ -179,7 +179,7 @@ public class SdkGenerator {
 		try {
 			// Refresh the container where we just placed the result
 			// as a service to the user.
-			fileProvider.refresh(getTargetDirName());
+			fileProvider.refresh(targetDirName);
 
 		} catch (Exception e) {
 			errorHandler.error(IErrorHandler.Severity.WARNING, which.getText(),
@@ -273,8 +273,8 @@ public class SdkGenerator {
 
 	protected URIResolver getResolverFor( String path) {
 		final String start = path != null && path.contains("/") ?
-				path.substring(0, path.lastIndexOf("/")) :
-				".";
+				path.substring(0, path.lastIndexOf("/") + 1) :
+				"";
 
 		return new URIResolver() {
 			public Source resolve(String fname, String base) throws TransformerException {
@@ -288,8 +288,7 @@ public class SdkGenerator {
 						
 					} else {
 						// This is a model reference, assume relative to the source file
-						String file = start + File.separatorChar + fname;
-						resource = fileProvider.fromWorkspace(file);
+						resource = fileProvider.fromWorkspace(start + fname);
 					}
 					return new StreamSource(resource.openStream());
 
@@ -315,6 +314,10 @@ public class SdkGenerator {
 			}
 			@Override
 			public URL fromWorkspace(String fileName) throws MalformedURLException {
+				return fromWorkspace(fileName, false);
+			}
+			@Override
+			public URL fromWorkspace(String fileName, boolean directory) throws MalformedURLException {
 				return new File(fileName).toURI().toURL();
 			}
 			@Override
