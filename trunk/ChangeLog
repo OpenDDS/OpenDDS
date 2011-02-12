@@ -1,3 +1,10 @@
+Sat Feb 12 17:30:31 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor:
+
+          svn:ignore auto-generated content.
+
 Fri Feb 11 21:58:09 UTC 2011  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java:
