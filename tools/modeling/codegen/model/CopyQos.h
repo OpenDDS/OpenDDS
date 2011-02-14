@@ -30,6 +30,7 @@ namespace OpenDDS { namespace Model {
         DDS::DataReaderQos& readerQos
       ) = 0;
 
+    virtual ~CopyQos() {}
   };
 
 } } // End of namespace OpenDDS::Model

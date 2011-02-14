@@ -231,7 +231,7 @@ SubscriberListenerImpl::verify (const Messenger::Message& msg,
   else { //TOPIC_PRESENTATION_QOS
     // two instances each from a writer, the samples from same writer should be
     // received in order.
-    typedef std::map <CORBA::Long, DDS::Time_t> InstanceTimeStamp;
+    typedef std::map <CORBA::ULongLong, DDS::Time_t> InstanceTimeStamp;
     static InstanceTimeStamp timestamps;
     if (timestamps.find (msg.subject_id) == timestamps.end ()) {
       timestamps[msg.subject_id] = si.source_timestamp;
