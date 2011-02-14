@@ -36,27 +36,30 @@
   figure below.</p><img alt="Creating new OpenDDS diagram" src=
   "../images/new_diagram_selection.png">
 
-  <p>The Create OpenDDS Diagram wizard when then prompt for the
-  name of the diagram file and the name of the file containing
-  domain model itself. It is recommended that when specifying the
-  model file name you use the default which has the same base name
-  as the diagram file.</p>
-
+  <p>The Create OpenDDS Diagram wizard will prompt for the name
+  of the model. This name is used in auto-generated source file
+  names and is used as the name of the shared library. It is also
+  used as the identifier for a C++ namespace.</p>
+  
   <div id="note">
-    <p>Many diagram-based modeling tools keep both the model and
-    diagram elements in a single file. In the case of the OpenDDS
-    SDK these files are kept separate. This will readily allow for
-    alternative representations of the model that coexist with
-    diagrams to be considered.</p>
-  </div><br>
+  <p>If you decide to later change the model name, click on an emtpy
+  portion of the main diagram to bring up the name in the property sheet
+  in the Properties tab below the diagram.</p>
+  </div>
+
+  <p>After selecting a model name the Create OpenDDS Diagram wizard will then prompt for the
+  name of the diagram file and the name of the file containing
+  domain model itself. It is recommended that when specifying these
+  names that you use the default which is the name of the model itself.</p>
 
   <div id="caution">
-    <p>After selecting the name of the diagram file, make sure you
-    select the Next button instead of Finish. Under certain
-    conditions the base portion of default name for the model file
-    will not match the base portion of the diagram file if this
-    step is skipped.</p>
-  </div>
+    <p>Many diagram-based modeling tools keep both the model and
+    diagram elements in a single file. In the case of the OpenDDS
+    SDK these files are kept separate. Although this will enable
+    alternative representations of the model to be considered,
+    care should be taken that both the domain model file and diagram
+    file are included when sharing OpenDDS models.</p>
+  </div><br>
 
   <h3>Populating the Model</h3>
 
