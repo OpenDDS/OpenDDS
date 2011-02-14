@@ -1,3 +1,11 @@
+Mon Feb 14 22:45:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/docs/design_notes/plugins.html:
+        * tools/modeling/docs/user_guide/index.html:
+
+          Removed svn:needs-lock property.  Creating read-only files in the
+          working copy is not compatible with the nightly build scripts.
+
 Mon Feb 14 22:30:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/GroupPresentation/SubscriberListener.cpp:
