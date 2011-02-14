@@ -6281,15 +6281,11 @@
             xsi:type="gmfgen:ToolEntry"
             title="Domain"
             description="Create new Domain"
-            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Domain.gif"
-            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Domain.gif"
             genNodes="//@diagram/@topLevelNodes.1"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DomainParticipant"
             description="Create new DomainParticipant"
-            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DomainParticipant.gif"
-            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DomainParticipant.gif"
             genNodes="//@diagram/@topLevelNodes.0"/>
         <entries
             xsi:type="gmfgen:Separator"/>
@@ -6297,22 +6293,16 @@
             xsi:type="gmfgen:ToolEntry"
             title="Subscriber"
             description="Create new Subscriber"
-            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Subscriber.gif"
-            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Subscriber.gif"
             genNodes="//@diagram/@childNodes.45"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DataReader"
             description="Create new DataReader"
-            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataReader.gif"
-            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataReader.gif"
             genNodes="//@diagram/@childNodes.46"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DataReader-Topic Connector"
             description="Create new DataReader-Topic Connector"
-            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataReader.gif"
-            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataReader.gif"
             genLinks="//@diagram/@links.0"/>
         <entries
             xsi:type="gmfgen:Separator"/>
@@ -6320,22 +6310,16 @@
             xsi:type="gmfgen:ToolEntry"
             title="Publisher"
             description="Create new Publisher"
-            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Publisher.gif"
-            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Publisher.gif"
             genNodes="//@diagram/@childNodes.0"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DataWriter"
             description="Create new DataWriter"
-            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataWriter.gif"
-            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataWriter.gif"
             genNodes="//@diagram/@childNodes.1"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DataWriter-Topic Connector"
             description="Create new DataWriter-Topic Connector"
-            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataWriter.gif"
-            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataWriter.gif"
             genLinks="//@diagram/@links.1"/>
         <entries
             xsi:type="gmfgen:Separator"/>
@@ -6343,22 +6327,16 @@
             xsi:type="gmfgen:ToolEntry"
             title="Topic"
             description="Create New Topic"
-            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Topic.gif"
-            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/Topic.gif"
             genNodes="//@diagram/@topLevelNodes.2"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="ContentFilteredTopic"
             description="Create New ContentFilteredTopic"
-            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/ContentFilteredTopic.gif"
-            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/ContentFilteredTopic.gif"
             genNodes="//@diagram/@topLevelNodes.3"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="MultiTopic"
             description="Create New MultiTopic"
-            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/MultiTopic.gif"
-            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/MultiTopic.gif"
             genNodes="//@diagram/@topLevelNodes.4"/>
       </groups>
     </palette>
