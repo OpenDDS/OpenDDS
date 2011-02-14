@@ -10,10 +10,12 @@ import org.eclipse.emf.common.notify.Notification;
 
 import org.eclipse.emf.ecore.EClass;
 
+import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 
 import org.opendds.modeling.model.topics.MultiTopic;
 import org.opendds.modeling.model.topics.TopicsPackage;
+import org.opendds.modeling.model.types.Struct;
 
 /**
  * <!-- begin-user-doc -->
@@ -23,6 +25,7 @@ import org.opendds.modeling.model.topics.TopicsPackage;
  * The following features are implemented:
  * <ul>
  *   <li>{@link org.opendds.modeling.model.topics.impl.MultiTopicImpl#getSubscription_expression <em>Subscription expression</em>}</li>
+ *   <li>{@link org.opendds.modeling.model.topics.impl.MultiTopicImpl#getDatatype <em>Datatype</em>}</li>
  * </ul>
  * </p>
  *
@@ -48,6 +51,16 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 	 * @ordered
 	 */
 	protected String subscription_expression = SUBSCRIPTION_EXPRESSION_EDEFAULT;
+
+	/**
+	 * The cached value of the '{@link #getDatatype() <em>Datatype</em>}' reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getDatatype()
+	 * @generated
+	 * @ordered
+	 */
+	protected Struct datatype;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -96,11 +109,56 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public Struct getDatatype() {
+		if (datatype != null && datatype.eIsProxy()) {
+			InternalEObject oldDatatype = (InternalEObject) datatype;
+			datatype = (Struct) eResolveProxy(oldDatatype);
+			if (datatype != oldDatatype) {
+				if (eNotificationRequired())
+					eNotify(new ENotificationImpl(this, Notification.RESOLVE,
+							TopicsPackage.MULTI_TOPIC__DATATYPE, oldDatatype,
+							datatype));
+			}
+		}
+		return datatype;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public Struct basicGetDatatype() {
+		return datatype;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public void setDatatype(Struct newDatatype) {
+		Struct oldDatatype = datatype;
+		datatype = newDatatype;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET,
+					TopicsPackage.MULTI_TOPIC__DATATYPE, oldDatatype, datatype));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
 		case TopicsPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
 			return getSubscription_expression();
+		case TopicsPackage.MULTI_TOPIC__DATATYPE:
+			if (resolve)
+				return getDatatype();
+			return basicGetDatatype();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -116,6 +174,9 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 		case TopicsPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
 			setSubscription_expression((String) newValue);
 			return;
+		case TopicsPackage.MULTI_TOPIC__DATATYPE:
+			setDatatype((Struct) newValue);
+			return;
 		}
 		super.eSet(featureID, newValue);
 	}
@@ -130,6 +191,9 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 		switch (featureID) {
 		case TopicsPackage.MULTI_TOPIC__SUBSCRIPTION_EXPRESSION:
 			setSubscription_expression(SUBSCRIPTION_EXPRESSION_EDEFAULT);
+			return;
+		case TopicsPackage.MULTI_TOPIC__DATATYPE:
+			setDatatype((Struct) null);
 			return;
 		}
 		super.eUnset(featureID);
@@ -147,6 +211,8 @@ public class MultiTopicImpl extends TopicDescriptionImpl implements MultiTopic {
 			return SUBSCRIPTION_EXPRESSION_EDEFAULT == null ? subscription_expression != null
 					: !SUBSCRIPTION_EXPRESSION_EDEFAULT
 							.equals(subscription_expression);
+		case TopicsPackage.MULTI_TOPIC__DATATYPE:
+			return datatype != null;
 		}
 		return super.eIsSet(featureID);
 	}

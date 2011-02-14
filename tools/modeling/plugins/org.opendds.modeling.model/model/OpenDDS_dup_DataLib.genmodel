@@ -2,8 +2,9 @@
 <genmodel:GenModel xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
     xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/org.opendds.modeling.model/src"
-    modelPluginID="org.opendds.modeling.model" modelName="OpenDDSDataLib" codeFormatting="true"
-    importerID="org.eclipse.emf.importer.ecore" complianceLevel="6.0" copyrightFields="false">
+    creationIcons="false" modelPluginID="org.opendds.modeling.model" templateDirectory="org.opendds.modeling.common/templates"
+    dynamicTemplates="true" modelName="OpenDDSDataLib" codeFormatting="true" importerID="org.eclipse.emf.importer.ecore"
+    complianceLevel="6.0" copyrightFields="false">
   <foreignModel>OpenDDS.ecore</foreignModel>
   <genPackages prefix="OpenDDS" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
       ecorePackage="OpenDDS.ecore#/">
@@ -170,9 +171,7 @@
   </genPackages>
   <genPackages prefix="Topics" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
       generateExampleClass="false" generateModelWizard="false" ecorePackage="Topics.ecore#/">
-    <genClasses image="false" ecoreClass="Topics.ecore#//TopicDescription">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Topics.ecore#//TopicDescription/datatype"/>
-    </genClasses>
+    <genClasses image="false" ecoreClass="Topics.ecore#//TopicDescription"/>
     <genClasses ecoreClass="Topics.ecore#//Topic">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/deadline"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/destination_order"/>
@@ -187,6 +186,7 @@
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/topic_data"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/transport_priority"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/lifespan"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Topics.ecore#//Topic/datatype"/>
     </genClasses>
     <genClasses ecoreClass="Topics.ecore#//ContentFilteredTopic">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Topics.ecore#//ContentFilteredTopic/filter_expression"/>
@@ -194,6 +194,7 @@
     </genClasses>
     <genClasses ecoreClass="Topics.ecore#//MultiTopic">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Topics.ecore#//MultiTopic/subscription_expression"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Topics.ecore#//MultiTopic/datatype"/>
     </genClasses>
   </genPackages>
   <genPackages prefix="Types" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"

@@ -42,7 +42,6 @@ import org.opendds.modeling.model.types.Struct;
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link org.opendds.modeling.model.topics.impl.TopicImpl#getDatatype <em>Datatype</em>}</li>
  *   <li>{@link org.opendds.modeling.model.topics.impl.TopicImpl#getDeadline <em>Deadline</em>}</li>
  *   <li>{@link org.opendds.modeling.model.topics.impl.TopicImpl#getDestination_order <em>Destination order</em>}</li>
  *   <li>{@link org.opendds.modeling.model.topics.impl.TopicImpl#getDurability <em>Durability</em>}</li>
@@ -56,22 +55,13 @@ import org.opendds.modeling.model.types.Struct;
  *   <li>{@link org.opendds.modeling.model.topics.impl.TopicImpl#getTopic_data <em>Topic data</em>}</li>
  *   <li>{@link org.opendds.modeling.model.topics.impl.TopicImpl#getTransport_priority <em>Transport priority</em>}</li>
  *   <li>{@link org.opendds.modeling.model.topics.impl.TopicImpl#getLifespan <em>Lifespan</em>}</li>
+ *   <li>{@link org.opendds.modeling.model.topics.impl.TopicImpl#getDatatype <em>Datatype</em>}</li>
  * </ul>
  * </p>
  *
  * @generated
  */
 public class TopicImpl extends DomainEntityImpl implements Topic {
-	/**
-	 * The cached value of the '{@link #getDatatype() <em>Datatype</em>}' reference.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getDatatype()
-	 * @generated
-	 * @ordered
-	 */
-	protected Struct datatype;
-
 	/**
 	 * The cached value of the '{@link #getDeadline() <em>Deadline</em>}' reference.
 	 * <!-- begin-user-doc -->
@@ -201,6 +191,16 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 	 * @ordered
 	 */
 	protected LifespanQosPolicy lifespan;
+
+	/**
+	 * The cached value of the '{@link #getDatatype() <em>Datatype</em>}' reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getDatatype()
+	 * @generated
+	 * @ordered
+	 */
+	protected Struct datatype;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -811,10 +811,6 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
-		case TopicsPackage.TOPIC__DATATYPE:
-			if (resolve)
-				return getDatatype();
-			return basicGetDatatype();
 		case TopicsPackage.TOPIC__DEADLINE:
 			if (resolve)
 				return getDeadline();
@@ -867,6 +863,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 			if (resolve)
 				return getLifespan();
 			return basicGetLifespan();
+		case TopicsPackage.TOPIC__DATATYPE:
+			if (resolve)
+				return getDatatype();
+			return basicGetDatatype();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -879,9 +879,6 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 	@Override
 	public void eSet(int featureID, Object newValue) {
 		switch (featureID) {
-		case TopicsPackage.TOPIC__DATATYPE:
-			setDatatype((Struct) newValue);
-			return;
 		case TopicsPackage.TOPIC__DEADLINE:
 			setDeadline((DeadlineQosPolicy) newValue);
 			return;
@@ -921,6 +918,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 		case TopicsPackage.TOPIC__LIFESPAN:
 			setLifespan((LifespanQosPolicy) newValue);
 			return;
+		case TopicsPackage.TOPIC__DATATYPE:
+			setDatatype((Struct) newValue);
+			return;
 		}
 		super.eSet(featureID, newValue);
 	}
@@ -933,9 +933,6 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 	@Override
 	public void eUnset(int featureID) {
 		switch (featureID) {
-		case TopicsPackage.TOPIC__DATATYPE:
-			setDatatype((Struct) null);
-			return;
 		case TopicsPackage.TOPIC__DEADLINE:
 			setDeadline((DeadlineQosPolicy) null);
 			return;
@@ -975,6 +972,9 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 		case TopicsPackage.TOPIC__LIFESPAN:
 			setLifespan((LifespanQosPolicy) null);
 			return;
+		case TopicsPackage.TOPIC__DATATYPE:
+			setDatatype((Struct) null);
+			return;
 		}
 		super.eUnset(featureID);
 	}
@@ -987,8 +987,6 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 	@Override
 	public boolean eIsSet(int featureID) {
 		switch (featureID) {
-		case TopicsPackage.TOPIC__DATATYPE:
-			return datatype != null;
 		case TopicsPackage.TOPIC__DEADLINE:
 			return deadline != null;
 		case TopicsPackage.TOPIC__DESTINATION_ORDER:
@@ -1015,44 +1013,10 @@ public class TopicImpl extends DomainEntityImpl implements Topic {
 			return transport_priority != null;
 		case TopicsPackage.TOPIC__LIFESPAN:
 			return lifespan != null;
+		case TopicsPackage.TOPIC__DATATYPE:
+			return datatype != null;
 		}
 		return super.eIsSet(featureID);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public int eBaseStructuralFeatureID(int derivedFeatureID, Class<?> baseClass) {
-		if (baseClass == TopicDescription.class) {
-			switch (derivedFeatureID) {
-			case TopicsPackage.TOPIC__DATATYPE:
-				return TopicsPackage.TOPIC_DESCRIPTION__DATATYPE;
-			default:
-				return -1;
-			}
-		}
-		return super.eBaseStructuralFeatureID(derivedFeatureID, baseClass);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public int eDerivedStructuralFeatureID(int baseFeatureID, Class<?> baseClass) {
-		if (baseClass == TopicDescription.class) {
-			switch (baseFeatureID) {
-			case TopicsPackage.TOPIC_DESCRIPTION__DATATYPE:
-				return TopicsPackage.TOPIC__DATATYPE;
-			default:
-				return -1;
-			}
-		}
-		return super.eDerivedStructuralFeatureID(baseFeatureID, baseClass);
 	}
 
 	/**

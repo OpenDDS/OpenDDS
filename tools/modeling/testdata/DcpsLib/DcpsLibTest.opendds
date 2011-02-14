@@ -15,9 +15,9 @@
         <readers xmi:id="_Yn7dsDLREeCvDoTjiP9YbQ" name="TestReader2" copyFromTopicQos="false" topic="_PfhHsDLREeCvDoTjiP9YbQ"/>
       </subscribers>
     </participants>
-    <topicDescriptions xsi:type="opendds:topic" xmi:id="_0rzkMBHMEeCilrwN-NFn_g" name="Message" datatype="_z3liYDLQEeCvDoTjiP9YbQ" deadline="_2Z42oBHMEeCilrwN-NFn_g"/>
-    <topicDescriptions xsi:type="topics:ContentFilteredTopic" xmi:id="__cRGgDLQEeCvDoTjiP9YbQ" name="TestContentFilteredTopic" datatype="_z3liYDLQEeCvDoTjiP9YbQ" filter_expression="count BETWEEN '2' and '7'" related_topic="_0rzkMBHMEeCilrwN-NFn_g"/>
-    <topicDescriptions xsi:type="topics:MultiTopic" xmi:id="_PfhHsDLREeCvDoTjiP9YbQ" name="TestMultiTopic" datatype="_z3liYDLQEeCvDoTjiP9YbQ" subscription_expression="SELECT text FROM Message"/>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_0rzkMBHMEeCilrwN-NFn_g" name="Message" deadline="_2Z42oBHMEeCilrwN-NFn_g" datatype="_z3liYDLQEeCvDoTjiP9YbQ"/>
+    <topicDescriptions xsi:type="topics:ContentFilteredTopic" xmi:id="__cRGgDLQEeCvDoTjiP9YbQ" name="TestContentFilteredTopic" filter_expression="count BETWEEN '2' and '7'" related_topic="_0rzkMBHMEeCilrwN-NFn_g"/>
+    <topicDescriptions xsi:type="topics:MultiTopic" xmi:id="_PfhHsDLREeCvDoTjiP9YbQ" name="TestMultiTopic" subscription_expression="SELECT text FROM Message" datatype="_z3liYDLQEeCvDoTjiP9YbQ"/>
     <policies xsi:type="opendds:udQosPolicy" xmi:id="_6TDZwAOYEeC_KbIBROAyfA" name="CustomUserData" value="custom data"/>
     <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_2Z42oBHMEeCilrwN-NFn_g" name="messageDeadline">
       <period xmi:id="_2Z42oRHMEeCilrwN-NFn_g" second="10"/>
