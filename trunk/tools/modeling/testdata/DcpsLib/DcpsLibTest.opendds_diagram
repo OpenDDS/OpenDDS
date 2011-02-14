@@ -182,7 +182,7 @@
         <styles xmi:type="notation:FilteringStyle" xmi:id="__cTiwzLQEeCvDoTjiP9YbQ"/>
       </children>
       <element xmi:type="topics:ContentFilteredTopic" href="DcpsLibTest.opendds#__cRGgDLQEeCvDoTjiP9YbQ"/>
-      <layoutConstraint xmi:type="notation:Bounds" xmi:id="__cS7sDLQEeCvDoTjiP9YbQ" x="324" y="552"/>
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="__cS7sDLQEeCvDoTjiP9YbQ" x="348" y="528"/>
     </children>
     <children xmi:type="notation:Shape" xmi:id="_PfiV0DLREeCvDoTjiP9YbQ" type="2006" fontName="Sans">
       <children xmi:type="notation:DecorationNode" xmi:id="_Pfi84DLREeCvDoTjiP9YbQ" type="5263"/>

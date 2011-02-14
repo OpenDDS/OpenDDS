@@ -5208,7 +5208,7 @@
         canonicalEditPolicyClassName="StructCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="StructGraphicalNodeEditPolicy"
         createCommandClassName="StructCreateCommand"
-        containers="//@diagram/@compartments.31 //@diagram/@compartments.34 //@diagram/@compartments.35">
+        containers="//@diagram/@compartments.31 //@diagram/@compartments.34">
       <diagramRunTimeClass
           href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
       <elementType
@@ -5473,7 +5473,6 @@
         editPartClassName="ContentFilteredTopicEditPart"
         itemSemanticEditPolicyClassName="ContentFilteredTopicItemSemanticEditPolicy"
         canonicalEditPolicyClassName="ContentFilteredTopicCanonicalEditPolicy"
-        compartments="//@diagram/@compartments.34"
         graphicalNodeEditPolicyClassName="ContentFilteredTopicGraphicalNodeEditPolicy"
         createCommandClassName="ContentFilteredTopicCreateCommand">
       <diagramRunTimeClass
@@ -5559,7 +5558,7 @@
         editPartClassName="MultiTopicEditPart"
         itemSemanticEditPolicyClassName="MultiTopicItemSemanticEditPolicy"
         canonicalEditPolicyClassName="MultiTopicCanonicalEditPolicy"
-        compartments="//@diagram/@compartments.35"
+        compartments="//@diagram/@compartments.34"
         graphicalNodeEditPolicyClassName="MultiTopicGraphicalNodeEditPolicy"
         createCommandClassName="MultiTopicCreateCommand">
       <diagramRunTimeClass
@@ -6245,21 +6244,6 @@
           figureQualifiedClassName="org.eclipse.draw2d.RectangleFigure"/>
     </compartments>
     <compartments
-        visualID="7048"
-        editPartClassName="ContentFilteredTopicDataTypeEditPart"
-        itemSemanticEditPolicyClassName="ContentFilteredTopicDataTypeItemSemanticEditPolicy"
-        canonicalEditPolicyClassName="ContentFilteredTopicDataTypeCanonicalEditPolicy"
-        childNodes="//@diagram/@childNodes.56"
-        title="DataType"
-        canCollapse="false"
-        node="//@diagram/@topLevelNodes.3">
-      <diagramRunTimeClass
-          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
-      <viewmap
-          xsi:type="gmfgen:FigureViewmap"
-          figureQualifiedClassName="org.eclipse.draw2d.RectangleFigure"/>
-    </compartments>
-    <compartments
         visualID="7049"
         editPartClassName="MultiTopicDataTypeEditPart"
         itemSemanticEditPolicyClassName="MultiTopicDataTypeItemSemanticEditPolicy"
@@ -6759,9 +6743,6 @@
     <childReferences
         parent="//@diagram"
         child="//@diagram/@topLevelNodes.2"/>
-    <childReferences
-        parent="//@diagram/@topLevelNodes.3"
-        child="//@diagram/@childNodes.56"/>
     <childReferences
         parent="//@diagram"
         child="//@diagram/@topLevelNodes.3"/>

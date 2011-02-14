@@ -1,3 +1,35 @@
+Mon Feb 14 20:19:02 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Topics.ecore:
+
+          Moved base class TopicDescriptions's datatype association to Topic and
+          MultiTopic since ContentFilteredTopic does not have its own datatype
+          but implicitly uses its related Topic's datatype.
+
+        * tools/modeling/docs/design_notes/images/Topics.png:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.trace:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Topics.ecore_diagram:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics/TopicDescription.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics/impl/MultiTopicImpl.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics/impl/TopicImpl.java:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds_diagram:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest_screenshot_2.png:
+
+          Updates to account for modification of Topics.ecore
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/part/OpenDDSDcpsLibRefTypeActionContentFilteredTopic.java:
+
+          Removed this file.
+
 Mon Feb 14 19:38:43 UTC 2011  Mike Martinez  <martinez_m@lab.ociweb.com>
 
           [r4303] 2011-02-14 19:36  martinezm
