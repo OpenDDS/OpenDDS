@@ -1,3 +1,11 @@
+Mon Feb 14 19:38:43 UTC 2011  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+          [r4303] 2011-02-14 19:36  martinezm
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/GeneratorItemProviderAdapterFactory.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/SearchLocationItemProvider.java:
+
+          Added SearchLocation support for table view items.
+
 Mon Feb 14 18:39:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/images/Topics.png:
