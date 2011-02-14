@@ -13,52 +13,36 @@
           title="PolicyLib"
           description="Create new PolicyLib">
         <smallIcon
-            xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/PolicyLib.gif"
-            bundle="org.opendds.modeling.model.edit"/>
+            xsi:type="gmftool:DefaultImage"/>
         <largeIcon
-            xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/PolicyLib.gif"
-            bundle="org.opendds.modeling.model.edit"/>
+            xsi:type="gmftool:DefaultImage"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="DcpsLib"
           description="Create new DcpsLib">
         <smallIcon
-            xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/DcpsLib.gif"
-            bundle="org.opendds.modeling.model.edit"/>
+            xsi:type="gmftool:DefaultImage"/>
         <largeIcon
-            xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/DcpsLib.gif"
-            bundle="org.opendds.modeling.model.edit"/>
+            xsi:type="gmftool:DefaultImage"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="DataLib"
           description="Create new DataLib">
         <smallIcon
-            xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/DataLib.gif"
-            bundle="org.opendds.modeling.model.edit"/>
+            xsi:type="gmftool:DefaultImage"/>
         <largeIcon
-            xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/DataLib.gif"
-            bundle="org.opendds.modeling.model.edit"/>
+            xsi:type="gmftool:DefaultImage"/>
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
           title="Package"
           description="Create new Package">
         <smallIcon
-            xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/LibPackage.gif"
-            bundle="org.opendds.modeling.model.edit"/>
+            xsi:type="gmftool:DefaultImage"/>
         <largeIcon
-            xsi:type="gmftool:BundleImage"
-            path="icons/full/obj16/LibPackage.gif"
-            bundle="org.opendds.modeling.model.edit"/>
+            xsi:type="gmftool:DefaultImage"/>
       </tools>
     </tools>
   </palette>

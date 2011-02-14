@@ -651,29 +651,21 @@
             xsi:type="gmfgen:ToolEntry"
             title="PolicyLib"
             description="Create new PolicyLib"
-            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/PolicyLib.gif"
-            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/PolicyLib.gif"
             genNodes="//@diagram/@topLevelNodes.1 //@diagram/@childNodes.3"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DcpsLib"
             description="Create new DcpsLib"
-            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DcpsLib.gif"
-            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DcpsLib.gif"
             genNodes="//@diagram/@topLevelNodes.0 //@diagram/@childNodes.2"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="DataLib"
             description="Create new DataLib"
-            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataLib.gif"
-            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/DataLib.gif"
             genNodes="//@diagram/@topLevelNodes.2 //@diagram/@childNodes.1"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="Package"
             description="Create new Package"
-            largeIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/LibPackage.gif"
-            smallIconPath="/org.opendds.modeling.model.edit/icons/full/obj16/LibPackage.gif"
             genNodes="//@diagram/@topLevelNodes.3 //@diagram/@childNodes.0"/>
       </groups>
     </palette>
