@@ -26,12 +26,12 @@
     <genClasses ecoreClass="Generator.ecore#//TargetDir">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//TargetDir/name"/>
     </genClasses>
-    <genClasses ecoreClass="Generator.ecore#//Environment">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Generator.ecore#//Environment/location"/>
+    <genClasses ecoreClass="Generator.ecore#//SearchPaths">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//SearchPaths/searchLocation"/>
     </genClasses>
-    <genClasses ecoreClass="Generator.ecore#//Location">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Generator.ecore#//Location/variable"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Generator.ecore#//Location/path"/>
+    <genClasses ecoreClass="Generator.ecore#//SearchLocation">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//SearchLocation/variable"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Generator.ecore#//SearchLocation/path"/>
     </genClasses>
     <genClasses ecoreClass="Generator.ecore#//LocationVariable">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Generator.ecore#//LocationVariable/value"/>
