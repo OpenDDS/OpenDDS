@@ -6,12 +6,10 @@
  */
 package org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation;
 
-import org.opendds.modeling.common.Plugin;
 import org.eclipse.emf.common.EMFPlugin;
-
 import org.eclipse.emf.common.ui.EclipseUIPlugin;
-
 import org.eclipse.emf.common.util.ResourceLocator;
+import org.opendds.modeling.common.Plugin;
 
 /**
  * This is the central singleton for the Generator editor plugin.

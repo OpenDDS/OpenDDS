@@ -2,7 +2,9 @@ package org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation;
 
 import java.util.List;
 
+import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -17,13 +19,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
 
 public class DeploymentTab extends StructuredViewer {
 	// A TableViewer with protected abstract methods
 	// exposed so that we can simply delegate to them.
-	protected TableViewerDelegate viewer;
+	protected TreeViewerDelegate viewer;
 
 	protected Composite control;
 
@@ -50,7 +52,7 @@ public class DeploymentTab extends StructuredViewer {
 		listPane.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		listPane.setLayout( new FillLayout(SWT.VERTICAL));
-		viewer = new TableViewerDelegate( listPane);
+		viewer = new TreeViewerDelegate( listPane);
 		
 		// Right Panel
 		panel = new Composite(control, 0);
@@ -223,7 +225,16 @@ public class DeploymentTab extends StructuredViewer {
 		viewer.setSelection( selection);
 	}
 	
-	public Table getTable() {
-		return viewer.getTable();
+	public Tree getTree() {
+		return viewer.getTree();
 	}
+	
+	public void setCellEditors(CellEditor[] editors) {
+		viewer.setCellEditors(editors);
+	}
+	
+	public void setCellModifier( ICellModifier modifier) {
+		viewer.setCellModifier(modifier);
+	}
+
 }
