@@ -2,6 +2,14 @@ package org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.edit.command.AddCommand;
+import org.eclipse.emf.edit.command.SetCommand;
+import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ICellModifier;
@@ -13,23 +21,40 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.DropTargetListener;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.CodeGen;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorFactory;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorPackage;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.LocationPath;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.LocationVariable;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.SearchLocation;
+import org.opendds.modeling.sdk.model.GeneratorSpecification.SearchPaths;
 
 public class DeploymentTab extends StructuredViewer {
 	// A TableViewer with protected abstract methods
 	// exposed so that we can simply delegate to them.
 	protected TreeViewerDelegate viewer;
+	protected Text variableText;
+	protected Text pathText;
+	protected Button actionButton;
 
 	protected Composite control;
 
+	protected GeneratorFactory generatorFactory = GeneratorPackage.eINSTANCE.getGeneratorFactory();
 	protected GeneratorEditor editor;
+	protected SearchPaths searchPaths;
 
 	public DeploymentTab( Composite parent) {
 		control = new Composite( parent, 0);
@@ -45,14 +70,46 @@ public class DeploymentTab extends StructuredViewer {
 		// TODO Put resolved reference information here.
 
 		Label label = new Label(panel, SWT.CENTER);
-		label.setText("Deployment Environment Variables");
+		label.setText("Deployment Search Paths");
 		label.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
 
 		Composite listPane = new Composite(panel,0);
 		listPane.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		listPane.setLayout( new FillLayout(SWT.VERTICAL));
-		viewer = new TreeViewerDelegate( listPane);
+		viewer = new TreeViewerDelegate( listPane, SWT.FULL_SELECTION);
+
+		// Area below the display list for entering data.
+		Composite enterPane = new Composite(panel, 0);
+		enterPane.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		enterPane.setLayout( new GridLayout( 5, false));
+
+		label = new Label(enterPane, SWT.LEFT);
+		label.setText("Base Variable:");
+		gridData = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
+		label.setLayoutData(gridData);
+
+		variableText = new Text(enterPane, SWT.LEFT | SWT.BORDER | SWT.SINGLE);
+		gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		variableText.setLayoutData(gridData);
+
+		label = new Label(enterPane, SWT.LEFT);
+		label.setText("Relative Path:");
+		gridData = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
+		label.setLayoutData(gridData);
+
+		pathText = new Text(enterPane, SWT.LEFT | SWT.BORDER | SWT.SINGLE);
+		gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		pathText.setLayoutData(gridData);
+		
+		actionButton = new Button( enterPane, SWT.PUSH | SWT.LEFT);
+		actionButton.setText("Add");
+		actionButton.addSelectionListener(new SelectionAdapter() {
+        	public void widgetSelected( SelectionEvent e) {
+        		addSearchPath( variableText.getText(), pathText.getText());
+        	}
+		});
 		
 		// Right Panel
 		panel = new Composite(control, 0);
@@ -65,6 +122,64 @@ public class DeploymentTab extends StructuredViewer {
 		label.setText("Selection Information");
 		
 		// TODO Add content here.
+	}
+	
+	public void setEditor( GeneratorEditor editor) {
+		this.editor = editor;
+		
+		// Grab the the model and domain.
+		EditingDomain editingDomain = editor.getEditingDomain();
+		EList<Resource> resources = editingDomain.getResourceSet().getResources();
+		if (resources.size() > 0) {
+			Resource resource = resources.get(0);
+			EList<EObject> contents = resource.getContents();
+			if (contents.size() > 0) {
+				EObject root = contents.get(0);
+				if (root instanceof CodeGen) {
+					CodeGen codeGen = (CodeGen)root;
+					searchPaths = codeGen.getSearchPaths();
+					if(searchPaths == null) {
+						editingDomain.getCommandStack().execute(
+								AddCommand.create(
+										editingDomain,
+										codeGen,
+										GeneratorPackage.eINSTANCE.getSearchLocation(),
+										searchPaths
+								));
+					}
+				}
+			}
+		}		
+	}
+	
+	protected void addSearchPath( String baseVariable, String relativePath) {
+		if( editor == null) {
+			return;
+		}
+
+		SearchLocation newPath = generatorFactory.createSearchLocation();
+		if( baseVariable != null) {
+			LocationVariable variable = generatorFactory.createLocationVariable();
+			variable.setValue(baseVariable);
+			newPath.setVariable(variable);
+		}
+		
+		if( relativePath != null) {
+			LocationPath path = generatorFactory.createLocationPath();
+			path.setValue(relativePath);
+			newPath.setPath(path);
+		}
+
+		EditingDomain editingDomain = editor.getEditingDomain();
+		if( editingDomain != null && searchPaths != null) {
+			editingDomain.getCommandStack().execute(
+					AddCommand.create(
+							editingDomain,
+							searchPaths,
+							GeneratorPackage.eINSTANCE.getSearchLocation(),
+							newPath
+					));
+		}
 	}
 
 	/* (non-Javadoc)
@@ -183,7 +298,7 @@ public class DeploymentTab extends StructuredViewer {
 		return control;
 	}
 	
-	public Control getTableControl() {
+	public Control getTreeControl() {
 		return viewer.getControl();
 	}
 
