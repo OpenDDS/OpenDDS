@@ -1,3 +1,9 @@
+Tue Feb 15 14:28:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/plugin.properties:
+
+          Workaround to allow EBoolean types to be viewed/editing in EMF editor.
+
 Tue Feb 15 13:47:48 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/OpenDDSDiagramDomainModelWizardPage.java:
