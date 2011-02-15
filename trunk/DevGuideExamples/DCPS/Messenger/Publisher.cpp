@@ -128,18 +128,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(condition);
 
-    DDS::ConditionSeq conditions;
-    DDS::PublicationMatchedStatus matches = { 0, 0, 0, 0, 0 };
-    DDS::Duration_t timeout = { 30, 0 };
-
-    do {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" wait failed!\n")),
-                         -1);
-      }
-
+    while (true) {
+      DDS::PublicationMatchedStatus matches;
       if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
@@ -147,7 +137,19 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                          -1);
       }
 
-    } while (matches.current_count < 1);
+      if (matches.current_count >= 1) {
+        break;
+      }
+
+      DDS::ConditionSeq conditions;
+      DDS::Duration_t timeout = { 30, 0 };
+      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wait failed!\n")),
+                         -1);
+      }
+    }
 
     ws->detach_condition(condition);
 
@@ -173,6 +175,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Wait for samples to be acknowledged
+    DDS::Duration_t timeout = { 30, 0 };
     if (message_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
