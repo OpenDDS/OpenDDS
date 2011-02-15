@@ -151,7 +151,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	 * Cache the parsed model file so we only read it once.
 	 */
 	protected ParsedModelFile parsedModelFile;
-	
+
 	/**
 	 * This just records the information.
 	 * <!-- begin-user-doc -->
@@ -182,7 +182,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 	 */
 	protected EObject createInitialModel() {
 		CodeGen codeGen = generatorFactory.createCodeGen();
-		
+
 		ModelFile modelFile = generatorFactory.createModelFile();
 		String modelFileName = parsedModelFile.getSourceName();
 		if( modelFileName != null) {
@@ -199,9 +199,9 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 
 		Instances instances = generatorFactory.createInstances();
 		codeGen.setInstances(instances);
-		
+
 		Instance instance = generatorFactory.createInstance();
-		
+
 		TransportOffset transportOffset = generatorFactory.createTransportOffset();
 		transportOffset.setValue(0);
 		instance.setTransportOffset(transportOffset);
@@ -217,22 +217,22 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		}
 
 		instances.getInstance().add(instance);
-		
+
 		SearchPaths searchPaths = generatorFactory.createSearchPaths();
 		codeGen.setSearchPaths(searchPaths);
-		
+
 		SearchLocation searchLocation = generatorFactory.createSearchLocation();
-		
+
 		LocationVariable locationVariable = generatorFactory.createLocationVariable();
 		locationVariable.setValue("PROJECT_ROOT");
 		searchLocation.setVariable(locationVariable);
-		
+
 		LocationPath locationPath = generatorFactory.createLocationPath();
 		locationPath.setValue(".");
 		searchLocation.setPath(locationPath);
 
 		searchPaths.getSearchLocation().add(searchLocation);
-		
+
 		return codeGen;
 	}
 
@@ -392,7 +392,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		public void setCurrentPath(IPath path) {
 			currentPath = path;
 		}
-		
+
 		public String getTargetDir() {
 			return targetDir;
 		}
@@ -427,27 +427,27 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 			gridLayout.numColumns = 3;
 			container.setLayout(gridLayout);
 			setControl(container);
-			
+
 			final Label label_1 = new Label( container, SWT.None);
 			final GridData gridData_1 = new GridData();
 			gridData_1.horizontalSpan = 3;
 			label_1.setLayoutData(gridData_1);
 			label_1.setText("Select the file containing the model definition.");
-			
+
 			final Label label_2 = new Label( container, SWT.None);
 			final GridData gridData_2 = new GridData(GridData.HORIZONTAL_ALIGN_END);
 			label_2.setLayoutData(gridData_2);
 			label_2.setText("Model File:");
-			
+
 			modelFileField = new Text( container, SWT.BORDER);
 			modelFileField.addModifyListener( new ModifyListener() {
 				@Override
 				public void modifyText(ModifyEvent e) {
-					updatePageComplete();					
+					updatePageComplete();
 				}
 			});
 			modelFileField.setLayoutData( new GridData( GridData.FILL_HORIZONTAL));
-			
+
 			final Button button_1 = new Button( container, SWT.None);
 			button_1.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected( SelectionEvent e) {
@@ -458,32 +458,32 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 				}
 			});
 			button_1.setText("Browse...");
-			
+
 			final Label label_3 = new Label( container, SWT.None);
 			final GridData gridData_3 = new GridData();
 			gridData_3.horizontalSpan = 3;
 			label_3.setLayoutData(gridData_3);
-			
+
 			final Label label_4 = new Label( container, SWT.None);
 			final GridData gridData_4 = new GridData();
 			gridData_4.horizontalSpan = 3;
 			label_4.setLayoutData(gridData_4);
 			label_4.setText("Select the target directory where generated files will be placed.");
-			
+
 			final Label label_5 = new Label( container, SWT.None);
 			final GridData gridData_5 = new GridData(GridData.HORIZONTAL_ALIGN_END);
 			label_5.setLayoutData(gridData_5);
 			label_5.setText("Target Directory:");
-			
+
 			targetDirField = new Text( container, SWT.BORDER);
 			targetDirField.addModifyListener( new ModifyListener() {
 				@Override
 				public void modifyText(ModifyEvent e) {
-					updatePageComplete();					
+					updatePageComplete();
 				}
 			});
 			targetDirField.setLayoutData( new GridData( GridData.FILL_HORIZONTAL));
-			
+
 			final Button button_2 = new Button( container, SWT.None);
 			button_2.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected( SelectionEvent e) {
@@ -500,13 +500,13 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 			final GridData gridData_6 = new GridData();
 			gridData_6.horizontalSpan = 3;
 			label_6.setLayoutData(gridData_6);
-			
+
 			final Label label_7 = new Label( container, SWT.None);
 			final GridData gridData_7 = new GridData();
 			gridData_7.horizontalSpan = GridData.FILL;
 			label_7.setLayoutData(gridData_7);
 			label_7.setText("Select the encoding for the code generation specification file.");
-			
+
 			final Label label_8 = new Label( container, SWT.None);
 			final GridData gridData_8 = new GridData(GridData.HORIZONTAL_ALIGN_END);
 			label_8.setLayoutData(gridData_8);
@@ -562,11 +562,11 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 				if( modelName == null) {
 					setMessage(null);
 					setErrorMessage("Model file "
-							+ newSource + " is not a valid OpenDDS model file");
+							+ newSource + " does not have a model name defined");
 					return;
 				}
 			}
-			
+
 			String newTarget = targetDirField.getText();
 
 			if( newTarget != null && !newTarget.isEmpty()) {
@@ -588,7 +588,7 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 				this.targetDir = newTarget;
 			}
 
-			setErrorMessage(null);			
+			setErrorMessage(null);
 			setPageComplete(true);
 		}
 
