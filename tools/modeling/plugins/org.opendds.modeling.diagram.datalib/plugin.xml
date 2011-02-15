@@ -23,7 +23,7 @@
       <editor
          id="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID"
          name="%editorName"
-         icon="../org.opendds.modeling.model.edit/icons/full/obj16/DataLib.gif"
+         icon="icons/obj16/DataLib.gif"
          extensions="opendds_diagram_datalib"
          default="true"
          class="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditor"
@@ -697,7 +697,7 @@
             priority="normal" 
             contentProvider="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibNavigatorContentProvider" 
             labelProvider="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibNavigatorLabelProvider"
-            icon="../org.opendds.modeling.model.edit/icons/full/obj16/DataLib.gif"
+            icon="icons/obj16/DataLib.gif"
             activeByDefault="true">
          <triggerPoints>
             <or>
@@ -739,7 +739,7 @@
             priority="normal" 
             contentProvider="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorContentProvider" 
             labelProvider="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorLabelProvider"
-            icon="../org.opendds.modeling.model.edit/icons/full/obj16/DataLib.gif"
+            icon="icons/obj16/DataLib.gif"
             activeByDefault="true">
          <triggerPoints>
             <or>

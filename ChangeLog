@@ -1,3 +1,23 @@
+Tue Feb 15 18:51:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/icons/obj16/DataLib.gif:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/icons/obj16/DcpsLib.gif:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/icons/obj16/PolicyLib.gif:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+          For now get correct icons to show up on editor tabs by using icons outside
+          of org.opendds.modeling.common. Although we should be able to point
+          to icons under org.opendds.modeling.common, this approach did not work here
+          (although it worked for a diagram prototype).
+
 Tue Feb 15 18:29:35 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Deep/Down/Reference/DeepDownReference.codegen:

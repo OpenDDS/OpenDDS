@@ -23,7 +23,7 @@
       <editor
          id="org.opendds.modeling.model.opendds.diagram.policylib.part.OpenDDSPolicyLibDiagramEditorID"
          name="%editorName"
-         icon="../org.opendds.modeling.model.edit/icons/full/obj16/PolicyLib.gif"
+         icon="icons/obj16/PolicyLib.gif"
          extensions="opendds_diagram_policylib"
          default="true"
          class="org.opendds.modeling.model.opendds.diagram.policylib.part.OpenDDSPolicyLibDiagramEditor"
@@ -670,7 +670,7 @@
             priority="normal" 
             contentProvider="org.opendds.modeling.model.opendds.diagram.policylib.navigator.OpenDDSPolicyLibNavigatorContentProvider" 
             labelProvider="org.opendds.modeling.model.opendds.diagram.policylib.navigator.OpenDDSPolicyLibNavigatorLabelProvider"
-            icon="../org.opendds.modeling.model.edit/icons/full/obj16/PolicyLib.gif"
+            icon="icons/obj16/PolicyLib.gif"
             activeByDefault="true">
          <triggerPoints>
             <or>
@@ -706,7 +706,7 @@
             priority="normal" 
             contentProvider="org.opendds.modeling.model.opendds.diagram.policylib.navigator.OpenDDSPolicyLibDomainNavigatorContentProvider" 
             labelProvider="org.opendds.modeling.model.opendds.diagram.policylib.navigator.OpenDDSPolicyLibDomainNavigatorLabelProvider"
-            icon="../org.opendds.modeling.model.edit/icons/full/obj16/PolicyLib.gif"
+            icon="icons/obj16/PolicyLib.gif"
             activeByDefault="true">
          <triggerPoints>
             <or>

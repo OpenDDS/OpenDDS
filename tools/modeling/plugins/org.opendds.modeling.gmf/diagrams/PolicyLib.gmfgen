@@ -41,7 +41,7 @@
       itemSemanticEditPolicyClassName="PolicyLibItemSemanticEditPolicy"
       canonicalEditPolicyClassName="PolicyLibCanonicalEditPolicy"
       iconProviderPriority="Low"
-      creationWizardIconPath="../org.opendds.modeling.model.edit/icons/full/obj16/PolicyLib.gif"
+      creationWizardIconPath="platform:/plugin/org.opendds.modeling.common/icons/full/obj16/OpenDDSSdkLib.gif"
       validationProviderPriority="Low"
       validationEnabled="true"
       validationDecorators="true">
@@ -3038,7 +3038,8 @@
       provider="Object Computing, Inc.">
     <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
   </plugin>
-  <editor/>
+  <editor
+      iconPath="icons/obj16/PolicyLib.gif"/>
   <navigator>
     <childReferences
         child="//@diagram"/>
