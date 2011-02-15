@@ -6358,7 +6358,8 @@
     <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
     <requiredPlugins>org.eclipse.gmf.runtime.draw2d.ui</requiredPlugins>
   </plugin>
-  <editor/>
+  <editor
+      iconPath="icons/obj16/DcpsLib.gif"/>
   <navigator>
     <childReferences
         child="//@diagram"/>

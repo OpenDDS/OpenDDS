@@ -23,7 +23,7 @@
       <editor
          id="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorID"
          name="%editorName"
-         icon="../org.opendds.modeling.model.edit/icons/full/obj16/DcpsLib.gif"
+         icon="icons/obj16/DcpsLib.gif"
          extensions="opendds_diagram_dcpslib"
          default="true"
          class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditor"
@@ -1023,7 +1023,7 @@
             priority="normal" 
             contentProvider="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorContentProvider" 
             labelProvider="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorLabelProvider"
-            icon="../org.opendds.modeling.model.edit/icons/full/obj16/DcpsLib.gif"
+            icon="icons/obj16/DcpsLib.gif"
             activeByDefault="true">
          <triggerPoints>
             <or>
@@ -1059,7 +1059,7 @@
             priority="normal" 
             contentProvider="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibDomainNavigatorContentProvider" 
             labelProvider="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibDomainNavigatorLabelProvider"
-            icon="../org.opendds.modeling.model.edit/icons/full/obj16/DcpsLib.gif"
+            icon="icons/obj16/DcpsLib.gif"
             activeByDefault="true">
          <triggerPoints>
             <or>
