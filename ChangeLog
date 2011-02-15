@@ -1,3 +1,10 @@
+Tue Feb 15 18:29:35 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Deep/Down/Reference/DeepDownReference.codegen:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.codegen:
+
+          Not well-formed.
+
 Tue Feb 15 17:28:02 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/paths_mpb.xsl:
