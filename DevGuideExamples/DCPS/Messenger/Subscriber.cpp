@@ -127,23 +127,26 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(condition);
 
-    DDS::ConditionSeq conditions;
-    DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0 };
-    DDS::Duration_t timeout = { 30, 0 }; // 30 seconds
-
-    do {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" wait failed!\n")), -1);
-      }
-
+    while (true) {
+      DDS::SubscriptionMatchedStatus matches;
       if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" get_subscription_matched_status failed!\n")), -1);
       }
-    } while (matches.current_count > 0);
+
+      if (matches.current_count == 0 && matches.total_count > 0) {
+        break;
+      }
+
+      DDS::ConditionSeq conditions;
+      DDS::Duration_t timeout = { 30, 0 }; // 30 seconds
+      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wait failed!\n")), -1);
+      }
+    }
 
     ws->detach_condition(condition);
 

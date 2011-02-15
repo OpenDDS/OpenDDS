@@ -1,3 +1,11 @@
+Tue Feb 15 23:25:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+
+          Corrected the use of Wait Sets and Status Conditions.
+          The key change is that the condition must be checked before waiting.
+
 Tue Feb 15 22:58:21 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Sync.cpp:
