@@ -1963,25 +1963,36 @@
           href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//domain"/>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
-          viewPattern="">
+          readOnly="true"
+          viewPattern="«domain»">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassName"/>
+            href="DcpsLib.gmfgraph#DomainStereotype"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
       </labelMappings>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
-          viewPattern="«domain»">
+          viewPattern="">
         <diagramLabel
-            href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassStereotype"/>
+            href="DcpsLib.gmfgraph#DomainName"/>
         <features
             href="../../org.opendds.modeling.model/model/Core.ecore#//Entity/name"/>
+      </labelMappings>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping"
+          viewPattern="domainID: {0}"
+          editorPattern="{0}"
+          editPattern="{0}">
+        <diagramLabel
+            href="DcpsLib.gmfgraph#DomainId"/>
+        <features
+            href="../../org.opendds.modeling.model/model/DCPS.ecore#//Domain/domainId"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
           href="DcpsLib.gmftool#//@palette/@tools.0/@tools.0"/>
       <diagramNode
-          href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#Class"/>
+          href="DcpsLib.gmfgraph#Domain"/>
     </ownedChild>
   </nodes>
   <nodes>

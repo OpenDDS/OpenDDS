@@ -143,6 +143,39 @@
       <accessors
           figure="//@figures.0/@descriptors.4/@actualFigure/@children.2"/>
     </descriptors>
+    <descriptors
+        name="DomainFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Rectangle"
+          name="DomainFigure">
+        <layout
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"
+            forceSingleLine="true"/>
+        <foregroundColor
+            xsi:type="gmfgraph:RGBColor"
+            red="240"
+            green="240"
+            blue="240"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="DomainStereotypeFigure"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="DomainNameFigure"
+            text="&lt;...>"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="DomainIdFigure"
+            text="&lt;...>"/>
+      </actualFigure>
+      <accessors
+          figure="//@figures.0/@descriptors.5/@actualFigure/@children.0"/>
+      <accessors
+          figure="//@figures.0/@descriptors.5/@actualFigure/@children.1"/>
+      <accessors
+          figure="//@figures.0/@descriptors.5/@actualFigure/@children.2"/>
+    </descriptors>
   </figures>
   <nodes
       name="PubSub"
@@ -159,6 +192,9 @@
   <nodes
       name="MultiTopic"
       figure="MultiTopicFigure"/>
+  <nodes
+      name="Domain"
+      figure="DomainFigure"/>
   <compartments
       name="DataWriters"
       collapsible="true"
@@ -246,4 +282,18 @@
       figure="MultiTopicFigure"
       elementIcon="false"
       accessor="//@figures.0/@descriptors.4/@accessors.2"/>
+  <labels
+      name="DomainStereotype"
+      figure="DomainFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.5/@accessors.0"/>
+  <labels
+      name="DomainName"
+      figure="DomainFigure"
+      accessor="//@figures.0/@descriptors.5/@accessors.1"/>
+  <labels
+      name="DomainId"
+      figure="DomainFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.5/@accessors.2"/>
 </gmfgraph:Canvas>

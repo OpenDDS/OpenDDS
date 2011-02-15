@@ -1,3 +1,13 @@
+Tue Feb 15 21:17:48 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgraph:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.trace:
+
+          Added label for domainId in Domain figure.
+
 Tue Feb 15 20:45:48 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/CopyTopicQos/CopyTopicQos.opendds:
