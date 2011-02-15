@@ -180,11 +180,16 @@ OpenDDS::Model::Delegate::createSubscription(
     // Error if copy from mulitopic
     DDS::TopicQos topicQos = TheServiceParticipant->initial_TopicQos();
     DDS::Topic* qosTopic;
-    DDS::ContentFilteredTopic* qosCfTopic;
     if ((qosTopic = dynamic_cast<DDS::Topic*>(topic)) != NULL) {
       qosTopic->get_qos(topicQos);
-    } else if ((qosCfTopic = dynamic_cast<DDS::ContentFilteredTopic*>(topic)) != NULL) {
-      qosCfTopic->get_related_topic()->get_qos(topicQos);
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    } else {
+      DDS::ContentFilteredTopic* qosCfTopic = 
+                    dynamic_cast<DDS::ContentFilteredTopic*>(topic);
+      if (qosCfTopic != NULL) {
+        qosCfTopic->get_related_topic()->get_qos(topicQos);
+      }
+#endif
     }
     subscriber->copy_from_topic_qos(readerQos, topicQos);
   }
