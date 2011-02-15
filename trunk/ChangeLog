@@ -1,3 +1,13 @@
+Tue Feb 15 15:05:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/DataLib/DataLib2.opendds:
+        * tools/modeling/testdata/DataLib/DataLibTest.opendds:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds:
+        * tools/modeling/testdata/MainDiagramTest.opendds:
+        * tools/modeling/testdata/PolicyLib/DefaultPolicyLibTest.opendds:
+
+          Populate model name.
+
 Tue Feb 15 15:03:45 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
