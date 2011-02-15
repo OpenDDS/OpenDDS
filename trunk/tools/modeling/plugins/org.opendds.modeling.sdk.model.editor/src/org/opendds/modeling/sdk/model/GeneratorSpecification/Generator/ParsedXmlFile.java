@@ -32,7 +32,6 @@ public abstract class ParsedXmlFile {
 	private static XPath xpath;
 	private Document modelDocument;
 	private DocumentBuilder documentBuilder;
-	private long timestamp;
 	
 	protected String sourceName;
 	protected Source source = null;
@@ -133,7 +132,6 @@ public abstract class ParsedXmlFile {
 						"Model file " + this.sourceName + " does not exist.", null);
 				return null;
 			}
-			timestamp = modelFile.lastModified();
 	
 			// We have a good input file, now parse the XML.
 			if (documentBuilder == null) {
@@ -167,7 +165,6 @@ public abstract class ParsedXmlFile {
 	public void reset() {
 		this.sourceName = null;
 		this.modelDocument = null;
-		this.timestamp = 0;
 	}
 	
 	protected NodeList parseExpression( XPathExpression expression) {
@@ -190,9 +187,18 @@ public abstract class ParsedXmlFile {
 		}
 		return null;
 	}
-	
+
+	/// Get the timestamp for this file or 0 if it's not known 
 	public long getTimestamp() {
-		return timestamp;
+		try {
+			URL modelUrl = fileProvider.fromWorkspace(this.sourceName);
+			File modelFile = new File(modelUrl.toURI());
+			return modelFile.lastModified();
+		} catch (MalformedURLException e) {
+			return 0;
+		} catch (URISyntaxException e) {
+			return 0;
+		}
 	}
 
 	public static class OpenDDSNamespaceContext implements NamespaceContext {
