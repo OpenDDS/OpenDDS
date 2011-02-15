@@ -1,3 +1,14 @@
+Tue Feb 15 20:10:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/ant/build.properties:
+        * java/ant/build.xml:
+
+          Set Java compatibility to 1.5, some build machines don't have 1.6.
+
+        * java/jms/lib/opendds-ant.jar:
+
+          Rebuilt with Java 1.5 compatibility.
+
 Tue Feb 15 18:55:55 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib:

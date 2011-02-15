@@ -58,6 +58,7 @@
                deprecation="${compile.deprecation}"
                optimize="${compile.optimize}"
                source="${project.source}"
+               target="${project.target}"
                classpathref="project.classpath">
         </javac>
     </target>
@@ -89,6 +90,7 @@
                deprecation="${compile.deprecation}"
                optimize="${compile.optimize}"
                source="${project.source}"
+               target="${project.target}"
                classpathref="project.classpath">
         </javac>
     </target>
