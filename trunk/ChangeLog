@@ -1,3 +1,10 @@
+Tue Feb 15 13:47:48 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/OpenDDSDiagramDomainModelWizardPage.java:
+
+          Check that characters being entered for model name are valid file name characters
+          instead of valid C++ namespace identifier characters.
+
 Mon Feb 14 22:45:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/docs/design_notes/plugins.html:
