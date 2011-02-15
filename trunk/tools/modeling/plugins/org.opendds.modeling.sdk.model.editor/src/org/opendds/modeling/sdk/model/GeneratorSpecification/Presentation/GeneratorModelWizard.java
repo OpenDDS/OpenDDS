@@ -228,7 +228,6 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		searchLocation.setVariable(locationVariable);
 
 		LocationPath locationPath = generatorFactory.createLocationPath();
-		locationPath.setValue(".");
 		searchLocation.setPath(locationPath);
 
 		searchPaths.getSearchLocation().add(searchLocation);

@@ -59,7 +59,6 @@ import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
 import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
 import org.eclipse.emf.edit.ui.action.EditingDomainActionBarContributor;
-import org.eclipse.emf.edit.ui.celleditor.AdapterFactoryTableTreeEditor;
 import org.eclipse.emf.edit.ui.celleditor.AdapterFactoryTreeEditor;
 import org.eclipse.emf.edit.ui.dnd.EditingDomainViewerDropAdapter;
 import org.eclipse.emf.edit.ui.dnd.LocalTransfer;
@@ -78,7 +77,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -90,7 +88,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -100,11 +97,8 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IActionBars;
@@ -1103,6 +1097,7 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				};
 				viewerPane.createControl(getContainer());
 				environmentViewer = (DeploymentTab) viewerPane.getViewer();
+				environmentViewer.setEditor(this);
 				environmentViewer
 						.setContentProvider(new AdapterFactoryContentProvider(
 								adapterFactory));
@@ -1148,8 +1143,8 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				contextMenu.setRemoveAllWhenShown(true);
 				contextMenu.addMenuListener(this);
 				Menu menu = contextMenu.createContextMenu(environmentViewer
-						.getTableControl());
-				environmentViewer.getTableControl().setMenu(menu);
+						.getTreeControl());
+				environmentViewer.getTreeControl().setMenu(menu);
 				getSite().registerContextMenu(contextMenu,
 						new UnwrappingSelectionProvider(environmentViewer));
 

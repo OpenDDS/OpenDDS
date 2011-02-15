@@ -11,8 +11,9 @@ import java.util.List;
 
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.Notification;
+
 import org.eclipse.emf.common.util.ResourceLocator;
-import org.eclipse.emf.ecore.EStructuralFeature;
+
 import org.eclipse.emf.edit.provider.ComposeableAdapterFactory;
 import org.eclipse.emf.edit.provider.IChildCreationExtender;
 import org.eclipse.emf.edit.provider.IEditingDomainItemProvider;
@@ -25,22 +26,21 @@ import org.eclipse.emf.edit.provider.ITreeItemContentProvider;
 import org.eclipse.emf.edit.provider.ItemPropertyDescriptor;
 import org.eclipse.emf.edit.provider.ItemProviderAdapter;
 import org.eclipse.emf.edit.provider.ViewerNotification;
+
 import org.opendds.modeling.common.Plugin;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorFactory;
+
 import org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorPackage;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.LocationPath;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.LocationVariable;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.SearchLocation;
-import org.opendds.modeling.sdk.model.GeneratorSpecification.SearchPaths;
 
 /**
- * This is the item provider adapter for a {@link org.opendds.modeling.sdk.model.GeneratorSpecification.SearchLocation} object.
+ * This is the item provider adapter for a {@link org.opendds.modeling.sdk.model.GeneratorSpecification.LocationPath} object.
  * <!-- begin-user-doc -->
  * @implements ITableItemLabelProvider
  * <!-- end-user-doc -->
  * @generated
  */
-public class SearchLocationItemProvider extends ItemProviderAdapter implements
+public class LocationPathItemProvider extends ItemProviderAdapter implements
 		IEditingDomainItemProvider, IStructuredItemContentProvider,
 		ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource,
 		ITableItemLabelProvider {
@@ -50,7 +50,7 @@ public class SearchLocationItemProvider extends ItemProviderAdapter implements
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public SearchLocationItemProvider(AdapterFactory adapterFactory) {
+	public LocationPathItemProvider(AdapterFactory adapterFactory) {
 		super(adapterFactory);
 	}
 
@@ -65,46 +65,31 @@ public class SearchLocationItemProvider extends ItemProviderAdapter implements
 		if (itemPropertyDescriptors == null) {
 			super.getPropertyDescriptors(object);
 
+			addValuePropertyDescriptor(object);
 		}
 		return itemPropertyDescriptors;
 	}
 
 	/**
-	 * This specifies how to implement {@link #getChildren} and is used to deduce an appropriate feature for an
-	 * {@link org.eclipse.emf.edit.command.AddCommand}, {@link org.eclipse.emf.edit.command.RemoveCommand} or
-	 * {@link org.eclipse.emf.edit.command.MoveCommand} in {@link #createCommand}.
+	 * This adds a property descriptor for the Value feature.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	@Override
-	public Collection<? extends EStructuralFeature> getChildrenFeatures(
-			Object object) {
-		if (childrenFeatures == null) {
-			super.getChildrenFeatures(object);
-			childrenFeatures
-					.add(GeneratorPackage.Literals.SEARCH_LOCATION__VARIABLE);
-			childrenFeatures
-					.add(GeneratorPackage.Literals.SEARCH_LOCATION__PATH);
-		}
-		return childrenFeatures;
+	protected void addValuePropertyDescriptor(Object object) {
+		itemPropertyDescriptors.add(createItemPropertyDescriptor(
+				((ComposeableAdapterFactory) adapterFactory)
+						.getRootAdapterFactory(), getResourceLocator(),
+				getString("_UI_LocationPath_value_feature"), getString(
+						"_UI_PropertyDescriptor_description",
+						"_UI_LocationPath_value_feature",
+						"_UI_LocationPath_type"),
+				GeneratorPackage.Literals.LOCATION_PATH__VALUE, true, false,
+				false, ItemPropertyDescriptor.GENERIC_VALUE_IMAGE, null, null));
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	protected EStructuralFeature getChildFeature(Object object, Object child) {
-		// Check the type of the specified child object and return the proper feature to use for
-		// adding (see {@link AddCommand}) it as a child.
-
-		return super.getChildFeature(object, child);
-	}
-
-	/**
-	 * This returns SearchLocation.gif.
+	 * This returns LocationPath.gif.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
@@ -112,37 +97,13 @@ public class SearchLocationItemProvider extends ItemProviderAdapter implements
 	@Override
 	public Object getImage(Object object) {
 		return overlayImage(object, getResourceLocator().getImage(
-				"full/obj16/" + Plugin.INSTANCE.imageMapping("SearchLocation")));
+				"full/obj16/" + Plugin.INSTANCE.imageMapping("LocationPath")));
 	}
 
 	@Override
 	public Object getColumnImage(Object object, int columnIndex) {
-		IItemLabelProvider itemLabelProvider;
-
-		switch (columnIndex) {
-		case 0:
-			LocationVariable variable = ((SearchLocation) object).getVariable();
-			if (variable == null) {
-				return null;
-			}
-			itemLabelProvider = (IItemLabelProvider) adapterFactory.adapt(
-					variable, IItemLabelProvider.class);
-			return itemLabelProvider.getImage(variable);
-
-		case 1:
-			LocationPath path = ((SearchLocation) object).getPath();
-			if (path == null) {
-				return null;
-			}
-			itemLabelProvider = (IItemLabelProvider) adapterFactory.adapt(path,
-					IItemLabelProvider.class);
-			return itemLabelProvider.getImage(path);
-
-		default:
-			return overlayImage(object, getResourceLocator().getImage(
-					"full/obj16/"
-							+ Plugin.INSTANCE.imageMapping("SearchLocation")));
-		}
+		return overlayImage(object, getResourceLocator().getImage(
+				"full/obj16/" + Plugin.INSTANCE.imageMapping("LocationPath")));
 	}
 
 	/**
@@ -153,21 +114,20 @@ public class SearchLocationItemProvider extends ItemProviderAdapter implements
 	 */
 	@Override
 	public String getText(Object object) {
-		return getString("_UI_SearchLocation_type");
+		String label = ((LocationPath) object).getValue();
+		return label == null || label.length() == 0 ? getString("_UI_LocationPath_type")
+				: getString("_UI_LocationPath_type") + " " + label;
 	}
 
 	@Override
 	public String getColumnText(Object object, int columnIndex) {
 		switch (columnIndex) {
 		case 0:
-			LocationVariable variable = ((SearchLocation) object).getVariable();
-			String value = (variable == null) ? "(empty)" : variable.getValue();
-			return (value != null && !value.isEmpty()) ? value : "(empty)";
+			return "Relative Path";
 
 		case 1:
-			LocationPath path = ((SearchLocation) object).getPath();
-			value = (path == null) ? "(empty)" : path.getValue();
-			return (value != null && !value.isEmpty()) ? value : "(empty)";
+			String text = ((LocationPath) object).getValue();
+			return (text != null && !text.isEmpty()) ? text : "(empty)";
 
 		default:
 			return "";
@@ -185,11 +145,10 @@ public class SearchLocationItemProvider extends ItemProviderAdapter implements
 	public void notifyChanged(Notification notification) {
 		updateChildren(notification);
 
-		switch (notification.getFeatureID(SearchLocation.class)) {
-		case GeneratorPackage.SEARCH_LOCATION__VARIABLE:
-		case GeneratorPackage.SEARCH_LOCATION__PATH:
+		switch (notification.getFeatureID(LocationPath.class)) {
+		case GeneratorPackage.LOCATION_PATH__VALUE:
 			fireNotifyChanged(new ViewerNotification(notification, notification
-					.getNotifier(), true, false));
+					.getNotifier(), false, true));
 			return;
 		}
 		super.notifyChanged(notification);
@@ -206,14 +165,6 @@ public class SearchLocationItemProvider extends ItemProviderAdapter implements
 	protected void collectNewChildDescriptors(
 			Collection<Object> newChildDescriptors, Object object) {
 		super.collectNewChildDescriptors(newChildDescriptors, object);
-
-		newChildDescriptors.add(createChildParameter(
-				GeneratorPackage.Literals.SEARCH_LOCATION__VARIABLE,
-				GeneratorFactory.eINSTANCE.createLocationVariable()));
-
-		newChildDescriptors.add(createChildParameter(
-				GeneratorPackage.Literals.SEARCH_LOCATION__PATH,
-				GeneratorFactory.eINSTANCE.createLocationPath()));
 	}
 
 	/**
