@@ -1,3 +1,15 @@
+Tue Feb 15 18:55:55 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/icons:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/icons:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/icons/obj16:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/icons:
+
+          svn:ignore files not under revision control.
+
 Tue Feb 15 18:51:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/icons/obj16/DataLib.gif:
