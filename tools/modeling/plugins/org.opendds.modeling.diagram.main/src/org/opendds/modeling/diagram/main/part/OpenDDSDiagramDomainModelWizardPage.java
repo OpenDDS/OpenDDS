@@ -40,6 +40,8 @@ public class OpenDDSDiagramDomainModelWizardPage extends WizardPage {
 	@Override
 	public void createControl(Composite parent) {
 
+		final String invalidFilenameChars = "\\\\/:*?\"<>|";
+
 		Composite composite = new Composite(parent, SWT.NULL);
 		composite.setLayout(new GridLayout(1, false));
 		setControl(composite);
@@ -55,7 +57,7 @@ public class OpenDDSDiagramDomainModelWizardPage extends WizardPage {
 		Label modelNameDescription1 = new Label(composite, SWT.SHADOW_IN);
 		modelNameDescription1.setText("This is used in generated file names and to name the resulting");
 		Label modelNameDescription2 = new Label(composite, SWT.SHADOW_IN);
-		modelNameDescription2.setText("shared library and is used as a C++ namespace identifier.");
+		modelNameDescription2.setText("shared library.");
 
 		// Validate attempt to change model name
 		modelNameControl.addVerifyListener(new VerifyListener() {
@@ -63,17 +65,12 @@ public class OpenDDSDiagramDomainModelWizardPage extends WizardPage {
 			@Override
 			public void verifyText(VerifyEvent event) {
 				String errorMessage = null;
-				// Check that text is a valid C++ identifier character.
-				if (!event.text.isEmpty() && !event.text.matches("[0-9a-zA-Z_]+")) {
+				if (event.text.matches("\\s")) {
 					event.doit = false;
-					errorMessage = "C++ namespace identifier can only be an alphanumeric character or _";
-				} else {
-					// First character cannot be numeric.
-					String attrib1Candidate = ((Text) event.widget).getText();
-					if (attrib1Candidate.length() == 0 && event.text.matches("[0-9]")) {
+					errorMessage = "Spaces will not be in the generated file names";
+				} else if (event.text.matches("[" + invalidFilenameChars + "]")) {
 						event.doit = false;
-						errorMessage = "C++ namespace identifier cannot begin with a digit";
-					}
+						errorMessage = "Invalid character for a file name";
 				}
 				setErrorMessage(errorMessage);
 			}
