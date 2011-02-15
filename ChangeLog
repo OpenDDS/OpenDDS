@@ -1,3 +1,9 @@
+Tue Feb 15 22:58:21 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Sync.cpp:
+
+          Use ACE_DEBUG logging.
+
 Tue Feb 15 22:07:40 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
 
           [r4325] 2011-02-15 22:05  martinezm
