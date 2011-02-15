@@ -1,3 +1,9 @@
+Tue Feb 15 15:03:45 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
+
+         Make error more specific when not being able to retrieve model name.
+
 Tue Feb 15 14:39:11 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model.editor/plugin.xml:
