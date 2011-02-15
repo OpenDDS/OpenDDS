@@ -10,19 +10,10 @@
 
 <plugin>
 
-   <extension point="org.eclipse.ui.newWizards">
-      <category
-            id="org.opendds.modeling.Wizard.category.ID"
-            name="%_UI_Wizard_category"/>
-      <wizard
-            category="org.opendds.modeling.Wizard.category.ID"
-            class="org.opendds.modeling.model.opendds.presentation.OpenDDSModelWizard"
-            icon="../org.opendds.modeling.common/icons/full/obj16/OpenDDSModelFile.gif"
-            id="OpenDDS.presentation.OpenDDSModelWizardID"
-            name="%_UI_OpenDDSModelWizard_label">
-         <description>%_UI_OpenDDSModelWizard_description</description>
-         <selection class="org.eclipse.core.resources.IResource"/>
-      </wizard>
+   <extension point="org.eclipse.ui.newWizards" id="creation-wizard">
+      <?gmfgen generated="false"?>
+      <!-- Remove wizard so user cannot create model without going
+      through the main diagram -->
    </extension>
 
    <extension point="org.eclipse.ui.editors">

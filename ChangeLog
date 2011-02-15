@@ -1,3 +1,9 @@
+Tue Feb 15 14:39:11 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/plugin.xml:
+
+          Disable creation wizard for model files.
+
 Tue Feb 15 14:28:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/plugin.properties:
