@@ -1,3 +1,11 @@
+Tue Feb 15 17:28:02 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/paths_mpb.xsl:
+        * tools/modeling/tests/Deep/Down/Reference/DeepDownReference.codegen:
+        * tools/modeling/tests/ReferExternalProj/ReferExternalProj.codegen:
+
+          Change location to search Location
+
 Tue Feb 15 15:20:23 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
 
           [r4313] 2011-02-15 15:17  martinezm
