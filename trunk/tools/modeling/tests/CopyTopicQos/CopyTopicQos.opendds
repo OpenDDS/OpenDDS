@@ -7,24 +7,20 @@
         <writers xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer1" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </publishers>
       <publishers xsi:type="opendds:publisher" xmi:id="_MihXoCQWEeCooMBoZQ9mbQ" name="pub3" transportId="1">
-        <writers xmi:id="_MihXoSQWEeCooMBoZQ9mbQ" name="writer2" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+        <writers xmi:id="_MihXoSQWEeCooMBoZQ9mbQ" name="writer2" copyFromTopicQos="false" topic="_sdgAMDlDEeCUZ6Ch-6Ja_Q"/>
       </publishers>
       <subscribers xsi:type="opendds:subscriber" xmi:id="_ROf-kCQWEeCooMBoZQ9mbQ" name="sub1" transportId="3">
-        <readers xmi:id="_TcPogCQWEeCooMBoZQ9mbQ" name="reader1" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+        <readers xmi:id="_TcPogCQWEeCooMBoZQ9mbQ" name="reader1" copyFromTopicQos="false" topic="_sdgAMDlDEeCUZ6Ch-6Ja_Q"/>
       </subscribers>
-      <subscribers xsi:type="opendds:subscriber" xmi:id="_Y_JQYCQWEeCooMBoZQ9mbQ" name="sub3" transportId="3">
-        <readers xmi:id="_Y_JQYSQWEeCooMBoZQ9mbQ" name="reader2" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
-      </subscribers>
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_Y_JQYCQWEeCooMBoZQ9mbQ" name="sub3" transportId="3"/>
     </participants>
     <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
-      <publishers xsi:type="opendds:publisher" xmi:id="_3C9pUCQWEeCooMBoZQ9mbQ" name="pub2" transportId="1">
-        <writers xmi:id="_3C9pUSQWEeCooMBoZQ9mbQ" name="writer3" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
-      </publishers>
       <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportId="3">
         <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
       </subscribers>
     </participants>
-    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw" destination_order="_HBtS4CP0EeCKso1NOi-MDw"/>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" destination_order="_HBtS4CP0EeCKso1NOi-MDw" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_sdgAMDlDEeCUZ6Ch-6Ja_Q" name="Topic2" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
   </libs>
   <libs xsi:type="opendds:PolicyLib" xmi:id="__uJtECPwEeCKso1NOi-MDw" name="Policy">
     <policies xsi:type="opendds:destinationOrderQosPolicy" xmi:id="_HBtS4CP0EeCKso1NOi-MDw" name="source" kind="BY_SOURCE_TIMESTAMP"/>
