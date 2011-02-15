@@ -1,3 +1,18 @@
+Tue Feb 15 15:20:23 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
+
+          [r4313] 2011-02-15 15:17  martinezm
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/DeploymentCellModifier.java,
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/DeploymentTab.java,
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorActionBarContributor.java,
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java,
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditorPlugin.java:
+
+          Migrated Deployment tab implementation from a pure table viewer to a
+          tree with columns table viewer.
+          The TableViewerDelegate and DeploymentCellModifier may become
+          obsolete due to this but are being retained until the migration is
+          complete.
+
 Tue Feb 15 15:05:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/testdata/DataLib/DataLib2.opendds:
