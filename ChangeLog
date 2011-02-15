@@ -1,3 +1,9 @@
+Tue Feb 15 20:45:48 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/CopyTopicQos/CopyTopicQos.opendds:
+
+          Make sure only one pub/sub per topic so sync works.
+
 Tue Feb 15 19:49:58 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Delegate.cpp:
