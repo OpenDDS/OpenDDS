@@ -59,6 +59,7 @@ import org.eclipse.emf.edit.provider.ComposedAdapterFactory;
 import org.eclipse.emf.edit.provider.ReflectiveItemProviderAdapterFactory;
 import org.eclipse.emf.edit.provider.resource.ResourceItemProviderAdapterFactory;
 import org.eclipse.emf.edit.ui.action.EditingDomainActionBarContributor;
+import org.eclipse.emf.edit.ui.celleditor.AdapterFactoryTableTreeEditor;
 import org.eclipse.emf.edit.ui.celleditor.AdapterFactoryTreeEditor;
 import org.eclipse.emf.edit.ui.dnd.EditingDomainViewerDropAdapter;
 import org.eclipse.emf.edit.ui.dnd.LocalTransfer;
@@ -77,6 +78,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -88,6 +90,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -97,10 +100,13 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -229,6 +235,8 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 	 * @generated
 	 */
 	protected TableViewer tableViewer;
+	protected static final String VARIABLE_COLUMN_ID = getString("_UI_VariableColumn_label");
+	protected static final String PATH_COLUMN_ID = getString("_UI_PathColumn_label");
 
 	/**
 	 * This shows how a tree view with columns works.
@@ -1050,22 +1058,6 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				new AdapterFactoryTreeEditor(customizationViewer.getTree(),
 						adapterFactory);
 
-//				// Restrict the tree editor to only the instances.
-//				//
-//				EList<Resource> resources = editingDomain.getResourceSet()
-//						.getResources();
-//				if (resources.size() > 0) {
-//					Resource resource = resources.get(0);
-//					EList<EObject> contents = resource.getContents();
-//					if (contents.size() > 0) {
-//						EObject root = contents.get(0);
-//						if (root instanceof CodeGen) {
-//							customizationViewer.setTreeInput(((CodeGen) root)
-//									.getInstances());
-//						}
-//					}
-//				}
-
 				// Do this specifically for the contained tree viewer here,
 				// since we don't want the containing widget to intercept.
 				//
@@ -1117,26 +1109,31 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				environmentViewer.setLabelProvider(new AdapterFactoryLabelProvider(
 						adapterFactory));
 
-//				new AdapterFactoryListEditor(environmentViewer.getList(),
+//				new AdapterFactoryTreeEditor(environmentViewer.getTree(),
 //						adapterFactory);
 
-				Table table = environmentViewer.getTable();
+				Tree tree = environmentViewer.getTree();
 				TableLayout layout = new TableLayout();
-				table.setLayout(layout);
-				table.setHeaderVisible(true);
-				table.setLinesVisible(true);
+				tree.setLayout(layout);
+				tree.setHeaderVisible(true);
+				tree.setLinesVisible(true);
 
-				TableColumn variableColumn = new TableColumn(table, SWT.NONE);
+				TreeColumn variableColumn = new TreeColumn(tree, SWT.NONE);
 				layout.addColumnData(new ColumnWeightData(2, 100, true));
-				variableColumn.setText(getString("_UI_VariableColumn_label"));
+				variableColumn.setText(VARIABLE_COLUMN_ID);
 				variableColumn.setResizable(true);
 
-				TableColumn valueColumn = new TableColumn(table, SWT.NONE);
+				TreeColumn valueColumn = new TreeColumn(tree, SWT.NONE);
 				layout.addColumnData(new ColumnWeightData(3, 100, true));
-				valueColumn.setText(getString("_UI_PathColumn_label"));
+				valueColumn.setText(PATH_COLUMN_ID);
 				valueColumn.setResizable(true);
 
-				environmentViewer.setColumnProperties(new String[] { "Variable", "Value" });
+				environmentViewer.setColumnProperties(new String[] { VARIABLE_COLUMN_ID, PATH_COLUMN_ID });
+//				final TextCellEditor variableEditor = new TextCellEditor( environmentViewer.getTable());
+//				final TextCellEditor pathEditor = new TextCellEditor( environmentViewer.getTable());
+//				environmentViewer.setCellEditors( new CellEditor[] { variableEditor, pathEditor});
+//				environmentViewer.setCellModifier( new DeploymentCellModifier( this, environmentViewer));
+				
 				environmentViewer
 						.setContentProvider(new AdapterFactoryContentProvider(
 								adapterFactory));
