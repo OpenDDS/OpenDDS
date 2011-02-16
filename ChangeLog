@@ -1,3 +1,16 @@
+Wed Feb 16 17:14:33 UTC 2011  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+          [r4336] 2011-02-16 17:11  martinezm
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/LocationPathItemProvider.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/DeploymentTab.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
+
+          Changed display strings to align better with usage. Made invalid
+          modelfile and target directories non-fatal in the generation file
+          creation wizard.
+
 Wed Feb 16 16:49:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
