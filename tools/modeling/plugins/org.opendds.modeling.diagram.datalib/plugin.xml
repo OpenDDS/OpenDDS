@@ -914,9 +914,11 @@ switch.oclIsTypeOf(WChar)
             name="No DCPS Data Type Structs defined"
             mode="Batch"
             severity="WARNING" statusCode="200">
-            <![CDATA[self.types->select(oclIsTypeOf(Struct))->notEmpty()]]>
-            <description><![CDATA[At least one DCPS Data Type Struct should be defined]]></description>
-            <message><![CDATA[At least one Struct should have isDcpsDataType = true]]></message>
+            <![CDATA[self.types->select(
+  s | s.oclIsTypeOf(Struct) and
+ (s.oclAsType(Struct).isDcpsDataType = true))->notEmpty()]]>
+            <description><![CDATA[Typically at least one Struct to use as a DCPS Data Type is defined]]></description>
+            <message><![CDATA[There are no Structs with isDcpsDataType = true]]></message>
             <target class="types.DataLib"/>
          </constraint>
                   <constraint id="org.opendds.modeling.model.types.validation.warning.non_dcps_datatype_struct_not_used"
@@ -924,9 +926,14 @@ switch.oclIsTypeOf(WChar)
             name="Non DCPS Data Type Struct not used"
             mode="Batch"
             severity="WARNING" statusCode="200">
-            <![CDATA[Struct.allInstances().fields
-  ->select(type = self)
-    ->notEmpty()
+            <![CDATA[if isDcpsDataType = false
+then
+  Struct.allInstances().fields
+    ->select(type = self)
+      ->notEmpty()
+else
+  true
+endif
 ]]>
             <description><![CDATA[A non DCPS Data Type Struct is not used elsewhere]]></description>
             <message><![CDATA[A Struct with isDcpsDataType = false is not used]]></message>
