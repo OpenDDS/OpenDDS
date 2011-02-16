@@ -1,3 +1,11 @@
+Wed Feb 16 16:01:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Corrected the use of Wait Sets and Status Conditions.
+          The key change is that the condition must be checked before waiting.
+
 Wed Feb 16 15:39:45 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Delegate.cpp:
