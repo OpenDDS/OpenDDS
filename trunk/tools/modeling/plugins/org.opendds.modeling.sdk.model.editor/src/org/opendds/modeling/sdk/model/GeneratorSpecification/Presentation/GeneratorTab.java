@@ -3,8 +3,11 @@ package org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.edit.domain.EditingDomain;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -24,6 +27,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGenerator;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkGeneratorFactory;
 import org.opendds.modeling.sdk.model.GeneratorSpecification.Generator.SdkTransformer;
@@ -247,10 +252,46 @@ public class GeneratorTab extends StructuredViewer {
 				// user canceled
 				return;
 			}
-			if (whichTransform == null) {
-				generator.generateAll();
-			} else {
-				generator.generate(whichTransform);
+			
+			IStatusLineManager statusLineManager = editor.getActionBars().getStatusLineManager();
+
+			// This is the progress monitor on the status line.
+//			IProgressMonitor progressMonitor
+//			  = statusLineManager != null ?
+//					  statusLineManager.getProgressMonitor(): new NullProgressMonitor();
+
+			// Do the work within an operation because this is a long running activity that modifies the workbench.
+			//
+			WorkspaceModifyOperation operation = new WorkspaceModifyOperation() {
+				// This is the method that gets invoked when the operation runs.
+				//
+				@Override
+				public void execute(IProgressMonitor monitor) {
+					if (whichTransform == null) {
+						generator.generateAll();
+					} else {
+						generator.generate(whichTransform);
+					}
+				}
+			};
+
+			try {
+				// This runs the options, and shows progress.
+				//
+				new ProgressMonitorDialog(control.getShell()).run(true, false,
+						operation);
+				editor.firePropertyChange(IEditorPart.PROP_DIRTY); // Maybe this will cause a refresh?
+				if( statusLineManager != null) {
+					statusLineManager.setMessage("Code Generation Complete");
+				}
+
+			} catch (Exception exception) {
+				// Something went wrong that shouldn't.
+				//
+				GeneratorEditorPlugin.INSTANCE.log(exception);
+				if( statusLineManager != null) {
+					statusLineManager.setErrorMessage("Code Generation: " + exception.getMessage());
+				}
 			}
 		}
 	}

@@ -61,7 +61,7 @@ public class CustomizationTab extends StructuredViewer {
 				treePane.setLayoutData(data);
 				
 				treePane.setLayout( new FillLayout(SWT.VERTICAL));
-				treeViewer = new TreeViewerDelegate( treePane);
+				treeViewer = new TreeViewerDelegate( treePane, SWT.FULL_SELECTION);
 			}
 			
 		}

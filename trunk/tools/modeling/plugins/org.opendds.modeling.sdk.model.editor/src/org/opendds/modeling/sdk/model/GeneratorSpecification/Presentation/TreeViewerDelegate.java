@@ -5,6 +5,7 @@ package org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation;
 
 import java.util.List;
 
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Tree;
@@ -102,4 +103,13 @@ public class TreeViewerDelegate extends TreeViewer {
 		super.setSelectionToWidget(l, reveal);
 	}
 
+	@Override
+	public void addSelectionChangedListener( ISelectionChangedListener listener) {
+		super.addSelectionChangedListener(listener);
+	}
+	
+	@Override
+	public void removeSelectionChangedListener( ISelectionChangedListener listener) {
+		super.removeSelectionChangedListener(listener);
+	}
 }
