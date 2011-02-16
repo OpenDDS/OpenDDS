@@ -16,15 +16,19 @@ be incremented (per-plugin) -- the "qualifier" change is not enough.
 3. Open site.xml from org.opendds.modeling.site and click the "Build All" button
 inside the site.xml editor.
 
-4. Update the opendds.org web site.  Run the following commands with
-$WEBSITE replaced by the root of the opendds.org subversion checkout.
+4. Create a zip file for offline updates.
 cd $DDS_ROOT/tools/modeling/features/org.opendds.modeling.site
+zip -r opendds_modeling_site . -x README.txt .svn .project
+
+5. Update the opendds.org web site.  Run the following commands with
+$WEBSITE replaced by the root of the opendds.org subversion checkout.
 tar --exclude=README.txt --exclude='.*' -c * | tar -C $WEBSITE/modeling/eclipse -x
 svn revert site.xml
 # revert because Eclipse replaced "qualifier" by the date stamp, don't commit
 cd $WEBSITE/modeling/eclipse
-svn add features/*.jar plugins/*.jar site.xml content.jar artifacts.jar
+svn add features/*.jar plugins/*.jar site.xml content.jar artifacts.jar opendds_modeling_site.zip
+# a few of those should already be added, so ignore svn's complaints about them
 svn commit
 
-5. Now sync the web site from subversion to the live site, which is beyond
+6. Now sync the web site from subversion to the live site, which is beyond
 the scope of this document.

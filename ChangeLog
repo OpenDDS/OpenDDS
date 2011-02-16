@@ -1,3 +1,9 @@
+Wed Feb 16 22:46:17 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+
+          Added a step for generating a single .zip file containing the site.
+
 Wed Feb 16 22:02:48 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Sync.h:
@@ -40,7 +46,7 @@ Wed Feb 16 22:02:48 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
         * tools/modeling/tests/CopyTopicQos/CopyTopicQos.opendds:
 
           Add 3rd Topic to test.  Having reader/writer associate in 2nd topic
-          seemed to interfere with subscriber getting notified of 
+          seemed to interfere with subscriber getting notified of
           dissasociation in first topic.  Now there is only one association
           and runs much better.
 
