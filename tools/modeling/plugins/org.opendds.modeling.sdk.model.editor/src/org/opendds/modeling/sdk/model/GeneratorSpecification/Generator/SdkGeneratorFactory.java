@@ -58,7 +58,7 @@ public class SdkGeneratorFactory {
 				IPath path = new Path(file);
 				if (path.isAbsolute() || editor == null) {
 					IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
-					return workspace.getFile(path);
+					return directory ? workspace.getFolder(path) : workspace.getFile(path);
 				} else {
 					IEditorInput input = editor.getEditorInput();
 					IFileEditorInput fei = (IFileEditorInput) input;

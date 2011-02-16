@@ -43,7 +43,7 @@
    </extension>
 
    <extension point="org.eclipse.ui.newWizards" id="creation-wizard">
-      <?gmfgen generated="true"?>
+      <?gmfgen generated="false"?>
   	  <wizard
   	     name="%newWizardName"
   	     icon="icons/obj16/OpenDDSDiagramFile.gif"
@@ -52,6 +52,10 @@
   	     id="org.opendds.modeling.diagram.main.part.OpenDDSCreationWizardID">
   	  	 <description>%newWizardDesc</description>  
       </wizard>
+     <category
+           id="org.opendds.modeling.Wizard.category.ID"
+           name="OpenDDS Models">
+     </category>
    </extension>
 
    <extension point="org.eclipse.ui.popupMenus" id="init-diagram-action">
