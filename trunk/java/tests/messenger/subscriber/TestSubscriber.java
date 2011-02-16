@@ -87,19 +87,25 @@ public class TestSubscriber {
         Duration_t timeout = new Duration_t(DURATION_INFINITE_SEC.value,
                                             DURATION_INFINITE_NSEC.value);
 
-        do {
-            ConditionSeqHolder cond = new ConditionSeqHolder(new Condition[]{});
-            if (ws.wait(cond, timeout) != RETCODE_OK.value) {
-                System.err.println("ERROR: wait() failed.");
-                return;
-            }
+        while (true) {
             final int result = dr.get_subscription_matched_status(matched);
             if (result != RETCODE_OK.value) {
                 System.err.println("ERROR: get_subscription_matched_status()" +
                                    "failed.");
                 return;
             }
-        } while (matched.value.current_count > 0);
+
+            if (matched.value.current_count == 0
+                && matched.value.total_count > 0) {
+                break;
+            }
+
+            ConditionSeqHolder cond = new ConditionSeqHolder(new Condition[]{});
+            if (ws.wait(cond, timeout) != RETCODE_OK.value) {
+                System.err.println("ERROR: wait() failed.");
+                return;
+            }
+        }
 
         ws.detach_condition(sc);
 

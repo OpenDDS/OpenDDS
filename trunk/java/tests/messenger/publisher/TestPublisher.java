@@ -47,7 +47,8 @@ public class TestPublisher {
             return;
         }
 
-        Publisher pub = dp.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
+        Publisher pub = dp.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null,
+                                            DEFAULT_STATUS_MASK.value);
         if (pub == null) {
             System.err.println("ERROR: Publisher creation failed");
             return;
@@ -77,13 +78,35 @@ public class TestPublisher {
             return;
         }
 
-        InstanceHandleSeqHolder holder =
-            new InstanceHandleSeqHolder(new int[]{});
-        while(holder.value.length == 0) {
-            dw.get_matched_subscriptions(holder);
-            if(holder.value.length == 0)
-                try{ Thread.sleep(200); } catch (InterruptedException ie) {}
+        StatusCondition sc = dw.get_statuscondition();
+        sc.set_enabled_statuses(PUBLICATION_MATCHED_STATUS.value);
+        WaitSet ws = new WaitSet();
+        ws.attach_condition(sc);
+        PublicationMatchedStatusHolder matched =
+          new PublicationMatchedStatusHolder(new PublicationMatchedStatus());
+        Duration_t timeout = new Duration_t(DURATION_INFINITE_SEC.value,
+                                            DURATION_INFINITE_NSEC.value);
+
+        while (true) {
+            final int result = dw.get_publication_matched_status(matched);
+            if (result != RETCODE_OK.value) {
+                System.err.println("ERROR: get_publication_matched_status()" +
+                                   "failed.");
+                return;
+            }
+
+            if (matched.value.current_count >= 1) {
+                break;
+            }
+
+            ConditionSeqHolder cond = new ConditionSeqHolder(new Condition[]{});
+            if (ws.wait(cond, timeout) != RETCODE_OK.value) {
+                System.err.println("ERROR: wait() failed.");
+                return;
+            }
         }
+
+        ws.detach_condition(sc);
 
         MessageDataWriter mdw = MessageDataWriterHelper.narrow(dw);
         Message msg = new Message();
@@ -93,16 +116,21 @@ public class TestPublisher {
         msg.subject = "Review";
         msg.text = "Worst. Movie. Ever.";
         msg.count = 0;
-        for(; msg.count < N_MSGS; ++msg.count) {
+        for (; msg.count < N_MSGS; ++msg.count) {
             int ret = mdw.write(msg, handle);
             if (ret != RETCODE_OK.value) {
                 System.err.println("ERROR " + msg.count +
                                    "dth write() returned " + ret);
           }
         }
-        //not synching after write, OK?
-        try{ Thread.sleep(3000); } catch (InterruptedException ie) {}
 
+        // Wait for samples to be acknowledged
+        if (dw.wait_for_acknowledgments(timeout) != RETCODE_OK.value) {
+            System.err.println("ERROR: wait_for_acknowledgments failed!");
+            return;
+        }
+
+        // Clean up
         dp.delete_contained_entities();
         dpf.delete_participant(dp);
         TheTransportFactory.release();
