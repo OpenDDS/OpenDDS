@@ -17,7 +17,7 @@ $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 $opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
 $repo_bit_opt = $opts;
 
-$pub_opts = "$opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile publisher.log -DCPSDebugLevel 10";
+$pub_opts = "$opts -ORBDebugLevel 10 -ORBLogFile publisher.log -DCPSDebugLevel 10";
 $sub_opts = "$opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile subscriber.log -DCPSDebugLevel 10";
 
 $dcpsrepo_ior = "repo.ior";

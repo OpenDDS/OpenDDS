@@ -70,7 +70,7 @@ foreach my $dir (get_dirs()) {
   chdir $cwd . '/' . $dir or die "Can't change to $dir\n";
   my @ddsfiles = glob '*.codegen';
   if ($#ddsfiles == -1) {
-    die "Can't find a .codegen file in " . getcwd() . "\n";
+    print "WARN Can't find a .codegen file in " . getcwd() . "\n";
   }
 
   foreach my $base (@ddsfiles) {
