@@ -1,3 +1,13 @@
+Wed Feb 16 18:11:19 UTC 2011  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+          [r4338] 2011-02-16 18:09  martinezm
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/DeploymentTab.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/DeploymentCellModifier.java[DEL]:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/TableViewerDelegate.java[DEL]:
+
+          Removed obsolete files and corrected import sections.
+
 Wed Feb 16 17:14:33 UTC 2011  Mike Martinez  <martinez_m@lab.ociweb.com>
 
           [r4336] 2011-02-16 17:11  martinezm
