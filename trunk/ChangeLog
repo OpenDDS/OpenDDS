@@ -1,3 +1,10 @@
+Wed Feb 16 15:39:45 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/Sync.cpp:
+
+          Removed trailing spaces so that fuzz doesn't slam the build.
+
 Wed Feb 16 15:19:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:

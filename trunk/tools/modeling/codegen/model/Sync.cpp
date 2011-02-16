@@ -118,13 +118,13 @@ OpenDDS::Model::ReaderSync::wait_unmatch(DDS::DataReader_var& reader)
                  -1);
     } else if (ms.current_count == 0 && ms.total_count > 0) {
       if (DCPS_debug_level > 4) {
-        ACE_DEBUG((LM_NOTICE, ACE_TEXT("ReaderSync: sub match count %d total count %d\n"), 
+        ACE_DEBUG((LM_NOTICE, ACE_TEXT("ReaderSync: sub match count %d total count %d\n"),
                                        ms.current_count, ms.total_count));
       }
       break;  // unmatched
     }
     if (DCPS_debug_level > 4) {
-      ACE_DEBUG((LM_NOTICE, ACE_TEXT("ReaderSync: sub match count %d total count %d\n"), 
+      ACE_DEBUG((LM_NOTICE, ACE_TEXT("ReaderSync: sub match count %d total count %d\n"),
                                      ms.current_count, ms.total_count));
     }
     // wait for a change
