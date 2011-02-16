@@ -184,7 +184,7 @@ OpenDDS::Model::Delegate::createSubscription(
       qosTopic->get_qos(topicQos);
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
     } else {
-      DDS::ContentFilteredTopic* qosCfTopic = 
+      DDS::ContentFilteredTopic* qosCfTopic =
                     dynamic_cast<DDS::ContentFilteredTopic*>(topic);
       if (qosCfTopic != NULL) {
         qosCfTopic->get_related_topic()->get_qos(topicQos);
