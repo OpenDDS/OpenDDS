@@ -7,18 +7,14 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerSimpleTypesTraits.h"
+#include "model/CfTopicTraits.h"
 #include <model/NullReaderListener.h>
 #include <model/Sync.h>
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
-  public:
-    ReaderListener(OpenDDS::Model::ReaderCondSync& rcs) : rcs_(rcs) {}
-    virtual void on_data_available(DDS::DataReader_ptr reader)
-        ACE_THROW_SPEC((CORBA::SystemException));
-  private:
-    OpenDDS::Model::ReaderCondSync& rcs_;
-
+  virtual void on_data_available(
+    DDS::DataReader_ptr reader)
+  ACE_THROW_SPEC((CORBA::SystemException));
 };
 
 // START OF EXISTING MESSENGER EXAMPLE LISTENER CODE
@@ -37,33 +33,28 @@ ACE_THROW_SPEC((CORBA::SystemException))
     ACE_OS::exit(-1);
   }
 
-  data1::Message msg;
+  data1::Message message;
   DDS::SampleInfo info;
 
-  while (true) {
-    DDS::ReturnCode_t error = reader_i->take_next_sample(msg, info);
-    if (error == DDS::RETCODE_OK) {
-      std::cout << "SampleInfo.sample_rank = " << info.sample_rank << std::endl;
-      std::cout << "SampleInfo.instance_state = " << info.instance_state << std::endl;
+  DDS::ReturnCode_t error = reader_i->take_next_sample(message, info);
 
-      if (info.valid_data) {
-        std::cout << "Message: subject    = " << msg.subject.in() << std::endl
-                  << "         subject_id = " << msg.subject_id   << std::endl
-                  << "         from       = " << msg.from.in()    << std::endl
-                  << "         count      = " << msg.count        << std::endl
-                  << "         text       = " << msg.text.in()    << std::endl;
-        if (msg.count == 9) {
-          rcs_.signal();
-        }
-      }
-    } else {
-      if (error != DDS::RETCODE_NO_DATA) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("ERROR: %N:%l: on_data_available() -")
-                   ACE_TEXT(" take_next_sample failed!\n")));
-      }
-      break;
+  if (error == DDS::RETCODE_OK) {
+    std::cout << "SampleInfo.sample_rank = " << info.sample_rank << std::endl;
+    std::cout << "SampleInfo.instance_state = " << info.instance_state << std::endl;
+
+    if (info.valid_data) {
+      std::cout << "Message: subject    = " << message.subject.in() << std::endl
+                << "         subject_id = " << message.subject_id   << std::endl
+                << "         from       = " << message.from.in()    << std::endl
+                << "         count      = " << message.count        << std::endl
+                << "         text       = " << message.text.in()    << std::endl;
+
     }
+
+  } else {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("ERROR: %N:%l: on_data_available() -")
+               ACE_TEXT(" take_next_sample failed!\n")));
   }
 }
 
@@ -73,20 +64,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   try {
     OpenDDS::Model::Application application(argc, argv);
-    MessengerSimpleTypesLib::DefaultMessengerSimpleTypesType model(application, argc, argv);
+    CfTopicLib::DefaultCfTopicType model(application, argc, argv);
 
-    using OpenDDS::Model::MessengerSimpleTypesLib::Elements;
+    using OpenDDS::Model::CfTopicLib::Elements;
 
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
 
-    ACE_SYNCH_MUTEX lock;
-    ACE_Condition<ACE_SYNCH_MUTEX> condition(lock);
-    OpenDDS::Model::ReaderCondSync rcs(reader, condition);
-    DDS::DataReaderListener_var listener(new ReaderListener(rcs));
+    DDS::DataReaderListener_var listener(new ReaderListener);
     reader->set_listener( listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    // Call on_data_available in case there are samples which are waiting
-    listener->on_data_available(reader);
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 

@@ -62,6 +62,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("ERROR: %N:%l: on_data_available() -")
                  ACE_TEXT(" take_next_sample failed!\n")));
+      break;
     } else {
       if (info.instance_state & DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         std::cout << "subscriber detected instance disposed" << std::endl;

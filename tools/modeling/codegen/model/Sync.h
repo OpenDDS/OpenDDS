@@ -3,6 +3,7 @@
 
 #include "model_export.h"
 #include "dds/DdsDcpsC.h"
+#include <ace/Condition_T.h>
 
 namespace OpenDDS {
   namespace Model {
@@ -23,6 +24,18 @@ namespace OpenDDS {
       static int wait_unmatch(DDS::DataReader_var& reader);
     private:
       DDS::DataReader_var& reader_;
+    };
+
+    class OpenDDS_Model_Export ReaderCondSync {
+    public:
+      ReaderCondSync(DDS::DataReader_var& reader, 
+                     ACE_Condition<ACE_SYNCH_MUTEX>& condition);
+      ~ReaderCondSync();
+      void signal();
+    private:
+      DDS::DataReader_var& reader_;
+      bool complete_;
+      ACE_Condition<ACE_SYNCH_MUTEX>& condition_;
     };
   };
 };

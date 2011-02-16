@@ -1,4 +1,5 @@
 
+#include <model/Sync.h>
 #include <ace/Log_Msg.h>
 
 #include <dds/DCPS/WaitSet.h>
@@ -7,7 +8,7 @@
 #include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
 #endif
 
-#include "model/MessengerSimpleTypesTraits.h"
+#include "model/Chained_TopicTraits.h"
 #include <model/NullReaderListener.h>
 #include <model/Sync.h>
 
@@ -27,8 +28,8 @@ void
 ReaderListener::on_data_available(DDS::DataReader_ptr reader)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  data1::MessageDataReader_var reader_i =
-    data1::MessageDataReader::_narrow(reader);
+  chained_data::MessageDataReader_var reader_i =
+    chained_data::MessageDataReader::_narrow(reader);
 
   if (CORBA::is_nil(reader_i.in())) {
     ACE_ERROR((LM_ERROR,
@@ -37,7 +38,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
     ACE_OS::exit(-1);
   }
 
-  data1::Message msg;
+  chained_data::Message msg;
   DDS::SampleInfo info;
 
   while (true) {
@@ -52,7 +53,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
                   << "         from       = " << msg.from.in()    << std::endl
                   << "         count      = " << msg.count        << std::endl
                   << "         text       = " << msg.text.in()    << std::endl;
-        if (msg.count == 9) {
+        if (msg.count == 7) {
           rcs_.signal();
         }
       }
@@ -65,6 +66,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
       break;
     }
   }
+
 }
 
 // END OF EXISTING MESSENGER EXAMPLE LISTENER CODE
@@ -73,9 +75,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   try {
     OpenDDS::Model::Application application(argc, argv);
-    MessengerSimpleTypesLib::DefaultMessengerSimpleTypesType model(application, argc, argv);
+    Chained_TopicLib::DefaultChained_TopicType model(application, argc, argv);
 
-    using OpenDDS::Model::MessengerSimpleTypesLib::Elements;
+    using OpenDDS::Model::Chained_TopicLib::Elements;
 
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
 
@@ -90,8 +92,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 
-    data1::MessageDataReader_var reader_i =
-      data1::MessageDataReader::_narrow(reader);
+    chained_data::MessageDataReader_var reader_i =
+      chained_data::MessageDataReader::_narrow(reader);
 
     if (CORBA::is_nil(reader_i.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -101,7 +103,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
 
     OpenDDS::Model::ReaderSync rs(reader);
-
     // END OF EXISTING MESSENGER EXAMPLE CODE
 
   } catch (const CORBA::Exception& e) {

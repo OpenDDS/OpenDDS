@@ -143,3 +143,30 @@ OpenDDS::Model::ReaderSync::wait_unmatch(DDS::DataReader_var& reader)
   return 0;
 }
 
+OpenDDS::Model::ReaderCondSync::ReaderCondSync(
+     DDS::DataReader_var& reader,
+     ACE_Condition<ACE_SYNCH_MUTEX>& condition) :
+reader_(reader),
+complete_(false),
+condition_(condition)
+{
+}
+
+OpenDDS::Model::ReaderCondSync::~ReaderCondSync()
+{
+  if (ReaderSync::wait_unmatch(reader_)) {
+    throw std::runtime_error("wait_unmatch failure");
+  }
+  ACE_GUARD(ACE_SYNCH_MUTEX, conditionGuard, condition_.mutex());
+  while (!complete_) {
+    condition_.wait();
+  }
+}
+
+void OpenDDS::Model::ReaderCondSync::signal()
+{
+  ACE_GUARD(ACE_SYNCH_MUTEX, conditionGuard, condition_.mutex());
+  complete_ = true;
+  condition_.broadcast();
+}
+

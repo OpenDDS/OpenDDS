@@ -1,3 +1,70 @@
+Wed Feb 16 22:02:48 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Sync.h:
+        * tools/modeling/codegen/model/Sync.cpp:
+
+          Add conditional sync for readers.
+
+        * tools/modeling/tests/Arrays/subscriber.cpp:
+        * tools/modeling/tests/CfTopic/subscriber.cpp:
+        * tools/modeling/tests/CompositeKey/subscriber.cpp:
+        * tools/modeling/tests/CopyTopicQos/subscriber.cpp:
+        * tools/modeling/tests/DataLibRef/subscriber.cpp:
+        * tools/modeling/tests/DomainZero/subscriber.cpp:
+        * tools/modeling/tests/EmptyLibs/subscriber.cpp:
+        * tools/modeling/tests/Exchange/subscriber.cpp:
+        * tools/modeling/tests/ExternalPolicies/subscriber.cpp:
+        * tools/modeling/tests/InvalidNames/subscriber.cpp:
+        * tools/modeling/tests/Messenger/subscriber.cpp:
+        * tools/modeling/tests/MessengerDpQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerGlobalNs/subscriber.cpp:
+        * tools/modeling/tests/MessengerMixed/subscriber.cpp:
+        * tools/modeling/tests/MessengerMulti/subscriber.cpp:
+        * tools/modeling/tests/MessengerPubQos/subscriber.cpp:
+        * tools/modeling/tests/MessengerSimpleTypes/subscriber.cpp:
+        * tools/modeling/tests/MessengerSplit/subscriber.cpp:
+        * tools/modeling/tests/MessengerWriterQos/subscriber.cpp:
+        * tools/modeling/tests/MultiDCPS/subscriber.cpp:
+        * tools/modeling/tests/MultiInstance/subscriber.cpp:
+        * tools/modeling/tests/PolicyLib/subscriber.cpp:
+        * tools/modeling/tests/ReaderQos/subscriber.cpp:
+        * tools/modeling/tests/ReferExternalProj/subscriber.cpp:
+        * tools/modeling/tests/Sequences/subscriber.cpp:
+        * tools/modeling/tests/SubscriberQos/subscriber.cpp:
+        * tools/modeling/tests/TopicQos/subscriber.cpp:
+
+          Use ReaderCondSync to make sure all messages received.
+          Call on_data_available after attaching listener.
+          Loop in on_data_available until no more messages.
+
+        * tools/modeling/tests/CopyTopicQos/CopyTopicQos.opendds:
+
+          Add 3rd Topic to test.  Having reader/writer associate in 2nd topic
+          seemed to interfere with subscriber getting notified of 
+          dissasociation in first topic.  Now there is only one association
+          and runs much better.
+
+        * tools/modeling/tests/CopyTopicQos/run_test.pl:
+
+          Publisher transport logging.
+
+        * tools/modeling/tests/setup.pl:
+        * tools/modeling/tests/Chained:
+        * tools/modeling/tests/Chained/Chained.codegen:
+        * tools/modeling/tests/Chained_Data:
+        * tools/modeling/tests/Chained_Data/Chained_Data.codegen:
+        * tools/modeling/tests/Chained_Data/Chained_Data.mwc:
+        * tools/modeling/tests/Chained_Data/Chained_Data.opendds:
+        * tools/modeling/tests/Chained_Topic:
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.mpc:
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.mwc:
+        * tools/modeling/tests/Chained_Topic/Chained_Topic.opendds:
+        * tools/modeling/tests/Chained_Topic/publisher.cpp:
+        * tools/modeling/tests/Chained_Topic/subscriber.cpp:
+
+          New test for Chain of genfile (Chained dir), DCPS (Chained_Topic dir)
+          and data lib (Chained_Data dir).
+
 Wed Feb 16 18:11:19 UTC 2011  Mike Martinez  <martinez_m@lab.ociweb.com>
 
           [r4338] 2011-02-16 18:09  martinezm
