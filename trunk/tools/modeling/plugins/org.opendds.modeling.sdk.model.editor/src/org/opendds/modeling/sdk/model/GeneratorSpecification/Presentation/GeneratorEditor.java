@@ -1098,9 +1098,8 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				viewerPane.createControl(getContainer());
 				environmentViewer = (DeploymentTab) viewerPane.getViewer();
 				environmentViewer.setEditor(this);
-				environmentViewer
-						.setContentProvider(new AdapterFactoryContentProvider(
-								adapterFactory));
+				environmentViewer.setContentProvider(new AdapterFactoryContentProvider(
+						adapterFactory));
 				environmentViewer.setLabelProvider(new AdapterFactoryLabelProvider(
 						adapterFactory));
 
@@ -1124,16 +1123,6 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				valueColumn.setResizable(true);
 
 				environmentViewer.setColumnProperties(new String[] { VARIABLE_COLUMN_ID, PATH_COLUMN_ID });
-//				final TextCellEditor variableEditor = new TextCellEditor( environmentViewer.getTable());
-//				final TextCellEditor pathEditor = new TextCellEditor( environmentViewer.getTable());
-//				environmentViewer.setCellEditors( new CellEditor[] { variableEditor, pathEditor});
-//				environmentViewer.setCellModifier( new DeploymentCellModifier( this, environmentViewer));
-				
-				environmentViewer
-						.setContentProvider(new AdapterFactoryContentProvider(
-								adapterFactory));
-				environmentViewer.setLabelProvider(new AdapterFactoryLabelProvider(
-						adapterFactory));
 
 				// Do this specifically for the contained table viewer here,
 				// since we don't want the containing widget to intercept.
