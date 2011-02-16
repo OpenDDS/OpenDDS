@@ -1,3 +1,15 @@
+Wed Feb 16 00:15:41 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
+
+          [r4330] 2011-02-16 00:13  martinezm
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/CustomizationTab.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/DeploymentTab.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorTab.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/TreeViewerDelegate.java:
+
+          Added a progress monitor, notifications to the status bar, and moved
+          code generation to a different thread. Updated some of the selection
+          handling details trying to get the selections to work right.
+
 Tue Feb 15 23:25:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
