@@ -66,7 +66,7 @@ public class DeploymentTab extends StructuredViewer {
 		// TODO Put resolved reference information here.
 
 		Label label = new Label(panel, SWT.CENTER);
-		label.setText("Deployment Search Paths");
+		label.setText("Build Search Paths");
 		label.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
 
 		Composite listPane = new Composite(panel,0);
@@ -91,7 +91,7 @@ public class DeploymentTab extends StructuredViewer {
 		variableText.setLayoutData(gridData);
 
 		label = new Label(enterPane, SWT.LEFT);
-		label.setText("Relative Path:");
+		label.setText("Path:");
 		gridData = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
 		label.setLayoutData(gridData);
 
@@ -137,15 +137,6 @@ public class DeploymentTab extends StructuredViewer {
 				if (root instanceof CodeGen) {
 					CodeGen codeGen = (CodeGen)root;
 					searchPaths = codeGen.getSearchPaths();
-					if(searchPaths == null) {
-						editingDomain.getCommandStack().execute(
-								AddCommand.create(
-										editingDomain,
-										codeGen,
-										GeneratorPackage.eINSTANCE.getSearchLocation(),
-										searchPaths
-								));
-					}
 				}
 			}
 		}		
@@ -156,21 +147,22 @@ public class DeploymentTab extends StructuredViewer {
 			return;
 		}
 
-		SearchLocation newPath = generatorFactory.createSearchLocation();
-		if( baseVariable != null) {
-			LocationVariable variable = generatorFactory.createLocationVariable();
-			variable.setValue(baseVariable);
-			newPath.setVariable(variable);
-		}
-		
-		if( relativePath != null) {
-			LocationPath path = generatorFactory.createLocationPath();
-			path.setValue(relativePath);
-			newPath.setPath(path);
-		}
-
 		EditingDomain editingDomain = editor.getEditingDomain();
 		if( editingDomain != null && searchPaths != null) {
+
+			SearchLocation newPath = generatorFactory.createSearchLocation();
+			if( baseVariable != null && !baseVariable.isEmpty()) {
+				LocationVariable variable = generatorFactory.createLocationVariable();
+				variable.setValue(baseVariable);
+				newPath.setVariable(variable);
+			}
+			
+			if( relativePath != null && !relativePath.isEmpty()) {
+				LocationPath path = generatorFactory.createLocationPath();
+				path.setValue(relativePath);
+				newPath.setPath(path);
+			}
+
 			editingDomain.getCommandStack().execute(
 					AddCommand.create(
 							editingDomain,
@@ -342,13 +334,4 @@ public class DeploymentTab extends StructuredViewer {
 	public Tree getTree() {
 		return viewer.getTree();
 	}
-	
-	public void setCellEditors(CellEditor[] editors) {
-		viewer.setCellEditors(editors);
-	}
-	
-	public void setCellModifier( ICellModifier modifier) {
-		viewer.setCellModifier(modifier);
-	}
-
 }

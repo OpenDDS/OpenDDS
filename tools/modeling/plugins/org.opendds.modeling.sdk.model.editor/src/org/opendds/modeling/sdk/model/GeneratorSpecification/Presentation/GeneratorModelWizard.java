@@ -221,17 +221,6 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 		SearchPaths searchPaths = generatorFactory.createSearchPaths();
 		codeGen.setSearchPaths(searchPaths);
 
-		SearchLocation searchLocation = generatorFactory.createSearchLocation();
-
-		LocationVariable locationVariable = generatorFactory.createLocationVariable();
-		locationVariable.setValue("PROJECT_ROOT");
-		searchLocation.setVariable(locationVariable);
-
-		LocationPath locationPath = generatorFactory.createLocationPath();
-		searchLocation.setPath(locationPath);
-
-		searchPaths.getSearchLocation().add(searchLocation);
-
 		return codeGen;
 	}
 
@@ -543,6 +532,8 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 
 		protected void updatePageComplete() {
 			setPageComplete(false);
+			
+			String resultsInfo = new String();
 
 			String newSource = modelFileField.getText();
 			if( newSource == null || newSource.isEmpty()) {
@@ -551,43 +542,39 @@ public class GeneratorModelWizard extends Wizard implements INewWizard {
 			} else {
 				parsedModelFile.setSourceName( newSource);
 				if( !parsedModelFile.exists()) {
-					setMessage(null);
-					setErrorMessage("Model file "
-							+ newSource + " does not exist");
-					return;
-				}
+					resultsInfo += "Model file " + newSource + " does not exist";
 
-				String modelName = parsedModelFile.getModelName();
-				if( modelName == null) {
-					setMessage(null);
-					setErrorMessage("Model file "
-							+ newSource + " does not have a model name defined");
-					return;
+				} else if(parsedModelFile.getModelName() == null) {
+					resultsInfo += "Model file " + newSource + " does not have a model name defined";
 				}
 			}
 
 			String newTarget = targetDirField.getText();
-
 			if( newTarget != null && !newTarget.isEmpty()) {
 				IResource container = ResourcesPlugin.getWorkspace().getRoot()
                 						.findMember(new Path( newTarget));
 
 				if (container == null || (container.getType() & (IResource.PROJECT | IResource.FOLDER)) == 0) {
-					setMessage(null);
-					setErrorMessage("Target folder " + newTarget + " must exist");
-					this.targetDir = "/";
-					return;
-				}
-				if (!container.isAccessible()) {
-					setMessage(null);
-					setErrorMessage("Target folder " + newTarget + " must be writable");
-					this.targetDir = "/";
-					return;
+					if( !resultsInfo.isEmpty()) {
+//						resultsInfo += Character.LINE_SEPARATOR;
+						resultsInfo += "\n";
+					}
+					resultsInfo += "Target folder " + newTarget + " does not exist";
+
+				} else if (!container.isAccessible()) {
+					if( !resultsInfo.isEmpty()) {
+//						resultsInfo += Character.LINE_SEPARATOR;
+						resultsInfo += "\n";
+					}
+					resultsInfo += "Target folder " + newTarget + " is not writeable";
 				}
 				this.targetDir = newTarget;
 			}
 
-			setErrorMessage(null);
+			setMessage(null);
+			if( !resultsInfo.isEmpty()) {
+				setMessage(resultsInfo, INFORMATION);
+			}
 			setPageComplete(true);
 		}
 

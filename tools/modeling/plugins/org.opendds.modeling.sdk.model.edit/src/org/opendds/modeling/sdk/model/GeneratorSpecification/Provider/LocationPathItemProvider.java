@@ -123,7 +123,7 @@ public class LocationPathItemProvider extends ItemProviderAdapter implements
 	public String getColumnText(Object object, int columnIndex) {
 		switch (columnIndex) {
 		case 0:
-			return "Relative Path";
+			return "Path";
 
 		case 1:
 			String text = ((LocationPath) object).getValue();
