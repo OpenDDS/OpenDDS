@@ -893,12 +893,12 @@
         description="Detects questionable modeling constructs.">
       <audits
           name="No DCPS Data Type Structs defined"
-          description="At least one DCPS Data Type Struct should be defined"
+          description="Typically at least one Struct to use as a DCPS Data Type is defined"
           id="org.opendds.modeling.model.types.validation.warning.no_dcps_datatype_struct_defined"
           severity="WARNING"
-          message="At least one Struct should have isDcpsDataType = true">
+          message="There are no Structs with isDcpsDataType = true">
         <rule
-            body="self.types->select(oclIsTypeOf(Struct))->notEmpty()"/>
+            body="self.types->select(&#xA;  s | s.oclIsTypeOf(Struct) and&#xA; (s.oclAsType(Struct).isDcpsDataType = true))->notEmpty()"/>
         <target
             xsi:type="gmfmap:DomainElementTarget">
           <element
@@ -912,7 +912,7 @@
           severity="WARNING"
           message="A Struct with isDcpsDataType = false is not used">
         <rule
-            body="Struct.allInstances().fields&#xA;  ->select(type = self)&#xA;    ->notEmpty()&#xA;"/>
+            body="if isDcpsDataType = false&#xA;then&#xA;  Struct.allInstances().fields&#xA;    ->select(type = self)&#xA;      ->notEmpty()&#xA;else&#xA;  true&#xA;endif&#xA;"/>
         <target
             xsi:type="gmfmap:DomainElementTarget">
           <element

@@ -166,10 +166,10 @@
     </rules>
     <rules
         name="No DCPS Data Type Structs defined"
-        description="At least one DCPS Data Type Struct should be defined"
+        description="Typically at least one Struct to use as a DCPS Data Type is defined"
         id="org.opendds.modeling.model.types.validation.warning.no_dcps_datatype_struct_defined"
         rule="//@expressionProviders/@providers.0/@expressions.11"
-        message="At least one Struct should have isDcpsDataType = true"
+        message="There are no Structs with isDcpsDataType = true"
         severity="WARNING"
         category="//@audits/@categories.2">
       <target
@@ -3209,10 +3209,10 @@
           body="not literal.oclIsUndefined() and literal &lt;> ''"/>
       <expressions
           xsi:type="gmfgen:GenConstraint"
-          body="self.types->select(oclIsTypeOf(Struct))->notEmpty()"/>
+          body="self.types->select(&#xA;  s | s.oclIsTypeOf(Struct) and&#xA; (s.oclAsType(Struct).isDcpsDataType = true))->notEmpty()"/>
       <expressions
           xsi:type="gmfgen:GenConstraint"
-          body="Struct.allInstances().fields&#xA;  ->select(type = self)&#xA;    ->notEmpty()&#xA;"/>
+          body="if isDcpsDataType = false&#xA;then&#xA;  Struct.allInstances().fields&#xA;    ->select(type = self)&#xA;      ->notEmpty()&#xA;else&#xA;  true&#xA;endif&#xA;"/>
     </providers>
   </expressionProviders>
   <labelParsers

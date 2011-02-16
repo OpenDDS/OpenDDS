@@ -1,3 +1,11 @@
+Wed Feb 16 16:49:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfmap:
+
+          Fixed validations about Struct's isDcpsDataType attribute.
+
 Wed Feb 16 16:01:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * java/tests/messenger/publisher/TestPublisher.java:
