@@ -1,6 +1,14 @@
 Version 2.3 of OpenDDS.
 
-- First release of the OpenDDS Modeling SDK {more here}
+- First release of the OpenDDS Modeling SDK, a modeling tool that can be
+  used by the application developer to define the required middleware
+  components and data structures as a UML model and then generate the
+  code to implement the model using OpenDDS.  The generated code can 
+  then be compiled and linked with the application to provide seamless
+  middleware support to the application.  UML models are manipulated using
+  a graphical editor based on Eclipse.  See the OpenDDS Developer's Guide
+  <http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf> for
+  installation instructions.
 
 - DCPSInfoRepo no longer requires an -ORBSvcConf argument when using
   Built-In Topics.  The DCPSInfoRepo process will take care of loading
