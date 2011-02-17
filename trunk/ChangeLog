@@ -1,3 +1,11 @@
+Thu Feb 17 16:56:54 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
+
+          [r4347] 2011-02-17 16:54  martinezm
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore:
+
+          Removed default modelfile name. Changed default target directory
+          name to 'model'.
+
 Thu Feb 17 16:50:23 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
