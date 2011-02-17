@@ -1,3 +1,9 @@
+Thu Feb 17 16:12:26 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Sync.h:
+
+          Trailing whitespace.
+
 Thu Feb 17 15:35:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:
