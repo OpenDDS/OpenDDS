@@ -28,7 +28,7 @@ namespace OpenDDS {
 
     class OpenDDS_Model_Export ReaderCondSync {
     public:
-      ReaderCondSync(DDS::DataReader_var& reader, 
+      ReaderCondSync(DDS::DataReader_var& reader,
                      ACE_Condition<ACE_SYNCH_MUTEX>& condition);
       ~ReaderCondSync();
       void signal();
