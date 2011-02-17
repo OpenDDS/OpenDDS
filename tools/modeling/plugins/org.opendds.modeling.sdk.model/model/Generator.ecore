@@ -16,11 +16,11 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ModelFile">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        defaultValueLiteral="&quot;&lt;none>&quot;"/>
+        defaultValueLiteral=""/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TargetDir">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        defaultValueLiteral="&quot;&lt;none>&quot;"/>
+        defaultValueLiteral="model"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SearchPaths">
     <eStructuralFeatures xsi:type="ecore:EReference" name="searchLocation" upperBound="-1"
