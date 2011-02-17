@@ -1,3 +1,10 @@
+Thu Feb 17 15:35:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * README:
+
+          Updates to prepare for release 2.3 of OpenDDS.
+
 Thu Feb 17 15:33:01 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/Arrays/Arrays.codegen:
