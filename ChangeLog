@@ -1,3 +1,11 @@
+Thu Feb 17 17:46:28 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds_diagram:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest_screenshot_2.png:
+
+          Update diagram to account for visual ID changes caused by using
+          topcis:Topic in mapping for node Topic.
+
 Thu Feb 17 17:08:36 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
