@@ -124,8 +124,12 @@ public class TestPublisher {
           }
         }
 
-        // Wait for samples to be acknowledged
-        if (dw.wait_for_acknowledgments(timeout) != RETCODE_OK.value) {
+        // Wait for samples to be acknowledged, need a finite timeout for
+        // non-TCP transports which don't support wait_for_acks
+        timeout.sec = 10;
+        timeout.nanosec = 0;
+        int ret = dw.wait_for_acknowledgments(timeout);
+        if (ret != RETCODE_OK.value && ret != RETCODE_TIMEOUT.value) {
             System.err.println("ERROR: wait_for_acknowledgments failed!");
             return;
         }
