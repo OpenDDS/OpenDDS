@@ -2000,7 +2000,7 @@
         href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//DcpsLib/topicDescriptions"/>
     <ownedChild>
       <domainMetaElement
-          href="../../org.opendds.modeling.model/model/OpenDDS.ecore#//topic"/>
+          href="../../org.opendds.modeling.model/model/Topics.ecore#//Topic"/>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           viewPattern="">

@@ -224,16 +224,16 @@
             <method name="getType()" value="OpenDDS DcpsLib"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-nodes">
-            <method name="getType()" value="2001,2002,2004,2005,2006,3001,3059,3022,3005,3023,3024,3006,3025,3026,3007,3027,3008,3028,3009,3029,3030,3031,3010,3032,3033,3034,3035,3013,3036,3037,3038,3039,3040,3041,3042,3043,3044,3045,3046,3047,3048,3021,3012,3014,3015,3016,3017,3018,3019,3020,3002,3060,3049,3055,3056,3050,3057,3051,3052,3053,3054,3058"/>
+            <method name="getType()" value="2001,2002,2007,2005,2006,3001,3059,3022,3005,3023,3024,3006,3025,3026,3007,3027,3008,3028,3009,3029,3030,3031,3010,3032,3033,3034,3035,3013,3036,3037,3038,3039,3040,3041,3042,3043,3044,3045,3046,3047,3048,3021,3012,3014,3015,3016,3017,3018,3019,3020,3002,3060,3049,3055,3056,3050,3057,3051,3052,3053,3054,3058"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Edge" id="generated-links">
             <method name="getType()" value="4005,4006,4007,4008"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-labels">
-            <method name="getType()" value="5001,5004,5002,5005,5266,5258,5259,5260,5261,5262,5263,5264,5265,5006,5007,5240,5252,5253,5254,5132,5133,5013,5014,5134,5135,5136,5137,5138,5139,5140,5141,5142,5143,5020,5021,5144,5145,5146,5147,5148,5149,5042,5043,5150,5151,5046,5047,5152,5153,5154,5050,5051,5155,5156,5157,5158,5159,5160,5161,5162,5163,5071,5072,5164,5165,5166,5167,5168,5169,5170,5171,5172,5173,5174,5175,5176,5177,5102,5103,5104,5178,5179,5180,5181,5182,5183,5184,5185,5186,5187,5188,5189,5190,5191,5192,5193,5194,5195,5196,5197,5198,5199,5200,5201,5202,5203,5204,5205,5206,5207,5208,5209,5210,5211,5212,5213,5214,5215,5216,5217,5218,5219,5220,5128,5129,5130,5099,5100,5101,5105,5106,5107,5108,5109,5110,5111,5112,5113,5114,5115,5116,5117,5118,5119,5120,5121,5122,5123,5124,5125,5126,5127,5008,5009,5241,5255,5256,5257,5221,5222,5243,5244,5245,5246,5224,5225,5247,5248,5227,5228,5229,5230,5231,5233,5234,5236,5237,5238,5250,5251"/>
+            <method name="getType()" value="5001,5004,5002,5005,5266,5267,5268,5260,5261,5262,5263,5264,5265,5006,5007,5240,5252,5253,5254,5132,5133,5013,5014,5134,5135,5136,5137,5138,5139,5140,5141,5142,5143,5020,5021,5144,5145,5146,5147,5148,5149,5042,5043,5150,5151,5046,5047,5152,5153,5154,5050,5051,5155,5156,5157,5158,5159,5160,5161,5162,5163,5071,5072,5164,5165,5166,5167,5168,5169,5170,5171,5172,5173,5174,5175,5176,5177,5102,5103,5104,5178,5179,5180,5181,5182,5183,5184,5185,5186,5187,5188,5189,5190,5191,5192,5193,5194,5195,5196,5197,5198,5199,5200,5201,5202,5203,5204,5205,5206,5207,5208,5209,5210,5211,5212,5213,5214,5215,5216,5217,5218,5219,5220,5128,5129,5130,5099,5100,5101,5105,5106,5107,5108,5109,5110,5111,5112,5113,5114,5115,5116,5117,5118,5119,5120,5121,5122,5123,5124,5125,5126,5127,5008,5009,5241,5255,5256,5257,5221,5222,5243,5244,5245,5246,5224,5225,5247,5248,5227,5228,5229,5230,5231,5233,5234,5236,5237,5238,5250,5251"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-compartments">
-            <method name="getType()" value="7001,7008,7011,7009,7012,7014,7041,7042,7017,7018,7019,7020,7021,7022,7023,7024,7025,7026,7027,7028,7010,7013,7029,7043,7044,7034,7035,7036,7037,7038,7039,7045,7046,7047,7049"/>
+            <method name="getType()" value="7001,7008,7011,7009,7012,7014,7041,7042,7017,7018,7019,7020,7021,7022,7023,7024,7025,7026,7027,7028,7010,7013,7029,7043,7044,7034,7035,7036,7037,7038,7039,7050,7051,7052,7049"/>
          </object>
          <context views="generated-diagram,generated-nodes,generated-links,generated-labels,generated-compartments"/>
       </editpartProvider>
@@ -246,10 +246,10 @@
          <object class="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.DcpsLibEditPart" id="DcpsLib_1000"/>
          <object class="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.DomainParticipantEditPart" id="DomainParticipant_2001"/>
          <object class="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.DomainEditPart" id="Domain_2002"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.TopicEditPart" id="Topic_2004"/>
+         <object class="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.TopicEditPart" id="Topic_2007"/>
          <object class="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.ContentFilteredTopicEditPart" id="ContentFilteredTopic_2005"/>
          <object class="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.MultiTopicEditPart" id="MultiTopic_2006"/>
-         <context elements="DcpsLib_1000,DomainParticipant_2001,Domain_2002,Topic_2004,ContentFilteredTopic_2005,MultiTopic_2006"/>
+         <context elements="DcpsLib_1000,DomainParticipant_2001,Domain_2002,Topic_2007,ContentFilteredTopic_2005,MultiTopic_2006"/>
       </modelingAssistantProvider>
    </extension>
 
@@ -299,14 +299,14 @@
             <param name="semanticHint" value="2002"/>
          </metamodelType>
       </metamodel>
-      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Topics/1.0">
          <metamodelType
-               id="org.opendds.modeling.diagram.dcpslib.Topic_2004"
-               name="%metatype.name.Topic_2004"
+               id="org.opendds.modeling.diagram.dcpslib.Topic_2007"
+               name="%metatype.name.Topic_2007"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
-               eclass="topic"
+               eclass="Topic"
                edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.TopicEditHelper">
-            <param name="semanticHint" value="2004"/>
+            <param name="semanticHint" value="2007"/>
          </metamodelType>
       </metamodel>
       <metamodel nsURI="http://www.opendds.org/modeling/schemas/Topics/1.0">
@@ -921,7 +921,7 @@
          <elementType ref="org.opendds.modeling.diagram.dcpslib.DcpsLib_1000"/>
          <elementType ref="org.opendds.modeling.diagram.dcpslib.DomainParticipant_2001"/>
          <elementType ref="org.opendds.modeling.diagram.dcpslib.Domain_2002"/>
-         <elementType ref="org.opendds.modeling.diagram.dcpslib.Topic_2004"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.Topic_2007"/>
          <elementType ref="org.opendds.modeling.diagram.dcpslib.ContentFilteredTopic_2005"/>
          <elementType ref="org.opendds.modeling.diagram.dcpslib.MultiTopic_2006"/>
          <elementType ref="org.opendds.modeling.diagram.dcpslib.Publisher_3001"/>
