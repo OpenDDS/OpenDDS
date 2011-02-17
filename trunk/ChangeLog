@@ -1,3 +1,76 @@
+Thu Feb 17 15:33:01 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/Arrays/Arrays.codegen:
+
+        * tools/modeling/tests/CfTopic/CfTopic.codegen:
+
+        * tools/modeling/tests/Chained_Data/Chained_Data.codegen:
+
+        * tools/modeling/tests/Codegen/Codegen.codegen:
+
+        * tools/modeling/tests/CompositeKey/CompositeKey.codegen:
+
+        * tools/modeling/tests/CopyTopicQos/CopyTopicQos.codegen:
+
+        * tools/modeling/tests/DataLibRef/DataLibRef.codegen:
+
+        * tools/modeling/tests/DomainZero/DomainZero.codegen:
+
+        * tools/modeling/tests/EmptyLibs/ELTypes.codegen:
+        * tools/modeling/tests/EmptyLibs/EmptyLibs.codegen:
+
+        * tools/modeling/tests/Exchange/Exchange.codegen:
+
+        * tools/modeling/tests/ExternalPolicies/ExternalPolicies.codegen:
+
+        * tools/modeling/tests/InvalidNames/InvalidNames.codegen:
+
+        * tools/modeling/tests/Messenger/Messenger.codegen:
+
+        * tools/modeling/tests/MessengerDpQos/MessengerDpQos.codegen:
+
+        * tools/modeling/tests/MessengerGlobalNs/MessengerGlobalNs.codegen:
+
+        * tools/modeling/tests/MessengerMC/MessengerMC.codegen:
+
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.codegen:
+        * tools/modeling/tests/MessengerMixed/MessengerTypesMixed.codegen:
+
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.codegen:
+
+        * tools/modeling/tests/MessengerNoPub/MessengerNoPub.codegen:
+
+        * tools/modeling/tests/MessengerNoSub/MessengerNoSub.codegen:
+
+        * tools/modeling/tests/MessengerPubQos/MessengerPubQos.codegen:
+
+        * tools/modeling/tests/MessengerSimpleTypes/MessengerSimpleTypes.codegen:
+
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.codegen:
+        * tools/modeling/tests/MessengerSplit/MessengerTypes.codegen:
+
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.codegen:
+
+        * tools/modeling/tests/MultiDCPS/MultiDCPS.codegen:
+
+        * tools/modeling/tests/MultiInstance/MultiInstance.codegen:
+
+        * tools/modeling/tests/MultiTopic/MultiTopic.codegen:
+
+        * tools/modeling/tests/PolicyLib/PolicyLib.codegen:
+
+        * tools/modeling/tests/ReaderQos/ReaderQos.codegen:
+
+        * tools/modeling/tests/Sequences/Sequences.codegen:
+
+        * tools/modeling/tests/SubscriberQos/SubQos.codegen:
+
+        * tools/modeling/tests/TopicQos/TopQos.codegen:
+
+        * tools/modeling/tests/UDP/UDP.codegen:
+
+          Added <searchPaths> to codegen files.
+
 Thu Feb 17 13:57:55 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/OpenDDSCreationWizard.java:

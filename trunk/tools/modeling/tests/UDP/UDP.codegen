@@ -35,4 +35,5 @@
       </transport>
     </instance>
   </instances>
+  <searchPaths/>
 </generator:CodeGen>
