@@ -22,7 +22,7 @@ zip -r opendds_modeling_site . -x README.txt .svn .project
 
 5. Update the opendds.org web site.  Run the following commands with
 $WEBSITE replaced by the root of the opendds.org subversion checkout.
-tar --exclude=README.txt --exclude='.*' -c * | tar -C $WEBSITE/modeling/eclipse -x
+tar --exclude=README.txt --exclude='.*' -ch * | tar -C $WEBSITE/modeling/eclipse -x
 svn revert site.xml
 # revert because Eclipse replaced "qualifier" by the date stamp, don't commit
 cd $WEBSITE/modeling/eclipse

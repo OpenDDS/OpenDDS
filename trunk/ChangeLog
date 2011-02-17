@@ -1,3 +1,10 @@
+Thu Feb 17 22:05:59 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+
+          Updates to prepare for release 2.3 of OpenDDS.
+
 Thu Feb 17 21:42:13 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGeneratorFactory.java:
