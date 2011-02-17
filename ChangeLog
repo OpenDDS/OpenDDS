@@ -1,3 +1,10 @@
+Thu Feb 17 21:17:57 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest_screenshot_2.png:
+
+	  Fixed "Entityactory" typo.
+
 Thu Feb 17 21:12:26 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/main_diagram_lib_shortcut.png:
