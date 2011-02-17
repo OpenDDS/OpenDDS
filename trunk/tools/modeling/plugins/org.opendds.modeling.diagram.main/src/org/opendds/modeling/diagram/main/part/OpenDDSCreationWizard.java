@@ -106,14 +106,16 @@ public class OpenDDSCreationWizard extends Wizard implements INewWizard {
 	}
 
 	/**
-	 * @generated
+	 * @generated NOT
 	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		this.workbench = workbench;
 		this.selection = selection;
 		setWindowTitle(Messages.OpenDDSCreationWizardTitle);
+		// Custom code begin
 		setDefaultPageImageDescriptor(OpenDDSDiagramEditorPlugin
-				.getBundledImageDescriptor("icons/wizban/NewOpenDDSWizard.gif")); //$NON-NLS-1$
+				.getBundledImageDescriptor("platform:/plugin/org.opendds.modeling.common/icons/full/obj16/OpenDDS.gif")); //$NON-NLS-1$
+		// Custom code end
 		setNeedsProgressMonitor(true);
 	}
 
