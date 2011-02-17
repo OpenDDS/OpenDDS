@@ -49,12 +49,6 @@ development model.
       <import plugin="org.eclipse.emf.edit"/>
       <import plugin="org.eclipse.emf.edit.ui"/>
       <import plugin="org.eclipse.ui.ide"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.jface.text"/>
-      <import plugin="org.eclipse.ui.editors"/>
-      <import plugin="org.eclipse.ui.forms"/>
-      <import plugin="javax.xml"/>
-      <import plugin="org.eclipse.core.filesystem"/>
       <import plugin="org.eclipse.core.expressions"/>
       <import plugin="org.eclipse.jface"/>
       <import plugin="org.eclipse.ui.views"/>
@@ -87,6 +81,8 @@ development model.
       <import plugin="org.eclipse.gmf.runtime.notation"/>
       <import plugin="org.eclipse.swt"/>
       <import plugin="org.eclipse.emf.codegen.ecore"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.filesystem"/>
    </requires>
 
    <plugin
