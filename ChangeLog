@@ -1,3 +1,16 @@
+Thu Feb 17 17:08:36 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/TopicQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram/dcpslib/edit/parts/TopicQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.trace:
+
+          Fix icon for Topic in palette by having Topic top-level node mapping use topics:Topic instead
+          of opendds.topic. This also makes it consistent with ContentFilteredTopic and MultiTopic
+          nodes.
+
 Thu Feb 17 16:56:54 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
 
           [r4347] 2011-02-17 16:54  martinezm
