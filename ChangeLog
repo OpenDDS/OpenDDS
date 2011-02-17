@@ -1,3 +1,10 @@
+Thu Feb 17 21:12:26 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/main_diagram_lib_shortcut.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithopenddsmodels.html:
+
+          Added discussion on how to link to other model libraries on the main diagram.
+
 Thu Feb 17 20:30:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * java/tests/messenger/publisher/TestPublisher.java:
