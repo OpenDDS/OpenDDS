@@ -2,6 +2,7 @@ package org.opendds.modeling.sdk.model.GeneratorSpecification.Generator;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URI;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -52,7 +53,12 @@ public class SdkGeneratorFactory {
 			}
 			@Override
 			public URL fromWorkspace(String fileName, boolean directory) throws MalformedURLException {
-				return getResource(fileName, directory).getLocationURI().toURL();
+				URI uri = getResource(fileName, directory).getLocationURI();
+				if (uri != null) {
+					return uri.toURL();
+				} else {
+					return null;
+				}
 			}
 			private IResource getResource(String file, boolean directory) {
 				IPath path = new Path(file);

@@ -1,9 +1,20 @@
+Thu Feb 17 21:42:13 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGeneratorFactory.java:
+
+          Handle URI to an invalid location in fromWorkspace and return null.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedXmlFile.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java:
+
+          Handle nulls returned from SdkGenerator.fromWorkspace().
+
 Thu Feb 17 21:17:57 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds:
         * tools/modeling/testdata/DcpsLib/DcpsLibTest_screenshot_2.png:
 
-	  Fixed "Entityactory" typo.
+          Fixed "Entityactory" typo.
 
 Thu Feb 17 21:12:26 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
