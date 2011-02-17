@@ -297,6 +297,9 @@ public class SdkGenerator {
 					} else {
 						// This is a model reference, assume relative to the source file
 						resource = fileProvider.fromWorkspace(start + fname);
+						if (resource == null) {
+							throw new IOException();
+						}
 					}
 					return new StreamSource(resource.openStream());
 

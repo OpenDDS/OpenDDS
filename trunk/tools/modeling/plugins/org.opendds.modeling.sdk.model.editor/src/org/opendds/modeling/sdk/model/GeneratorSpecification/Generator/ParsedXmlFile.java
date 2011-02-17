@@ -62,9 +62,11 @@ public abstract class ParsedXmlFile {
 		if(sourceName != null) {
 			try {
 				URL modelUrl = fileProvider.fromWorkspace(sourceName);
+				if (modelUrl == null) {
+					return false;
+				}
 				File modelFile = new File(modelUrl.toURI());
-				return modelFile.exists();
-	
+				return modelFile.exists();	
 			} catch (MalformedURLException e) {
 				errorHandler.error(IErrorHandler.Severity.INFO, "exists",
 						"Unable to parse URL for file " + sourceName, e);
@@ -125,9 +127,16 @@ public abstract class ParsedXmlFile {
 		}
 	
 		try {
+			File modelFile;
 			URL modelUrl = fileProvider.fromWorkspace(this.sourceName);
-			File modelFile = new File(modelUrl.toURI());
-			if (!modelFile.exists()) {
+			if (modelUrl != null) {
+				modelFile = new File(modelUrl.toURI());
+				if (!modelFile.exists()) {
+					errorHandler.error(IErrorHandler.Severity.ERROR, "getModelDocument",
+							"Model file " + this.sourceName + " does not exist.", null);
+					return null;
+				}
+			} else {
 				errorHandler.error(IErrorHandler.Severity.ERROR, "getModelDocument",
 						"Model file " + this.sourceName + " does not exist.", null);
 				return null;
@@ -192,6 +201,9 @@ public abstract class ParsedXmlFile {
 	public long getTimestamp() {
 		try {
 			URL modelUrl = fileProvider.fromWorkspace(this.sourceName);
+			if (modelUrl == null) {
+				return 0;
+			}
 			File modelFile = new File(modelUrl.toURI());
 			return modelFile.lastModified();
 		} catch (MalformedURLException e) {
