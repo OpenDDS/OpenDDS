@@ -1,11 +1,18 @@
 Version 2.3 of OpenDDS.
 
+- First release of the OpenDDS Modeling SDK {more here}
+
 - DCPSInfoRepo no longer requires an -ORBSvcConf argument when using
   Built-In Topics.  The DCPSInfoRepo process will take care of loading
   SimpleTCP (if it's not already loaded).
 
 - Fixed method signature of DataWriter::register_instance_w_timestamp()
   to have two arguments per the latest spec, not three.
+
+- "make install" is now available on platforms using GNU Make and when
+  building with OCI TAO 1.6a or DOC Group TAO.
+
+- Added support for Microsoft Visual Studio 2010 (vc10).
 
 
 ========================================================================

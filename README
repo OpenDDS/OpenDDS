@@ -85,9 +85,9 @@ the "configure" script will download it for you.
 At a minimum, you must be at one of the following versions in order to properly
 compile OpenDDS:
 
-*** TAO 1.5a patch 21
-*** TAO 1.6a patch 7
-*** TAO 1.8.1 (DOC Group)
+*** TAO 1.5a patch 22
+*** TAO 1.6a patch 9
+*** TAO 2.0.1 (DOC Group)
 
 Note that the 1.5a and 1.6a releases are from OCI and can be obtained from
 http://www.theaceorb.com/.  The DOC Group releases can be obtained from
@@ -115,6 +115,7 @@ This release of OpenDDS has been tested under the following platforms:
 Linux family:
 ** RedHat EL 5, x86_64
 ** Fedora Core 6, x86
+** Fedora 12, x86_64
 ** CentOS 5, x86_64
 ** Ubuntu 8.04 LTS, x86_64
 ** Ubuntu 8.10, x86
@@ -123,6 +124,7 @@ Windows family:
 ** Windows XP
 ** Windows Server 2003
 ** Windows 7 (64-bit)
+** Windows Server 2008 R2 (64-bit)
 ** Windows Mobile 6 (ARM)
 
 Others:
@@ -139,16 +141,17 @@ Others:
 
 This release of OpenDDS has been tested using the following compilers:
 
-** Microsoft Visual C++ 7.1 (Visual Studio .NET 2003)
+** Microsoft Visual C++ 7.1 with SP1 (Visual Studio .NET 2003)
 ** Microsoft Visual C++ 8 with SP1 (Visual Studio 2005)
 ** Microsoft Visual C++ 9 with SP1 (Visual Studio 2008)
+** Microsoft Visual C++ 10 (Visual Studio 2010)
 ** gcc 3.3.2
 ** gcc 4.0.1 (Apple Inc. build 5465)
 ** gcc 4.1.1 (Red Hat 4.1.1-30) (Red Hat 4.1.1-52)
 ** gcc 4.1.2 (Red Hat 4.1.2-14)
 ** gcc 4.2.4 (Ubuntu 4.2.4-1ubuntu4)
 ** gcc 4.3.2 (Ubuntu 4.3.2-1ubuntu11)
-** gcc 4.5.1
+** gcc 4.5.2
 ** QNX gcc 3.3.5
 ** Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
 ** Sun C++ 5.9 SunOS_i386 Patch 124864-07 2008/08/22
