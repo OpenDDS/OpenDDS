@@ -1,3 +1,14 @@
+Fri Feb 18 20:56:21 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/toc.html:
+
+          Removed samples section.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/samples:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/samples/maintopic.html:
+
+          Removed these files.
+
 Fri Feb 18 20:32:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/authoring_guide.html:
