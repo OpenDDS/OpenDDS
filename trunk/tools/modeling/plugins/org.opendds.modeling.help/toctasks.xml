@@ -11,4 +11,8 @@
 		<topic href="html/modeling/tasks/workingwithdcpslib.html" label="Working with DCPS Libraries"/>
         <topic href="html/modeling/tasks/performingvalidations.html" label="Performing Validations"/>
     </topic>
+	<topic label="Codegen">
+	<anchor id="codegentasks"/>
+        <topic href="html/codegen/tasks/task1.html" label="Task1"/>
+    </topic>
 </toc>
