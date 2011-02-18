@@ -1,0 +1,177 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_DOMAIN_IDL
+#define OPENDDS_DCPS_DOMAIN_IDL
+
+#include "dds/DdsDcpsInfrastructure.idl"
+#include "dds/DdsDcpsTopic.idl"
+#include "dds/DdsDcpsPublication.idl"
+#include "dds/DdsDcpsSubscription.idl"
+
+#pragma ciao lem "dds/DdsDcpsDomainE.idl"
+
+module DDS
+{
+  local interface DomainParticipantListener : TopicListener,
+                                              PublisherListener,
+                                              SubscriberListener
+  {
+  };
+
+  // ----------------------------------------------------------------------
+  local interface DomainParticipant : Entity
+  {
+    // Factory interfaces
+    Publisher create_publisher(in PublisherQos qos,
+                               in PublisherListener a_listener,
+                               in StatusMask mask);
+
+    ReturnCode_t delete_publisher(in Publisher p);
+
+    Subscriber create_subscriber(in SubscriberQos qos,
+                                 in SubscriberListener a_listener,
+                                 in StatusMask mask);
+
+    ReturnCode_t delete_subscriber(in Subscriber s);
+
+    Subscriber get_builtin_subscriber();
+
+    // Note:
+    //     If the create_topic and find_topic are called multiple times
+    //     then the delete_topic has to be called the same number of
+    //     times.
+    Topic create_topic(in string topic_name,
+                       in string type_name,
+                       in TopicQos qos,
+                       in TopicListener a_listener,
+                       in StatusMask mask);
+
+    ReturnCode_t delete_topic(in Topic a_topic);
+
+    Topic find_topic(in string topic_name,
+                     in Duration_t timeout);
+
+    // Note:
+    //     Do not call delete_topic for lookup_topicdescription since
+    //     topic is not duplicated.
+    TopicDescription lookup_topicdescription(in string name);
+
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
+    ContentFilteredTopic create_contentfilteredtopic(
+        in string name,
+        in Topic related_topic,
+        in string filter_expression,
+        in StringSeq expression_parameters);
+
+    ReturnCode_t delete_contentfilteredtopic(
+        in ContentFilteredTopic a_contentfilteredtopic);
+
+    MultiTopic create_multitopic(
+        in string name,
+        in string type_name,
+        in string subscription_expression,
+        in StringSeq expression_parameters);
+
+    ReturnCode_t delete_multitopic(in MultiTopic a_multitopic);
+
+#endif
+
+
+    ReturnCode_t delete_contained_entities();
+
+    boolean contains_entity(in InstanceHandle_t a_handle);
+
+    ReturnCode_t set_qos(in DomainParticipantQos qos);
+
+    ReturnCode_t get_qos(inout DomainParticipantQos qos);
+
+    ReturnCode_t set_listener(in DomainParticipantListener a_listener,
+                              in StatusMask mask);
+
+    DomainParticipantListener get_listener();
+
+    ReturnCode_t ignore_participant(in InstanceHandle_t handle);
+
+    ReturnCode_t ignore_topic(in InstanceHandle_t handle);
+
+    ReturnCode_t ignore_publication(in InstanceHandle_t handle);
+
+    ReturnCode_t ignore_subscription(in InstanceHandle_t handle);
+
+    DomainId_t get_domain_id();
+
+    ReturnCode_t assert_liveliness();
+
+    ReturnCode_t set_default_publisher_qos(in PublisherQos qos);
+
+    ReturnCode_t get_default_publisher_qos(inout PublisherQos qos);
+
+    ReturnCode_t set_default_subscriber_qos(in SubscriberQos qos);
+
+    ReturnCode_t get_default_subscriber_qos(inout SubscriberQos qos);
+
+    ReturnCode_t set_default_topic_qos(in TopicQos qos);
+
+    ReturnCode_t get_default_topic_qos(inout TopicQos qos);
+
+    ReturnCode_t get_current_time( inout Time_t current_time);
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+
+          ReturnCode_t get_discovered_participants(
+                  inout InstanceHandleSeq participant_handles);
+
+          ReturnCode_t get_discovered_participant_data(
+                  inout ParticipantBuiltinTopicData participant_data,
+                  in InstanceHandle_t participant_handle);
+
+          ReturnCode_t get_discovered_topics(
+                  inout InstanceHandleSeq topic_handles);
+
+          ReturnCode_t get_discovered_topic_data(
+                  inout TopicBuiltinTopicData topic_data,
+                  in InstanceHandle_t topic_handle);
+
+#endif
+
+  };
+
+  local interface DomainParticipantFactory
+  {
+    // Note:
+    //       The caller will NOT have ownership of the DomainParticipant.
+    //       To destroy the object, the caller has to call delete_participant.
+    //       The domain participant defaults to not enabled.
+    //       The caller has to enable it after the domain participant is created.
+    DomainParticipant create_participant(in DomainId_t domainId,
+                                         in DomainParticipantQos qos,
+                                         in DomainParticipantListener a_listener,
+                                         in StatusMask mask);
+
+    ReturnCode_t delete_participant(in DomainParticipant a_participant);
+
+    DomainParticipant lookup_participant(in DomainId_t domainId);
+
+    ReturnCode_t set_default_participant_qos(in DomainParticipantQos qos);
+
+    ReturnCode_t get_default_participant_qos(inout DomainParticipantQos qos);
+
+    DomainParticipantFactory get_instance();
+
+    ReturnCode_t set_qos(
+        in DomainParticipantFactoryQos qos);
+
+    ReturnCode_t get_qos(
+        inout DomainParticipantFactoryQos qos);
+  };
+};
+
+#endif /* OPENDDS_DCPS_DOMAIN_IDL */

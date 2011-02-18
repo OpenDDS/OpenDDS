@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_X8GmkB9WEeCdmLtJE9cY9Q" type="OpenDDS" name="MainDiagramTest.opendds_diagram" measurementUnit="Pixel">
+  <children xmi:type="notation:Shape" xmi:id="_ZLB30B9WEeCdmLtJE9cY9Q" type="2008" fontName="Sans">
+    <children xmi:type="notation:DecorationNode" xmi:id="_ZLDF8B9WEeCdmLtJE9cY9Q" type="5014"/>
+    <children xmi:type="notation:DecorationNode" xmi:id="_ZLDF8R9WEeCdmLtJE9cY9Q" type="5015"/>
+    <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_ZLCe4B9WEeCdmLtJE9cY9Q" hint="OpenDDS PolicyLib"/>
+    <element xmi:type="opendds:PolicyLib" href="MainDiagramTest.opendds#_ZK7xMB9WEeCdmLtJE9cY9Q"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ZLCe4R9WEeCdmLtJE9cY9Q" x="72" y="60"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_bOjOwB9WEeCdmLtJE9cY9Q" type="2007" fontName="Sans">
+    <children xmi:type="notation:DecorationNode" xmi:id="_bOj10B9WEeCdmLtJE9cY9Q" type="5012"/>
+    <children xmi:type="notation:DecorationNode" xmi:id="_bOj10R9WEeCdmLtJE9cY9Q" type="5013"/>
+    <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_bOjOwR9WEeCdmLtJE9cY9Q" hint="OpenDDS DcpsLib"/>
+    <element xmi:type="opendds:DcpsLib" href="MainDiagramTest.opendds#_bOgygB9WEeCdmLtJE9cY9Q"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_bOjOwh9WEeCdmLtJE9cY9Q" x="216" y="60"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_coXhYB9WEeCdmLtJE9cY9Q" type="2009" fontName="Sans">
+    <children xmi:type="notation:DecorationNode" xmi:id="_coYIcB9WEeCdmLtJE9cY9Q" type="5016"/>
+    <children xmi:type="notation:DecorationNode" xmi:id="_coYIcR9WEeCdmLtJE9cY9Q" type="5017"/>
+    <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_coXhYR9WEeCdmLtJE9cY9Q" hint="OpenDDS DataLib"/>
+    <element xmi:type="types:DataLib" href="MainDiagramTest.opendds#_coVFIB9WEeCdmLtJE9cY9Q"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_coXhYh9WEeCdmLtJE9cY9Q" x="360" y="60"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_e-rRcB9WEeCdmLtJE9cY9Q" type="2010" fontName="Sans">
+    <children xmi:type="notation:DecorationNode" xmi:id="_e-r4gB9WEeCdmLtJE9cY9Q" type="5019"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_e-sfkB9WEeCdmLtJE9cY9Q" type="7001">
+      <children xmi:type="notation:Shape" xmi:id="_gp75YB9WEeCdmLtJE9cY9Q" type="2010" fontName="Sans">
+        <children xmi:type="notation:DecorationNode" xmi:id="_gp9HgB9WEeCdmLtJE9cY9Q" type="5019"/>
+        <children xmi:type="notation:BasicCompartment" xmi:id="_gp9HgR9WEeCdmLtJE9cY9Q" type="7001">
+          <children xmi:type="notation:Shape" xmi:id="_sBQW8B9WEeCdmLtJE9cY9Q" type="3004" fontName="Sans">
+            <children xmi:type="notation:DecorationNode" xmi:id="_sBQ-AB9WEeCdmLtJE9cY9Q" type="5024"/>
+            <children xmi:type="notation:DecorationNode" xmi:id="_sBQ-AR9WEeCdmLtJE9cY9Q" type="5025"/>
+            <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_sBQW8R9WEeCdmLtJE9cY9Q" hint="OpenDDS PolicyLib"/>
+            <element xmi:type="opendds:PolicyLib" href="MainDiagramTest.opendds#_sBOhwB9WEeCdmLtJE9cY9Q"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_sBQW8h9WEeCdmLtJE9cY9Q" x="31" y="30"/>
+          </children>
+          <children xmi:type="notation:Shape" xmi:id="_uG2KcB9WEeCdmLtJE9cY9Q" type="3003" fontName="Sans">
+            <children xmi:type="notation:DecorationNode" xmi:id="_uG2xgB9WEeCdmLtJE9cY9Q" type="5022"/>
+            <children xmi:type="notation:DecorationNode" xmi:id="_uG2xgR9WEeCdmLtJE9cY9Q" type="5023"/>
+            <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_uG2KcR9WEeCdmLtJE9cY9Q" hint="OpenDDS DcpsLib"/>
+            <element xmi:type="opendds:DcpsLib" href="MainDiagramTest.opendds#_uG0VQB9WEeCdmLtJE9cY9Q"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_uG2Kch9WEeCdmLtJE9cY9Q" x="187" y="30"/>
+          </children>
+          <children xmi:type="notation:Shape" xmi:id="_vuXh4B9WEeCdmLtJE9cY9Q" type="3002" fontName="Sans">
+            <children xmi:type="notation:DecorationNode" xmi:id="_vuYI8B9WEeCdmLtJE9cY9Q" type="5020"/>
+            <children xmi:type="notation:DecorationNode" xmi:id="_vuYI8R9WEeCdmLtJE9cY9Q" type="5021"/>
+            <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_vuXh4R9WEeCdmLtJE9cY9Q" hint="OpenDDS DataLib"/>
+            <element xmi:type="types:DataLib" href="MainDiagramTest.opendds#_vuWTwB9WEeCdmLtJE9cY9Q"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_vuXh4h9WEeCdmLtJE9cY9Q" x="355" y="30"/>
+          </children>
+        </children>
+        <element xmi:type="opendds:LibPackage" href="MainDiagramTest.opendds#_gp6rQB9WEeCdmLtJE9cY9Q"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_gp75YR9WEeCdmLtJE9cY9Q" x="28" y="26"/>
+      </children>
+    </children>
+    <element xmi:type="opendds:LibPackage" href="MainDiagramTest.opendds#_e-pcQB9WEeCdmLtJE9cY9Q"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_e-rRcR9WEeCdmLtJE9cY9Q" x="204" y="168"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_3b080B9WEeCdmLtJE9cY9Q" type="2008" fontName="Sans">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_3b84oB9WEeCdmLtJE9cY9Q" source="Shortcut">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_3b9fsB9WEeCdmLtJE9cY9Q" key="modelID" value="OpenDDS"/>
+    </eAnnotations>
+    <children xmi:type="notation:DecorationNode" xmi:id="_3b2K8B9WEeCdmLtJE9cY9Q" type="5014"/>
+    <children xmi:type="notation:DecorationNode" xmi:id="_3b2K8R9WEeCdmLtJE9cY9Q" type="5015"/>
+    <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_3b080R9WEeCdmLtJE9cY9Q" hint="OpenDDS PolicyLib"/>
+    <element xmi:type="opendds:PolicyLib" href="PolicyLib/NonDefaultPolicyLibTest.opendds#_U54321GNEd-D-nAsONlpcwOw"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_3b080h9WEeCdmLtJE9cY9Q" x="12" y="300"/>
+  </children>
+  <styles xmi:type="notation:DiagramStyle" xmi:id="_X8GmkR9WEeCdmLtJE9cY9Q"/>
+  <element xmi:type="opendds:OpenDDSModel" href="MainDiagramTest.opendds#_X8F_gB9WEeCdmLtJE9cY9Q"/>
+</notation:Diagram>
