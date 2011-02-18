@@ -86,7 +86,7 @@ At a minimum, you must be at one of the following versions in order to properly
 compile OpenDDS:
 
 *** TAO 1.5a patch 22
-*** TAO 1.6a patch 9
+*** TAO 1.6a patch 10
 *** TAO 2.0.1 (DOC Group)
 
 Note that the 1.5a and 1.6a releases are from OCI and can be obtained from

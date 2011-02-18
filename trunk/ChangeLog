@@ -1,3 +1,10 @@
+Fri Feb 18 21:03:23 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * README:
+        * tools/modeling/README.dev:
+
+          Updates to prepare for release 2.3 of OpenDDS.
+
 Fri Feb 18 20:56:21 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/toc.html:
