@@ -1,3 +1,29 @@
+Fri Feb 18 19:39:23 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/concepts/modeling.html:
+
+	  Added screenshot of modeling tool.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_type_shortcut_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/opendds_modeling_editors_examples.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/opendds_modeling_perspective_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/opendds_modeling_perspective_setting.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdatalib.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdiagrams.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithopenddsmodels.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithpolicylib.html:
+
+	  Added content for modeling tasks.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/toc.xml:
+
+	  Removed Reference section.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/datatypes.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qospolicies.html:
+
+          Removed these files as there isn't any reference material yet.
+
 Thu Feb 17 22:05:59 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:
