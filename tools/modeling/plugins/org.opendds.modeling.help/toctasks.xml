@@ -13,6 +13,8 @@
     </topic>
 	<topic label="Codegen">
 	<anchor id="codegentasks"/>
-        <topic href="html/codegen/tasks/task1.html" label="Task1"/>
+        <topic href="html/codegen/tasks/generate.html" label="Selecting Generate Parameters"/>
+        <topic href="html/codegen/tasks/customization.html" label="Customizing Transports"/>
+        <topic href="html/codegen/tasks/integration.html" label="Integrating with Other Models"/>
     </topic>
 </toc>

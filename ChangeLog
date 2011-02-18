@@ -1,3 +1,28 @@
+Fri Feb 18 22:36:48 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/concepts/maintopic.html:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/images:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/images/BuildPaths.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/images/Generate.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/images/ModelCustomization.png:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/tasks/customization.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/tasks/generate.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/tasks/integration.html:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdatalib.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdiagrams.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithopenddsmodels.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithpolicylib.html:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/styles.css:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
+
+          Added codegen help, change div ids to class.  Add div padding.
+
 Fri Feb 18 21:41:55 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
 
