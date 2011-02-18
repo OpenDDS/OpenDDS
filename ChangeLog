@@ -1,10 +1,16 @@
+Fri Feb 18 21:40:08 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/toc.html:
+
+          Added some basic "welcome" content.
+
 Fri Feb 18 21:12:28 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/tasks:
         * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/tasks/task1.html:
         * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
 
-	  Placeholder for codegen tasks.
+          Placeholder for codegen tasks.
 
 Fri Feb 18 21:03:23 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
