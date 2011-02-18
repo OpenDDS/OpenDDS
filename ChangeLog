@@ -1,8 +1,23 @@
+Fri Feb 18 20:32:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/authoring_guide.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/concepts/modeling.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdiagrams.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithopenddsmodels.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/toc.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/toc.xml:
+        * tools/modeling/plugins/org.opendds.modeling.help/tocgettingstarted.xml:
+        * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
+
+          Replaced "OpenDDS SDK" with "OpenDDS Modeling SDK" or in some cases
+          "OpenDDS SDK model" with "OpenDDS model".
+
 Fri Feb 18 19:39:23 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/concepts/modeling.html:
 
-	  Added screenshot of modeling tool.
+          Added screenshot of modeling tool.
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_type_shortcut_example.png:
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/opendds_modeling_editors_examples.png:
@@ -13,11 +28,11 @@ Fri Feb 18 19:39:23 UTC 2011  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithopenddsmodels.html:
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithpolicylib.html:
 
-	  Added content for modeling tasks.
+          Added content for modeling tasks.
 
         * tools/modeling/plugins/org.opendds.modeling.help/toc.xml:
 
-	  Removed Reference section.
+          Removed Reference section.
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/reference/datatypes.html:
         * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qospolicies.html:

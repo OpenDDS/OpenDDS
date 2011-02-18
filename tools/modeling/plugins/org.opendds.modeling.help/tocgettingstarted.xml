@@ -2,6 +2,6 @@
 <?NLS TYPE="org.eclipse.help.toc"?>
 
 <toc label="Getting Started" link_to="toc.xml#gettingstarted"> 
-	<topic label="Introduction to OpenDDS SDK"  href="html/gettingstarted/maintopic.html"> 
+	<topic label="Introduction to the OpenDDS Modeling SDK"  href="html/gettingstarted/maintopic.html"> 
 	</topic>
 </toc>
