@@ -30,7 +30,8 @@ I. Generate eCore/EMF code
   d. In the right pane, right-click on openDDS and select Generate Model Code
   e. In the right pane, right-click on openDDS and select Generate Edit Code
   f. In the right pane, right-click on openDDS and select Generate Editor Code
-  g. Repeat the same steps a-f for the org.opendds.modeling.sdk.model project
+  g. Repeat the same steps a-e for the org.opendds.modeling.sdk.model project
+     (step f is not repeated because the Editor code is all in subversion)
 
 II. Generate GMF code
   a. In the package explorer, expand org.opendds.modeling.gmf
