@@ -5,7 +5,7 @@
 	<topic label="Modeling"> 
     <anchor id="modelingtasks"/>
         <topic href="html/modeling/tasks/workingwithdiagrams.html" label="Working with Diagrams"/>
-		<topic href="html/modeling/tasks/workingwithopenddsmodels.html" label="Working with OpenDDS SDK Models"/>
+		<topic href="html/modeling/tasks/workingwithopenddsmodels.html" label="Working with OpenDDS Models"/>
 		<topic href="html/modeling/tasks/workingwithpolicylib.html" label="Working with Policy Libraries"/>
 		<topic href="html/modeling/tasks/workingwithdatalib.html" label="Working with Data Libraries"/>
 		<topic href="html/modeling/tasks/workingwithdcpslib.html" label="Working with DCPS Libraries"/>
