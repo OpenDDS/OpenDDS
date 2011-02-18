@@ -1,3 +1,13 @@
+Fri Feb 18 21:41:55 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/tasks:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/tasks/maintopic.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/tasks/subtopic.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/tasks/subtopic2.html:
+
+          Removed these files.
+
 Fri Feb 18 21:40:08 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/toc.html:
