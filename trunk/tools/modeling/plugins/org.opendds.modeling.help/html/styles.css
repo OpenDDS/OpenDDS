@@ -1,17 +1,19 @@
-#note
+.note
 {
 	background:lightgray;
 	border: solid;
 	border-width: thin;
 	margin-left: 20px;
 	margin-right: 20px;
+	padding: 5px;
 }
 
-#caution
+.caution
 {
 	background:yellow;
 	border: solid;
 	border-width: thin;
 	margin-left: 20px;
 	margin-right: 20px;
+	padding: 5px;
 }
