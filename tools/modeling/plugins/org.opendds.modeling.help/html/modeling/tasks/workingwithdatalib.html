@@ -46,12 +46,6 @@
   (You can have multiple figures of the same basic type on the same
   diagram if you wish.)</p>
 
-  <div id="note">
-    <p>Basic types need to be added to the diagram even though they
-    may only be used as a Field type in Structs or Unions and
-    therefore not be the target of any connectors.</p>
-  </div>
-
   <h4>Types with Fields</h4>
 
   <p>Struct and Union have Fields which are named references to
@@ -60,7 +54,7 @@
   to contain the Field. You then fill out the Field using the form
   "name: type". For example, to indicate that a Field is to be
   named count and that points to a Long you would enter "count:
-  Long". The type can be from any of the active DataLibs in
+  Long". (Basic types do not need to be created first.) The type can be from any of the active DataLibs in
   addition to the types in the currently opened diagram.</p>
 
   <h4>Structs</h4>
@@ -94,7 +88,7 @@
 
   <p>An example of a Sequence of Structs is shown
   below.</p><img alt="Example Sequence" src=
-  "html/modeling/images/datalib_sequence_example.png">
+  "../images/datalib_sequence_example.png">
 
   <h4>Unions</h4>
 
@@ -119,6 +113,16 @@ default:
 };
 </pre>
 
+<h3>Referring to types from other DataLibs</h3>
+
+<p>You can refer to types from other DataLibs using shortcuts (the same
+mechanism used to place libraries from other model files onto the main diagram).
+</p>
+
+<p>An example of using shortcuts in this way is shown in the following diagram. In
+this case the Messenger Struct uses a type BinaryFile defined in another
+model file.
+<img alt="Datalib type shortcut example" src="../images/datalib_type_shortcut_example.png"></img></p>
   <h3>Validation of Data Types</h3>
 
   <p>Before using your Data library you should have validations
