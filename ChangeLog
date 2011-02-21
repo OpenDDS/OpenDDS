@@ -1,3 +1,14 @@
+Mon Feb 21 16:09:23 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * AUTHORS:
+
+          Chris Cleeland, Don Hudson, and Jeff Schmitz, all of OCI, are now
+          OpenDDS AUTHORS.
+
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+
+          Updated handling of Eclipse content.jar and artifacts.jar files.
+
 Mon Feb 21 15:52:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:
