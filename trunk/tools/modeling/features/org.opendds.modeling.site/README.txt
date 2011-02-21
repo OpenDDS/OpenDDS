@@ -18,6 +18,7 @@ inside the site.xml editor.
 
 4. Create a zip file for offline updates.
 cd $DDS_ROOT/tools/modeling/features/org.opendds.modeling.site
+rm content.jar artifacts.jar   # these are for an older Eclispe site format
 zip -r opendds_modeling_site . -x README.txt .svn .project
 
 5. Update the opendds.org web site.  Run the following commands with
@@ -26,8 +27,8 @@ tar --exclude=README.txt --exclude='.*' -ch * | tar -C $WEBSITE/modeling/eclipse
 svn revert site.xml
 # revert because Eclipse replaced "qualifier" by the date stamp, don't commit
 cd $WEBSITE/modeling/eclipse
-svn add features/*.jar plugins/*.jar site.xml content.jar artifacts.jar opendds_modeling_site.zip
-# a few of those should already be added, so ignore svn's complaints about them
+svn add features/*.jar plugins/*.jar
+# a few of those may already be added, so ignore svn's complaints about them
 svn commit
 
 6. Now sync the web site from subversion to the live site, which is beyond
