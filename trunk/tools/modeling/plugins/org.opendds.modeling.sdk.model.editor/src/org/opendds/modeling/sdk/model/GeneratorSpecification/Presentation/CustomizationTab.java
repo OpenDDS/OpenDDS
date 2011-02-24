@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation;
 
@@ -31,21 +31,21 @@ public class CustomizationTab extends StructuredViewer {
 	// A TreeViewer with the protected abstract StructuredViewer methods
 	// exposed so that we can simply delegate to them.
 	protected TreeViewerDelegate treeViewer;
-	
+
 	protected Composite control;
 
 	/**
-	 * 
+	 *
 	 */
 	public CustomizationTab( Composite parent) {
 		control = new Composite(parent, 0);
-		
+
 		control.setLayout( new GridLayout( 2, true));
 		{
 			Composite panel = new Composite(control, 0);
 			GridData panelData = new GridData(SWT.FILL, SWT.FILL, true, true);
 			panel.setLayoutData(panelData);
-			
+
 			GridLayout layout = new GridLayout(1, true);
 			panel.setLayout(layout);
 			{
@@ -54,23 +54,23 @@ public class CustomizationTab extends StructuredViewer {
 				GridData data = new GridData(SWT.CENTER, SWT.TOP, false, false);
 				label.setLayoutData(data);
 			}
-			
+
 			{
 				Composite treePane = new Composite(panel,0);
 				GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
 				treePane.setLayoutData(data);
-				
+
 				treePane.setLayout( new FillLayout(SWT.VERTICAL));
 				treeViewer = new TreeViewerDelegate( treePane, SWT.FULL_SELECTION);
 			}
-			
+
 		}
-		
+
 		{
 			Composite panel = new Composite(control, 0);
 			GridData panelData = new GridData(SWT.LEAD, SWT.FILL, true, true);
 			panel.setLayoutData(panelData);
-			
+
 			GridLayout layout = new GridLayout(1, true);
 			panel.setLayout(layout);
 			{
@@ -78,11 +78,11 @@ public class CustomizationTab extends StructuredViewer {
 				label.setText("Selection Information");
 				GridData data = new GridData(SWT.CENTER, SWT.TOP, true, true);
 				label.setLayoutData(data);
-				
+
 				// TODO add content here
 			}
 		}
-		
+
 	}
 
 	/* (non-Javadoc)
@@ -164,7 +164,7 @@ public class CustomizationTab extends StructuredViewer {
 	protected void internalRefresh(Object element) {
 		treeViewer.internalRefresh(element);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.viewers.Viewer#removeSelectionChangedListener()
 	 */
@@ -184,7 +184,7 @@ public class CustomizationTab extends StructuredViewer {
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#setSelectionToWidget(java.util.List, boolean)
-	 * 
+	 *
 	 * List<Object>
 	 */
 	@SuppressWarnings("unchecked")
@@ -200,13 +200,13 @@ public class CustomizationTab extends StructuredViewer {
 	public Control getControl() {
 		return control;
 	}
-	
+
 	public Control getTreeControl() {
 		return treeViewer.getControl();
 	}
 
 	// From TreeViewer
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#setContentProvider(org.eclipse.jface.viewers.IContentProvider)
 	 */
@@ -222,7 +222,7 @@ public class CustomizationTab extends StructuredViewer {
 		treeViewer.setInput(input);
 	}
 
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ColumnViewer#setLabelProvider(org.eclipse.jface.viewers.IBaseLabelProvider)
 	 */
@@ -238,7 +238,15 @@ public class CustomizationTab extends StructuredViewer {
 	public void setSelection( ISelection selection) {
 		treeViewer.setSelection( selection);
 	}
-	
+
+	/*
+	 * @see org.eclipse.jface.viewers.TreeViewer.setSelection(ISelection, boolean)
+	 */
+	@Override
+	public void setSelection(ISelection selection, boolean reveal) {
+		treeViewer.setSelection(selection, reveal);
+	}
+
 	public Tree getTree() {
 		return treeViewer.getTree();
 	}
