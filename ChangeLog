@@ -1,3 +1,10 @@
+Thu Feb 24 20:21:25 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/CustomizationTab.java:
+
+          Fix so that when creating new transport elements the PropertySheet will change
+          selection to the new element.
+
 Mon Feb 21 16:09:23 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * AUTHORS:
