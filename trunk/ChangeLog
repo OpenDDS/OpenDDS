@@ -1,3 +1,11 @@
+Fri Feb 25 14:10:58 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/CustomizationTab.java:
+
+          As a follow on to previous commit, added missing refresh methods to delegate to the
+          TreeViewerDelegate so that the ColumnViewer will handle instead of the StructuredViewer
+          (refresh can be invoked by selecting from the Model Customization tab's context menu).
+
 Thu Feb 24 20:21:25 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/CustomizationTab.java:

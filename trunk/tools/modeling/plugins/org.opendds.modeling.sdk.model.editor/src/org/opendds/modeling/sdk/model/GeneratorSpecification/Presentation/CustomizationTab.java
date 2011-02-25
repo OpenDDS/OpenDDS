@@ -158,6 +158,22 @@ public class CustomizationTab extends StructuredViewer {
 	}
 
 	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ColumnViewer#refresh(java.lang.Object)
+	 */
+	@Override
+	public void refresh(final Object element) {
+		treeViewer.refresh(element);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ColumnViewer#refresh(java.lang.Object, boolean)
+	 */
+	@Override
+	public void refresh(Object element, boolean updateLabels) {
+		treeViewer.refresh(element, updateLabels);
+	}
+
+	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#internalRefresh(java.lang.Object)
 	 */
 	@Override
