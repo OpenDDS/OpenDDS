@@ -1,42 +1,28 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 
 <html>
 <head>
-  <title>Working with Data Libraries</title>
-  <link rel="stylesheet" type="text/css" href="../../styles.css">
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=us-ascii">
+
+  <title>Adding Types</title>
+  <link rel="stylesheet" type="text/css" href=
+  "../../../styles.css">
 </head>
 
 <body>
-  <h2>Working with Data Libraries</h2>
-
-  <p>Data libraries are where you define the Structs and supporting
-  types. The Structs can be then be used as the Topic type in DCPS
-  Libraries.</p>
-
-  <h3>Creating Data Libraries</h3>
-
-  <p>From the main diagram a Data Library can be created by either
-  double-clicking on the DataLib tool in the palette, or by
-  clicking on the DataLib tool and then dragging the region on the
-  diagram surface that the Data library figure should occupy. After
-  that specify the name to use for the library.</p>
-
-  <p>The library can then be opened by double-clicking on the
-  library. A new diagram editor will be opened (using the same
-  diagram file used for the main diagram).</p>
-
-  <h3>Adding Types</h3>
+  <h2>Adding Types</h2>
 
   <div class="note">
     <p>You will be connecting a number of the types together so it
     could be helpful to <a href=
-    "workingwithdiagrams.html#connecting_figures">review how to
+    "../diagrams/connecting_figures.html">review how to
     make connections</a> if you're not familiar with how to do
     so.</p>
   </div>
 
-  <h4>Basic Types</h4>
+  <h3>Basic Types</h3>
 
   <p>Ultimately, basic types like Long, Octet, or String, must be
   referred to by the other types. When using connectors an option
@@ -46,7 +32,7 @@
   (You can have multiple figures of the same basic type on the same
   diagram if you wish.)</p>
 
-  <h4>Types with Fields</h4>
+  <h3>Types with Fields</h3>
 
   <p>Struct and Union have Fields which are named references to
   types (similar to class attributes). To add a Field, click on the
@@ -54,15 +40,16 @@
   to contain the Field. You then fill out the Field using the form
   "name: type". For example, to indicate that a Field is to be
   named count and that points to a Long you would enter "count:
-  Long". (Basic types do not need to be created first.) The type can be from any of the active DataLibs in
-  addition to the types in the currently opened diagram.</p>
+  Long". (Basic types do not need to be created first.) The type
+  can be from any of the active DataLibs in addition to the types
+  in the currently opened diagram.</p>
 
-  <h4>Structs</h4>
+  <h3>Structs</h3>
 
   <p>Structs with attribute isDcpsDataType set to true are
   candidate types to use for Topic types. An example Struct is
   shown below.</p><img alt="Example Struct" src=
-  "../images/datalib_struct_example.png">
+  "../../images/datalib_struct_example.png">
 
   <p>A Struct is created by selecting a Struct from the palette and
   adding to the diagram.</p>
@@ -80,7 +67,7 @@
   should be used for the Key. Similar to how Fields can be
   re-ordered, Keys can be re-ordered by dragging and dropping.</p>
 
-  <h4>Array and Sequence Types</h4>
+  <h3>Array and Sequence Types</h3>
 
   <p>For collection types Array and Sequence, the type used for the
   collection must be specified. This is done by connecting the
@@ -88,9 +75,9 @@
 
   <p>An example of a Sequence of Structs is shown
   below.</p><img alt="Example Sequence" src=
-  "../images/datalib_sequence_example.png">
+  "../../images/datalib_sequence_example.png">
 
-  <h4>Unions</h4>
+  <h3>Unions</h3>
 
   <p>Unions contains Branches to hold a list of Cases along with a
   Field to apply if any of the Case literals matches with switch
@@ -98,7 +85,7 @@
 
   <p>These Branches and Cases as placed in collapsable compartments
   are shown in the example below.</p><img alt="Union Example" src=
-  "../images/datalib_union_example.png">
+  "../../images/datalib_union_example.png">
 
   <p>This example corresponds to the IDL:</p>
   <pre>
@@ -112,22 +99,5 @@ default:
     string string_mem;
 };
 </pre>
-
-<h3>Referring to types from other DataLibs</h3>
-
-<p>You can refer to types from other DataLibs using shortcuts (the same
-mechanism used to place libraries from other model files onto the main diagram).
-</p>
-
-<p>An example of using shortcuts in this way is shown in the following diagram. In
-this case the Messenger Struct uses a type BinaryFile defined in another
-model file.
-<img alt="Datalib type shortcut example" src="../images/datalib_type_shortcut_example.png"></img></p>
-  <h3>Validation of Data Types</h3>
-
-  <p>Before using your Data library you should have validations
-  performed first. See <a href=
-  "performingvalidations.html">Performing Validations</a> to learn
-  how to do validations.</p>
 </body>
 </html>

@@ -1,3 +1,57 @@
+Mon Feb 28 21:10:11 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/adding_types.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/creating_data_libs.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/data_libs_defined.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/performing_validations.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/using_types_from_other_datalibs.html:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/compartments_usage.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/creating_dcps_libs.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datawriter_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/dcps_libs_defined.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/domain_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/domain_participant_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/performing_validations.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/pub_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/sub_datareader_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/topics_usage.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/working_with_qos_policies.html:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/arranging_figures.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/connecting_figures.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/exporting_diagrams_as_images.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/modeling_perspective.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/moving_between_diagrams.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/setting_element_attributes.html:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/model_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/model_population.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/opendds_model.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/performing_validations.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/using_libs_from_other_files.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/using_packages.html:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/policy_lib/adding_policies.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/policy_lib/creating_policy_libs.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/policy_lib/performing_validations.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/policy_lib/policy_libs_defined.html:
+
+          Split out sections from workingwith*.html files into individual pages to make navigation easier
+          and to allow for additional content to be added without adding to already over-crowded pages.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
+
+          Updated to refer to new HTML pages.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdatalib.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdcpslib.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithdiagrams.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithopenddsmodels.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/workingwithpolicylib.html:
+
+          Removed these files as their sections were split out into separate pages.
+
 Mon Feb 28 19:53:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/RemoteInstHandles:
