@@ -1,3 +1,53 @@
+Tue Mar  1 16:24:44 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/authoring_guide.html:
+
+          Added to HTML tools section, discussed duplication content from dev guide.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/policy_lib/policy_libs_defined.html:
+
+          Refer to policy references instead of dev guide.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/QoS.css:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/deadline.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/destination_order.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/durability.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/durability_service.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/entity_factory.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/group_data.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/history.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/index.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/latency_budget.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/lifespan.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/liveliness.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/ownership.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/ownership_strength.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/partition.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/presentation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/reader_data_lifecycle.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/reliability.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/resource_limits.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/time_based_filter.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/topic_data.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/transport_priority.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/user_data.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/writer_data_lifecycle.html:
+
+          Markup taken from Framemaker HTML export of QoS section of dev guide..
+
+        * tools/modeling/plugins/org.opendds.modeling.help/toc.xml:
+
+          Add reference section.
+          Remove reference to toc.html and let help system generate instead.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/tocreference.xml:
+
+          Reference the policy definitions.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/toc.html:
+
+          Removed this file.
+
 Tue Mar  1 15:36:48 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/RemoteInstHandles/RemoteInstHandles.opendds:

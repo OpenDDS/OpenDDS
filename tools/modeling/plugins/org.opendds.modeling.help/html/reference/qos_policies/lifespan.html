@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=UTF-8">
+
+  <title>LIFESPAN</title>
+  <link rel="stylesheet" type="text/css" href="QoS.css">
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+
+<H4 CLASS="Head3">
+<A NAME="pgfId-186025"></A>LIFESPAN</H4>
+<UL>
+<LI CLASS="BodyNoLead">
+<A NAME="pgfId-188332"></A>The <A NAME="marker-199645"></A>LIFESPAN QoS policy allows the application to specify when a sample expires. Expired samples will not be delivered to <A NAME="marker-267979"></A>subscribers. This policy applies to the <A NAME="marker-268040"></A>topic and <A NAME="marker-268045"></A>data writer entities via the <EM CLASS="Code">
+lifespan</EM>
+ member of their respective QoS structures. Below is the IDL related to the lifespan QoS policy.</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-188135"></A><EM CLASS="Code">
+</EM>
+&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-192809"></A><EM CLASS="Code">
+struct LifespanQosPolicy {</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-188136"></A><EM CLASS="Code">
+  Duration_t duration;</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-188269"></A><EM CLASS="Code">
+}</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-192845"></A><EM CLASS="Code">
+</EM>
+&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-192822"></A>The default value of the <EM CLASS="Code">
+duration</EM>
+ member is infinite, which means samples never expire. OpenDDS currently supports expired sample detection on the <A NAME="marker-268078"></A>publisher side when using a DURABILITY <EM CLASS="Code">
+kind</EM>
+ other than <EM CLASS="Code">
+VOLATILE</EM>
+. The current OpenDDS implementation may not remove samples from the <A NAME="marker-268138"></A>data writer and <A NAME="marker-268147"></A>data reader caches when they expire after being placed in the cache.</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-190367"></A>The value of this policy may be changed at any time. Changes to this policy affect only data written after the change.</LI>
+</UL>
+
+</body>
+</html>
