@@ -1,3 +1,12 @@
+Tue Mar  1 15:36:48 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/RemoteInstHandles/RemoteInstHandles.opendds:
+        * tools/modeling/tests/RemoteInstHandles/publisher.cpp:
+        * tools/modeling/tests/RemoteInstHandles/subscriber.cpp:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Update for a more reliable test.
+
 Mon Feb 28 21:10:11 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/adding_types.html:
