@@ -1,5 +1,4 @@
 
-#include <model/Sync.h>
 #include <ace/Log_Msg.h>
 
 #include <dds/DCPS/WaitSet.h>
@@ -13,17 +12,46 @@
 #include <model/NullReaderListener.h>
 #include <model/Sync.h>
 
-class ReaderListener : public OpenDDS::Model::NullReaderListener {
-  public:
-    ReaderListener(OpenDDS::Model::ReaderCondSync& rcs) : rcs_(rcs) {}
-    virtual void on_data_available(DDS::DataReader_ptr reader)
-        ACE_THROW_SPEC((CORBA::SystemException));
-    virtual void on_subscription_matched(DDS::DataReader_ptr reader,
-                     const ::DDS::SubscriptionMatchedStatus & status)
-        ACE_THROW_SPEC((CORBA::SystemException));
-  private:
-    OpenDDS::Model::ReaderCondSync& rcs_;
+::data1::BitKey sub_internal_key;
+::data1::BitKey pub_external_key;
 
+class BitSubscriptionListener : public OpenDDS::Model::NullReaderListener {
+public:
+  virtual void on_data_available(DDS::DataReader_ptr reader)
+      ACE_THROW_SPEC((CORBA::SystemException));
+};
+
+void 
+BitSubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
+ACE_THROW_SPEC((CORBA::SystemException))
+{
+  std::cout << "sub got bit data" << std::endl;
+  DDS::SubscriptionBuiltinTopicDataDataReader_var bit_reader_i =
+        DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(reader);
+  DDS::SubscriptionBuiltinTopicData msg;
+  DDS::SampleInfo info;
+  DDS::ReturnCode_t error = bit_reader_i->take_next_sample(msg, info);
+  if (error == DDS::RETCODE_OK) {
+    sub_internal_key[0] = msg.participant_key.value[0];
+    sub_internal_key[1] = msg.participant_key.value[1];
+    sub_internal_key[2] = msg.participant_key.value[2];
+    // DDS::BuiltinTopicKey_t subkey = msg.participant_key;
+    // std::cout << "subscriber oda bit sample[0] = " << subkey.value[0] << std::endl;
+    // std::cout << "subscriber oda bit sample[1] = " << subkey.value[1] << std::endl;
+    // std::cout << "subscriber oda bit sample[2] = " << subkey.value[2] << std::endl;
+  } else {
+  }
+}
+
+class ReaderListener : public OpenDDS::Model::NullReaderListener {
+public:
+  ReaderListener(OpenDDS::Model::ReaderCondSync& rcs) : rcs_(rcs) {}
+  virtual void on_data_available(DDS::DataReader_ptr reader)
+      ACE_THROW_SPEC((CORBA::SystemException));
+private:
+  OpenDDS::Model::ReaderCondSync& rcs_;
+  DDS::DomainParticipant_var reader_part_;
+  DDS::BuiltinTopicKey_t subkey_;
 };
 
 // START OF EXISTING MESSENGER EXAMPLE LISTENER CODE
@@ -45,6 +73,35 @@ ACE_THROW_SPEC((CORBA::SystemException))
   data1::Message msg;
   DDS::SampleInfo info;
 
+/*
+  if (!reader_part_.in()) {
+    // Find reader key
+    reader_part_ = reader->get_subscriber()->get_participant();
+    DDS::Subscriber_var bit_sub(reader_part_->get_builtin_subscriber());
+    DDS::DataReader_var bit_dr(bit_sub->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC));
+    DDS::SubscriptionBuiltinTopicDataDataReader_var bit_reader_i =
+          DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(bit_dr);
+    DDS::SubscriptionBuiltinTopicDataSeq instances;
+    DDS::SampleInfoSeq infos;
+    DDS::ReturnCode_t error;
+    error = bit_reader_i->read(instances, 
+                               infos, 
+                               1, 
+                               DDS::ANY_SAMPLE_STATE, 
+                               DDS::ANY_VIEW_STATE, 
+                               DDS::ANY_INSTANCE_STATE);
+    if (error == DDS::RETCODE_OK) {
+      std::cout << "subscriber bit sample" << std::endl;
+      subkey_ = instances[0].participant_key;
+      std::cout << "subscriber bit sample[0] = " << subkey_.value[0] << std::endl;
+      std::cout << "subscriber bit sample[1] = " << subkey_.value[1] << std::endl;
+      std::cout << "subscriber bit sample[2] = " << subkey_.value[2] << std::endl;
+    } else {
+      std::cout << "subscriber bit sample error = " << error << std::endl;
+    }
+  }
+*/
+
   while (true) {
     DDS::ReturnCode_t error = reader_i->take_next_sample(msg, info);
     if (error == DDS::RETCODE_OK) {
@@ -52,6 +109,20 @@ ACE_THROW_SPEC((CORBA::SystemException))
       std::cout << "SampleInfo.instance_state = " << info.instance_state << std::endl;
 
       if (info.valid_data) {
+/*
+        if ((msg.subscriber_key[0] != subkey_.value[0]) ||
+            (msg.subscriber_key[1] != subkey_.value[1]) ||
+            (msg.subscriber_key[2] != subkey_.value[2])) {
+          std::cout << "ERROR - mismatch of key data" << std::endl;
+          std::cout << "Msg " << msg.subscriber_key[0] << " " << 
+                                 msg.subscriber_key[1] << " " << 
+                                 msg.subscriber_key[2] << std::endl;
+          exit(-1);
+        }
+*/
+        pub_external_key[0] = msg.subscriber_key[0];
+        pub_external_key[1] = msg.subscriber_key[1];
+        pub_external_key[2] = msg.subscriber_key[2];
         std::cout << "Message: subject    = " << msg.subject.in() << std::endl
                   << "         subject_id = " << msg.subject_id   << std::endl
                   << "         from       = " << msg.from.in()    << std::endl
@@ -72,82 +143,57 @@ ACE_THROW_SPEC((CORBA::SystemException))
   }
 }
 
-void 
-ReaderListener::on_subscription_matched(DDS::DataReader_ptr reader,
-                    const ::DDS::SubscriptionMatchedStatus & status)
-                             ACE_THROW_SPEC((CORBA::SystemException))
-{
-/*
-  std::cout << "on_subscription_matched" << std::endl;
-  DDS::InstanceHandle_t bitHandle = status.last_publication_handle;
-  DDS::PublicationBuiltinTopicData bitData;
-  if (reader->get_matched_publication_data(bitData, bitHandle) == DDS::RETCODE_OK) {
-    DDS::BuiltinTopicKey_t key =  bitData.key;
-    std::cout << "subscriber: found participant key[0] " << key.value[0] << std::endl;
-    std::cout << "subscriber: found participant key[1] " << key.value[1] << std::endl;
-    std::cout << "subscriber: found participant key[2] " << key.value[2] << std::endl;
-    DDS::BuiltinTopicKey_t participant_key =  bitData.participant_key;
-    std::cout << "subscriber: found remote participant key[0] " << participant_key.value[0] << std::endl;
-    std::cout << "subscriber: found remote participant key[1] " << participant_key.value[1] << std::endl;
-    std::cout << "subscriber: found remote participant key[2] " << participant_key.value[2] << std::endl;
-  }
-    DDS::DomainParticipant_var reader_part = reader->get_subscriber()->get_participant();
-    DDS::ParticipantBuiltinTopicData participant_data;
-std::cout << "sub get_discovered_participant_data" << std::endl;
-    DDS::ReturnCode_t error = reader_part->get_discovered_participant_data(
-      participant_data,
-      reader->get_instance_handle());
-    if (error == DDS::RETCODE_OK) {
-std::cout << "sub get_matched_subscription_data" << std::endl;
-      DDS::BuiltinTopicKey_t key = participant_data.key;
-      //if (reader->get_matched_subscription_data(sub_data, participant_data.instance_handle)== DDS::RETCODE_OK) {
-        //DDS::BuiltinTopicKey_t key =  sub_data.participant_key;
-        std::cout << "subscriber: my handle[0] " << key.value[0] << std::endl;
-        std::cout << "subscriber: my handle[1] " << key.value[1] << std::endl;
-        std::cout << "subscriber: my handle[2] " << key.value[2] << std::endl;
-      //}
-    } else {
-      std::cout << "subscriber error " << error << " in get_discovered_participant_data" << std::endl;
-    }
-*/
-
-}
-
 // END OF EXISTING MESSENGER EXAMPLE LISTENER CODE
 
 int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
-  DDS::ReturnCode_t error;
   try {
+std::cout << "sub running" << std::endl;
     OpenDDS::Model::Application application(argc, argv);
     RemoteInstHandlesLib::DefaultRemoteInstHandlesType model(application, argc, argv);
 
     using OpenDDS::Model::RemoteInstHandlesLib::Elements;
 
     DDS::DataReader_var reader = model.reader(Elements::DataReaders::reader);
+    DDS::DataReaderListener_var bit_listener(new BitSubscriptionListener());
     DDS::DomainParticipant_var reader_part = reader->get_subscriber()->get_participant();
 
     DDS::Subscriber_var bit_sub(reader_part->get_builtin_subscriber());
     DDS::DataReader_var bit_dr(bit_sub->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC));
+    bit_dr->set_listener(bit_listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+std::cout << "sub priming oda" << std::endl;
+    bit_listener->on_data_available(bit_dr);
+
+/*
+    DDS::DomainParticipant_var reader_part = reader->get_subscriber()->get_participant();
+
+    DDS::Subscriber_var bit_sub(reader_part->get_builtin_subscriber());
+    DDS::DataReader_var bit_dr(bit_sub->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC));
+    
     DDS::SubscriptionBuiltinTopicDataDataReader_var bit_reader_i =
           DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(bit_dr);
-    DDS::SubscriptionBuiltinTopicData instance;
-    DDS::SampleInfo info;
-    error = bit_reader_i->read_next_sample(instance, info);
+    DDS::SubscriptionBuiltinTopicDataSeq instances;
+    DDS::SampleInfoSeq infos;
+    error = bit_reader_i->read(instances, 
+                               infos, 
+                               1, 
+                               DDS::ANY_SAMPLE_STATE, 
+                               DDS::ANY_VIEW_STATE, 
+                               DDS::ANY_INSTANCE_STATE);
     if (error == DDS::RETCODE_OK) {
       std::cout << "subscriber bit sample" << std::endl;
-      DDS::BuiltinTopicKey_t mykey = instance.participant_key;
+      DDS::BuiltinTopicKey_t mykey = instances[0].participant_key;
       std::cout << "subscriber bit sample[0] = " << mykey.value[0] << std::endl;
       std::cout << "subscriber bit sample[1] = " << mykey.value[1] << std::endl;
       std::cout << "subscriber bit sample[2] = " << mykey.value[2] << std::endl;
     } else {
       std::cout << "subscriber bit sample error = " << error << std::endl;
     }
-
-    
+*/
     ACE_SYNCH_MUTEX lock;
     ACE_Condition<ACE_SYNCH_MUTEX> condition(lock);
-    OpenDDS::Model::ReaderCondSync rcs(reader, condition);
+    OpenDDS::Model::ReaderCondSync rcs(reader, 
+                                       condition);
     DDS::DataReaderListener_var listener(new ReaderListener(rcs));
     reader->set_listener( listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -167,6 +213,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
 
     // END OF EXISTING MESSENGER EXAMPLE CODE
+    std::cout << "sub leaving scope" << std::endl;
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
@@ -178,6 +225,27 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
                       ACE_TEXT(" Exception caught: %C\n"),
                       ex.what()),
                      -1);
+  }
+
+  if ((sub_internal_key[0] != pub_external_key[0])  ||
+      (sub_internal_key[1] != pub_external_key[1])  ||
+      (sub_internal_key[2] != pub_external_key[2])) {
+    std::cout << "Subscriber Error: " 
+              << sub_internal_key[0] << "." 
+              << sub_internal_key[1] << "." 
+              << sub_internal_key[2] << " does not match "
+              << pub_external_key[0] << "."
+              << pub_external_key[1] << "." 
+              << pub_external_key[2] << std::endl;
+    return -1;
+  } else {
+    std::cout << "Subscriber Match: "
+              << sub_internal_key[0] << "." 
+              << sub_internal_key[1] << "." 
+              << sub_internal_key[2] << " matches "
+              << pub_external_key[0] << "."
+              << pub_external_key[1] << "." 
+              << pub_external_key[2] << std::endl;
   }
 
   return 0;

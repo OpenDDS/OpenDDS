@@ -32,3 +32,4 @@ tools/modeling/tests/MessengerSimpleTypes/run_test.pl
 tools/modeling/tests/CfTopic/run_test.pl
 tools/modeling/tests/MultiTopic/run_test.pl
 tools/modeling/tests/Exchange/run_test.pl: COMPILE_ONLY
+tools/modeling/tests/RemoteInstHandles/run_test.pl
