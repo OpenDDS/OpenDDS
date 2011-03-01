@@ -61,12 +61,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     DDS::DataWriter_var writer = model.writer(Elements::DataWriters::writer);
     DDS::DataWriterListener_var listener(new RIH::WriterListener);
     writer->set_listener(listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    writer->enable();
+    if (writer->enable() != DDS::RETCODE_OK) {
+      std::cout << "writer enable failure" << std::endl;
+    }
+
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
     std::cout << "pub waiting for sync" << std::endl;
     OpenDDS::Model::WriterSync ws(writer);
     {
+      std::cout << "pub sync'd" << std::endl;
       data1::MessageDataWriter_var message_writer =
         data1::MessageDataWriter::_narrow(writer);
   
@@ -100,7 +104,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
                      ACE_TEXT(" write returned %d!\n"), error));
         }
       }
+      std::cout << "pub waiting for acks" << std::endl;
     }
+    std::cout << "pub got acks" << std::endl;
 
     // END OF EXISTING MESSENGER EXAMPLE CODE
   } catch (const CORBA::Exception& e) {
