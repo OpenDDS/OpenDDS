@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=UTF-8">
+
+  <title>READER_DATA_LIFECYCLE</title>
+  <link rel="stylesheet" type="text/css" href="QoS.css">
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+
+<H4 CLASS="Head3">
+<A NAME="pgfId-266311"></A>READER_DATA_LIFECYCLE</H4>
+<UL>
+<LI CLASS="BodyNoLead">
+<A NAME="pgfId-266313"></A>The <A NAME="marker-266312"></A>READER_DATA_LIFECYCLE QoS policy controls the lifecycle of data instances managed by a data reader. Here is the IDL for the Reader Data Lifecycle QoS policy:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-277631"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-277688"></A>struct ReaderDataLifecycleQosPolicy {</P>
+<P CLASS="Code">
+<A NAME="pgfId-277689"></A>  Duration_t autopurge_nowriter_samples_delay;</P>
+<P CLASS="Code">
+<A NAME="pgfId-277690"></A>  Duration_t autopurge_disposed_samples_delay;</P>
+<P CLASS="Code">
+<A NAME="pgfId-277691"></A>};</P>
+<P CLASS="Code">
+<A NAME="pgfId-277673"></A>&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-277201"></A>Normally, a data reader maintains data for all instances until there are no more associated data writers for the instance, the instance has been disposed, or the data has been taken by the user.</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-277205"></A>In some cases, it may be desirable to constrain the reclamation of these resources. This policy could, for example, permit a late-joining data writer to prolong the lifetime of an instance in fail-over situations.</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-277209"></A>The <EM CLASS="Code">
+autopurge_nowriter_samples_delay</EM>
+ controls how long the data reader waits before reclaiming resources once an instance transitions to the NOT_ALIVE_NO_WRITERS state. By default, <EM CLASS="Code">
+autopurge_nowriter_samples_delay</EM>
+ is infinite.</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-277214"></A>The <EM CLASS="Code">
+autopurge_disposed_samples_delay</EM>
+ controls how long the data reader waits before reclaiming resources once an instance transitions to the NO_ALIVE_DISPOSED state. By default, <EM CLASS="Code">
+autopurge_disposed_samples_delay</EM>
+ is infinite.</LI>
+</UL>
+
+</body>
+</html>
