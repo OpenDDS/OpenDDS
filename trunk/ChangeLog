@@ -1,3 +1,14 @@
+Tue Mar  1 17:11:51 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/RemoteInstHandles/RemoteInstHandles.opendds:
+        * tools/modeling/tests/RemoteInstHandles/publisher.cpp:
+        * tools/modeling/tests/RemoteInstHandles/subscriber.cpp:
+
+          Read BIT samples, instead of taking them.
+          Manually enable subscriber.
+          Check return code of all enable() calls.
+          Cleanup.
+
 Tue Mar  1 16:24:44 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/authoring_guide.html:
