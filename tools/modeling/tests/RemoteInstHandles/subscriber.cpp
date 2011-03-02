@@ -25,7 +25,7 @@ public:
       ACE_THROW_SPEC((CORBA::SystemException));
 };
 
-void 
+void
 BitSubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
@@ -133,7 +133,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     ACE_SYNCH_MUTEX lock;
     ACE_Condition<ACE_SYNCH_MUTEX> condition(lock);
-    OpenDDS::Model::ReaderCondSync rcs(reader, 
+    OpenDDS::Model::ReaderCondSync rcs(reader,
                                        condition);
     DDS::DataReaderListener_var listener(new ReaderListener(rcs));
     reader->set_listener( listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -180,21 +180,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
   if ((sub_internal_key[0] != pub_external_key[0])  ||
       (sub_internal_key[1] != pub_external_key[1])  ||
       (sub_internal_key[2] != pub_external_key[2])) {
-    std::cout << "Subscriber Error: " 
-              << sub_internal_key[0] << "." 
-              << sub_internal_key[1] << "." 
+    std::cout << "Subscriber Error: "
+              << sub_internal_key[0] << "."
+              << sub_internal_key[1] << "."
               << sub_internal_key[2] << " does not match "
               << pub_external_key[0] << "."
-              << pub_external_key[1] << "." 
+              << pub_external_key[1] << "."
               << pub_external_key[2] << std::endl;
     return -1;
   } else {
     std::cout << "Subscriber Match: "
-              << sub_internal_key[0] << "." 
-              << sub_internal_key[1] << "." 
+              << sub_internal_key[0] << "."
+              << sub_internal_key[1] << "."
               << sub_internal_key[2] << " matches "
               << pub_external_key[0] << "."
-              << pub_external_key[1] << "." 
+              << pub_external_key[1] << "."
               << pub_external_key[2] << std::endl;
   }
 

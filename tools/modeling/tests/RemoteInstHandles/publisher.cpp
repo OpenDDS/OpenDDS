@@ -21,7 +21,7 @@ namespace RIH {
   class WriterListener : public OpenDDS::Model::NullWriterListener {
     virtual void on_publication_matched(DDS::DataWriter_ptr writer,
                     const ::DDS::PublicationMatchedStatus & status)
-        ACE_THROW_SPEC((CORBA::SystemException)); 
+        ACE_THROW_SPEC((CORBA::SystemException));
   };
 };
 
@@ -73,7 +73,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
       std::cout << "pub sync'd" << std::endl;
       data1::MessageDataWriter_var message_writer =
         data1::MessageDataWriter::_narrow(writer);
-  
+
       if (CORBA::is_nil(message_writer.in())) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
