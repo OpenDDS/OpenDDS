@@ -6,7 +6,7 @@ use strict;
 use Env qw(ACE_ROOT);
 my $lib = shift;
 my $file = $lib . '_export.h';
-if (!-e $file) {
+if (!-e $file || -z $file) {
   my $s = system("perl $ACE_ROOT/bin/generate_export_file.pl $lib > $file");
   if ($s > 0) {
     print "ERROR: generate_export_file.pl failed with $s\n";
