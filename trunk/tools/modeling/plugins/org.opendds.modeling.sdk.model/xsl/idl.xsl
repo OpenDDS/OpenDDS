@@ -267,11 +267,12 @@
   <xsl:variable name="scopename">
     <xsl:call-template name="scopename"/>
   </xsl:variable>
-  <xsl:value-of select="concat($newline,'#pragma DCPS_DATA_TYPE &quot;')"/>
 
-  <xsl:value-of select="concat($scopename, @name, '&quot;', $newline)"/>
-
-  <xsl:apply-templates select="keys"/>
+  <xsl:if test="@isDcpsDataType = 'true'">
+    <xsl:value-of select="concat($newline,'#pragma DCPS_DATA_TYPE &quot;')"/>
+    <xsl:value-of select="concat($scopename, @name, '&quot;', $newline)"/>
+    <xsl:apply-templates select="keys"/>
+  </xsl:if>
 
   <xsl:value-of select="concat('  struct ',@name,' {', $newline)"/>
 

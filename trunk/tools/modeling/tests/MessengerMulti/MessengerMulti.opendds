@@ -16,7 +16,7 @@
   </libs>
   <packages name="data1">
   <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw1" name="data1">
-    <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw1" name="Message">
+    <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw1" name="Message" isDcpsDataType="true">
       <fields xmi:id="_AbpJwPDvEd-I4rwicuuPOw" name="from" type="_E8F2IPDvEd-I4rwicuuPOw1"/>
       <fields xmi:id="_JUMe0PDvEd-I4rwicuuPOw" name="subject" type="_E8F2IPDvEd-I4rwicuuPOw1"/>
       <fields xmi:id="_M8mv8PDvEd-I4rwicuuPOw" name="subject_id" type="_PXgFEPDvEd-I4rwicuuPOw1"/>
