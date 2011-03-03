@@ -1,3 +1,9 @@
+Thu Mar  3 14:28:07 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore_diagram:
+
+          Diagram of Generator model to help in navigating the modeling elements.
+
 Wed Mar  2 21:49:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * bin/expfile.pl:
