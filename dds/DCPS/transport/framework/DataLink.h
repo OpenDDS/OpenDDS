@@ -253,6 +253,11 @@ public:
   virtual void control_dropped(ACE_Message_Block* message,
                                bool dropped_by_transport);
 
+  /// Return the subset of the input set which are also targets of
+  /// this DataLink (see is_target()).
+  GUIDSeq* target_intersection(const GUIDSeq& in);
+  CORBA::ULong num_targets() const;
+
 protected:
 
   /// This is how the subclass "announces" to this DataLink base class
@@ -358,7 +363,7 @@ private:
   /// association being managed here.
   RepoIdSetMap sub_map_;
 
-  LockType sub_map_lock_;
+  mutable LockType sub_map_lock_;
 
   /// A (smart) pointer to the TransportImpl that created this DataLink.
   TransportImpl_rch impl_;

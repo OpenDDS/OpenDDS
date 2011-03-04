@@ -826,20 +826,10 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
                      sample_length);
       mb->wr_ptr(sample_length);
 
-      if (data_writer->write(mb,
-                             handle,
-                             source_timestamp) == DDS::RETCODE_OK) {
-//         ACE_HEX_DUMP ((LM_DEBUG,
-//                        mb->rd_ptr (),
-//                        mb->total_length (),
-//                        ACE_TEXT ("WRITTEN DURABLE DATA")));
+      const DDS::ReturnCode_t ret = data_writer->write(mb, handle,
+        source_timestamp, 0 /* no content filtering */);
 
-        // @todo This causes a seg fault.  Comment out and reset
-        //       wholesale after queue iteration loop completed.
-        // Data successfully written.  Remove it from the cache.
-//         sample_data_type data;
-//         (void) q->dequeue_head (data);
-      } else {
+      if (ret != DDS::RETCODE_OK) {
         ACE_DES_FREE(mb,
                      mb_allocator->free,
                      ACE_Message_Block);

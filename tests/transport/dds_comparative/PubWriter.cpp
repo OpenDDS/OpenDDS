@@ -181,7 +181,8 @@ PubWriter::get_element(OpenDDS::DCPS::DataSampleHeader& header)
                          new OpenDDS::DCPS::DataSampleListElement(this->pub_id_,
                                                               this,
                                                               0,
-                                                              &trans_allocator);
+                                                              &trans_allocator,
+                                                              0);
 
   // TBD SOON - Use an allocator
   elem->sample_ = new ACE_Message_Block(header.max_marshaled_size());

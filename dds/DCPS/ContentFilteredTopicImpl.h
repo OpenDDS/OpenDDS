@@ -15,6 +15,7 @@
 #include "dds/DCPS/FilterEvaluator.h"
 
 #include <string>
+#include <vector>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -22,6 +23,8 @@
 
 namespace OpenDDS {
 namespace DCPS {
+
+class DataReaderImpl;
 
 class OpenDDS_Dcps_Export ContentFilteredTopicImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::ContentFilteredTopic>
@@ -52,13 +55,17 @@ public:
     return filter_eval_.eval(s, expression_parameters_);
   }
 
+  void add_reader(DataReaderImpl& reader);
+  void remove_reader(DataReaderImpl& reader);
+
 private:
   std::string filter_expression_;
   FilterEvaluator filter_eval_;
   DDS::StringSeq expression_parameters_;
   DDS::Topic_var related_topic_;
+  std::vector<DataReaderImpl*> readers_;
 
-  ///concurrent access to expression_parameters_
+  ///concurrent access to expression_parameters_ and readers_
   mutable ACE_Recursive_Thread_Mutex lock_;
 };
 

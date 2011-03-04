@@ -18,6 +18,8 @@ public:
           int num_readers = 1,
           int writer_id = -1);
 
+  virtual ~Writer() { end(); }
+
   void start ();
 
   void end ();

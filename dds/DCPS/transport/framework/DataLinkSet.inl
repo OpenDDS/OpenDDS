@@ -12,37 +12,90 @@
 #include "SendResponseListener.h"
 #include "dds/DCPS/Util.h"
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#include "dds/DdsDcpsGuidTypeSupportImpl.h"
+#include "TransportCustomizedElement.h"
+#endif
+
 ACE_INLINE void
 OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
 {
-  DBG_ENTRY_LVL("DataLinkSet","send",6);
-  VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: DataLinkSet::send element %@.\n"
-            , sample), 5);
-
-  TransportSendElement* send_element = 0;
-  //Optimized - use cached allocator.
+  DBG_ENTRY_LVL("DataLinkSet", "send", 6);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: DataLinkSet::send element %@.\n",
+            sample), 5);
 
   GuardType guard(this->lock_);
+  TransportSendElement* send_element =
+    TransportSendElement::alloc(map_.size(), sample);
 
-  ACE_NEW_MALLOC(send_element,
-                 (TransportSendElement*)sample->transport_send_element_allocator_->malloc(),
-                 TransportSendElement(map_.size(),
-                                      sample,
-                                      sample->transport_send_element_allocator_));
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  enum { DATA, DB, MB, N_ALLOC }; // for ACE_Allocators below
+  const bool customHeader =
+    DataSampleHeader::test_flag(CONTENT_FILTER_FLAG, sample->sample_);
+  const bool swap = (TAO_ENCAP_BYTE_ORDER !=
+    DataSampleHeader::test_flag(BYTE_ORDER_FLAG, sample->sample_));
+#endif
 
-  for (MapType::iterator itr = map_.begin();
-       itr != map_.end();
-       ++itr) {
-// Bump up the DataLink ref count
+  for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {
 
-    // ciju: I don't see why this is necessary.
-    // Since the entry itself is ref-counted as long as the
-    // entry itself isn't removed, the DataLink should be safe.
-    // For now commenting it out.
-    //RcHandle<DataLink> data_link (entry->int_id_);
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    if (customHeader) {
+      typedef std::map<DataLinkIdType, GUIDSeq_var>::iterator FilterIter;
+      FilterIter fi = sample->filter_per_link_.find(itr->first);
+      GUIDSeq* guids = 0;
+      if (fi != sample->filter_per_link_.end()) {
+        guids = fi->second.ptr();
+      }
 
-// Tell the DataLink to send it.
-    itr->second->send(send_element);
+      VDBG_LVL((LM_DEBUG,
+        "(%P|%t) DBG: DataLink %@ filtering %d subscribers.\n",
+        itr->second.in(), guids ? guids->length() : 0), 5);
+
+      ACE_Message_Block* mb = sample->sample_->duplicate();
+      ACE_Allocator* allocators[N_ALLOC];
+      mb->access_allocators(allocators[DATA], allocators[DB], allocators[MB]);
+      ACE_Message_Block* optHdr;
+      ACE_NEW_MALLOC(optHdr,
+        static_cast<ACE_Message_Block*>(
+          allocators[MB]->malloc(sizeof(ACE_Message_Block))),
+        ACE_Message_Block(guids ? gen_find_size(*guids) : sizeof(CORBA::ULong),
+                          ACE_Message_Block::MB_DATA,
+                          0, // cont
+                          0, // data
+                          0, // data allocator: leave as default
+                          0, // locking_strategy
+                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                          ACE_Time_Value::zero,
+                          ACE_Time_Value::max_time,
+                          allocators[DB],
+                          allocators[MB]));
+
+      Serializer ser(optHdr, swap);
+      if (guids) {
+        ser << *guids;
+      } else {
+        ser << CORBA::ULong(0);
+      }
+
+      // New chain: mb (DataSampleHeader), optHdr (GUIDSeq), data (Foo)
+      optHdr->cont(mb->cont());
+      mb->cont(optHdr);
+
+      TransportCustomizedElement* tce =
+        TransportCustomizedElement::alloc(send_element);
+      tce->set_msg(mb); // tce now owns ACE_Message_Block chain
+
+      itr->second->send(tce);
+
+    } else {
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
+      // Tell the DataLink to send it.
+      itr->second->send(send_element);
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    }
+#endif
   }
 }
 
@@ -58,13 +111,14 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
   GuardType guard(this->lock_);
 
   ACE_NEW_MALLOC_RETURN(send_element,
-                        (TransportSendControlElement*)send_control_element_allocator_.malloc(),
-                        TransportSendControlElement(map_.size(),
-                                                    pub_id,
-                                                    listener,
-                                                    msg,
-                                                    &send_control_element_allocator_),
-                        SEND_CONTROL_ERROR);
+    static_cast<TransportSendControlElement*>(
+      send_control_element_allocator_.malloc()),
+    TransportSendControlElement(map_.size(),
+                                pub_id,
+                                listener,
+                                msg,
+                                &send_control_element_allocator_),
+    SEND_CONTROL_ERROR);
 
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();
@@ -89,12 +143,13 @@ OpenDDS::DCPS::DataLinkSet::send_response(
 
   GuardType guard(this->lock_);
   ACE_NEW_MALLOC(send_element,
-                 (TransportSendControlElement*)send_control_element_allocator_.malloc(),
-                 TransportSendControlElement(map_.size(),
-                                             pub_id,
-                                             &listener,
-                                             response,
-                                             &send_control_element_allocator_));
+    static_cast<TransportSendControlElement*>(
+      send_control_element_allocator_.malloc()),
+    TransportSendControlElement(map_.size(),
+                                pub_id,
+                                &listener,
+                                response,
+                                &send_control_element_allocator_));
 
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();

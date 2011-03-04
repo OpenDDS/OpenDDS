@@ -25,7 +25,8 @@ OpenDDS::DCPS::TransportSendElement::release_element(bool dropped_by_transport)
   DBG_ENTRY_LVL("TransportSendElement","release_element",6);
 
   if (this->was_dropped()) {
-    this->element_->send_listener_->data_dropped(this->element_, dropped_by_transport);
+    this->element_->send_listener_->data_dropped(this->element_,
+                                                 dropped_by_transport);
 
   } else {
     this->element_->send_listener_->data_delivered(this->element_);

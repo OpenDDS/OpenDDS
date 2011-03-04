@@ -236,13 +236,20 @@ Manager::pushImage(const DImage& image)
       dr_qos_seq.push_back(reader_qos);
       read_cdr >> *reader_qos;
 
+      ContentSubscriptionInfo* csi = 0;
+      ACE_NEW_NORETURN(csi, ContentSubscriptionInfo);
+      csi->filterExpr = actor.contentSubscriptionProfile.filterExpr.c_str();
+      TAO_InputCDR csp_cdr(actor.contentSubscriptionProfile.exprParams.second,
+                           actor.contentSubscriptionProfile.exprParams.first);
+      csp_cdr >> csi->exprParams;
+
       URActor* reader;
       ACE_NEW_NORETURN(reader
                        , URActor(actor.domainId, actor.actorId
                                  , actor.topicId, actor.participantId
                                  , actor.type, actor.callback.c_str()
                                  , *sub_qos, *reader_qos
-                                 , *trans));
+                                 , *trans, *csi));
       readers.push_back(reader);
       u_image.actors.push_back(reader);
 
@@ -259,13 +266,15 @@ Manager::pushImage(const DImage& image)
       dw_qos_seq.push_back(writer_qos);
       write_cdr >> *writer_qos;
 
+      ContentSubscriptionInfo csi; //writers have no info
+
       UWActor* writer;
       ACE_NEW_NORETURN(writer
                        , UWActor(actor.domainId, actor.actorId
                                  , actor.topicId, actor.participantId
                                  , actor.type, actor.callback.c_str()
                                  , *pub_qos, *writer_qos
-                                 , *trans));
+                                 , *trans, csi));
       writers.push_back(writer);
       u_image.wActors.push_back(writer);
 
@@ -358,11 +367,18 @@ Manager::add(const DActor& actor)
     pubSubCdr >> sub_qos;
     drdwCdr >> reader_qos;
 
+    Update::ContentSubscriptionInfo csi;
+    csi.filterExpr = actor.contentSubscriptionProfile.filterExpr.c_str();
+    TAO_InputCDR cspCdr(actor.contentSubscriptionProfile.exprParams.second,
+                        actor.contentSubscriptionProfile.exprParams.first);
+    cspCdr >> csi.exprParams;
+
     // Pass actor to InfoRepo.
     info_->add_subscription(actor.domainId, actor.participantId
                             , actor.topicId, actor.actorId
                             , callback.c_str(), reader_qos
-                            , transport_info, sub_qos);
+                            , transport_info, sub_qos
+                            , csi.filterExpr, csi.exprParams);
 
   } else if (actor.type == DataWriter) {
     DDS::PublisherQos pub_qos;

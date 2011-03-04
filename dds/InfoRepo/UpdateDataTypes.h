@@ -32,7 +32,6 @@ typedef long                            DomainIdType;
 typedef OpenDDS::DCPS::RepoId           IdType; // Federation scope identifier type.
 typedef std::pair <size_t, char*>       BinSeq;
 typedef std::pair <SpecificQos, BinSeq> QosSeq;
-typedef BinSeq                          TransportInterfaceInfo;
 
 struct IdPath {
   DomainIdType domain;
@@ -100,7 +99,24 @@ struct ParticipantStrt {
 typedef struct ParticipantStrt<DDS::DomainParticipantQos&> UParticipant;
 typedef struct ParticipantStrt<QosSeq>                     DParticipant;
 
-template <typename PSQ, typename RWQ, typename C, typename T>
+struct ContentSubscriptionInfo {
+  CORBA::String_var filterExpr;
+  DDS::StringSeq exprParams;
+
+  ContentSubscriptionInfo() {}
+  ContentSubscriptionInfo(const char* fx, const DDS::StringSeq& ep)
+    : filterExpr(fx), exprParams(ep) {}
+};
+
+// like std::pair but with names instead of "first" and "second", since the
+// exprParams attribute is itself a std::pair and naming is too confusing with
+// nested pairs.
+struct ContentSubscriptionBin {
+  ACE_CString filterExpr;
+  BinSeq exprParams;
+};
+
+template <typename PSQ, typename RWQ, typename C, typename T, typename CSP>
 struct ActorStrt {
   DomainIdType domainId;
   IdType       actorId;
@@ -111,6 +127,7 @@ struct ActorStrt {
   PSQ          pubsubQos;
   RWQ          drdwQos;
   T            transportInterfaceInfo;
+  CSP          contentSubscriptionProfile;
 
   ActorStrt(
     DomainIdType dom,
@@ -121,7 +138,8 @@ struct ActorStrt {
     const char*  call,
     PSQ          pub,
     RWQ          drdw,
-    T            trans)
+    T            trans,
+    CSP          csProf)
     : domainId(dom),
       actorId(act),
       topicId(top),
@@ -130,19 +148,24 @@ struct ActorStrt {
       callback(call),
       pubsubQos(pub),
       drdwQos(drdw),
-      transportInterfaceInfo(trans) { };
+      transportInterfaceInfo(trans),
+      contentSubscriptionProfile(csProf)
+    { };
 };
 typedef struct ActorStrt<
-      DDS::SubscriberQos& ,
+      DDS::SubscriberQos&,
       DDS::DataReaderQos&,
       std::string,
-      OpenDDS::DCPS::TransportInterfaceInfo&> URActor;
+      OpenDDS::DCPS::TransportInterfaceInfo&,
+      ContentSubscriptionInfo&> URActor;
 typedef struct ActorStrt<
-      DDS::PublisherQos& ,
-      DDS::DataWriterQos& ,
+      DDS::PublisherQos&,
+      DDS::DataWriterQos&,
       std::string,
-      OpenDDS::DCPS::TransportInterfaceInfo&> UWActor;
-typedef struct ActorStrt<QosSeq, QosSeq, std::string, BinSeq> DActor;
+      OpenDDS::DCPS::TransportInterfaceInfo&,
+      ContentSubscriptionInfo&> UWActor;
+typedef struct ActorStrt<QosSeq, QosSeq, std::string,
+                         BinSeq, ContentSubscriptionBin> DActor;
 
 template <typename T, typename P, typename A, typename W>
 struct ImageData {

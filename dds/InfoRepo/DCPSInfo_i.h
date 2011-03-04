@@ -195,7 +195,9 @@ public:
     OpenDDS::DCPS::DataReaderRemote_ptr subscription,
     const DDS::DataReaderQos & qos,
     const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
-    const DDS::SubscriberQos & subscriberQos)
+    const DDS::SubscriberQos & subscriberQos,
+    const char* filterExpression,
+    const DDS::StringSeq& exprParams)
   ACE_THROW_SPEC((CORBA::SystemException
                    , OpenDDS::DCPS::Invalid_Domain
                    , OpenDDS::DCPS::Invalid_Participant
@@ -230,6 +232,8 @@ public:
                         const DDS::DataReaderQos & qos,
                         const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
                         const DDS::SubscriberQos & subscriberQos,
+                        const char* filterExpression,
+                        const DDS::StringSeq& exprParams,
                         bool associate = false);
 
   virtual void remove_subscription(
@@ -389,6 +393,16 @@ public:
     const OpenDDS::DCPS::RepoId& partId,
     const OpenDDS::DCPS::RepoId& drId,
     const DDS::SubscriberQos&  qos);
+
+  virtual ::CORBA::Boolean update_subscription_params(
+    DDS::DomainId_t domainId,
+    const OpenDDS::DCPS::RepoId& participantId,
+    const OpenDDS::DCPS::RepoId& subscriptionId,
+    const DDS::StringSeq& params)
+  ACE_THROW_SPEC((CORBA::SystemException,
+                  OpenDDS::DCPS::Invalid_Domain,
+                  OpenDDS::DCPS::Invalid_Participant,
+                  OpenDDS::DCPS::Invalid_Subscription));
 
   virtual CORBA::Boolean update_topic_qos(
     const OpenDDS::DCPS::RepoId& topicId,

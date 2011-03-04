@@ -130,13 +130,24 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                  dr.in(),
                                                  drq.in(),
                                                  tii.in(),
-                                                 sQos.in());
+                                                 sQos.in(),
+                                                 "", DDS::StringSeq());
       if( OpenDDS::DCPS::GUID_UNKNOWN == subId)
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("add_subscription failed!\n") ));
         }
+      
+      ACE_Time_Value run_time = ACE_Time_Value(3,0);
+      orb->run(run_time);
 
-      ACE_Time_Value run_time = ACE_Time_Value(15,0);
+      DDS::StringSeq newParams(1);
+      newParams.length(1);
+      newParams[0] = "New content-filtering parameter";
+      if (!info->update_subscription_params(domainId, dpId, subId, newParams)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("update_subscription_params failed!\n")));
+      }
+
+      run_time = ACE_Time_Value(15,0);
       orb->run(run_time);
 
 

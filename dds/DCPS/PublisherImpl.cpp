@@ -917,7 +917,7 @@ void PublisherImpl::add_associations(const ReaderAssociationSeq & readers,
   // datawriter fully associated (in DataWriterImpl::fully_associated()).
   info.association_data_ = new AssociationData[info.num_associations_];
 
-  for (ssize_t i = 0; i < info.num_associations_; ++i) {
+  for (CORBA::ULong i = 0; i < info.num_associations_; ++i) {
     info.association_data_[i].remote_id_ = readers[i].readerId;
     info.association_data_[i].remote_data_ = readers[i].readerTransInfo;
   }

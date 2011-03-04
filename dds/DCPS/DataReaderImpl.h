@@ -519,6 +519,10 @@ public:
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   void enable_filtering(ContentFilteredTopicImpl* cft);
 
+  DDS::ContentFilteredTopic_ptr get_cf_topic() const;
+
+  void update_subscription_params(const DDS::StringSeq& params) const;
+
   typedef std::vector<void*> GenericSeq;
 
   struct GenericBundle {

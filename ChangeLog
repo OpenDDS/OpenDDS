@@ -1,3 +1,135 @@
+Fri Mar  4 20:35:40 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/DCPS/ContentFilteredTopicImpl.h:
+        * dds/DCPS/ContentFilteredTopicImpl.cpp:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterRemoteImpl.h:
+        * dds/DCPS/DataWriterRemoteImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/MultiTopicImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/Util.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.h:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.inl:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+
+          Implemented publisher-side filtering for Content-Filtered Topics.
+          It can be disabled using "-DCPSPublisherContentFilter 0" on the
+          command line or the equivalent setting in the [common] section of the
+          config file.
+          wait_for_acknowledgments() still needs work to make it aware of the
+          fact that some associated DataReaders may be expected to have lower
+          values of the sequence number if the most recent sample(s) were
+          filtered out.
+
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/DdsDcpsInfo.idl:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+        * dds/InfoRepo/UpdateDataTypes.h:
+        * dds/InfoRepo/UpdateManager.cpp:
+        * dds/InfoRepo/UpdateProcessor_T.h:
+        * dds/InfoRepo/UpdateProcessor_T.cpp:
+        * dds/InfoRepo/Updater.h:
+
+          InfoRepo support for communicating the Content-Filtered Topic's
+          filter string and subscription parameters from the subscriber to
+          any associated data writers.  Parameters can be changed at any time.
+          The ContentFilteredTopic::set_expression_parameters() will block
+          until all associated data writers are made aware of the new params.
+          Federation and Persistence for the above.
+
+        * tools/dissector/packet.cpp:
+
+          Updated the Wireshark Dissector for these changes to the
+          DataSampleHeader.
+
+        * performance-tests/DCPS/TCPListenerTest/Writer.h:
+
+          Join the thread in the destructor to prevent the thread's cleanup
+          code (in ACE) from running while ACE itself is cleaning up (in main).
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/DCPS/ContentFilteredTopic/dcps.ini:
+        * tests/DCPS/ContentFilteredTopic/run_test.pl:
+
+          Extend this test, in order to exercise the new features.
+          Run the test with both settings for -DCPSPublisherContentFilter.
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+
+          Test the subscription parameters dynamic updating.
+
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/dds_comparative/PubWriter.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_n/SimpleDataWriter.cpp:
+
+          Update tests for changes to internal classes.
+
+        * docs/design/PERSISTENCE:
+
+          Typo fix.
+
+        * configure:
+
+          Whitespace fix only.
+
+        * dds/InfoRepo/README:
+
+          Removed this file.  It only had info about the domain_ids file, which
+          is long since gone.
+
 Thu Mar  3 17:51:36 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
@@ -9,7 +141,7 @@ Thu Mar  3 17:51:36 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
         * tools/modeling/tests/MessengerNoPub/MessengerNoPub.opendds:
         * tools/modeling/tests/MessengerNoSub/MessengerNoSub.opendds:
         * tools/modeling/tests/MessengerSplit/MessengerTypes.opendds:
- 
+
           Explicitly set @isDcpsDataType where needed.
 
         * tools/modeling/tests/Chained/run_test.pl:

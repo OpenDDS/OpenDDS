@@ -24,6 +24,10 @@
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#include "FilterEvaluator.h"
+#endif
+
 #include "ace/Event_Handler.h"
 #include "ace/OS_NS_sys_time.h"
 #include "ace/Condition_T.h"
@@ -51,7 +55,7 @@ class Monitor;
 * @class DataWriterImpl
 *
 * @brief Implements the OpenDDS::DCPS::DataWriterRemote interfaces and
-*        DDS::DataWrite interfaces.
+*        DDS::DataWriter interfaces.
 *
 * See the DDS specification, OMG formal/04-12-02, for a description of
 * the interface this class is implementing.
@@ -59,11 +63,11 @@ class Monitor;
 * This class must be inherited by the type-specific datawriter which
 * is specific to the data-type associated with the topic.
 *
-* @note: This class is responsiable for allocating memory for the
+* @note: This class is responsible for allocating memory for the
 *        header message block
 *        (MessageBlock + DataBlock + DataSampleHeader) and the
 *        DataSampleListElement.
-*        The data-type datawriter is responsiable for allocating
+*        The data-type datawriter is responsible for allocating
 *        memory for the sample data message block.
 *        (e.g. MessageBlock + DataBlock + Foo data). But it gives
 *        up ownership to this WriteDataContainer.
@@ -177,17 +181,16 @@ public:
   virtual DDS::ReturnCode_t enable()
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  virtual void add_associations(OpenDDS::DCPS::RepoId yourId,
-                                const ReaderAssociationSeq & readers)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  void add_associations(OpenDDS::DCPS::RepoId yourId,
+                        const ReaderAssociationSeq & readers);
+  
+  void remove_associations(const ReaderIdSeq & readers,
+                           CORBA::Boolean callback);
 
-  virtual void remove_associations(const ReaderIdSeq & readers,
-                                   CORBA::Boolean callback)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  void update_incompatible_qos(const IncompatibleQosStatus& status);
 
-  virtual void update_incompatible_qos(
-    const OpenDDS::DCPS::IncompatibleQosStatus & status)
-  ACE_THROW_SPEC((CORBA::SystemException));
+  void update_subscription_params(const RepoId& readerId,
+                                  const DDS::StringSeq& params);
 
   /**
    * cleanup the DataWriter.
@@ -239,11 +242,15 @@ public:
   /**
    * Delegate to the WriteDataContainer to queue the instance
    * sample and finally tell the transport to send the sample.
+   * \param filter_out can either be null (if the writer can't
+   *        or won't evaluate the filters), or a list of
+   *        associated reader RepoIds that should NOT get the
+   *        data sample due to content filtering.
    */
   DDS::ReturnCode_t write(DataSample* sample,
-                            DDS::InstanceHandle_t handle,
-                            const DDS::Time_t & source_timestamp)
-  ACE_THROW_SPEC((CORBA::SystemException));
+                          DDS::InstanceHandle_t handle,
+                          const DDS::Time_t& source_timestamp,
+                          GUIDSeq* filter_out);
 
   /**
    * Delegate to the WriteDataContainer to dispose all data
@@ -439,7 +446,8 @@ public:
   create_sample_data_message(DataSample* data,
                              DDS::InstanceHandle_t instance_handle,
                              ACE_Message_Block*& message,
-                             const DDS::Time_t& source_timestamp);
+                             const DDS::Time_t& source_timestamp,
+                             bool content_filter);
 
   /// Make sent data available beyond the lifetime of this
   /// @c DataWriter.
@@ -489,6 +497,21 @@ protected:
   /// creates this datawriter.
   DomainParticipantImpl*          participant_servant_;
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  struct ReaderInfo {
+    DomainParticipantImpl* participant_;
+    DDS::StringSeq expression_params_;
+    std::string filter_;
+    RcHandle<FilterEvaluator> eval_;
+    SequenceNumber expected_sequence_;
+    ReaderInfo(const char* filter, const DDS::StringSeq& params,
+      DomainParticipantImpl* participant);
+    ~ReaderInfo();
+  };
+  typedef std::map<RepoId, ReaderInfo, GUID_tKeyLessThan> RepoIdToReaderInfoMap;
+  RepoIdToReaderInfoMap reader_info_;
+#endif
+
 private:
 
   void notify_publication_lost(const DDS::InstanceHandleSeq& handles);
@@ -500,7 +523,7 @@ private:
    * The fast allocator is not used for the header.
    */
   ACE_Message_Block*
-  create_control_message(enum MessageId message_id,
+  create_control_message(MessageId message_id,
                          ACE_Message_Block* data,
                          const DDS::Time_t& source_timestamp);
 

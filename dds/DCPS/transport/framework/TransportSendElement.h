@@ -19,9 +19,13 @@ namespace DCPS {
 class OpenDDS_Dcps_Export TransportSendElement : public TransportQueueElement {
 public:
 
+  static TransportSendElement* alloc(int initial_count,
+                                     const DataSampleListElement* sample);
+
   TransportSendElement(int initial_count,
                        const DataSampleListElement* sample,
                        TransportSendElementAllocator* allocator = 0);
+
   virtual ~TransportSendElement();
 
   /// Accessor for the publisher id.

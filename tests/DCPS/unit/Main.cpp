@@ -351,18 +351,16 @@ void run_next_sample_test (ssize_t size)
 
   OpenDDS::DCPS::RepoId repoId(builder);
 
-  { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = 0; i < size; i ++)
   {
     repoId.entityId.entityKey[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement(repoId, 0, 0, &trans_allocator);
+      = new DataSampleListElement(repoId, 0, 0, &trans_allocator, 0);
     if (i == pub_id_middle)
     {
       middle = sample;
     }
     list.enqueue_tail_next_sample (sample);
-  }
   }
   ssize_t current_size = list.size_;
   bool ret = true;
@@ -448,22 +446,20 @@ void run_next_send_sample_test (ssize_t size)
   {
     repoId.entityId.entityKey[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement(repoId, 0, 0, &trans_allocator);
+      = new DataSampleListElement(repoId, 0, 0, &trans_allocator, 0);
     list.enqueue_tail_next_send_sample (sample);
   }
 
-  { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = pub_id_middle; i < size; i ++)
   {
     repoId.entityId.entityKey[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement(repoId, 0, 0, &trans_allocator);
+      = new DataSampleListElement(repoId, 0, 0, &trans_allocator, 0);
     if (i == pub_id_middle)
     {
       middle = sample;
     }
     appended_list.enqueue_tail_next_send_sample (sample);
-  }
   }
   list.enqueue_tail_next_send_sample (appended_list);
 
@@ -554,7 +550,7 @@ void run_next_instance_sample_test (ssize_t size)
   {
     repoId.entityId.entityKey[2] = i;
     DataSampleListElement* sample
-      = new DataSampleListElement(repoId, 0, 0, &trans_allocator);
+      = new DataSampleListElement(repoId, 0, 0, &trans_allocator, 0);
     if (i == pub_id_middle)
     {
       middle = sample;

@@ -39,7 +39,7 @@ class OpenDDS_Federator_Export ManagerImpl
     public virtual UpdateProcessor<TopicUpdate>,
     public virtual UpdateProcessor<ParticipantUpdate>,
     public virtual UpdateProcessor<SubscriptionUpdate>,
-      public virtual UpdateProcessor<PublicationUpdate> {
+    public virtual UpdateProcessor<PublicationUpdate> {
 public:
   /// Default constructor.
   ManagerImpl(Config& config);
@@ -157,6 +157,7 @@ public:
   virtual void update(const Update::IdPath& id, const DDS::PublisherQos&         qos);
   virtual void update(const Update::IdPath& id, const DDS::DataReaderQos&        qos);
   virtual void update(const Update::IdPath& id, const DDS::SubscriberQos&        qos);
+  virtual void update(const Update::IdPath& id, const DDS::StringSeq&     exprParams);
 
   virtual void destroy(const Update::IdPath& id, Update::ItemType type, Update::ActorType actor);
 
@@ -198,6 +199,9 @@ public:
 
   /// Update the proxy SubscriberQos for a subscription.
   void processUpdateQos2(const SubscriptionUpdate* sample, const DDS::SampleInfo* info);
+
+  /// Update the proxy filter expression params for a subscription.
+  void processUpdateFilterExpressionParams(const SubscriptionUpdate* sample, const DDS::SampleInfo* info);
 
   /// Update the proxy ParticipantQos for a participant.
   void processUpdateQos1(const ParticipantUpdate* sample, const DDS::SampleInfo* info);

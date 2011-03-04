@@ -833,7 +833,33 @@ ACE_THROW_SPEC((CORBA::SystemException))
   return DDS::RETCODE_OK;
 }
 
-#endif
+RcHandle<FilterEvaluator>
+DomainParticipantImpl::get_filter_eval(const char* filter)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, filter_cache_lock_,
+                   RcHandle<FilterEvaluator>());
+  typedef std::map<std::string, RcHandle<FilterEvaluator> > Map;
+  Map::iterator iter = filter_cache_.find(filter);
+  if (iter == filter_cache_.end()) {
+    return filter_cache_[filter] = new FilterEvaluator(filter, false);
+  }
+  return iter->second;
+}
+
+void
+DomainParticipantImpl::deref_filter_eval(const char* filter)
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, filter_cache_lock_);
+  typedef std::map<std::string, RcHandle<FilterEvaluator> > Map;
+  Map::iterator iter = filter_cache_.find(filter);
+  if (iter != filter_cache_.end()) {
+    if (iter->second->ref_count() == 1) {
+      filter_cache_.erase(iter);
+    }
+  }
+}
+
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 DDS::ReturnCode_t
 DomainParticipantImpl::delete_contained_entities()
@@ -1503,9 +1529,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
         continue;
       }
 
-      CORBA::ULong len = participant_handles.length();
-      participant_handles.length(len + 1);
-      participant_handles[len] = iter->second;
+      push_back(participant_handles, iter->second);
     }
   }
 
@@ -1588,9 +1612,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
         continue;
       }
 
-      CORBA::ULong len = topic_handles.length();
-      topic_handles.length(len + 1);
-      topic_handles[len] = iter->second;
+      push_back(topic_handles, iter->second);
     }
   }
 

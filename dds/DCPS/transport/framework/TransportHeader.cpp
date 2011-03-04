@@ -46,18 +46,5 @@ operator<<(ACE_Message_Block& buffer, OpenDDS::DCPS::TransportHeader& value)
 ACE_CDR::Boolean
 operator<<(ACE_Message_Block*& buffer, OpenDDS::DCPS::TransportHeader& value)
 {
-  DBG_ENTRY_LVL("TransportHeader","operator<<",6);
-
-  OpenDDS::DCPS::Serializer writer(buffer, value.swap_bytes());
-
-  writer.write_octet_array(value.protocol_, sizeof(value.protocol_));
-
-  writer << ACE_OutputCDR::from_octet(value.byte_order_);
-  writer << ACE_OutputCDR::from_octet(value.reserved_);
-
-  writer << value.length_;
-  writer << value.sequence_;
-  writer << value.source_;
-
-  return writer.good_bit();
+  return *buffer << value;
 }

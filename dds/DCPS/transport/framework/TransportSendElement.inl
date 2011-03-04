@@ -19,6 +19,20 @@ OpenDDS::DCPS::TransportSendElement::TransportSendElement(int initial_count,
   DBG_ENTRY_LVL("TransportSendElement","TransportSendElement",6);
 }
 
+ACE_INLINE /*static*/
+OpenDDS::DCPS::TransportSendElement*
+OpenDDS::DCPS::TransportSendElement::alloc(int initial_count,
+                                           const DataSampleListElement* sample)
+{
+  TransportSendElement* ret;
+  TransportSendElementAllocator* al = sample->transport_send_element_allocator_;
+  ACE_NEW_MALLOC_RETURN(ret,
+    static_cast<TransportSendElement*>(al->malloc()),
+    TransportSendElement(initial_count, sample, al),
+    0);
+  return ret;
+}
+
 ACE_INLINE
 bool
 OpenDDS::DCPS::TransportSendElement::owned_by_transport ()

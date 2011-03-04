@@ -59,6 +59,11 @@ public:
     const DataType*          sample,
     const DDS::SampleInfo* info);
 
+  /// A default null implementation is provided.
+  virtual void processUpdateFilterExpressionParams(
+    const DataType*        sample,
+    const DDS::SampleInfo* info);
+
   /// Entities are destroyed.
   virtual void processDelete(
     const DataType*          sample,

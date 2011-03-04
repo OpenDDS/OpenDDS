@@ -93,8 +93,10 @@ OpenDDS::DCPS::DataLink::send(TransportQueueElement* element)
   if (this->thr_per_con_send_task_ != 0) {
     this->thr_per_con_send_task_->add_request(SEND, element);
 
-  } else
+  } else {
     this->send_i(element);
+
+  }
 }
 
 ACE_INLINE void

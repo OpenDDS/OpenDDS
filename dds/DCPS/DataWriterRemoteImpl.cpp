@@ -51,5 +51,13 @@ ACE_THROW_SPEC((CORBA::SystemException))
   parent_->update_incompatible_qos(status);
 }
 
+void
+DataWriterRemoteImpl::update_subscription_params(const RepoId& readerId,
+                                                 const DDS::StringSeq& params)
+ACE_THROW_SPEC((CORBA::SystemException))
+{
+  parent_->update_subscription_params(readerId, params);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

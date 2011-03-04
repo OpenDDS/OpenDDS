@@ -96,12 +96,17 @@ public:
 
   bool empty();
 
-private:
-
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
 
   typedef std::map<DataLinkIdType, DataLink_rch> MapType;
+
+  ///{@ Accessors for external iteration
+  LockType& lock() { return lock_; }
+  MapType& map() { return map_; }
+  ///@}
+
+private:
 
   /// Hash map for DataLinks.
   MapType map_;

@@ -38,6 +38,7 @@ public:
   virtual void update(const IdPath& id, const DDS::PublisherQos&         qos) = 0;
   virtual void update(const IdPath& id, const DDS::DataReaderQos&        qos) = 0;
   virtual void update(const IdPath& id, const DDS::SubscriberQos&        qos) = 0;
+  virtual void update(const IdPath& id, const DDS::StringSeq&     exprParams) = 0;
 
   // Propagate that an entity has been destroyed.
   virtual void destroy(const IdPath& id, ItemType type, ActorType actor) = 0;

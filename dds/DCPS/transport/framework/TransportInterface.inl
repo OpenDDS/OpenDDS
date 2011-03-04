@@ -198,7 +198,7 @@ OpenDDS::DCPS::TransportInterface::send(const DataSampleList& samples)
     // DataSampleListElement.  The issue is that once we have invoked
     // data_delivered() on the send_listener_ object, or we have invoked
     // send() on the pub_links, we can no longer access the current
-    // DataSampleListElement!Thus, we need to get the next
+    // DataSampleListElement!  Thus, we need to get the next
     // DataSampleListElement (pointer) from the current element now,
     // while it is safe.
     DataSampleListElement* next_elem = cur->next_send_sample_;
@@ -235,6 +235,43 @@ OpenDDS::DCPS::TransportInterface::send(const DataSampleList& samples)
     } else {
       VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: Found DataLinkSet. Sending element %@.\n"
                 , cur), 5);
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+      // Content-Filtering adjustment to the pub_links:
+      // - If the sample should be filtered out of all subscriptions on a given
+      //   DataLink, then exclude that link from the subset that we'll send to.
+      // - If the sample should be filtered out of some (or none) of the subs,
+      //   then record that information in the DataSampleListElement so that the
+      //   header's content_filter_entries_ can be marshaled before it's sent.
+      if (cur->filter_out_.ptr()) {
+        DataLinkSet_rch subset;
+        DataLinkSet::GuardType guard(pub_links->lock());
+        typedef DataLinkSet::MapType MapType;
+        MapType& map = pub_links->map();
+        for (MapType::iterator itr = map.begin(); itr != map.end(); ++itr) {
+          GUIDSeq_var ti = itr->second->target_intersection(cur->filter_out_);
+          if (ti.ptr() == 0 || ti->length() != itr->second->num_targets()) {
+            if (!subset.in()) {
+              subset = new DataLinkSet;
+            }
+            subset->insert_link(itr->second.in());
+            cur->filter_per_link_[itr->first] = ti._retn();
+          } else {
+            VDBG((LM_DEBUG,
+              "(%P|%t) DBG: DataLink completely filtered-out %@.\n",
+              itr->second.in()));
+          }
+        }
+        if (!subset.in()) {
+          VDBG((LM_DEBUG, "(%P|%t) DBG: filtered-out of all DataLinks.\n"));
+          // similar to the "if (pub_links.is_nil())" case above, no links
+          cur->send_listener_->data_delivered(cur);
+          cur = next_elem;
+          continue;
+        }
+        pub_links = subset;
+      }
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
       // This will do several things, including adding to the membership
       // of the send_links_ set.  Any DataLinks added to the send_links_

@@ -455,13 +455,14 @@ ACE_THROW_SPEC((CORBA::SystemException
 
   if (this->um_ && (partPtr->isBitPublisher() == false)) {
     CORBA::String_var callback = orb_->object_to_string(publication);
+    Update::ContentSubscriptionInfo csi;
 
     Update::UWActor actor(domainId, pubId, topicId, participantId, Update::DataWriter
                           , callback.in()
                           , const_cast<DDS::PublisherQos &>(publisherQos)
                           , const_cast<DDS::DataWriterQos &>(qos)
                           , const_cast<OpenDDS::DCPS::TransportInterfaceInfo &>
-                          (transInfo));
+                          (transInfo), csi);
     this->um_->create(actor);
 
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -668,7 +669,9 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
   OpenDDS::DCPS::DataReaderRemote_ptr subscription,
   const DDS::DataReaderQos & qos,
   const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
-  const DDS::SubscriberQos & subscriberQos)
+  const DDS::SubscriberQos & subscriberQos,
+  const char* filterExpression,
+  const DDS::StringSeq& exprParams)
 ACE_THROW_SPEC((CORBA::SystemException
                  , OpenDDS::DCPS::Invalid_Domain
                  , OpenDDS::DCPS::Invalid_Participant
@@ -708,7 +711,9 @@ ACE_THROW_SPEC((CORBA::SystemException
                    subscription,
                    qos,
                    transInfo,
-                   subscriberQos),
+                   subscriberQos,
+                   filterExpression,
+                   exprParams),
                  OpenDDS::DCPS::GUID_UNKNOWN);
 
   if (partPtr->add_subscription(subPtr) != 0) {
@@ -726,13 +731,14 @@ ACE_THROW_SPEC((CORBA::SystemException
 
   if (this->um_ && (partPtr->isBitPublisher() == false)) {
     CORBA::String_var callback = orb_->object_to_string(subscription);
+    Update::ContentSubscriptionInfo csi(filterExpression, exprParams);
 
     Update::URActor actor(domainId, subId, topicId, participantId, Update::DataReader
                           , callback.in()
                           , const_cast<DDS::SubscriberQos &>(subscriberQos)
                           , const_cast<DDS::DataReaderQos &>(qos)
                           , const_cast<OpenDDS::DCPS::TransportInterfaceInfo &>
-                          (transInfo));
+                          (transInfo), csi);
 
     this->um_->create(actor);
 
@@ -761,6 +767,8 @@ TAO_DDS_DCPSInfo_i::add_subscription(
   const DDS::DataReaderQos & qos,
   const OpenDDS::DCPS::TransportInterfaceInfo & transInfo,
   const DDS::SubscriberQos & subscriberQos,
+  const char* filterExpression,
+  const DDS::StringSeq& exprParams,
   bool associate)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, false);
@@ -824,7 +832,9 @@ TAO_DDS_DCPSInfo_i::add_subscription(
                    subscription.in(),
                    qos,
                    transInfo,
-                   subscriberQos),
+                   subscriberQos,
+                   filterExpression,
+                   exprParams),
                  0);
 
   switch (partPtr->add_subscription(subPtr)) {
@@ -1812,6 +1822,44 @@ TAO_DDS_DCPSInfo_i::update_subscription_qos(
   sub->set_qos(qos);
 }
 
+CORBA::Boolean
+TAO_DDS_DCPSInfo_i::update_subscription_params(
+    DDS::DomainId_t domainId,
+    const OpenDDS::DCPS::RepoId& participantId,
+    const OpenDDS::DCPS::RepoId& subscriptionId,
+    const DDS::StringSeq& params)
+  ACE_THROW_SPEC((CORBA::SystemException,
+                  OpenDDS::DCPS::Invalid_Domain,
+                  OpenDDS::DCPS::Invalid_Participant,
+                  OpenDDS::DCPS::Invalid_Subscription))
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
+
+  DCPS_IR_Domain_Map::iterator domain = this->domains_.find(domainId);
+  if (domain == this->domains_.end()) {
+    throw OpenDDS::DCPS::Invalid_Domain();
+  }
+
+  DCPS_IR_Participant* partPtr = domain->second->participant(participantId);
+  if (0 == partPtr) {
+    throw OpenDDS::DCPS::Invalid_Participant();
+  }
+
+  DCPS_IR_Subscription* sub;
+  if (partPtr->find_subscription_reference(subscriptionId, sub) != 0) {
+    throw OpenDDS::DCPS::Invalid_Subscription();
+  }
+
+  sub->update_expr_params(params);  // calls writers via DataWriterRemote
+
+  if (this->um_ && !partPtr->isBitPublisher()) {
+    Update::IdPath path(domainId, participantId, subscriptionId);
+    this->um_->update(path, params);
+  }
+
+  return true;
+}
+
 CORBA::Boolean TAO_DDS_DCPSInfo_i::update_topic_qos(
   const OpenDDS::DCPS::RepoId& topicId,
   DDS::DomainId_t domainId,
@@ -2098,7 +2146,9 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
                                 , sub->topicId, sub->actorId
                                 , sub->callback.c_str(), sub->drdwQos
                                 , sub->transportInterfaceInfo
-                                , sub->pubsubQos)) {
+                                , sub->pubsubQos
+                                , sub->contentSubscriptionProfile.filterExpr
+                                , sub->contentSubscriptionProfile.exprParams)) {
       OpenDDS::DCPS::RepoIdConverter sub_converter(sub->actorId);
       OpenDDS::DCPS::RepoIdConverter part_converter(sub->participantId);
       ACE_ERROR((LM_ERROR,

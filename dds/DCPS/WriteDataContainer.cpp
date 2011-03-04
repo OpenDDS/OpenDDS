@@ -18,6 +18,7 @@
 #include "Qos_Helper.h"
 #include "RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
+#include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
 #include "tao/debug.h"
 
@@ -46,8 +47,7 @@ resend_data_expired(DataSampleListElement const & element,
     };
 
     ACE_Time_Value const now(ACE_OS::gettimeofday());
-    ACE_Time_Value const expiration_time(
-      OpenDDS::DCPS::time_to_time_value(tmp));
+    ACE_Time_Value const expiration_time(time_to_time_value(tmp));
 
     if (now >= expiration_time) {
       if (DCPS_debug_level >= 8) {
@@ -88,7 +88,9 @@ WriteDataContainer::WriteDataContainer(
     n_chunks_(n_chunks),
     sample_list_element_allocator_(2 * n_chunks_),
     transport_send_element_allocator_(2 * n_chunks_,
-                                      sizeof(OpenDDS::DCPS::TransportSendElement)),
+                                      sizeof(TransportSendElement)),
+    transport_customized_element_allocator_(2 * n_chunks_,
+                                            sizeof(TransportCustomizedElement)),
     shutdown_(false),
     domain_id_(domain_id),
     topic_name_(topic_name),
@@ -177,7 +179,7 @@ WriteDataContainer::enqueue(
 }
 
 DDS::ReturnCode_t
-WriteDataContainer::reenqueue_all(OpenDDS::DCPS::ReaderIdSeq const & rds,
+WriteDataContainer::reenqueue_all(ReaderIdSeq const & rds,
                                   DDS::LifespanQosPolicy const & lifespan)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -766,7 +768,8 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
     DataSampleListElement(publication_id_,
                           this->writer_,
                           instance,
-                          &transport_send_element_allocator_),
+                          &transport_send_element_allocator_,
+                          &transport_customized_element_allocator_),
     DDS::RETCODE_ERROR);
 
   // Extract the current instance queue.
@@ -982,7 +985,7 @@ WriteDataContainer::get_handle_instance(DDS::InstanceHandle_t handle)
 void
 WriteDataContainer::copy_and_append(DataSampleList& list,
                                     DataSampleList const & appended,
-                                    OpenDDS::DCPS::ReaderIdSeq const & rds,
+                                    ReaderIdSeq const & rds,
                                     DDS::LifespanQosPolicy const & lifespan)
 {
   CORBA::ULong const num_rds = rds.length();

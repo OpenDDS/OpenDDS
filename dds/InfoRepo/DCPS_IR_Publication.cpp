@@ -64,6 +64,8 @@ int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub)
     associationSeq[0].readerId = sub->get_id();
     associationSeq[0].subQos = *(sub->get_subscriber_qos());
     associationSeq[0].readerQos = *(sub->get_datareader_qos());
+    associationSeq[0].filterExpression = sub->get_filter_expression().c_str();
+    associationSeq[0].exprParams = sub->get_expr_params();
 
     if (participant_->is_alive() && this->participant_->isOwner()) {
       try {
@@ -227,8 +229,8 @@ void DCPS_IR_Publication::disassociate_participant(OpenDDS::DCPS::RepoId id,
   long count = 0;
 
   if (0 < numAssociations) {
-    OpenDDS::DCPS::ReaderIdSeq idSeq(numAssociations);
-    idSeq.length(numAssociations);
+    OpenDDS::DCPS::ReaderIdSeq idSeq(static_cast<CORBA::ULong>(numAssociations));
+    idSeq.length(static_cast<CORBA::ULong>(numAssociations));
 
     DCPS_IR_Subscription_Set::ITERATOR iter = associations_.begin();
     DCPS_IR_Subscription_Set::ITERATOR end = associations_.end();
@@ -302,8 +304,8 @@ void DCPS_IR_Publication::disassociate_topic(OpenDDS::DCPS::RepoId id)
   long count = 0;
 
   if (0 < numAssociations) {
-    OpenDDS::DCPS::ReaderIdSeq idSeq(numAssociations);
-    idSeq.length(numAssociations);
+    OpenDDS::DCPS::ReaderIdSeq idSeq(static_cast<CORBA::ULong>(numAssociations));
+    idSeq.length(static_cast<CORBA::ULong>(numAssociations));
 
     DCPS_IR_Subscription_Set::ITERATOR iter = associations_.begin();
     DCPS_IR_Subscription_Set::ITERATOR end = associations_.end();
@@ -367,8 +369,8 @@ void DCPS_IR_Publication::disassociate_subscription(OpenDDS::DCPS::RepoId id,
   long count = 0;
 
   if (0 < numAssociations) {
-    OpenDDS::DCPS::ReaderIdSeq idSeq(numAssociations);
-    idSeq.length(numAssociations);
+    OpenDDS::DCPS::ReaderIdSeq idSeq(static_cast<CORBA::ULong>(numAssociations));
+    idSeq.length(static_cast<CORBA::ULong>(numAssociations));
 
     DCPS_IR_Subscription_Set::ITERATOR iter = associations_.begin();
     DCPS_IR_Subscription_Set::ITERATOR end = associations_.end();
@@ -759,6 +761,21 @@ DCPS_IR_Publication::reevaluate_association(DCPS_IR_Subscription* subscription)
   }
 
   return false;
+}
+
+void
+DCPS_IR_Publication::update_expr_params(OpenDDS::DCPS::RepoId readerId,
+                                        const DDS::StringSeq& params)
+{
+  try {
+    writer_->update_subscription_params(readerId, params);
+  } catch (const CORBA::SystemException& ex) {
+    if (OpenDDS::DCPS::DCPS_debug_level) {
+      ex._tao_print_exception("(%P|%t) ERROR: Exception caught in "
+        "DCPS_IR_Publication::update_expr_params:");
+    }
+    participant_->mark_dead();
+  }
 }
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)

@@ -57,7 +57,7 @@ struct OpenDDS_Dcps_Export TransportHeader {
   ACE_CDR::Octet reserved_;
 
   /// The size of the message following this header, not including the
-  /// 13 bytes used by this TransportHeader.
+  /// bytes used by this TransportHeader.
   ACE_UINT32 length_;
 
   /// The sequence number of the packet identified by this header; this
@@ -70,7 +70,7 @@ struct OpenDDS_Dcps_Export TransportHeader {
   ACE_INT32 source_;
 
   /// Similar to IDL compiler generated methods.
-  size_t max_marshaled_size() ;
+  size_t max_marshaled_size();
 
   /// Demarshall transport packet from ACE_Message_Block.
   void init(ACE_Message_Block* buffer);

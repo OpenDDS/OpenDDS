@@ -44,7 +44,9 @@ public:
                        OpenDDS::DCPS::DataReaderRemote_ptr reader,
                        DDS::DataReaderQos qos,
                        OpenDDS::DCPS::TransportInterfaceInfo info,
-                       DDS::SubscriberQos subscriberQos);
+                       DDS::SubscriberQos subscriberQos,
+                       const char* filterExpression,
+                       const DDS::StringSeq& exprParams);
 
   ~DCPS_IR_Subscription();
 
@@ -165,6 +167,12 @@ public:
   // Expose the datareader.
   OpenDDS::DCPS::DataReaderRemote_ptr reader();
 
+  std::string get_filter_expression() const;
+  DDS::StringSeq get_expr_params() const;
+
+  /// Calls associated Publications
+  void update_expr_params(const DDS::StringSeq& params);
+
 private:
   /// Check compatibility between provided DataReader QoS and the QoS of
   /// this subscription associated DataWriters.
@@ -185,6 +193,8 @@ private:
   DDS::DataReaderQos qos_;
   OpenDDS::DCPS::TransportInterfaceInfo info_;
   DDS::SubscriberQos subscriberQos_;
+  std::string filterExpression_;
+  DDS::StringSeq exprParams_;
 
   DCPS_IR_Publication_Set associations_;
   DCPS_IR_Publication_Set defunct_;

@@ -95,7 +95,7 @@ SimpleDataWriter::run(SimplePublisher* publisher,
 
       ACE_NEW_MALLOC_RETURN(element,
               static_cast<OpenDDS::DCPS::DataSampleListElement*> (allocator.malloc(sizeof (OpenDDS::DCPS::DataSampleListElement))),
-              OpenDDS::DCPS::DataSampleListElement(this->pub_id_, this, 0, &trans_allocator),
+              OpenDDS::DCPS::DataSampleListElement(this->pub_id_, this, 0, &trans_allocator, 0),
               1);
 
       // The Sample Element will hold the chain of blocks (header + data).

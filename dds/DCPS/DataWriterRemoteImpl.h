@@ -50,6 +50,10 @@ public:
     const OpenDDS::DCPS::IncompatibleQosStatus & status)
   ACE_THROW_SPEC((CORBA::SystemException));
 
+  virtual void update_subscription_params(
+    const RepoId& readerId, const DDS::StringSeq& exprParams)
+  ACE_THROW_SPEC((CORBA::SystemException));
+
 private:
   DataWriterImpl* parent_;
 };

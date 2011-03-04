@@ -29,7 +29,8 @@ module OpenDDS { module Federator {
       CreateEntity,
       DestroyEntity,
       UpdateQosValue1,
-      UpdateQosValue2
+      UpdateQosValue2,
+      UpdateFilterExpressionParams
     };
 
     // Constant values.
@@ -168,6 +169,10 @@ module OpenDDS { module Federator {
       // Information about the transport instance that is opaque to all but
       // code specific to that transport implementation.
       CORBA::OctetSeq                     transport_blob;
+
+      // The following are for Content-Subscription Profile
+      string                              filter_expression;
+      DDS::StringSeq                      expression_params;
     };
 
     // Constant values.

@@ -42,7 +42,7 @@ Logical -> physical transformation
        If the length is actually >= 150
           append .0000N (counter) to the encoded name
    For files:
-       If then length >= 155 this is an error
+       If the name's length >= 155 this is an error
        *NOTE: we don't know of a case where we need arbitrary-length file names
 
 2. Overflowing a directory

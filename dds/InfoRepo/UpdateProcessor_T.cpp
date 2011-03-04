@@ -60,6 +60,9 @@ UpdateProcessor<DataType>::processSample(
     case UpdateQosValue2:
       this->processUpdateQos2(sample, info);
       break;
+    case UpdateFilterExpressionParams:
+      this->processUpdateFilterExpressionParams(sample, info);
+      break;
     case DestroyEntity:
       this->processDelete(sample, info);
       break;
@@ -84,6 +87,15 @@ template<class DataType>
 void
 UpdateProcessor<DataType>::processUpdateQos2(
   const DataType*          /* sample */,
+  const DDS::SampleInfo* /* info */)
+{
+  /* This method intentionally left unimplemented. */
+}
+
+template<class DataType>
+void
+UpdateProcessor<DataType>::processUpdateFilterExpressionParams(
+  const DataType*        /* sample */,
   const DDS::SampleInfo* /* info */)
 {
   /* This method intentionally left unimplemented. */
