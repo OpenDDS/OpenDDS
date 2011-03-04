@@ -13,6 +13,7 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "Comparator_T.h"
+#include "RcObject_T.h"
 
 #include <vector>
 #include <string>
@@ -25,7 +26,7 @@ class MetaStruct;
 template<typename T>
 const MetaStruct& getMetaStruct();
 
-class OpenDDS_Dcps_Export FilterEvaluator {
+class OpenDDS_Dcps_Export FilterEvaluator : public RcObject<ACE_SYNCH_MUTEX> {
 public:
 
   struct AstNodeWrapper;

@@ -317,5 +317,19 @@ Service_Participant::priority_max() const
   return this->priority_max_;
 }
 
+ACE_INLINE
+bool&
+Service_Participant::publisher_content_filter()
+{
+  return this->publisher_content_filter_;
+}
+
+ACE_INLINE
+bool
+Service_Participant::publisher_content_filter() const
+{
+  return this->publisher_content_filter_;
+}
+
 } // namespace DDS
 } // namespace OpenDDS

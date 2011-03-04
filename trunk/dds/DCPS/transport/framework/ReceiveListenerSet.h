@@ -31,11 +31,14 @@ public:
   typedef std::map<RepoId, TransportReceiveListener*, GUID_tKeyLessThan> MapType;
 
   ReceiveListenerSet();
+  ReceiveListenerSet(const ReceiveListenerSet&);
+  ReceiveListenerSet& operator=(const ReceiveListenerSet&);
   virtual ~ReceiveListenerSet();
 
   int insert(RepoId                    subscriber_id,
              TransportReceiveListener* listener);
   int remove(RepoId subscriber_id);
+  void remove_all(const GUIDSeq& to_remove);
 
   ssize_t size() const;
 
@@ -47,12 +50,10 @@ public:
 
   /// Check if the key is in the map and if it's the only left entry
   /// in the map.
-  bool exist(const RepoId& key,
-             bool& last);
-
-  void  get_keys(ReaderIdSeq & ids);
-
+  bool exist(const RepoId& key, bool& last);
   bool exist(const RepoId& local_id);
+
+  void get_keys(ReaderIdSeq & ids);
 
   void clear();
 

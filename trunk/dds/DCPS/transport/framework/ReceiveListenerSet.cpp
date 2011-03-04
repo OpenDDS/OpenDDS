@@ -62,9 +62,7 @@ OpenDDS::DCPS::ReceiveListenerSet::get_keys(ReaderIdSeq & ids)
 
   for (MapType::iterator iter = map_.begin();
        iter != map_.end(); ++ iter) {
-    CORBA::ULong sz = ids.length();
-    ids.length(sz + 1);
-    ids[sz] = iter->first;
+    push_back(ids, iter->first);
   }
 }
 

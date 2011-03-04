@@ -55,7 +55,8 @@ public:
   /// Persisted entity data structures
   typedef struct TopicStrt <QosSeq, ACE_CString> Topic;
   typedef struct ParticipantStrt <QosSeq> Participant;
-  typedef struct ActorStrt <QosSeq, QosSeq, ACE_CString, BinSeq> RWActor;
+  typedef struct ActorStrt <QosSeq, QosSeq, ACE_CString,
+                            BinSeq, ContentSubscriptionBin> RWActor;
 
   typedef ACE_Hash_Map_With_Allocator<IdType_ExtId, Topic*> TopicIndex;
   typedef ACE_Hash_Map_With_Allocator<IdType_ExtId, Participant*> ParticipantIndex;
@@ -91,6 +92,7 @@ public:
   virtual void update(const IdPath& id, const DDS::PublisherQos&         qos);
   virtual void update(const IdPath& id, const DDS::DataReaderQos&        qos);
   virtual void update(const IdPath& id, const DDS::SubscriberQos&        qos);
+  virtual void update(const IdPath& id, const DDS::StringSeq&     exprParams);
 
   /// Remove an entity (but not children) from persistence.
   virtual void destroy(const IdPath& id, ItemType type, ActorType actor);

@@ -16,7 +16,8 @@ DataSampleListElement::DataSampleListElement(
   PublicationId           publication_id,
   TransportSendListener*  send_listner,
   PublicationInstance*    handle,
-  TransportSendElementAllocator* allocator)
+  TransportSendElementAllocator* tse_allocator,
+  TransportCustomizedElementAllocator* tce_allocator)
   : sample_(0),
     publication_id_(publication_id),
     num_subs_(0),
@@ -28,15 +29,15 @@ DataSampleListElement::DataSampleListElement(
     send_listener_(send_listner),
     space_available_(false),
     handle_(handle),
-    transport_send_element_allocator_(allocator)
+    transport_send_element_allocator_(tse_allocator),
+    transport_customized_element_allocator_(tce_allocator)
 {
   source_timestamp_.sec = 0;
   source_timestamp_.nanosec = 0;
 }
 
 ACE_INLINE
-DataSampleListElement::DataSampleListElement(
-  const DataSampleListElement& elem)
+DataSampleListElement::DataSampleListElement(const DataSampleListElement& elem)
   : sample_(elem.sample_->duplicate())
   , publication_id_(elem.publication_id_)
   , num_subs_(elem.num_subs_)
@@ -50,6 +51,10 @@ DataSampleListElement::DataSampleListElement(
   , handle_(elem.handle_)
   , transport_send_element_allocator_(
       elem.transport_send_element_allocator_)
+  , transport_customized_element_allocator_(
+      elem.transport_customized_element_allocator_)
+  , filter_out_(elem.filter_out_)
+  , filter_per_link_(elem.filter_per_link_)
 {
   std::copy(elem.subscription_ids_,
             elem.subscription_ids_ + num_subs_,
@@ -68,8 +73,8 @@ DataSampleListElement::~DataSampleListElement()
 }
 
 ACE_INLINE
-DataSampleListElement &
-DataSampleListElement::operator= (DataSampleListElement const & rhs)
+DataSampleListElement&
+DataSampleListElement::operator=(const DataSampleListElement& rhs)
 {
   sample_ = rhs.sample_->duplicate();
   publication_id_ = rhs.publication_id_;
@@ -88,6 +93,10 @@ DataSampleListElement::operator= (DataSampleListElement const & rhs)
   space_available_ = rhs.space_available_;
   handle_ = rhs.handle_;
   transport_send_element_allocator_ = rhs.transport_send_element_allocator_;
+  transport_customized_element_allocator_ =
+    rhs.transport_customized_element_allocator_;
+  filter_out_ = rhs.filter_out_;
+  filter_per_link_ = rhs.filter_per_link_;
 
   return *this;
 }

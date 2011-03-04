@@ -164,6 +164,9 @@ public:
   // the new association will be added.
   bool reevaluate_association(DCPS_IR_Subscription* subscription);
 
+  void update_expr_params(OpenDDS::DCPS::RepoId readerId,
+                          const DDS::StringSeq& params);
+
 private:
 
   /// Check compatibility between provided Publisher QoS and the QoS of

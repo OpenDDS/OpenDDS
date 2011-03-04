@@ -451,7 +451,7 @@ const char* DCPS_IR_Topic_Description::get_dataTypeName() const
 
 CORBA::ULong DCPS_IR_Topic_Description::get_number_topics() const
 {
-  return topics_.size();
+  return static_cast<CORBA::ULong>(topics_.size());
 }
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)

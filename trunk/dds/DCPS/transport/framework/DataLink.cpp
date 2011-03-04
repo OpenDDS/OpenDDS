@@ -20,6 +20,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
+#include "dds/DCPS/Util.h"
 
 #include "EntryExit.h"
 #include "tao/ORB_Core.h"
@@ -659,10 +660,22 @@ OpenDDS::DCPS::DataLink::data_received(ReceivedDataSample& sample)
     return 0;
   }
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  if (sample.header_.content_filter_
+      && sample.header_.content_filter_entries_.length()) {
+    ReceiveListenerSet subset(*listener_set.in());
+    subset.remove_all(sample.header_.content_filter_entries_);
+    subset.data_received(sample);
+  } else {
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
   // Just get the set to do our dirty work by having it iterate over its
   // collection of TransportReceiveListeners, and invoke the data_received()
   // method on each one.
   listener_set->data_received(sample);
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  }
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
   return 0;
 }
@@ -1054,6 +1067,31 @@ OpenDDS::DCPS::DataLink::is_target(const RepoId& sub_id)
   RepoIdSet_rch pubs = this->sub_map_.find(sub_id);
 
   return !pubs.is_nil();
+}
+
+OpenDDS::DCPS::GUIDSeq*
+OpenDDS::DCPS::DataLink::target_intersection(const OpenDDS::DCPS::GUIDSeq& in)
+{
+  GUIDSeq_var res;
+  GuardType guard(this->sub_map_lock_);
+  const CORBA::ULong len = in.length();
+  for (CORBA::ULong i(0); i < len; ++i) {
+    RepoIdSet_rch target = this->sub_map_.find(in[i]);
+    if (!target.is_nil()) {
+      if (res.ptr() == 0) {
+        res = new GUIDSeq;
+      }
+      push_back(res.inout(), in[i]);
+    }
+  }
+  return res._retn();
+}
+
+CORBA::ULong
+OpenDDS::DCPS::DataLink::num_targets() const
+{
+  GuardType guard(this->sub_map_lock_);
+  return this->sub_map_.size();
 }
 
 bool

@@ -27,6 +27,7 @@
 #include "MultiTopicImpl.h"
 #include "GroupRakeData.h"
 #include "MultiTopicDataReaderBase.h"
+#include "Util.h"
 #include "dds/DCPS/transport/framework/TransportInterface.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/transport/framework/DataLinkSet.h"
@@ -581,8 +582,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
     if ((*pos)->have_sample_states(sample_states) &&
         (*pos)->have_view_states(view_states) &&
         (*pos)->have_instance_states(instance_states)) {
-      readers.length(count + 1) ;
-      readers[count++] = (*pos)->get_dr_obj_ref() ;
+      push_back(readers, (*pos)->get_dr_obj_ref());
+      ++count;
     }
   }
 
@@ -1027,15 +1028,27 @@ ACE_THROW_SPEC((CORBA::SystemException))
     OpenDDS::DCPS::TransportInterfaceInfo trans_conf_info = connection_info();
     trans_conf_info.publication_transport_priority = 0;
 
+    CORBA::String_var filterExpression = "";
+    DDS::StringSeq exprParams;
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    DDS::ContentFilteredTopic_var cft = local_reader_impl->get_cf_topic();
+    if (cft) {
+      filterExpression = cft->get_filter_expression();
+      cft->get_expression_parameters(exprParams);
+    }
+#endif
+
     DCPSInfo_var repo = TheServiceParticipant->get_repository(this->domain_id_);
     info->subscription_id_
-    = repo->add_subscription(this->domain_id_,
-                             participant_->get_id(),
-                             info->topic_id_,
-                             info->remote_reader_objref_,
-                             qos,
-                             trans_conf_info,
-                             this->qos_) ;
+      = repo->add_subscription(this->domain_id_,
+                               participant_->get_id(),
+                               info->topic_id_,
+                               info->remote_reader_objref_,
+                               qos,
+                               trans_conf_info,
+                               this->qos_,
+                               filterExpression,
+                               exprParams);
 
     if (info->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,

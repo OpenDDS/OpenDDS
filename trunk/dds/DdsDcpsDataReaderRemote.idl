@@ -27,10 +27,10 @@ module OpenDDS {
 
     typedef sequence<OpenDDS::DCPS::RepoId> WriterIdSeq;
 
-    // This interface contains TAO specific interfaces
+    // This interface contains OpenDDS-specific operations
     // related to a DDS::DataReader servant.
     // It is split out so the DDS::DataReader interface can be local.
-    interface DataReaderRemote  { //x : ::DDS::DataReader {
+    interface DataReaderRemote  {
 
       // will tell transport and call on_subscription_matched()
       oneway void add_associations(

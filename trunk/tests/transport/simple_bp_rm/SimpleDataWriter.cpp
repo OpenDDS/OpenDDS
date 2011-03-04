@@ -42,7 +42,7 @@ SimpleDataWriter::init(OpenDDS::DCPS::RepoId pub_id)
 
   ACE_NEW_MALLOC(this->element_,
            static_cast<OpenDDS::DCPS::DataSampleListElement*> (allocator_->malloc(sizeof (OpenDDS::DCPS::DataSampleListElement))),
-           OpenDDS::DCPS::DataSampleListElement(this->pub_id_, this, 0, trans_allocator_)
+           OpenDDS::DCPS::DataSampleListElement(this->pub_id_, this, 0, trans_allocator_, 0)
            );
 }
 

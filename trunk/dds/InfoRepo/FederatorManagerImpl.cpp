@@ -386,8 +386,7 @@ ManagerImpl::initialize()
     throw Incomplete();
   }
 
-  this->ownerWriter_
-  = OwnerUpdateDataWriter::_narrow(dataWriter.in());
+  this->ownerWriter_ = OwnerUpdateDataWriter::_narrow(dataWriter.in());
 
   if (::CORBA::is_nil(this->ownerWriter_.in())) {
     ACE_ERROR((LM_ERROR,

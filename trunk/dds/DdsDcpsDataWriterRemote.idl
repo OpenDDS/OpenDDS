@@ -21,16 +21,18 @@ module OpenDDS {
       OpenDDS::DCPS::RepoId     readerId;
       ::DDS::SubscriberQos subQos;
       ::DDS::DataReaderQos readerQos;
+      string filterExpression;
+      ::DDS::StringSeq exprParams;
     };
 
     typedef sequence<ReaderAssociation> ReaderAssociationSeq;
 
     typedef sequence<OpenDDS::DCPS::RepoId> ReaderIdSeq;
 
-    // This interface contains TAO specific interfaces
+    // This interface contains OpenDDS-specific operations
     // related to a DDS::DataWriter servant.
     // It is split out so the DDS::DataWriter interface can be local.
-    interface DataWriterRemote { //x : ::DDS::DataWriter {
+    interface DataWriterRemote {
 
       // will tell transport and call on_publication_matched()
       oneway void add_associations(
@@ -55,6 +57,13 @@ module OpenDDS {
         in OpenDDS::DCPS::IncompatibleQosStatus status
         );
 
+      // This call is two-way because the InfoRepo will block the reader
+      // in CFT::set_expression_parameters() until each associated writer
+      // is notified synchronously by this call.
+      void update_subscription_params(
+        in OpenDDS::DCPS::RepoId readerId,
+        in ::DDS::StringSeq exprParams
+        );
     };
   }; // module DDS
 }; // module OpenDDS

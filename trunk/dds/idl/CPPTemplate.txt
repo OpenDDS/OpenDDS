@@ -245,13 +245,35 @@ DDS::ReturnCode_t
 
     handle = registered_handle;
   }
-
+ 
+  // list of reader RepoIds that should not get data
+  OpenDDS::DCPS::GUIDSeq_var filter_out;
+#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  const bool use_filter = false;
+#else
+  const bool use_filter = reader_info_.size() &&
+    TheServiceParticipant->publisher_content_filter();
+  if (use_filter) {
+    filter_out = new OpenDDS::DCPS::GUIDSeq;
+    for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
+         end = reader_info_.end(); iter != end; ++iter) {
+      const ReaderInfo& ri = iter->second;
+      if (!ri.eval_->eval(instance_data, ri.expression_params_)) {
+        push_back(filter_out.inout(), iter->first);
+      }
+    }
+  }
+#endif
+  
   ACE_Message_Block* const marshalled =
     dds_marshal (instance_data); // FOR_WRITE - using cached
                                  // allocators
 
   return OpenDDS::DCPS::DataWriterImpl::write(marshalled, handle,
-                                              source_timestamp);
+                                              source_timestamp,
+                                              use_filter
+                                                ? filter_out._retn()
+                                                : 0);
 }
 
 DDS::ReturnCode_t
@@ -1690,15 +1712,14 @@ void
 <%TYPE%>DataReaderImpl::dds_demarshal(
   const OpenDDS::DCPS::ReceivedDataSample& sample,
   OpenDDS::DCPS::SubscriptionInstance*& instance,
-  bool & just_registered,
-  bool & filtered)
+  bool& just_registered,
+  bool& filtered)
 {
-  ::<%SCOPED%> *data /* = new ::<%SCOPED%>(instance_data) */ ;
+  ::<%SCOPED%>* data;
 
-  ACE_NEW_MALLOC_NORETURN (data,
-                           static_cast< ::<%SCOPED%> *> (
-                             data_allocator_->malloc (
-                               sizeof (::<%SCOPED%>))),
+  ACE_NEW_MALLOC_NORETURN(data,
+                          static_cast< ::<%SCOPED%> *>(
+                            data_allocator_->malloc(sizeof(::<%SCOPED%>))),
                            ::<%SCOPED%>);
 
   OpenDDS::DCPS::Serializer ser(
@@ -1708,13 +1729,15 @@ void
   ser >> *data;
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  using OpenDDS::DCPS::ContentFilteredTopicImpl;
-  if (ContentFilteredTopicImpl* cft =
-      dynamic_cast<ContentFilteredTopicImpl*>(content_filtered_topic_.in())) {
-    if (sample.header_.message_id_ == OpenDDS::DCPS::SAMPLE_DATA
-        && !cft->filter(*data)) {
-      filtered = true;
-      return;
+  if (!sample.header_.content_filter_) { // if this is true, the writer has already filtered
+    using OpenDDS::DCPS::ContentFilteredTopicImpl;
+    if (ContentFilteredTopicImpl* cft =
+        dynamic_cast<ContentFilteredTopicImpl*>(content_filtered_topic_.in())) {
+      if (sample.header_.message_id_ == OpenDDS::DCPS::SAMPLE_DATA
+          && !cft->filter(*data)) {
+        filtered = true;
+        return;
+      }
     }
   }
 #endif

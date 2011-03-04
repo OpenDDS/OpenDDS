@@ -211,7 +211,6 @@ DataWriterImpl::get_next_handle()
 void
 DataWriterImpl::add_associations(OpenDDS::DCPS::RepoId yourId,
                                  const ReaderAssociationSeq & readers)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   DBG_ENTRY_LVL("DataWriterImpl","add_associations",6);
 
@@ -254,12 +253,22 @@ ACE_THROW_SPEC((CORBA::SystemException))
                    ACE_TEXT("failed to mark %C as pending.\n"),
                    std::string(converter).c_str()));
 
-      } else if (DCPS_debug_level > 0) {
-        RepoIdConverter converter(readers[i].readerId);
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataWriterImpl::add_associations: ")
-                   ACE_TEXT("marked %C as pending.\n"),
-                   std::string(converter).c_str()));
+      } else {
+        if (DCPS_debug_level > 0) {
+          RepoIdConverter converter(readers[i].readerId);
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) DataWriterImpl::add_associations: ")
+                     ACE_TEXT("marked %C as pending.\n"),
+                     std::string(converter).c_str()));
+        }
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+        if (TheServiceParticipant->publisher_content_filter()
+            && readers[i].filterExpression.in()[0]) {
+          reader_info_.insert(std::make_pair(readers[i].readerId,
+            ReaderInfo(readers[i].filterExpression, readers[i].exprParams,
+              participant_servant_)));
+        }
+#endif
       }
     }
   }
@@ -275,6 +284,25 @@ ACE_THROW_SPEC((CORBA::SystemException))
     this->publisher_servant_->add_associations(readers, this, qos_);
   }
 }
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
+DataWriterImpl::ReaderInfo::ReaderInfo(const char* filter,
+                                       const DDS::StringSeq& params,
+                                       DomainParticipantImpl* participant)
+  : participant_(participant)
+  , expression_params_(params)
+  , filter_(filter)
+  , eval_(participant->get_filter_eval(filter))
+{}
+
+DataWriterImpl::ReaderInfo::~ReaderInfo()
+{
+  eval_ = RcHandle<FilterEvaluator>();
+  participant_->deref_filter_eval(filter_.c_str());
+}
+
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 void
 DataWriterImpl::fully_associated(OpenDDS::DCPS::RepoId myid,
@@ -425,7 +453,6 @@ DataWriterImpl::fully_associated(OpenDDS::DCPS::RepoId myid,
 void
 DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
                                     CORBA::Boolean notify_lost)
-ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (DCPS_debug_level >= 1) {
     RepoIdConverter writer_converter(publication_id_);
@@ -496,7 +523,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
                   ACE_TEXT("removing reader %C before fully_associated() call.\n"),
                   std::string(converter).c_str()));
       }
-
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+      reader_info_.erase(readers[i]);
+#endif
       //else reader is already removed which indicates remove_association()
       //is called multiple times.
     }
@@ -612,9 +641,7 @@ void DataWriterImpl::remove_all_associations()
 }
 
 void
-DataWriterImpl::update_incompatible_qos(
-  const OpenDDS::DCPS::IncompatibleQosStatus & status)
-ACE_THROW_SPEC((CORBA::SystemException))
+DataWriterImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
   DDS::DataWriterListener* listener =
     listener_for(::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
@@ -649,6 +676,23 @@ ACE_THROW_SPEC((CORBA::SystemException))
   }
 
   notify_status_condition();
+}
+
+void
+DataWriterImpl::update_subscription_params(const RepoId& readerId,
+                                           const DDS::StringSeq& params)
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+  RepoIdToReaderInfoMap::iterator iter = reader_info_.find(readerId);
+  if (iter != reader_info_.end()) {
+    iter->second.expression_params_ = params;
+  } else if (DCPS_debug_level > 4) {
+    RepoIdConverter pubConv(this->publication_id_), subConv(readerId);
+    ACE_DEBUG((LM_WARNING,
+      ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::update_subscription_params()")
+      ACE_TEXT(" - writer: %C has no info about reader: %C\n"),
+      std::string(pubConv).c_str(), std::string(subConv).c_str()));
+  }
 }
 
 DDS::ReturnCode_t
@@ -723,13 +767,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
       }
 
       qos_ = qos;
-      // TBD - when there are changable QoS supported
-      //       this code may need to do something
-      //       with the changed values.
-      // TBD - when there are changable QoS then we
-      //       need to tell the DCPSInfo/repo about
-      //       the changes in Qos.
-      // repo->set_qos(qos_);
     }
 
     return DDS::RETCODE_OK;
@@ -791,7 +828,22 @@ DataWriterImpl::create_ack_token(DDS::Duration_t max_wait) const
 DDS::ReturnCode_t
 DataWriterImpl::send_ack_requests(const DataWriterImpl::AckToken& token)
 {
-  size_t dataSize = sizeof(token.sequence_.getValue()); // Assume no padding.
+#if 0 //TODO: acks for Publisher-side filtering of Content-Filtered Topics
+  GUIDSeq customized;
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  std::map<SequenceNumber, GUIDSeq> customSequenceNumbers;
+  for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
+       end = reader_info_.end(); iter != end; ++iter) {
+    if (iter->second.expected_sequence_ != token.sequence_) {
+      GUIDSeq& guids = customSequenceNumbers[iter->second.expected_sequence_];
+      push_back(guids, iter->first);
+      push_back(customized, iter->first);
+    }
+  }
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif // 0
+
+  size_t dataSize = sizeof(SequenceNumber::Value);
   dataSize += gen_find_size(token.max_wait_);
 
   ACE_Message_Block* data;
@@ -1406,10 +1458,13 @@ DataWriterImpl::unregister_instances(const DDS::Time_t& source_timestamp)
 DDS::ReturnCode_t
 DataWriterImpl::write(DataSample* data,
                       DDS::InstanceHandle_t handle,
-                      const DDS::Time_t & source_timestamp)
-ACE_THROW_SPEC((CORBA::SystemException))
+                      const DDS::Time_t& source_timestamp,
+                      GUIDSeq* filter_out)
 {
   DBG_ENTRY_LVL("DataWriterImpl","write",6);
+
+  // take ownership of sequence allocated in FooDWImpl::write_w_timestamp()
+  GUIDSeq_var filter_out_var(filter_out);
 
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1419,8 +1474,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
   }
 
   DataSampleListElement* element;
-  DDS::ReturnCode_t ret = this->data_container_->obtain_buffer(element,
-                                                                 handle);
+  DDS::ReturnCode_t ret = this->data_container_->obtain_buffer(element, handle);
 
   if (ret == DDS::RETCODE_TIMEOUT) {
     return ret; // silent for timeout
@@ -1437,8 +1491,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
   ret = create_sample_data_message(data,
                                    handle,
                                    element->sample_,
-                                   source_timestamp);
-
+                                   source_timestamp,
+                                   (filter_out != 0));
   if (ret != DDS::RETCODE_OK) {
     return ret;
   }
@@ -1446,8 +1500,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
   element->source_timestamp_.sec     = source_timestamp.sec;
   element->source_timestamp_.nanosec = source_timestamp.nanosec;
 
-  ret = this->data_container_->enqueue(element,
-                                       handle);
+  element->filter_out_ = filter_out_var._retn(); // ownership passed to element
+
+  ret = this->data_container_->enqueue(element, handle);
 
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1465,9 +1520,24 @@ ACE_THROW_SPEC((CORBA::SystemException))
                       ACE_TEXT("DataWriterImpl::write: ")
                       ACE_TEXT("data_available failed.\n")),
                      ret);
+  }
 
-  } else
-    last_liveliness_activity_time_ = ACE_OS::gettimeofday();
+  this->last_liveliness_activity_time_ = ACE_OS::gettimeofday();
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  // Track individual expected sequence numbers in ReaderInfo
+  std::set<GUID_t, GUID_tKeyLessThan> excluded;
+  if (filter_out && reader_info_.size()) {
+    const GUID_t* buf = filter_out->get_buffer();
+    excluded.insert(buf, buf + filter_out->length());
+  }
+  for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
+       end = reader_info_.end(); iter != end; ++iter) {
+    if (excluded.count(iter->first) == 0) {
+      iter->second.expected_sequence_ = sequence_number_;
+    }
+  }
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
   if (this->coherent_) {
     ++this->coherent_samples_;
@@ -1591,7 +1661,7 @@ DataWriterImpl::get_type_name() const
 }
 
 ACE_Message_Block*
-DataWriterImpl::create_control_message(enum MessageId message_id,
+DataWriterImpl::create_control_message(MessageId message_id,
                                        ACE_Message_Block* data,
                                        const DDS::Time_t& source_timestamp)
 {
@@ -1636,7 +1706,8 @@ DDS::ReturnCode_t
 DataWriterImpl::create_sample_data_message(DataSample* data,
                                            DDS::InstanceHandle_t instance_handle,
                                            ACE_Message_Block*& message,
-                                           const DDS::Time_t& source_timestamp)
+                                           const DDS::Time_t& source_timestamp,
+                                           bool content_filter)
 {
   PublicationInstance* const instance =
     data_container_->get_handle_instance(instance_handle);
@@ -1659,6 +1730,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
   header_data.group_coherent_
     = this->publisher_servant_->qos_.presentation.access_scope
       == ::DDS::GROUP_PRESENTATION_QOS;
+  header_data.content_filter_ = content_filter;
   header_data.message_length_ = data->total_length();
   ++this->sequence_number_;
   header_data.sequence_ = this->sequence_number_.getValue();

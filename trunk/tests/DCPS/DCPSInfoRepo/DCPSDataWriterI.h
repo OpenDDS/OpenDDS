@@ -73,6 +73,12 @@ public:
     ACE_THROW_SPEC ((
       CORBA::SystemException
     ));
+
+  virtual void update_subscription_params(
+    const OpenDDS::DCPS::RepoId&, const DDS::StringSeq &)
+    ACE_THROW_SPEC ((
+      CORBA::SystemException
+    ));
 };
 
 

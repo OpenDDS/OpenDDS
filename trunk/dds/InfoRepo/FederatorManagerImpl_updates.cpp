@@ -120,6 +120,8 @@ ManagerImpl::create(const Update::URActor& reader)
   sample.transport_blob = reader.transportInterfaceInfo.data;
   sample.datareader_qos = reader.drdwQos;
   sample.subscriber_qos = reader.pubsubQos;
+  sample.filter_expression = reader.contentSubscriptionProfile.filterExpr;
+  sample.expression_params = reader.contentSubscriptionProfile.exprParams;
 
   if (OpenDDS::DCPS::DCPS_debug_level > 9) {
     OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
@@ -505,6 +507,37 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::DataReaderQos& qos)
 }
 
 void
+ManagerImpl::update(const Update::IdPath& id, const DDS::StringSeq& params)
+{
+  if (CORBA::is_nil(this->subscriptionWriter_.in())) {
+    // Decline to publish data until we can.
+    return;
+  }
+
+  SubscriptionUpdate sample;
+  sample.sender            = this->id();
+  sample.action            = UpdateFilterExpressionParams;
+  sample.domain            = id.domain;
+  sample.participant       = id.participant;
+  sample.id                = id.id;
+  sample.expression_params = params;
+
+  if (OpenDDS::DCPS::DCPS_debug_level > 9) {
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample.participant);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(sample.id);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) Federator::ManagerImpl::update(FilterParams): ")
+               ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
+               this->id(),
+               sample.domain,
+               std::string(part_converter).c_str(),
+               std::string(sub_converter).c_str()));
+  }
+
+  this->subscriptionWriter_->write(sample, DDS::HANDLE_NIL);
+}
+
+void
 ManagerImpl::update(const Update::IdPath& id, const DDS::SubscriberQos& qos)
 {
   if (CORBA::is_nil(this->subscriptionWriter_.in())) {
@@ -654,6 +687,8 @@ ManagerImpl::processCreate(const SubscriptionUpdate* sample, const DDS::SampleIn
                                              sample->datareader_qos,
                                              transportInfo,
                                              sample->subscriber_qos,
+                                             sample->filter_expression,
+                                             sample->expression_params,
                                              true)) {
     {
       ACE_GUARD(ACE_Thread_Mutex,
@@ -857,6 +892,8 @@ ManagerImpl::processDeferred()
                                                 current->datareader_qos,
                                                 transportInfo,
                                                 current->subscriber_qos,
+                                                current->filter_expression,
+                                                current->expression_params,
                                                 true)) {
         if (OpenDDS::DCPS::DCPS_debug_level > 9) {
           OpenDDS::DCPS::RepoIdConverter part_converter(current->participant);
@@ -998,6 +1035,29 @@ ManagerImpl::processUpdateQos2(const SubscriptionUpdate* sample, const DDS::Samp
     sample->participant,
     sample->id,
     sample->subscriber_qos);
+}
+
+void
+ManagerImpl::processUpdateFilterExpressionParams(
+  const SubscriptionUpdate* sample, const DDS::SampleInfo* /* info */)
+{
+  if (OpenDDS::DCPS::DCPS_debug_level > 9) {
+    OpenDDS::DCPS::RepoIdConverter part_converter(sample->participant);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(sample->id);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateFilterExpressionParams(SubscriptionUpdate): ")
+               ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
+               this->id(),
+               sample->domain,
+               std::string(part_converter).c_str(),
+               std::string(sub_converter).c_str()));
+  }
+
+  this->info_->update_subscription_params(
+    sample->domain,
+    sample->participant,
+    sample->id,
+    sample->expression_params);
 }
 
 void
@@ -1322,6 +1382,8 @@ ManagerImpl::pushState(Manager_ptr peer)
         subscriptionSample.transport_blob = s->get_transportInterfaceInfo().data;
         subscriptionSample.datareader_qos = *s->get_datareader_qos();
         subscriptionSample.subscriber_qos = *s->get_subscriber_qos();
+        subscriptionSample.filter_expression = s->get_filter_expression().c_str();
+        subscriptionSample.expression_params = s->get_expr_params();
 
         peer->initializeSubscription(subscriptionSample);
       }

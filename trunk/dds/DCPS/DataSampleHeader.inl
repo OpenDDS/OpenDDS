@@ -22,7 +22,7 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader()
   , historic_sample_(0)
   , lifespan_duration_(0)
   , group_coherent_(0)
-  , reserved_2(0)
+  , content_filter_(0)
   , reserved_3(0)
   , reserved_4(0)
   , message_length_(0)
@@ -44,7 +44,7 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block* buffer)
   , historic_sample_(0)
   , lifespan_duration_(0)
   , group_coherent_(0)
-  , reserved_2(0)
+  , content_filter_(0)
   , reserved_3(0)
   , reserved_4(0)
   , message_length_(0)
@@ -55,7 +55,7 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block* buffer)
   , publisher_id_(GUID_UNKNOWN)
   , marshaled_size_(0)
 {
-  this->init(buffer) ;
+  this->init(buffer);
 }
 
 ACE_INLINE
@@ -67,7 +67,7 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block& buffer)
   , historic_sample_(0)
   , lifespan_duration_(0)
   , group_coherent_(0)
-  , reserved_2(0)
+  , content_filter_(0)
   , reserved_3(0)
   , reserved_4(0)
   , message_length_(0)
@@ -76,47 +76,49 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block& buffer)
   , source_timestamp_nanosec_(0)
   , publication_id_(GUID_UNKNOWN)
 {
-  this->init(&buffer) ;
+  this->init(&buffer);
 }
 
 ACE_INLINE
 OpenDDS::DCPS::DataSampleHeader&
-OpenDDS::DCPS::DataSampleHeader::operator= (ACE_Message_Block* buffer)
+OpenDDS::DCPS::DataSampleHeader::operator=(ACE_Message_Block* buffer)
 {
-  this->init(buffer) ;
-  return *this ;
+  this->init(buffer);
+  return *this;
 }
 
 ACE_INLINE
 OpenDDS::DCPS::DataSampleHeader&
-OpenDDS::DCPS::DataSampleHeader::operator= (ACE_Message_Block& buffer)
+OpenDDS::DCPS::DataSampleHeader::operator=(ACE_Message_Block& buffer)
 {
-  this->init(&buffer) ;
-  return *this ;
+  this->init(&buffer);
+  return *this;
 }
 
 ACE_INLINE
 size_t
 OpenDDS::DCPS::DataSampleHeader::marshaled_size() const
 {
-  return marshaled_size_ ;
+  return marshaled_size_;
 }
 
 ACE_INLINE
 size_t
 OpenDDS::DCPS::DataSampleHeader::max_marshaled_size()
 {
-  return sizeof(this->message_id_)
-         + sizeof(this->submessage_id_)
-         + sizeof(char) // Flags are a single byte.
-         + sizeof(this->message_length_)
-         + sizeof(this->sequence_)
-         + sizeof(this->source_timestamp_sec_)
-         + sizeof(this->source_timestamp_nanosec_)
-         + sizeof(this->lifespan_duration_sec_)
-         + sizeof(this->lifespan_duration_nanosec_)
-         + sizeof(this->publication_id_)
-         + (this->group_coherent_ ? sizeof(this->publisher_id_) : 0);
+  return 1 + // message_id_;
+         1 + // submessage_id_;
+         1 + // flags
+         4 + // message_length_;
+         4 + // sequence_;
+         4 + // source_timestamp_sec_;
+         4 + // source_timestamp_nanosec_;
+         4 + // lifespan_duration_sec_;
+         4 + // lifespan_duration_nanosec_;
+        16 + // publication_id_;
+        16 ; // publisher_id_;
+  // content_filter_entries_ is not marsahled into the same Data Block
+  // so it is not part of the max_marshaled_size() which is used to allocate
 }
 
 ACE_INLINE
@@ -136,18 +138,17 @@ void
 OpenDDS::DCPS::DataSampleHeader::clear_flag(DataSampleHeaderFlag flag,
                                             ACE_Message_Block* buffer)
 {
-  char *base = buffer->base();
+  char* base = buffer->base();
 
-  // The flags octet will always be the second byte;
   // verify sufficient length exists:
-  if (buffer->end() - base < 2) {
+  if (static_cast<size_t>(buffer->end() - base) < FLAGS_OFFSET + 1) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::clear_flag: ")
                ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")));
     return;
   }
 
-  *(base + FLAGS_OFFSET) &= ~mask_flag(flag);
+  base[FLAGS_OFFSET] &= ~mask_flag(flag);
 }
 
 ACE_INLINE
@@ -155,35 +156,33 @@ void
 OpenDDS::DCPS::DataSampleHeader::set_flag(DataSampleHeaderFlag flag,
                                           ACE_Message_Block* buffer)
 {
-  char *base = buffer->base();
+  char* base = buffer->base();
 
-  // The flags octet will always be the second byte;
   // verify sufficient length exists:
-  if (buffer->end() - base < 2) {
+  if (static_cast<size_t>(buffer->end() - base) < FLAGS_OFFSET + 1) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::set_flag: ")
                ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")));
     return;
   }
 
-  *(base + FLAGS_OFFSET) |= mask_flag(flag);
+  base[FLAGS_OFFSET] |= mask_flag(flag);
 }
 
 ACE_INLINE
 bool
 OpenDDS::DCPS::DataSampleHeader::test_flag(DataSampleHeaderFlag flag,
-                                           ACE_Message_Block* buffer)
+                                           const ACE_Message_Block* buffer)
 {
-  char *base = buffer->base();
+  char* base = buffer->base();
 
-  // The flags octet will always be the second byte;
   // verify sufficient length exists:
-  if (buffer->end() - base < 2) {
+  if (static_cast<size_t>(buffer->end() - base) < FLAGS_OFFSET + 1) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataSampleHeader::set_flag: ")
                       ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")), false);
   }
 
   // Test flag bit.
-  return *(base + FLAGS_OFFSET) & mask_flag(flag);
+  return base[FLAGS_OFFSET] & mask_flag(flag);
 }

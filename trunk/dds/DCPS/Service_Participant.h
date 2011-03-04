@@ -284,6 +284,12 @@ public:
   long  scheduler() const;
   //@}
 
+  /// Accessors for PublisherContentFilter.
+  //@{
+  bool& publisher_content_filter();
+  bool  publisher_content_filter() const;
+  //@}
+
   /// Accessor for pending data timeout.
   ACE_Time_Value pending_timeout() const;
 
@@ -527,6 +533,9 @@ private:
 
   /// Maximum priority value for the current scheduling policy.
   int priority_max_;
+
+  /// Allow the publishing side to do content filtering?
+  bool publisher_content_filter_;
 
   /// The @c TRANSIENT data durability cache.
   std::auto_ptr<DataDurabilityCache> transient_data_cache_;

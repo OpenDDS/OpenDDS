@@ -25,7 +25,9 @@ DCPS_IR_Subscription::DCPS_IR_Subscription(OpenDDS::DCPS::RepoId id,
                                            OpenDDS::DCPS::DataReaderRemote_ptr reader,
                                            DDS::DataReaderQos qos,
                                            OpenDDS::DCPS::TransportInterfaceInfo info,
-                                           DDS::SubscriberQos subscriberQos)
+                                           DDS::SubscriberQos subscriberQos,
+                                           const char* filterExpression,
+                                           const DDS::StringSeq& exprParams)
   : id_(id),
     participant_(participant),
     topic_(topic),
@@ -33,7 +35,9 @@ DCPS_IR_Subscription::DCPS_IR_Subscription(OpenDDS::DCPS::RepoId id,
     isBIT_(0),
     qos_(qos),
     info_(info),
-    subscriberQos_(subscriberQos)
+    subscriberQos_(subscriberQos),
+    filterExpression_(filterExpression),
+    exprParams_(exprParams)
 {
   reader_ =  OpenDDS::DCPS::DataReaderRemote::_duplicate(reader);
 
@@ -228,8 +232,8 @@ void DCPS_IR_Subscription::disassociate_participant(OpenDDS::DCPS::RepoId id,
   long count = 0;
 
   if (0 < numAssociations) {
-    OpenDDS::DCPS::WriterIdSeq idSeq(numAssociations);
-    idSeq.length(numAssociations);
+    OpenDDS::DCPS::WriterIdSeq idSeq(static_cast<CORBA::ULong>(numAssociations));
+    idSeq.length(static_cast<CORBA::ULong>(numAssociations));
 
     DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin();
     DCPS_IR_Publication_Set::ITERATOR end = associations_.end();
@@ -303,8 +307,8 @@ void DCPS_IR_Subscription::disassociate_topic(OpenDDS::DCPS::RepoId id)
   long count = 0;
 
   if (0 < numAssociations) {
-    OpenDDS::DCPS::WriterIdSeq idSeq(numAssociations);
-    idSeq.length(numAssociations);
+    OpenDDS::DCPS::WriterIdSeq idSeq(static_cast<CORBA::ULong>(numAssociations));
+    idSeq.length(static_cast<CORBA::ULong>(numAssociations));
 
     DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin();
     DCPS_IR_Publication_Set::ITERATOR end = associations_.end();
@@ -368,8 +372,8 @@ void DCPS_IR_Subscription::disassociate_publication(OpenDDS::DCPS::RepoId id,
   long count = 0;
 
   if (0 < numAssociations) {
-    OpenDDS::DCPS::WriterIdSeq idSeq(numAssociations);
-    idSeq.length(numAssociations);
+    OpenDDS::DCPS::WriterIdSeq idSeq(static_cast<CORBA::ULong>(numAssociations));
+    idSeq.length(static_cast<CORBA::ULong>(numAssociations));
 
     DCPS_IR_Publication_Set::ITERATOR iter = associations_.begin();
     DCPS_IR_Publication_Set::ITERATOR end = associations_.end();
@@ -760,6 +764,28 @@ OpenDDS::DCPS::DataReaderRemote_ptr
 DCPS_IR_Subscription::reader()
 {
   return OpenDDS::DCPS::DataReaderRemote::_duplicate(this->reader_.in());
+}
+
+std::string
+DCPS_IR_Subscription::get_filter_expression() const
+{
+  return filterExpression_;
+}
+
+DDS::StringSeq
+DCPS_IR_Subscription::get_expr_params() const
+{
+  return exprParams_;
+}
+
+void
+DCPS_IR_Subscription::update_expr_params(const DDS::StringSeq& params)
+{
+  exprParams_ = params;
+  typedef DCPS_IR_Publication_Set::ITERATOR iter_t;
+  for (iter_t i(associations_.begin()), e(associations_.end()); i != e; ++i) {
+    (*i)->update_expr_params(id_, params);
+  }
 }
 
 #if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)

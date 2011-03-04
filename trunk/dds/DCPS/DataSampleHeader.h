@@ -50,7 +50,7 @@ enum DataSampleHeaderFlag {
   HISTORIC_SAMPLE_FLAG,
   LIFESPAN_DURATION_FLAG,
   GROUP_COHERENT_FLAG,
-  RESERVED_2_FLAG,
+  CONTENT_FILTER_FLAG,
   RESERVED_3_FLAG,
   RESERVED_4_FLAG
 };
@@ -85,12 +85,18 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
 
   bool group_coherent_ : 1;
 
-  /// reserved bits
-  bool reserved_2   : 1;
-  bool reserved_3   : 1;
-  bool reserved_4   : 1;
+  /// The publishing side has applied content filtering, and the optional
+  /// content_filter_entries_ field is present in the marshaled header.
+  bool content_filter_ : 1;
 
-  //The size of the message including the entire header.
+  ///{@ reserved bits
+  bool reserved_3 : 1;
+  bool reserved_4 : 1;
+  ///@}
+
+  /// The size of the data sample (without header).  After this header is
+  /// demarshaled, the transport expects to see this many bytes in the stream
+  /// before the start of the next header (or end of the Transport PDU).
   ACE_UINT32 message_length_;
 
   /// The sequence number is obtained from the Publisher
@@ -98,7 +104,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// requirement for the sequence value (access_scope == GROUP).
   SequenceNumber::Value sequence_;
 
-  /// The SOURCE_TIMESTAMP field is generated from the DataWriter
+  ///{@ The SOURCE_TIMESTAMP field is generated from the DataWriter
   /// or supplied by the application at the time of the write.
   /// This value is derived from the local hosts system clock,
   /// which is assumed to be synchronized with the clocks on other
@@ -108,8 +114,9 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// SampleInfo structure supplied along with each data sample.
   ACE_INT32 source_timestamp_sec_;
   ACE_UINT32 source_timestamp_nanosec_; // Corresponding IDL is unsigned.
+  ///@}
 
-  /// The LIFESPAN duration field is generated from the DataWriter
+  ///{@ The LIFESPAN duration field is generated from the DataWriter
   /// or supplied by the application at the time of the write. This
   /// field is used to determine if a given sample is considered
   /// 'stale' and should be discarded by associated DataReader.
@@ -117,13 +124,19 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// lifespan_duration_ flag.
   ACE_INT32 lifespan_duration_sec_;
   ACE_UINT32 lifespan_duration_nanosec_;  // Corresponding IDL is unsigned.
+  ///@}
 
   /// Identify the DataWriter that produced the sample data being
   /// sent.
-  PublicationId  publication_id_;
+  PublicationId publication_id_;
 
-  /// Id represent coherent group.
-  RepoId         publisher_id_;
+  /// Id representing the coherent group.  Optional field that's only present if
+  /// the flag for group_coherent_ is set.
+  RepoId publisher_id_;
+
+  /// Optional field present if the content_filter_ flag bit is set.
+  /// Indicates which readers should not receive the data.
+  GUIDSeq content_filter_entries_;
 
   static long mask_flag(DataSampleHeaderFlag flag);
 
@@ -134,40 +147,41 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
                        ACE_Message_Block* buffer);
 
   static bool test_flag(DataSampleHeaderFlag flag,
-                        ACE_Message_Block* buffer);
+                        const ACE_Message_Block* buffer);
 
   /// Does the data in this mb constitute a partial Sample Header?
-  static bool partial(ACE_Message_Block& mb);
+  static bool partial(const ACE_Message_Block& mb);
 
-  /// Default constructor.
-  DataSampleHeader() ;
+  DataSampleHeader();
 
-  /// Construct with values extracted from a buffer.
-  DataSampleHeader(ACE_Message_Block* buffer) ;
-  DataSampleHeader(ACE_Message_Block& buffer) ;
+  ///{@ Construct with values extracted from a buffer.
+  explicit DataSampleHeader(ACE_Message_Block* buffer);
+  explicit DataSampleHeader(ACE_Message_Block& buffer);
+  ///@}
 
-  /// Assignment from an ACE_Message_Block.
-  DataSampleHeader& operator= (ACE_Message_Block* buffer) ;
-  DataSampleHeader& operator= (ACE_Message_Block& buffer) ;
+  ///{@ Assignment from an ACE_Message_Block.
+  DataSampleHeader& operator=(ACE_Message_Block* buffer);
+  DataSampleHeader& operator=(ACE_Message_Block& buffer);
+  ///@}
 
   /// Amount of data read when initializing from a buffer.
   size_t marshaled_size() const;
 
   /// Similar to IDL compiler generated methods.
-  size_t max_marshaled_size() ;
+  static size_t max_marshaled_size();
 
   /// Implement load from buffer.
-  void init(ACE_Message_Block* buffer) ;
+  void init(ACE_Message_Block* buffer);
 
 private:
   /// Keep track of the amount of data read from a buffer.
-  size_t marshaled_size_ ;
+  size_t marshaled_size_;
 };
 
 /// Marshal/Insertion into a buffer.
 OpenDDS_Dcps_Export
 ACE_CDR::Boolean
-operator<< (ACE_Message_Block*&, DataSampleHeader& value) ;
+operator<<(ACE_Message_Block*&, DataSampleHeader& value);
 
 /// Message Id enumarion insertion onto an ostream.
 OpenDDS_Dcps_Export

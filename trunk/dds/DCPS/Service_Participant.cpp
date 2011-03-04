@@ -72,6 +72,7 @@ static bool got_bit_transport_port = false;
 static bool got_bit_transport_ip = false;
 static bool got_bit_lookup_duration_msec = false;
 static bool got_bit_flag = false;
+static bool got_publisher_content_filter = false;
 
 Service_Participant::Service_Participant()
   : orb_(CORBA::ORB::_nil()),
@@ -98,6 +99,7 @@ Service_Participant::Service_Participant()
     scheduler_(-1),
     priority_min_(0),
     priority_max_(0),
+    publisher_content_filter_(true),
     transient_data_cache_(),
     persistent_data_cache_(),
     persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR),
@@ -465,6 +467,11 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPendingTimeout"))) != 0) {
       this->pending_timeout_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPublisherContentFilter"))) != 0) {
+      this->publisher_content_filter_ = ACE_OS::atoi(currentArg);
+      arg_shifter.consume_arg();
+      got_publisher_content_filter = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationRecoveryDuration"))) != 0) {
       this->federation_recovery_duration_ = ACE_OS::atoi(currentArg);
@@ -1395,6 +1402,16 @@ Service_Participant::load_common_configuration()
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSBit value from command option (overrides value if it's in config file).\n")));
     } else {
       GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSBit"), this->bit_enabled_, int)
+    }
+
+    if (got_publisher_content_filter) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSPublisherContentFilter ")
+                 ACE_TEXT("value from command option (overrides value if it's ")
+                 ACE_TEXT("in config file).\n")));
+    } else {
+      GET_CONFIG_VALUE(this->cf_, sect, ACE_TEXT("DCPSPublisherContentFilter"),
+        this->publisher_content_filter_, bool)
     }
 
     // These are not handled on the command line.

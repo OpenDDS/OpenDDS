@@ -182,7 +182,10 @@ public:
   virtual DDS::ReturnCode_t delete_multitopic(DDS::MultiTopic_ptr a_multitopic)
   ACE_THROW_SPEC((CORBA::SystemException));
 
-#endif
+  RcHandle<FilterEvaluator> get_filter_eval(const char* filter);
+  void deref_filter_eval(const char* filter);
+
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
   virtual DDS::ReturnCode_t delete_contained_entities()
   ACE_THROW_SPEC((CORBA::SystemException));
@@ -457,6 +460,11 @@ private:
 
   /// Publisher ID generator.
   RepoIdGenerator  pub_id_generator_;
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  ACE_Thread_Mutex filter_cache_lock_;
+  std::map<std::string, RcHandle<FilterEvaluator> > filter_cache_;
+#endif
 };
 
 } // namespace DCPS

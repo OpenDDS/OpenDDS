@@ -103,6 +103,7 @@ private:
 
   /// Common logic for data_dropped() and data_delivered().
   bool decision_made(bool dropped_by_transport);
+  friend class TransportCustomizedElement;
 
   /// Thread lock type
   typedef ACE_SYNCH_MUTEX LockType;

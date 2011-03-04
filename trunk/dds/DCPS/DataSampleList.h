@@ -11,8 +11,10 @@
 
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "Definitions.h"
+#include "transport/framework/TransportDefs.h"
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
 
+#include <map>
 #include <iterator>
 
 namespace OpenDDS {
@@ -20,7 +22,15 @@ namespace DCPS {
 
 const CORBA::ULong MAX_READERS_PER_ELEM = 5;
 typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>
-TransportSendElementAllocator;
+  TransportSendElementAllocator;
+
+class TransportCustomizedElement;
+typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>
+  TransportCustomizedElementAllocator;
+
+struct DataSampleListElement;
+typedef Cached_Allocator_With_Overflow<DataSampleListElement, ACE_Null_Mutex>
+  DataSampleListElementAllocator;
 
 const int MAX_READERS_TO_RESEND = 5;
 
@@ -31,7 +41,7 @@ struct PublicationInstance;
 * Currently we contain entire messages in a single ACE_Message_Block
 * chain.
 */
-typedef ACE_Message_Block DataSample ;
+typedef ACE_Message_Block DataSample;
 
 /**
 * List elements include the marshaled message, the publication Id and
@@ -89,21 +99,20 @@ struct OpenDDS_Dcps_Export DataSampleListElement {
   DataSampleListElement(PublicationId                   publication_id,
                         TransportSendListener*          send_listner,
                         PublicationInstance*            handle,
-                        TransportSendElementAllocator*  allocator);
+                        TransportSendElementAllocator*  tse_allocator,
+                        TransportCustomizedElementAllocator* tce_allocator);
 
   DataSampleListElement(const DataSampleListElement& elem);
+  DataSampleListElement& operator=(const DataSampleListElement& elem);
 
-//remove check all calling locations of the above and rename to send both
   ~DataSampleListElement();
-
-  DataSampleListElement & operator= (DataSampleListElement const & elem);
 
   /// Message being sent which includes the DataSampleHeader message block
   /// and DataSample message block.
-  DataSample*            sample_ ;
+  DataSample*            sample_;
 
   /// Publication Id used downstream.
-  PublicationId          publication_id_ ;
+  PublicationId          publication_id_;
   CORBA::ULong           num_subs_;
   OpenDDS::DCPS::RepoId  subscription_ids_[OpenDDS::DCPS::MAX_READERS_PER_ELEM];
 
@@ -114,14 +123,14 @@ struct OpenDDS_Dcps_Export DataSampleListElement {
   /// container _much_ more efficient.
 
   /// Thread of all data within a DataWriter.
-  DataSampleListElement* previous_sample_ ;
-  DataSampleListElement* next_sample_ ;
+  DataSampleListElement* previous_sample_;
+  DataSampleListElement* next_sample_;
 
   /// Thread of data within the instance.
-  DataSampleListElement* next_instance_sample_ ;
+  DataSampleListElement* next_instance_sample_;
 
   /// Thread of data being unsent/sending/sent/released.
-  DataSampleListElement* next_send_sample_ ;
+  DataSampleListElement* next_send_sample_;
   DataSampleListElement* previous_send_sample_;
 
   /// Pointer to object that will be informed when the data has
@@ -139,6 +148,14 @@ struct OpenDDS_Dcps_Export DataSampleListElement {
 
   /// Allocator for the TransportSendElement.
   TransportSendElementAllocator* transport_send_element_allocator_;
+
+  /// Allocator for TransportCustomizedElement
+  TransportCustomizedElementAllocator* transport_customized_element_allocator_;
+
+  ///{@ tracking for Content-Filtering data
+  GUIDSeq_var filter_out_;
+  std::map<DataLinkIdType, GUIDSeq_var> filter_per_link_;
+  ///@}
 };
 
 /**
@@ -271,21 +288,17 @@ public:
   iterator end();
 
   /// The first element of the list.
-  DataSampleListElement* head_ ;
+  DataSampleListElement* head_;
 
   /// The last element of the list.
-  DataSampleListElement* tail_ ;
+  DataSampleListElement* tail_;
 
   /// Number of elements in the list.
-  ssize_t                size_ ;
+  ssize_t                size_;
   //TBD size is never negative so should be size_t but this ripples through
   // the transport code so leave it for now. SHH
 
 };
-
-/// Used to allocator the DataSampleListElement object.
-typedef Cached_Allocator_With_Overflow<DataSampleListElement, ACE_Null_Mutex>
-DataSampleListElementAllocator;
 
 } // namespace DCPS
 } // namespace OpenDDS

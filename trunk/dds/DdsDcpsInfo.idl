@@ -77,7 +77,6 @@ module OpenDDS {
                               in RepoId participantId,
                               in RepoId topicId,
                               in DataWriterRemote publication,
-    //                          in ::DDS::DataWriter publication,
                               in ::DDS::DataWriterQos qos,
                               in TransportInterfaceInfo transInfo,
                               in ::DDS::PublisherQos publisherQos)
@@ -103,10 +102,11 @@ module OpenDDS {
                                in RepoId participantId,
                                in RepoId topicId,
                                in DataReaderRemote subscription,
-    //                            in ::DDS::DataReader subscription,
                                in ::DDS::DataReaderQos qos,
                                in TransportInterfaceInfo transInfo,
-                               in ::DDS::SubscriberQos subscriberQos)
+                               in ::DDS::SubscriberQos subscriberQos,
+                               in string filterExpression,
+                               in ::DDS::StringSeq exprParams)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Topic);
@@ -234,6 +234,14 @@ module OpenDDS {
                                     in RepoId subscriptionId,
                                     in ::DDS::DataReaderQos qos,
                                     in ::DDS::SubscriberQos subscriberQos)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Subscription);
+
+      boolean update_subscription_params(in ::DDS::DomainId_t domainId,
+                                         in RepoId participantId,
+                                         in RepoId subscriptionId,
+                                         in ::DDS::StringSeq exprParams)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Subscription);

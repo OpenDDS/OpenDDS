@@ -19,41 +19,87 @@
 #include "DataSampleHeader.inl"
 #endif /* __ACE_INLINE__ */
 
+namespace {
+  struct AMB_Releaser {
+    explicit AMB_Releaser(ACE_Message_Block* p) : p_(p) {}
+    ~AMB_Releaser() { p_->release(); }
+    ACE_Message_Block* p_;
+  };
+
+  bool mb_copy(char& dest, const ACE_Message_Block& mb, size_t offset, bool)
+  {
+    dest = mb.rd_ptr()[offset];
+    return true;
+  }
+
+  template <typename T>
+  bool mb_copy(T& dest, const ACE_Message_Block& mb, size_t offset, bool swap)
+  {
+    ACE_Message_Block* temp = mb.duplicate();
+    if (!temp) { // couldn't allocate
+      return false;
+    }
+    AMB_Releaser r(temp);
+    temp->rd_ptr(offset);
+    if (temp->total_length() < sizeof(T)) {
+      return false;
+    }
+    OpenDDS::DCPS::Serializer ser(temp, swap);
+    ser.buffer_read(reinterpret_cast<char*>(&dest), sizeof(T), swap);
+    return true;
+  }
+
+  // Skip "offset" bytes from the mb and copy the subsequent data
+  // (sizeof(T) bytes) into dest.  Return false if there is not enough data
+  // in the mb to complete the operation.  Continuation pointers are followed.
+  template <typename T>
+  bool mb_peek(T& dest, const ACE_Message_Block& mb, size_t offset, bool swap)
+  {
+    for (const ACE_Message_Block* iter = &mb; iter; iter = iter->cont()) {
+      const size_t len = iter->length();
+      if (len > offset) {
+        return mb_copy(dest, *iter, offset, swap);
+      }
+      offset -= len;
+    }
+    return false;
+  }
+
+}
+
 namespace OpenDDS {
 namespace DCPS {
 
-bool DataSampleHeader::partial(ACE_Message_Block& mb)
+bool DataSampleHeader::partial(const ACE_Message_Block& mb)
 {
-  static const unsigned int LIFESPAN_MASK = 0x08, LIFESPAN_LENGTH = 8;
-  const size_t full_header = DataSampleHeader().max_marshaled_size();
+  static const unsigned int LIFESPAN_MASK = mask_flag(LIFESPAN_DURATION_FLAG),
+    LIFESPAN_LENGTH = 8,
+    COHERENT_MASK = mask_flag(GROUP_COHERENT_FLAG),
+    COHERENT_LENGTH = 16,
+    CONTENT_FILT_MASK = mask_flag(CONTENT_FILTER_FLAG),
+    BYTE_ORDER_MASK = mask_flag(BYTE_ORDER_FLAG);
 
-  size_t len = mb.total_length();
+  const size_t len = mb.total_length();
 
-  if (len < 2) return true;
+  if (len <= FLAGS_OFFSET) return true;
 
-  char buffer[2];
+  char flags;
+  mb_peek(flags, mb, FLAGS_OFFSET, false /*swap ignored for 1-byte read*/);
 
-  switch (mb.length()) {
-  case 0:
+  size_t expected = max_marshaled_size();
+  if (!(flags & LIFESPAN_MASK)) expected -= LIFESPAN_LENGTH;
+  if (!(flags & COHERENT_MASK)) expected -= COHERENT_LENGTH;
 
-    if (!mb.cont()) return true;
-
-    memcpy(buffer, mb.cont()->rd_ptr(), 2);
-    break;
-  case 1:
-
-    if (!mb.cont()) return true;
-
-    buffer[0] = *mb.rd_ptr();
-    buffer[1] = *mb.cont()->rd_ptr();
-    break;
-  default:
-    memcpy(buffer, mb.rd_ptr(), 2);
+  if (flags & CONTENT_FILT_MASK) {
+    CORBA::ULong seqLen;
+    const bool swap = (flags & BYTE_ORDER_MASK) != TAO_ENCAP_BYTE_ORDER;
+    if (!mb_peek(seqLen, mb, expected, swap)) {
+      return true;
+    }
+    expected += sizeof(seqLen) + gen_find_size(GUID_t()) * seqLen;
   }
 
-  if (buffer[1] & LIFESPAN_MASK) return len < full_header;
-
-  else return len < full_header - LIFESPAN_LENGTH;
+  return len < expected;
 }
 
 void
@@ -70,19 +116,19 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   // than the latter approach.
   reader >> this->message_id_;
 
-  if (reader.good_bit() != true) return;
+  if (!reader.good_bit()) return;
   this->marshaled_size_ += sizeof(this->message_id_);
 
   reader >> this->submessage_id_;
 
-  if (reader.good_bit() != true) return;
+  if (!reader.good_bit()) return;
   this->marshaled_size_ += sizeof(this->submessage_id_);
 
   // Extract the flag values.
-  ACE_CDR::Octet byte ;
+  ACE_CDR::Octet byte;
   reader >> ACE_InputCDR::to_octet(byte);
 
-  if (reader.good_bit() != true) return;
+  if (!reader.good_bit()) return;
   this->marshaled_size_ += sizeof(byte);
 
   this->byte_order_         = byte & mask_flag(BYTE_ORDER_FLAG);
@@ -90,7 +136,7 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   this->historic_sample_    = byte & mask_flag(HISTORIC_SAMPLE_FLAG);
   this->lifespan_duration_  = byte & mask_flag(LIFESPAN_DURATION_FLAG);
   this->group_coherent_     = byte & mask_flag(GROUP_COHERENT_FLAG);
-  this->reserved_2          = byte & mask_flag(RESERVED_2_FLAG);
+  this->content_filter_     = byte & mask_flag(CONTENT_FILTER_FLAG);
   this->reserved_3          = byte & mask_flag(RESERVED_3_FLAG);
   this->reserved_4          = byte & mask_flag(RESERVED_4_FLAG);
 
@@ -100,22 +146,22 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
 
   reader >> this->message_length_;
 
-  if (reader.good_bit() != true) return;
-  this->marshaled_size_ += sizeof(this->message_length_) ;
+  if (!reader.good_bit()) return;
+  this->marshaled_size_ += sizeof(this->message_length_);
 
-  reader >> this->sequence_ ;
+  reader >> this->sequence_;
 
-  if (reader.good_bit() != true) return;
+  if (!reader.good_bit()) return;
   this->marshaled_size_ += sizeof(this->sequence_);
 
   reader >> this->source_timestamp_sec_;
 
-  if (reader.good_bit() != true) return;
+  if (!reader.good_bit()) return;
   this->marshaled_size_ += sizeof(this->source_timestamp_sec_);
 
-  reader >> this->source_timestamp_nanosec_ ;
+  reader >> this->source_timestamp_nanosec_;
 
-  if (reader.good_bit() != true) return;
+  if (!reader.good_bit()) return;
   this->marshaled_size_ += sizeof(this->source_timestamp_nanosec_);
 
   if (this->lifespan_duration_) {
@@ -132,20 +178,24 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
 
   reader >> this->publication_id_;
 
-  if (reader.good_bit() != true) return ;
+  if (!reader.good_bit()) return;
   this->marshaled_size_ += gen_find_size(this->publication_id_);
-
 
   if (this->group_coherent_) {
     reader >> this->publisher_id_;
-    if (reader.good_bit() != true) return ;
+    if (!reader.good_bit()) return;
     this->marshaled_size_ += gen_find_size(this->publisher_id_);
   }
 
+  if (this->content_filter_) {
+    reader >> this->content_filter_entries_;
+    if (!reader.good_bit()) return;
+    this->marshaled_size_ += gen_find_size(this->content_filter_entries_);
+  }
 }
 
 ACE_CDR::Boolean
-operator<< (ACE_Message_Block*& buffer, DataSampleHeader& value)
+operator<<(ACE_Message_Block*& buffer, DataSampleHeader& value)
 {
   Serializer writer(buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER);
 
@@ -153,20 +203,20 @@ operator<< (ACE_Message_Block*& buffer, DataSampleHeader& value)
   writer << value.submessage_id_;
 
   // Write the flags as a single byte.
-  ACE_CDR::Octet flags = (value.byte_order_         << BYTE_ORDER_FLAG)
+  ACE_CDR::Octet flags = (value.byte_order_           << BYTE_ORDER_FLAG)
                          | (value.coherent_change_    << COHERENT_CHANGE_FLAG)
                          | (value.historic_sample_    << HISTORIC_SAMPLE_FLAG)
                          | (value.lifespan_duration_  << LIFESPAN_DURATION_FLAG)
                          | (value.group_coherent_     << GROUP_COHERENT_FLAG)
-                         | (value.reserved_2          << RESERVED_2_FLAG)
+                         | (value.content_filter_     << CONTENT_FILTER_FLAG)
                          | (value.reserved_3          << RESERVED_3_FLAG)
                          | (value.reserved_4          << RESERVED_4_FLAG)
                          ;
   writer << ACE_OutputCDR::from_octet(flags);
-  writer << value.message_length_ ;
-  writer << value.sequence_ ;
-  writer << value.source_timestamp_sec_ ;
-  writer << value.source_timestamp_nanosec_ ;
+  writer << value.message_length_;
+  writer << value.sequence_;
+  writer << value.source_timestamp_sec_;
+  writer << value.source_timestamp_nanosec_;
 
   if (value.lifespan_duration_) {
     writer << value.lifespan_duration_sec_;
@@ -179,7 +229,12 @@ operator<< (ACE_Message_Block*& buffer, DataSampleHeader& value)
     writer << value.publisher_id_;
   }
 
-  return writer.good_bit() ;
+  // content_filter_entries_ is deliberately not marshaled here.
+  // It's variable sized, so it won't fit into our pre-allocated data block.
+  // It may be customized per-datalink so it will be handled later with a
+  // a chained (continuation) ACE_Message_Block.
+
+  return writer.good_bit();
 }
 
 /// Message Id enumeration insertion onto an ostream.
@@ -258,6 +313,8 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     if (value.coherent_change_ == 1) str << "Coherent, ";
     if (value.historic_sample_ == 1) str << "Historic, ";
     if (value.lifespan_duration_ == 1) str << "Lifespan, ";
+    if (value.group_coherent_ == 1) str << "Group-Coherent, ";
+    if (value.content_filter_ == 1) str << "Content-Filtered, ";
 
     str << "Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
         << value.sequence_ << ", ";
@@ -272,7 +329,16 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
 
     str << "Publication: " << RepoIdConverter(value.publication_id_) << ", ";
     if (value.group_coherent_) {
-      str << "Publisher: " << RepoIdConverter(value.publisher_id_);
+      str << ", Publisher: " << RepoIdConverter(value.publisher_id_);
+    }
+
+    if (value.content_filter_) {
+      const CORBA::ULong len = value.content_filter_entries_.length();
+      str << ", Content-Filter Entries (" << len << "): [";
+      for (CORBA::ULong i(0); i < len; ++i) {
+        str << RepoIdConverter(value.content_filter_entries_[i]) << ' ';
+      }
+      str << ']';
     }
   }
 

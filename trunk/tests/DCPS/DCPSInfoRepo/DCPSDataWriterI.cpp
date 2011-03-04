@@ -3,6 +3,7 @@
 // $Id$
 
 #include "DCPSDataWriterI.h"
+#include <dds/DCPS/RepoIdConverter.h>
 
 // Implementation skeleton constructor
 TAO_DDS_DCPSDataWriter_i::TAO_DDS_DCPSDataWriter_i (void)
@@ -105,3 +106,19 @@ void TAO_DDS_DCPSDataWriter_i::update_incompatible_qos (
   }
 
 
+void
+TAO_DDS_DCPSDataWriter_i::update_subscription_params(
+  const OpenDDS::DCPS::RepoId& id, const DDS::StringSeq& params)
+ACE_THROW_SPEC((CORBA::SystemException))
+{
+  OpenDDS::DCPS::RepoIdConverter readerConv(id);
+  ACE_DEBUG((LM_INFO,
+             ACE_TEXT("\nTAO_DDS_DCPSDataWriter_i::update_subscription_params() :\n")
+             ACE_TEXT("\treader = %C\n\tparams.length = %d\n"),
+             std::string(readerConv).c_str(), params.length()));
+
+  const CORBA::ULong length = params.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("\tparams[%d] = %C\n"), i, params[i].in()));
+  }
+}

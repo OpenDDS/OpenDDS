@@ -72,12 +72,16 @@ int hf_sample_sequence    = -1;
 int hf_sample_timestamp   = -1;
 int hf_sample_lifespan    = -1;
 int hf_sample_publication = -1;
+int hf_sample_publisher   = -1;
+int hf_sample_content_filt= -1;
 
 int hf_sample_flags             = -1;
 int hf_sample_flags_byte_order  = -1;
 int hf_sample_flags_coherent    = -1;
 int hf_sample_flags_historic    = -1;
 int hf_sample_flags_lifespan    = -1;
+int hf_sample_flags_group_coh   = -1;
+int hf_sample_flags_content_filt= -1;
 
 const int sample_flags_bits = 8;
 
@@ -86,6 +90,8 @@ const int* sample_flags_fields[] = {
   &hf_sample_flags_coherent,
   &hf_sample_flags_historic,
   &hf_sample_flags_lifespan,
+  &hf_sample_flags_group_coh,
+  &hf_sample_flags_content_filt,
   NULL
 };
 
@@ -306,6 +312,31 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
   }
   offset += len;
 
+  // hf_sample_publisher
+  if (sample.group_coherent_) {
+    len = gen_find_size(sample.publisher_id_);
+    if (sample.message_id_ != TRANSPORT_CONTROL) {
+      RepoIdConverter converter(sample.publisher_id_);
+      proto_tree_add_bytes_format_value(tree, hf_sample_publisher, tvb, offset,
+        len, reinterpret_cast<const guint8*>(&sample.publisher_id_),
+        std::string(converter).c_str());
+    }
+    offset += len;
+  }
+
+  // hf_sample_content_filt
+  if (sample.content_filter_) {
+    size_t total_len = gen_find_size(sample.content_filter_entries_);
+    len = sizeof(CORBA::ULong);
+    if (sample.message_id_ != TRANSPORT_CONTROL) {
+      proto_tree_add_uint_format_value(tree, hf_sample_content_filt, tvb,
+        offset, len, sample.content_filter_entries_.length(), "%d entries",
+        sample.content_filter_entries_.length());
+    }
+    offset += total_len;
+    //TODO: represent the content_filter entries in wireshark, for now skip
+  }
+
   offset += sample.message_length_; // skip marshaled data
 }
 
@@ -519,6 +550,28 @@ proto_register_opendds()
         HFILL
       }
     },
+    { &hf_sample_flags_group_coh,
+      { "Group Coherent",
+        "opendds.sample.flags.group_coherent",
+        FT_BOOLEAN,
+        sample_flags_bits,
+        NULL,
+        1 << 4,
+        NULL,
+        HFILL
+      }
+    },
+    { &hf_sample_flags_content_filt,
+      { "Content Filtering",
+        "opendds.sample.flags.content_filter",
+        FT_BOOLEAN,
+        sample_flags_bits,
+        NULL,
+        1 << 5,
+        NULL,
+        HFILL
+      }
+    },
     { &hf_sample_length,
       { "Length",
         "opendds.sample.length",
@@ -573,6 +626,28 @@ proto_register_opendds()
         NULL,
         HFILL
       }
+    },
+    { &hf_sample_publisher,
+      { "Publisher",
+        "opendds.sample.publisher",
+        FT_BYTES,
+        BASE_NONE,
+        NULL,
+        0,
+        NULL,
+        HFILL
+      }
+    },
+    { &hf_sample_content_filt,
+      { "Number of Content Filter Entries",
+        "opendds.sample.content_filter_entries",
+        FT_UINT32,
+        BASE_HEX,
+        NULL,
+        0,
+        NULL,
+        HFILL
+      }
     }
   };
 
@@ -585,7 +660,7 @@ proto_register_opendds()
   proto_opendds = proto_register_protocol(
     "OpenDDS DCPS Protocol",  // name
     "OpenDDS",                // short_name
-    "opendds");                  // filter_name
+    "opendds");               // filter_name
 
   proto_register_field_array(proto_opendds, hf, array_length(hf));
   proto_register_subtree_array(ett, array_length(ett));

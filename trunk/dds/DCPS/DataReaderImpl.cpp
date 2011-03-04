@@ -137,8 +137,10 @@ DataReaderImpl::~DataReaderImpl()
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   if (content_filtered_topic_.in()) {
-    dynamic_cast<TopicDescriptionImpl*>(content_filtered_topic_.in())
-      ->update_reader_count(false);
+    ContentFilteredTopicImpl* cft =
+      dynamic_cast<ContentFilteredTopicImpl*>(content_filtered_topic_.in());
+    cft->remove_reader(*this);
+    cft->update_reader_count(false);
   }
 #endif
 }
@@ -566,9 +568,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
         }
 
       } else {
-        CORBA::Long len = updated_writers.length();
-        updated_writers.length(len + 1);
-        updated_writers[len] = writer_id;
+        push_back(updated_writers, writer_id);
       }
     }
   }
@@ -2049,8 +2049,7 @@ OpenDDS::DCPS::WriterInfo::should_ack(
     return false;
   }
 
-  DeadlineList::iterator current
-  = this->ack_deadlines_.begin();
+  DeadlineList::iterator current = this->ack_deadlines_.begin();
 
   while (current != this->ack_deadlines_.end()) {
     if (current->second < now) {
@@ -2079,8 +2078,7 @@ OpenDDS::DCPS::WriterInfo::ack_deadline(SequenceNumber sequence, ACE_Time_Value 
     return;
   }
 
-  for (DeadlineList::iterator current
-       = this->ack_deadlines_.begin();
+  for (DeadlineList::iterator current = this->ack_deadlines_.begin();
        current != this->ack_deadlines_.end();
        ++current) {
     // Insertion sort.
@@ -3279,7 +3277,31 @@ void
 DataReaderImpl::enable_filtering(ContentFilteredTopicImpl* cft)
 {
   cft->update_reader_count(true);
+  cft->add_reader(*this);
   content_filtered_topic_ = DDS::ContentFilteredTopic::_duplicate(cft);
+}
+
+DDS::ContentFilteredTopic_ptr
+DataReaderImpl::get_cf_topic() const
+{
+  return DDS::ContentFilteredTopic::_duplicate(content_filtered_topic_);
+}
+
+void
+DataReaderImpl::update_subscription_params(const DDS::StringSeq& params) const
+{
+  try {
+    DCPSInfo_var repo = TheServiceParticipant->get_repository(domain_id_);
+    repo->update_subscription_params(participant_servant_->get_domain_id(),
+                                     participant_servant_->get_id(),
+                                     subscription_id_,
+                                     params);
+  } catch (const CORBA::Exception& ex) {
+    if (DCPS_debug_level) {
+      ex._tao_print_exception("ERROR: Exception in DataReaderImpl::"
+        "update_subscription_params");
+    }
+  }
 }
 #endif
 

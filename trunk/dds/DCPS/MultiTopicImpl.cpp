@@ -82,7 +82,8 @@ DDS::ReturnCode_t
 MultiTopicImpl::get_expression_parameters(DDS::StringSeq& params)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_,
+    DDS::RETCODE_OUT_OF_RESOURCES);
   params = expression_parameters_;
   return DDS::RETCODE_OK;
 }
@@ -91,7 +92,8 @@ DDS::ReturnCode_t
 MultiTopicImpl::set_expression_parameters(const DDS::StringSeq& p)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_,
+    DDS::RETCODE_OUT_OF_RESOURCES);
   expression_parameters_ = p;
   return DDS::RETCODE_OK;
 }
