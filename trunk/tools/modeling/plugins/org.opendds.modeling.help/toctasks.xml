@@ -29,7 +29,13 @@
         <topic label="Working with Data Libraries">
                 <topic href="html/modeling/tasks/data_lib/data_libs_defined.html" label="Data Libraries Defined"/>
                 <topic href="html/modeling/tasks/data_lib/creating_data_libs.html" label="Creating Data Libraries"/>
-                <topic href="html/modeling/tasks/data_lib/adding_types.html" label="Adding Types"/>
+                <topic label="Adding Types">
+                	<topic href="html/modeling/tasks/data_lib/types/basic.html" label = "Basic Types"/>
+                 	<topic href="html/modeling/tasks/data_lib/types/types_with_fields.html" label = "Types with Fields"/>
+                 	<topic href="html/modeling/tasks/data_lib/types/struct.html" label="Structs"/>
+                 	<topic href="html/modeling/tasks/data_lib/types/collection_types.html" label="Array and Sequence Types"/>
+                 	<topic href="html/modeling/tasks/data_lib/types/union.html" label="Unions"/>
+                </topic>
                 <topic href="html/modeling/tasks/data_lib/using_types_from_other_datalibs.html" label="Referring to types from other DataLibs"/>
                 <topic href="html/modeling/tasks/policy_lib/performing_validations.html" label="Validation of Data Types"/>
         </topic>

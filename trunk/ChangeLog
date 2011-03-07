@@ -1,3 +1,24 @@
+Mon Mar  7 15:22:05 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_collection_types_palette.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_simple_types_palette.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_struct_palette.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_typedef_field_palette.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_union_palette.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/basic.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/collection_types.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/struct.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/types_with_fields.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/union.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
+
+          Extract sections of data types to their own pages to make it easier to navigate the content
+          and to provide room for growth of content.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/adding_types.html:
+
+          Removed this file as content has been extracted to separate pages.
+
 Fri Mar  4 20:35:40 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:
