@@ -126,7 +126,7 @@
 </xsl:template>
 
 <!-- Handle TCP-specific configuration parameters -->
-<xsl:template match="TCPTransport">
+<xsl:template match="TCPTransport[*]">
   <xsl:text>        {
           OpenDDS::DCPS::SimpleTcpConfiguration* specific_config =
               (OpenDDS::DCPS::SimpleTcpConfiguration*) config.in();
@@ -137,7 +137,7 @@
 </xsl:template>
 
 <!-- Handle Multicast-specific configuration parameters -->
-<xsl:template match="MulticastTransport">
+<xsl:template match="MulticastTransport[*]">
   <xsl:text>        {
           OpenDDS::DCPS::MulticastConfiguration* specific_config =
               (OpenDDS::DCPS::MulticastConfiguration*) config.in();
@@ -148,7 +148,7 @@
 </xsl:template>
 
 <!-- Handle UDP-specific configuration parameters -->
-<xsl:template match="UDPTransport">
+<xsl:template match="UDPTransport[*]">
   <xsl:text>        {
           OpenDDS::DCPS::UdpConfiguration* specific_config =
               (OpenDDS::DCPS::UdpConfiguration*) config.in();

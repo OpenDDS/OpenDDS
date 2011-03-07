@@ -1,3 +1,10 @@
+Mon Mar  7 19:40:47 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          Don't mention specific_config when it has no subelements to
+          prevent warning.
+
 Mon Mar  7 15:52:09 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/struct.html:
