@@ -245,7 +245,7 @@ DDS::ReturnCode_t
 
     handle = registered_handle;
   }
- 
+
   // list of reader RepoIds that should not get data
   OpenDDS::DCPS::GUIDSeq_var filter_out;
 #ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
@@ -264,7 +264,7 @@ DDS::ReturnCode_t
     }
   }
 #endif
-  
+
   ACE_Message_Block* const marshalled =
     dds_marshal (instance_data); // FOR_WRITE - using cached
                                  // allocators

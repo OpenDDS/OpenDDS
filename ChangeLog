@@ -1,3 +1,18 @@
+Mon Mar  7 22:45:36 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/ContentFilteredTopicImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/Util.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+
+          Fixed scoreboard errors and warnings from my commit last Friday.
+
 Mon Mar  7 19:40:47 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:

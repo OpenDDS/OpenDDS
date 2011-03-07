@@ -136,7 +136,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT("add_subscription failed!\n") ));
         }
-      
+
       ACE_Time_Value run_time = ACE_Time_Value(3,0);
       orb->run(run_time);
 

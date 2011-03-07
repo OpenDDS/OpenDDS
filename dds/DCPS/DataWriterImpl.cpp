@@ -682,6 +682,10 @@ void
 DataWriterImpl::update_subscription_params(const RepoId& readerId,
                                            const DDS::StringSeq& params)
 {
+#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  ACE_UNUSED_ARG(readerId);
+  ACE_UNUSED_ARG(params);
+#else
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
   RepoIdToReaderInfoMap::iterator iter = reader_info_.find(readerId);
   if (iter != reader_info_.end()) {
@@ -693,6 +697,7 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
       ACE_TEXT(" - writer: %C has no info about reader: %C\n"),
       std::string(pubConv).c_str(), std::string(subConv).c_str()));
   }
+#endif
 }
 
 DDS::ReturnCode_t

@@ -12,6 +12,8 @@
 #include "ContentFilteredTopicImpl.h"
 #include "DataReaderImpl.h"
 
+#include <cstring>
+
 namespace OpenDDS {
 namespace DCPS {
 
