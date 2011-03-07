@@ -49,6 +49,10 @@ class SubscriberImpl;
 class DomainParticipantFactoryImpl;
 class Monitor;
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+class FilterEvaluator;
+#endif
+
 /**
 * @class DomainParticipantImpl
 *

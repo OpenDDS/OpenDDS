@@ -1306,7 +1306,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_sample(TransportSendElement& elemen
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_sample",6);
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t)  Removing sample: %@", element.msg ()),5);
+  VDBG_LVL((LM_DEBUG, "(%P|%t)  Removing sample: %@\n", element.msg ()),5);
 
   // The sample to remove is either in temporary delayed notification list or
   // internal list (elems_ or queue_). If it's going to be removed from temporary delayed

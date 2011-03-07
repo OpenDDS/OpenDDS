@@ -130,7 +130,7 @@ int remove(
   return -1;
 }
 
-/// std::vector-style push_back() for CORBA Sequences 
+/// std::vector-style push_back() for CORBA Sequences
 template <typename Seq>
 void push_back(Seq& seq, const typename Seq::value_type& val)
 {

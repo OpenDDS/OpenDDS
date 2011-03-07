@@ -183,7 +183,7 @@ public:
 
   void add_associations(OpenDDS::DCPS::RepoId yourId,
                         const ReaderAssociationSeq & readers);
-  
+
   void remove_associations(const ReaderIdSeq & readers,
                            CORBA::Boolean callback);
 

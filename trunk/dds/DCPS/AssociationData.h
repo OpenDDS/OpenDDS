@@ -43,7 +43,7 @@ struct AssociationData {
 };
 
 struct AssociationInfo {
-  ssize_t           num_associations_;
+  size_t            num_associations_;
   AssociationData*  association_data_;
 };
 

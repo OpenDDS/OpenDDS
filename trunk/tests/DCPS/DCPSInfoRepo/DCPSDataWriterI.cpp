@@ -117,8 +117,14 @@ ACE_THROW_SPEC((CORBA::SystemException))
              ACE_TEXT("\treader = %C\n\tparams.length = %d\n"),
              std::string(readerConv).c_str(), params.length()));
 
+#if TAO_MAJOR_VERSION > 1 || (TAO_MAJOR_VERSION == 1 && TAO_MINOR_VERSION > 5)
+#define DOT_IN .in()
+#else
+#define DOT_IN
+#endif
+
   const CORBA::ULong length = params.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("\tparams[%d] = %C\n"), i, params[i].in()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("\tparams[%d] = %C\n"), i, params[i] DOT_IN));
   }
 }
