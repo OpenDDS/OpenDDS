@@ -127,7 +127,14 @@ bool run_filtering_test(const DomainParticipant_var& dp,
 
   if (!waitForSample(dr)) return false;
 
-  if (takeSamples(dr, bind2nd(greater<CORBA::Long>(), 1)) != 2) {
+  size_t taken = takeSamples(dr, bind2nd(greater<CORBA::Long>(), 1));
+  if (taken == 1) {
+    cout << "INFO: partial read on DataReader \"dr\"\n";
+    if (!waitForSample(dr)) return false;
+    taken += takeSamples(dr, bind2nd(greater<CORBA::Long>(), 1));
+  }
+
+  if (taken != 2) {
     cout << "ERROR: take() should have returned two valid samples" << endl;
     return false;
   }
