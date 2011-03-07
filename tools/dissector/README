@@ -130,6 +130,12 @@ A number of display filters are supported by the OpenDDS DCPS dissector:
    opendds.sample.flags.lifespan
      Indicates sample defines a lifespan.
 
+   opendds.sample.flags.group_coherent
+     Indicates sample uses PRESENTATION.coherent_access.
+
+   opendds.sample.flags.content_filter
+     Indicates the publisher has applied filters for Content-Filtered Topics.
+
    opendds.sample.length
      Total length of sample data, not including sample header.
 
@@ -144,6 +150,12 @@ A number of display filters are supported by the OpenDDS DCPS dissector:
 
    opendds.sample.publication
      Publication ID of transmitting DataWriter.
+
+   opendds.sample.publisher
+     ID representing the coherent group (if group_coherent flag is set).
+
+   opendds.sample.content_filter_entries
+     Number of entries in this list for filtering (if content_filter flag is set).
 
 
 ======================================================================
