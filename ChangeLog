@@ -1,3 +1,13 @@
+Mon Mar  7 15:52:09 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/struct.html:
+
+          Put discussion on Keys under its own header to make stand out.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/model_population.html:
+
+          Added caution about modifying the model directly using the Property view.
+
 Mon Mar  7 15:22:05 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datalib_collection_types_palette.png:
