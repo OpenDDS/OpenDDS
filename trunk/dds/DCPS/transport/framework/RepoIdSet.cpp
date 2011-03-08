@@ -23,7 +23,7 @@ void
 OpenDDS::DCPS::RepoIdSet::serialize(OpenDDS::DCPS::Serializer & serializer)
 {
   DBG_ENTRY_LVL("RepoIdSet","serialize",6);
-  CORBA::ULong sz = this->size();
+  CORBA::ULong sz = static_cast<CORBA::ULong>(this->size());
   serializer << sz;
 
   for (MapType::iterator itr = map_.begin();

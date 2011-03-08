@@ -567,7 +567,7 @@ OpenDDS::DCPS::DataLink::create_control(char submessage_id,
                                                  : TAO_ENCAP_BYTE_ORDER;
   header.message_id_ = TRANSPORT_CONTROL;
   header.submessage_id_ = submessage_id;
-  header.message_length_ = data->total_length();
+  header.message_length_ = static_cast<ACE_UINT32>(data->total_length());
 
   ACE_Message_Block* message;
   ACE_NEW_MALLOC_RETURN(message,
@@ -949,7 +949,7 @@ OpenDDS::DCPS::DataLink::notify(enum ConnectionNotice notice)
         RepoIdSet::MapType & map = pubset->map();
 
         WriterIdSeq pubids;
-        pubids.length(pubset->size());
+        pubids.length(static_cast<CORBA::ULong>(pubset->size()));
         CORBA::ULong i = 0;
 
         for (RepoIdSet::MapType::iterator iitr = map.begin();
@@ -1091,7 +1091,7 @@ CORBA::ULong
 OpenDDS::DCPS::DataLink::num_targets() const
 {
   GuardType guard(this->sub_map_lock_);
-  return this->sub_map_.size();
+  return static_cast<CORBA::ULong>(this->sub_map_.size());
 }
 
 bool
@@ -1214,7 +1214,8 @@ void OpenDDS::DCPS::DataLink::clear_associations()
     // Check id DataReader exists (could have been deleted before we got here.)
     if (dr != NULL) {
       // Each sub-id is mapped to a bunch of pub-id's
-      ssize_t pub_ids_count = pub_id_set->size();
+      CORBA::ULong pub_ids_count =
+        static_cast<CORBA::ULong>(pub_id_set->size());
       WriterIdSeq pub_ids(pub_ids_count);
       pub_ids.length(pub_ids_count);
 
@@ -1223,7 +1224,7 @@ void OpenDDS::DCPS::DataLink::clear_associations()
       // create a sequence of associated pub-id's
       for (RepoIdSet::MapType::iterator pub_ids_iter = pub_id_set->map().begin();
            pub_ids_iter != pub_id_set->map().end(); ++pub_ids_iter) {
-        pub_ids [count++] = pub_ids_iter->first;
+        pub_ids[count++] = pub_ids_iter->first;
       }
 
       // after creating remote id sequence, remove from DataReader

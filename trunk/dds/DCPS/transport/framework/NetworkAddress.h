@@ -21,7 +21,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 struct HostnameInfo {
-  int index_;
+  size_t index_;
   ACE_TString hostname_;
 };
 

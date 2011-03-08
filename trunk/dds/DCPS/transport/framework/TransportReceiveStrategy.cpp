@@ -264,11 +264,17 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
                        -1) ;
     }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+// iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
+// since on other platforms iov_len is 64-bit
+#pragma warning(disable : 4267)
+#endif
     // This check covers the case where we have an unread fragment in
     // the first buffer, but no space to write any more data.
-    if (this->receive_buffers_[ current]->space() > 0) {
-      iov[ vec_index].iov_len  = this->receive_buffers_[ current]->space() ;
-      iov[ vec_index].iov_base = this->receive_buffers_[ current]->wr_ptr() ;
+    if (this->receive_buffers_[current]->space() > 0) {
+      iov[vec_index].iov_len  = this->receive_buffers_[current]->space();
+      iov[vec_index].iov_base = this->receive_buffers_[current]->wr_ptr();
 
       VDBG((LM_DEBUG,"(%P|%t) DBG:   "
             "index==%d, len==%d, base==%x\n",
@@ -278,6 +284,10 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
     }
   }
 
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
   VDBG((LM_DEBUG,"(%P|%t) DBG:   "
         "Perform the recvv() call\n"));
 
@@ -286,7 +296,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
   //
   ACE_INET_Addr remote_address;
   ssize_t bytes_remaining = this->receive_bytes(iov,
-                                                vec_index,
+                                                static_cast<int>(vec_index),
                                                 remote_address);
 
   if (bytes_remaining < 0) {
@@ -472,7 +482,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
         // only do the hexdump if it will be printed - to not impact perfomance.
         if (OpenDDS::DCPS::Transport_debug_level) {
           ACE_TCHAR xbuffer[4096];
-          int xbytes =
+          size_t xbytes =
             this->receive_buffers_[this->buffer_index_]->length();
 
           if (xbytes > 11) {

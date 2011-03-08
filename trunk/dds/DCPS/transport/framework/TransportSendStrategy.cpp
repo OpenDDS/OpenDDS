@@ -47,12 +47,11 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
   : max_samples_(config->max_samples_per_packet_),
     optimum_size_(config->optimum_packet_size_),
     max_size_(config->max_packet_size_),
-    queue_(new QueueType(config->queue_messages_per_pool_,config->queue_initial_pools_)),
-    //not_yet_pac_q_(new QueueType (1,config->max_samples_per_packet_)),
-    //not_yet_pac_q_len_ (0),
+    queue_(new QueueType(config->queue_messages_per_pool_,
+                         config->queue_initial_pools_)),
     max_header_size_(0),
     header_block_(0),
-    elems_(new QueueType(1,config->max_samples_per_packet_)),
+    elems_(new QueueType(1, config->max_samples_per_packet_)),
     pkt_chain_(0),
     header_complete_(0),
     start_counter_(0),
@@ -422,7 +421,7 @@ OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
           "At top of 'num bytes left' loop.  num_bytes_left == [%d].\n",
           num_bytes_left));
 
-    int block_length = this->pkt_chain_->length();
+    int block_length = static_cast<int>(this->pkt_chain_->length());
 
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Length of block at front of pkt_chain_ is [%d].\n",
@@ -671,7 +670,7 @@ OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
 
   // Adjust the packet header_.length_ to indicate how many non header
   // bytes are left to send.
-  this->header_.length_ -= num_non_header_bytes_sent;
+  this->header_.length_ -= static_cast<ACE_UINT32>(num_non_header_bytes_sent);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "After, header_.length_ == %d.\n",
@@ -834,7 +833,7 @@ OpenDDS::DCPS::TransportSendStrategy::clear(SendMode mode)
     if (this->header_.length_ > 0) {
       // Clear the messages in the pkt_chain_ that is partially sent.
       // We just reuse these functions for normal partial send except actual sending.
-      int num_bytes_left = this->pkt_chain_->total_length();
+      int num_bytes_left = static_cast<int>(this->pkt_chain_->total_length());
       int result = this->adjust_packet_after_send(num_bytes_left, DELAY_NOTIFICATION);
 
       if (result == 0) {
@@ -848,9 +847,10 @@ OpenDDS::DCPS::TransportSendStrategy::clear(SendMode mode)
     }
 
     elems = this->elems_;
-    this->elems_ = new QueueType(1,this->config_->max_samples_per_packet_);
+    this->elems_ = new QueueType(1, this->config_->max_samples_per_packet_);
     queue = this->queue_;
-    this->queue_ = new QueueType(this->config_->queue_messages_per_pool_,this->config_->queue_initial_pools_);
+    this->queue_ = new QueueType(this->config_->queue_messages_per_pool_,
+                                 this->config_->queue_initial_pools_);
 
     this->header_.length_ = 0;
     this->pkt_chain_ = 0;
@@ -1118,7 +1118,7 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
             this->header_.length_));
 
       // Adjust the header_.length_ to account for the length of the element.
-      this->header_.length_ += element_length;
+      this->header_.length_ += static_cast<ACE_UINT32>(element_length);
       size_t header_length = this->header_.length_;// + element_length;
       //this->not_yet_pac_q_len_ += element_length;
 
@@ -1606,7 +1606,7 @@ OpenDDS::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
         // element from the queue_ at this time (we've been peek()'ing
         // at the element all this time).
         this->elems_->put(this->queue_->get());
-        this->header_.length_ = element_length;
+        this->header_.length_ = static_cast<ACE_UINT32>(element_length);
       }
 
       // Otherwise (when elems_.size() != 0), we don't use the current
@@ -1622,7 +1622,7 @@ OpenDDS::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
     // now extract the current element from the queue_, put it into the
     // packet elems_, and adjust the packet header_.length_.
     this->elems_->put(this->queue_->get());
-    this->header_.length_ += element_length;
+    this->header_.length_ += static_cast<ACE_UINT32>(element_length);
 
     // If the current number of packet elems_ has reached the maximum
     // number of samples per packet, then we are done.
@@ -1762,12 +1762,21 @@ OpenDDS::DCPS::TransportSendStrategy::do_send_packet( ACE_Message_Block* packet,
 
   int num_blocks = 0;
 
+#ifdef _MSC_VER
+#pragma warning(push)
+// iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
+// since on other platforms iov_len is 64-bit
+#pragma warning(disable : 4267)
+#endif
   while (block != 0 && num_blocks < MAX_SEND_BLOCKS) {
     iov[num_blocks].iov_len  = block->length();
     iov[num_blocks].iov_base = block->rd_ptr();
     ++num_blocks;
     block = block->cont();
   }
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "There are [%d] number of entries in the iovec array.\n",

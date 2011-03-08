@@ -40,7 +40,7 @@ DRMonitorImpl::report() {
     DataReaderImpl::InstanceHandleVec instances;
     this->dr_->get_instance_handles(instances);
     CORBA::ULong length = 0;
-    report.instances.length(instances.size());
+    report.instances.length(static_cast<CORBA::ULong>(instances.size()));
     for (DataReaderImpl::InstanceHandleVec::iterator iter = instances.begin();
          iter != instances.end();
          ++iter) {
@@ -49,7 +49,7 @@ DRMonitorImpl::report() {
     DataReaderImpl::WriterStatePairVec writer_states;
     this->dr_->get_writer_states(writer_states);
     length = 0;
-    report.associations.length(writer_states.size());
+    report.associations.length(static_cast<CORBA::ULong>(writer_states.size()));
     for (DataReaderImpl::WriterStatePairVec::iterator iter = writer_states.begin();
          iter != writer_states.end();
          ++iter) {

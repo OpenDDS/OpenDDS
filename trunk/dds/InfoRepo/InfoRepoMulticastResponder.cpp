@@ -73,7 +73,7 @@ InfoRepoMulticastResponder::init(
 
   if (tmpnic != 0) {
     // i.e. a nic name has been specified
-    length_addr = tmpnic - mcast_addr + 1;
+    length_addr = static_cast<CORBA::ULong>(tmpnic - mcast_addr + 1);
     actual_mcast_addr = CORBA::string_alloc(length_addr);
 
     ACE_OS::strncpy(actual_mcast_addr.inout(),

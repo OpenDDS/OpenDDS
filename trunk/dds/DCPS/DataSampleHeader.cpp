@@ -84,7 +84,9 @@ bool DataSampleHeader::partial(const ACE_Message_Block& mb)
   if (len <= FLAGS_OFFSET) return true;
 
   char flags;
-  mb_peek(flags, mb, FLAGS_OFFSET, false /*swap ignored for 1-byte read*/);
+  if (!mb_peek(flags, mb, FLAGS_OFFSET, false /*swap ignored for char*/)) {
+    return true;
+  }
 
   size_t expected = max_marshaled_size();
   if (!(flags & LIFESPAN_MASK)) expected -= LIFESPAN_LENGTH;

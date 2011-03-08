@@ -245,7 +245,7 @@ OpenDDS::DCPS::SimpleTcpDataLink::send_graceful_disconnect_message()
                             0));
   data->wr_ptr(20);
 
-  header_data.message_length_ = data->length();
+  header_data.message_length_ = static_cast<ACE_UINT32>(data->length());
 
   ACE_NEW(message,
           ACE_Message_Block(max_marshaled_size,
@@ -309,7 +309,7 @@ OpenDDS::DCPS::SimpleTcpDataLink::fully_associated()
 
   ACE_Message_Block* data = this->marshal_acks(swap_byte);
 
-  header_data.message_length_ = data->length();
+  header_data.message_length_ = static_cast<ACE_UINT32>(data->length());
 
   ACE_NEW(message,
           ACE_Message_Block(max_marshaled_size,

@@ -395,7 +395,7 @@ OpenDDS::DCPS::SimpleTcpTransport::connection_info_i
 
   ACE_OutputCDR cdr;
   cdr << network_order_address;
-  size_t len = cdr.total_length();
+  CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
 
   // Allow DCPSInfo to check compatibility of transport implemenations.
   local_info.transport_id = 1; // TBD Change magic number into a enum or constant value.

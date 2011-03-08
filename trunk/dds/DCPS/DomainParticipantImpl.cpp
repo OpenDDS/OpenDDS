@@ -435,11 +435,11 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
       if (status == CREATED || status == FOUND) {
         DDS::Topic_ptr new_topic = create_topic_i(topic_id,
-                                                    topic_name,
-                                                    type_name,
-                                                    topic_qos,
-                                                    a_listener,
-                                                    mask);
+                                                  topic_name,
+                                                  type_name,
+                                                  topic_qos,
+                                                  a_listener,
+                                                  mask);
         if (this->monitor_) {
           this->monitor_->report();
         }
@@ -758,7 +758,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
                    DDS::RETCODE_OUT_OF_RESOURCES);
   DDS::ContentFilteredTopic_var cft =
     DDS::ContentFilteredTopic::_duplicate(a_contentfilteredtopic);
-  TopicDescriptionMap::iterator iter = topic_descrs_.find(cft->get_name());
+  CORBA::String_var name = cft->get_name();
+  TopicDescriptionMap::iterator iter = topic_descrs_.find(name.in());
   if (iter == topic_descrs_.end()) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }

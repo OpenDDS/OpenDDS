@@ -20,7 +20,7 @@ inline void
 fill_guid(CORBA::Octet* begin, long value, std::size_t len)
 {
   for (std::size_t i = 0; i < len; ++i) {
-    unsigned shift = (len - i - 1) << 3;
+    size_t shift = (len - i - 1) << 3;
     begin[i] = static_cast<CORBA::Octet>(0xff & (value >> shift));
   }
 }

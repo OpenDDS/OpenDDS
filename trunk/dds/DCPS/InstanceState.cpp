@@ -46,28 +46,32 @@ OpenDDS::DCPS::InstanceState::~InstanceState()
 void OpenDDS::DCPS::InstanceState::sample_info(DDS::SampleInfo& si,
                                                const ReceivedDataElement* de)
 {
-  si.sample_state = de->sample_state_ ;
-  si.view_state = view_state_ ;
-  si.instance_state = instance_state_ ;
-  si.disposed_generation_count = disposed_generation_count_ ;
-  si.no_writers_generation_count = no_writers_generation_count_ ;
-  si.source_timestamp = de->source_timestamp_ ;
-  si.instance_handle = handle_ ;
+  si.sample_state = de->sample_state_;
+  si.view_state = view_state_;
+  si.instance_state = instance_state_;
+  si.disposed_generation_count =
+    static_cast<CORBA::Long>(disposed_generation_count_);
+  si.no_writers_generation_count =
+    static_cast<CORBA::Long>(no_writers_generation_count_);
+  si.source_timestamp = de->source_timestamp_;
+  si.instance_handle = handle_;
   si.publication_handle = this->reader_->participant_servant_->get_handle(de->pub_);
   si.valid_data = de->registered_data_ != 0;
   /*
    * These are actually calculated later...
    */
-  si.sample_rank = 0 ;
+  si.sample_rank = 0;
 
   // these aren't the real value, they're being saved
   // for a later calculation. the actual value is
   // calculated in DataReaderImpl::sample_info using
   // these values.
-  si.generation_rank = de->disposed_generation_count_ +
-                       de->no_writers_generation_count_ ;
-  si.absolute_generation_rank = de->disposed_generation_count_ +
-                                de->no_writers_generation_count_ ;
+  si.generation_rank =
+    static_cast<CORBA::Long>(de->disposed_generation_count_ +
+                             de->no_writers_generation_count_);
+  si.absolute_generation_rank =
+    static_cast<CORBA::Long>(de->disposed_generation_count_ +
+                             de->no_writers_generation_count_);
 }
 
 // cannot ACE_INLINE because of #include loop

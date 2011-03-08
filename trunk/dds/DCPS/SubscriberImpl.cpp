@@ -149,10 +149,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   ContentFilteredTopicImpl* cft = 0;
   MultiTopicImpl* mt = 0;
+  DDS::Topic_var related;
   if (!topic_servant) {
     cft = dynamic_cast<ContentFilteredTopicImpl*>(a_topic_desc);
     if (cft) {
-      topic_servant = dynamic_cast<TopicImpl*>(cft->get_related_topic());
+      related = cft->get_related_topic();
+      topic_servant = dynamic_cast<TopicImpl*>(related.in());
     } else {
       mt = dynamic_cast<MultiTopicImpl*>(a_topic_desc);
     }
@@ -969,7 +971,7 @@ SubscriberImpl::add_associations(
   info.association_data_ = new AssociationData[info.num_associations_];
   ACE_Auto_Array_Ptr<AssociationData> safe_associations(info.association_data_);
 
-  for (ssize_t i = 0; i < info.num_associations_; ++i) {
+  for (CORBA::ULong i = 0; i < info.num_associations_; ++i) {
     info.association_data_[i].remote_id_ = writers[i].writerId;
     info.association_data_[i].remote_data_ = writers[i].writerTransInfo;
   }

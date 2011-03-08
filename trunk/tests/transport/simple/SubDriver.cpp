@@ -221,7 +221,7 @@ SubDriver::run()
 
   ACE_OutputCDR cdr;
   cdr << network_order_address;
-  size_t len = cdr.total_length ();
+  CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
 
   publications[0].remote_data_.data
     = OpenDDS::DCPS::TransportInterfaceBLOB

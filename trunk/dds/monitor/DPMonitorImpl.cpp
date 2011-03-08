@@ -43,7 +43,7 @@ DPMonitorImpl::report() {
     DomainParticipantImpl::TopicIdVec topics;
     this->dp_->get_topic_ids(topics);
     CORBA::ULong length = 0;
-    report.topics.length(topics.size());
+    report.topics.length(static_cast<CORBA::ULong>(topics.size()));
     for (DomainParticipantImpl::TopicIdVec::iterator iter = topics.begin();
          iter != topics.end();
          ++iter) {

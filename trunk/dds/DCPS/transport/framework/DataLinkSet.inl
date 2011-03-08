@@ -26,7 +26,7 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
 
   GuardType guard(this->lock_);
   TransportSendElement* send_element =
-    TransportSendElement::alloc(map_.size(), sample);
+    TransportSendElement::alloc(static_cast<int>(map_.size()), sample);
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   enum { DATA, DB, MB, N_ALLOC }; // for ACE_Allocators below
@@ -113,7 +113,7 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                 pub_id,
   ACE_NEW_MALLOC_RETURN(send_element,
     static_cast<TransportSendControlElement*>(
       send_control_element_allocator_.malloc()),
-    TransportSendControlElement(map_.size(),
+    TransportSendControlElement(static_cast<int>(map_.size()),
                                 pub_id,
                                 listener,
                                 msg,
@@ -145,7 +145,7 @@ OpenDDS::DCPS::DataLinkSet::send_response(
   ACE_NEW_MALLOC(send_element,
     static_cast<TransportSendControlElement*>(
       send_control_element_allocator_.malloc()),
-    TransportSendControlElement(map_.size(),
+    TransportSendControlElement(static_cast<int>(map_.size()),
                                 pub_id,
                                 &listener,
                                 response,

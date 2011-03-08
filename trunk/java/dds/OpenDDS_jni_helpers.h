@@ -87,7 +87,7 @@ struct SimpleField : Field<C, T, whichSig> {
 
   void toJava(JNIEnv *jni, jclass clazz, const C &cxx, jobject obj) {
     jfieldID fid = this->getFid(jni, clazz);
-    (jni->*jniSetFn)(obj, fid, cxx.*(this->member_ptr_));
+    (jni->*jniSetFn)(obj, fid, static_cast<JNI_T>(cxx.*(this->member_ptr_)));
   }
 };
 

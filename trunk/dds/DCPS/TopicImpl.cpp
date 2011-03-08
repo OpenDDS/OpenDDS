@@ -18,7 +18,6 @@
 namespace OpenDDS {
 namespace DCPS {
 
-// Implementation skeleton constructor
 TopicImpl::TopicImpl(const RepoId                   topic_id,
                      const char*                    topic_name,
                      const char*                    type_name,
@@ -41,17 +40,16 @@ TopicImpl::TopicImpl(const RepoId                   topic_id,
 {
   inconsistent_topic_status_.total_count = 0;
   inconsistent_topic_status_.total_count_change = 0;
-  monitor_ = TheServiceParticipant->monitor_factory_->create_topic_monitor(this);
+  monitor_ =
+    TheServiceParticipant->monitor_factory_->create_topic_monitor(this);
 }
 
-// Implementation skeleton destructor
 TopicImpl::~TopicImpl()
 {
 }
 
 DDS::ReturnCode_t
-TopicImpl::set_qos(
-  const DDS::TopicQos & qos)
+TopicImpl::set_qos(const DDS::TopicQos & qos)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
@@ -64,12 +62,15 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
     } else {
       qos_ = qos;
-      DomainParticipantImpl* part = dynamic_cast<DomainParticipantImpl*>(this->participant_);
+      DomainParticipantImpl* part =
+        dynamic_cast<DomainParticipantImpl*>(this->participant_);
 
       try {
-        DCPSInfo_var repo = TheServiceParticipant->get_repository(part->get_domain_id());
-        CORBA::Boolean status
-        = repo->update_topic_qos(this->id_, part->get_domain_id(), part->get_id(), qos_);
+        DCPSInfo_var repo =
+          TheServiceParticipant->get_repository(part->get_domain_id());
+        CORBA::Boolean status =
+          repo->update_topic_qos(this->id_, part->get_domain_id(),
+                                 part->get_id(), qos_);
 
         if (status == 0) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -79,15 +80,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
         }
 
       } catch (const CORBA::SystemException& sysex) {
-        sysex._tao_print_exception(
-          "ERROR: System Exception"
-          " in TopicImpl::set_qos");
+        sysex._tao_print_exception("ERROR: System Exception in "
+                                   "TopicImpl::set_qos");
         return DDS::RETCODE_ERROR;
 
       } catch (const CORBA::UserException& userex) {
-        userex._tao_print_exception(
-          "ERROR:  Exception"
-          " in TopicImpl::set_qos");
+        userex._tao_print_exception("ERROR: Exception in TopicImpl::set_qos");
         return DDS::RETCODE_ERROR;
       }
     }
@@ -100,8 +98,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 DDS::ReturnCode_t
-TopicImpl::get_qos(
-  DDS::TopicQos & qos)
+TopicImpl::get_qos(DDS::TopicQos& qos)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
   qos = qos_;
@@ -109,9 +106,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 DDS::ReturnCode_t
-TopicImpl::set_listener(
-  DDS::TopicListener_ptr a_listener,
-  DDS::StatusMask mask)
+TopicImpl::set_listener(DDS::TopicListener_ptr a_listener, DDS::StatusMask mask)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
   listener_mask_ = mask;
@@ -129,8 +124,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 DDS::ReturnCode_t
-TopicImpl::get_inconsistent_topic_status(
-  DDS::InconsistentTopicStatus & a_status)
+TopicImpl::get_inconsistent_topic_status(DDS::InconsistentTopicStatus& a_status)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
   a_status = inconsistent_topic_status_;
@@ -151,7 +145,8 @@ ACE_THROW_SPEC((CORBA::SystemException))
     return DDS::RETCODE_OK;
   }
 
-  DomainParticipantImpl* part = dynamic_cast<DomainParticipantImpl*>(this->participant_);
+  DomainParticipantImpl* part =
+    dynamic_cast<DomainParticipantImpl*>(this->participant_);
 
   if (part->is_enabled() == false) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
@@ -177,9 +172,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
 }
 
 const char*
-TopicImpl::type_name ()
+TopicImpl::type_name() const
 {
-  return this->type_name_.c_str ();
+  return this->type_name_.c_str();
 }
 
 } // namespace DCPS

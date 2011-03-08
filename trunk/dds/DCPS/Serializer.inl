@@ -31,20 +31,21 @@ Serializer::doread(char* dest, size_t size, bool swap, size_t offset)
   // Determine how much data will remain to be read after the current
   // buffer has been entirely read.
   //
-  register int remainder = size - offset - this->current_->length();
-  remainder = (remainder<0)? 0: remainder;
+  const size_t len = this->current_->length();
+  register size_t remainder = (size - offset > len) ? size - offset - len : 0;
 
   //
   // Derive how much data we need to read from the current buffer.
   //
-  register size_t initial = size-offset-remainder;
+  register size_t initial = size - offset - remainder;
 
   //
   // Copy or swap the source data from the current buffer into the
   // destination.
   //
-  swap? this->swapcpy(dest+remainder, this->current_->rd_ptr(), initial):
-  this->smemcpy(dest+   offset, this->current_->rd_ptr(), initial);
+  swap
+    ? this->swapcpy(dest + remainder, this->current_->rd_ptr(), initial)
+    : this->smemcpy(dest + offset, this->current_->rd_ptr(), initial);
   this->current_->rd_ptr(initial);
 
   //   smemcpy
@@ -74,7 +75,7 @@ Serializer::doread(char* dest, size_t size, bool swap, size_t offset)
   //
   // Move to the next chained block if this one is spent.
   //
-  this->current_->length()==0? this->current_ = this->current_->cont() :0;
+  (this->current_->length() == 0) ? this->current_ = this->current_->cont() : 0;
 
   //
   // Return the current location in the read.
@@ -110,19 +111,20 @@ Serializer::dowrite(const char* src, size_t size, bool swap, size_t offset)
   // Determine how much data will remain to be written after the current
   // buffer has been entirely filled.
   //
-  register int remainder = size - offset - this->current_->space();
-  remainder = (remainder<0)? 0: remainder;
+  const size_t spc = this->current_->space();
+  register size_t remainder = (size - offset > spc) ? size - offset - spc : 0;
 
   //
   // Derive how much data we need to write to the current buffer.
   //
-  register size_t initial = size-offset-remainder;
+  register size_t initial = size - offset - remainder;
 
   //
   // Copy or swap the source data into the current buffer.
   //
-  swap? this->swapcpy(this->current_->wr_ptr(), src+remainder, initial):
-  this->smemcpy(this->current_->wr_ptr(), src+   offset, initial);
+  swap
+    ? this->swapcpy(this->current_->wr_ptr(), src + remainder, initial)
+    : this->smemcpy(this->current_->wr_ptr(), src + offset, initial);
   this->current_->wr_ptr(initial);
 
   //   smemcpy
@@ -152,7 +154,7 @@ Serializer::dowrite(const char* src, size_t size, bool swap, size_t offset)
   //
   // Move to the next chained block if this one is spent.
   //
-  this->current_->space()==0? this->current_ = this->current_->cont() :0;
+  (this->current_->space() == 0) ? this->current_ = this->current_->cont() : 0;
 
   //
   // Return the current location in the write.

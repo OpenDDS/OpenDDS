@@ -33,12 +33,11 @@ class Monitor;
 * the interface this class is implementing.
 */
 class OpenDDS_Dcps_Export TopicImpl
-  : public virtual OpenDDS::DCPS::LocalObject<DDS::Topic>,
+  : public virtual LocalObject<DDS::Topic>,
     public virtual EntityImpl,
     public virtual TopicDescriptionImpl {
 public:
 
-  //Constructor
   TopicImpl(const RepoId                   topic_id,
             const char*                    topic_name,
             const char*                    type_name,
@@ -48,30 +47,26 @@ public:
             const DDS::StatusMask &        mask,
             DomainParticipantImpl*         participant);
 
-  //Destructor
   virtual ~TopicImpl();
 
   virtual DDS::InstanceHandle_t get_instance_handle()
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  virtual DDS::ReturnCode_t set_qos(
-    const DDS::TopicQos & qos)
+  virtual DDS::ReturnCode_t set_qos(const DDS::TopicQos& qos)
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  virtual DDS::ReturnCode_t get_qos(
-    DDS::TopicQos & qos)
+  virtual DDS::ReturnCode_t get_qos(DDS::TopicQos& qos)
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  virtual DDS::ReturnCode_t set_listener(
-    DDS::TopicListener_ptr a_listener,
-    DDS::StatusMask mask)
+  virtual DDS::ReturnCode_t set_listener(DDS::TopicListener_ptr a_listener,
+                                         DDS::StatusMask mask)
   ACE_THROW_SPEC((CORBA::SystemException));
 
   virtual DDS::TopicListener_ptr get_listener()
   ACE_THROW_SPEC((CORBA::SystemException));
 
   virtual DDS::ReturnCode_t get_inconsistent_topic_status(
-    DDS::InconsistentTopicStatus & a_status)
+    DDS::InconsistentTopicStatus& a_status)
   ACE_THROW_SPEC((CORBA::SystemException));
 
   virtual DDS::ReturnCode_t enable()
@@ -85,17 +80,17 @@ public:
 
   CORBA::Long entity_refs() const {
     return entity_refs_;
-  };
+  }
 
   void add_entity_ref() {
     entity_refs_++;
-  };
+  }
 
   void remove_entity_ref() {
     entity_refs_--;
-  };
+  }
 
-  const char* type_name ();
+  const char* type_name() const;
 
 private:
   /// The topic qos

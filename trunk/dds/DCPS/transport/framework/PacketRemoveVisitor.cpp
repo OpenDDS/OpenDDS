@@ -395,7 +395,7 @@ OpenDDS::DCPS::PacketRemoveVisitor::visit_element_ref
     // to match the block at the front of the original_blocks chain -
     // with respect to the difference between the rd_ptr() setting and
     // the base() setting.
-    unsigned rd_offset = original_blocks->rd_ptr() - original_blocks->base();
+    size_t rd_offset = original_blocks->rd_ptr() - original_blocks->base();
 
     if (rd_offset > 0) {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "

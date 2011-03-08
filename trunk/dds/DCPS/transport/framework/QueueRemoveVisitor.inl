@@ -29,5 +29,5 @@ ACE_INLINE int
 OpenDDS::DCPS::QueueRemoveVisitor::removed_bytes() const
 {
   DBG_ENTRY_LVL("QueueRemoveVisitor","removed_bytes",6);
-  return this->removed_bytes_;
+  return static_cast<int>(this->removed_bytes_);
 }

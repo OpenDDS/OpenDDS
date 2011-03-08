@@ -21,7 +21,8 @@ ContentFilteredTopicImpl::ContentFilteredTopicImpl(const char* name,
   DDS::Topic_ptr related_topic, const char* filter_expression,
   const DDS::StringSeq& expression_parameters,
   DomainParticipantImpl* participant)
-  : TopicDescriptionImpl(name, related_topic->get_type_name(),
+  : TopicDescriptionImpl(name,
+      CORBA::String_var(related_topic->get_type_name()),
       dynamic_cast<TopicDescriptionImpl*>(related_topic)->get_type_support(),
       participant)
   , filter_expression_(filter_expression)
@@ -108,7 +109,7 @@ ContentFilteredTopicImpl::remove_reader(DataReaderImpl& reader)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
   std::vector<DataReaderImpl*>::iterator end = readers_.end();
-  readers_.erase(remove(readers_.begin(), end, &reader), end);
+  readers_.erase(std::remove(readers_.begin(), end, &reader), end);
 }
 
 } // namespace DCPS
