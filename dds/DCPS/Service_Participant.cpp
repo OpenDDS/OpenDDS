@@ -211,6 +211,10 @@ Service_Participant::shutdown()
   try {
     ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
 
+    domainRepoMap_.clear();
+    keyIorMap_.clear();
+    repoMap_.clear();
+
     if (!CORBA::is_nil(orb_.in())) {
       if (!orb_from_user_) {
         orb_->shutdown(0);
@@ -236,6 +240,7 @@ Service_Participant::shutdown()
         orb_->destroy();
       }
 
+      root_poa_ = PortableServer::POA::_nil();
       orb_ = CORBA::ORB::_nil();
     }
 

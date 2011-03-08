@@ -64,7 +64,7 @@ SPMonitorImpl::report()
     length = 0;
     const TransportFactory::ImplMap& transports =
       TransportFactory::instance()->get_transport_impl_map();
-    report.transports.length(transports.size());
+    report.transports.length(static_cast<CORBA::ULong>(transports.size()));
     for (TransportFactory::ImplMap::const_iterator mapIter = transports.begin();
          mapIter != transports.end();
          ++mapIter) {

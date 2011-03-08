@@ -41,7 +41,7 @@ DWMonitorImpl::report() {
     DataWriterImpl::InstanceHandleVec instances;
     this->dw_->get_instance_handles(instances);
     CORBA::ULong length = 0;
-    report.instances.length(instances.size());
+    report.instances.length(static_cast<CORBA::ULong>(instances.size()));
     for (DataWriterImpl::InstanceHandleVec::iterator iter = instances.begin();
          iter != instances.end();
          ++iter) {
@@ -50,7 +50,7 @@ DWMonitorImpl::report() {
     DataWriterImpl::IdSet readers;
     this->dw_->get_readers(readers);
     length = 0;
-    report.associations.length(readers.size());
+    report.associations.length(static_cast<CORBA::ULong>(readers.size()));
     for (DataWriterImpl::IdSet::iterator iter = readers.begin();
          iter != readers.end();
          ++iter) {

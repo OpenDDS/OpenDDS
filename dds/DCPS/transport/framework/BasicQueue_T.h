@@ -25,12 +25,12 @@ private:
 
 public:
 
-  BasicQueue(unsigned links_per_pool, unsigned initial_pools)
+  BasicQueue(size_t links_per_pool, size_t initial_pools)
   : head_(0),
-      tail_(0),
-      size_(0),
-      pool_(links_per_pool,initial_pools) {
-  }
+    tail_(0),
+    size_(0),
+    pool_(links_per_pool, initial_pools)
+  {}
 
   virtual ~BasicQueue() {
   }

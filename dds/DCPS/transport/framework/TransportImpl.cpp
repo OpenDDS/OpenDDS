@@ -601,22 +601,22 @@ bool OpenDDS::DCPS::TransportImpl::check_fully_association(const RepoId pub_id,
 {
   DBG_ENTRY_LVL("TransportImpl","check_fully_association",6);
 
-  int num_acked = 0;
+  size_t num_acked = 0;
 
   PublicationObjectMap::iterator pubiter = dw_map_.find(pub_id);
 
-  for (ssize_t i=0; i < associations.num_associations_; ++i) {
+  for (size_t i = 0; i < associations.num_associations_; ++i) {
     RepoId sub_id = associations.association_data_[i].remote_id_;
 
     if (this->acked(pub_id, sub_id) && pubiter != dw_map_.end()) {
-      ++ num_acked;
+      ++num_acked;
     }
   }
 
   bool ret = (num_acked == associations.num_associations_);
 
   if (ret && pubiter != dw_map_.end()) {
-    for (ssize_t i=0; i < associations.num_associations_; ++i) {
+    for (size_t i = 0; i < associations.num_associations_; ++i) {
       RepoId sub_id = associations.association_data_[i].remote_id_;
       this->remove_ack(pub_id, sub_id);
     }

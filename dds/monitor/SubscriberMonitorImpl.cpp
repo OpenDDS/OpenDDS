@@ -45,7 +45,7 @@ SubscriberMonitorImpl::report() {
     SubscriberImpl::SubscriptionIdVec readers;
     sub_->get_subscription_ids(readers);
     CORBA::ULong length = 0;
-    report.readers.length(readers.size());
+    report.readers.length(static_cast<CORBA::ULong>(readers.size()));
     for (SubscriberImpl::SubscriptionIdVec::iterator iter = readers.begin();
          iter != readers.end();
          ++iter) {

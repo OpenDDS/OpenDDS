@@ -202,7 +202,7 @@ OpenDDS::DCPS::RepoIdSetMap::marshal(bool byte_order)
                  0);
 
   Serializer writer(data, byte_order);
-  CORBA::ULong sz = this->size();
+  CORBA::ULong sz = static_cast<CORBA::ULong>(this->size());
   writer << sz;
 
   for (MapType::iterator itr = map_.begin();

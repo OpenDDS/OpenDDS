@@ -45,7 +45,7 @@ PublisherMonitorImpl::report() {
     PublisherImpl::PublicationIdVec writers;
     pub_->get_publication_ids(writers);
     CORBA::ULong length = 0;
-    report.writers.length(writers.size());
+    report.writers.length(static_cast<CORBA::ULong>(writers.size()));
     for (PublisherImpl::PublicationIdVec::iterator iter = writers.begin();
          iter != writers.end();
          ++iter) {

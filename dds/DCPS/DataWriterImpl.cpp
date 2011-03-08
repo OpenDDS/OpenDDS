@@ -551,9 +551,10 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
     if (!this->is_bit_) {
 
       // Derive the change in the number of subscriptions reading this writer.
-      int matchedSubscriptions = this->id_to_handle_map_.size();
-      this->publication_match_status_.current_count_change
-      = matchedSubscriptions - this->publication_match_status_.current_count;
+      int matchedSubscriptions =
+        static_cast<int>(this->id_to_handle_map_.size());
+      this->publication_match_status_.current_count_change =
+        matchedSubscriptions - this->publication_match_status_.current_count;
 
       // Only process status if the number of subscriptions has changed.
       if (this->publication_match_status_.current_count_change != 0) {
@@ -562,13 +563,13 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
         /// Section 7.1.4.1: total_count will not decrement.
 
         /// @TODO: Reconcile this with the verbiage in section 7.1.4.1
-        this->publication_match_status_.last_subscription_handle
-        = handles[ rds_len - 1];
+        this->publication_match_status_.last_subscription_handle =
+          handles[rds_len - 1];
 
         set_status_changed_flag(::DDS::PUBLICATION_MATCHED_STATUS, true);
 
-        DDS::DataWriterListener* listener
-        = this->listener_for(::DDS::SUBSCRIPTION_MATCHED_STATUS);
+        DDS::DataWriterListener* listener =
+         this->listener_for(::DDS::SUBSCRIPTION_MATCHED_STATUS);
 
         if (listener != 0) {
           listener->on_publication_matched(
@@ -606,8 +607,8 @@ void DataWriterImpl::remove_all_associations()
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
 
-    num_pending_readers = pending_readers_.size();
-    size = readers_.size() + num_pending_readers;
+    num_pending_readers = static_cast<CORBA::ULong>(pending_readers_.size());
+    size = static_cast<CORBA::ULong>(readers_.size()) + num_pending_readers;
     readers.length(size);
 
     IdSet::iterator itEnd = readers_.end();
@@ -1128,13 +1129,14 @@ ACE_THROW_SPEC((CORBA::SystemException))
 
   // Copy out the handles for the current set of subscriptions.
   int index = 0;
-  subscription_handles.length(this->id_to_handle_map_.size());
+  subscription_handles.length(
+    static_cast<CORBA::ULong>(this->id_to_handle_map_.size()));
 
   for (RepoIdToHandleMap::iterator
        current = this->id_to_handle_map_.begin();
        current != this->id_to_handle_map_.end();
        ++current, ++index) {
-    subscription_handles[ index] = current->second;
+    subscription_handles[index] = current->second;
   }
 
   return DDS::RETCODE_OK;
@@ -1677,7 +1679,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
     ? !TAO_ENCAP_BYTE_ORDER
   : TAO_ENCAP_BYTE_ORDER;
   header_data.coherent_change_ = 0;
-  header_data.message_length_ = data->total_length();
+  header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
   header_data.sequence_ = 0;
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
@@ -1736,7 +1738,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
     = this->publisher_servant_->qos_.presentation.access_scope
       == ::DDS::GROUP_PRESENTATION_QOS;
   header_data.content_filter_ = content_filter;
-  header_data.message_length_ = data->total_length();
+  header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
   ++this->sequence_number_;
   header_data.sequence_ = this->sequence_number_.getValue();
   header_data.source_timestamp_sec_ = source_timestamp.sec;

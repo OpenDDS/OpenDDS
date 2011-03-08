@@ -28,7 +28,7 @@ public:
 
   // TMB: links_per_pool == CHUNK_SIZE in Mike's code
   //      num_pools      == 1 in Mike's code.
-  BasicQueueLinkPool(unsigned links_per_pool, unsigned num_pools) {
+  BasicQueueLinkPool(size_t links_per_pool, size_t num_pools) {
     this->allocator_ = new AllocatorType(links_per_pool, num_pools);
   }
 

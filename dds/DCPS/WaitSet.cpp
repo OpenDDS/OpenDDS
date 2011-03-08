@@ -20,13 +20,15 @@ void copyInto(DDS::ConditionSeq& target,
 {
   size_t size = source.size();
 
+#if TAO_MAJOR_VERSION == 1 && TAO_MINOR_VERSION < 6
   // If we're shortening the sequence we must manually nil-out the extra slots
   // See DOC group bug 3481
   for (CORBA::ULong i = target.length(); i > size; --i) {
     target[i - 1] = DDS::Condition::_nil();
   }
+#endif
 
-  target.length(size);
+  target.length(static_cast<CORBA::ULong>(size));
   CORBA::ULong index = 0;
 
   for (DDS::WaitSet::ConditionSet::const_iterator iter = source.begin(),

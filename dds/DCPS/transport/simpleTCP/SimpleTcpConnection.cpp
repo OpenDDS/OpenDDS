@@ -392,7 +392,8 @@ OpenDDS::DCPS::SimpleTcpConnection::active_establishment
   // It will use that as an "identifier" of sorts.  To the other
   // (passive) side, our local_address that we send here will be known
   // as the remote_address.
-  ACE_UINT32 len = tcp_config_->local_address_str_.length() + 1;
+  ACE_UINT32 len =
+    static_cast<ACE_UINT32>(tcp_config_->local_address_str_.length()) + 1;
 
   ACE_UINT32 nlen = htonl(len);
 

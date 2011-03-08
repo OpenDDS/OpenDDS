@@ -29,12 +29,12 @@ private:
 public:
 
   /// Constructor.
-  BasicQueueLinkAllocator(unsigned chunk_size, unsigned initial_chunks)
-  : chunk_size_(chunk_size),
+  BasicQueueLinkAllocator(size_t chunk_size, size_t initial_chunks)
+    : chunk_size_(chunk_size),
       head_chunk_(0),
       tail_chunk_(0),
       free_list_(ACE_PURE_FREE_LIST) {
-    for (unsigned i = 0; i < initial_chunks; i++) {
+    for (size_t i = 0; i < initial_chunks; i++) {
       this->grow();
     }
   }

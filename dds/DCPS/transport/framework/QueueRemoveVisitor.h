@@ -47,7 +47,7 @@ private:
   /// Holds the status of our visit.
   int status_;
 
-  int removed_bytes_;
+  size_t removed_bytes_;
 };
 
 } // namespace DCPS

@@ -138,7 +138,7 @@ UdpTransport::connection_info_i(TransportInterfaceInfo& info) const
   ACE_OutputCDR cdr;
   cdr << network_address;
 
-  size_t len = cdr.total_length();
+  CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
   char *buffer = const_cast<char*>(cdr.buffer()); // safe
 
   info.transport_id = TRANSPORT_INTERFACE_ID;
