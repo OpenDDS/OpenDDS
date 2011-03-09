@@ -802,9 +802,9 @@ bool idl_mapping_java::gen_union(UTL_ScopedName *name,
 
   for (size_t i = 0; i < branches.size(); ++i) {
     string disc_check, first_label_value;
-    size_t n_labels = branches[i]->label_list_length();
+    unsigned long n_labels = branches[i]->label_list_length();
 
-    for (size_t j = 0; j < n_labels; ++j) {
+    for (unsigned long j = 0; j < n_labels; ++j) {
       AST_UnionLabel *ul = branches[i]->label(j);
       ostringstream oss;
 

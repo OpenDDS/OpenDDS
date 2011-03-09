@@ -788,7 +788,8 @@ TAO_IDL_CPP_Keyword_Table cpp_key_tbl_;
 
 bool isCxxKeyword(const char *word)
 {
-  return cpp_key_tbl_.lookup(word, ACE_OS::strlen(word));
+  return cpp_key_tbl_.lookup(word,
+                             static_cast<unsigned int>(ACE_OS::strlen(word)));
 }
 
 static const char name_sep = '_';
@@ -1654,10 +1655,10 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
   bool someBranchUsesExplicitDisc(false);
 
   for (size_t i = 0; i < branches.size(); ++i) {
-    size_t n_labels = branches[i]->label_list_length();
+    unsigned long n_labels = branches[i]->label_list_length();
     bool useExplicitDisc(n_labels > 1);
 
-    for (size_t j = 0; j < n_labels; ++j) {
+    for (unsigned long j = 0; j < n_labels; ++j) {
       AST_UnionLabel *ul = branches[i]->label(j);
       ostringstream oss;
 

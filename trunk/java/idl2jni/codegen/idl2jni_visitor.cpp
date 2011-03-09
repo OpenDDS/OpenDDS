@@ -227,7 +227,7 @@ idl2jni_visitor::visit_structure(AST_Structure *node)
 
   fields.reserve(nfields);
 
-  for (size_t i = 0; i < nfields; ++i) {
+  for (ACE_CDR::ULong i = 0; i < nfields; ++i) {
     AST_Field **f;
     node->field(f, i);
     fields.push_back(*f);
@@ -377,7 +377,7 @@ idl2jni_visitor::visit_union(AST_Union *node)
 
   branches.reserve(nfields);
 
-  for (size_t i = 0; i < nfields; ++i) {
+  for (ACE_CDR::ULong i = 0; i < nfields; ++i) {
     AST_Field **f;
     node->field(f, i);
     AST_UnionBranch *ub = AST_UnionBranch::narrow_from_decl(*f);
