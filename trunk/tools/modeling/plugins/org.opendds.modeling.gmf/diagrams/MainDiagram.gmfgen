@@ -761,6 +761,15 @@
         <generatedTypes>abstractNavigatorItem</generatedTypes>
       </filter>
     </tabs>
+    <tabs
+        xsi:type="gmfgen:GenCustomPropertyTab"
+        iD="ElementComment"
+        label="Comment"
+        className="ElementCommentPropertySection">
+      <filter
+          xsi:type="gmfgen:CustomTabFilter"
+          className="ElementCommentFilter"/>
+    </tabs>
   </propertySheet>
   <domainGenModel
       href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#/"/>

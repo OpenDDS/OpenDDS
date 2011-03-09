@@ -80,6 +80,12 @@
     <genClasses ecoreClass="Core.ecore#//TypedEntity">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Core.ecore#//TypedEntity/type"/>
     </genClasses>
+    <genClasses image="false" ecoreClass="Core.ecore#//Element">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Core.ecore#//Element/comment"/>
+    </genClasses>
+    <genClasses ecoreClass="Core.ecore#//Comment">
+      <genFeatures createChild="false" propertyMultiLine="true" ecoreFeature="ecore:EAttribute Core.ecore#//Comment/body"/>
+    </genClasses>
   </genPackages>
   <genPackages prefix="Domain" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
       generateExampleClass="false" generateModelWizard="false" ecorePackage="Domain.ecore#/">

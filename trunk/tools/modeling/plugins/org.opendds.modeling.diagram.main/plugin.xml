@@ -31,7 +31,7 @@
          contributorClass="org.opendds.modeling.diagram.main.part.OpenDDSDiagramActionBarContributor">
       </editor>
    </extension>
-   
+
    <extension point="org.eclipse.ui.contexts" id="ui-context">
       <?gmfgen generated="true"?>
       <context
@@ -50,7 +50,7 @@
   	     category="org.opendds.modeling.Wizard.category.ID"
   	     class="org.opendds.modeling.diagram.main.part.OpenDDSCreationWizard"
   	     id="org.opendds.modeling.diagram.main.part.OpenDDSCreationWizardID">
-  	  	 <description>%newWizardDesc</description>  
+  	  	 <description>%newWizardDesc</description>
       </wizard>
      <category
            id="org.opendds.modeling.Wizard.category.ID"
@@ -73,7 +73,7 @@
          </action>
       </objectContribution>
    </extension>
-	
+
    <extension point="org.eclipse.gmf.runtime.common.ui.services.action.globalActionHandlerProviders" id="global-actions">
       <?gmfgen generated="true"?>
       <GlobalActionHandlerProvider
@@ -127,7 +127,7 @@
       <super type="org.eclipse.core.resources.problemmarker"/>
       <super type="org.eclipse.gmf.runtime.common.ui.services.marker"/>
       <persistent value="true"/>
-   </extension>   
+   </extension>
 
    <extension id="validationDecoratorProvider" name="ValidationDecorations" point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders">
       <?gmfgen generated="true"?>
@@ -188,7 +188,7 @@
    </extension>
 
    <extension point="org.eclipse.ui.views.properties.tabbed.propertyTabs" id="proptabs">
-      <?gmfgen generated="true"?>   
+      <?gmfgen generated="true"?>
       <propertyTabs contributorId="org.opendds.modeling.diagram.main">
          <propertyTab
              category="visual"
@@ -202,39 +202,49 @@
              category="domain"
              id="property.tab.domain"
              label="%tab.domain"/>
+          <propertyTab
+             category="extra"
+             id="property.tab.Comment"
+             label="%tab.Comment"/>
       </propertyTabs>
    </extension>
 
    <extension point="org.eclipse.ui.views.properties.tabbed.propertySections" id="propsections">
-      <?gmfgen generated="true"?>   
+      <?gmfgen generated="true"?>
       <propertySections contributorId="org.opendds.modeling.diagram.main">
-         <propertySection id="property.section.ConnectorAppearancePropertySection" 
-            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.ConnectionEditPartPropertySectionFilter" 
-            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.appearance.ConnectionAppearancePropertySection" 
+         <propertySection id="property.section.ConnectorAppearancePropertySection"
+            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.ConnectionEditPartPropertySectionFilter"
+            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.appearance.ConnectionAppearancePropertySection"
             tab="property.tab.AppearancePropertySection">
          </propertySection>
-         <propertySection id="property.section.ShapeColorAndFontPropertySection" 
-            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.ShapeEditPartPropertySectionFilter" 
-            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.appearance.ShapeColorsAndFontsPropertySection" 
+         <propertySection id="property.section.ShapeColorAndFontPropertySection"
+            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.ShapeEditPartPropertySectionFilter"
+            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.appearance.ShapeColorsAndFontsPropertySection"
             tab="property.tab.AppearancePropertySection">
-         </propertySection> 
-         <propertySection id="property.section.DiagramColorsAndFontsPropertySection" 
-            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.DiagramEditPartPropertySectionFilter" 
-            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.appearance.DiagramColorsAndFontsPropertySection" 
+         </propertySection>
+         <propertySection id="property.section.DiagramColorsAndFontsPropertySection"
+            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.DiagramEditPartPropertySectionFilter"
+            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.appearance.DiagramColorsAndFontsPropertySection"
             tab="property.tab.AppearancePropertySection">
-         </propertySection>     
-         <propertySection id="property.section.RulerGridPropertySection" 
-            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.DiagramEditPartPropertySectionFilter" 
-            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.grid.RulerGridPropertySection" 
+         </propertySection>
+         <propertySection id="property.section.RulerGridPropertySection"
+            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.DiagramEditPartPropertySectionFilter"
+            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.grid.RulerGridPropertySection"
             tab="property.tab.DiagramPropertySection">
-         </propertySection>     
+         </propertySection>
          <propertySection
-            id="property.section.domain" 
+            id="property.section.domain"
             tab="property.tab.domain"
             class="org.opendds.modeling.diagram.main.sheet.OpenDDSPropertySection">
             <input type="org.eclipse.gmf.runtime.notation.View"/>
             <input type="org.eclipse.gef.EditPart"/>
             <input type="org.opendds.modeling.diagram.main.navigator.OpenDDSAbstractNavigatorItem"/>
+         </propertySection>
+         <propertySection
+            id="property.section.Comment"
+            tab="property.tab.Comment"
+            filter="org.opendds.modeling.diagram.main.part.ElementCommentFilter"
+            class="org.opendds.modeling.diagram.main.sheet.ElementCommentPropertySection">
          </propertySection>
       </propertySections>
    </extension>
@@ -416,7 +426,7 @@
                property="org.eclipse.gmf.runtime.emf.core.editingDomain"
                value="org.opendds.modeling.diagram.main.EditingDomain"/>
          </enablement>
-      </clientContext> 
+      </clientContext>
       <binding context="org.opendds.modeling.diagram.main.TypeContext">
          <elementType ref="org.opendds.modeling.diagram.main.OpenDDSModel_1000"/>
          <elementType ref="org.opendds.modeling.diagram.main.DcpsLib_2007"/>
@@ -471,10 +481,10 @@
    <extension point="org.eclipse.ui.navigator.navigatorContent" id="navigator-content">
       <?gmfgen generated="true"?>
       <navigatorContent
-            id="org.opendds.modeling.diagram.main.resourceContent" 
-            name="%navigatorContentName" 
-            priority="normal" 
-            contentProvider="org.opendds.modeling.diagram.main.navigator.OpenDDSNavigatorContentProvider" 
+            id="org.opendds.modeling.diagram.main.resourceContent"
+            name="%navigatorContentName"
+            priority="normal"
+            contentProvider="org.opendds.modeling.diagram.main.navigator.OpenDDSNavigatorContentProvider"
             labelProvider="org.opendds.modeling.diagram.main.navigator.OpenDDSNavigatorLabelProvider"
             icon="icons/obj16/OpenDDSDiagramFile.gif"
             activeByDefault="true">
@@ -498,8 +508,8 @@
            	   </adapt>
             </or>
          </possibleChildren>
-         <commonSorter 
-               id="org.opendds.modeling.diagram.main.navigatorSorter" 
+         <commonSorter
+               id="org.opendds.modeling.diagram.main.navigatorSorter"
                class="org.opendds.modeling.diagram.main.navigator.OpenDDSNavigatorSorter">
             <parentExpression>
                <or>
@@ -513,10 +523,10 @@
          </commonSorter>
       </navigatorContent>
       <navigatorContent
-            id="org.opendds.modeling.diagram.main.domainResourceContent" 
-            name="%domainNavigatorContentName" 
-            priority="normal" 
-            contentProvider="org.opendds.modeling.diagram.main.navigator.OpenDDSDomainNavigatorContentProvider" 
+            id="org.opendds.modeling.diagram.main.domainResourceContent"
+            name="%domainNavigatorContentName"
+            priority="normal"
+            contentProvider="org.opendds.modeling.diagram.main.navigator.OpenDDSDomainNavigatorContentProvider"
             labelProvider="org.opendds.modeling.diagram.main.navigator.OpenDDSDomainNavigatorLabelProvider"
             icon="icons/obj16/OpenDDSDiagramFile.gif"
             activeByDefault="true">
@@ -546,7 +556,7 @@
          </enablement>
       </actionProvider>
    </extension>
-   
+
 	   <extension point="org.eclipse.ui.navigator.linkHelper" id="navigator-linkhelper">
       <?gmfgen generated="true"?>
       <linkHelper
@@ -622,10 +632,10 @@
          id="org.opendds.modeling.diagram.main.updateDiagram"
          name="%update.diagram.name"/>
    </extension>
-   
+
    <extension point="org.eclipse.ui.bindings" id="update-cmd-binding">
       <?gmfgen generated="true"?>
-      <key 
+      <key
          commandId="org.opendds.modeling.diagram.main.updateDiagram"
          contextId="org.opendds.modeling.diagram.main.ui.diagramContext"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
@@ -643,7 +653,7 @@
             <visibleWhen>
                <and>
                   <with variable="activePartId"><equals value="org.opendds.modeling.diagram.main.part.OpenDDSDiagramEditorID"/></with>
-                  <with variable="selection"><iterate ifEmpty="false"> 
+                  <with variable="selection"><iterate ifEmpty="false">
                      <instanceof value="org.opendds.modeling.diagram.main.edit.parts.OpenDDSModelEditPart"/>
                   </iterate></with>
                </and>

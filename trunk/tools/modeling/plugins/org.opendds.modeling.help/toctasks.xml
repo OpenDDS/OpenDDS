@@ -10,6 +10,7 @@
                 <topic href="html/modeling/tasks/diagrams/connecting_figures.html" label="Connecting Figures"/>
                 <topic href="html/modeling/tasks/diagrams/moving_between_diagrams.html" label="Moving between diagrams"/>
                 <topic href="html/modeling/tasks/diagrams/arranging_figures.html" label="Arranging Figures"/>
+				<topic href="html/modeling/tasks/diagrams/adding_comments.html" label="Adding Comments"/>
                 <topic href="html/modeling/tasks/diagrams/exporting_diagrams_as_images.html" label="Exporting diagrams as images"/>
         </topic>
         <topic label="Working with OpenDDS Models">
