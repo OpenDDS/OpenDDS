@@ -368,7 +368,7 @@ InfoRepo::init()
     throw InitError("Unable to open IOR file.");
   }
 
-  ACE_OS::fprintf(output_file, "%s", objref_str);
+  ACE_OS::fprintf(output_file, "%s", objref_str.in());
   ACE_OS::fclose(output_file);
 
   // Initial federation join if specified on command line.
