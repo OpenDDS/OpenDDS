@@ -75,6 +75,7 @@ InfoRepo::run()
 {
   this->shutdown_complete_ = false;
   this->orb_->run();
+  this->finalize();
   ACE_GUARD(ACE_Thread_Mutex, g, this->lock_);
   this->shutdown_complete_ = true;
   this->cond_.signal();
@@ -86,10 +87,6 @@ InfoRepo::finalize()
   if (this->finalized_) {
     return;
   }
-
-  this->info_servant_->finalize();
-
-  this->federator_.finalize();
 
   TheTransportFactory->release();
   TheServiceParticipant->shutdown();
@@ -104,7 +101,11 @@ InfoRepo::finalize()
 int
 InfoRepo::handle_exception(ACE_HANDLE /* fd */)
 {
-  this->finalize();
+  // these should occur before ORB::shutdown() since they use the ORB/reactor
+  this->info_servant_->finalize();
+  this->federator_.finalize();
+
+  this->orb_->shutdown(true);
   return 0;
 }
 
@@ -112,6 +113,7 @@ void
 InfoRepo::shutdown()
 {
   this->orb_->orb_core()->reactor()->notify(this);
+  // reactor will invoke our InfoRepo::handle_exception()
 }
 
 void
