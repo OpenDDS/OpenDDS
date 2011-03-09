@@ -8,13 +8,13 @@
         eType="#//Type"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Boolean" eSuperTypes="#//Simple"/>
-  <eClassifiers xsi:type="ecore:EClass" name="Branch">
+  <eClassifiers xsi:type="ecore:EClass" name="Branch" eSuperTypes="Core.ecore#//Element">
     <eStructuralFeatures xsi:type="ecore:EReference" name="field" lowerBound="1" eType="#//Field"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="cases" lowerBound="1" upperBound="-1"
         eType="#//Case" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Case">
+  <eClassifiers xsi:type="ecore:EClass" name="Case" eSuperTypes="Core.ecore#//Element">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="literal" lowerBound="1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
@@ -29,14 +29,14 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="literals" upperBound="-1"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Field">
+  <eClassifiers xsi:type="ecore:EClass" name="Field" eSuperTypes="Core.ecore#//Element">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" lowerBound="1" eType="#//Type"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Float" eSuperTypes="#//FloatingPoint"/>
   <eClassifiers xsi:type="ecore:EClass" name="FloatingPoint" abstract="true" eSuperTypes="#//Simple"/>
   <eClassifiers xsi:type="ecore:EClass" name="Int" abstract="true" eSuperTypes="#//Simple"/>
-  <eClassifiers xsi:type="ecore:EClass" name="Key">
+  <eClassifiers xsi:type="ecore:EClass" name="Key" eSuperTypes="Core.ecore#//Element">
     <eStructuralFeatures xsi:type="ecore:EReference" name="field" lowerBound="1" eType="#//Field"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Long" eSuperTypes="#//SignedInt"/>
@@ -60,7 +60,7 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="isDcpsDataType" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
         defaultValueLiteral="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Type" abstract="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Type" abstract="true" eSuperTypes="Core.ecore#//Element"/>
   <eClassifiers xsi:type="ecore:EClass" name="Typedef" eSuperTypes="#//Type">
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" lowerBound="1" eType="#//Type"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>

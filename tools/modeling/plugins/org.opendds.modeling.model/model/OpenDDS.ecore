@@ -38,7 +38,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="tpQosPolicy" eSuperTypes="QoS.ecore#//TransportPriorityQosPolicy #//qosPolicy"/>
   <eClassifiers xsi:type="ecore:EClass" name="udQosPolicy" eSuperTypes="QoS.ecore#//UserDataQosPolicy #//qosPolicy"/>
   <eClassifiers xsi:type="ecore:EClass" name="wdlQosPolicy" eSuperTypes="QoS.ecore#//WriterDataLifecycleQosPolicy #//qosPolicy"/>
-  <eClassifiers xsi:type="ecore:EClass" name="OpenDDSModel">
+  <eClassifiers xsi:type="ecore:EClass" name="OpenDDSModel" eSuperTypes="Core.ecore#//Element">
     <eAnnotations source="GenModel">
       <details key="documentation" value="This is the container used by GMF for the objects that can reside on the main diagram."/>
     </eAnnotations>
@@ -50,14 +50,14 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="basicTypes" eType="#//BasicTypes"
         containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="LibPackage">
+  <eClassifiers xsi:type="ecore:EClass" name="LibPackage" eSuperTypes="Core.ecore#//Element">
     <eStructuralFeatures xsi:type="ecore:EReference" name="packages" upperBound="-1"
         eType="#//LibPackage" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="libs" upperBound="-1" eType="#//OpenDDSLib"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="OpenDDSLib" abstract="true">
+  <eClassifiers xsi:type="ecore:EClass" name="OpenDDSLib" abstract="true" eSuperTypes="Core.ecore#//Element">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" ordered="false" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="PolicyLib" eSuperTypes="#//OpenDDSLib">

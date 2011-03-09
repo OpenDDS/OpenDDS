@@ -183,6 +183,10 @@
              category="domain"
              id="property.tab.domain"
              label="%tab.domain"/>
+          <propertyTab
+             category="extra"
+             id="property.tab.ElementComment"
+             label="%tab.ElementComment"/>
       </propertyTabs>
    </extension>
 
@@ -216,6 +220,12 @@
             <input type="org.eclipse.gmf.runtime.notation.View"/>
             <input type="org.eclipse.gef.EditPart"/>
             <input type="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+         </propertySection>
+         <propertySection
+            id="property.section.ElementComment" 
+            tab="property.tab.ElementComment"
+            filter="org.opendds.modeling.model.opendds.diagram.datalib.part.ElementCommentFilter"
+            class="org.opendds.modeling.model.opendds.diagram.datalib.sheet.ElementCommentPropertySection">
          </propertySection>
       </propertySections>
    </extension>

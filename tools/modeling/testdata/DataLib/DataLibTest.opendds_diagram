@@ -6,7 +6,7 @@
       <children xmi:type="notation:DecorationNode" xmi:id="_BqUesSMIEeCjIfxEl4-peg" type="5017"/>
       <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_BqT3oCMIEeCjIfxEl4-peg" diagramLink="_CO0S4CMIEeCjIfxEl4-peg" hint="OpenDDS DataLib"/>
       <element xmi:type="types:DataLib" href="DataLibTest.opendds#_W-U8gf7lEd-9W4ll_I0Ewg"/>
-      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_BqT3oSMIEeCjIfxEl4-peg"/>
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_BqT3oSMIEeCjIfxEl4-peg" x="60" y="408"/>
     </children>
     <styles xmi:type="notation:DiagramStyle" xmi:id="_BpIL4SMIEeCjIfxEl4-peg"/>
     <element xmi:type="opendds:OpenDDSModel" href="DataLibTest.opendds#_7w7mIRN0EeCZGfFbfO1234"/>
