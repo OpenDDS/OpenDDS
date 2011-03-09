@@ -89,10 +89,11 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// content_filter_entries_ field is present in the marshaled header.
   bool content_filter_ : 1;
 
-  ///{@ reserved bits
+  //{@
+  /// reserved bits
   bool reserved_3 : 1;
   bool reserved_4 : 1;
-  ///@}
+  //@}
 
   /// The size of the data sample (without header).  After this header is
   /// demarshaled, the transport expects to see this many bytes in the stream
@@ -104,7 +105,8 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// requirement for the sequence value (access_scope == GROUP).
   SequenceNumber::Value sequence_;
 
-  ///{@ The SOURCE_TIMESTAMP field is generated from the DataWriter
+  //{@
+  /// The SOURCE_TIMESTAMP field is generated from the DataWriter
   /// or supplied by the application at the time of the write.
   /// This value is derived from the local hosts system clock,
   /// which is assumed to be synchronized with the clocks on other
@@ -114,9 +116,10 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// SampleInfo structure supplied along with each data sample.
   ACE_INT32 source_timestamp_sec_;
   ACE_UINT32 source_timestamp_nanosec_; // Corresponding IDL is unsigned.
-  ///@}
+  //@}
 
-  ///{@ The LIFESPAN duration field is generated from the DataWriter
+  //{@
+  /// The LIFESPAN duration field is generated from the DataWriter
   /// or supplied by the application at the time of the write. This
   /// field is used to determine if a given sample is considered
   /// 'stale' and should be discarded by associated DataReader.
@@ -124,7 +127,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// lifespan_duration_ flag.
   ACE_INT32 lifespan_duration_sec_;
   ACE_UINT32 lifespan_duration_nanosec_;  // Corresponding IDL is unsigned.
-  ///@}
+  //@}
 
   /// Identify the DataWriter that produced the sample data being
   /// sent.
@@ -154,15 +157,17 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
 
   DataSampleHeader();
 
-  ///{@ Construct with values extracted from a buffer.
+  //{@
+  /// Construct with values extracted from a buffer.
   explicit DataSampleHeader(ACE_Message_Block* buffer);
   explicit DataSampleHeader(ACE_Message_Block& buffer);
-  ///@}
+  //@}
 
-  ///{@ Assignment from an ACE_Message_Block.
+  //{@
+  /// Assignment from an ACE_Message_Block.
   DataSampleHeader& operator=(ACE_Message_Block* buffer);
   DataSampleHeader& operator=(ACE_Message_Block& buffer);
-  ///@}
+  //@}
 
   /// Amount of data read when initializing from a buffer.
   size_t marshaled_size() const;

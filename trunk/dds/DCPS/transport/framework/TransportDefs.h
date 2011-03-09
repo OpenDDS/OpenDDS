@@ -11,7 +11,6 @@
 
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/Cached_Allocator_With_Overflow_T.h"
-#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/debug.h"
 #include "ace/Basic_Types.h"
 #include "TransportDebug.h"
