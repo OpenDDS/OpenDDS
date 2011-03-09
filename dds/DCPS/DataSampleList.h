@@ -152,10 +152,11 @@ struct OpenDDS_Dcps_Export DataSampleListElement {
   /// Allocator for TransportCustomizedElement
   TransportCustomizedElementAllocator* transport_customized_element_allocator_;
 
-  ///{@ tracking for Content-Filtering data
+  //{@
+  /// tracking for Content-Filtering data
   GUIDSeq_var filter_out_;
   std::map<DataLinkIdType, GUIDSeq_var> filter_per_link_;
-  ///@}
+  //@}
 };
 
 /**

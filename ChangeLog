@@ -1,3 +1,15 @@
+Wed Mar  9 22:03:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+
+          Attempting to fix Doxygen comment formatting.
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Removed a duplicate #include.
+
 Wed Mar  9 20:54:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepoServ.cpp:
@@ -14,18 +26,18 @@ Wed Mar  9 20:26:52 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/Core.ecore:
 
-	  Added Element class and Comment class with Element optionally owning a Comment.
+          Added Element class and Comment class with Element optionally owning a Comment.
           Entity now inherits from Element.
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:
         * tools/modeling/plugins/org.opendds.modeling.model/model/Types.ecore:
 
-	  Updated so that all class (eventually) inherit from Element. This way comments
-	  can be added to all modeling elements.
+          Updated so that all class (eventually) inherit from Element. This way comments
+          can be added to all modeling elements.
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
 
-	  Re-generated and set Multiline property for Comment body to true.
+          Re-generated and set Multiline property for Comment body to true.
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/Core.ecore_diagram:
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
@@ -35,7 +47,7 @@ Wed Mar  9 20:26:52 UTC 2011  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
         * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
 
-	  Auto-generated dependency updates.
+          Auto-generated dependency updates.
 
         * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/ElementCommentFilter.java:
         * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/ElementCommentPropertySection.java:
@@ -63,19 +75,19 @@ Wed Mar  9 20:26:52 UTC 2011  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
 
-	  Added Comment tab for viewing/entering comments to the property sheet that's active whenever
-   	  a diagram item is selected whose modeling  element inherits from Element.
+          Added Comment tab for viewing/entering comments to the property sheet that's active whenever
+          a diagram item is selected whose modeling  element inherits from Element.
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/element_comment_example.png:
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/adding_comments.html:
         * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
 
-	  Updated help content to include discussion of adding comments.
+          Updated help content to include discussion of adding comments.
 
         * tools/modeling/testdata/DataLib/DataLibTest.opendds:
         * tools/modeling/testdata/DataLib/DataLibTest.opendds_diagram:
 
-	  Sprinkled some comments in the Struct and its content.
+          Sprinkled some comments in the Struct and its content.
 
 Wed Mar  9 19:30:30 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 

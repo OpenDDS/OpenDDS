@@ -101,10 +101,11 @@ public:
 
   typedef std::map<DataLinkIdType, DataLink_rch> MapType;
 
-  ///{@ Accessors for external iteration
+  //{@
+  /// Accessors for external iteration
   LockType& lock() { return lock_; }
   MapType& map() { return map_; }
-  ///@}
+  //@}
 
 private:
 
