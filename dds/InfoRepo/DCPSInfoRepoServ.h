@@ -55,9 +55,6 @@ private:
   void finalize();
 
   CORBA::ORB_var orb_;
-  PortableServer::POA_var root_poa_;
-  PortableServer::POA_var info_poa_;
-  PortableServer::POAManager_var poa_manager_;
 
   ACE_TString ior_file_;
   ACE_TString listen_address_str_;
@@ -73,7 +70,6 @@ private:
   OpenDDS::Federator::ManagerImpl federator_;
   OpenDDS::Federator::Config      federatorConfig_;
 
-  PortableServer::ServantBase_var info_;
   TAO_DDS_DCPSInfo_i* info_servant_;
 
   ACE_Thread_Mutex lock_;

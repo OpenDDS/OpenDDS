@@ -1,3 +1,17 @@
+Wed Mar  9 19:30:30 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepoServ.h:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Refrain from holding references to the POAs and Servants.
+          Also cleaned up some style (using this-> consistently, etc).
+
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+        * java/idl2jni/codegen/im_java.cpp:
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          More 64-bit warnings.
+
 Tue Mar  8 20:11:23 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/CoherentChangeControl.cpp:
