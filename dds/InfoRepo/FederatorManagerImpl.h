@@ -169,6 +169,10 @@ public:
   using UpdateProcessor<OwnerUpdate>::processUpdateQos2;
   using UpdateProcessor<TopicUpdate>::processUpdateQos2;
   using UpdateProcessor<ParticipantUpdate>::processUpdateQos2;
+  using UpdateProcessor<OwnerUpdate>::processUpdateFilterExpressionParams;
+  using UpdateProcessor<TopicUpdate>::processUpdateFilterExpressionParams;
+  using UpdateProcessor<ParticipantUpdate>::processUpdateFilterExpressionParams;
+  using UpdateProcessor<PublicationUpdate>::processUpdateFilterExpressionParams;
 
   /// Null implementation for OwnerUpdate samples.
   void processCreate(const OwnerUpdate* sample, const DDS::SampleInfo* info);

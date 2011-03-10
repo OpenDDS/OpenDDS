@@ -1,8 +1,26 @@
+Thu Mar 10 18:32:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+
+          Fixed SunCC warnings in the new code for content-subscription.
+
+        * java/tests/dcps_java_tests.lst:
+        * java/tests/messenger/both:
+        * java/tests/messenger/both/Both.java:
+        * java/tests/messenger/both/java_both_test.mpc:
+        * java/tests/messenger/both/opendds_tcp.ini:
+        * java/tests/messenger/both/run_test.pl:
+
+          Added a new Java test that runs both publisher and subscriber in
+          the same process (and same domain participant).  It also serves
+          as an example of reading with wait sets and conditions instead
+          of using a listener class.
+
 Thu Mar 10 14:39:05 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/element_comment_example.png:
 
-	  Update to reflect re-ordering of property sheet tabs.
+          Update to reflect re-ordering of property sheet tabs.
 
 Thu Mar 10 14:29:21 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
