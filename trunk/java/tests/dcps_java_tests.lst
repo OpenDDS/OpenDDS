@@ -28,3 +28,5 @@ java/tests/messenger/subscriber/run_test.pl multicast
 java/tests/messenger/run_test.pl tcp
 java/tests/messenger/run_test.pl udp
 java/tests/messenger/run_test.pl multicast
+
+java/tests/messenger/both/run_test.pl
