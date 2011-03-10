@@ -1,3 +1,12 @@
+Thu Mar 10 14:29:21 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
+
+          Re-ordered property sheet tabs so that the Comment tab shows up first.
+
 Wed Mar  9 22:03:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.h:
