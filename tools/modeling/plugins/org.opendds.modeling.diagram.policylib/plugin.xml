@@ -132,13 +132,14 @@
    </extension>
 
    <extension point="org.eclipse.ui.views.properties.tabbed.propertyContributor" id="prop-contrib">
-      <?gmfgen generated="true"?>
+      <?gmfgen generated="false"?>
       <propertyContributor
             contributorId="org.opendds.modeling.diagram.policylib"
             labelProvider="org.opendds.modeling.model.opendds.diagram.policylib.sheet.OpenDDSPolicyLibSheetLabelProvider">
+         <!-- Re-order so that the category associated with the Comment shows up first -->
+         <propertyCategory category="extra"/>
          <propertyCategory category="domain"/>
          <propertyCategory category="visual"/>
-         <propertyCategory category="extra"/>
       </propertyContributor>
    </extension>
 
