@@ -1,3 +1,9 @@
+Thu Mar 10 14:39:05 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/element_comment_example.png:
+
+	  Update to reflect re-ordering of property sheet tabs.
+
 Thu Mar 10 14:29:21 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
