@@ -56,7 +56,7 @@ public:
   int demarshal(ACE_Message_Block* acks, bool byte_order);
 
   /// List the key of this map.
-  void get_keys(RepoIdSet& keys);
+  void get_keys(RepoIdSet& keys) const;
 
   void operator= (const RepoIdSetMap &);
 

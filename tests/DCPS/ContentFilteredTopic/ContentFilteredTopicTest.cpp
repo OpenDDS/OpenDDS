@@ -155,12 +155,21 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   sample.key = 0; // no DataLink receives this sample
   if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
 
-#if 0 //TODO: acks for Publisher-side filtering of Content-Filtered Topics
   if (mdw->wait_for_acknowledgments(infinite) != RETCODE_OK) {
-    cout << "ERROR: wait_for_acknowledgments" << endl;
+    cout << "ERROR: wait_for_acknowledgments 1" << endl;
     return false;
   }
-#endif
+
+  // To set up a more difficult wait_for_acknowledgements() scenario,
+  // make sure the sub2 datalink's two readers have different "latest"
+  // sequence numbers, and the sub datalink needs no customization.
+  sample.key = 2;
+  if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
+
+  if (mdw->wait_for_acknowledgments(infinite) != RETCODE_OK) {
+    cout << "ERROR: wait_for_acknowledgments 2" << endl;
+    return false;
+  }
 
   if (dp->delete_contentfilteredtopic(cft) != RETCODE_PRECONDITION_NOT_MET) {
     cout << "ERROR: delete_contentfilteredtopic should return "

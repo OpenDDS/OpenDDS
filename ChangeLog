@@ -1,3 +1,46 @@
+Mon Mar 14 23:41:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+
+          Implemented wait_for_acknowledgments() behavior with content-
+          filtering, including the ability for the DataWriter to send
+          customized control messages (REQUEST_ACK) to each DataLink.
+
+        * tools/dissector/packet.cpp:
+
+          Added new DataSampleHeader flag to Wireshark.
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/DCPS/ContentFilteredTopic/run_test.pl:
+
+          Test wait_for_acknowledgments() with content-filtering.
+
+        * tests/DCPS/NotifyTest/NotifyTest.mpc:
+        * tests/DCPS/NotifyTest/NotifyTest_export.h:
+        * tests/DCPS/Partition/Partition.mpc:
+        * tests/DCPS/Partition/Partition_export.h:
+
+          Re-organized these two tests so that they build a shared library
+          from the generated code.  This prevents duplicate code compilation
+          steps with MPC types that use per-project dirs for object files, and
+          prevents parallel build errors on MPC types that always run custom
+          build steps per-project even if the outputs are up to date.
+          This is a a bit of a "pilot project" of this way of setting up the
+          tests.  If it works well, many other tests will be changed too.
+
 Mon Mar 14 12:29:42 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/Core.ecore:

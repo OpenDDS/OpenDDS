@@ -1,21 +1,23 @@
-
 project(DDS*idl): dcps {
-  // This project ensures the common components get built first.
+  idlflags      += -Wb,stub_export_include=NotifyTest_export.h \
+                   -Wb,stub_export_macro=NotifyTest_Export
+  dcps_ts_flags += -Wb,export_macro=NotifyTest_Export
+  dynamicflags  += NOTIFYTEST_BUILD_DLL
+
+  Source_Files {
+  }
 
   TypeSupport_Files {
     Messenger.idl
   }
-
-  custom_only = 1
 }
 
-
-project(DDS*Publisher) : dcpsexe_with_tcp {
+project(DDS*Publisher): dcpsexe_with_tcp {
   exename = publisher
   after  += DDS*idl
+  libs   += DDS*idl
 
-  TypeSupport_Files {
-    Messenger.idl
+  Idl_Files {
   }
 
   Source_Files {
@@ -24,12 +26,12 @@ project(DDS*Publisher) : dcpsexe_with_tcp {
   }
 }
 
-project(DDS*Subscriber) : dcpsexe_with_tcp {
+project(DDS*Subscriber): dcpsexe_with_tcp {
   exename = subscriber
   after  += DDS*idl
+  libs   += DDS*idl
 
-  TypeSupport_Files {
-    Messenger.idl
+  Idl_Files {
   }
 
   Source_Files {

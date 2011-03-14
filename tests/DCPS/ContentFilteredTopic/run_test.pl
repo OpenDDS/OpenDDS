@@ -28,7 +28,7 @@ my $opts = $use_svc_config ? "-ORBSvcConf $ENV{DDS_ROOT}/tests/tcp.conf" : '';
 while (scalar @ARGV) {
   if ($ARGV[0] =~ /^-d/i) {
     shift;
-    $opts .= " -DCPSTransportDebugLevel 6";
+    $opts .= " -DCPSTransportDebugLevel 6 -DCPSDebugLevel 10";
   }
   elsif ($ARGV[0] eq 'nopub') {
     shift;

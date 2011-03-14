@@ -47,7 +47,8 @@ OpenDDS::DCPS::TransportInterface::swap_bytes() const
 ACE_INLINE OpenDDS::DCPS::SendControlStatus
 OpenDDS::DCPS::TransportInterface::send_control(RepoId                 pub_id,
                                                 TransportSendListener* listener,
-                                                ACE_Message_Block*     msg)
+                                                ACE_Message_Block*     msg,
+                                                void*                  extra)
 {
   DBG_ENTRY_LVL("TransportInterface","send_control",6);
 
@@ -66,6 +67,8 @@ OpenDDS::DCPS::TransportInterface::send_control(RepoId                 pub_id,
     listener->control_delivered(msg);
     return SEND_CONTROL_OK;
 
+  } else if (extra) {
+    return listener->send_control_customized(pub_links, msg, extra);
   } else {
     // Just have the DataLinkSet do the send_control for us, on each
     // DataLink in the set.

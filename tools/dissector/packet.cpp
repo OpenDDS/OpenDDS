@@ -82,6 +82,7 @@ int hf_sample_flags_historic    = -1;
 int hf_sample_flags_lifespan    = -1;
 int hf_sample_flags_group_coh   = -1;
 int hf_sample_flags_content_filt= -1;
+int hf_sample_flags_seq_reapir  = -1;
 
 const int sample_flags_bits = 8;
 
@@ -92,6 +93,7 @@ const int* sample_flags_fields[] = {
   &hf_sample_flags_lifespan,
   &hf_sample_flags_group_coh,
   &hf_sample_flags_content_filt,
+  &hf_sample_flags_seq_reapir,
   NULL
 };
 
@@ -140,7 +142,8 @@ demarshal_data(tvbuff_t* tvb, gint offset)
 {
   T t;
 
-  size_t len = std::min(size_t(tvb->length - offset), t.max_marshaled_size());
+  guint len = std::min(tvb->length - offset,
+    static_cast<guint>(t.max_marshaled_size()));
   const guint8* data = tvb_get_ptr(tvb, offset, len);
 
   ACE_Message_Block mb(reinterpret_cast<const char*>(data));
@@ -171,7 +174,7 @@ dissect_header(tvbuff* tvb, packet_info* pinfo, proto_tree* tree,
 {
   ACE_UNUSED_ARG(pinfo);
 
-  size_t len;
+  gint len;
 
   offset += sizeof(header.protocol_) - 2; // skip preamble
 
@@ -242,7 +245,7 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
 {
   ACE_UNUSED_ARG(pinfo);
 
-  size_t len;
+  gint len;
 
   // hf_sample_id
   len = sizeof(sample.message_id_);
@@ -303,7 +306,7 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
   }
 
   // hf_sample_publication
-  len = gen_find_size(sample.publication_id_);
+  len = static_cast<gint>(gen_find_size(sample.publication_id_));
   if (sample.message_id_ != TRANSPORT_CONTROL) {
     RepoIdConverter converter(sample.publication_id_);
     proto_tree_add_bytes_format_value(tree, hf_sample_publication, tvb, offset, len,
@@ -314,7 +317,7 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
 
   // hf_sample_publisher
   if (sample.group_coherent_) {
-    len = gen_find_size(sample.publisher_id_);
+    len = static_cast<gint>(gen_find_size(sample.publisher_id_));
     if (sample.message_id_ != TRANSPORT_CONTROL) {
       RepoIdConverter converter(sample.publisher_id_);
       proto_tree_add_bytes_format_value(tree, hf_sample_publisher, tvb, offset,
@@ -326,7 +329,8 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
 
   // hf_sample_content_filt
   if (sample.content_filter_) {
-    size_t total_len = gen_find_size(sample.content_filter_entries_);
+    gint total_len =
+      static_cast<gint>(gen_find_size(sample.content_filter_entries_));
     len = sizeof(CORBA::ULong);
     if (sample.message_id_ != TRANSPORT_CONTROL) {
       proto_tree_add_uint_format_value(tree, hf_sample_content_filt, tvb,
@@ -378,7 +382,8 @@ dissect_opendds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 
       proto_item* item =
         proto_tree_add_none_format(header_tree, hf_sample, tvb, offset,
-          sample.marshaled_size() + sample.message_length_, sample_str.c_str());
+          static_cast<gint>(sample.marshaled_size()) + sample.message_length_,
+          sample_str.c_str());
 
       proto_tree* sample_tree = proto_item_add_subtree(item, ett_sample);
 
@@ -391,7 +396,7 @@ extern "C"
 dissector_Export gboolean
 dissect_opendds_heur(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 {
-  size_t len = sizeof(TransportHeader::DCPS_PROTOCOL);
+  gint len = sizeof(TransportHeader::DCPS_PROTOCOL);
   guint8* data = tvb_get_ephemeral_string(tvb, 0, len);
 
   if (std::memcmp(data, TransportHeader::DCPS_PROTOCOL, len) != 0) {
@@ -568,6 +573,17 @@ proto_register_opendds()
         sample_flags_bits,
         NULL,
         1 << 5,
+        NULL,
+        HFILL
+      }
+    },
+    { &hf_sample_flags_seq_reapir,
+      { "Sequence Repair",
+        "opendds.sample.flags.sequence_repair",
+        FT_BOOLEAN,
+        sample_flags_bits,
+        NULL,
+        1 << 6,
         NULL,
         HFILL
       }

@@ -139,7 +139,7 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   this->lifespan_duration_  = byte & mask_flag(LIFESPAN_DURATION_FLAG);
   this->group_coherent_     = byte & mask_flag(GROUP_COHERENT_FLAG);
   this->content_filter_     = byte & mask_flag(CONTENT_FILTER_FLAG);
-  this->reserved_3          = byte & mask_flag(RESERVED_3_FLAG);
+  this->sequence_repair_    = byte & mask_flag(SEQUENCE_REPAIR_FLAG);
   this->reserved_4          = byte & mask_flag(RESERVED_4_FLAG);
 
   // Set swap_bytes flag to the Serializer if data sample from
@@ -211,7 +211,7 @@ operator<<(ACE_Message_Block*& buffer, DataSampleHeader& value)
                          | (value.lifespan_duration_  << LIFESPAN_DURATION_FLAG)
                          | (value.group_coherent_     << GROUP_COHERENT_FLAG)
                          | (value.content_filter_     << CONTENT_FILTER_FLAG)
-                         | (value.reserved_3          << RESERVED_3_FLAG)
+                         | (value.sequence_repair_    << SEQUENCE_REPAIR_FLAG)
                          | (value.reserved_4          << RESERVED_4_FLAG)
                          ;
   writer << ACE_OutputCDR::from_octet(flags);
@@ -237,6 +237,41 @@ operator<<(ACE_Message_Block*& buffer, DataSampleHeader& value)
   // a chained (continuation) ACE_Message_Block.
 
   return writer.good_bit();
+}
+
+void
+DataSampleHeader::add_cfentries(const GUIDSeq* guids, ACE_Message_Block* mb)
+{
+  enum { DATA, DB, MB, N_ALLOC };
+  ACE_Allocator* allocators[N_ALLOC];
+  mb->access_allocators(allocators[DATA], allocators[DB], allocators[MB]);
+  ACE_Message_Block* optHdr;
+  ACE_NEW_MALLOC(optHdr,
+    static_cast<ACE_Message_Block*>(
+      allocators[MB]->malloc(sizeof(ACE_Message_Block))),
+    ACE_Message_Block(guids ? gen_find_size(*guids) : sizeof(CORBA::ULong),
+                      ACE_Message_Block::MB_DATA,
+                      0, // cont
+                      0, // data
+                      0, // data allocator: leave as default
+                      0, // locking_strategy
+                      ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                      ACE_Time_Value::zero,
+                      ACE_Time_Value::max_time,
+                      allocators[DB],
+                      allocators[MB]));
+
+  const bool swap = (TAO_ENCAP_BYTE_ORDER != test_flag(BYTE_ORDER_FLAG, mb));
+  Serializer ser(optHdr, swap);
+  if (guids) {
+    ser << *guids;
+  } else {
+    ser << CORBA::ULong(0);
+  }
+
+  // New chain: mb (DataSampleHeader), optHdr (GUIDSeq), data (Foo or control)
+  optHdr->cont(mb->cont());
+  mb->cont(optHdr);
 }
 
 /// Message Id enumeration insertion onto an ostream.
@@ -317,6 +352,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     if (value.lifespan_duration_ == 1) str << "Lifespan, ";
     if (value.group_coherent_ == 1) str << "Group-Coherent, ";
     if (value.content_filter_ == 1) str << "Content-Filtered, ";
+    if (value.sequence_repair_ == 1) str << "Sequence Repair, ";
 
     str << "Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
         << value.sequence_ << ", ";
@@ -329,7 +365,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
           << std::dec << value.lifespan_duration_nanosec_ << ", ";
     }
 
-    str << "Publication: " << RepoIdConverter(value.publication_id_) << ", ";
+    str << "Publication: " << RepoIdConverter(value.publication_id_);
     if (value.group_coherent_) {
       str << ", Publisher: " << RepoIdConverter(value.publisher_id_);
     }

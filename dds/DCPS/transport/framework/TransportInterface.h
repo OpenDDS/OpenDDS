@@ -56,7 +56,8 @@ public:
   /// it to all remote subscribers interested in the local publisher_id.
   SendControlStatus send_control(RepoId                 pub_id,
                                  TransportSendListener* listener,
-                                 ACE_Message_Block*     msg);
+                                 ACE_Message_Block*     msg,
+                                 void*                  extra = 0);
 
   /// Send a response message back to a publication.
   bool send_response(RepoId             pub_id,

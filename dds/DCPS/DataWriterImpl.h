@@ -85,10 +85,14 @@ public:
   friend class WriteDataContainer;
   friend class PublisherImpl;
 
+  typedef std::map<RepoId, SequenceNumber, GUID_tKeyLessThan>
+    RepoIdToSequenceMap;
+
   struct AckToken {
     ACE_Time_Value tstamp_;
     DDS::Duration_t max_wait_;
     SequenceNumber sequence_;
+    RepoIdToSequenceMap custom_;
 
     AckToken(const DDS::Duration_t& max_wait,
              const SequenceNumber& sequence)
@@ -105,6 +109,10 @@ public:
     DDS::Time_t timestamp() const {
       return time_value_to_time(this->tstamp_);
     }
+
+    SequenceNumber expected(const RepoId& subscriber) const;
+
+    bool marshal(ACE_Message_Block*& mblock, bool swap_bytes) const;
   };
 
   ///Constructor
@@ -307,6 +315,10 @@ public:
    */
   void control_delivered(ACE_Message_Block* sample);
 
+  SendControlStatus send_control_customized(const DataLinkSet_rch& links,
+                                            ACE_Message_Block* msg,
+                                            void* extra);
+
   /// Does this writer have samples to be acknowledged?
   bool should_ack() const;
 
@@ -314,7 +326,7 @@ public:
   AckToken create_ack_token(DDS::Duration_t max_wait) const;
 
   /// Send SAMPLE_ACK messages to associated readers.
-  DDS::ReturnCode_t send_ack_requests(const AckToken& token);
+  DDS::ReturnCode_t send_ack_requests(AckToken& token);
 
   /// Wait for SAMPLE_ACK responses from associated readers.
   DDS::ReturnCode_t wait_for_ack_responses(const AckToken& token);
@@ -498,6 +510,7 @@ protected:
   DomainParticipantImpl*          participant_servant_;
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
   struct ReaderInfo {
     DomainParticipantImpl* participant_;
     DDS::StringSeq expression_params_;
@@ -505,12 +518,20 @@ protected:
     RcHandle<FilterEvaluator> eval_;
     SequenceNumber expected_sequence_;
     ReaderInfo(const char* filter, const DDS::StringSeq& params,
-      DomainParticipantImpl* participant);
+               DomainParticipantImpl* participant);
     ~ReaderInfo();
   };
+
   typedef std::map<RepoId, ReaderInfo, GUID_tKeyLessThan> RepoIdToReaderInfoMap;
   RepoIdToReaderInfoMap reader_info_;
-#endif
+
+  struct AckCustomization {
+    GUIDSeq customized_;
+    AckToken& token_;
+    explicit AckCustomization(AckToken& at) : token_(at) {}
+  };
+
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 private:
 
@@ -642,7 +663,6 @@ private:
   /// Used to block in wait_for_acks().
   ACE_Condition<ACE_SYNCH_MUTEX> wfaCondition_;
 
-  typedef std::map<RepoId, SequenceNumber, GUID_tKeyLessThan> RepoIdToSequenceMap;
   RepoIdToSequenceMap idToSequence_;
 
   IdSet                      pending_readers_;

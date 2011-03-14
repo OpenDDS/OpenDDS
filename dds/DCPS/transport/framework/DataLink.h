@@ -256,7 +256,9 @@ public:
   /// Return the subset of the input set which are also targets of
   /// this DataLink (see is_target()).
   GUIDSeq* target_intersection(const GUIDSeq& in);
+
   CORBA::ULong num_targets() const;
+  RepoIdSet_rch get_targets() const;
 
 protected:
 
