@@ -1094,6 +1094,15 @@ OpenDDS::DCPS::DataLink::num_targets() const
   return static_cast<CORBA::ULong>(this->sub_map_.size());
 }
 
+OpenDDS::DCPS::RepoIdSet_rch
+OpenDDS::DCPS::DataLink::get_targets() const
+{
+  GuardType guard(this->sub_map_lock_);
+  RepoIdSet_rch ret(new RepoIdSet);
+  this->sub_map_.get_keys(*ret.in());
+  return ret;
+}
+
 bool
 OpenDDS::DCPS::DataLink::exist(const RepoId& remote_id,
                                const RepoId& local_id,

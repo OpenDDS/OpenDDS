@@ -253,11 +253,11 @@ OpenDDS::DCPS::RepoIdSetMap::demarshal(ACE_Message_Block* acks, bool byte_order)
 }
 
 void
-OpenDDS::DCPS::RepoIdSetMap::get_keys(RepoIdSet& keys)
+OpenDDS::DCPS::RepoIdSetMap::get_keys(RepoIdSet& keys) const
 {
   DBG_ENTRY_LVL("RepoIdSetMap","get_keys",6);
 
-  for (MapType::iterator itr = map_.begin();
+  for (MapType::const_iterator itr = map_.begin();
        itr != map_.end();
        ++itr) {
     keys.insert_id(itr->first, itr->first);

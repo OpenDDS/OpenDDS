@@ -1225,7 +1225,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
 
     if (header.message_id_ == SAMPLE_DATA) {
 
-      if (writer->seen_data_) {
+      if (writer->seen_data_ && !header.sequence_repair_) {
         // Data samples should be acknowledged prior to any
         // reader-side filtering to ensure discontiguities
         // are not unintentionally introduced.

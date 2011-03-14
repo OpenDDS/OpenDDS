@@ -831,38 +831,45 @@ DataWriterImpl::create_ack_token(DDS::Duration_t max_wait) const
   return AckToken(max_wait, this->sequence_number_);
 }
 
-DDS::ReturnCode_t
-DataWriterImpl::send_ack_requests(const DataWriterImpl::AckToken& token)
+SequenceNumber
+DataWriterImpl::AckToken::expected(const RepoId& subscriber) const
 {
-#if 0 //TODO: acks for Publisher-side filtering of Content-Filtered Topics
-  GUIDSeq customized;
+  RepoIdToSequenceMap::const_iterator found = this->custom_.find(subscriber);
+  return (found == this->custom_.end()) ? this->sequence_ : found->second;
+}
+
+bool
+DataWriterImpl::AckToken::marshal(ACE_Message_Block*& mblock, bool swap) const
+{
+  const size_t dataSize = sizeof(SequenceNumber::Value)
+    + gen_find_size(max_wait_);
+
+  ACE_NEW_RETURN(mblock, ACE_Message_Block(dataSize), false);
+
+  Serializer ser(mblock, swap);
+  ser << sequence_.getValue();
+  ser << max_wait_;
+  return ser.good_bit();
+}
+
+DDS::ReturnCode_t
+DataWriterImpl::send_ack_requests(DataWriterImpl::AckToken& token)
+{
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  std::map<SequenceNumber, GUIDSeq> customSequenceNumbers;
+  AckCustomization ac(token);
   for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
        end = reader_info_.end(); iter != end; ++iter) {
     if (iter->second.expected_sequence_ != token.sequence_) {
-      GUIDSeq& guids = customSequenceNumbers[iter->second.expected_sequence_];
-      push_back(guids, iter->first);
-      push_back(customized, iter->first);
+      push_back(ac.customized_, iter->first);
+      token.custom_[iter->first] = iter->second.expected_sequence_;
     }
   }
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-#endif // 0
-
-  size_t dataSize = sizeof(SequenceNumber::Value);
-  dataSize += gen_find_size(token.max_wait_);
 
   ACE_Message_Block* data;
-  ACE_NEW_RETURN(
-    data,
-    ACE_Message_Block(dataSize),
-    DDS::RETCODE_OUT_OF_RESOURCES);
-
-  Serializer serializer(
-    data,
-    this->get_publisher_servant()->swap_bytes());
-  serializer << token.sequence_.getValue();
-  serializer << token.max_wait_;
+  if (!token.marshal(data, this->get_publisher_servant()->swap_bytes())) {
+    return DDS::RETCODE_OUT_OF_RESOURCES;
+  }
 
   if (DCPS_debug_level > 0) {
     RepoIdConverter converter(this->publication_id_);
@@ -881,10 +888,13 @@ DataWriterImpl::send_ack_requests(const DataWriterImpl::AckToken& token)
   SendControlStatus status;
   { // This reaches all associated subscriptions.
     ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publisher_servant_->get_pi_lock());
-    status = this->publisher_servant_->send_control(
-               this->publication_id_,
-               this,
-               ack_request);
+    status = this->publisher_servant_->send_control(this->publication_id_,
+                                                    this, ack_request
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+                                                    , ac.customized_.length()
+                                                        ? &ac : 0
+#endif
+                                                   );
   }
 
   if (status == SEND_CONTROL_ERROR) {
@@ -895,6 +905,142 @@ DataWriterImpl::send_ack_requests(const DataWriterImpl::AckToken& token)
   }
 
   return DDS::RETCODE_OK;
+}
+
+SendControlStatus
+DataWriterImpl::send_control_customized(const DataLinkSet_rch& links,
+  ACE_Message_Block* msg, void* extra)
+{
+#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
+  ACE_UNUSED_ARG(links);
+  ACE_UNUSED_ARG(msg);
+  ACE_UNUSED_ARG(extra);
+  return SEND_CONTROL_ERROR; // this method shouldn't be called
+
+#else
+
+  AckCustomization& ac = *static_cast<AckCustomization*>(extra);
+  const bool swap = this->get_publisher_servant()->swap_bytes();
+
+  // set of DataLinks that have no targets that need custom control messages
+  DataLinkSet notCustomized;
+  bool ok = true;
+
+  typedef std::map<SequenceNumber, GUIDSeq> GUIDSeqMap;
+
+  DataLinkSet::GuardType guard(links->lock());
+
+  // For each data link in "links"...
+  for (DataLinkSet::MapType::iterator iter = links->map().begin(),
+       end = links->map().end(); iter != end; ++iter) {
+
+    const DataLink_rch& datalink = iter->second;
+    GUIDSeq_var intersect = datalink->target_intersection(ac.customized_);
+    // "intersect" is the list of GUIDs for the subs on this link that will
+    // need to get a customized REQUEST_ACK message.
+
+    if (intersect.ptr() == 0 || intersect->length() == 0) {
+      // This link requires no customization, add to the notCustomized list
+      // so we can handle it after the big for loop.
+      notCustomized.insert_link(datalink.in());
+
+    } else {
+      DataLinkSet thisLink; // need a "set" with only the current link in it
+      thisLink.insert_link(datalink.in());
+      RepoIdSet_rch allTargets = datalink->get_targets();
+      RepoIdSet::MapType noCustTargets = allTargets->map(); // copied
+
+      // Each sequence number may go to > 1 target on this link, build the
+      // STL map "gsm" keyed on the sequence number.
+      GUIDSeqMap gsm;
+      const CORBA::ULong len = intersect->length();
+      for (CORBA::ULong i = 0; i < len; ++i) {
+        const GUID_t& target = intersect[i];
+        push_back(gsm[ac.token_.custom_[target]], target);
+        noCustTargets.erase(target);
+      }
+
+      // Some targets don't require customization, but do need to see the
+      // original sequence number from the AckToken
+      for (RepoIdSet::MapType::iterator nct_iter(noCustTargets.begin()),
+           nct_end(noCustTargets.end()); nct_iter != nct_end; ++nct_iter) {
+        push_back(gsm[ac.token_.sequence_], nct_iter->first);
+      }
+
+      // For each sequence number that needs to go to this link:
+      for (GUIDSeqMap::iterator it2 = gsm.begin(), it2_end = gsm.end();
+           it2 != it2_end; ++it2) {
+
+        const SequenceNumber& seq = it2->first;
+        const GUIDSeq& targets = it2->second;
+
+        // Deep copy the payload and chain it to a shallow-copied header
+        ACE_Message_Block* data_orig = msg->cont();
+        msg->cont(0); // temporarily unlink so we don't duplicate the data
+        ACE_Message_Block* header = msg->duplicate();
+        ACE_Message_Block* data_modified = data_orig->clone();
+        header->cont(data_modified);
+        msg->cont(data_orig);                 // undo the temporary unlink
+
+        // Modify the payload to contain the customized sequence #
+        char* wr = data_modified->wr_ptr();
+        data_modified->wr_ptr(data_modified->base());   // rewind
+        Serializer ser(data_modified, swap);
+        ser << seq.getValue();                          // overwrite Seq#
+        data_modified->wr_ptr(wr);                      // wind
+
+        // If other targets are listening on the DataLink, filter those out
+        // using the CONTENT_FILTER_FLAG and its optional header.
+        if (allTargets->size() != targets.length()) {
+          RepoIdSet::MapType filterTargets = allTargets->map(); // copied
+          for (CORBA::ULong i = 0, len = targets.length(); i < len; ++i) {
+            filterTargets.erase(targets[i]);
+          }
+          GUIDSeq ftseq(static_cast<CORBA::ULong>(filterTargets.size()));
+          for (RepoIdSet::MapType::iterator ris_iter(filterTargets.begin()),
+               ris_end(filterTargets.end()); ris_iter != ris_end; ++ris_iter) {
+            push_back(ftseq, ris_iter->first);
+          }
+
+          // Now changing the header, need to copy its data contents
+          size_t len = header->length();
+          header->data_block(header->data_block()->clone());
+          header->wr_ptr(len);
+          DataSampleHeader::set_flag(CONTENT_FILTER_FLAG, header);
+          DataSampleHeader::add_cfentries(&ftseq, header);
+        }
+
+        if (DCPS_debug_level > 4) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) DataWriterImpl::send_control_customized() - ")
+            ACE_TEXT("sending REQUEST_ACK 0x%x to single data link with%C ")
+            ACE_TEXT("content filtering.\n"), seq.getValue(),
+            (allTargets->size() == targets.length()) ? "out" : ""));
+        }
+
+        ok &= (thisLink.send_control(this->publication_id_, this, header)
+               == SEND_CONTROL_OK);
+      }
+    }
+  }
+
+  if (notCustomized.empty()) {
+    msg->release();
+  } else {
+    if (DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataWriterImpl::send_control_customized() - ")
+        ACE_TEXT("sending REQUEST_ACK to %d non-customized data links.\n"),
+        notCustomized.map().size()));
+    }
+
+    ok &= (notCustomized.send_control(this->publication_id_, this, msg)
+           == SEND_CONTROL_OK);
+  }
+
+  return ok ? SEND_CONTROL_OK : SEND_CONTROL_ERROR;
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 }
 
 DDS::ReturnCode_t
@@ -926,8 +1072,17 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
       for (IdSet::const_iterator current = this->readers_.begin();
            current != this->readers_.end();
            ++current) {
-        if (this->idToSequence_[ *current] < token.sequence_) {
+        if (this->idToSequence_[*current] < token.expected(*current)) {
           done = false;
+          if (DCPS_debug_level > 0) {
+            RepoIdConverter conv(*current);
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_ack_responses() - ")
+              ACE_TEXT("waiting for seq 0x%x from sub %C, got 0x%x\n"),
+              token.expected(*current).getValue(), std::string(conv).c_str(),
+              this->idToSequence_[*current].getValue()));
+          }
+          break;
         }
       }
     }
@@ -1727,6 +1882,17 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
                      DDS::RETCODE_ERROR);
   }
 
+  bool needSequenceRepair = false;
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  for (RepoIdToReaderInfoMap::iterator it = reader_info_.begin(),
+       end = reader_info_.end(); it != end; ++it) {
+    if (it->second.expected_sequence_ != sequence_number_) {
+      needSequenceRepair = true;
+      break;
+    }
+  }
+#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
   DataSampleHeader header_data;
   header_data.message_id_ = SAMPLE_DATA;
   header_data.byte_order_ =
@@ -1738,6 +1904,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
     = this->publisher_servant_->qos_.presentation.access_scope
       == ::DDS::GROUP_PRESENTATION_QOS;
   header_data.content_filter_ = content_filter;
+  header_data.sequence_repair_ = needSequenceRepair;
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
   ++this->sequence_number_;
   header_data.sequence_ = this->sequence_number_.getValue();

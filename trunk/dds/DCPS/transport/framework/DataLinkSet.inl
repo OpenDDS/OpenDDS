@@ -29,11 +29,8 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
     TransportSendElement::alloc(static_cast<int>(map_.size()), sample);
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  enum { DATA, DB, MB, N_ALLOC }; // for ACE_Allocators below
   const bool customHeader =
     DataSampleHeader::test_flag(CONTENT_FILTER_FLAG, sample->sample_);
-  const bool swap = (TAO_ENCAP_BYTE_ORDER !=
-    DataSampleHeader::test_flag(BYTE_ORDER_FLAG, sample->sample_));
 #endif
 
   for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {
@@ -52,34 +49,8 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
         itr->second.in(), guids ? guids->length() : 0), 5);
 
       ACE_Message_Block* mb = sample->sample_->duplicate();
-      ACE_Allocator* allocators[N_ALLOC];
-      mb->access_allocators(allocators[DATA], allocators[DB], allocators[MB]);
-      ACE_Message_Block* optHdr;
-      ACE_NEW_MALLOC(optHdr,
-        static_cast<ACE_Message_Block*>(
-          allocators[MB]->malloc(sizeof(ACE_Message_Block))),
-        ACE_Message_Block(guids ? gen_find_size(*guids) : sizeof(CORBA::ULong),
-                          ACE_Message_Block::MB_DATA,
-                          0, // cont
-                          0, // data
-                          0, // data allocator: leave as default
-                          0, // locking_strategy
-                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                          ACE_Time_Value::zero,
-                          ACE_Time_Value::max_time,
-                          allocators[DB],
-                          allocators[MB]));
 
-      Serializer ser(optHdr, swap);
-      if (guids) {
-        ser << *guids;
-      } else {
-        ser << CORBA::ULong(0);
-      }
-
-      // New chain: mb (DataSampleHeader), optHdr (GUIDSeq), data (Foo)
-      optHdr->cont(mb->cont());
-      mb->cont(optHdr);
+      DataSampleHeader::add_cfentries(guids, mb);
 
       TransportCustomizedElement* tce =
         TransportCustomizedElement::alloc(send_element);

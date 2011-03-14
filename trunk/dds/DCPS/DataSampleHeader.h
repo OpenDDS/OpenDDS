@@ -51,7 +51,7 @@ enum DataSampleHeaderFlag {
   LIFESPAN_DURATION_FLAG,
   GROUP_COHERENT_FLAG,
   CONTENT_FILTER_FLAG,
-  RESERVED_3_FLAG,
+  SEQUENCE_REPAIR_FLAG,
   RESERVED_4_FLAG
 };
 
@@ -89,11 +89,13 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// content_filter_entries_ field is present in the marshaled header.
   bool content_filter_ : 1;
 
-  //{@
-  /// reserved bits
-  bool reserved_3 : 1;
+  /// Due to content filtering, a gap in the sequence numbers may be an
+  /// expected condition.  If this bit is set, assume prior sequence numbers
+  /// were filtered-out and are not missing.
+  bool sequence_repair_ : 1;
+
+  /// reserved bit
   bool reserved_4 : 1;
-  //@}
 
   /// The size of the data sample (without header).  After this header is
   /// demarshaled, the transport expects to see this many bytes in the stream
@@ -154,6 +156,12 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
 
   /// Does the data in this mb constitute a partial Sample Header?
   static bool partial(const ACE_Message_Block& mb);
+
+  /// Marshal the "guids" as an optional header chained as to the continuation
+  /// of "mb" (which must already be a valid DataSampleHeader serialization).
+  /// Any existing payload of "mb" (its continuation) will be chained after the
+  /// new optional header part.  "guids" may be null, same serialization as 0.
+  static void add_cfentries(const GUIDSeq* guids, ACE_Message_Block* mb);
 
   DataSampleHeader();
 
