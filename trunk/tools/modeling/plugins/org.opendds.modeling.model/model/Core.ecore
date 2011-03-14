@@ -18,5 +18,11 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Comment">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="body" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="format" eType="#//CommentFormat"
+        defaultValueLiteral=""/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="CommentFormat">
+    <eLiterals name="PLAIN"/>
+    <eLiterals name="DOXYGEN" value="1" literal="DOXYGEN"/>
   </eClassifiers>
 </ecore:EPackage>
