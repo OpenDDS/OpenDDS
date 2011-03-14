@@ -16,6 +16,10 @@ import org.eclipse.gmf.runtime.diagram.ui.properties.sections.AbstractBasicTextP
 import org.eclipse.gmf.runtime.diagram.ui.properties.views.TextChangeHelper;
 import org.eclipse.gmf.runtime.notation.View;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Composite;
@@ -24,12 +28,15 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.views.properties.tabbed.ITabbedPropertyConstants;
+import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.opendds.modeling.model.core.Comment;
+import org.opendds.modeling.model.core.CommentFormat;
 import org.opendds.modeling.model.core.CorePackage;
 import org.opendds.modeling.model.core.Element;
 
 /**
- * Based on code given in Eclipse Modeling Project, 4.4, page 142.
+ * Based on org.eclipse.gmf.runtime.diagram.ui.properties.sections.DiagramGeneralSection
  * @generated NOT
  */
 public class ElementCommentPropertySection extends
@@ -74,6 +81,66 @@ public class ElementCommentPropertySection extends
 
 	private MultilineTextChangeHelper multilineListener = new MultilineTextChangeHelper();
 
+	private CLabel formatLabel;
+
+	private CCombo formatCombo;
+
+	private synchronized void setCommentFormat() {
+		if (formatCombo != null) {
+			Element element = (Element) getEObject();
+			CommentFormat format = CommentFormat.get(formatCombo
+					.getSelectionIndex());
+			getComment(element, format);
+		}
+	}
+
+	@Override
+	public void doCreateControls(Composite parent,
+			TabbedPropertySheetPage aTabbedPropertySheetPage) {
+		super.doCreateControls(parent, aTabbedPropertySheetPage);
+		doCreateFormatCombo();
+	}
+
+	private void doCreateFormatCombo() {
+		FormData data;
+
+		// Text label for combo box
+		formatLabel = getWidgetFactory().createCLabel(getSectionComposite(),
+		"Format:");
+		data = new FormData();
+		data.top = new FormAttachment(getTextWidget(), ITabbedPropertyConstants.VSPACE, SWT.BOTTOM);
+		data.bottom = new FormAttachment(100, 0);
+		formatLabel.setLayoutData(data);
+
+		// Combo box
+		formatCombo = getWidgetFactory().createCCombo(getSectionComposite());
+		CommentFormat[] formatValues = CommentFormat.values();
+		int i = 0;
+		String[] options = new String[formatValues.length];
+		for (CommentFormat formatValue : formatValues) {
+			options[i++] = formatValue.name().toLowerCase();
+		}
+		formatCombo.setItems(options);
+		formatCombo.pack();
+		data = new FormData();
+		data.left = new FormAttachment(formatLabel, 0, SWT.RIGHT);
+		data.bottom = new FormAttachment(100, 0);
+		formatCombo.setLayoutData(data);
+
+		formatCombo.addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				setCommentFormat();
+			}
+
+			@Override
+			public void focusGained(FocusEvent e) {
+			}
+		});
+
+	}
+
 	@Override
 	protected String getPropertyChangeCommandName() {
 		return "ElementDescriptionChangeCommand";
@@ -93,28 +160,19 @@ public class ElementCommentPropertySection extends
 	}
 
 	@Override
+	protected void setPropertyValue(Control control) {
+		if (control == getTextWidget())
+			super.setPropertyValue(control);
+		else
+			setCommentFormat();
+
+	}
+
+	@Override
 	protected void setPropertyValue(EObject object,
 			Object value) {
 		Element element = (Element) getEObject();
-		Comment comment = element.getComment();
-		if (element.getComment() == null) {
-			// The comment is an optional reference, so create one
-			// to have a place to put the value in.
-			EPackage ePackage = EPackage.Registry.INSTANCE
-					.getEPackage(CorePackage.eNS_URI);
-			EFactory factory = ePackage.getEFactoryInstance();
-			EClass commentClass = (EClass) ePackage.getEClassifier("Comment");
-			EStructuralFeature commentRef = element.eClass()
-					.getEStructuralFeature("comment");
-			comment = (Comment) factory.create(commentClass);
-
-			// Need to add the comment reference to the element inside a transaction.
-			TransactionalEditingDomain editingDomain = getEditingDomain();
-			SetCommand command = new SetCommand(editingDomain, element,
-					commentRef, comment);
-			assert command.canExecute();
-			editingDomain.getCommandStack().execute(command);
-		}
+		Comment comment = getComment(element, CommentFormat.PLAIN);
 		comment.setBody((String) value);
 	}
 
@@ -126,14 +184,23 @@ public class ElementCommentPropertySection extends
 		data.left = new FormAttachment(0, 0);
 		data.right = new FormAttachment(100, 0);
 		data.top = new FormAttachment(0, 0);
-		data.bottom = new FormAttachment(100, 0);
-		data.height = 100;
-		data.width = 100;
+		data.bottom = new FormAttachment(80, 0);
 		text.setLayoutData(data);
 		if (isReadOnly()) {
 			text.setEditable(false);
 		}
 		return text;
+	}
+
+	protected void refreshUI() {
+		super.refreshUI();
+		Element element = (Element) getEObject();
+		Comment comment = element.getComment();
+		int enumValue = 0;
+		if (comment != null) {
+			enumValue = comment.getFormat().getValue();
+		}
+		formatCombo.select(enumValue);
 	}
 
 	@Override
@@ -164,6 +231,34 @@ public class ElementCommentPropertySection extends
 	@Override
 	protected TextChangeHelper getListener() {
 		return multilineListener;
+	}
+
+	/**
+	 * Get the comment for an Element. If necessary
+	 * create the comment if it doesn't exist.
+	 * @param format The format to use if a Comment is being created.
+	 */
+	private Comment getComment(Element element, CommentFormat format) {
+		Comment comment = element.getComment();
+		if (element.getComment() == null) {
+
+			EFactory factory = element.eClass().getEPackage()
+					.getEFactoryInstance();
+			EPackage ePackage = EPackage.Registry.INSTANCE
+					.getEPackage(CorePackage.eNS_URI);
+			EClass commentClass = (EClass) ePackage.getEClassifier("Comment");
+			EStructuralFeature commentRef = element.eClass()
+					.getEStructuralFeature("comment");
+			comment = (Comment) factory.create(commentClass);
+			comment.setFormat(format);
+
+			TransactionalEditingDomain editingDomain = getEditingDomain();
+			SetCommand command = new SetCommand(editingDomain, element,
+					commentRef, comment);
+			assert command.canExecute();
+			editingDomain.getCommandStack().execute(command);
+		}
+		return comment;
 	}
 
 }

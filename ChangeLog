@@ -1,3 +1,28 @@
+Mon Mar 14 12:29:42 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Core.ecore:
+
+          Added CommentFormat EEnum to indicate how the comment should be
+          formatted in the C++ code.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/plugin.properties:
+
+          Updated to pick up CommentFormat.
+
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/ElementCommentPropertySection.java:
+
+          Present combobox for comment format below comment.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/element_comment_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/adding_comments.html:
+
+          Added paragraph about comment format.
+
 Thu Mar 10 18:32:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/FederatorManagerImpl.h:
