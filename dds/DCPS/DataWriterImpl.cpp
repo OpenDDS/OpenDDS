@@ -691,7 +691,8 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
   RepoIdToReaderInfoMap::iterator iter = reader_info_.find(readerId);
   if (iter != reader_info_.end()) {
     iter->second.expression_params_ = params;
-  } else if (DCPS_debug_level > 4) {
+  } else if (DCPS_debug_level > 4 &&
+             TheServiceParticipant->publisher_content_filter()) {
     RepoIdConverter pubConv(this->publication_id_), subConv(readerId);
     ACE_DEBUG((LM_WARNING,
       ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::update_subscription_params()")

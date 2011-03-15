@@ -112,7 +112,7 @@
         </and>
     </condition>
 
-    <condition property="make.compile.arguments" value="">
+    <condition property="make.compile.arguments" value="depend all">
         <os family="unix"/>
     </condition>
     <condition property="make.compile.arguments"

@@ -1,3 +1,15 @@
+Tue Mar 15 22:09:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Don't log a warning when we receive a parameter update from the
+          InfoRepo and we aren't tracking that reader because publisher-side
+          content filtering is disabled.
+
+        * java/jms/native/build.xml:
+
+          Running GNU Make requires a "make depend" step.
+
 Tue Mar 15 15:36:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
