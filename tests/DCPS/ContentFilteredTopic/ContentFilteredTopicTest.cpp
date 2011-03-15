@@ -155,7 +155,8 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   sample.key = 0; // no DataLink receives this sample
   if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
 
-  if (mdw->wait_for_acknowledgments(infinite) != RETCODE_OK) {
+  Duration_t wfa = {60 /*seconds*/};
+  if (mdw->wait_for_acknowledgments(wfa) != RETCODE_OK) {
     cout << "ERROR: wait_for_acknowledgments 1" << endl;
     return false;
   }
@@ -166,7 +167,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   sample.key = 2;
   if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
 
-  if (mdw->wait_for_acknowledgments(infinite) != RETCODE_OK) {
+  if (mdw->wait_for_acknowledgments(wfa) != RETCODE_OK) {
     cout << "ERROR: wait_for_acknowledgments 2" << endl;
     return false;
   }

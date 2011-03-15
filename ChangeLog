@@ -1,3 +1,12 @@
+Tue Mar 15 22:32:15 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+
+          Change the wait_for_acknowledgments() delay from infinite to
+          finite-but-sufficient (1 minute).  The value for infinite delay
+          doesn't seem to be handled correctly, but that should be addressed
+          in the WaitForAck test and not here.
+
 Tue Mar 15 22:09:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
