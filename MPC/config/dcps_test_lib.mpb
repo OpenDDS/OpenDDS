@@ -1,0 +1,10 @@
+// -*- MPC -*-
+// $Id$
+// Base project for DDS tests that build a library from the generated code.
+
+project: dcps {
+  libout = .
+
+  Source_Files {
+  }
+}

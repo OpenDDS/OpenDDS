@@ -1,11 +1,8 @@
-project(DDS*idl): dcps {
+project(DDS*idl): dcps_test_lib {
   idlflags      += -Wb,stub_export_include=NotifyTest_export.h \
                    -Wb,stub_export_macro=NotifyTest_Export
   dcps_ts_flags += -Wb,export_macro=NotifyTest_Export
   dynamicflags  += NOTIFYTEST_BUILD_DLL
-
-  Source_Files {
-  }
 
   TypeSupport_Files {
     Messenger.idl

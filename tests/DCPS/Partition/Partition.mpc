@@ -1,4 +1,4 @@
-project(DDS*idl): dcps {
+project(DDS*idl): dcps_test_lib {
   idlflags      += -Wb,stub_export_include=Partition_export.h \
                    -Wb,stub_export_macro=Partition_Export
   dcps_ts_flags += -Wb,export_macro=Partition_Export
@@ -6,9 +6,6 @@ project(DDS*idl): dcps {
 
   TypeSupport_Files {
     Test.idl
-  }
-
-  Source_Files {
   }
 }
 
