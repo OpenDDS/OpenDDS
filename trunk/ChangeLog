@@ -1,3 +1,22 @@
+Tue Mar 15 15:36:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Fixed a compiler warning.
+
+        * MPC/config/dcps_test_lib.mpb:
+
+          New base project for DDS tests that create libraries.
+
+        * tests/DCPS/NotifyTest/NotifyTest.mpc:
+        * tests/DCPS/Partition/Partition.mpc:
+
+          Update these files to use the new mpb.  Also requires latest MPC rev.
+
+        * lib/.empty:
+
+          Removed this file.  It's a relic from the CVS days.
+
 Tue Mar 15 14:05:11 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackage2EditPart.java:
@@ -47,7 +66,7 @@ Mon Mar 14 23:41:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
           steps with MPC types that use per-project dirs for object files, and
           prevents parallel build errors on MPC types that always run custom
           build steps per-project even if the outputs are up to date.
-          This is a a bit of a "pilot project" of this way of setting up the
+          This is a bit of a "pilot project" of this way of setting up the
           tests.  If it works well, many other tests will be changed too.
 
 Mon Mar 14 12:29:42 UTC 2011  Byron Harris  <harrisb@ociweb.com>

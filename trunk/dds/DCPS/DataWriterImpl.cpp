@@ -994,7 +994,7 @@ DataWriterImpl::send_control_customized(const DataLinkSet_rch& links,
         // using the CONTENT_FILTER_FLAG and its optional header.
         if (allTargets->size() != targets.length()) {
           RepoIdSet::MapType filterTargets = allTargets->map(); // copied
-          for (CORBA::ULong i = 0, len = targets.length(); i < len; ++i) {
+          for (CORBA::ULong i = 0, leng = targets.length(); i < leng; ++i) {
             filterTargets.erase(targets[i]);
           }
           GUIDSeq ftseq(static_cast<CORBA::ULong>(filterTargets.size()));
