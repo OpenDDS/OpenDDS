@@ -1,3 +1,12 @@
+Tue Mar 15 14:05:11 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackage2EditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackageEditPart.java:
+
+          Extend region of Package figure to include entire compartment
+          for which children (Subpackages and libraries) selected from the palette
+          are added to the Package. (RT 14610)
+
 Mon Mar 14 23:41:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
