@@ -395,26 +395,4 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Enumerations.ecore#//Period/second"/>
     </genClasses>
   </genPackages>
-  <genPackages prefix="Element_comment" ecorePackage="element_comment.ecore#/">
-    <genEnums typeSafeEnumCompatible="false" ecoreEnum="element_comment.ecore#//CommentFormat">
-      <genEnumLiterals ecoreEnumLiteral="element_comment.ecore#//CommentFormat/PLAIN"/>
-      <genEnumLiterals ecoreEnumLiteral="element_comment.ecore#//CommentFormat/DOXYGEN"/>
-    </genEnums>
-    <genClasses ecoreClass="element_comment.ecore#//System">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference element_comment.ecore#//System/elements"/>
-    </genClasses>
-    <genClasses image="false" ecoreClass="element_comment.ecore#//Element">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference element_comment.ecore#//Element/comment"/>
-    </genClasses>
-    <genClasses ecoreClass="element_comment.ecore#//Comment">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute element_comment.ecore#//Comment/body"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute element_comment.ecore#//Comment/format"/>
-    </genClasses>
-    <genClasses ecoreClass="element_comment.ecore#//Concrete1">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute element_comment.ecore#//Concrete1/name"/>
-    </genClasses>
-    <genClasses ecoreClass="element_comment.ecore#//Concrete2">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute element_comment.ecore#//Concrete2/name"/>
-    </genClasses>
-  </genPackages>
 </genmodel:GenModel>
