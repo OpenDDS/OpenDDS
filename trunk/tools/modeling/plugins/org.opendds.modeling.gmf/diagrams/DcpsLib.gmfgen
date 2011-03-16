@@ -5,6 +5,8 @@
     xmlns:gmfgen="http://www.eclipse.org/gmf/2009/GenModel" packageNamePrefix="org.opendds.modeling.model.opendds.diagram.dcpslib"
     modelID="OpenDDS DcpsLib"
     diagramFileExtension="opendds_diagram_dcpslib"
+    dynamicTemplates="true"
+    templateDirectory="/org.opendds.modeling.gmf/templates"
     copyrightText="(c) Copyright Object Computing, Incorporated. 2005,2010. All rights reserved.">
   <audits>
     <categories

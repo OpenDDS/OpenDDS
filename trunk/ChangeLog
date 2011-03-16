@@ -1,3 +1,19 @@
+Wed Mar 16 19:44:46 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/impl/diagram/editparts/NodeEditPart.xpt:
+
+          Modified Xpand code for EditPart's getPrimaryChildEditPart() method so that the method is only
+          created if there is an editable label and if so then the first editable label is returned. The
+          original version returns the first label, even if it is read-only, which results in cursor not
+          being placed on an editable label as would be expected.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+          Updated to that custom code generation templates can be used.
+
 Wed Mar 16 19:40:56 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:
