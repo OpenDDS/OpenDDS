@@ -1,3 +1,14 @@
+Wed Mar 16 20:49:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * docs/design/CONTENT_SUBSCRIPTION:
+
+          Documented the Content-Subscription changes & implementation.
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+
+          Fixed a compiler warning.
+
 Wed Mar 16 19:44:46 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/impl/diagram/editparts/NodeEditPart.xpt:

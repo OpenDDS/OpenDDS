@@ -1,6 +1,13 @@
 Version 2.4 of OpenDDS.
 
--
+- The implementation of ContentFilteredTopics now defaults to evaluating
+  the filter expression at the publisher so that data samples which would
+  be ignored by the subscriber can be dropped before getting to the transport.
+  This feature can be turned off with "-DCPSPublisherContentFilter 0" or the
+  equivalent setting in the [common] section of the configuration file.
+  When using non-default DEADLINE or LIVELINESS QoS policy values, special
+  consideration needs to be given to how these "missing" samples impact the
+  QoS behavior, see the document in docs/design/CONTENT_SUBSCRIPTION.
 
 
 ========================================================================
