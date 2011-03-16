@@ -1,3 +1,9 @@
+Wed Mar 16 19:17:50 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/sheet/ElementCommentPropertySection.java:
+
+          Use code formatted by code generator.
+
 Tue Mar 15 22:32:15 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
