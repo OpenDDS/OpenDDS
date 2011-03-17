@@ -90,6 +90,12 @@ bool run_filtering_test(const DomainParticipant_var& dp,
     "MyTopic-Filtered", topic, "key > 1", StringSeq());
   DataReader_var dr =
     sub->create_datareader(cft, dr_qos, 0, DEFAULT_STATUS_MASK);
+  TopicDescription_var td = dr->get_topicdescription();
+  ContentFilteredTopic_var cft_from_td = ContentFilteredTopic::_narrow(td);
+  if (!cft_from_td) {
+    cout << "ERROR: get_topicdescription() did not return the CFT\n";
+    return false;
+  }
   DataReader_var dr2 =
     sub->create_datareader(topic, dr_qos, 0, DEFAULT_STATUS_MASK);
 
