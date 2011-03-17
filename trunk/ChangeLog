@@ -1,3 +1,9 @@
+Thu Mar 17 22:14:33 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/Bench/bin/gen-latency-tables.pl:
+
+          Allow "mrel" as the tranport identifier for multicast-reliable.
+
 Thu Mar 17 21:30:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

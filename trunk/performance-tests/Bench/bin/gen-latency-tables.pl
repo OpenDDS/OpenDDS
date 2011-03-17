@@ -40,7 +40,7 @@ sub transportName {
   return "TCP"      if $type eq "SimpleTcp";
   return "Multicast Best Effort"  if $type eq "mbe";
   return "Multicast Best Effort"  if $type eq "best effort multicast";
-  return "Multicast Reliable" if $type eq "mre";
+  return "Multicast Reliable" if ($type eq "mre" || $type eq "mrel");
   return "Multicast Reliable" if $type eq "reliable multicast";
   return "UDP" if $type eq "udp";
   return "UNKNOWN TRANSPORT TYPE";
