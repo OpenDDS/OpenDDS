@@ -12,14 +12,19 @@ import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
+import org.eclipse.gef.Request;
 import org.eclipse.gef.editpolicies.LayoutEditPolicy;
+import org.eclipse.gmf.runtime.diagram.core.edithelpers.CreateElementRequestAdapter;
 import org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart;
 import org.eclipse.gmf.runtime.diagram.ui.editparts.ITextAwareEditPart;
 import org.eclipse.gmf.runtime.diagram.ui.editparts.ShapeNodeEditPart;
 import org.eclipse.gmf.runtime.diagram.ui.editpolicies.ConstrainedToolbarLayoutEditPolicy;
+import org.eclipse.gmf.runtime.diagram.ui.editpolicies.CreationEditPolicy;
 import org.eclipse.gmf.runtime.diagram.ui.editpolicies.EditPolicyRoles;
+import org.eclipse.gmf.runtime.diagram.ui.requests.CreateViewAndElementRequest;
 import org.eclipse.gmf.runtime.draw2d.ui.figures.ConstrainedToolbarLayout;
 import org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel;
+import org.eclipse.gmf.runtime.emf.type.core.IElementType;
 import org.eclipse.gmf.runtime.gef.ui.figures.DefaultSizeNodeFigure;
 import org.eclipse.gmf.runtime.gef.ui.figures.NodeFigure;
 import org.eclipse.gmf.runtime.notation.View;
@@ -27,6 +32,7 @@ import org.eclipse.swt.graphics.Color;
 import org.opendds.modeling.diagram.main.edit.policies.LibPackageItemSemanticEditPolicy;
 import org.opendds.modeling.diagram.main.edit.policies.OpenDDSTextSelectionEditPolicy;
 import org.opendds.modeling.diagram.main.part.OpenDDSVisualIDRegistry;
+import org.opendds.modeling.diagram.main.providers.OpenDDSElementTypes;
 
 import com.ociweb.gmf.figures.UmlPackageFig;
 
@@ -58,9 +64,20 @@ public class LibPackageEditPart extends ShapeNodeEditPart {
 	}
 
 	/**
-	 * @generated
+	 * A LibPackage is both a top-level node and can be a child of a
+	 * LibPackage. GMF 2.2.2 generates code with the following behavior:
+	 * When selecting a Package from the palette and clicking on any
+	 * region below the top region of Package P, then then the package is treated
+	 * as a top-level node and not a child of P as would be expected.
+	 * This change results in being able to add in any portion of P's
+	 * compartment.
+	 * @generated NOT
 	 */
 	protected void createDefaultEditPolicies() {
+		// Custom code begin
+		installEditPolicy(EditPolicyRoles.CREATION_ROLE,
+				new CreationEditPolicy());
+		// Custom code end
 		super.createDefaultEditPolicies();
 		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
 				new LibPackageItemSemanticEditPolicy());
@@ -162,10 +179,10 @@ public class LibPackageEditPart extends ShapeNodeEditPart {
 
 	/**
 	 * Creates figure for this edit part.
-	 * 
+	 *
 	 * Body of this method does not depend on settings in generation model
 	 * so you may safely remove <i>generated</i> tag and modify it.
-	 * 
+	 *
 	 * @generated
 	 */
 	protected NodeFigure createNodeFigure() {
@@ -257,6 +274,41 @@ public class LibPackageEditPart extends ShapeNodeEditPart {
 		} else {
 			super.handleNotificationEvent(event);
 		}
+	}
+
+	/**
+	 * This is the code that is generated when LibPackage's compartment
+	 * has property ListLayout = true in MainDiagram.gmfgen.
+	 * See the comments to createDefaultEditPolicies() concerning
+	 * the region for which children can be added to the LibPackage's
+	 * compartment for why this change is necessary.
+	 * @generated NOT
+	 */
+	public EditPart getTargetEditPart(Request request) {
+		if (request instanceof CreateViewAndElementRequest) {
+			CreateElementRequestAdapter adapter = ((CreateViewAndElementRequest) request)
+					.getViewAndElementDescriptor()
+					.getCreateElementRequestAdapter();
+			IElementType type = (IElementType) adapter
+					.getAdapter(IElementType.class);
+			if (type == OpenDDSElementTypes.LibPackage_3001) {
+				return getChildBySemanticHint(OpenDDSVisualIDRegistry
+						.getType(LibPackageUmlPackageCompartmentEditPart.VISUAL_ID));
+			}
+			if (type == OpenDDSElementTypes.DataLib_3002) {
+				return getChildBySemanticHint(OpenDDSVisualIDRegistry
+						.getType(LibPackageUmlPackageCompartmentEditPart.VISUAL_ID));
+			}
+			if (type == OpenDDSElementTypes.DcpsLib_3003) {
+				return getChildBySemanticHint(OpenDDSVisualIDRegistry
+						.getType(LibPackageUmlPackageCompartmentEditPart.VISUAL_ID));
+			}
+			if (type == OpenDDSElementTypes.PolicyLib_3004) {
+				return getChildBySemanticHint(OpenDDSVisualIDRegistry
+						.getType(LibPackageUmlPackageCompartmentEditPart.VISUAL_ID));
+			}
+		}
+		return super.getTargetEditPart(request);
 	}
 
 	/**
