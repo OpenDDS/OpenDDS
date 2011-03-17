@@ -895,6 +895,12 @@ ACE_THROW_SPEC((CORBA::SystemException))
 DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription()
 ACE_THROW_SPEC((CORBA::SystemException))
 {
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  DDS::ContentFilteredTopic_ptr cft = this->get_cf_topic();
+  if (cft) {
+    return cft; // get_cf_topic has already _duplicated()
+  }
+#endif
   return DDS::TopicDescription::_duplicate(topic_desc_.in());
 }
 
