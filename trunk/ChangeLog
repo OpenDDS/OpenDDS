@@ -1,3 +1,11 @@
+Thu Mar 17 12:09:12 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackage2EditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackageEditPart.java:
+
+	  Intended changes for "Tue Mar 15 14:05:11 UTC 2011" commit. (May have forgotten
+	  @generated NOT tag and changes got overridden after regenerating code to format changes.)
+
 Wed Mar 16 20:49:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:
