@@ -1,3 +1,12 @@
+Fri Mar 18 14:47:45 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * configure:
+
+          Fixed a bug with default.features.  Put "extra" DDS features in the
+          default.features instead of passing them on the command line with
+          -features.  The old way was too hard to use, the user would have to
+          remember to run MPC with a similar command line.
+
 Fri Mar 18 13:45:49 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib:
