@@ -1,3 +1,10 @@
+Fri Mar 18 21:58:58 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/h.xsl:
+        * tools/modeling/tests/Comments/Comments.opendds:
+
+          Output comments from DCPSlib in _T.h
+
 Fri Mar 18 20:38:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/common.xsl:

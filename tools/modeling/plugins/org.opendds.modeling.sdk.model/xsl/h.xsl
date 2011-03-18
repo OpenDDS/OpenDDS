@@ -100,6 +100,7 @@ namespace OpenDDS { namespace Model {
 
 <!-- For a DCPSlib, output a namespace and the Elements class -->
 <xsl:template match="libs[@xsi:type='opendds:DcpsLib']" mode="declare">
+  <xsl:call-template name="output-comment"/>
   <xsl:value-of select="concat('namespace ', @name, ' {', $newline)"/>
   <xsl:text> 
   class Elements {
@@ -981,6 +982,9 @@ OpenDDS::DCPS::TransportIdType
         public: enum Values {
 </xsl:text>
     <xsl:for-each select="$values">
+      <xsl:call-template name="output-comment">
+        <xsl:with-param name="indent" select="'          '"/>
+      </xsl:call-template>
       <xsl:text>          </xsl:text>
       <xsl:call-template name="normalize-identifier"/>
       <xsl:value-of select="concat(',', $newline)"/>
