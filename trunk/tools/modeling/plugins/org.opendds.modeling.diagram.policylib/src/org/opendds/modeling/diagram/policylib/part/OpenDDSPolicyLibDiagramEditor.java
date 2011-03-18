@@ -54,7 +54,7 @@ public class OpenDDSPolicyLibDiagramEditor extends DiagramDocumentEditor
 	/**
 	 * @generated
 	 */
-	public static final String ID = "org.opendds.modeling.diagram.policylib.part.OpenDDSPolicyLibDiagramEditorID"; //$NON-NLS-1$
+	public static final String ID = "org.opendds.modeling.model.opendds.diagram.policylib.part.OpenDDSPolicyLibDiagramEditorID"; //$NON-NLS-1$
 
 	/**
 	 * @generated

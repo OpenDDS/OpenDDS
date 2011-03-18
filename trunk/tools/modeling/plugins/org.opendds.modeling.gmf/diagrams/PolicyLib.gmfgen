@@ -3041,7 +3041,8 @@
     <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
   </plugin>
   <editor
-      iconPath="icons/obj16/PolicyLib.gif"/>
+      iconPath="icons/obj16/PolicyLib.gif"
+      iD="org.opendds.modeling.model.opendds.diagram.policylib.part.OpenDDSPolicyLibDiagramEditorID"/>
   <navigator>
     <childReferences
         child="//@diagram"/>
