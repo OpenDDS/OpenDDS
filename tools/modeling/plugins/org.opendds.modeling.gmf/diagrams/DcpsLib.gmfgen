@@ -2,7 +2,7 @@
 <gmfgen:GenEditorGenerator xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:gmfgen="http://www.eclipse.org/gmf/2009/GenModel" packageNamePrefix="org.opendds.modeling.model.opendds.diagram.dcpslib"
+    xmlns:gmfgen="http://www.eclipse.org/gmf/2009/GenModel" packageNamePrefix="org.opendds.modeling.diagram.dcpslib"
     modelID="OpenDDS DcpsLib"
     diagramFileExtension="opendds_diagram_dcpslib"
     dynamicTemplates="true"

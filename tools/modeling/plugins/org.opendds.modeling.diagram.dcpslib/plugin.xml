@@ -26,9 +26,9 @@
          icon="icons/obj16/DcpsLib.gif"
          extensions="opendds_diagram_dcpslib"
          default="true"
-         class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditor"
-         matchingStrategy="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibMatchingStrategy"
-         contributorClass="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramActionBarContributor">
+         class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditor"
+         matchingStrategy="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibMatchingStrategy"
+         contributorClass="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibDiagramActionBarContributor">
       </editor>
    </extension>
    
@@ -36,7 +36,7 @@
       <?gmfgen generated="true"?>
       <context
          description="%context.description"
-         id="org.opendds.modeling.model.opendds.diagram.dcpslib.ui.diagramContext"
+         id="org.opendds.modeling.diagram.dcpslib.ui.diagramContext"
          name="%context.name"
          parentId="org.eclipse.gmf.runtime.diagram.ui.diagramContext">
       </context>
@@ -105,7 +105,7 @@
 
    <extension point="org.eclipse.core.runtime.preferences" id="prefs">
       <?gmfgen generated="true"?>
-      <initializer class="org.opendds.modeling.model.opendds.diagram.dcpslib.preferences.DiagramPreferenceInitializer"/>
+      <initializer class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramPreferenceInitializer"/>
    </extension>
 
    <extension point="org.eclipse.ui.preferencePages" id="prefpages">
@@ -113,31 +113,31 @@
       <page
             id="org.opendds.modeling.diagram.general"
             name="%prefpage.org.opendds.modeling.diagram.general"
-            class="org.opendds.modeling.model.opendds.diagram.dcpslib.preferences.DiagramGeneralPreferencePage">
+            class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramGeneralPreferencePage">
       </page>
       <page
             id="org.opendds.modeling.diagram.appearance"
             name="%prefpage.org.opendds.modeling.diagram.appearance"
             category="org.opendds.modeling.diagram.general"
-            class="org.opendds.modeling.model.opendds.diagram.dcpslib.preferences.DiagramAppearancePreferencePage">
+            class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramAppearancePreferencePage">
       </page>
       <page
             id="org.opendds.modeling.diagram.connections"
             name="%prefpage.org.opendds.modeling.diagram.connections"
             category="org.opendds.modeling.diagram.general"
-            class="org.opendds.modeling.model.opendds.diagram.dcpslib.preferences.DiagramConnectionsPreferencePage">
+            class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramConnectionsPreferencePage">
       </page>
       <page
             id="org.opendds.modeling.diagram.printing"
             name="%prefpage.org.opendds.modeling.diagram.printing"
             category="org.opendds.modeling.diagram.general"
-            class="org.opendds.modeling.model.opendds.diagram.dcpslib.preferences.DiagramPrintingPreferencePage">
+            class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramPrintingPreferencePage">
       </page>
       <page
             id="org.opendds.modeling.diagram.rulersAndGrid"
             name="%prefpage.org.opendds.modeling.diagram.rulersAndGrid"
             category="org.opendds.modeling.diagram.general"
-            class="org.opendds.modeling.model.opendds.diagram.dcpslib.preferences.DiagramRulersAndGridPreferencePage">
+            class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramRulersAndGridPreferencePage">
       </page>
    </extension>
 
@@ -145,7 +145,7 @@
       <?gmfgen generated="false"?>
       <propertyContributor
             contributorId="org.opendds.modeling.diagram.dcpslib"
-            labelProvider="org.opendds.modeling.model.opendds.diagram.dcpslib.sheet.OpenDDSDcpsLibSheetLabelProvider">
+            labelProvider="org.opendds.modeling.diagram.dcpslib.sheet.OpenDDSDcpsLibSheetLabelProvider">
          <!-- Re-order so that the category associated with the Comment shows up first -->
          <propertyCategory category="extra"/>
          <propertyCategory category="domain"/>
@@ -201,23 +201,23 @@
          <propertySection
             id="property.section.domain" 
             tab="property.tab.domain"
-            class="org.opendds.modeling.model.opendds.diagram.dcpslib.sheet.OpenDDSDcpsLibPropertySection">
+            class="org.opendds.modeling.diagram.dcpslib.sheet.OpenDDSDcpsLibPropertySection">
             <input type="org.eclipse.gmf.runtime.notation.View"/>
             <input type="org.eclipse.gef.EditPart"/>
-            <input type="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
+            <input type="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
          </propertySection>
          <propertySection
             id="property.section.ElementComment" 
             tab="property.tab.ElementComment"
-            filter="org.opendds.modeling.model.opendds.diagram.dcpslib.part.ElementCommentFilter"
-            class="org.opendds.modeling.model.opendds.diagram.dcpslib.sheet.ElementCommentPropertySection">
+            filter="org.opendds.modeling.diagram.dcpslib.part.ElementCommentFilter"
+            class="org.opendds.modeling.diagram.dcpslib.sheet.ElementCommentPropertySection">
          </propertySection>
       </propertySections>
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.diagram.core.viewProviders" id="view-provider">
       <?gmfgen generated="false"?>
-      <viewProvider class="org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibViewProvider">
+      <viewProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibViewProvider">
          <Priority name="Lowest"/>
          <context viewClass="org.eclipse.gmf.runtime.notation.Diagram" semanticHints="OpenDDS DcpsLib"/>
          <!-- Emptied semanticHints according to workaround for diagram reload bug 281014,
@@ -229,7 +229,7 @@
 
    <extension point="org.eclipse.gmf.runtime.diagram.ui.editpartProviders" id="ep-provider">
       <?gmfgen generated="true"?>
-      <editpartProvider class="org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibEditPartProvider">
+      <editpartProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibEditPartProvider">
          <Priority name="Lowest"/>
          <object class="org.eclipse.gmf.runtime.notation.Diagram" id="generated-diagram">
             <method name="getType()" value="OpenDDS DcpsLib"/>
@@ -252,28 +252,28 @@
 
    <extension point="org.eclipse.gmf.runtime.emf.ui.modelingAssistantProviders" id="modelassist-provider">
       <?gmfgen generated="true"?>
-      <modelingAssistantProvider class="org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibModelingAssistantProvider">
+      <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibModelingAssistantProvider">
          <Priority name="Lowest"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.DcpsLibEditPart" id="DcpsLib_1000"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.DomainParticipantEditPart" id="DomainParticipant_2001"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.DomainEditPart" id="Domain_2002"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.TopicEditPart" id="Topic_2007"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.ContentFilteredTopicEditPart" id="ContentFilteredTopic_2005"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.MultiTopicEditPart" id="MultiTopic_2006"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DcpsLibEditPart" id="DcpsLib_1000"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DomainParticipantEditPart" id="DomainParticipant_2001"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DomainEditPart" id="Domain_2002"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TopicEditPart" id="Topic_2007"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.ContentFilteredTopicEditPart" id="ContentFilteredTopic_2005"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.MultiTopicEditPart" id="MultiTopic_2006"/>
          <context elements="DcpsLib_1000,DomainParticipant_2001,Domain_2002,Topic_2007,ContentFilteredTopic_2005,MultiTopic_2006"/>
       </modelingAssistantProvider>
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.common.ui.services.iconProviders" id="icon-provider">
       <?gmfgen generated="true"?>
-      <IconProvider class="org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibIconProvider">
+      <IconProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibIconProvider">
          <Priority name="Low"/>
       </IconProvider>
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.common.ui.services.parserProviders" id="parser-provider">
       <?gmfgen generated="true"?>
-      <ParserProvider class="org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibParserProvider">
+      <ParserProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibParserProvider">
          <Priority name="Lowest"/>
       </ParserProvider>
    </extension>
@@ -286,7 +286,7 @@
                name="%metatype.name.DcpsLib_1000"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="DcpsLib"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.DcpsLibEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DcpsLibEditHelper">
             <param name="semanticHint" value="1000"/>
          </metamodelType>
       </metamodel>
@@ -296,7 +296,7 @@
                name="%metatype.name.DomainParticipant_2001"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="domainParticipant"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.DomainParticipantEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DomainParticipantEditHelper">
             <param name="semanticHint" value="2001"/>
          </metamodelType>
       </metamodel>
@@ -306,7 +306,7 @@
                name="%metatype.name.Domain_2002"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="domain"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.DomainEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DomainEditHelper">
             <param name="semanticHint" value="2002"/>
          </metamodelType>
       </metamodel>
@@ -316,7 +316,7 @@
                name="%metatype.name.Topic_2007"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Topic"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.TopicEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.TopicEditHelper">
             <param name="semanticHint" value="2007"/>
          </metamodelType>
       </metamodel>
@@ -326,7 +326,7 @@
                name="%metatype.name.ContentFilteredTopic_2005"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="ContentFilteredTopic"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.ContentFilteredTopicEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.ContentFilteredTopicEditHelper">
             <param name="semanticHint" value="2005"/>
          </metamodelType>
       </metamodel>
@@ -336,7 +336,7 @@
                name="%metatype.name.MultiTopic_2006"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="MultiTopic"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.MultiTopicEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.MultiTopicEditHelper">
             <param name="semanticHint" value="2006"/>
          </metamodelType>
       </metamodel>
@@ -346,7 +346,7 @@
                name="%metatype.name.Publisher_3001"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="publisher"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.PublisherEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.PublisherEditHelper">
             <param name="semanticHint" value="3001"/>
          </metamodelType>
       </metamodel>
@@ -356,7 +356,7 @@
                name="%metatype.name.DataWriter_3059"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="DataWriter"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.DataWriterEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DataWriterEditHelper">
             <param name="semanticHint" value="3059"/>
          </metamodelType>
       </metamodel>
@@ -366,7 +366,7 @@
                name="%metatype.name.DeadlineQosPolicy_3022"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="deadlineQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.DeadlineQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DeadlineQosPolicyEditHelper">
             <param name="semanticHint" value="3022"/>
          </metamodelType>
       </metamodel>
@@ -376,7 +376,7 @@
                name="%metatype.name.Period_3005"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Period"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.PeriodEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.PeriodEditHelper">
             <param name="semanticHint" value="3005"/>
          </metamodelType>
       </metamodel>
@@ -386,7 +386,7 @@
                name="%metatype.name.DestinationOrderQosPolicy_3023"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="destinationOrderQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.DestinationOrderQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DestinationOrderQosPolicyEditHelper">
             <param name="semanticHint" value="3023"/>
          </metamodelType>
       </metamodel>
@@ -396,7 +396,7 @@
                name="%metatype.name.DsQosPolicy_3024"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="dsQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.DsQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DsQosPolicyEditHelper">
             <param name="semanticHint" value="3024"/>
          </metamodelType>
       </metamodel>
@@ -415,7 +415,7 @@
                name="%metatype.name.HistoryQosPolicy_3025"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="historyQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.HistoryQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.HistoryQosPolicyEditHelper">
             <param name="semanticHint" value="3025"/>
          </metamodelType>
       </metamodel>
@@ -425,7 +425,7 @@
                name="%metatype.name.LbQosPolicy_3026"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="lbQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.LbQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.LbQosPolicyEditHelper">
             <param name="semanticHint" value="3026"/>
          </metamodelType>
       </metamodel>
@@ -444,7 +444,7 @@
                name="%metatype.name.LifespanQosPolicy_3027"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="lifespanQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.LifespanQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.LifespanQosPolicyEditHelper">
             <param name="semanticHint" value="3027"/>
          </metamodelType>
       </metamodel>
@@ -463,7 +463,7 @@
                name="%metatype.name.LivelinessQosPolicy_3028"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="livelinessQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.LivelinessQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.LivelinessQosPolicyEditHelper">
             <param name="semanticHint" value="3028"/>
          </metamodelType>
       </metamodel>
@@ -482,7 +482,7 @@
                name="%metatype.name.OsQosPolicy_3029"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="osQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.OsQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.OsQosPolicyEditHelper">
             <param name="semanticHint" value="3029"/>
          </metamodelType>
       </metamodel>
@@ -492,7 +492,7 @@
                name="%metatype.name.OwnershipQosPolicy_3030"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="ownershipQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.OwnershipQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.OwnershipQosPolicyEditHelper">
             <param name="semanticHint" value="3030"/>
          </metamodelType>
       </metamodel>
@@ -502,7 +502,7 @@
                name="%metatype.name.ReliabilityQosPolicy_3031"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="reliabilityQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.ReliabilityQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.ReliabilityQosPolicyEditHelper">
             <param name="semanticHint" value="3031"/>
          </metamodelType>
       </metamodel>
@@ -521,7 +521,7 @@
                name="%metatype.name.RlQosPolicy_3032"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="rlQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.RlQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.RlQosPolicyEditHelper">
             <param name="semanticHint" value="3032"/>
          </metamodelType>
       </metamodel>
@@ -531,7 +531,7 @@
                name="%metatype.name.TpQosPolicy_3033"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="tpQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.TpQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.TpQosPolicyEditHelper">
             <param name="semanticHint" value="3033"/>
          </metamodelType>
       </metamodel>
@@ -541,7 +541,7 @@
                name="%metatype.name.WdlQosPolicy_3034"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="wdlQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.WdlQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.WdlQosPolicyEditHelper">
             <param name="semanticHint" value="3034"/>
          </metamodelType>
       </metamodel>
@@ -551,7 +551,7 @@
                name="%metatype.name.DurabilityQosPolicy_3035"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="durabilityQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.DurabilityQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DurabilityQosPolicyEditHelper">
             <param name="semanticHint" value="3035"/>
          </metamodelType>
       </metamodel>
@@ -561,7 +561,7 @@
                name="%metatype.name.UdQosPolicy_3013"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="udQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.UdQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.UdQosPolicyEditHelper">
             <param name="semanticHint" value="3013"/>
          </metamodelType>
       </metamodel>
@@ -697,7 +697,7 @@
                name="%metatype.name.EfQosPolicy_3012"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="efQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.EfQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.EfQosPolicyEditHelper">
             <param name="semanticHint" value="3012"/>
          </metamodelType>
       </metamodel>
@@ -707,7 +707,7 @@
                name="%metatype.name.GdQosPolicy_3014"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="gdQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.GdQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.GdQosPolicyEditHelper">
             <param name="semanticHint" value="3014"/>
          </metamodelType>
       </metamodel>
@@ -717,7 +717,7 @@
                name="%metatype.name.PartitionQosPolicy_3015"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="partitionQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.PartitionQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.PartitionQosPolicyEditHelper">
             <param name="semanticHint" value="3015"/>
          </metamodelType>
       </metamodel>
@@ -727,7 +727,7 @@
                name="%metatype.name.PresentationQosPolicy_3016"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="presentationQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.PresentationQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.PresentationQosPolicyEditHelper">
             <param name="semanticHint" value="3016"/>
          </metamodelType>
       </metamodel>
@@ -773,7 +773,7 @@
                name="%metatype.name.Subscriber_3002"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="subscriber"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.SubscriberEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.SubscriberEditHelper">
             <param name="semanticHint" value="3002"/>
          </metamodelType>
       </metamodel>
@@ -783,7 +783,7 @@
                name="%metatype.name.DataReader_3060"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="DataReader"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.DataReaderEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DataReaderEditHelper">
             <param name="semanticHint" value="3060"/>
          </metamodelType>
       </metamodel>
@@ -793,7 +793,7 @@
                name="%metatype.name.RdlQosPolicy_3049"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="rdlQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.RdlQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.RdlQosPolicyEditHelper">
             <param name="semanticHint" value="3049"/>
          </metamodelType>
       </metamodel>
@@ -821,7 +821,7 @@
                name="%metatype.name.TbfQosPolicy_3050"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="tbfQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.TbfQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.TbfQosPolicyEditHelper">
             <param name="semanticHint" value="3050"/>
          </metamodelType>
       </metamodel>
@@ -840,7 +840,7 @@
                name="%metatype.name.TdQosPolicy_3051"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="tdQosPolicy"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.TdQosPolicyEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.TdQosPolicyEditHelper">
             <param name="semanticHint" value="3051"/>
          </metamodelType>
       </metamodel>
@@ -877,7 +877,7 @@
                name="%metatype.name.Struct_3058"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Struct"
-               edithelper="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.helpers.StructEditHelper">
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.StructEditHelper">
             <param name="semanticHint" value="3058"/>
          </metamodelType>
       </metamodel>
@@ -1006,7 +1006,7 @@
            type="org.eclipse.emf.common.ui.URIEditorInput"
            namespace="org.opendds.modeling.diagram.dcpslib"
            properties="isURIEditorInput"
-           class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibUriEditorInputTester">
+           class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibUriEditorInputTester">
        </propertyTester>
    </extension>
 
@@ -1032,8 +1032,8 @@
             id="org.opendds.modeling.diagram.dcpslib.resourceContent" 
             name="%navigatorContentName" 
             priority="normal" 
-            contentProvider="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorContentProvider" 
-            labelProvider="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorLabelProvider"
+            contentProvider="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorContentProvider" 
+            labelProvider="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorLabelProvider"
             icon="icons/obj16/DcpsLib.gif"
             activeByDefault="true">
          <triggerPoints>
@@ -1042,24 +1042,24 @@
     	          <instanceof value="org.eclipse.core.resources.IFile"/>
         	      <test property="org.eclipse.core.resources.extension" value="opendds_diagram_dcpslib"/>
                </and>
-               <instanceof value="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
+               <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
             </or>
          </triggerPoints>
          <possibleChildren>
             <or>
-         	   <instanceof value="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
+         	   <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
             </or>
          </possibleChildren>
          <commonSorter 
                id="org.opendds.modeling.diagram.dcpslib.navigatorSorter" 
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorSorter">
+               class="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorSorter">
             <parentExpression>
                <or>
 	              <and>
     	             <instanceof value="org.eclipse.core.resources.IFile"/>
         	         <test property="org.eclipse.core.resources.extension" value="opendds_diagram_dcpslib"/>
                   </and>
-                  <instanceof value="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
+                  <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
                </or>
             </parentExpression>
          </commonSorter>
@@ -1068,8 +1068,8 @@
             id="org.opendds.modeling.diagram.dcpslib.domainResourceContent" 
             name="%domainNavigatorContentName" 
             priority="normal" 
-            contentProvider="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibDomainNavigatorContentProvider" 
-            labelProvider="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibDomainNavigatorLabelProvider"
+            contentProvider="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibDomainNavigatorContentProvider" 
+            labelProvider="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibDomainNavigatorLabelProvider"
             icon="icons/obj16/DcpsLib.gif"
             activeByDefault="true">
          <triggerPoints>
@@ -1078,19 +1078,19 @@
     	          <instanceof value="org.eclipse.core.resources.IFile"/>
         	      <test property="org.eclipse.core.resources.extension" value="opendds"/>
                </and>
-               <instanceof value="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibDomainNavigatorItem"/>
+               <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibDomainNavigatorItem"/>
             </or>
          </triggerPoints>
          <possibleChildren>
-            <instanceof value="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibDomainNavigatorItem"/>
+            <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibDomainNavigatorItem"/>
          </possibleChildren>
       </navigatorContent>
       <actionProvider
             id="org.opendds.modeling.diagram.dcpslib.navigatorActionProvider"
-            class="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorActionProvider">
+            class="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorActionProvider">
          <enablement>
             <or>
-               <instanceof value="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
+               <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
             </or>
          </enablement>
       </actionProvider>
@@ -1100,7 +1100,7 @@
       <?gmfgen generated="true"?>
       <linkHelper
             id="org.opendds.modeling.diagram.dcpslib.navigatorLinkHelper"
-            class="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorLinkHelper">
+            class="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorLinkHelper">
          <editorInputEnablement>
             <and>
                <instanceof value="org.eclipse.emf.common.ui.URIEditorInput"/>
@@ -1108,7 +1108,7 @@
             </and>
          </editorInputEnablement>
          <selectionEnablement>
-            <instanceof value="org.opendds.modeling.model.opendds.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
+            <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
          </selectionEnablement>
       </linkHelper>
    </extension>
@@ -1116,17 +1116,17 @@
       <?gmfgen generated="true"?>
       <command
          categoryId="org.eclipse.ui.category.edit"
-         defaultHandler="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramUpdateCommand"
+         defaultHandler="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibDiagramUpdateCommand"
          description="%update.diagram.description"
-         id="org.opendds.modeling.model.opendds.diagram.dcpslib.updateDiagram"
+         id="org.opendds.modeling.diagram.dcpslib.updateDiagram"
          name="%update.diagram.name"/>
    </extension>
    
    <extension point="org.eclipse.ui.bindings" id="update-cmd-binding">
       <?gmfgen generated="true"?>
       <key 
-         commandId="org.opendds.modeling.model.opendds.diagram.dcpslib.updateDiagram"
-         contextId="org.opendds.modeling.model.opendds.diagram.dcpslib.ui.diagramContext"
+         commandId="org.opendds.modeling.diagram.dcpslib.updateDiagram"
+         contextId="org.opendds.modeling.diagram.dcpslib.ui.diagramContext"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="F5"/>
    </extension>
@@ -1143,7 +1143,7 @@
                <and>
                   <with variable="activePartId"><equals value="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorID"/></with>
                   <with variable="selection"><iterate ifEmpty="false"> 
-                     <instanceof value="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.DcpsLibEditPart"/>
+                     <instanceof value="org.opendds.modeling.diagram.dcpslib.edit.parts.DcpsLibEditPart"/>
                   </iterate></with>
                </and>
             </visibleWhen>
@@ -1157,7 +1157,7 @@
       <command id="org.opendds.modeling.diagram.dcpslib.LoadResourceAction"
          name="Load Resource"
          categoryId="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorID"
-         defaultHandler="org.opendds.modeling.model.opendds.diagram.dcpslib.part.LoadResourceAction"/>
+         defaultHandler="org.opendds.modeling.diagram.dcpslib.part.LoadResourceAction"/>
    </extension>
 
    <extension point="org.eclipse.ui.handlers" id="menu-handlers">
@@ -1173,7 +1173,7 @@
       <objectContribution
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.DomainParticipantEditPart"
-            objectClass="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.DomainParticipantEditPart">
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.DomainParticipantEditPart">
          <menu 
             id="DomainParticipantInsert" 
             label="&amp;Add &amp;QoS Policy" 
@@ -1181,14 +1181,14 @@
             <separator name="group1"/>
          </menu>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionDomainParticipant"
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionDomainParticipant"
                enablesFor="1"
                id="DomainParticipantRefQosPolicyAdd"
                label="Add &amp;reference to library QoS Policy"
                menubarPath="DomainParticipantInsert/group1">
          </action>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionDomainParticipant"
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionDomainParticipant"
                enablesFor="1"
                id="DomainParticipantCreateQosPolicyAdd"
                label="Add &amp;custom QoS Policy"
@@ -1200,7 +1200,7 @@
       <objectContribution
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.PublisherEditPart"
-            objectClass="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.PublisherEditPart">
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.PublisherEditPart">
          <menu 
             id="PublisherInsert" 
             label="&amp;Add &amp;QoS Policy" 
@@ -1208,14 +1208,14 @@
             <separator name="group1"/>
          </menu>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionPublisher"
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionPublisher"
                enablesFor="1"
                id="PublisherRefQosPolicyAdd"
                label="Add &amp;reference to library QoS Policy"
                menubarPath="PublisherInsert/group1">
          </action>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionPublisher"
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionPublisher"
                enablesFor="1"
                id="org.opendds.modeling.popup.PublisherCreatePolicyActionID"
                label="Add &amp;custom QoS Policy"
@@ -1227,7 +1227,7 @@
       <objectContribution
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.DataWriterEditPart"
-            objectClass="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.DataWriterEditPart">
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.DataWriterEditPart">
          <menu 
             id="DataWriterInsert" 
             label="&amp;Add &amp;QoS Policy" 
@@ -1235,14 +1235,14 @@
             <separator name="group1"/>
          </menu>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionDataWriter"
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionDataWriter"
                enablesFor="1"
                id="DataWriterRefQosPolicyAdd"
                label="Add &amp;reference to library QoS Policy"
                menubarPath="DataWriterInsert/group1">
          </action>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionDataWriter"
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionDataWriter"
                enablesFor="1"
                id="org.opendds.modeling.popup.DataWriterCreatePolicyActionID"
                label="Add &amp;custom QoS Policy"
@@ -1254,7 +1254,7 @@
       <objectContribution
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.SubscriberEditPart"
-            objectClass="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.SubscriberEditPart">
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.SubscriberEditPart">
          <menu 
             id="SubscriberInsert" 
             label="&amp;Add &amp;QoS Policy" 
@@ -1262,14 +1262,14 @@
             <separator name="group1"/>
          </menu>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionSubscriber"
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionSubscriber"
                enablesFor="1"
                id="SubscriberRefQosPolicyAdd"
                label="Add &amp;reference to library QoS Policy"
                menubarPath="SubscriberInsert/group1">
          </action>
           <action
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionSubscriber"
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionSubscriber"
                enablesFor="1"
                id="org.opendds.modeling.popup.SubscriberCreatePolicyActionID"
                label="Add &amp;custom QoS Policy"
@@ -1281,7 +1281,7 @@
       <objectContribution
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.DataReaderEditPart"
-            objectClass="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.DataReaderEditPart">
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.DataReaderEditPart">
          <menu 
             id="DataReaderInsert" 
             label="&amp;Add &amp;QoS Policy" 
@@ -1289,14 +1289,14 @@
             <separator name="group1"/>
          </menu>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionDataReader"
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionDataReader"
                enablesFor="1"
                id="DataReaderRefQosPolicyAdd"
                label="Add &amp;reference to library QoS Policy"
                menubarPath="DataReaderInsert/group1">
          </action>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionDataReader"
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionDataReader"
                enablesFor="1"
                id="org.opendds.modeling.popup.DataReaderCreatePolicyActionID"
                label="Add &amp;custom QoS Policy"
@@ -1308,7 +1308,7 @@
       <objectContribution
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.TopicEditPart"
-            objectClass="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.TopicEditPart">
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.TopicEditPart">
          <menu 
             id="TopicPolicyInsert" 
             label="&amp;Add &amp;QoS Policy" 
@@ -1316,14 +1316,14 @@
             <separator name="group1"/>
          </menu>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionTopic"
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionTopic"
                enablesFor="1"
                id="TopicRefQosPolicyAdd"
                label="Add &amp;reference to library QoS Policy"
                menubarPath="TopicPolicyInsert/group1">
          </action>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionTopic"
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionTopic"
                enablesFor="1"
                id="org.opendds.modeling.popup.TopicCreatePolicyActionID"
                label="Add &amp;custom QoS Policy"
@@ -1334,7 +1334,7 @@
                label="Select &amp;Struct">
         </menu>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibRefTypeActionTopic"
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefTypeActionTopic"
                enablesFor="1"
                id="TopicDataTypeSelect"
                label="Select DataType"
@@ -1346,13 +1346,13 @@
       <objectContribution
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.ContentFilteredTopicEditPart"
-            objectClass="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.ContentFilteredTopicEditPart">
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.ContentFilteredTopicEditPart">
          <menu
                id="ContentFilteredTopicDataTypeSelect"
                label="Select &amp;Struct">
         </menu>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibRefTypeActionContentFilteredTopic"
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefTypeActionContentFilteredTopic"
                enablesFor="1"
                id="ContentFilteredTopicDataTypeSelect"
                label="Select DataType"
@@ -1364,13 +1364,13 @@
       <objectContribution
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.MultiTopicEditPart"
-            objectClass="org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts.MultiTopicEditPart">
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.MultiTopicEditPart">
          <menu
                id="MultiTopicDataTypeSelect"
                label="Select &amp;Struct">
         </menu>
          <action
-               class="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibRefTypeActionMultiTopic"
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefTypeActionMultiTopic"
                enablesFor="1"
                id="MultiTopicDataTypeSelect"
                label="Select DataType"
@@ -1381,7 +1381,7 @@
     </extension>
 <extension point="org.eclipse.gmf.runtime.common.ui.services.markerNavigationProviders" id="markers-navigation">
       <?gmfgen generated="true"?>
-      <MarkerNavigationProvider class="org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibMarkerNavigationProvider">
+      <MarkerNavigationProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibMarkerNavigationProvider">
          <MarkerType name="org.opendds.modeling.diagram.dcpslib.diagnostic"/>
          <Priority name="Lowest"/>
       </MarkerNavigationProvider>
@@ -1394,7 +1394,7 @@
       <persistent value="true"/>
    </extension><extension id="validationDecoratorProvider" name="ValidationDecorations" point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders">
       <?gmfgen generated="true"?>
-      <decoratorProvider class="org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibValidationDecoratorProvider">
+      <decoratorProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibValidationDecoratorProvider">
          <Priority name="Lowest"/>
          <object class="org.eclipse.gmf.runtime.diagram.ui.editparts.IPrimaryEditPart(org.eclipse.gmf.runtime.diagram.ui)" id="PRIMARY_VIEW"/>
          <context decoratorTargets="PRIMARY_VIEW"/>
@@ -1446,7 +1446,7 @@
 <extension point="org.eclipse.emf.validation.constraintBindings">
       <?gmfgen generated="true"?>
       <clientContext default="false" id="org.opendds.modeling.diagram.dcpslibDefaultCtx">
-         <selector class="org.opendds.modeling.model.opendds.diagram.dcpslib.providers.OpenDDSDcpsLibValidationProvider$DefaultCtx"/>
+         <selector class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibValidationProvider$DefaultCtx"/>
       </clientContext>
       <binding context="org.opendds.modeling.diagram.dcpslibDefaultCtx">
                   <constraint ref="org.opendds.modeling.diagram.dcpslib.org.opendds.modeling.model.dcps.validation.error.domain_entity_name_blank"/>
