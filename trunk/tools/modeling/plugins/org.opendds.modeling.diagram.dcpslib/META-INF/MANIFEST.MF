@@ -4,12 +4,15 @@ Bundle-Name: %pluginName
 Bundle-SymbolicName: org.opendds.modeling.diagram.dcpslib; singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .
-Bundle-Activator: org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorPlugin
+Bundle-Activator: org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Export-Package: org.opendds.modeling.model.opendds.diagram.dcpslib.edit.parts,
- org.opendds.modeling.model.opendds.diagram.dcpslib.part,
- org.opendds.modeling.model.opendds.diagram.dcpslib.providers
+Export-Package: org.opendds.modeling.diagram.dcpslib.edit.parts,
+ org.opendds.modeling.diagram.dcpslib.part,
+ org.opendds.modeling.diagram.dcpslib.providers,
+ org.opendds.modeling.diagram.dcpslib.edit.parts,
+ org.opendds.modeling.diagram.dcpslib.part,
+ org.opendds.modeling.diagram.dcpslib.providers
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.core.expressions,

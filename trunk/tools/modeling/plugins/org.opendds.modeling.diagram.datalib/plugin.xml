@@ -26,9 +26,9 @@
          icon="icons/obj16/DataLib.gif"
          extensions="opendds_diagram_datalib"
          default="true"
-         class="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditor"
-         matchingStrategy="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibMatchingStrategy"
-         contributorClass="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramActionBarContributor">
+         class="org.opendds.modeling.diagram.datalib.part.OpenDDSDataLibDiagramEditor"
+         matchingStrategy="org.opendds.modeling.diagram.datalib.part.OpenDDSDataLibMatchingStrategy"
+         contributorClass="org.opendds.modeling.diagram.datalib.part.OpenDDSDataLibDiagramActionBarContributor">
       </editor>
    </extension>
    
@@ -36,7 +36,7 @@
       <?gmfgen generated="true"?>
       <context
          description="%context.description"
-         id="org.opendds.modeling.model.opendds.diagram.datalib.ui.diagramContext"
+         id="org.opendds.modeling.diagram.datalib.ui.diagramContext"
          name="%context.name"
          parentId="org.eclipse.gmf.runtime.diagram.ui.diagramContext">
       </context>
@@ -105,7 +105,7 @@
 
    <extension point="org.eclipse.gmf.runtime.common.ui.services.markerNavigationProviders" id="markers-navigation">
       <?gmfgen generated="true"?>
-      <MarkerNavigationProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibMarkerNavigationProvider">
+      <MarkerNavigationProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibMarkerNavigationProvider">
          <MarkerType name="org.opendds.modeling.diagram.datalib.diagnostic"/>
          <Priority name="Lowest"/>
       </MarkerNavigationProvider>
@@ -121,7 +121,7 @@
    
    <extension point="org.eclipse.core.runtime.preferences" id="prefs">
       <?gmfgen generated="true"?>
-      <initializer class="org.opendds.modeling.model.opendds.diagram.datalib.preferences.DiagramPreferenceInitializer"/>
+      <initializer class="org.opendds.modeling.diagram.datalib.preferences.DiagramPreferenceInitializer"/>
    </extension>
 
    <extension point="org.eclipse.ui.preferencePages" id="prefpages">
@@ -129,31 +129,31 @@
       <page
             id="org.opendds.modeling.diagram.general"
             name="%prefpage.org.opendds.modeling.diagram.general"
-            class="org.opendds.modeling.model.opendds.diagram.datalib.preferences.DiagramGeneralPreferencePage">
+            class="org.opendds.modeling.diagram.datalib.preferences.DiagramGeneralPreferencePage">
       </page>
       <page
             id="org.opendds.modeling.diagram.appearance"
             name="%prefpage.org.opendds.modeling.diagram.appearance"
             category="org.opendds.modeling.diagram.general"
-            class="org.opendds.modeling.model.opendds.diagram.datalib.preferences.DiagramAppearancePreferencePage">
+            class="org.opendds.modeling.diagram.datalib.preferences.DiagramAppearancePreferencePage">
       </page>
       <page
             id="org.opendds.modeling.diagram.connections"
             name="%prefpage.org.opendds.modeling.diagram.connections"
             category="org.opendds.modeling.diagram.general"
-            class="org.opendds.modeling.model.opendds.diagram.datalib.preferences.DiagramConnectionsPreferencePage">
+            class="org.opendds.modeling.diagram.datalib.preferences.DiagramConnectionsPreferencePage">
       </page>
       <page
             id="org.opendds.modeling.diagram.printing"
             name="%prefpage.org.opendds.modeling.diagram.printing"
             category="org.opendds.modeling.diagram.general"
-            class="org.opendds.modeling.model.opendds.diagram.datalib.preferences.DiagramPrintingPreferencePage">
+            class="org.opendds.modeling.diagram.datalib.preferences.DiagramPrintingPreferencePage">
       </page>
       <page
             id="org.opendds.modeling.diagram.rulersAndGrid"
             name="%prefpage.org.opendds.modeling.diagram.rulersAndGrid"
             category="org.opendds.modeling.diagram.general"
-            class="org.opendds.modeling.model.opendds.diagram.datalib.preferences.DiagramRulersAndGridPreferencePage">
+            class="org.opendds.modeling.diagram.datalib.preferences.DiagramRulersAndGridPreferencePage">
       </page>
    </extension>
 
@@ -161,7 +161,7 @@
       <?gmfgen generated="false"?>
       <propertyContributor
             contributorId="org.opendds.modeling.diagram.datalib"
-            labelProvider="org.opendds.modeling.model.opendds.diagram.datalib.sheet.OpenDDSDataLibSheetLabelProvider">
+            labelProvider="org.opendds.modeling.diagram.datalib.sheet.OpenDDSDataLibSheetLabelProvider">
          <!-- Re-order so that the category associated with the Comment shows up first -->
          <propertyCategory category="extra"/>
          <propertyCategory category="domain"/>
@@ -217,23 +217,23 @@
          <propertySection
             id="property.section.domain" 
             tab="property.tab.domain"
-            class="org.opendds.modeling.model.opendds.diagram.datalib.sheet.OpenDDSDataLibPropertySection">
+            class="org.opendds.modeling.diagram.datalib.sheet.OpenDDSDataLibPropertySection">
             <input type="org.eclipse.gmf.runtime.notation.View"/>
             <input type="org.eclipse.gef.EditPart"/>
-            <input type="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+            <input type="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
          </propertySection>
          <propertySection
             id="property.section.ElementComment" 
             tab="property.tab.ElementComment"
-            filter="org.opendds.modeling.model.opendds.diagram.datalib.part.ElementCommentFilter"
-            class="org.opendds.modeling.model.opendds.diagram.datalib.sheet.ElementCommentPropertySection">
+            filter="org.opendds.modeling.diagram.datalib.part.ElementCommentFilter"
+            class="org.opendds.modeling.diagram.datalib.sheet.ElementCommentPropertySection">
          </propertySection>
       </propertySections>
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.diagram.core.viewProviders" id="view-provider">
       <?gmfgen generated="false"?>
-      <viewProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibViewProvider">
+      <viewProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibViewProvider">
          <Priority name="Lowest"/>
          <context viewClass="org.eclipse.gmf.runtime.notation.Diagram" semanticHints="OpenDDS DataLib"/>
          <!-- Emptied semanticHints according to workaround for diagram reload bug 281014,
@@ -245,7 +245,7 @@
 
    <extension point="org.eclipse.gmf.runtime.diagram.ui.editpartProviders" id="ep-provider">
       <?gmfgen generated="true"?>
-      <editpartProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibEditPartProvider">
+      <editpartProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibEditPartProvider">
          <Priority name="Lowest"/>
          <object class="org.eclipse.gmf.runtime.notation.Diagram" id="generated-diagram">
             <method name="getType()" value="OpenDDS DataLib"/>
@@ -268,44 +268,44 @@
 
    <extension point="org.eclipse.gmf.runtime.emf.ui.modelingAssistantProviders" id="modelassist-provider">
       <?gmfgen generated="true"?>
-      <modelingAssistantProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibModelingAssistantProvider">
+      <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibModelingAssistantProvider">
          <Priority name="Lowest"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.DataLibEditPart" id="DataLib_1000"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.LongEditPart" id="Long_2001"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.LongDoubleEditPart" id="LongDouble_2023"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.LongLongEditPart" id="LongLong_2002"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.ShortEditPart" id="Short_2003"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.ULongEditPart" id="ULong_2004"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.ULongLongEditPart" id="ULongLong_2005"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.UShortEditPart" id="UShort_2006"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.DoubleEditPart" id="Double_2007"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.FloatEditPart" id="Float_2008"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.CharEditPart" id="Char_2009"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.WCharEditPart" id="WChar_2010"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.OctetEditPart" id="Octet_2011"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.BooleanEditPart" id="Boolean_2012"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.ArrayEditPart" id="Array_2013"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.EnumEditPart" id="Enum_2014"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.SequenceEditPart" id="Sequence_2015"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.StringEditPart" id="String_2016"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.WStringEditPart" id="WString_2017"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.TypedefEditPart" id="Typedef_2018"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.UnionEditPart" id="Union_2021"/>
-         <object class="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.StructEditPart" id="Struct_2022"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.DataLibEditPart" id="DataLib_1000"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.LongEditPart" id="Long_2001"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.LongDoubleEditPart" id="LongDouble_2023"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.LongLongEditPart" id="LongLong_2002"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ShortEditPart" id="Short_2003"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ULongEditPart" id="ULong_2004"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ULongLongEditPart" id="ULongLong_2005"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.UShortEditPart" id="UShort_2006"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.DoubleEditPart" id="Double_2007"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.FloatEditPart" id="Float_2008"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.CharEditPart" id="Char_2009"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.WCharEditPart" id="WChar_2010"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.OctetEditPart" id="Octet_2011"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.BooleanEditPart" id="Boolean_2012"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ArrayEditPart" id="Array_2013"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.EnumEditPart" id="Enum_2014"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.SequenceEditPart" id="Sequence_2015"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.StringEditPart" id="String_2016"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.WStringEditPart" id="WString_2017"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.TypedefEditPart" id="Typedef_2018"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.UnionEditPart" id="Union_2021"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.StructEditPart" id="Struct_2022"/>
          <context elements="DataLib_1000,Long_2001,LongDouble_2023,LongLong_2002,Short_2003,ULong_2004,ULongLong_2005,UShort_2006,Double_2007,Float_2008,Char_2009,WChar_2010,Octet_2011,Boolean_2012,Array_2013,Enum_2014,Sequence_2015,String_2016,WString_2017,Typedef_2018,Union_2021,Struct_2022"/>
       </modelingAssistantProvider>
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.common.ui.services.iconProviders" id="icon-provider">
       <?gmfgen generated="true"?>
-      <IconProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibIconProvider">
+      <IconProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibIconProvider">
          <Priority name="Low"/>
       </IconProvider>
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.common.ui.services.parserProviders" id="parser-provider">
       <?gmfgen generated="true"?>
-      <ParserProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibParserProvider">
+      <ParserProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibParserProvider">
          <Priority name="Lowest"/>
       </ParserProvider>
    </extension>
@@ -318,7 +318,7 @@
                name="%metatype.name.DataLib_1000"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="DataLib"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.DataLibEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.DataLibEditHelper">
             <param name="semanticHint" value="1000"/>
          </metamodelType>
       </metamodel>
@@ -328,7 +328,7 @@
                name="%metatype.name.Long_2001"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Long"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.LongEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.LongEditHelper">
             <param name="semanticHint" value="2001"/>
          </metamodelType>
       </metamodel>
@@ -338,7 +338,7 @@
                name="%metatype.name.LongDouble_2023"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="LongDouble"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.LongDoubleEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.LongDoubleEditHelper">
             <param name="semanticHint" value="2023"/>
          </metamodelType>
       </metamodel>
@@ -348,7 +348,7 @@
                name="%metatype.name.LongLong_2002"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="LongLong"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.LongLongEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.LongLongEditHelper">
             <param name="semanticHint" value="2002"/>
          </metamodelType>
       </metamodel>
@@ -358,7 +358,7 @@
                name="%metatype.name.Short_2003"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Short"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.ShortEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.ShortEditHelper">
             <param name="semanticHint" value="2003"/>
          </metamodelType>
       </metamodel>
@@ -368,7 +368,7 @@
                name="%metatype.name.ULong_2004"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="ULong"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.ULongEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.ULongEditHelper">
             <param name="semanticHint" value="2004"/>
          </metamodelType>
       </metamodel>
@@ -378,7 +378,7 @@
                name="%metatype.name.ULongLong_2005"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="ULongLong"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.ULongLongEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.ULongLongEditHelper">
             <param name="semanticHint" value="2005"/>
          </metamodelType>
       </metamodel>
@@ -388,7 +388,7 @@
                name="%metatype.name.UShort_2006"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="UShort"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.UShortEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.UShortEditHelper">
             <param name="semanticHint" value="2006"/>
          </metamodelType>
       </metamodel>
@@ -398,7 +398,7 @@
                name="%metatype.name.Double_2007"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Double"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.DoubleEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.DoubleEditHelper">
             <param name="semanticHint" value="2007"/>
          </metamodelType>
       </metamodel>
@@ -408,7 +408,7 @@
                name="%metatype.name.Float_2008"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Float"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.FloatEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.FloatEditHelper">
             <param name="semanticHint" value="2008"/>
          </metamodelType>
       </metamodel>
@@ -418,7 +418,7 @@
                name="%metatype.name.Char_2009"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Char"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.CharEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.CharEditHelper">
             <param name="semanticHint" value="2009"/>
          </metamodelType>
       </metamodel>
@@ -428,7 +428,7 @@
                name="%metatype.name.WChar_2010"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="WChar"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.WCharEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.WCharEditHelper">
             <param name="semanticHint" value="2010"/>
          </metamodelType>
       </metamodel>
@@ -438,7 +438,7 @@
                name="%metatype.name.Octet_2011"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Octet"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.OctetEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.OctetEditHelper">
             <param name="semanticHint" value="2011"/>
          </metamodelType>
       </metamodel>
@@ -448,7 +448,7 @@
                name="%metatype.name.Boolean_2012"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Boolean"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.BooleanEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.BooleanEditHelper">
             <param name="semanticHint" value="2012"/>
          </metamodelType>
       </metamodel>
@@ -458,7 +458,7 @@
                name="%metatype.name.Array_2013"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Array"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.ArrayEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.ArrayEditHelper">
             <param name="semanticHint" value="2013"/>
          </metamodelType>
       </metamodel>
@@ -468,7 +468,7 @@
                name="%metatype.name.Enum_2014"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Enum"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.EnumEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.EnumEditHelper">
             <param name="semanticHint" value="2014"/>
          </metamodelType>
       </metamodel>
@@ -478,7 +478,7 @@
                name="%metatype.name.Sequence_2015"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Sequence"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.SequenceEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.SequenceEditHelper">
             <param name="semanticHint" value="2015"/>
          </metamodelType>
       </metamodel>
@@ -488,7 +488,7 @@
                name="%metatype.name.String_2016"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="String"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.StringEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.StringEditHelper">
             <param name="semanticHint" value="2016"/>
          </metamodelType>
       </metamodel>
@@ -498,7 +498,7 @@
                name="%metatype.name.WString_2017"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="WString"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.WStringEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.WStringEditHelper">
             <param name="semanticHint" value="2017"/>
          </metamodelType>
       </metamodel>
@@ -508,7 +508,7 @@
                name="%metatype.name.Typedef_2018"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Typedef"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.TypedefEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.TypedefEditHelper">
             <param name="semanticHint" value="2018"/>
          </metamodelType>
       </metamodel>
@@ -518,7 +518,7 @@
                name="%metatype.name.Union_2021"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Union"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.UnionEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.UnionEditHelper">
             <param name="semanticHint" value="2021"/>
          </metamodelType>
       </metamodel>
@@ -528,7 +528,7 @@
                name="%metatype.name.Struct_2022"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Struct"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.StructEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.StructEditHelper">
             <param name="semanticHint" value="2022"/>
          </metamodelType>
       </metamodel>
@@ -538,7 +538,7 @@
                name="%metatype.name.Field_3002"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Field"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.FieldEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.FieldEditHelper">
             <param name="semanticHint" value="3002"/>
          </metamodelType>
       </metamodel>
@@ -548,7 +548,7 @@
                name="%metatype.name.Branch_3005"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Branch"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.BranchEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.BranchEditHelper">
             <param name="semanticHint" value="3005"/>
          </metamodelType>
       </metamodel>
@@ -567,7 +567,7 @@
                name="%metatype.name.Case_3006"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Case"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.CaseEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.CaseEditHelper">
             <param name="semanticHint" value="3006"/>
          </metamodelType>
       </metamodel>
@@ -586,7 +586,7 @@
                name="%metatype.name.Key_3004"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Key"
-               edithelper="org.opendds.modeling.model.opendds.diagram.datalib.edit.helpers.KeyEditHelper">
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.KeyEditHelper">
             <param name="semanticHint" value="3004"/>
          </metamodelType>
       </metamodel>
@@ -680,7 +680,7 @@
            type="org.eclipse.emf.common.ui.URIEditorInput"
            namespace="org.opendds.modeling.diagram.datalib"
            properties="isURIEditorInput"
-           class="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibUriEditorInputTester">
+           class="org.opendds.modeling.diagram.datalib.part.OpenDDSDataLibUriEditorInputTester">
        </propertyTester>
    </extension>
 
@@ -706,8 +706,8 @@
             id="org.opendds.modeling.diagram.datalib.resourceContent" 
             name="%navigatorContentName" 
             priority="normal" 
-            contentProvider="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibNavigatorContentProvider" 
-            labelProvider="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibNavigatorLabelProvider"
+            contentProvider="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibNavigatorContentProvider" 
+            labelProvider="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibNavigatorLabelProvider"
             icon="icons/obj16/DataLib.gif"
             activeByDefault="true">
          <triggerPoints>
@@ -716,7 +716,7 @@
     	          <instanceof value="org.eclipse.core.resources.IFile"/>
         	      <test property="org.eclipse.core.resources.extension" value="opendds_diagram_datalib"/>
                </and>
-               <instanceof value="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+               <instanceof value="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
            	   <adapt type="org.eclipse.gmf.runtime.notation.View">
            	      <test property="org.opendds.modeling.diagram.datalib.isShortcut"/>
            	   </adapt>
@@ -724,7 +724,7 @@
          </triggerPoints>
          <possibleChildren>
             <or>
-         	   <instanceof value="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+         	   <instanceof value="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
            	   <adapt type="org.eclipse.gmf.runtime.notation.View">
            	      <test property="org.opendds.modeling.diagram.datalib.isShortcut"/>
            	   </adapt>
@@ -732,14 +732,14 @@
          </possibleChildren>
          <commonSorter 
                id="org.opendds.modeling.diagram.datalib.navigatorSorter" 
-               class="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibNavigatorSorter">
+               class="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibNavigatorSorter">
             <parentExpression>
                <or>
 	              <and>
     	             <instanceof value="org.eclipse.core.resources.IFile"/>
         	         <test property="org.eclipse.core.resources.extension" value="opendds_diagram_datalib"/>
                   </and>
-                  <instanceof value="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+                  <instanceof value="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
                </or>
             </parentExpression>
          </commonSorter>
@@ -748,8 +748,8 @@
             id="org.opendds.modeling.diagram.datalib.domainResourceContent" 
             name="%domainNavigatorContentName" 
             priority="normal" 
-            contentProvider="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorContentProvider" 
-            labelProvider="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorLabelProvider"
+            contentProvider="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorContentProvider" 
+            labelProvider="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorLabelProvider"
             icon="icons/obj16/DataLib.gif"
             activeByDefault="true">
          <triggerPoints>
@@ -758,19 +758,19 @@
     	          <instanceof value="org.eclipse.core.resources.IFile"/>
         	      <test property="org.eclipse.core.resources.extension" value="opendds"/>
                </and>
-               <instanceof value="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorItem"/>
+               <instanceof value="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorItem"/>
             </or>
          </triggerPoints>
          <possibleChildren>
-            <instanceof value="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorItem"/>
+            <instanceof value="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibDomainNavigatorItem"/>
          </possibleChildren>
       </navigatorContent>
       <actionProvider
             id="org.opendds.modeling.diagram.datalib.navigatorActionProvider"
-            class="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibNavigatorActionProvider">
+            class="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibNavigatorActionProvider">
          <enablement>
             <or>
-               <instanceof value="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+               <instanceof value="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
            	   <adapt type="org.eclipse.gmf.runtime.notation.View">
            	      <test property="org.opendds.modeling.diagram.datalib.isShortcut"/>
            	   </adapt>
@@ -783,7 +783,7 @@
       <?gmfgen generated="true"?>
       <linkHelper
             id="org.opendds.modeling.diagram.datalib.navigatorLinkHelper"
-            class="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibNavigatorLinkHelper">
+            class="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibNavigatorLinkHelper">
          <editorInputEnablement>
             <and>
                <instanceof value="org.eclipse.emf.common.ui.URIEditorInput"/>
@@ -791,7 +791,7 @@
             </and>
          </editorInputEnablement>
          <selectionEnablement>
-            <instanceof value="org.opendds.modeling.model.opendds.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+            <instanceof value="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
          </selectionEnablement>
       </linkHelper>
    </extension>
@@ -957,7 +957,7 @@ endif
    <extension point="org.eclipse.emf.validation.constraintBindings">
       <?gmfgen generated="true"?>
       <clientContext default="false" id="org.opendds.modeling.diagram.datalibDefaultCtx">
-         <selector class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibValidationProvider$DefaultCtx"/>
+         <selector class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibValidationProvider$DefaultCtx"/>
       </clientContext>
       <binding context="org.opendds.modeling.diagram.datalibDefaultCtx">
                   <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.struct_name_blank"/>
@@ -981,17 +981,17 @@ endif
       <?gmfgen generated="true"?>
       <command
          categoryId="org.eclipse.ui.category.edit"
-         defaultHandler="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramUpdateCommand"
+         defaultHandler="org.opendds.modeling.diagram.datalib.part.OpenDDSDataLibDiagramUpdateCommand"
          description="%update.diagram.description"
-         id="org.opendds.modeling.model.opendds.diagram.datalib.updateDiagram"
+         id="org.opendds.modeling.diagram.datalib.updateDiagram"
          name="%update.diagram.name"/>
    </extension>
    
    <extension point="org.eclipse.ui.bindings" id="update-cmd-binding">
       <?gmfgen generated="true"?>
       <key 
-         commandId="org.opendds.modeling.model.opendds.diagram.datalib.updateDiagram"
-         contextId="org.opendds.modeling.model.opendds.diagram.datalib.ui.diagramContext"
+         commandId="org.opendds.modeling.diagram.datalib.updateDiagram"
+         contextId="org.opendds.modeling.diagram.datalib.ui.diagramContext"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="F5"/>
    </extension>
@@ -1008,7 +1008,7 @@ endif
                <and>
                   <with variable="activePartId"><equals value="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID"/></with>
                   <with variable="selection"><iterate ifEmpty="false"> 
-                     <instanceof value="org.opendds.modeling.model.opendds.diagram.datalib.edit.parts.DataLibEditPart"/>
+                     <instanceof value="org.opendds.modeling.diagram.datalib.edit.parts.DataLibEditPart"/>
                   </iterate></with>
                </and>
             </visibleWhen>
@@ -1022,7 +1022,7 @@ endif
       <command id="org.opendds.modeling.diagram.datalib.LoadResourceAction"
          name="Load Resource"
          categoryId="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID"
-         defaultHandler="org.opendds.modeling.model.opendds.diagram.datalib.part.LoadResourceAction"/>
+         defaultHandler="org.opendds.modeling.diagram.datalib.part.LoadResourceAction"/>
    </extension>
 
    <extension point="org.eclipse.ui.handlers" id="menu-handlers">
@@ -1032,14 +1032,14 @@ endif
    <!-- Manual edits begin -->
 	<extension point="org.eclipse.gmf.runtime.common.ui.services.parserProviders">
      <?gmfgen generated="false"?>
-	  	<ParserProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.FieldParserProvider">
+	  	<ParserProvider class="org.opendds.modeling.diagram.datalib.providers.FieldParserProvider">
 	     	<Priority name="Low"/>
 	  	</ParserProvider>
 	</extension>
 
 	<extension point="org.eclipse.gmf.runtime.common.ui.services.parserProviders">
      <?gmfgen generated="false"?>
-	  	<ParserProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.StructKeyParserProvider">
+	  	<ParserProvider class="org.opendds.modeling.diagram.datalib.providers.StructKeyParserProvider">
 	     	<Priority name="Low"/>
 	  	</ParserProvider>
 	</extension>
@@ -1047,7 +1047,7 @@ endif
 
 <extension id="validationDecoratorProvider" name="ValidationDecorations" point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders">
       <?gmfgen generated="true"?>
-      <decoratorProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibValidationDecoratorProvider">
+      <decoratorProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibValidationDecoratorProvider">
          <Priority name="Lowest"/>
          <object class="org.eclipse.gmf.runtime.diagram.ui.editparts.IPrimaryEditPart(org.eclipse.gmf.runtime.diagram.ui)" id="PRIMARY_VIEW"/>
          <context decoratorTargets="PRIMARY_VIEW"/>
@@ -1055,7 +1055,7 @@ endif
    </extension>
 <extension point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders" id="decorator-provider">
       <?gmfgen generated="true"?>
-      <decoratorProvider class="org.opendds.modeling.model.opendds.diagram.datalib.providers.OpenDDSDataLibShortcutsDecoratorProvider">
+      <decoratorProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibShortcutsDecoratorProvider">
          <Priority name="Lowest"/>
          <object class="org.eclipse.gmf.runtime.notation.Node(org.eclipse.gmf.runtime.notation)" id="generated-top-nodes">
             <method name="getType()" value="2001,2023,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2021,2022"/>
@@ -1071,7 +1071,7 @@ endif
            type="org.eclipse.gmf.runtime.notation.View"
            namespace="org.opendds.modeling.diagram.datalib"
            properties="isShortcut"
-           class="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibShortcutPropertyTester">
+           class="org.opendds.modeling.diagram.datalib.part.OpenDDSDataLibShortcutPropertyTester">
        </propertyTester>
    </extension>
 

@@ -4,12 +4,15 @@ Bundle-Name: %pluginName
 Bundle-SymbolicName: org.opendds.modeling.diagram.datalib; singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .
-Bundle-Activator: org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorPlugin
+Bundle-Activator: org.opendds.modeling.diagram.datalib.part.OpenDDSDataLibDiagramEditorPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Export-Package: org.opendds.modeling.model.opendds.diagram.datalib.edit.parts,
- org.opendds.modeling.model.opendds.diagram.datalib.part,
- org.opendds.modeling.model.opendds.diagram.datalib.providers
+Export-Package: org.opendds.modeling.diagram.datalib.edit.parts,
+ org.opendds.modeling.diagram.datalib.part,
+ org.opendds.modeling.diagram.datalib.providers,
+ org.opendds.modeling.diagram.datalib.edit.parts,
+ org.opendds.modeling.diagram.datalib.part,
+ org.opendds.modeling.diagram.datalib.providers
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.core.expressions,
