@@ -156,5 +156,94 @@
   </xsl:if>
 </xsl:template>
 
+<xsl:template name="output-comment">
+  <xsl:param name="comment" select="comment"/>
+  <xsl:param name="indent" select=""/>
+
+  <xsl:choose>
+    <xsl:when test="not($comment)">
+    </xsl:when>
+    <xsl:when test="contains($comment/@body, $newline)">
+      <xsl:call-template name="output-multi-line-comment">
+        <xsl:with-param name="comment" select="$comment"/>
+        <xsl:with-param name="indent" select="$indent"/>
+      </xsl:call-template>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:call-template name="output-single-line-comment">
+        <xsl:with-param name="comment" select="$comment"/>
+        <xsl:with-param name="indent" select="$indent"/>
+      </xsl:call-template>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
+
+<xsl:template name="output-single-line-comment">
+  <xsl:param name="comment" select="comment"/>
+  <xsl:param name="indent" select=""/>
+  <xsl:variable name="prefix">
+    <xsl:choose>
+      <xsl:when test="$comment/@format='PLAIN'">
+        <xsl:value-of select="'//  '"/>
+      </xsl:when>
+      <xsl:when test="$comment/@format='DOXYGEN'">
+        <xsl:value-of select="'/// '"/>
+      </xsl:when>
+    </xsl:choose>
+  </xsl:variable>
+
+  <xsl:value-of select="concat($indent, $prefix, $comment/@body, $newline)"/>
+</xsl:template>
+
+<xsl:template name="output-multi-line-comment-line">
+  <xsl:param name="value"/>
+  <xsl:param name="indent" select="''"/>
+
+  <xsl:variable name="line" select="substring-before($value, $newline)"/>
+
+  <!-- 
+       We could have the following cases for value:
+      
+       1) text <newline> text
+       2) text
+       3) text <newline>
+       4) <newline> text
+       5) <empty>
+    -->
+  <xsl:choose>
+    <xsl:when test="not($value)"/>
+    <xsl:when test="not(contains($value, $newline))">
+      <!-- on the last line, there is no newline -->
+      <xsl:value-of select="concat($indent, ' * ', $value, $newline)"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:value-of select="concat($indent, ' * ', substring-before($value, $newline), $newline)"/>
+      <xsl:call-template name="output-multi-line-comment-line">
+        <xsl:with-param name="value" select="substring-after($value, $newline)"/>
+        <xsl:with-param name="indent" select="$indent"/>
+      </xsl:call-template>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
+
+<xsl:template name="output-multi-line-comment">
+  <xsl:param name="comment" select="comment"/>
+  <xsl:param name="indent" select=""/>
+  <xsl:choose>
+    <xsl:when test="$comment/@format='PLAIN'">
+      <xsl:value-of select="concat($indent, '/*', $newline)"/>
+    </xsl:when>
+    <xsl:when test="$comment/@format='DOXYGEN'">
+      <xsl:value-of select="concat($indent, '/**', $newline)"/>
+    </xsl:when>
+  </xsl:choose>
+
+  <xsl:call-template name="output-multi-line-comment-line">
+    <xsl:with-param name="value" select="$comment/@body"/>
+    <xsl:with-param name="indent" select="$indent"/>
+  </xsl:call-template>
+  <xsl:value-of select="concat($indent, ' */', $newline)"/>
+</xsl:template>
+
 </xsl:stylesheet>
 

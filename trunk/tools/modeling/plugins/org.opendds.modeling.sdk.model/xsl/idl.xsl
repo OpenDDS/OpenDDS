@@ -58,6 +58,7 @@
 
 <!-- For packages containing named types, output a module -->
 <xsl:template match="packages[.//types[@name]]" mode="declare">
+  <xsl:call-template name="output-comment"/>
   <xsl:value-of select="concat('module ', @name, ' {', $newline)"/>
   <xsl:apply-templates mode="declare"/>
   <xsl:value-of select="concat('};', $newline)"/>
@@ -225,6 +226,9 @@
 
 <!-- Process enumeration definitions. -->
 <xsl:template match="types[ @xsi:type = 'types:Enum']">
+  <xsl:call-template name="output-comment">
+    <xsl:with-param name="indent" select="'  '"/>
+  </xsl:call-template>
   <xsl:value-of select="concat('  enum ', @name, ' {', $newline)"/>
 
   <xsl:apply-templates select="literals" mode="enum"/>
@@ -234,6 +238,9 @@
 
 <!-- Process typedef definitions. -->
 <xsl:template match="types[@xsi:type = 'types:Typedef']">
+  <xsl:call-template name="output-comment">
+    <xsl:with-param name="indent" select="'  '"/>
+  </xsl:call-template>
   <xsl:call-template name="define-type">
     <xsl:with-param name="targetid" select="@type"/>
     <xsl:with-param name="name" select="@name"/>
@@ -242,6 +249,9 @@
 
 <!-- Process union definitions. -->
 <xsl:template match="types[@xsi:type = 'types:Union']">
+  <xsl:call-template name="output-comment">
+    <xsl:with-param name="indent" select="'  '"/>
+  </xsl:call-template>
   <xsl:value-of select="concat('  union ',@name,' switch (')"/>
 
   <xsl:call-template name="typename">
@@ -274,6 +284,9 @@
     <xsl:apply-templates select="keys"/>
   </xsl:if>
 
+  <xsl:call-template name="output-comment">
+    <xsl:with-param name="indent" select="'  '"/>
+  </xsl:call-template>
   <xsl:value-of select="concat('  struct ',@name,' {', $newline)"/>
 
   <xsl:apply-templates select="fields" mode="struct"/>
@@ -283,6 +296,9 @@
 
 <!-- Process individual union cases. -->
 <xsl:template match="branches">
+  <xsl:call-template name="output-comment">
+    <xsl:with-param name="indent" select="'  '"/>
+  </xsl:call-template>
   <!-- handle mulitple cases for the variant... -->
   <xsl:for-each select="cases">
     <xsl:if test="position() > 1">
@@ -322,6 +338,9 @@
     </xsl:call-template>
   </xsl:variable>
 
+  <xsl:call-template name="output-comment">
+    <xsl:with-param name="indent" select="'    '"/>
+  </xsl:call-template>
   <xsl:value-of select="concat('    ', $typename,' ',@name,';',$newline)"/>
 </xsl:template>
 
