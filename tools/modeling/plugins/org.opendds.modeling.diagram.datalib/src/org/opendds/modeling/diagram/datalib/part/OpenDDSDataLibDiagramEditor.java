@@ -72,7 +72,7 @@ public class OpenDDSDataLibDiagramEditor extends DiagramDocumentEditor
 	/**
 	 * @generated
 	 */
-	public static final String ID = "org.opendds.modeling.diagram.datalib.part.OpenDDSDataLibDiagramEditorID"; //$NON-NLS-1$
+	public static final String ID = "org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID"; //$NON-NLS-1$
 
 	/**
 	 * @generated

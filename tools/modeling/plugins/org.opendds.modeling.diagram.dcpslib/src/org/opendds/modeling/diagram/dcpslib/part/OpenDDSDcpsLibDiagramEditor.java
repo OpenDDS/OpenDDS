@@ -54,7 +54,7 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 	/**
 	 * @generated
 	 */
-	public static final String ID = "org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorID"; //$NON-NLS-1$
+	public static final String ID = "org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorID"; //$NON-NLS-1$
 
 	/**
 	 * @generated
