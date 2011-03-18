@@ -1,23 +1,34 @@
+Fri Mar 18 13:45:49 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/edit:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit:
+
+          svn:ignore auto-generated files.
+
 Fri Mar 18 12:53:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
 
-	  For the package name prefix incorrectly had
-	  org.opendds.modeling.model.opendds.diagram.<lib>.
-	  Fixed to be
-	  org.opendds.modeling.diagram.<lib>.
-	  This change results in shorter paths to the Java diagram code which should
-	  reduce the opportunity of running into problems with subversion and excessive
-	  path lengths.
+          For the package name prefix incorrectly had
+          org.opendds.modeling.model.opendds.diagram.<lib>.
+          Fixed to be
+          org.opendds.modeling.diagram.<lib>.
+          This change results in shorter paths to the Java diagram code which should
+          reduce the opportunity of running into problems with subversion and excessive
+          path lengths.
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram:
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram:
         * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram:
 
-	  All the Java source code has been moved to these directories. Because the package name changed
-	  all the Java files have been updated to use the new package names.
+          All the Java source code has been moved to these directories. Because the package name changed
+          all the Java files have been updated to use the new package names.
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
@@ -27,14 +38,14 @@ Fri Mar 18 12:53:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
         * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
 
-	  Updates to account for package name change.
+          Updates to account for package name change.
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/model/opendds/diagram:
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/model/opendds/diagram:
         * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/model/opendds/diagram:
 
           These directories have been removed since the source files under these directories
-	  are now in their proper location.
+          are now in their proper location.
 
 Thu Mar 17 22:14:33 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
