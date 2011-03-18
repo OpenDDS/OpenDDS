@@ -399,6 +399,8 @@ sub backup_and_open {
   return $fh;
 }
 
+my $wrote_df = 0;
+
 if (-r "$ENV{'ACE_ROOT'}/ace/config.h") {
   print "ACE_ROOT/ace/config.h exists, skipping configuration of ACE+TAO\n";
 }
@@ -427,9 +429,10 @@ else {
   if ($opts{'ipv6'} || $opts{'features'}) {
     my $DF = backup_and_open("$ENV{'ACE_ROOT'}/bin/MakeProjectCreator/config" .
                              "/default.features");
-    print DF "ipv6=1\n" if $opts{'ipv6'};
+    $wrote_df = 1;
+    print $DF "ipv6=1\n" if $opts{'ipv6'};
     for my $f (@{$opts{'features'}}) {
-      print DF "$f\n";
+      print $DF "$f\n";
     }
     $DF->close;
     print "Wrote default.features\n" if $opts{'verbose'};
@@ -581,15 +584,19 @@ if ($needmpc) {
       "'MPC' directory under ACE_ROOT ($ENV{'ACE_ROOT'}), stopped";
   }
 
-  my $feat = '';
-  for my $f (@features) {
-    if ($feat eq '') {
-      $feat = "-features ";
+  if (@features) {
+    my $df_file =
+      "$ENV{'ACE_ROOT'}/bin/MakeProjectCreator/config/default.features";
+    my $DF = $wrote_df
+      ? new FileHandle(">>$df_file")
+      : backup_and_open($df_file);
+    for my $f (@features) {
+      print $DF ($f =~ /=/ ? $f : "$f=1"), "\n";
     }
-    else {
-      $feat .= ',';
+    $DF->close;
+    if ($opts{'verbose'}) {
+      print ($wrote_df ? 'Appended to' : 'Wrote') . " default.features\n"
     }
-    $feat .= ($f =~ /=/ ? $f : "$f=1");
   }
 
   my $ws = 'DDS.mwc';
@@ -611,10 +618,10 @@ if ($needmpc) {
 
   print 'Running MPC to generate ', ($needmpc eq 'gnuace' ? 'makefiles' :
                                      'project files'), ".\n";
-  print "mwc command line: -type $needmpc $feat $ws $static\n"
+  print "mwc command line: -type $needmpc $ws $static\n"
     if $opts{'verbose'};
-  if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl " .
-             "-type $needmpc $feat $ws $static") != 0) {
+  if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl -type $needmpc $ws $static")
+      != 0) {
     die "Error from MPC, stopped";
   }
 
