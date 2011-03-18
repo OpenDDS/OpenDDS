@@ -1,3 +1,21 @@
+Fri Mar 18 20:38:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/common.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
+
+          Output comments in IDL.
+
+        * tools/modeling/tests/Comments:
+        * tools/modeling/tests/Comments/Comments.codegen:
+        * tools/modeling/tests/Comments/Comments.mpc:
+        * tools/modeling/tests/Comments/Comments.mwc:
+        * tools/modeling/tests/Comments/Comments.opendds:
+        * tools/modeling/tests/Comments/publisher.cpp:
+        * tools/modeling/tests/Comments/subscriber.cpp:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          New test case with comments in datalib.
+
 Fri Mar 18 17:57:29 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/ElementCommentPropertySection.java:
