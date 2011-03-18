@@ -241,17 +241,18 @@ public class ElementCommentPropertySection extends
 	private Comment getComment(Element element, CommentFormat format) {
 		Comment comment = element.getComment();
 		if (element.getComment() == null) {
-
-			EFactory factory = element.eClass().getEPackage()
-					.getEFactoryInstance();
+			// The comment is an optional reference, so create one
+			// to have a place to put the value in.
 			EPackage ePackage = EPackage.Registry.INSTANCE
-					.getEPackage(CorePackage.eNS_URI);
+			.getEPackage(CorePackage.eNS_URI);
+			EFactory factory = ePackage.getEFactoryInstance();
 			EClass commentClass = (EClass) ePackage.getEClassifier("Comment");
 			EStructuralFeature commentRef = element.eClass()
 					.getEStructuralFeature("comment");
 			comment = (Comment) factory.create(commentClass);
 			comment.setFormat(format);
 
+			// Need to add the comment reference to the element inside a transaction.
 			TransactionalEditingDomain editingDomain = getEditingDomain();
 			SetCommand command = new SetCommand(editingDomain, element,
 					commentRef, comment);
