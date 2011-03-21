@@ -42,6 +42,9 @@ import org.opendds.modeling.model.core.Element;
 public class ElementCommentPropertySection extends
 		AbstractBasicTextPropertySection {
 
+	static final CommentFormat defaultCommentFormat = getDefaultCommentFormat();
+	static final String defaultCommentFormatString = defaultCommentFormat.getName();
+
 	/**
 	 * A modified version of the TextChangeHelper in
 	 * org.eclipse.gmf.runtime.diagram.ui.properties.sections.AbstractBasicTextPropertySection
@@ -90,7 +93,16 @@ public class ElementCommentPropertySection extends
 			Element element = (Element) getEObject();
 			CommentFormat format = CommentFormat.get(formatCombo
 					.getSelectionIndex());
-			getComment(element, format);
+			Comment comment = element.getComment();
+			if (comment == null) {
+				comment = createComment(element, format);
+			} else {
+				TransactionalEditingDomain editingDomain = getEditingDomain();
+				EStructuralFeature formatRef = comment.eClass().getEStructuralFeature("format");
+				SetCommand command = new SetCommand(editingDomain, comment, formatRef, format);
+				assert command.canExecute();
+				editingDomain.getCommandStack().execute(command);
+			}
 		}
 	}
 
@@ -105,8 +117,7 @@ public class ElementCommentPropertySection extends
 		FormData data;
 
 		// Text label for combo box
-		formatLabel = getWidgetFactory().createCLabel(getSectionComposite(),
-		"Format:");
+		formatLabel = getWidgetFactory().createCLabel(getSectionComposite(), "Format:");
 		data = new FormData();
 		data.top = new FormAttachment(getTextWidget(), ITabbedPropertyConstants.VSPACE, SWT.BOTTOM);
 		data.bottom = new FormAttachment(100, 0);
@@ -125,7 +136,6 @@ public class ElementCommentPropertySection extends
 		// combo box option, but this did not work. So instead, we'll force
 		// the issue by making the default format the first one added to
 		// the combo box.
-		String defaultCommentFormatString = getDefaultCommentFormatString();
 		formatCombo.add(defaultCommentFormatString.toLowerCase());
 		for (String format : formats) {
 			if (! format.equals(defaultCommentFormatString)) {
@@ -184,7 +194,10 @@ public class ElementCommentPropertySection extends
 	protected void setPropertyValue(EObject object,
 			Object value) {
 		Element element = (Element) getEObject();
-		Comment comment = getComment(element, CommentFormat.PLAIN);
+		Comment comment = element.getComment();
+		if (comment == null) {
+			comment = createComment(element, defaultCommentFormat);
+		}
 		comment.setBody((String) value);
 	}
 
@@ -204,6 +217,7 @@ public class ElementCommentPropertySection extends
 		return text;
 	}
 
+	@Override
 	protected void refreshUI() {
 		super.refreshUI();
 		Element element = (Element) getEObject();
@@ -245,33 +259,26 @@ public class ElementCommentPropertySection extends
 		return multilineListener;
 	}
 
-	/**
-	 * Get the comment for an Element. If necessary
-	 * create the comment if it doesn't exist.
-	 * @param format The format to use if a Comment is being created.
-	 */
-	private Comment getComment(Element element, CommentFormat format) {
+	private Comment createComment(Element element, CommentFormat format) {
+		// The comment is an optional reference, so create one
+		// to have a place to put the value in.
 		Comment comment = element.getComment();
-		if (element.getComment() == null) {
-			// The comment is an optional reference, so create one
-			// to have a place to put the value in.
-			EPackage ePackage = EPackage.Registry.INSTANCE
-			.getEPackage(CorePackage.eNS_URI);
-			EFactory factory = ePackage.getEFactoryInstance();
-			EClass commentClass = (EClass) ePackage.getEClassifier("Comment");
-			comment = (Comment) factory.create(commentClass);
-			comment.setFormat(format);
+		EPackage ePackage = EPackage.Registry.INSTANCE
+		.getEPackage(CorePackage.eNS_URI);
+		EFactory factory = ePackage.getEFactoryInstance();
+		EClass commentClass = (EClass) ePackage.getEClassifier("Comment");
+		comment = (Comment) factory.create(commentClass);
+		comment.setFormat(format);
 
-			// Need to add the comment reference to the element inside a transaction.
-			TransactionalEditingDomain editingDomain = getEditingDomain();
-			EStructuralFeature commentRef = element.eClass()
-			.getEStructuralFeature("comment");
-			SetCommand command = new SetCommand(editingDomain, element,
-					commentRef, comment);
-			assert command.canExecute();
-			editingDomain.getCommandStack().execute(command);
-		}
+		// Need to add the comment reference to the element inside a transaction.
+		TransactionalEditingDomain editingDomain = getEditingDomain();
+		EStructuralFeature commentRef = element.eClass().getEStructuralFeature("comment");
+		SetCommand command = new SetCommand(editingDomain, element,
+				commentRef, comment);
+		assert command.canExecute();
+		editingDomain.getCommandStack().execute(command);
 		return comment;
+
 	}
 
 	/**
@@ -279,7 +286,7 @@ public class ElementCommentPropertySection extends
 	 * This is the default value specified in the
 	 * Comment Ecore model.
 	 */
-	String getDefaultCommentFormatString() {
+	static private CommentFormat getDefaultCommentFormat() {
 		// Get the CommentFormat from a Comment that has just
 		// been constructed, which has the default format.
 		// (Couldn't find an EMF API to get more directly.)
@@ -288,6 +295,6 @@ public class ElementCommentPropertySection extends
 		EFactory factory = ePackage.getEFactoryInstance();
 		EClass commentClass = (EClass) ePackage.getEClassifier("Comment");
 		Comment comment = (Comment) factory.create(commentClass);
-		return comment.getFormat().getName();
+		return comment.getFormat();
 	}
 }
