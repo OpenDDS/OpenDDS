@@ -108,7 +108,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Initialize random number generator
       ACE_Time_Value curr_time = ACE_OS::gettimeofday();
-      ACE_RANDR_TYPE seed = (ACE_RANDR_TYPE) (curr_time.usec() + curr_time.sec());
+      u_int seed = (u_int) (curr_time.usec() + curr_time.sec());
       ACE_OS::srand(seed);
 
       // Wait before publishing
