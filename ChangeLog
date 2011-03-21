@@ -1,3 +1,59 @@
+Mon Mar 21 17:45:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/Messenger_IOGR_Imr/Messenger_IOGR_Imr.mpc:
+        * examples/DCPS/Messenger_IOGR_Imr/Messenger_IOGR_Imr_export.h:
+        * examples/DCPS/Messenger_Imr/Messenger_Imr.mpc:
+        * examples/DCPS/Messenger_Imr/Messenger_Imr_export.h:
+        * performance-tests/DCPS/Priority/Priority.mpc:
+        * performance-tests/DCPS/Priority/Priority_export.h:
+        * performance-tests/DCPS/TransportLatency/TransportLatency.mpc:
+        * performance-tests/DCPS/TransportLatency/TransportLatency_export.h:
+        * tests/DCPS/BidirMessenger/BidirMessenger.mpc:
+        * tests/DCPS/BidirMessenger/BidirMessenger_export.h:
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest_export.h:
+        * tests/DCPS/DPFactoryQos/DPFactoryQos.mpc:
+        * tests/DCPS/DPFactoryQos/DPFactoryQos_export.h:
+        * tests/DCPS/Deadline/Deadline.mpc:
+        * tests/DCPS/Deadline/Deadline_export.h:
+        * tests/DCPS/GroupPresentation/GroupPresentation.mpc:
+        * tests/DCPS/GroupPresentation/GroupPresentation_export.h:
+        * tests/DCPS/LargeSample/LargeSample.mpc:
+        * tests/DCPS/LargeSample/LargeSample_export.h:
+        * tests/DCPS/LatencyBudget/LatencyBudget.mpc:
+        * tests/DCPS/LatencyBudget/LatencyBudget_export.h:
+        * tests/DCPS/Lifespan/Lifespan.mpc:
+        * tests/DCPS/Lifespan/Lifespan_export.h:
+        * tests/DCPS/ManualAssertLiveliness/ManualAssertLiveliness.mpc:
+        * tests/DCPS/ManualAssertLiveliness/ManualAssertLiveliness_export.h:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Messenger/Messenger_export.h:
+        * tests/DCPS/Monitor/Messenger.mpc:
+        * tests/DCPS/Monitor/Messenger_export.h:
+        * tests/DCPS/Ownership/Ownership.mpc:
+        * tests/DCPS/Ownership/Ownership_export.h:
+        * tests/DCPS/PersistentDurability/PersistentDurability.mpc:
+        * tests/DCPS/PersistentDurability/PersistentDurability_export.h:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Priority/Priority_export.h:
+        * tests/DCPS/Prst_delayed_subscriber/Prst_delayed_subscriber.mpc:
+        * tests/DCPS/Prst_delayed_subscriber/Prst_delayed_subscriber_export.h:
+        * tests/DCPS/SetQosDeadline/SetQosDeadline.mpc:
+        * tests/DCPS/SetQosDeadline/SetQosDeadline_export.h:
+        * tests/DCPS/SetQosPartition/SetQosPartition.mpc:
+        * tests/DCPS/SetQosPartition/SetQosPartition_export.h:
+        * tests/DCPS/StringKey/StringKey.mpc:
+        * tests/DCPS/StringKey/StringKey_export.h:
+        * tests/DCPS/TransientDurability/TransientDurability.mpc:
+        * tests/DCPS/TransientDurability/TransientDurability_export.h:
+        * tests/DCPS/TransientLocalTest/TransientLocalTest.mpc:
+        * tests/DCPS/TransientLocalTest/TransientLocalTest_export.h:
+        * tests/DCPS/WaitForAck/WaitForAck.mpc:
+        * tests/DCPS/WaitForAck/WaitForAck_export.h:
+
+          Fixed parallel build issues with tests & examples.  See the note at
+          the end of the Mon Mar 14 23:41:58 UTC 2011 ChangeLog entry.
+
 Mon Mar 21 15:36:30 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/providers/BasicTypesSupplier.java:
