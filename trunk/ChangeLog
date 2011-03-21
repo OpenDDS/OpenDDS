@@ -1,3 +1,17 @@
+Mon Mar 21 14:53:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * configure:
+
+          Use a more descriptive message with --verbose.
+
+        * examples/DCPS/DistributedContent/main.cpp:
+
+          ACE_RANDR_TYPE was removed from the DOC Group repo, it's not needed.
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Removed dead code that also mentioned ACE_RANDR_TYPE.
+
 Mon Mar 21 14:52:48 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/ElementCommentPropertySection.java:

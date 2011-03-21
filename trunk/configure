@@ -678,7 +678,8 @@ print "Wrote setenv.$specific{'ext'}\n" if $opts{'verbose'};
 if ($MK) {
   print $MK "include GNUmakefile.dist\n";
   $MK->close;
-  print "GNUmakefile\n" if $opts{'verbose'};
+  print "Wrote GNUmakefile, wrapping orignial GNUmakefile.dist\n"
+    if $opts{'verbose'};
 }
 
 ## Final message
