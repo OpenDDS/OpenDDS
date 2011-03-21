@@ -1,13 +1,20 @@
+Mon Mar 21 14:52:48 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/ElementCommentPropertySection.java:
+
+          Fix so that if comment format picked first before comment text is entered
+          the new format is saved instead of being ignored.
+
 Mon Mar 21 12:49:49 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/ElementCommentPropertySection.java:
 
-	  Make default value in format combobox be based on the default literal
-	  set in the Ecore model for Comment's CommentFormat.
+          Make default value in format combobox be based on the default literal
+          set in the Ecore model for Comment's CommentFormat.
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/Core.ecore:
 
-	  Change the default literal for Comment's CommentFormat to DOXYGEN.
+          Change the default literal for Comment's CommentFormat to DOXYGEN.
 
 Fri Mar 18 21:58:58 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
