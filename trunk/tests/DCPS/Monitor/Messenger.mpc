@@ -1,12 +1,13 @@
 
-project(Monitor*idl): dcps {
-  // This project ensures the common components get built first.
+project(Monitor*idl): dcps_test_lib {
+  idlflags      += -Wb,stub_export_include=Messenger_export.h \
+                   -Wb,stub_export_macro=Messenger_Export
+  dcps_ts_flags += -Wb,export_macro=Messenger_Export
+  dynamicflags  += MESSENGER_BUILD_DLL
 
   TypeSupport_Files {
     Messenger.idl
   }
-
-  custom_only = 1
 }
 
 
@@ -15,10 +16,9 @@ project(Monitor*Publisher) : dcpsexe_with_tcp {
   exename   = publisher
   after    += Monitor*idl
   after    += monitor
-  libs     += OpenDDS_monitor
+  libs     += OpenDDS_monitor Monitor*idl
 
-  TypeSupport_Files {
-    Messenger.idl
+  Idl_Files {
   }
 
   Source_Files {
@@ -32,10 +32,9 @@ project(Monitor*Subscriber) : dcpsexe_with_tcp {
   exename   = subscriber
   after    += Monitor*idl
   after    += monitor
-  libs     += OpenDDS_monitor
+  libs     += OpenDDS_monitor Monitor*idl
 
-  TypeSupport_Files {
-    Messenger.idl
+  Idl_Files {
   }
 
   Source_Files {
@@ -49,9 +48,9 @@ project(Monitor*monitor) : dcpsexe_with_tcp {
   exename   = monitor
   after    += Monitor*idl
   after    += monitor
-  libs     += OpenDDS_monitor
+  libs     += OpenDDS_monitor Monitor*idl
 
-  TypeSupport_Files {
+  Idl_Files {
   }
 
   Source_Files {

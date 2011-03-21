@@ -1,21 +1,22 @@
 
-project(*idl): dcps {
-  // This project ensures the common components get built first.
+project(*idl): dcps_test_lib {
+  idlflags      += -Wb,stub_export_include=SetQosDeadline_export.h \
+                   -Wb,stub_export_macro=SetQosDeadline_Export
+  dcps_ts_flags += -Wb,export_macro=SetQosDeadline_Export
+  dynamicflags  += SETQOSDEADLINE_BUILD_DLL
 
   TypeSupport_Files {
     Messenger.idl
   }
-
-  custom_only = 1
 }
 
 
 project(*Publisher) : dcpsexe_with_tcp {
   exename = publisher
-  after  += DDS*idl
+  after  += *idl
+  libs   += *idl
 
-  TypeSupport_Files {
-    Messenger.idl
+  Idl_Files {
   }
 
   Source_Files {
@@ -27,9 +28,9 @@ project(*Publisher) : dcpsexe_with_tcp {
 project(*Subscriber) : dcpsexe_with_tcp {
   exename = subscriber
   after  += *idl
+  libs   += *idl
 
-  TypeSupport_Files {
-    Messenger.idl
+  Idl_Files {
   }
 
   Source_Files {

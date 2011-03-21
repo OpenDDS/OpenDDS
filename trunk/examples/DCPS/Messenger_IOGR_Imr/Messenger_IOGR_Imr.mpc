@@ -1,12 +1,15 @@
 
-project(DDS*idl): dcps {
-  // This project ensures the common components get built first.
+project(DDS*idl): dcps_test_lib {
+  idlflags      += -Wb,stub_export_include=Messenger_IOGR_Imr_export.h \
+                   -Wb,stub_export_macro=Messenger_IOGR_Imr_Export
+  dcps_ts_flags += -Wb,export_macro=Messenger_IOGR_Imr_Export
+  dynamicflags  += MESSENGER_IOGR_IMR_BUILD_DLL
 
   TypeSupport_Files {
     Messenger.idl
   }
 
-  custom_only = 1
+
 }
 
 project(DDS*Aggregator) : portableserver, orbsvcsexe, iormanip, ftorb, dds_macros {
@@ -24,9 +27,9 @@ project(DDS*Aggregator) : portableserver, orbsvcsexe, iormanip, ftorb, dds_macro
 project(DDS*Publisher) : dcpsexe {
   exename = publisher
   after  += DDS*idl
+  libs   += DDS*idl
 
-  TypeSupport_Files {
-    Messenger.idl
+  Idl_Files {
   }
 
   Source_Files {
@@ -38,9 +41,9 @@ project(DDS*Publisher) : dcpsexe {
 project(DDS*Subscriber) : dcpsexe {
   exename = subscriber
   after  += DDS*idl
+  libs   += DDS*idl
 
-  TypeSupport_Files {
-    Messenger.idl
+  Idl_Files {
   }
 
   Source_Files {
