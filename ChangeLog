@@ -1,3 +1,16 @@
+Mon Mar 21 18:47:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Messenger_ZeroCopy.mpc:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Messenger_ZeroCopy_export.h:
+        * performance-tests/DCPS/SimpleLatency/SimpleLatency.mpc:
+        * performance-tests/DCPS/SimpleLatency/SimpleLatency_export.h:
+        * tests/DCPS/CorbaSeq/CorbaSeq.mpc:
+        * tests/DCPS/CorbaSeq/CorbaSeq_export.h:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/sub_init_loop/sub_init_loop.mpc:
+
+          More parallel build fixes (see previous commit).
+
 Mon Mar 21 17:45:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * examples/DCPS/Messenger_IOGR_Imr/Messenger_IOGR_Imr.mpc:

@@ -1,20 +1,23 @@
 // -*- MPC -*-
 // $Id$
 
-project(*idl): dcps {
+project(*idl): dcps_test_lib {
+  idlflags      += -Wb,stub_export_include=SimpleLatency_export.h \
+                   -Wb,stub_export_macro=SimpleLatency_Export
+  dcps_ts_flags += -Wb,export_macro=SimpleLatency_Export
+  dynamicflags  += SIMPLELATENCY_BUILD_DLL
+
   TypeSupport_Files {
     DDSPerfTest.idl
   }
-
-  custom_only = 1
 }
 
 project(DDS*Pub): dcpsexe {
   after  += *idl
+  libs   += *idl
   exename = dds_pub
 
-  TypeSupport_Files {
-    DDSPerfTest.idl
+  Idl_Files {
   }
 
   Source_Files {
@@ -26,10 +29,10 @@ project(DDS*Pub): dcpsexe {
 
 project(DDS*Sub): dcpsexe {
   after  += *idl
+  libs   += *idl
   exename = dds_sub
 
-  TypeSupport_Files {
-    DDSPerfTest.idl
+  Idl_Files {
   }
 
   Source_Files {

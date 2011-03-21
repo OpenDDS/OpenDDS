@@ -25,12 +25,11 @@ project(*Publisher): dcpsexe_with_tcp {
 
 project(*Subscriber): dcpsexe_with_tcp {
   exename = FooTest3NoKey_subscriber
-  after    += DcpsFooType3NoKey
+  after    += DcpsFooType3NoKey *Publisher
   libs     += DcpsFooType3NoKey
   libpaths += ../FooType3NoKey
 
   IDL_Files {
-    Test.idl
   }
 
   Source_Files {

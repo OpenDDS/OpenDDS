@@ -2,20 +2,23 @@
 // $Id$
 //
 
-project(*idl): dcps {
+project(*idl): dcps_test_lib {
+  idlflags      += -Wb,stub_export_include=Messenger_ZeroCopy_export.h \
+                   -Wb,stub_export_macro=Messenger_ZeroCopy_Export
+  dcps_ts_flags += -Wb,export_macro=Messenger_ZeroCopy_Export
+  dynamicflags  += MESSENGER_ZEROCOPY_BUILD_DLL
+
   TypeSupport_Files {
     Messenger.idl
   }
-
-  custom_only = 1
 }
 
 project(*publisher) : dcpsexe_with_tcp {
   exename   = publisher
   after    += *idl
+  libs     += *idl
 
-  TypeSupport_Files {
-    Messenger.idl
+  Idl_Files {
   }
 
   Source_Files {
@@ -26,9 +29,9 @@ project(*publisher) : dcpsexe_with_tcp {
 project(*subscriber) : dcpsexe_with_tcp {
   exename   = subscriber
   after    += *idl
+  libs     += *idl
 
-  TypeSupport_Files {
-    Messenger.idl
+  Idl_Files {
   }
 
   Source_Files {
