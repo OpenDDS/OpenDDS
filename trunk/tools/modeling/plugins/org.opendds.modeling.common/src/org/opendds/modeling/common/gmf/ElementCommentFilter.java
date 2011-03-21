@@ -31,6 +31,9 @@ public class ElementCommentFilter implements IFilter {
         	Object model = editPart.getModel();
         	if (model instanceof View) {
         		EObject element = ((View) model).getElement();
+        		if (BasicTypeIdentifier.isBasic(element.eClass())) {
+        			return false;
+        		}
         		if (element instanceof Element) {
         			return true;
         		}

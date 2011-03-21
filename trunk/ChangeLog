@@ -1,3 +1,20 @@
+Mon Mar 21 15:36:30 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/providers/BasicTypesSupplier.java:
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/BasicTypeIdentifier.java:
+
+          Move method to to detect if a type is a basic type from a diagram plug-in to
+          the common plug-in to so it can be re-used in common code without cyclical dependencies
+          between plug-ins.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/providers/FieldParserProvider.java:
+
+          Use basic type detection from common plug-in.
+
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/ElementCommentFilter.java:
+
+          Don't present the comment tab in the property sheet if the type is a basic type.
+
 Mon Mar 21 14:53:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * configure:

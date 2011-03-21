@@ -37,6 +37,7 @@ import org.eclipse.gmf.runtime.emf.ui.services.parser.ISemanticParser;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 
 import org.opendds.modeling.model.opendds.OpenDDSModel;
+import org.opendds.modeling.common.gmf.BasicTypeIdentifier;
 import org.opendds.modeling.diagram.datalib.edit.parts.Field2EditPart;
 import org.opendds.modeling.diagram.datalib.edit.parts.Field3EditPart;
 import org.opendds.modeling.diagram.datalib.edit.parts.FieldEditPart;
@@ -133,7 +134,7 @@ public class FieldParserProvider extends AbstractProvider implements IParserProv
 			Type fieldType = field.getType();
 			if (fieldType != null) {
 				String fieldName = "";
-				if (BasicTypesSupplier.isBasic(fieldType.eClass())) {
+				if (BasicTypeIdentifier.isBasic(fieldType.eClass())) {
 					fieldName = fieldType.eClass().getName();
 				}
 				else {
@@ -286,7 +287,7 @@ public class FieldParserProvider extends AbstractProvider implements IParserProv
 			}
 			return result;
 		}
-		
+
 		/**
 		 * Determine the name for allowable Types to be referenced by a Field.
 		 * @param type
@@ -295,7 +296,7 @@ public class FieldParserProvider extends AbstractProvider implements IParserProv
 		private String getTypeName(EObject type) {
 			String name = null;
 			EClass typeClass = type.eClass();
-			
+
 			// Determine if type has an attribute named "name". If so, use that.
 			for (Iterator iter = typeClass.getEAllAttributes().iterator(); iter.hasNext(); ) {
 				EAttribute attribute = (EAttribute) iter.next();
