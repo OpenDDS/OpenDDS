@@ -7,6 +7,7 @@ import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EFactory;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.opendds.modeling.common.gmf.BasicTypeIdentifier;
 import org.opendds.modeling.model.opendds.BasicTypes;
 import org.opendds.modeling.model.opendds.OpenDDSFactory;
 import org.opendds.modeling.model.opendds.OpenDDSModel;
@@ -24,7 +25,7 @@ import org.opendds.modeling.model.types.TypesPackage;
  * the dependency between a basic Field type and basic types defined elsewhere
  * that may be later removed.
  * Basic types used here are Type-derived types that do not require any attributes.
- * This includes Simple types except Enum, and String and WString with length of 0. 
+ * This includes Simple types except Enum, and String and WString with length of 0.
  */
 class BasicTypesSupplier {
 
@@ -62,7 +63,7 @@ class BasicTypesSupplier {
 				EClassifier classifier = (EClassifier) iter.next();
 				if (classifier instanceof EClass) {
 					EClass typeClass = (EClass) classifier;
-					if (isBasic(typeClass)) {
+					if (BasicTypeIdentifier.isBasic(typeClass)) {
 						Type basicTypeObject = (Type) typesFactory.create(typeClass);
 						basicTypes.getTypes().add(basicTypeObject);
 						if (typeClass.getName().equals(typeName)) {
@@ -74,25 +75,10 @@ class BasicTypesSupplier {
 		}
 		return basicType;
 	}
-	
-	static boolean isBasic(EClass type) {
-		EClass simpleClass = (EClass) typesPackage.getEClassifier("Simple");
-		if (simpleClass.isSuperTypeOf(type) && !type.isAbstract()) {
-			if (type.getName() == "Enum") {
-				return false;
-			} else {
-				return true;
-			}
-		} else if (type.getName().equals("String") ||
-				type.getName().equals("WString")) {
-			return true;
-		}
-		return false;
-	}
 
 	/**
 	 * If OpenDDSModel.basicTypes exists and it contains an object whose type
-	 * is named typeCandidateName, return that object. Otherwise return null.  
+	 * is named typeCandidateName, return that object. Otherwise return null.
 	 */
 	static Type getType(OpenDDSModel openDDSModel, String typeCandidateName) {
 		BasicTypes basicTypes = openDDSModel.getBasicTypes();
@@ -113,10 +99,9 @@ class BasicTypesSupplier {
 	static EClass getTypeClass(String typeCandidateName) {
 		EClass typeClass = null;
 		EClass typeCandidateClass = (EClass) typesPackage.getEClassifier(typeCandidateName);
-		if (typeCandidateClass != null && isBasic(typeCandidateClass)) {
+		if (typeCandidateClass != null && BasicTypeIdentifier.isBasic(typeCandidateClass)) {
 			typeClass = typeCandidateClass;
 		}
 		return typeClass;
 	}
 }
-
