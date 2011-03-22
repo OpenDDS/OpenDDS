@@ -14,6 +14,7 @@ project(*idl): dcps_test_lib {
 project(*Publisher) : dcpsexe_with_tcp {
   exename = publisher
   after  += *idl
+  libs   += *idl
 
   Idl_Files {
   }
@@ -27,6 +28,7 @@ project(*Publisher) : dcpsexe_with_tcp {
 project(*Subscriber) : dcpsexe_with_tcp {
   exename = subscriber
   after  += *idl
+  libs   += *idl
 
   Idl_Files {
   }
