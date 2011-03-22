@@ -13,6 +13,7 @@ project(*idl): dcps_test_lib {
 project(*Publisher) : dcpsexe, dcps_tcp {
   exename = publisher
   after  += *idl
+  libs   += *idl
 
   Idl_Files {
   }
@@ -28,6 +29,7 @@ project(*Publisher) : dcpsexe, dcps_tcp {
 project(*Subscriber) : dcpsexe, dcps_tcp {
   exename = subscriber
   after  += *idl
+  libs   += *idl
 
   Idl_Files {
   }
