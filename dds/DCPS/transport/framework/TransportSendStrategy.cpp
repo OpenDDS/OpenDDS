@@ -802,7 +802,7 @@ OpenDDS::DCPS::TransportSendStrategy::terminate_send(bool graceful_disconnecting
     if ((this->mode_ == MODE_TERMINATED || this->mode_ == MODE_SUSPEND)
         && !this->graceful_disconnecting_) {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "It was already terminated non gracefully, will not set to graceful disconnecting \n "));
+            "It was already terminated non gracefully, will not set to graceful disconnecting \n"));
       reset_flag = false;
     }
   }

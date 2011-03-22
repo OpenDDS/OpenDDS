@@ -1,3 +1,17 @@
+Tue Mar 22 15:05:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Cleaned up formatting in a logging message.
+
+        * tests/DCPS/WaitForAck/WaitForAck.mpc:
+
+          Missed the "libs +=" change in this file yesterday.
+
+        * tests/DCPS/sub_init_loop/SubInitLoop_export.h:
+
+          Forgot to svn add this yesterday.
+
 Mon Mar 21 18:47:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger_ZeroCopy/Messenger_ZeroCopy.mpc:
