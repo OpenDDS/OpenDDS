@@ -14,6 +14,7 @@ import org.eclipse.gmf.runtime.emf.type.core.commands.DestroyElementCommand;
 import org.eclipse.gmf.runtime.emf.type.core.requests.DestroyElementRequest;
 import org.eclipse.gmf.runtime.notation.Node;
 import org.eclipse.gmf.runtime.notation.View;
+import org.opendds.modeling.common.gmf.OpenDDSLibHelper;
 import org.opendds.modeling.diagram.dcpslib.edit.parts.DsQosPolicyService_cleanup_delay2EditPart;
 import org.opendds.modeling.diagram.dcpslib.edit.parts.Period2EditPart;
 import org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibVisualIDRegistry;
@@ -60,6 +61,13 @@ public class DsQosPolicy2ItemSemanticEditPolicy extends
 				for (Iterator cit = node.getChildren().iterator(); cit
 						.hasNext();) {
 					Node cnode = (Node) cit.next();
+					// For the OpenDDS Modeling SDK, elements behind compartment children may not necessarily be in the same
+					// library as the element behind the compartment's parent (e.g. a DataReader's shared policies).
+					// In this case avoid destroying the child.
+					if (!OpenDDSLibHelper.areElementsInSameLib(view
+							.getElement(), cnode.getElement())) {
+						break;
+					}
 					switch (OpenDDSDcpsLibVisualIDRegistry.getVisualID(cnode)) {
 					case Period2EditPart.VISUAL_ID:
 						cmd.add(new DestroyElementCommand(

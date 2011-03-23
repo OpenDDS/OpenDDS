@@ -13,7 +13,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.gmf.runtime.common.core,
  org.eclipse.gmf.runtime.common.ui,
  org.eclipse.gmf.runtime.diagram.ui.properties,
- org.opendds.modeling.model
+ org.opendds.modeling.model,
+ com.ociweb.emf.util
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.opendds.modeling.common,
