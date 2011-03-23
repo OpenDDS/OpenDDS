@@ -9,101 +9,25 @@
 namespace OpenDDS {
 namespace DCPS {
 
-ACE_INLINE
-DisjointSequence::range_iterator::range_iterator()
-{
-}
-
-ACE_INLINE
-DisjointSequence::range_iterator::range_iterator(SequenceSet::iterator begin,
-                                                 SequenceSet::iterator end)
-  : pos_(begin),
-    end_(end)
-{
-  // N.B. range_iterators always look ahead; the iterator must be
-  // incremented to properly initialize state:
-  ++*this;
-}
-
-ACE_INLINE DisjointSequence::range_iterator
-DisjointSequence::range_iterator::operator++(int)
-{
-  range_iterator prev(*this);
-  ++*this;
-  return prev;
-}
-
-ACE_INLINE bool
-DisjointSequence::range_iterator::operator==(const range_iterator& rhs) const
-{
-  return this->pos_ == rhs.pos_ &&
-         this->end_ == rhs.end_;
-}
-
-ACE_INLINE bool
-DisjointSequence::range_iterator::operator!=(const range_iterator& rhs) const
-{
-  return !(*this == rhs);
-}
-
-ACE_INLINE SequenceRange&
-DisjointSequence::range_iterator::operator*()
-{
-  return this->value_;
-}
-
-ACE_INLINE SequenceRange*
-DisjointSequence::range_iterator::operator->()
-{
-  return &this->value_;
-}
-
-//
-
 ACE_INLINE SequenceNumber
 DisjointSequence::low() const
 {
-  return *(this->sequences_.begin());
+  // only the high end of the range matters for the 
+  // low sequence since all numbers less than it are 
+  // also in the sequence
+  return this->sequences_.begin()->second;
 }
 
 ACE_INLINE SequenceNumber
 DisjointSequence::high() const
 {
-  return *(this->sequences_.rbegin());
+  return this->sequences_.rbegin()->second;
 }
 
 ACE_INLINE bool
 DisjointSequence::disjoint() const
 {
   return this->sequences_.size() > 1;
-}
-
-ACE_INLINE bool
-DisjointSequence::seen(SequenceNumber value) const
-{
-  return value <= low();
-}
-
-ACE_INLINE DisjointSequence::range_iterator
-DisjointSequence::range_begin()
-{
-  return range_iterator(this->sequences_.begin(),
-                        this->sequences_.end());
-}
-
-ACE_INLINE DisjointSequence::range_iterator
-DisjointSequence::range_end()
-{
-  return range_iterator(this->sequences_.end(),
-                        this->sequences_.end());
-}
-
-ACE_INLINE
-DisjointSequence::operator SequenceNumber() const
-{
-  // Always return low water mark; this value/ represents the
-  // maximum contiguous value seen.
-  return low();
 }
 
 } // namespace DCPS

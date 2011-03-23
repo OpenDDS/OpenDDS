@@ -29,7 +29,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     DisjointSequence sequence;
 
     // ASSERT initial value is a default SequenceNumber:
-    SequenceNumber default_value = sequence;
+    SequenceNumber default_value = sequence.low();
     TEST_CHECK(default_value == SequenceNumber());
 
     // ASSERT low and high water marks are the same:
@@ -44,7 +44,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     DisjointSequence sequence(10);
 
     // ASSERT initial value is correct:
-    SequenceNumber initial_value = sequence;
+    SequenceNumber initial_value = sequence.low();
     TEST_CHECK(initial_value == SequenceNumber(10));
 
     // ASSERT low and high water marks are the same:
@@ -63,7 +63,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     sequence.reset(20);
 
     // ASSERT reset value is correct:
-    SequenceNumber reset_value = sequence;
+    SequenceNumber reset_value = sequence.low();
     TEST_CHECK(reset_value == SequenceNumber(20));
 
     // ASSERT low and high water marks are the same:
@@ -111,6 +111,79 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(sequence.low() == SequenceNumber(5));
     TEST_CHECK(sequence.high() == SequenceNumber(5));
     TEST_CHECK(!sequence.disjoint());
+
+    // Testing negative LWM
+    sequence = DisjointSequence(-23);
+    sequence.update(-20); // discontiguity
+    sequence.update(-19);
+    sequence.update(-18);
+
+    TEST_CHECK(sequence.low() == SequenceNumber(-23));
+    TEST_CHECK(sequence.high() == SequenceNumber(-18));
+    TEST_CHECK(sequence.disjoint());
+
+    sequence.update(-22);
+
+    TEST_CHECK(sequence.low() == SequenceNumber(-22));
+    TEST_CHECK(sequence.high() == SequenceNumber(-18));
+    TEST_CHECK(sequence.disjoint());
+
+    sequence.update(-21);
+    TEST_CHECK(sequence.low() == SequenceNumber(-18));
+    TEST_CHECK(sequence.high() == SequenceNumber(-18));
+    TEST_CHECK(!sequence.disjoint());
+
+    // Testing lowest_valid()
+    sequence = DisjointSequence(-23);
+    sequence.update(-20); // discontiguity
+    sequence.update(-19);
+    sequence.update(-18);
+
+    TEST_CHECK(sequence.low() == SequenceNumber(-23));
+    TEST_CHECK(sequence.high() == SequenceNumber(-18));
+    TEST_CHECK(sequence.disjoint());
+
+    TEST_CHECK(sequence.lowest_valid(-21));
+
+    TEST_CHECK(sequence.low() == SequenceNumber(-22));
+    TEST_CHECK(sequence.high() == SequenceNumber(-18));
+    TEST_CHECK(sequence.disjoint());
+
+    sequence.update(-21);
+    TEST_CHECK(sequence.low() == SequenceNumber(-18));
+    TEST_CHECK(sequence.high() == SequenceNumber(-18));
+    TEST_CHECK(!sequence.disjoint());
+
+    // Testing lowest_valid() coalesce with above
+    sequence = DisjointSequence(-23);
+    sequence.update(-20); // discontiguity
+    sequence.update(-19);
+    sequence.update(-18);
+
+    TEST_CHECK(sequence.low() == SequenceNumber(-23));
+    TEST_CHECK(sequence.high() == SequenceNumber(-18));
+    TEST_CHECK(sequence.disjoint());
+
+    TEST_CHECK(sequence.lowest_valid(-20));
+
+    TEST_CHECK(sequence.low() == SequenceNumber(-18));
+    TEST_CHECK(sequence.high() == SequenceNumber(-18));
+    TEST_CHECK(!sequence.disjoint());
+
+    // Testing lowest_valid() coalesce with above
+    sequence = DisjointSequence(-23);
+    sequence.update(-20); // discontiguity
+    sequence.update(-18);
+
+    TEST_CHECK(sequence.low() == SequenceNumber(-23));
+    TEST_CHECK(sequence.high() == SequenceNumber(-18));
+    TEST_CHECK(sequence.disjoint());
+
+    TEST_CHECK(sequence.lowest_valid(-20));
+
+    TEST_CHECK(sequence.low() == SequenceNumber(-20));
+    TEST_CHECK(sequence.high() == SequenceNumber(-18));
+    TEST_CHECK(sequence.disjoint());
 
     // ASSERT update of low + 1 updates the low water mark
     //        and preserves existing discontiguities:
@@ -189,7 +262,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     sequence.update(POSITIVE_RANGE/2+1);
 
     try {
-      sequence.shift(0);
+      sequence.lowest_valid(0);
       TEST_CHECK(false);
     } catch (const std::exception& ) {
     }
@@ -199,8 +272,6 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   // Range iterator
   {
     DisjointSequence sequence;
-    DisjointSequence::range_iterator it;
-    DisjointSequence::range_iterator end;
     SequenceRange range;
 
     // ASSERT a single dicontiguity returns a single range
@@ -208,12 +279,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     sequence = DisjointSequence(0);
     sequence.update(5); // discontiguity
 
-    it = sequence.range_begin();
+    std::vector<SequenceRange> missingSet = sequence.missing_sequence_ranges();
+    std::vector<SequenceRange>::const_iterator it = missingSet.begin();
 
     range = *it;
     TEST_CHECK(range.first == SequenceNumber(1));
     TEST_CHECK(range.second == SequenceNumber(4));
-    TEST_CHECK(++it == sequence.range_end());
+    TEST_CHECK(++it == missingSet.end());
 
     // ASSERT multiple contiguities return multiple ranges
     //        of values:
@@ -222,17 +294,18 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     sequence.update(6);
     sequence.update(10);  // discontiguity
 
-    it = sequence.range_begin();
+    missingSet = sequence.missing_sequence_ranges();
+    it = missingSet.begin();
 
     range = *it;
     TEST_CHECK(range.first == SequenceNumber(1));
     TEST_CHECK(range.second == SequenceNumber(4));
-    TEST_CHECK(++it != sequence.range_end());
+    TEST_CHECK(++it != missingSet.end());
 
     range = *it;
     TEST_CHECK(range.first == SequenceNumber(7));
     TEST_CHECK(range.second == SequenceNumber(9));
-    TEST_CHECK(++it == sequence.range_end());
+    TEST_CHECK(++it == missingSet.end());
 
     // ASSERT multiple contiguities return  multiple ranges
     //        of values with a difference of one:
@@ -242,27 +315,28 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     sequence.update(7);  // discontiguity
     sequence.update(9);  // discontiguity
 
-    it = sequence.range_begin();
+    missingSet = sequence.missing_sequence_ranges();
+    it = missingSet.begin();
 
     range = *it;
     TEST_CHECK(range.first == SequenceNumber(ACE_INT32_MIN + 1));
     TEST_CHECK(range.second == SequenceNumber(-1));
-    TEST_CHECK(++it != sequence.range_end());
+    TEST_CHECK(++it != missingSet.end());
 
     range = *it;
     TEST_CHECK(range.first == SequenceNumber(1));
     TEST_CHECK(range.second == SequenceNumber(4));
-    TEST_CHECK(++it != sequence.range_end());
+    TEST_CHECK(++it != missingSet.end());
 
     range = *it;
     TEST_CHECK(range.first == SequenceNumber(6));
     TEST_CHECK(range.second == SequenceNumber(6));
-    TEST_CHECK(++it != sequence.range_end());
+    TEST_CHECK(++it != missingSet.end());
 
     range = *it;
     TEST_CHECK(range.first == SequenceNumber(8));
     TEST_CHECK(range.second == SequenceNumber(8));
-    TEST_CHECK(++it == sequence.range_end());
+    TEST_CHECK(++it == missingSet.end());
 
 
     // ASSERT rollover ranges return proper missing sequences:
@@ -271,34 +345,36 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     sequence.update(6);   // discontiguity
     sequence.update(10);  // discontiguity
 
-    it = sequence.range_begin();
+    missingSet = sequence.missing_sequence_ranges();
+    it = missingSet.begin();
 
     range = *it;
     TEST_CHECK(range.first == SequenceNumber(MAX_POSITIVE-1));
     TEST_CHECK(range.second == SequenceNumber(MAX_POSITIVE));
-    TEST_CHECK(++it != sequence.range_end());
+    TEST_CHECK(++it != missingSet.end());
 
     range = *it;
     TEST_CHECK(range.first == SequenceNumber(1));
     TEST_CHECK(range.second == SequenceNumber(5));
-    TEST_CHECK(++it != sequence.range_end());
+    TEST_CHECK(++it != missingSet.end());
 
     range = *it;
     TEST_CHECK(range.first == SequenceNumber(7));
     TEST_CHECK(range.second == SequenceNumber(9));
-    TEST_CHECK(++it == sequence.range_end());
+    TEST_CHECK(++it == missingSet.end());
 
     // ASSERT a range update returns the proper iterators
     sequence = DisjointSequence(0);
     sequence.update(SequenceRange(3, 5)); // discontiguity
     sequence.update(6);
 
-    it = sequence.range_begin();
+    missingSet = sequence.missing_sequence_ranges();
+    it = missingSet.begin();
 
     range = *it;
     TEST_CHECK(range.first == SequenceNumber(1));
     TEST_CHECK(range.second == SequenceNumber(2));
-    TEST_CHECK(++it == sequence.range_end());
+    TEST_CHECK(++it == missingSet.end());
   }
 
   return 0;

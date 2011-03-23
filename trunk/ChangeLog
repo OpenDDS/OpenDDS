@@ -1,8 +1,61 @@
+Wed Mar 23 15:42:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        DisjointSequence changes originally developed by Brian Johnson.
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Changed DisjointSequence to store a set of SequenceRanges, so
+          that we only need to store the lowest and highest values of a
+          contiguous range of seen SequenceNumbers.  The largest change
+          I made to the interface for DisjointSequence were to remove
+          the range_iterator and related functions and replace it with
+          a function called missing_sequence_ranges() which returned a
+          set of SequenceRanges indicating ranges of unseen
+          SequenceNumbers (the inverse of the DisjointSequence itself).
+          Other changes to the interface were changing shift to
+          lowest_valid which was intended to better indicate what was
+          going on and changed it to return an indication that
+          SequenceNumbers were dropped (which allowed the removing of
+          seen, which really wasn't "seen" it was "will this be
+          shifted?") and the implicit conversion to SequenceNumber was
+          removed.  previous_sequence_number now can be a non-static
+          function and use low() as the reference point and normalize
+          is no longer needed.  The DisjointSequence used to be
+          understood that the first value in the set was really the
+          last contiguous SequenceNumber from the start that was
+          received, now the lowest SequenceRange is a range of a
+          single value indicating the the same as before.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Changed to use explicit call of low().
+
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          I changed code due to change of DisjointSequence interface:
+          changing to use explicit call of low(), lowest_valid(), and
+          just using the RangeSet returned by missingSequenceRanges.
+          I changed every DisjointSequence name from "missing" to
+          "received", since a DisjointSequence is a "set" of received
+          SequenceNumbers which provides an interface for getting the
+          missing SequenceNumbers.  I also changed the code to be more
+          efficient and call update with a range instead of each
+          consecutive value.
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Changed to call missingSequenceRanges() and use explicit call
+          of low().  More test coverage of range-combining in lowest_valid()
+          and in update().
+
 Tue Mar 22 19:32:27 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicDataTypeEditPart.java:
 
-	  Refresh Topic's datatype compartment if the datatype is changed.
+          Refresh Topic's datatype compartment if the datatype is changed.
 
 Tue Mar 22 15:14:05 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
