@@ -1,3 +1,29 @@
+Wed Mar 23 18:36:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/gmf/OpenDDSLibHelper.java:
+
+          Added helper class for working with the OpenDDSLib derived EClasses.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/xpt/diagram/editpolicies/NodeItemSemanticEditPolicy.xpt:
+
+          Modified template definition of getDestroyElementCommand() to check using
+          OpenDDSLibHelper if the element to destroy is in a different
+          library than view's model element. If so, don't destroy. This fixes a bug
+          where deleting, say, a Topic on a diagram with a shared policy would also
+          delete the policy itself.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DeadlineQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DsQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LbQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LifespanQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LivelinessQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/RdlQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/ReliabilityQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/TbfQosPolicy2ItemSemanticEditPolicy.java:
+
+          Changes in auto-generated code due to using modified template definition.
+
 Wed Mar 23 18:23:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * java/tests/messenger/publisher/run_test.pl:
