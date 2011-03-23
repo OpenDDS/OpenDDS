@@ -46,6 +46,7 @@ my $PUB = PerlDDS::create_process ("$DDS_ROOT/tests/DCPS/Messenger".
                                    "/publisher", "$pub_opts");
 
 PerlACE::add_lib_path ("$DDS_ROOT/java/tests/messenger/messenger_idl");
+PerlACE::add_lib_path ("$DDS_ROOT/tests/DCPS/Messenger");
 
 my $SUB = new PerlDDS::Process_Java ('TestSubscriber', $sub_opts,
                            ["$DDS_ROOT/java/tests/messenger/messenger_idl/".

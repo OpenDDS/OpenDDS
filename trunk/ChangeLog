@@ -1,3 +1,10 @@
+Wed Mar 23 18:23:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/subscriber/run_test.pl:
+
+          Now need an add_lib_path() to locate the corresponding C++ pub/sub.
+
 Wed Mar 23 15:42:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         DisjointSequence changes originally developed by Brian Johnson.
