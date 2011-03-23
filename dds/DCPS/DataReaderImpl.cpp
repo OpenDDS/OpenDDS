@@ -2063,7 +2063,7 @@ OpenDDS::DCPS::WriterInfo::should_ack(
       current = this->ack_deadlines_.erase(current);
 
     } else {
-      if (current->first <= this->ack_sequence_) {
+      if (current->first <= this->ack_sequence_.low()) {
         return true;
       }
 
@@ -2119,7 +2119,7 @@ SequenceNumber
 OpenDDS::DCPS::WriterInfo::ack_sequence() const
 {
   // sample_lock_ is held by the caller.
-  return this->ack_sequence_;
+  return this->ack_sequence_.low();
 }
 
 

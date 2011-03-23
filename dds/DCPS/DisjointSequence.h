@@ -15,36 +15,20 @@
 #include <cstdlib>
 #include <iterator>
 #include <set>
+#include <vector>
 
 namespace OpenDDS {
 namespace DCPS {
 
+struct SequenceRange_LessThan {
+  bool operator()(const SequenceRange& lhs, const SequenceRange& rhs) {
+    return lhs.second < rhs.second;
+  }
+};
+
 class OpenDDS_Dcps_Export DisjointSequence {
 public:
-  typedef std::set<SequenceNumber> SequenceSet;
-
-  class OpenDDS_Dcps_Export range_iterator
-    : public std::iterator<std::input_iterator_tag, SequenceRange> {
-  public:
-    range_iterator();
-    range_iterator(SequenceSet::iterator begin,
-                   SequenceSet::iterator end);
-
-    range_iterator& operator++();
-    range_iterator  operator++(int);
-
-    bool operator==(const range_iterator& rhs) const;
-    bool operator!=(const range_iterator& rhs) const;
-
-    SequenceRange& operator*();
-    SequenceRange* operator->();
-
-  private:
-    SequenceSet::iterator pos_;
-    SequenceSet::iterator end_;
-
-    SequenceRange value_;
-  };
+  typedef std::set<SequenceRange, SequenceRange_LessThan> RangeSet;
 
   static const size_t MAX_DEPTH;
 
@@ -55,27 +39,34 @@ public:
 
   bool disjoint() const;
 
-  bool seen(SequenceNumber value) const;
-
   void reset(SequenceNumber value = SequenceNumber());
-  void shift(SequenceNumber value);
 
+  // indicates the new lowest valid SequenceNumber,
+  // if there are SequenceNumbers missing before
+  // this value, they will be treated as received
+  // and the low water mark will be moved to at least
+  // the SequenceNumber prior to value (if value itself
+  // has already been received, then low water mark will
+  // be moved to just prior to the next missing Sequence
+  // Number).  lowest_valid will return true if invalid 
+  // values have been dropped.
+  bool lowest_valid(SequenceNumber value);
+
+  // add the value or range of values to the set of seen
+  // values
   bool update(SequenceNumber value);
   bool update(const SequenceRange& range);
 
-  range_iterator range_begin();
-  range_iterator range_end();
+  // returns missing ranges of SequenceNumbers
+  std::vector<SequenceRange> missing_sequence_ranges() const;
 
-  operator SequenceNumber() const;
-
-  void dump();
+  void dump() const;
 
 private:
-  SequenceSet sequences_;
-
-  void normalize();
   void validate(const SequenceRange& range) const;
-  static SequenceNumber previous_sequence_number(SequenceNumber value, SequenceNumber in_reference_to);
+  SequenceNumber previous_sequence_number(SequenceNumber value) const;
+
+  RangeSet sequences_;
 };
 
 
