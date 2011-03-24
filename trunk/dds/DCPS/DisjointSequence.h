@@ -21,7 +21,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 struct SequenceRange_LessThan {
-  bool operator()(const SequenceRange& lhs, const SequenceRange& rhs) {
+  bool operator()(const SequenceRange& lhs, const SequenceRange& rhs) const {
     return lhs.second < rhs.second;
   }
 };
@@ -48,7 +48,7 @@ public:
   // the SequenceNumber prior to value (if value itself
   // has already been received, then low water mark will
   // be moved to just prior to the next missing Sequence
-  // Number).  lowest_valid will return true if invalid 
+  // Number).  lowest_valid will return true if invalid
   // values have been dropped.
   bool lowest_valid(SequenceNumber value);
 

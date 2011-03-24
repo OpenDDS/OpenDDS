@@ -518,8 +518,6 @@ ReliableSession::send_naks(DisjointSequence& received)
 
   CORBA::ULong size = ACE_Utils::truncate_cast<CORBA::ULong>(ranges.size());
 
-  if (!size) { _CrtDbgBreak(); }
-
   size_t len = sizeof(this->remote_peer_)
              + sizeof(size)
              + size * 2 * sizeof(SequenceNumber);
@@ -565,7 +563,7 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
   serializer >> low;
 
   // MULTICAST_NAKACK control samples indicate data which cannot be
-  // repaired by a remote peer; if any values were needed below 
+  // repaired by a remote peer; if any values were needed below
   // this value, then the sequence needs to be shifted:
   if (this->nak_sequence_.lowest_valid(low)) {
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
