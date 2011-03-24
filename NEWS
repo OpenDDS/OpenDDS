@@ -9,6 +9,40 @@ Version 2.4 of OpenDDS.
   consideration needs to be given to how these "missing" samples impact the
   QoS behavior, see the document in docs/design/CONTENT_SUBSCRIPTION.
 
+- Various enhancements and fixes were made to the diagram modeling portion
+  of the OpenDDS Modeling SDK. These include:
+    * The property sheet now includes a tab for viewing and editing
+      comments related to the selected figure. These comments are
+      included in the generated C++ code.
+    * In some cases, when attempting to adding a figure to a Package
+      on the main diagram, the figure would unknowingly be placed as a
+      peer of the Package on the canvas. A fix was made so the figure
+      could be added to any portion of the Package to be treated as a
+      child of the Package.
+    * When creating a new figure, the cursor will now be set on a
+      label within the figure to edit. Previously, in some cases
+      the cursor would not be placed on any label, increasing the
+      chance to overlook defining required properties.
+    * Fixed so that when a Topic or MultiTopic's data type is
+      changed a refresh of the data type is properly done. Previously
+      both the original and new data type may have been displayed.
+    * Previously, when deleting a figure that included an association
+      with a shared policy, the shared policy would also be deleted.
+      Now shared policies will be retained in this case.
+    * Fixed diagram preferences all showing up under the DataLib
+      preferences, making it hard to set preferences for the
+      different diagram types.
+    * Policy definitions from the OpenDDS Developer's Guide were
+      included in the Eclipse help content to make it easier to
+      get to these definitions during modeling.
+    * The modeling help content was broken out into subsections to
+      make it easier to navigate.
+
+- On the code generation portion of the OpenDDS Modeling SDK, a fix was
+  made so that when creating a new element value in the Model
+  Customization tab property sheet, the value shown for the element is
+  the actual value and not the value from the previous element
+  displayed.
 
 ========================================================================
 
