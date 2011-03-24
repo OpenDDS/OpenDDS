@@ -152,11 +152,6 @@
             xsi:type="gmfgraph:FlowLayout"
             vertical="true"
             forceSingleLine="true"/>
-        <foregroundColor
-            xsi:type="gmfgraph:RGBColor"
-            red="240"
-            green="240"
-            blue="240"/>
         <children
             xsi:type="gmfgraph:Label"
             name="DomainStereotypeFigure"/>

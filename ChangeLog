@@ -1,3 +1,10 @@
+Thu Mar 24 14:41:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgraph:
+
+          Fix problem with domain figure's outline being barely visible.
+
 Thu Mar 24 14:33:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DisjointSequence.h:
