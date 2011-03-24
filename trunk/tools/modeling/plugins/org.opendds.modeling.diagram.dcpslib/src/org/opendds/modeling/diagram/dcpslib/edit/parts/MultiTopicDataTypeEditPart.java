@@ -10,25 +10,25 @@ import org.eclipse.gmf.runtime.diagram.ui.editpolicies.CreationEditPolicy;
 import org.eclipse.gmf.runtime.diagram.ui.editpolicies.DragDropEditPolicy;
 import org.eclipse.gmf.runtime.diagram.ui.editpolicies.EditPolicyRoles;
 import org.eclipse.gmf.runtime.notation.View;
-import org.opendds.modeling.diagram.dcpslib.edit.policies.TopicDataTypeCanonicalEditPolicy;
-import org.opendds.modeling.diagram.dcpslib.edit.policies.TopicDataTypeItemSemanticEditPolicy;
+import org.opendds.modeling.diagram.dcpslib.edit.policies.MultiTopicDataTypeCanonicalEditPolicy;
+import org.opendds.modeling.diagram.dcpslib.edit.policies.MultiTopicDataTypeItemSemanticEditPolicy;
 import org.opendds.modeling.diagram.dcpslib.part.Messages;
 import org.opendds.modeling.model.topics.TopicsPackage;
 
 /**
  * @generated
  */
-public class TopicDataTypeEditPart extends ListCompartmentEditPart {
+public class MultiTopicDataTypeEditPart extends ListCompartmentEditPart {
 
 	/**
 	 * @generated
 	 */
-	public static final int VISUAL_ID = 7050;
+	public static final int VISUAL_ID = 7049;
 
 	/**
 	 * @generated
 	 */
-	public TopicDataTypeEditPart(View view) {
+	public MultiTopicDataTypeEditPart(View view) {
 		super(view);
 	}
 
@@ -43,7 +43,7 @@ public class TopicDataTypeEditPart extends ListCompartmentEditPart {
 	 * @generated
 	 */
 	public String getCompartmentName() {
-		return Messages.TopicDataTypeEditPart_title;
+		return Messages.MultiTopicDataTypeEditPart_title;
 	}
 
 	/**
@@ -52,13 +52,13 @@ public class TopicDataTypeEditPart extends ListCompartmentEditPart {
 	protected void createDefaultEditPolicies() {
 		super.createDefaultEditPolicies();
 		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
-				new TopicDataTypeItemSemanticEditPolicy());
+				new MultiTopicDataTypeItemSemanticEditPolicy());
 		installEditPolicy(EditPolicyRoles.CREATION_ROLE,
 				new CreationEditPolicy());
 		installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE,
 				new DragDropEditPolicy());
 		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE,
-				new TopicDataTypeCanonicalEditPolicy());
+				new MultiTopicDataTypeCanonicalEditPolicy());
 	}
 
 	/**
@@ -70,7 +70,7 @@ public class TopicDataTypeEditPart extends ListCompartmentEditPart {
 	}
 
 	/*
-	 * Since the Topic's datatype can be changed outside diagram manipulation
+	 * Since the MultiTopic's datatype can be changed outside diagram manipulation
 	 * through a context menu, make sure the datatype compartment gets refreshed.
 	 * generated NOT
 	 */
@@ -78,7 +78,7 @@ public class TopicDataTypeEditPart extends ListCompartmentEditPart {
 	protected void handleNotificationEvent(Notification notification) {
 		int type = notification.getEventType();
 		Object feature = notification.getFeature();
-		if (TopicsPackage.eINSTANCE.getTopic_Datatype().equals(feature)
+		if (TopicsPackage.eINSTANCE.getMultiTopic_Datatype().equals(feature)
 				&& (type == Notification.SET)) {
 			CanonicalEditPolicy canonicalEditPolicy = (CanonicalEditPolicy) getEditPolicy(EditPolicyRoles.CANONICAL_ROLE);
 			canonicalEditPolicy.refresh();
