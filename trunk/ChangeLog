@@ -1,3 +1,10 @@
+Thu Mar 24 19:04:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * NEWS:
+
+	  Added content about OpenDDS Modeling SDK changes since
+	  the previous release.
+
 Thu Mar 24 17:53:06 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
