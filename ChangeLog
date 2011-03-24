@@ -1,3 +1,14 @@
+Thu Mar 24 13:56:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/MultiTopicDataTypeEditPart.java:
+
+	  Oops. Forgot to commit update to MultiTopicDataType similar to update to
+	  Topic in "Tue Mar 22 19:32:27 UTC 2011" commit.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicDataTypeEditPart.java:
+
+	  Format change caused by GMF code generator.
+
 Wed Mar 23 18:36:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
