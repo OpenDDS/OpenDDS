@@ -1957,26 +1957,26 @@
     </palette>
     <preferencePages
         xsi:type="gmfgen:GenStandardPreferencePage"
-        iD="org.opendds.modeling.diagram.general"
+        iD="org.opendds.modeling.diagram.datalib.general"
         name="OpenDDSDataLib Diagram">
       <children
           xsi:type="gmfgen:GenStandardPreferencePage"
-          iD="org.opendds.modeling.diagram.appearance"
+          iD="org.opendds.modeling.diagram.datalib.appearance"
           name="Appearance"
           kind="Appearance"/>
       <children
           xsi:type="gmfgen:GenStandardPreferencePage"
-          iD="org.opendds.modeling.diagram.connections"
+          iD="org.opendds.modeling.diagram.datalib.connections"
           name="Connections"
           kind="Connections"/>
       <children
           xsi:type="gmfgen:GenStandardPreferencePage"
-          iD="org.opendds.modeling.diagram.printing"
+          iD="org.opendds.modeling.diagram.datalib.printing"
           name="Printing"
           kind="Printing"/>
       <children
           xsi:type="gmfgen:GenStandardPreferencePage"
-          iD="org.opendds.modeling.diagram.rulersAndGrid"
+          iD="org.opendds.modeling.diagram.datalib.rulersAndGrid"
           name="Rulers And Grid"
           kind="RulersAndGrid"/>
     </preferencePages>

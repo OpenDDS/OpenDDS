@@ -111,32 +111,32 @@
    <extension point="org.eclipse.ui.preferencePages" id="prefpages">
       <?gmfgen generated="true"?>
       <page
-            id="org.opendds.modeling.diagram.general"
-            name="%prefpage.org.opendds.modeling.diagram.general"
+            id="org.opendds.modeling.diagram.dcpslib.general"
+            name="%prefpage.org.opendds.modeling.diagram.dcpslib.general"
             class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramGeneralPreferencePage">
       </page>
       <page
-            id="org.opendds.modeling.diagram.appearance"
-            name="%prefpage.org.opendds.modeling.diagram.appearance"
-            category="org.opendds.modeling.diagram.general"
+            id="org.opendds.modeling.diagram.dcpslib.appearance"
+            name="%prefpage.org.opendds.modeling.diagram.dcpslib.appearance"
+            category="org.opendds.modeling.diagram.dcpslib.general"
             class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramAppearancePreferencePage">
       </page>
       <page
-            id="org.opendds.modeling.diagram.connections"
-            name="%prefpage.org.opendds.modeling.diagram.connections"
-            category="org.opendds.modeling.diagram.general"
+            id="org.opendds.modeling.diagram.dcpslib.connections"
+            name="%prefpage.org.opendds.modeling.diagram.dcpslib.connections"
+            category="org.opendds.modeling.diagram.dcpslib.general"
             class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramConnectionsPreferencePage">
       </page>
       <page
-            id="org.opendds.modeling.diagram.printing"
-            name="%prefpage.org.opendds.modeling.diagram.printing"
-            category="org.opendds.modeling.diagram.general"
+            id="org.opendds.modeling.diagram.dcpslib.printing"
+            name="%prefpage.org.opendds.modeling.diagram.dcpslib.printing"
+            category="org.opendds.modeling.diagram.dcpslib.general"
             class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramPrintingPreferencePage">
       </page>
       <page
-            id="org.opendds.modeling.diagram.rulersAndGrid"
-            name="%prefpage.org.opendds.modeling.diagram.rulersAndGrid"
-            category="org.opendds.modeling.diagram.general"
+            id="org.opendds.modeling.diagram.dcpslib.rulersAndGrid"
+            name="%prefpage.org.opendds.modeling.diagram.dcpslib.rulersAndGrid"
+            category="org.opendds.modeling.diagram.dcpslib.general"
             class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramRulersAndGridPreferencePage">
       </page>
    </extension>
