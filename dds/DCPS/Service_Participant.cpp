@@ -18,8 +18,8 @@
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #include "tao/ORB_Core.h"
-#include "tao/TAO_Singleton.h"
 
+#include "ace/Singleton.h"
 #include "ace/Arg_Shifter.h"
 #include "ace/Reactor.h"
 #include "ace/Configuration_Import_Export.h"
@@ -111,6 +111,7 @@ Service_Participant::Service_Participant()
 Service_Participant::~Service_Participant()
 {
   delete monitor_;
+  delete monitor_factory_;
 }
 
 Service_Participant *
@@ -119,8 +120,7 @@ Service_Participant::instance()
   // Hide the template instantiation to prevent multiple instances
   // from being created.
 
-  return
-    TAO_Singleton<Service_Participant, TAO_SYNCH_MUTEX>::instance();
+  return ACE_Singleton<Service_Participant, TAO_SYNCH_MUTEX>::instance();
 }
 
 int
@@ -211,10 +211,6 @@ Service_Participant::shutdown()
   try {
     ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
 
-    domainRepoMap_.clear();
-    keyIorMap_.clear();
-    repoMap_.clear();
-
     if (!CORBA::is_nil(orb_.in())) {
       if (!orb_from_user_) {
         orb_->shutdown(0);
@@ -245,6 +241,10 @@ Service_Participant::shutdown()
     }
 
     dp_factory_ = DDS::DomainParticipantFactory::_nil();
+
+    domainRepoMap_.clear();
+    keyIorMap_.clear();
+    repoMap_.clear();
 
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: Service_Participant::shutdown");
@@ -1694,13 +1694,12 @@ Service_Participant::get_data_durability_cache(
 } // namespace DCPS
 } // namespace OpenDDS
 
-// gcc on AIX needs explicit instantiation of the singleton templates
-#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION) || (defined (__GNUC__) && defined (_AIX))
+#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
 
-template class TAO_Singleton<Service_Participant, TAO_SYNCH_MUTEX>;
+template class ACE_Singleton<Service_Participant, TAO_SYNCH_MUTEX>;
 
 #elif defined (ACE_HAS_TEMPLATENSTANTIATION_PRAGMA)
 
-#pragma instantiate TAO_Singleton<Service_Participant, TAO_SYNCH_MUTEX>
+#pragma instantiate ACE_Singleton<Service_Participant, TAO_SYNCH_MUTEX>
 
 #endif /*ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */

@@ -1,9 +1,40 @@
+Thu Mar 24 21:38:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Fixed a compiler error on SunCC.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Changed the Service_Participant singleton from TAO_Singleton<> to
+          ACE_Singleton<>.  TAO may not be initialized at the time the
+          Service_Participant is first accessed.  This causes the TAO_Singleton
+          to go through the "we'll have to leak" path, which we don't want.
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Removed an LM_ERROR log message in get_configuration() when the
+          configuration is not found.  That's a normal condition (even though
+          we end up throwing an exception for it) so no need to log.
+
+        * tests/DCPS/ContentFilteredTopic/Messenger.idl:
+
+          Removed parts of the IDL that are not used by the test.
+
+        * java/tests/messenger/both:
+        * performance-tests/DCPS/MulticastListenerTest:
+        * tests/DCPS/LivelinessTimeout:
+        * tests/DCPS/MultiTopic:
+        * tests/DCPS/QueryCondition:
+
+          Updated svn:ignore properties.
+
 Thu Mar 24 19:04:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * NEWS:
 
-	  Added content about OpenDDS Modeling SDK changes since
-	  the previous release.
+          Added content about OpenDDS Modeling SDK changes since
+          the previous release.
 
 Thu Mar 24 17:53:06 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
