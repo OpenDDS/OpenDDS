@@ -3010,26 +3010,26 @@
     </palette>
     <preferencePages
         xsi:type="gmfgen:GenStandardPreferencePage"
-        iD="org.opendds.modeling.diagram.general"
+        iD="org.opendds.modeling.diagram.policylib.general"
         name="OpenDDSPolicyLib Diagram">
       <children
           xsi:type="gmfgen:GenStandardPreferencePage"
-          iD="org.opendds.modeling.diagram.appearance"
+          iD="org.opendds.modeling.diagram.policylib.appearance"
           name="Appearance"
           kind="Appearance"/>
       <children
           xsi:type="gmfgen:GenStandardPreferencePage"
-          iD="org.opendds.modeling.diagram.connections"
+          iD="org.opendds.modeling.diagram.policylib.connections"
           name="Connections"
           kind="Connections"/>
       <children
           xsi:type="gmfgen:GenStandardPreferencePage"
-          iD="org.opendds.modeling.diagram.printing"
+          iD="org.opendds.modeling.diagram.policylib.printing"
           name="Printing"
           kind="Printing"/>
       <children
           xsi:type="gmfgen:GenStandardPreferencePage"
-          iD="org.opendds.modeling.diagram.rulersAndGrid"
+          iD="org.opendds.modeling.diagram.policylib.rulersAndGrid"
           name="Rulers And Grid"
           kind="RulersAndGrid"/>
     </preferencePages>
