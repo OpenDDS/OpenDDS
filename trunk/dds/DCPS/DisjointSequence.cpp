@@ -37,7 +37,7 @@ DisjointSequence::reset(SequenceNumber value)
 }
 
 bool
-DisjointSequence::lowest_valid(const SequenceNumber value)
+DisjointSequence::lowest_valid(SequenceNumber value)
 {
   validate(SequenceRange(value, value));
   if (++low() >= value) return false; // nothing to shift

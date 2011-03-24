@@ -258,9 +258,6 @@ OpenDDS::DCPS::TransportFactory::get_configuration(TransportIdType transport_id)
   }
 
   if (result != 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TransportFactory::get_configuration ")
-               ACE_TEXT("transport (id=%u) is not configured. \n"),
-               transport_id));
     throw Transport::NotConfigured();
   }
 
