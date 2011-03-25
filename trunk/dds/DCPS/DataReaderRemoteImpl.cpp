@@ -24,26 +24,62 @@ DataReaderRemoteImpl::~DataReaderRemoteImpl()
 {
 }
 
-void DataReaderRemoteImpl::add_associations(const OpenDDS::DCPS::RepoId& yourId,
-                                            const OpenDDS::DCPS::WriterAssociationSeq & writers)
-ACE_THROW_SPEC((CORBA::SystemException))
+void
+DataReaderRemoteImpl::detach_parent()
 {
-  parent_->add_associations(yourId, writers);
+  ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
+  this->parent_ = 0;
 }
 
-void DataReaderRemoteImpl::remove_associations(
-  const OpenDDS::DCPS::WriterIdSeq & writers,
-  CORBA::Boolean notify_lost)
+void
+DataReaderRemoteImpl::add_associations(const RepoId& yourId,
+                                       const WriterAssociationSeq & writers)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  parent_->remove_associations(writers, notify_lost);
+  DataReaderImpl* parent = 0;
+  DDS::DataReader_var drv;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
+    drv = DDS::DataReader::_duplicate(this->parent_);
+    parent = this->parent_;
+  }
+  if (parent) {
+    parent->add_associations(yourId, writers);
+  }
 }
 
-void DataReaderRemoteImpl::update_incompatible_qos(
-  const OpenDDS::DCPS::IncompatibleQosStatus & status)
+void
+DataReaderRemoteImpl::remove_associations(const WriterIdSeq& writers,
+                                          CORBA::Boolean notify_lost)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  parent_->update_incompatible_qos(status);
+  DataReaderImpl* parent = 0;
+  DDS::DataReader_var drv;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
+    drv = DDS::DataReader::_duplicate(this->parent_);
+    parent = this->parent_;
+  }
+  if (parent) {
+    parent->remove_associations(writers, notify_lost);
+  }
+}
+
+void
+DataReaderRemoteImpl::update_incompatible_qos(
+  const IncompatibleQosStatus& status)
+ACE_THROW_SPEC((CORBA::SystemException))
+{
+  DataReaderImpl* parent = 0;
+  DDS::DataReader_var drv;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
+    drv = DDS::DataReader::_duplicate(this->parent_);
+    parent = this->parent_;
+  }
+  if (parent) {
+    parent->update_incompatible_qos(status);
+  }
 }
 
 } // namespace DCPS

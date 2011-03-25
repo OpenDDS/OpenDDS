@@ -25,6 +25,7 @@
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
 #include "MonitorFactory.h"
+#include "DataReaderRemoteImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
@@ -166,10 +167,11 @@ DataReaderImpl::cleanup()
 
   dr_local_objref_ = DDS::DataReader::_nil();
 
-  if (dr_remote_objref_) {
-    deactivate_remote_object(dr_remote_objref_.in());
-    dr_remote_objref_ = DataReaderRemote::_nil();
-  }
+  DataReaderRemoteImpl* drr =
+    remote_reference_to_servant<DataReaderRemoteImpl>(dr_remote_objref_.in());
+  drr->detach_parent();
+  deactivate_remote_object(dr_remote_objref_.in());
+  dr_remote_objref_ = DataReaderRemote::_nil();
 }
 
 void DataReaderImpl::init(

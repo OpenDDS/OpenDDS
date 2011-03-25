@@ -13,6 +13,8 @@
 #include "DdsDcpsDataReaderRemoteS.h"
 #include "Definitions.h"
 
+#include "ace/Thread_Mutex.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -33,28 +35,26 @@ class OpenDDS_Dcps_Export DataReaderRemoteImpl
   : public virtual POA_OpenDDS::DCPS::DataReaderRemote {
 public:
 
-  //Constructor
-  DataReaderRemoteImpl(DataReaderImpl* parent);
+  explicit DataReaderRemoteImpl(DataReaderImpl* parent);
 
-  //Destructor
   virtual ~DataReaderRemoteImpl();
 
-  virtual void add_associations(
-    const OpenDDS::DCPS::RepoId& yourId,
-    const OpenDDS::DCPS::WriterAssociationSeq & writers)
+  virtual void add_associations(const RepoId& yourId,
+                                const WriterAssociationSeq & writers)
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  virtual void remove_associations(
-    const OpenDDS::DCPS::WriterIdSeq & writers,
-    CORBA::Boolean callback)
+  virtual void remove_associations(const WriterIdSeq& writers,
+                                   CORBA::Boolean callback)
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  virtual void update_incompatible_qos(
-    const OpenDDS::DCPS::IncompatibleQosStatus & status)
+  virtual void update_incompatible_qos(const IncompatibleQosStatus& status)
   ACE_THROW_SPEC((CORBA::SystemException));
+
+  void detach_parent();
+
 private:
   DataReaderImpl* parent_;
-
+  ACE_Thread_Mutex mutex_;
 };
 
 } // namespace DCPS

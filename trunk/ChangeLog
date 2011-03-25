@@ -1,3 +1,16 @@
+Fri Mar 25 21:04:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderRemoteImpl.h:
+        * dds/DCPS/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterRemoteImpl.h:
+        * dds/DCPS/DataWriterRemoteImpl.cpp:
+
+          Account for the scenario where an ORB upcall is active in one of
+          the "remotes" while its "parent" object is cleaning up.  In this
+          case the parent is explicitly detached, making the upcall a no-op.
+
 Fri Mar 25 15:27:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
