@@ -13,10 +13,6 @@
 namespace OpenDDS {
 namespace DCPS {
 
-//TBD - add check for enabled in most methods.
-//      currently this is not needed because auto_enable_created_entities
-//      cannot be false.
-
 DataWriterRemoteImpl::DataWriterRemoteImpl(DataWriterImpl* parent)
   : parent_(parent)
 {
@@ -29,26 +25,61 @@ DataWriterRemoteImpl::~DataWriterRemoteImpl()
 }
 
 void
-DataWriterRemoteImpl::add_associations(const OpenDDS::DCPS::RepoId& yourId,
-                                       const ReaderAssociationSeq & readers)
-ACE_THROW_SPEC((CORBA::SystemException))
+DataWriterRemoteImpl::detach_parent()
 {
-  parent_->add_associations(yourId, readers);
+  ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
+  this->parent_ = 0;
 }
 
 void
-DataWriterRemoteImpl::remove_associations(const ReaderIdSeq & readers,
+DataWriterRemoteImpl::add_associations(const RepoId& yourId,
+                                       const ReaderAssociationSeq& readers)
+ACE_THROW_SPEC((CORBA::SystemException))
+{
+  DataWriterImpl* parent = 0;
+  DDS::DataWriter_var dwv;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
+    dwv = DDS::DataWriter::_duplicate(this->parent_);
+    parent = this->parent_;
+  }
+  if (parent) {
+    parent->add_associations(yourId, readers);
+  }
+}
+
+void
+DataWriterRemoteImpl::remove_associations(const ReaderIdSeq& readers,
                                           CORBA::Boolean notify_lost)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  parent_->remove_associations(readers, notify_lost);
+  DataWriterImpl* parent = 0;
+  DDS::DataWriter_var dwv;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
+    dwv = DDS::DataWriter::_duplicate(this->parent_);
+    parent = this->parent_;
+  }
+  if (parent) {
+    parent->remove_associations(readers, notify_lost);
+  }
 }
 
 void
-DataWriterRemoteImpl::update_incompatible_qos(const OpenDDS::DCPS::IncompatibleQosStatus & status)
+DataWriterRemoteImpl::update_incompatible_qos(
+  const IncompatibleQosStatus& status)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  parent_->update_incompatible_qos(status);
+  DataWriterImpl* parent = 0;
+  DDS::DataWriter_var dwv;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
+    dwv = DDS::DataWriter::_duplicate(this->parent_);
+    parent = this->parent_;
+  }
+  if (parent) {
+    parent->update_incompatible_qos(status);
+  }
 }
 
 void
@@ -56,7 +87,16 @@ DataWriterRemoteImpl::update_subscription_params(const RepoId& readerId,
                                                  const DDS::StringSeq& params)
 ACE_THROW_SPEC((CORBA::SystemException))
 {
-  parent_->update_subscription_params(readerId, params);
+  DataWriterImpl* parent = 0;
+  DDS::DataWriter_var dwv;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
+    dwv = DDS::DataWriter::_duplicate(this->parent_);
+    parent = this->parent_;
+  }
+  if (parent) {
+    parent->update_subscription_params(readerId, params);
+  }
 }
 
 } // namespace DCPS

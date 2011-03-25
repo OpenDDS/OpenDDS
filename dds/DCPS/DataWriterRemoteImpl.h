@@ -12,6 +12,8 @@
 #include "dds/DdsDcpsDataWriterRemoteS.h"
 #include "Definitions.h"
 
+#include "ace/Thread_Mutex.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -30,32 +32,30 @@ class DataWriterImpl;
 class OpenDDS_Dcps_Export DataWriterRemoteImpl
   : public virtual POA_OpenDDS::DCPS::DataWriterRemote {
 public:
-  ///Constructor
-  DataWriterRemoteImpl(DataWriterImpl* parent);
+  explicit DataWriterRemoteImpl(DataWriterImpl* parent);
 
-  ///Destructor
   virtual ~DataWriterRemoteImpl();
 
-  virtual void add_associations(
-    const OpenDDS::DCPS::RepoId& yourId,
-    const ReaderAssociationSeq & readers)
+  virtual void add_associations(const RepoId& yourId,
+                                const ReaderAssociationSeq& readers)
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  virtual void remove_associations(
-    const ReaderIdSeq & readers,
-    CORBA::Boolean callback)
+  virtual void remove_associations(const ReaderIdSeq& readers,
+                                   CORBA::Boolean callback)
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  virtual void update_incompatible_qos(
-    const OpenDDS::DCPS::IncompatibleQosStatus & status)
+  virtual void update_incompatible_qos(const IncompatibleQosStatus& status)
   ACE_THROW_SPEC((CORBA::SystemException));
 
-  virtual void update_subscription_params(
-    const RepoId& readerId, const DDS::StringSeq& exprParams)
+  virtual void update_subscription_params(const RepoId& readerId,
+                                          const DDS::StringSeq& exprParams)
   ACE_THROW_SPEC((CORBA::SystemException));
+
+  void detach_parent();
 
 private:
   DataWriterImpl* parent_;
+  ACE_Thread_Mutex mutex_;
 };
 
 } // namespace DCPS
