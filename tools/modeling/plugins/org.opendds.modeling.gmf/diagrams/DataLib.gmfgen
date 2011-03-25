@@ -1985,6 +1985,7 @@
       iD="org.opendds.modeling.diagram.datalib"
       name="OpenDDS DataLib Plugin"
       provider="Object Computing, Inc."
+      version="1.0.1.qualifier"
       printingEnabled="true">
     <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
     <requiredPlugins>org.eclipse.gmf.runtime.draw2d.ui</requiredPlugins>

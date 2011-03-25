@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.opendds.modeling.model.editor;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.1.qualifier
 Bundle-ClassPath: .
 Bundle-Activator: org.opendds.modeling.model.opendds.presentation.OpenDDSEditorPlugin$Implementation
 Bundle-Vendor: %providerName
