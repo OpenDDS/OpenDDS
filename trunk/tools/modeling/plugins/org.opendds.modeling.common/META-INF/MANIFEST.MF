@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OpenDDS Modeling SDK
 Bundle-SymbolicName: org.opendds.modeling.common;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.1.qualifier
 Bundle-Vendor: Object Computing, Inc.
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.common;visibility:=reexport,

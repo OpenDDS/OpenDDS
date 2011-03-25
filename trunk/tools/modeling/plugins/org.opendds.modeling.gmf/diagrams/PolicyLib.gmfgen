@@ -3037,7 +3037,8 @@
   <plugin
       iD="org.opendds.modeling.diagram.policylib"
       name="OpenDDS PolicyLib Plugin"
-      provider="Object Computing, Inc.">
+      provider="Object Computing, Inc."
+      version="1.0.1.qualifier">
     <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
   </plugin>
   <editor
