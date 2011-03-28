@@ -214,7 +214,7 @@
     </xsl:if>
     <xsl:call-template name="process-external-refs">
       <xsl:with-param name="refs" select="$refs[position() &gt; 1]"/>
-      <xsl:with-param name="complete-refs" select="concat(' ', $id, ' ')"/>
+      <xsl:with-param name="complete-refs" select="concat($complete-refs, ' ', $id, ' ')"/>
     </xsl:call-template>
   </xsl:if>
 </xsl:template>
@@ -230,7 +230,6 @@
       <xsl:call-template name="modelname">
         <xsl:with-param name="target" select="$target/.."/>
       </xsl:call-template>
-
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>

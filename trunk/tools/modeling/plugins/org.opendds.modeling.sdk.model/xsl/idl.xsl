@@ -57,7 +57,7 @@
 <!-- End of main processing template. -->
 
 <!-- For packages containing named types, output a module -->
-<xsl:template match="packages[.//types[@name]]" mode="declare">
+<xsl:template match="packages[.//types[not(@model) and @name]]" mode="declare">
   <xsl:call-template name="output-comment"/>
   <xsl:value-of select="concat('module ', @name, ' {', $newline)"/>
   <xsl:apply-templates mode="declare"/>
@@ -127,14 +127,14 @@
 </xsl:template>
 
 <!-- Forward declare union definitions. -->
-<xsl:template match="types[@xsi:type = 'types:Union']" mode="declare">
+<xsl:template match="types[not(@model) and @xsi:type = 'types:Union']" mode="declare">
   <xsl:call-template name="module-wrapped-qname">
     <xsl:with-param name="type" select="'  union '"/>
   </xsl:call-template>
 </xsl:template>
 
 <!-- Forward declare data structure definitions. -->
-<xsl:template match="types[@xsi:type = 'types:Struct']" mode="declare">
+<xsl:template match="types[not(@model) and @xsi:type = 'types:Struct']" mode="declare">
   <xsl:call-template name="module-wrapped-qname">
     <xsl:with-param name="type" select="'  struct '"/>
   </xsl:call-template>

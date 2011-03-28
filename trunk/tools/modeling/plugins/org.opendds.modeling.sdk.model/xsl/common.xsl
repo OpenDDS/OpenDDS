@@ -158,7 +158,7 @@
 
 <xsl:template name="output-comment">
   <xsl:param name="comment" select="comment"/>
-  <xsl:param name="indent" select=""/>
+  <xsl:param name="indent" select="''"/>
 
   <xsl:choose>
     <xsl:when test="not($comment)">
@@ -180,7 +180,7 @@
 
 <xsl:template name="output-single-line-comment">
   <xsl:param name="comment" select="comment"/>
-  <xsl:param name="indent" select=""/>
+  <xsl:param name="indent" select="''"/>
   <xsl:variable name="prefix">
     <xsl:choose>
       <xsl:when test="$comment/@format='PLAIN'">
@@ -228,7 +228,7 @@
 
 <xsl:template name="output-multi-line-comment">
   <xsl:param name="comment" select="comment"/>
-  <xsl:param name="indent" select=""/>
+  <xsl:param name="indent" select="''"/>
   <xsl:choose>
     <xsl:when test="$comment/@format='PLAIN'">
       <xsl:value-of select="concat($indent, '/*', $newline)"/>
