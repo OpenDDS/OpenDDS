@@ -1,3 +1,9 @@
+Mon Mar 28 18:31:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fix last Friday's change for the MultiTopic case.
+
 Mon Mar 28 17:55:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Crossplatform/Messenger_run_test.pl:
