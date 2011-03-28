@@ -50,6 +50,7 @@
                 <topic href="html/modeling/tasks/dcps_lib/datawriter_creation.html" label="Creating a DataWriter"/>
                 <topic href="html/modeling/tasks/dcps_lib/sub_datareader_creation.html" label="Creating Subscriber and DataReaders"/>
                 <topic href="html/modeling/tasks/dcps_lib/topics_usage.html" label="Working with Topics"/>
+                <topic href="html/modeling/tasks/dcps_lib/datareaderwriter_topic_connection.html" label="Connecting DataReader/DataWriter to Topics"/>
                 <topic href="html/modeling/tasks/dcps_lib/compartments_usage.html" label="Working with compartments within compartments"/>
                 <topic href="html/modeling/tasks/dcps_lib/performing_validations.html" label="Validation of DCPS Types"/>
         </topic>

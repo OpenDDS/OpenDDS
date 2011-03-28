@@ -1,3 +1,21 @@
+Mon Mar 28 19:40:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/concepts/modeling.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datareaderwriter_topic_connection_palette.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/new_diagram_editor.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/new_diagram_selection.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/new_project_selection.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/struct.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/data_lib/types/types_with_fields.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datareaderwriter_topic_connection.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datawriter_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/topics_usage.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/model_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/model_population.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
+
+	  Addressed deficiencies in the on-line help based on feedback from Steve Totten.
+
 Mon Mar 28 18:31:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
