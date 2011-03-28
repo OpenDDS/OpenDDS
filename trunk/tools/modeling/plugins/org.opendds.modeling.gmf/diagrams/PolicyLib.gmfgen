@@ -61,6 +61,7 @@
         visualID="3001"
         editPartClassName="PeriodEditPart"
         itemSemanticEditPolicyClassName="PeriodItemSemanticEditPolicy"
+        notationViewFactoryClassName="PeriodViewFactory"
         canonicalEditPolicyClassName="PeriodCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="PeriodGraphicalNodeEditPolicy"
         createCommandClassName="PeriodCreateCommand"
@@ -86,7 +87,8 @@
       <labels
           visualID="5113"
           editPartClassName="PeriodSecondEditPart"
-          itemSemanticEditPolicyClassName="PeriodSecondItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodSecondItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodSecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -106,7 +108,8 @@
       <labels
           visualID="5114"
           editPartClassName="PeriodNanosecondEditPart"
-          itemSemanticEditPolicyClassName="PeriodNanosecondItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodNanosecondItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodNanosecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -128,6 +131,7 @@
         visualID="3002"
         editPartClassName="Period2EditPart"
         itemSemanticEditPolicyClassName="Period2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="PeriodViewFactory"
         canonicalEditPolicyClassName="Period2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="Period2GraphicalNodeEditPolicy"
         createCommandClassName="Period2CreateCommand"
@@ -153,7 +157,8 @@
       <labels
           visualID="5115"
           editPartClassName="PeriodSecond2EditPart"
-          itemSemanticEditPolicyClassName="PeriodSecond2ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodSecond2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodSecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -173,7 +178,8 @@
       <labels
           visualID="5116"
           editPartClassName="PeriodNanosecond2EditPart"
-          itemSemanticEditPolicyClassName="PeriodNanosecond2ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodNanosecond2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodNanosecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -195,6 +201,7 @@
         visualID="3003"
         editPartClassName="Period3EditPart"
         itemSemanticEditPolicyClassName="Period3ItemSemanticEditPolicy"
+        notationViewFactoryClassName="PeriodViewFactory"
         canonicalEditPolicyClassName="Period3CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="Period3GraphicalNodeEditPolicy"
         createCommandClassName="Period3CreateCommand"
@@ -220,7 +227,8 @@
       <labels
           visualID="5117"
           editPartClassName="PeriodSecond3EditPart"
-          itemSemanticEditPolicyClassName="PeriodSecond3ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodSecond3ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodSecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -240,7 +248,8 @@
       <labels
           visualID="5118"
           editPartClassName="PeriodNanosecond3EditPart"
-          itemSemanticEditPolicyClassName="PeriodNanosecond3ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodNanosecond3ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodNanosecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -262,6 +271,7 @@
         visualID="3004"
         editPartClassName="Period4EditPart"
         itemSemanticEditPolicyClassName="Period4ItemSemanticEditPolicy"
+        notationViewFactoryClassName="PeriodViewFactory"
         canonicalEditPolicyClassName="Period4CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="Period4GraphicalNodeEditPolicy"
         createCommandClassName="Period4CreateCommand"
@@ -287,7 +297,8 @@
       <labels
           visualID="5119"
           editPartClassName="PeriodSecond4EditPart"
-          itemSemanticEditPolicyClassName="PeriodSecond4ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodSecond4ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodSecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -307,7 +318,8 @@
       <labels
           visualID="5120"
           editPartClassName="PeriodNanosecond4EditPart"
-          itemSemanticEditPolicyClassName="PeriodNanosecond4ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodNanosecond4ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodNanosecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -329,6 +341,7 @@
         visualID="3005"
         editPartClassName="Period5EditPart"
         itemSemanticEditPolicyClassName="Period5ItemSemanticEditPolicy"
+        notationViewFactoryClassName="PeriodViewFactory"
         canonicalEditPolicyClassName="Period5CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="Period5GraphicalNodeEditPolicy"
         createCommandClassName="Period5CreateCommand"
@@ -354,7 +367,8 @@
       <labels
           visualID="5121"
           editPartClassName="PeriodSecond5EditPart"
-          itemSemanticEditPolicyClassName="PeriodSecond5ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodSecond5ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodSecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -374,7 +388,8 @@
       <labels
           visualID="5122"
           editPartClassName="PeriodNanosecond5EditPart"
-          itemSemanticEditPolicyClassName="PeriodNanosecond5ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodNanosecond5ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodNanosecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -396,6 +411,7 @@
         visualID="3007"
         editPartClassName="Period6EditPart"
         itemSemanticEditPolicyClassName="Period6ItemSemanticEditPolicy"
+        notationViewFactoryClassName="PeriodViewFactory"
         canonicalEditPolicyClassName="Period6CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="Period6GraphicalNodeEditPolicy"
         createCommandClassName="Period6CreateCommand"
@@ -421,7 +437,8 @@
       <labels
           visualID="5125"
           editPartClassName="PeriodSecond6EditPart"
-          itemSemanticEditPolicyClassName="PeriodSecond6ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodSecond6ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodSecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -441,7 +458,8 @@
       <labels
           visualID="5126"
           editPartClassName="PeriodNanosecond6EditPart"
-          itemSemanticEditPolicyClassName="PeriodNanosecond6ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodNanosecond6ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodNanosecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -463,6 +481,7 @@
         visualID="3008"
         editPartClassName="Period7EditPart"
         itemSemanticEditPolicyClassName="Period7ItemSemanticEditPolicy"
+        notationViewFactoryClassName="PeriodViewFactory"
         canonicalEditPolicyClassName="Period7CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="Period7GraphicalNodeEditPolicy"
         createCommandClassName="Period7CreateCommand"
@@ -488,7 +507,8 @@
       <labels
           visualID="5127"
           editPartClassName="PeriodSecond7EditPart"
-          itemSemanticEditPolicyClassName="PeriodSecond7ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodSecond7ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodSecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -508,7 +528,8 @@
       <labels
           visualID="5128"
           editPartClassName="PeriodNanosecond7EditPart"
-          itemSemanticEditPolicyClassName="PeriodNanosecond7ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodNanosecond7ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodNanosecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -530,6 +551,7 @@
         visualID="3006"
         editPartClassName="Period8EditPart"
         itemSemanticEditPolicyClassName="Period8ItemSemanticEditPolicy"
+        notationViewFactoryClassName="PeriodViewFactory"
         canonicalEditPolicyClassName="Period8CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="Period8GraphicalNodeEditPolicy"
         createCommandClassName="Period8CreateCommand"
@@ -555,7 +577,8 @@
       <labels
           visualID="5123"
           editPartClassName="PeriodSecond8EditPart"
-          itemSemanticEditPolicyClassName="PeriodSecond8ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodSecond8ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodSecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -575,7 +598,8 @@
       <labels
           visualID="5124"
           editPartClassName="PeriodNanosecond8EditPart"
-          itemSemanticEditPolicyClassName="PeriodNanosecond8ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodNanosecond8ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodNanosecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -597,6 +621,7 @@
         visualID="3009"
         editPartClassName="Period9EditPart"
         itemSemanticEditPolicyClassName="Period9ItemSemanticEditPolicy"
+        notationViewFactoryClassName="PeriodViewFactory"
         canonicalEditPolicyClassName="Period9CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="Period9GraphicalNodeEditPolicy"
         createCommandClassName="Period9CreateCommand"
@@ -622,7 +647,8 @@
       <labels
           visualID="5129"
           editPartClassName="PeriodSecond9EditPart"
-          itemSemanticEditPolicyClassName="PeriodSecond9ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodSecond9ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodSecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -642,7 +668,8 @@
       <labels
           visualID="5130"
           editPartClassName="PeriodNanosecond9EditPart"
-          itemSemanticEditPolicyClassName="PeriodNanosecond9ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PeriodNanosecond9ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PeriodNanosecondViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -664,6 +691,7 @@
         visualID="2021"
         editPartClassName="DeadlineQosPolicyEditPart"
         itemSemanticEditPolicyClassName="DeadlineQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="DeadlineQosPolicyViewFactory"
         canonicalEditPolicyClassName="DeadlineQosPolicyCanonicalEditPolicy"
         compartments="//@diagram/@compartments.0"
         graphicalNodeEditPolicyClassName="DeadlineQosPolicyGraphicalNodeEditPolicy"
@@ -712,6 +740,7 @@
           visualID="5021"
           editPartClassName="DeadlineQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="DeadlineQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="DeadlineQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -731,6 +760,7 @@
           visualID="5043"
           editPartClassName="DeadlineQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="DeadlineQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="DeadlineQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -750,6 +780,7 @@
         visualID="2022"
         editPartClassName="DestinationOrderQosPolicyEditPart"
         itemSemanticEditPolicyClassName="DestinationOrderQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="DestinationOrderQosPolicyViewFactory"
         canonicalEditPolicyClassName="DestinationOrderQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DestinationOrderQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="DestinationOrderQosPolicyCreateCommand">
@@ -775,6 +806,7 @@
           visualID="5044"
           editPartClassName="DestinationOrderQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="DestinationOrderQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="DestinationOrderQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -794,6 +826,7 @@
           visualID="5045"
           editPartClassName="DestinationOrderQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="DestinationOrderQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="DestinationOrderQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -811,7 +844,8 @@
       <labels
           visualID="5086"
           editPartClassName="DestinationOrderQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="DestinationOrderQosPolicyKindItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="DestinationOrderQosPolicyKindItemSemanticEditPolicy"
+          notationViewFactoryClassName="DestinationOrderQosPolicyKindViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -833,6 +867,7 @@
         visualID="2023"
         editPartClassName="DsQosPolicyEditPart"
         itemSemanticEditPolicyClassName="DsQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="DsQosPolicyViewFactory"
         canonicalEditPolicyClassName="DsQosPolicyCanonicalEditPolicy"
         compartments="//@diagram/@compartments.1"
         graphicalNodeEditPolicyClassName="DsQosPolicyGraphicalNodeEditPolicy"
@@ -881,6 +916,7 @@
           visualID="5046"
           editPartClassName="DsQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="DsQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="DsQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -900,6 +936,7 @@
           visualID="5047"
           editPartClassName="DsQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="DsQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="DsQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -917,7 +954,8 @@
       <labels
           visualID="5087"
           editPartClassName="DsQosPolicyHistory_depthEditPart"
-          itemSemanticEditPolicyClassName="DsQosPolicyHistory_depthItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="DsQosPolicyHistory_depthItemSemanticEditPolicy"
+          notationViewFactoryClassName="DsQosPolicyHistory_depthViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -937,7 +975,8 @@
       <labels
           visualID="5088"
           editPartClassName="DsQosPolicyHistory_kindEditPart"
-          itemSemanticEditPolicyClassName="DsQosPolicyHistory_kindItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="DsQosPolicyHistory_kindItemSemanticEditPolicy"
+          notationViewFactoryClassName="DsQosPolicyHistory_kindViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -957,7 +996,8 @@
       <labels
           visualID="5089"
           editPartClassName="DsQosPolicyMax_instancesEditPart"
-          itemSemanticEditPolicyClassName="DsQosPolicyMax_instancesItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="DsQosPolicyMax_instancesItemSemanticEditPolicy"
+          notationViewFactoryClassName="DsQosPolicyMax_instancesViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -977,7 +1017,8 @@
       <labels
           visualID="5090"
           editPartClassName="DsQosPolicyMax_samplesEditPart"
-          itemSemanticEditPolicyClassName="DsQosPolicyMax_samplesItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="DsQosPolicyMax_samplesItemSemanticEditPolicy"
+          notationViewFactoryClassName="DsQosPolicyMax_samplesViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -997,7 +1038,8 @@
       <labels
           visualID="5091"
           editPartClassName="DsQosPolicyMax_samples_per_instancEditPart"
-          itemSemanticEditPolicyClassName="DsQosPolicyMax_samples_per_instancItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="DsQosPolicyMax_samples_per_instancItemSemanticEditPolicy"
+          notationViewFactoryClassName="DsQosPolicyMax_samples_per_instanceViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1019,6 +1061,7 @@
         visualID="2024"
         editPartClassName="DurabilityQosPolicyEditPart"
         itemSemanticEditPolicyClassName="DurabilityQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="DurabilityQosPolicyViewFactory"
         canonicalEditPolicyClassName="DurabilityQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DurabilityQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="DurabilityQosPolicyCreateCommand">
@@ -1044,6 +1087,7 @@
           visualID="5048"
           editPartClassName="DurabilityQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="DurabilityQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="DurabilityQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1063,6 +1107,7 @@
           visualID="5049"
           editPartClassName="DurabilityQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="DurabilityQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="DurabilityQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1080,7 +1125,8 @@
       <labels
           visualID="5092"
           editPartClassName="DurabilityQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="DurabilityQosPolicyKindItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="DurabilityQosPolicyKindItemSemanticEditPolicy"
+          notationViewFactoryClassName="DurabilityQosPolicyKindViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1102,6 +1148,7 @@
         visualID="2025"
         editPartClassName="EfQosPolicyEditPart"
         itemSemanticEditPolicyClassName="EfQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="EfQosPolicyViewFactory"
         canonicalEditPolicyClassName="EfQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="EfQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="EfQosPolicyCreateCommand">
@@ -1127,6 +1174,7 @@
           visualID="5050"
           editPartClassName="EfQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="EfQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="EfQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1146,6 +1194,7 @@
           visualID="5051"
           editPartClassName="EfQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="EfQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="EfQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1163,7 +1212,8 @@
       <labels
           visualID="5093"
           editPartClassName="EfQosPolicyAutoenable_created_entiEditPart"
-          itemSemanticEditPolicyClassName="EfQosPolicyAutoenable_created_entiItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="EfQosPolicyAutoenable_created_entiItemSemanticEditPolicy"
+          notationViewFactoryClassName="EfQosPolicyAutoenable_created_entitiesViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1185,6 +1235,7 @@
         visualID="2026"
         editPartClassName="GdQosPolicyEditPart"
         itemSemanticEditPolicyClassName="GdQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="GdQosPolicyViewFactory"
         canonicalEditPolicyClassName="GdQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="GdQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="GdQosPolicyCreateCommand">
@@ -1210,6 +1261,7 @@
           visualID="5052"
           editPartClassName="GdQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="GdQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="GdQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1229,6 +1281,7 @@
           visualID="5053"
           editPartClassName="GdQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="GdQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="GdQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1246,7 +1299,8 @@
       <labels
           visualID="5094"
           editPartClassName="GdQosPolicyDatavalueEditPart"
-          itemSemanticEditPolicyClassName="GdQosPolicyDatavalueItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="GdQosPolicyDatavalueItemSemanticEditPolicy"
+          notationViewFactoryClassName="GdQosPolicyDatavalueViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1268,6 +1322,7 @@
         visualID="2027"
         editPartClassName="HistoryQosPolicyEditPart"
         itemSemanticEditPolicyClassName="HistoryQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="HistoryQosPolicyViewFactory"
         canonicalEditPolicyClassName="HistoryQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="HistoryQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="HistoryQosPolicyCreateCommand">
@@ -1293,6 +1348,7 @@
           visualID="5054"
           editPartClassName="HistoryQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="HistoryQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="HistoryQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1312,6 +1368,7 @@
           visualID="5055"
           editPartClassName="HistoryQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="HistoryQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="HistoryQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1329,7 +1386,8 @@
       <labels
           visualID="5095"
           editPartClassName="HistoryQosPolicyDepthEditPart"
-          itemSemanticEditPolicyClassName="HistoryQosPolicyDepthItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="HistoryQosPolicyDepthItemSemanticEditPolicy"
+          notationViewFactoryClassName="HistoryQosPolicyDepthViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1349,7 +1407,8 @@
       <labels
           visualID="5096"
           editPartClassName="HistoryQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="HistoryQosPolicyKindItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="HistoryQosPolicyKindItemSemanticEditPolicy"
+          notationViewFactoryClassName="HistoryQosPolicyKindViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1371,6 +1430,7 @@
         visualID="2028"
         editPartClassName="LbQosPolicyEditPart"
         itemSemanticEditPolicyClassName="LbQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="LbQosPolicyViewFactory"
         canonicalEditPolicyClassName="LbQosPolicyCanonicalEditPolicy"
         compartments="//@diagram/@compartments.2"
         graphicalNodeEditPolicyClassName="LbQosPolicyGraphicalNodeEditPolicy"
@@ -1419,6 +1479,7 @@
           visualID="5056"
           editPartClassName="LbQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="LbQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="LbQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1438,6 +1499,7 @@
           visualID="5057"
           editPartClassName="LbQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="LbQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="LbQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1457,6 +1519,7 @@
         visualID="2029"
         editPartClassName="LifespanQosPolicyEditPart"
         itemSemanticEditPolicyClassName="LifespanQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="LifespanQosPolicyViewFactory"
         canonicalEditPolicyClassName="LifespanQosPolicyCanonicalEditPolicy"
         compartments="//@diagram/@compartments.3"
         graphicalNodeEditPolicyClassName="LifespanQosPolicyGraphicalNodeEditPolicy"
@@ -1505,6 +1568,7 @@
           visualID="5058"
           editPartClassName="LifespanQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="LifespanQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="LifespanQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1524,6 +1588,7 @@
           visualID="5059"
           editPartClassName="LifespanQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="LifespanQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="LifespanQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1543,6 +1608,7 @@
         visualID="2030"
         editPartClassName="LivelinessQosPolicyEditPart"
         itemSemanticEditPolicyClassName="LivelinessQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="LivelinessQosPolicyViewFactory"
         canonicalEditPolicyClassName="LivelinessQosPolicyCanonicalEditPolicy"
         compartments="//@diagram/@compartments.4"
         graphicalNodeEditPolicyClassName="LivelinessQosPolicyGraphicalNodeEditPolicy"
@@ -1591,6 +1657,7 @@
           visualID="5060"
           editPartClassName="LivelinessQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="LivelinessQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="LivelinessQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1610,6 +1677,7 @@
           visualID="5061"
           editPartClassName="LivelinessQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="LivelinessQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="LivelinessQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1627,7 +1695,8 @@
       <labels
           visualID="5097"
           editPartClassName="LivelinessQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="LivelinessQosPolicyKindItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="LivelinessQosPolicyKindItemSemanticEditPolicy"
+          notationViewFactoryClassName="LivelinessQosPolicyKindViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1649,6 +1718,7 @@
         visualID="2031"
         editPartClassName="OsQosPolicyEditPart"
         itemSemanticEditPolicyClassName="OsQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="OsQosPolicyViewFactory"
         canonicalEditPolicyClassName="OsQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="OsQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="OsQosPolicyCreateCommand">
@@ -1674,6 +1744,7 @@
           visualID="5062"
           editPartClassName="OsQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="OsQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="OsQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1693,6 +1764,7 @@
           visualID="5063"
           editPartClassName="OsQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="OsQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="OsQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1710,7 +1782,8 @@
       <labels
           visualID="5098"
           editPartClassName="OsQosPolicyValueEditPart"
-          itemSemanticEditPolicyClassName="OsQosPolicyValueItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="OsQosPolicyValueItemSemanticEditPolicy"
+          notationViewFactoryClassName="OsQosPolicyValueViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1732,6 +1805,7 @@
         visualID="2032"
         editPartClassName="OwnershipQosPolicyEditPart"
         itemSemanticEditPolicyClassName="OwnershipQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="OwnershipQosPolicyViewFactory"
         canonicalEditPolicyClassName="OwnershipQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="OwnershipQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="OwnershipQosPolicyCreateCommand">
@@ -1757,6 +1831,7 @@
           visualID="5064"
           editPartClassName="OwnershipQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="OwnershipQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="OwnershipQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1776,6 +1851,7 @@
           visualID="5065"
           editPartClassName="OwnershipQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="OwnershipQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="OwnershipQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1793,7 +1869,8 @@
       <labels
           visualID="5099"
           editPartClassName="OwnershipQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="OwnershipQosPolicyKindItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="OwnershipQosPolicyKindItemSemanticEditPolicy"
+          notationViewFactoryClassName="OwnershipQosPolicyKindViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1815,6 +1892,7 @@
         visualID="2033"
         editPartClassName="PartitionQosPolicyEditPart"
         itemSemanticEditPolicyClassName="PartitionQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="PartitionQosPolicyViewFactory"
         canonicalEditPolicyClassName="PartitionQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="PartitionQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="PartitionQosPolicyCreateCommand">
@@ -1840,6 +1918,7 @@
           visualID="5066"
           editPartClassName="PartitionQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="PartitionQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="PartitionQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1859,6 +1938,7 @@
           visualID="5067"
           editPartClassName="PartitionQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="PartitionQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PartitionQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1878,6 +1958,7 @@
         visualID="2034"
         editPartClassName="PresentationQosPolicyEditPart"
         itemSemanticEditPolicyClassName="PresentationQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="PresentationQosPolicyViewFactory"
         canonicalEditPolicyClassName="PresentationQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="PresentationQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="PresentationQosPolicyCreateCommand">
@@ -1903,6 +1984,7 @@
           visualID="5068"
           editPartClassName="PresentationQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="PresentationQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="PresentationQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1922,6 +2004,7 @@
           visualID="5069"
           editPartClassName="PresentationQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="PresentationQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="PresentationQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1939,7 +2022,8 @@
       <labels
           visualID="5100"
           editPartClassName="PresentationQosPolicyAccess_scopeEditPart"
-          itemSemanticEditPolicyClassName="PresentationQosPolicyAccess_scopeItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PresentationQosPolicyAccess_scopeItemSemanticEditPolicy"
+          notationViewFactoryClassName="PresentationQosPolicyAccess_scopeViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1959,7 +2043,8 @@
       <labels
           visualID="5101"
           editPartClassName="PresentationQosPolicyCoherent_accessEditPart"
-          itemSemanticEditPolicyClassName="PresentationQosPolicyCoherent_accessItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PresentationQosPolicyCoherent_accessItemSemanticEditPolicy"
+          notationViewFactoryClassName="PresentationQosPolicyCoherent_accessViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1979,7 +2064,8 @@
       <labels
           visualID="5102"
           editPartClassName="PresentationQosPolicyOrdered_accessEditPart"
-          itemSemanticEditPolicyClassName="PresentationQosPolicyOrdered_accessItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="PresentationQosPolicyOrdered_accessItemSemanticEditPolicy"
+          notationViewFactoryClassName="PresentationQosPolicyOrdered_accessViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2001,6 +2087,7 @@
         visualID="2035"
         editPartClassName="RdlQosPolicyEditPart"
         itemSemanticEditPolicyClassName="RdlQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="RdlQosPolicyViewFactory"
         canonicalEditPolicyClassName="RdlQosPolicyCanonicalEditPolicy"
         compartments="//@diagram/@compartments.5 //@diagram/@compartments.6"
         graphicalNodeEditPolicyClassName="RdlQosPolicyGraphicalNodeEditPolicy"
@@ -2068,6 +2155,7 @@
           visualID="5070"
           editPartClassName="RdlQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="RdlQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="RdlQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2087,6 +2175,7 @@
           visualID="5071"
           editPartClassName="RdlQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="RdlQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="RdlQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2106,6 +2195,7 @@
         visualID="2036"
         editPartClassName="ReliabilityQosPolicyEditPart"
         itemSemanticEditPolicyClassName="ReliabilityQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="ReliabilityQosPolicyViewFactory"
         canonicalEditPolicyClassName="ReliabilityQosPolicyCanonicalEditPolicy"
         compartments="//@diagram/@compartments.7"
         graphicalNodeEditPolicyClassName="ReliabilityQosPolicyGraphicalNodeEditPolicy"
@@ -2154,6 +2244,7 @@
           visualID="5072"
           editPartClassName="ReliabilityQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="ReliabilityQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="ReliabilityQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2173,6 +2264,7 @@
           visualID="5073"
           editPartClassName="ReliabilityQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="ReliabilityQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="ReliabilityQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2190,7 +2282,8 @@
       <labels
           visualID="5104"
           editPartClassName="ReliabilityQosPolicyKindEditPart"
-          itemSemanticEditPolicyClassName="ReliabilityQosPolicyKindItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="ReliabilityQosPolicyKindItemSemanticEditPolicy"
+          notationViewFactoryClassName="ReliabilityQosPolicyKindViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2212,6 +2305,7 @@
         visualID="2037"
         editPartClassName="RlQosPolicyEditPart"
         itemSemanticEditPolicyClassName="RlQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="RlQosPolicyViewFactory"
         canonicalEditPolicyClassName="RlQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="RlQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="RlQosPolicyCreateCommand">
@@ -2237,6 +2331,7 @@
           visualID="5074"
           editPartClassName="RlQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="RlQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="RlQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2256,6 +2351,7 @@
           visualID="5075"
           editPartClassName="RlQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="RlQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="RlQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2273,7 +2369,8 @@
       <labels
           visualID="5105"
           editPartClassName="RlQosPolicyMax_instancesEditPart"
-          itemSemanticEditPolicyClassName="RlQosPolicyMax_instancesItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="RlQosPolicyMax_instancesItemSemanticEditPolicy"
+          notationViewFactoryClassName="RlQosPolicyMax_instancesViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2293,7 +2390,8 @@
       <labels
           visualID="5106"
           editPartClassName="RlQosPolicyMax_samples_per_instancEditPart"
-          itemSemanticEditPolicyClassName="RlQosPolicyMax_samples_per_instancItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="RlQosPolicyMax_samples_per_instancItemSemanticEditPolicy"
+          notationViewFactoryClassName="RlQosPolicyMax_samples_per_instanceViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2313,7 +2411,8 @@
       <labels
           visualID="5107"
           editPartClassName="RlQosPolicyMax_samplesEditPart"
-          itemSemanticEditPolicyClassName="RlQosPolicyMax_samplesItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="RlQosPolicyMax_samplesItemSemanticEditPolicy"
+          notationViewFactoryClassName="RlQosPolicyMax_samplesViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2335,6 +2434,7 @@
         visualID="2038"
         editPartClassName="TbfQosPolicyEditPart"
         itemSemanticEditPolicyClassName="TbfQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="TbfQosPolicyViewFactory"
         canonicalEditPolicyClassName="TbfQosPolicyCanonicalEditPolicy"
         compartments="//@diagram/@compartments.8"
         graphicalNodeEditPolicyClassName="TbfQosPolicyGraphicalNodeEditPolicy"
@@ -2383,6 +2483,7 @@
           visualID="5076"
           editPartClassName="TbfQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="TbfQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="TbfQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2402,6 +2503,7 @@
           visualID="5077"
           editPartClassName="TbfQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="TbfQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="TbfQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2421,6 +2523,7 @@
         visualID="2039"
         editPartClassName="TdQosPolicyEditPart"
         itemSemanticEditPolicyClassName="TdQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="TdQosPolicyViewFactory"
         canonicalEditPolicyClassName="TdQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TdQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="TdQosPolicyCreateCommand">
@@ -2446,6 +2549,7 @@
           visualID="5078"
           editPartClassName="TdQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="TdQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="TdQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2465,6 +2569,7 @@
           visualID="5079"
           editPartClassName="TdQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="TdQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="TdQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2482,7 +2587,8 @@
       <labels
           visualID="5109"
           editPartClassName="TdQosPolicyValueEditPart"
-          itemSemanticEditPolicyClassName="TdQosPolicyValueItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="TdQosPolicyValueItemSemanticEditPolicy"
+          notationViewFactoryClassName="TdQosPolicyValueViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2504,6 +2610,7 @@
         visualID="2040"
         editPartClassName="TpQosPolicyEditPart"
         itemSemanticEditPolicyClassName="TpQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="TpQosPolicyViewFactory"
         canonicalEditPolicyClassName="TpQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TpQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="TpQosPolicyCreateCommand">
@@ -2529,6 +2636,7 @@
           visualID="5080"
           editPartClassName="TpQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="TpQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="TpQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2548,6 +2656,7 @@
           visualID="5081"
           editPartClassName="TpQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="TpQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="TpQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2565,7 +2674,8 @@
       <labels
           visualID="5110"
           editPartClassName="TpQosPolicyValueEditPart"
-          itemSemanticEditPolicyClassName="TpQosPolicyValueItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="TpQosPolicyValueItemSemanticEditPolicy"
+          notationViewFactoryClassName="TpQosPolicyValueViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2587,6 +2697,7 @@
         visualID="2041"
         editPartClassName="UdQosPolicyEditPart"
         itemSemanticEditPolicyClassName="UdQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="UdQosPolicyViewFactory"
         canonicalEditPolicyClassName="UdQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="UdQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="UdQosPolicyCreateCommand">
@@ -2612,6 +2723,7 @@
           visualID="5082"
           editPartClassName="UdQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="UdQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="UdQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2631,6 +2743,7 @@
           visualID="5083"
           editPartClassName="UdQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="UdQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="UdQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2648,7 +2761,8 @@
       <labels
           visualID="5111"
           editPartClassName="UdQosPolicyValueEditPart"
-          itemSemanticEditPolicyClassName="UdQosPolicyValueItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="UdQosPolicyValueItemSemanticEditPolicy"
+          notationViewFactoryClassName="UdQosPolicyValueViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2670,6 +2784,7 @@
         visualID="2042"
         editPartClassName="WdlQosPolicyEditPart"
         itemSemanticEditPolicyClassName="WdlQosPolicyItemSemanticEditPolicy"
+        notationViewFactoryClassName="WdlQosPolicyViewFactory"
         canonicalEditPolicyClassName="WdlQosPolicyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="WdlQosPolicyGraphicalNodeEditPolicy"
         createCommandClassName="WdlQosPolicyCreateCommand">
@@ -2695,6 +2810,7 @@
           visualID="5084"
           editPartClassName="WdlQosPolicyNameEditPart"
           itemSemanticEditPolicyClassName="WdlQosPolicyNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="WdlQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2714,6 +2830,7 @@
           visualID="5085"
           editPartClassName="WdlQosPolicyName2EditPart"
           itemSemanticEditPolicyClassName="WdlQosPolicyName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="WdlQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -2731,7 +2848,8 @@
       <labels
           visualID="5112"
           editPartClassName="WdlQosPolicyAutodispose_unregistereEditPart"
-          itemSemanticEditPolicyClassName="WdlQosPolicyAutodispose_unregistereItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="WdlQosPolicyAutodispose_unregistereItemSemanticEditPolicy"
+          notationViewFactoryClassName="WdlQosPolicyAutodispose_unregistered_instancesViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -2753,6 +2871,7 @@
         visualID="7001"
         editPartClassName="DeadlineQosPolicyPeriodEditPart"
         itemSemanticEditPolicyClassName="DeadlineQosPolicyPeriodItemSemanticEditPolicy"
+        notationViewFactoryClassName="DeadlineQosPolicyPeriodViewFactory"
         canonicalEditPolicyClassName="DeadlineQosPolicyPeriodCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.0"
         title="period"
@@ -2769,6 +2888,7 @@
         visualID="7002"
         editPartClassName="DsQosPolicyService_cleanup_delayEditPart"
         itemSemanticEditPolicyClassName="DsQosPolicyService_cleanup_delayItemSemanticEditPolicy"
+        notationViewFactoryClassName="DsQosPolicyService_cleanup_delayViewFactory"
         canonicalEditPolicyClassName="DsQosPolicyService_cleanup_delayCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.1"
         title="service_cleanup_delay"
@@ -2785,6 +2905,7 @@
         visualID="7003"
         editPartClassName="LbQosPolicyDurationEditPart"
         itemSemanticEditPolicyClassName="LbQosPolicyDurationItemSemanticEditPolicy"
+        notationViewFactoryClassName="LbQosPolicyDurationViewFactory"
         canonicalEditPolicyClassName="LbQosPolicyDurationCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.2"
         title="duration"
@@ -2801,6 +2922,7 @@
         visualID="7004"
         editPartClassName="LifespanQosPolicyDurationEditPart"
         itemSemanticEditPolicyClassName="LifespanQosPolicyDurationItemSemanticEditPolicy"
+        notationViewFactoryClassName="LifespanQosPolicyDurationViewFactory"
         canonicalEditPolicyClassName="LifespanQosPolicyDurationCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.3"
         title="duration"
@@ -2817,6 +2939,7 @@
         visualID="7005"
         editPartClassName="LivelinessQosPolicyLease_durationEditPart"
         itemSemanticEditPolicyClassName="LivelinessQosPolicyLease_durationItemSemanticEditPolicy"
+        notationViewFactoryClassName="LivelinessQosPolicyLease_durationViewFactory"
         canonicalEditPolicyClassName="LivelinessQosPolicyLease_durationCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.4"
         title="lease_duration"
@@ -2833,6 +2956,7 @@
         visualID="7007"
         editPartClassName="RdlQosPolicyAutopurge_disposed_samples_delayEditPart"
         itemSemanticEditPolicyClassName="RdlQosPolicyAutopurge_disposed_samples_delayItemSemanticEditPolicy"
+        notationViewFactoryClassName="RdlQosPolicyAutopurge_disposed_samples_delayViewFactory"
         canonicalEditPolicyClassName="RdlQosPolicyAutopurge_disposed_samples_delayCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.5"
         title="autopurge_disposed_samples_delay"
@@ -2849,6 +2973,7 @@
         visualID="7008"
         editPartClassName="RdlQosPolicyAutopurge_nowriter_samples_delayEditPart"
         itemSemanticEditPolicyClassName="RdlQosPolicyAutopurge_nowriter_samples_delayItemSemanticEditPolicy"
+        notationViewFactoryClassName="RdlQosPolicyAutopurge_nowriter_samples_delayViewFactory"
         canonicalEditPolicyClassName="RdlQosPolicyAutopurge_nowriter_samples_delayCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.6"
         title="autopurge_nowriter_samples_delay"
@@ -2865,6 +2990,7 @@
         visualID="7006"
         editPartClassName="ReliabilityQosPolicyMax_blocking_timeEditPart"
         itemSemanticEditPolicyClassName="ReliabilityQosPolicyMax_blocking_timeItemSemanticEditPolicy"
+        notationViewFactoryClassName="ReliabilityQosPolicyMax_blocking_timeViewFactory"
         canonicalEditPolicyClassName="ReliabilityQosPolicyMax_blocking_timeCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.7"
         title="max_blocking_time"
@@ -2881,6 +3007,7 @@
         visualID="7009"
         editPartClassName="TbfQosPolicyMinimum_separationEditPart"
         itemSemanticEditPolicyClassName="TbfQosPolicyMinimum_separationItemSemanticEditPolicy"
+        notationViewFactoryClassName="TbfQosPolicyMinimum_separationViewFactory"
         canonicalEditPolicyClassName="TbfQosPolicyMinimum_separationCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.8"
         title="minimum_separation"
