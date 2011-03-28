@@ -1,3 +1,11 @@
+Mon Mar 28 12:53:02 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/creating_dcps_libs.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/modeling_perspective.html:
+
+	  Fixed typos identified by Steve Totten.
+
 Fri Mar 25 21:04:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
