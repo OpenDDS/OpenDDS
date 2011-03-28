@@ -226,6 +226,7 @@
         visualID="3002"
         editPartClassName="FieldEditPart"
         itemSemanticEditPolicyClassName="FieldItemSemanticEditPolicy"
+        notationViewFactoryClassName="FieldViewFactory"
         canonicalEditPolicyClassName="FieldCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="FieldGraphicalNodeEditPolicy"
         createCommandClassName="FieldCreateCommand"
@@ -258,6 +259,7 @@
         visualID="3005"
         editPartClassName="BranchEditPart"
         itemSemanticEditPolicyClassName="BranchItemSemanticEditPolicy"
+        notationViewFactoryClassName="BranchViewFactory"
         canonicalEditPolicyClassName="BranchCanonicalEditPolicy"
         compartments="//@diagram/@compartments.2 //@diagram/@compartments.3"
         graphicalNodeEditPolicyClassName="BranchGraphicalNodeEditPolicy"
@@ -285,6 +287,7 @@
           visualID="5037"
           editPartClassName="WrappingLabel15EditPart"
           itemSemanticEditPolicyClassName="WrappingLabel15ItemSemanticEditPolicy"
+          notationViewFactoryClassName="BranchLabelViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -305,6 +308,7 @@
         visualID="3001"
         editPartClassName="Field2EditPart"
         itemSemanticEditPolicyClassName="Field2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="FieldViewFactory"
         canonicalEditPolicyClassName="Field2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="Field2GraphicalNodeEditPolicy"
         createCommandClassName="Field2CreateCommand"
@@ -337,6 +341,7 @@
         visualID="3006"
         editPartClassName="CaseEditPart"
         itemSemanticEditPolicyClassName="CaseItemSemanticEditPolicy"
+        notationViewFactoryClassName="CaseViewFactory"
         canonicalEditPolicyClassName="CaseCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="CaseGraphicalNodeEditPolicy"
         createCommandClassName="CaseCreateCommand"
@@ -363,6 +368,7 @@
           visualID="5035"
           editPartClassName="CaseLiteralEditPart"
           itemSemanticEditPolicyClassName="CaseLiteralItemSemanticEditPolicy"
+          notationViewFactoryClassName="CaseLiteralViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -383,7 +389,8 @@
       <labels
           visualID="5036"
           editPartClassName="CaseLiteral2EditPart"
-          itemSemanticEditPolicyClassName="CaseLiteral2ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="CaseLiteral2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="CaseLiteralViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -406,6 +413,7 @@
         visualID="3003"
         editPartClassName="Field3EditPart"
         itemSemanticEditPolicyClassName="Field3ItemSemanticEditPolicy"
+        notationViewFactoryClassName="FieldViewFactory"
         canonicalEditPolicyClassName="Field3CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="Field3GraphicalNodeEditPolicy"
         createCommandClassName="Field3CreateCommand"
@@ -439,6 +447,7 @@
         visualID="3004"
         editPartClassName="KeyEditPart"
         itemSemanticEditPolicyClassName="KeyItemSemanticEditPolicy"
+        notationViewFactoryClassName="KeyViewFactory"
         canonicalEditPolicyClassName="KeyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="KeyGraphicalNodeEditPolicy"
         createCommandClassName="KeyCreateCommand"
@@ -468,6 +477,7 @@
         visualID="2001"
         editPartClassName="LongEditPart"
         itemSemanticEditPolicyClassName="LongItemSemanticEditPolicy"
+        notationViewFactoryClassName="LongViewFactory"
         canonicalEditPolicyClassName="LongCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="LongGraphicalNodeEditPolicy"
         createCommandClassName="LongCreateCommand">
@@ -493,6 +503,7 @@
           visualID="5001"
           editPartClassName="WrappingLabelEditPart"
           itemSemanticEditPolicyClassName="WrappingLabelItemSemanticEditPolicy"
+          notationViewFactoryClassName="LongLabelViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -512,6 +523,7 @@
         visualID="2023"
         editPartClassName="LongDoubleEditPart"
         itemSemanticEditPolicyClassName="LongDoubleItemSemanticEditPolicy"
+        notationViewFactoryClassName="LongDoubleViewFactory"
         canonicalEditPolicyClassName="LongDoubleCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="LongDoubleGraphicalNodeEditPolicy"
         createCommandClassName="LongDoubleCreateCommand">
@@ -537,6 +549,7 @@
           visualID="5034"
           editPartClassName="WrappingLabel2EditPart"
           itemSemanticEditPolicyClassName="WrappingLabel2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="LongDoubleLabelViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -556,6 +569,7 @@
         visualID="2002"
         editPartClassName="LongLongEditPart"
         itemSemanticEditPolicyClassName="LongLongItemSemanticEditPolicy"
+        notationViewFactoryClassName="LongLongViewFactory"
         canonicalEditPolicyClassName="LongLongCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="LongLongGraphicalNodeEditPolicy"
         createCommandClassName="LongLongCreateCommand">
@@ -581,6 +595,7 @@
           visualID="5002"
           editPartClassName="WrappingLabel3EditPart"
           itemSemanticEditPolicyClassName="WrappingLabel3ItemSemanticEditPolicy"
+          notationViewFactoryClassName="LongLongLabelViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -599,6 +614,7 @@
         visualID="2003"
         editPartClassName="ShortEditPart"
         itemSemanticEditPolicyClassName="ShortItemSemanticEditPolicy"
+        notationViewFactoryClassName="ShortViewFactory"
         canonicalEditPolicyClassName="ShortCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="ShortGraphicalNodeEditPolicy"
         createCommandClassName="ShortCreateCommand">
@@ -624,6 +640,7 @@
           visualID="5003"
           editPartClassName="WrappingLabel4EditPart"
           itemSemanticEditPolicyClassName="WrappingLabel4ItemSemanticEditPolicy"
+          notationViewFactoryClassName="ShortLabelViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -642,6 +659,7 @@
         visualID="2004"
         editPartClassName="ULongEditPart"
         itemSemanticEditPolicyClassName="ULongItemSemanticEditPolicy"
+        notationViewFactoryClassName="ULongViewFactory"
         canonicalEditPolicyClassName="ULongCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="ULongGraphicalNodeEditPolicy"
         createCommandClassName="ULongCreateCommand">
@@ -667,6 +685,7 @@
           visualID="5004"
           editPartClassName="WrappingLabel5EditPart"
           itemSemanticEditPolicyClassName="WrappingLabel5ItemSemanticEditPolicy"
+          notationViewFactoryClassName="ULongLabelViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -685,6 +704,7 @@
         visualID="2005"
         editPartClassName="ULongLongEditPart"
         itemSemanticEditPolicyClassName="ULongLongItemSemanticEditPolicy"
+        notationViewFactoryClassName="ULongLongViewFactory"
         canonicalEditPolicyClassName="ULongLongCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="ULongLongGraphicalNodeEditPolicy"
         createCommandClassName="ULongLongCreateCommand">
@@ -710,6 +730,7 @@
           visualID="5005"
           editPartClassName="WrappingLabel6EditPart"
           itemSemanticEditPolicyClassName="WrappingLabel6ItemSemanticEditPolicy"
+          notationViewFactoryClassName="ULongLongLabelViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -728,6 +749,7 @@
         visualID="2006"
         editPartClassName="UShortEditPart"
         itemSemanticEditPolicyClassName="UShortItemSemanticEditPolicy"
+        notationViewFactoryClassName="UShortViewFactory"
         canonicalEditPolicyClassName="UShortCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="UShortGraphicalNodeEditPolicy"
         createCommandClassName="UShortCreateCommand">
@@ -753,6 +775,7 @@
           visualID="5006"
           editPartClassName="WrappingLabel7EditPart"
           itemSemanticEditPolicyClassName="WrappingLabel7ItemSemanticEditPolicy"
+          notationViewFactoryClassName="UShortLabelViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -771,6 +794,7 @@
         visualID="2007"
         editPartClassName="DoubleEditPart"
         itemSemanticEditPolicyClassName="DoubleItemSemanticEditPolicy"
+        notationViewFactoryClassName="DoubleViewFactory"
         canonicalEditPolicyClassName="DoubleCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DoubleGraphicalNodeEditPolicy"
         createCommandClassName="DoubleCreateCommand">
@@ -796,6 +820,7 @@
           visualID="5007"
           editPartClassName="WrappingLabel8EditPart"
           itemSemanticEditPolicyClassName="WrappingLabel8ItemSemanticEditPolicy"
+          notationViewFactoryClassName="DoubleLabelViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -814,6 +839,7 @@
         visualID="2008"
         editPartClassName="FloatEditPart"
         itemSemanticEditPolicyClassName="FloatItemSemanticEditPolicy"
+        notationViewFactoryClassName="FloatViewFactory"
         canonicalEditPolicyClassName="FloatCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="FloatGraphicalNodeEditPolicy"
         createCommandClassName="FloatCreateCommand">
@@ -839,6 +865,7 @@
           visualID="5008"
           editPartClassName="WrappingLabel9EditPart"
           itemSemanticEditPolicyClassName="WrappingLabel9ItemSemanticEditPolicy"
+          notationViewFactoryClassName="FloatLabelViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -857,6 +884,7 @@
         visualID="2009"
         editPartClassName="CharEditPart"
         itemSemanticEditPolicyClassName="CharItemSemanticEditPolicy"
+        notationViewFactoryClassName="CharViewFactory"
         canonicalEditPolicyClassName="CharCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="CharGraphicalNodeEditPolicy"
         createCommandClassName="CharCreateCommand">
@@ -882,6 +910,7 @@
           visualID="5009"
           editPartClassName="WrappingLabel10EditPart"
           itemSemanticEditPolicyClassName="WrappingLabel10ItemSemanticEditPolicy"
+          notationViewFactoryClassName="CharLabelViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -900,6 +929,7 @@
         visualID="2010"
         editPartClassName="WCharEditPart"
         itemSemanticEditPolicyClassName="WCharItemSemanticEditPolicy"
+        notationViewFactoryClassName="WCharViewFactory"
         canonicalEditPolicyClassName="WCharCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="WCharGraphicalNodeEditPolicy"
         createCommandClassName="WCharCreateCommand">
@@ -925,6 +955,7 @@
           visualID="5010"
           editPartClassName="WrappingLabel11EditPart"
           itemSemanticEditPolicyClassName="WrappingLabel11ItemSemanticEditPolicy"
+          notationViewFactoryClassName="WCharLabelViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -943,6 +974,7 @@
         visualID="2011"
         editPartClassName="OctetEditPart"
         itemSemanticEditPolicyClassName="OctetItemSemanticEditPolicy"
+        notationViewFactoryClassName="OctetViewFactory"
         canonicalEditPolicyClassName="OctetCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="OctetGraphicalNodeEditPolicy"
         createCommandClassName="OctetCreateCommand">
@@ -968,6 +1000,7 @@
           visualID="5011"
           editPartClassName="WrappingLabel12EditPart"
           itemSemanticEditPolicyClassName="WrappingLabel12ItemSemanticEditPolicy"
+          notationViewFactoryClassName="OctetLabelViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -986,6 +1019,7 @@
         visualID="2012"
         editPartClassName="BooleanEditPart"
         itemSemanticEditPolicyClassName="BooleanItemSemanticEditPolicy"
+        notationViewFactoryClassName="BooleanViewFactory"
         canonicalEditPolicyClassName="BooleanCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="BooleanGraphicalNodeEditPolicy"
         createCommandClassName="BooleanCreateCommand">
@@ -1011,6 +1045,7 @@
           visualID="5012"
           editPartClassName="WrappingLabel13EditPart"
           itemSemanticEditPolicyClassName="WrappingLabel13ItemSemanticEditPolicy"
+          notationViewFactoryClassName="BooleanLabelViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -1029,6 +1064,7 @@
         visualID="2013"
         editPartClassName="ArrayEditPart"
         itemSemanticEditPolicyClassName="ArrayItemSemanticEditPolicy"
+        notationViewFactoryClassName="ArrayViewFactory"
         canonicalEditPolicyClassName="ArrayCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="ArrayGraphicalNodeEditPolicy"
         createCommandClassName="ArrayCreateCommand">
@@ -1054,6 +1090,7 @@
           visualID="5013"
           editPartClassName="ArrayLengthEditPart"
           itemSemanticEditPolicyClassName="ArrayLengthItemSemanticEditPolicy"
+          notationViewFactoryClassName="ArrayLengthViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -1073,7 +1110,8 @@
       <labels
           visualID="5014"
           editPartClassName="ArrayLength2EditPart"
-          itemSemanticEditPolicyClassName="ArrayLength2ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="ArrayLength2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="ArrayLengthViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1095,6 +1133,7 @@
         visualID="2014"
         editPartClassName="EnumEditPart"
         itemSemanticEditPolicyClassName="EnumItemSemanticEditPolicy"
+        notationViewFactoryClassName="EnumViewFactory"
         canonicalEditPolicyClassName="EnumCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="EnumGraphicalNodeEditPolicy"
         createCommandClassName="EnumCreateCommand">
@@ -1120,6 +1159,7 @@
           visualID="5015"
           editPartClassName="WrappingLabel14EditPart"
           itemSemanticEditPolicyClassName="WrappingLabel14ItemSemanticEditPolicy"
+          notationViewFactoryClassName="EnumLabelViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -1136,7 +1176,8 @@
       <labels
           visualID="5016"
           editPartClassName="EnumNameEditPart"
-          itemSemanticEditPolicyClassName="EnumNameItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="EnumNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="EnumNameViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1156,7 +1197,8 @@
       <labels
           visualID="5017"
           editPartClassName="EnumLiteralsEditPart"
-          itemSemanticEditPolicyClassName="EnumLiteralsItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="EnumLiteralsItemSemanticEditPolicy"
+          notationViewFactoryClassName="EnumLiteralsViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1175,6 +1217,7 @@
         visualID="2015"
         editPartClassName="SequenceEditPart"
         itemSemanticEditPolicyClassName="SequenceItemSemanticEditPolicy"
+        notationViewFactoryClassName="SequenceViewFactory"
         canonicalEditPolicyClassName="SequenceCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="SequenceGraphicalNodeEditPolicy"
         createCommandClassName="SequenceCreateCommand">
@@ -1200,6 +1243,7 @@
           visualID="5018"
           editPartClassName="SequenceLengthEditPart"
           itemSemanticEditPolicyClassName="SequenceLengthItemSemanticEditPolicy"
+          notationViewFactoryClassName="SequenceLengthViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -1219,7 +1263,8 @@
       <labels
           visualID="5019"
           editPartClassName="SequenceLength2EditPart"
-          itemSemanticEditPolicyClassName="SequenceLength2ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="SequenceLength2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="SequenceLengthViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1241,6 +1286,7 @@
         visualID="2016"
         editPartClassName="StringEditPart"
         itemSemanticEditPolicyClassName="StringItemSemanticEditPolicy"
+        notationViewFactoryClassName="StringViewFactory"
         canonicalEditPolicyClassName="StringCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="StringGraphicalNodeEditPolicy"
         createCommandClassName="StringCreateCommand">
@@ -1266,6 +1312,7 @@
           visualID="5020"
           editPartClassName="StringLengthEditPart"
           itemSemanticEditPolicyClassName="StringLengthItemSemanticEditPolicy"
+          notationViewFactoryClassName="StringLengthViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -1285,7 +1332,8 @@
       <labels
           visualID="5021"
           editPartClassName="StringLength2EditPart"
-          itemSemanticEditPolicyClassName="StringLength2ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="StringLength2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="StringLengthViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1307,6 +1355,7 @@
         visualID="2017"
         editPartClassName="WStringEditPart"
         itemSemanticEditPolicyClassName="WStringItemSemanticEditPolicy"
+        notationViewFactoryClassName="WStringViewFactory"
         canonicalEditPolicyClassName="WStringCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="WStringGraphicalNodeEditPolicy"
         createCommandClassName="WStringCreateCommand">
@@ -1332,6 +1381,7 @@
           visualID="5022"
           editPartClassName="WStringLengthEditPart"
           itemSemanticEditPolicyClassName="WStringLengthItemSemanticEditPolicy"
+          notationViewFactoryClassName="WStringLengthViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -1351,7 +1401,8 @@
       <labels
           visualID="5023"
           editPartClassName="WStringLength2EditPart"
-          itemSemanticEditPolicyClassName="WStringLength2ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="WStringLength2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="WStringLengthViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1373,6 +1424,7 @@
         visualID="2018"
         editPartClassName="TypedefEditPart"
         itemSemanticEditPolicyClassName="TypedefItemSemanticEditPolicy"
+        notationViewFactoryClassName="TypedefViewFactory"
         canonicalEditPolicyClassName="TypedefCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TypedefGraphicalNodeEditPolicy"
         createCommandClassName="TypedefCreateCommand">
@@ -1398,6 +1450,7 @@
           visualID="5024"
           editPartClassName="TypedefNameEditPart"
           itemSemanticEditPolicyClassName="TypedefNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="TypedefNameViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -1417,7 +1470,8 @@
       <labels
           visualID="5025"
           editPartClassName="TypedefName2EditPart"
-          itemSemanticEditPolicyClassName="TypedefName2ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="TypedefName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="TypedefNameViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1439,6 +1493,7 @@
         visualID="2021"
         editPartClassName="UnionEditPart"
         itemSemanticEditPolicyClassName="UnionItemSemanticEditPolicy"
+        notationViewFactoryClassName="UnionViewFactory"
         canonicalEditPolicyClassName="UnionCanonicalEditPolicy"
         compartments="//@diagram/@compartments.0 //@diagram/@compartments.1"
         graphicalNodeEditPolicyClassName="UnionGraphicalNodeEditPolicy"
@@ -1488,6 +1543,7 @@
           visualID="5029"
           editPartClassName="UnionNameEditPart"
           itemSemanticEditPolicyClassName="UnionNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="UnionNameViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -1507,7 +1563,8 @@
       <labels
           visualID="5030"
           editPartClassName="UnionName2EditPart"
-          itemSemanticEditPolicyClassName="UnionName2ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="UnionName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="UnionNameViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1529,6 +1586,7 @@
         visualID="2022"
         editPartClassName="StructEditPart"
         itemSemanticEditPolicyClassName="StructItemSemanticEditPolicy"
+        notationViewFactoryClassName="StructViewFactory"
         canonicalEditPolicyClassName="StructCanonicalEditPolicy"
         compartments="//@diagram/@compartments.4 //@diagram/@compartments.5"
         graphicalNodeEditPolicyClassName="StructGraphicalNodeEditPolicy"
@@ -1555,6 +1613,7 @@
           visualID="5031"
           editPartClassName="StructNameEditPart"
           itemSemanticEditPolicyClassName="StructNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="StructNameViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -1574,7 +1633,8 @@
       <labels
           visualID="5032"
           editPartClassName="StructName2EditPart"
-          itemSemanticEditPolicyClassName="StructName2ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="StructName2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="StructNameViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1594,7 +1654,8 @@
       <labels
           visualID="5033"
           editPartClassName="StructIsDcpsDataTypeEditPart"
-          itemSemanticEditPolicyClassName="StructIsDcpsDataTypeItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="StructIsDcpsDataTypeItemSemanticEditPolicy"
+          notationViewFactoryClassName="StructIsDcpsDataTypeViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1616,6 +1677,7 @@
         visualID="4001"
         editPartClassName="ArraySubtypeEditPart"
         itemSemanticEditPolicyClassName="ArraySubtypeItemSemanticEditPolicy"
+        notationViewFactoryClassName="ArraySubtypeViewFactory"
         createCommandClassName="ArraySubtypeCreateCommand"
         reorientCommandClassName="ArraySubtypeReorientCommand">
       <diagramRunTimeClass
@@ -1636,6 +1698,7 @@
         visualID="4002"
         editPartClassName="SequenceSubtypeEditPart"
         itemSemanticEditPolicyClassName="SequenceSubtypeItemSemanticEditPolicy"
+        notationViewFactoryClassName="SequenceSubtypeViewFactory"
         createCommandClassName="SequenceSubtypeCreateCommand"
         reorientCommandClassName="SequenceSubtypeReorientCommand">
       <diagramRunTimeClass
@@ -1656,6 +1719,7 @@
         visualID="4003"
         editPartClassName="TypedefTypeEditPart"
         itemSemanticEditPolicyClassName="TypedefTypeItemSemanticEditPolicy"
+        notationViewFactoryClassName="TypedefTypeViewFactory"
         createCommandClassName="TypedefTypeCreateCommand"
         reorientCommandClassName="TypedefTypeReorientCommand">
       <diagramRunTimeClass
@@ -1676,6 +1740,7 @@
         visualID="4006"
         editPartClassName="UnionSwitchEditPart"
         itemSemanticEditPolicyClassName="UnionSwitchItemSemanticEditPolicy"
+        notationViewFactoryClassName="UnionSwitchViewFactory"
         createCommandClassName="UnionSwitchCreateCommand"
         reorientCommandClassName="UnionSwitchReorientCommand">
       <diagramRunTimeClass
@@ -1695,6 +1760,7 @@
           visualID="6003"
           editPartClassName="WrappingLabel16EditPart"
           itemSemanticEditPolicyClassName="WrappingLabel16ItemSemanticEditPolicy"
+          notationViewFactoryClassName="UnionSwitchLabelViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1716,6 +1782,7 @@
         visualID="7002"
         editPartClassName="UnionDefaultFieldEditPart"
         itemSemanticEditPolicyClassName="UnionDefaultFieldItemSemanticEditPolicy"
+        notationViewFactoryClassName="UnionDefaultFieldViewFactory"
         canonicalEditPolicyClassName="UnionDefaultFieldCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.0"
         title="Default Field"
@@ -1732,6 +1799,7 @@
         visualID="7005"
         editPartClassName="UnionBranchesEditPart"
         itemSemanticEditPolicyClassName="UnionBranchesItemSemanticEditPolicy"
+        notationViewFactoryClassName="UnionBranchesViewFactory"
         canonicalEditPolicyClassName="UnionBranchesCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.1"
         title="Branches"
@@ -1747,6 +1815,7 @@
         visualID="7006"
         editPartClassName="BranchFieldEditPart"
         itemSemanticEditPolicyClassName="BranchFieldItemSemanticEditPolicy"
+        notationViewFactoryClassName="BranchFieldViewFactory"
         canonicalEditPolicyClassName="BranchFieldCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.2"
         title="Field"
@@ -1763,6 +1832,7 @@
         visualID="7007"
         editPartClassName="BranchCasesEditPart"
         itemSemanticEditPolicyClassName="BranchCasesItemSemanticEditPolicy"
+        notationViewFactoryClassName="BranchCasesViewFactory"
         canonicalEditPolicyClassName="BranchCasesCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.3"
         title="Cases"
@@ -1778,6 +1848,7 @@
         visualID="7003"
         editPartClassName="StructFieldsEditPart"
         itemSemanticEditPolicyClassName="StructFieldsItemSemanticEditPolicy"
+        notationViewFactoryClassName="StructFieldsViewFactory"
         canonicalEditPolicyClassName="StructFieldsCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.4"
         title="Fields"
@@ -1795,6 +1866,7 @@
         visualID="7004"
         editPartClassName="StructKeysEditPart"
         itemSemanticEditPolicyClassName="StructKeysItemSemanticEditPolicy"
+        notationViewFactoryClassName="StructKeysViewFactory"
         canonicalEditPolicyClassName="StructKeysCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.5"
         title="Keys"

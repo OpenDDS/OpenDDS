@@ -1,10 +1,26 @@
+Mon Mar 28 16:54:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+          Versions of GMF gen models after generating on top of an
+          existing gen model file from the map files. Compared to
+          generating to fresh gen model file, notationViewFactoryClassName
+          property values are explicitly set. From testing determined that
+          this side effect is benign and verified it is the only change
+          from creating a fresh gen model file. These versions of the gen
+          model files should be easier to verify when making incremental
+          changes to the map and graphic defintion files.
+
 Mon Mar 28 12:53:02 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/creating_dcps_libs.html:
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/modeling_perspective.html:
 
-	  Fixed typos identified by Steve Totten.
+          Fixed typos identified by Steve Totten.
 
 Fri Mar 25 21:04:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
