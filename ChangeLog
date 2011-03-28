@@ -1,3 +1,9 @@
+Mon Mar 28 17:55:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+
+          Now need an add_lib_path() to locate the shared library for the test.
+
 Mon Mar 28 16:54:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
