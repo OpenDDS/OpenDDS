@@ -167,11 +167,13 @@ DataReaderImpl::cleanup()
 
   dr_local_objref_ = DDS::DataReader::_nil();
 
-  DataReaderRemoteImpl* drr =
-    remote_reference_to_servant<DataReaderRemoteImpl>(dr_remote_objref_.in());
-  drr->detach_parent();
-  deactivate_remote_object(dr_remote_objref_.in());
-  dr_remote_objref_ = DataReaderRemote::_nil();
+  if (dr_remote_objref_) { // it will be null for multitopic
+    DataReaderRemoteImpl* drr =
+      remote_reference_to_servant<DataReaderRemoteImpl>(dr_remote_objref_.in());
+    drr->detach_parent();
+    deactivate_remote_object(dr_remote_objref_.in());
+    dr_remote_objref_ = DataReaderRemote::_nil();
+  }
 }
 
 void DataReaderImpl::init(
