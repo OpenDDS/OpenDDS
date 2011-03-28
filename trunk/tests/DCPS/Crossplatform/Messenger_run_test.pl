@@ -72,6 +72,8 @@ my $common_args = "-DCPSInfoRepo corbaloc:iiop:$repo_host:$port1/DCPSInfoRepo"
 
 unlink $dcpsrepo_ior;
 
+PerlACE::add_lib_path ("$DDS_ROOT/tests/DCPS/Messenger");
+
 $Subscriber = PerlDDS::create_process
       ("$ENV{DDS_ROOT}/tests/DCPS/Messenger/subscriber",
        "-DCPSConfigFile $sub_config_file $common_args $sub_opts");
