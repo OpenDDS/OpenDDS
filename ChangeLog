@@ -1,3 +1,35 @@
+Mon Mar 28 18:47:01 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/common.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:
+
+          Fix repeated type references.
+
+        * tools/modeling/tests/ReusedExtTypes:
+        * tools/modeling/tests/ReusedExtTypes/ReusedExtTypes.codegen:
+        * tools/modeling/tests/ReusedExtTypes/ReusedExtTypes.mpc:
+        * tools/modeling/tests/ReusedExtTypes/ReusedExtTypes.mwc:
+        * tools/modeling/tests/ReusedExtTypes/ReusedExtTypes.opendds:
+        * tools/modeling/tests/ReusedExtTypes/publisher.cpp:
+        * tools/modeling/tests/ReusedExtTypes/subscriber.cpp:
+
+        * tools/modeling/tests/ReusedTypes:
+
+        * tools/modeling/tests/ReusedTypes/ReusedTypes.codegen:
+        * tools/modeling/tests/ReusedTypes/ReusedTypes.mpc:
+        * tools/modeling/tests/ReusedTypes/ReusedTypes.mwc:
+        * tools/modeling/tests/ReusedTypes/ReusedTypes.opendds:
+        * tools/modeling/tests/ReusedTypes/publisher.cpp:
+        * tools/modeling/tests/ReusedTypes/subscriber.cpp:
+        * tools/modeling/tests/ReusedExtTypes/Messenger.codegen:
+        * tools/modeling/tests/ReusedExtTypes/Messenger.mpc:
+        * tools/modeling/tests/ReusedExtTypes/Messenger.mwc:
+        * tools/modeling/tests/ReusedExtTypes/Messenger.opendds:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Tests for repeated type references.
+
 Mon Mar 28 19:40:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/concepts/modeling.html:
