@@ -1,3 +1,11 @@
+Tue Mar 29 20:14:15 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/creating_figures.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
+
+          Add discussion about creating figures that aren't auto-sized and how
+          this can hide content added to its compartments.
+
 Mon Mar 28 18:47:01 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/common.xsl:
@@ -46,7 +54,7 @@ Mon Mar 28 19:40:04 UTC 2011  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/model_population.html:
         * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
 
-	  Addressed deficiencies in the on-line help based on feedback from Steve Totten.
+          Addressed deficiencies in the on-line help based on feedback from Steve Totten.
 
 Mon Mar 28 18:31:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 

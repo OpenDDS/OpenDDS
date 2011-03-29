@@ -6,6 +6,7 @@
     <anchor id="modelingtasks"/>
         <topic label="Working with Diagrams">
         	<topic href="html/modeling/tasks/diagrams/modeling_perspective.html" label="Using the OpenDDS Modeling SDK Perspective"/>
+                <topic href="html/modeling/tasks/diagrams/creating_figures.html" label="Creating Figures"/>
                 <topic href="html/modeling/tasks/diagrams/setting_element_attributes.html" label="Setting element attributes"/>
                 <topic href="html/modeling/tasks/diagrams/connecting_figures.html" label="Connecting Figures"/>
                 <topic href="html/modeling/tasks/diagrams/moving_between_diagrams.html" label="Moving between diagrams"/>
