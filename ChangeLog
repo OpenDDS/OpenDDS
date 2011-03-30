@@ -1,3 +1,10 @@
+Wed Mar 30 18:46:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/ReusedExtTypes/ReusedData.codegen:
+        * tools/modeling/tests/ReusedExtTypes/ReusedData.opendds:
+
+          Missed in last checkin.
+
 Tue Mar 29 20:14:15 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/creating_figures.html:
