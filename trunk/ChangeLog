@@ -1,9 +1,22 @@
+Thu Mar 31 20:06:05 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedXmlFile.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java:
+        * tools/modeling/tests/setup.pl:
+
+          Changed the "up-to-date" checking strategy, due to external references
+          it's not practical to determine the set of input files so instead we
+          generate to an in-memory buffer and update the filesystem if anything
+          in the output has changed.  At the same time, fixed some bugs where
+          ParsedXmlFile was caching too much, causing changes in the model to
+          not be reflected in the transformer source.
+
 Thu Mar 31 18:31:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/Dcps.gif:
 
-	  Changed layer boundary size from 16x11 to 16x16. For some reason original
-	  size was causing rendering problems using Microsoft viewers.
+          Changed layer boundary size from 16x11 to 16x16. For some reason original
+          size was causing rendering problems using Microsoft viewers.
 
 Thu Mar 31 16:48:41 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
