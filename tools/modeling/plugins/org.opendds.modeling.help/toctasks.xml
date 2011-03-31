@@ -49,7 +49,7 @@
                 <topic href="html/modeling/tasks/dcps_lib/domain_participant_creation.html" label="Creating a DomainParticipant"/>
                 <topic href="html/modeling/tasks/dcps_lib/pub_creation.html" label="Creating a Publisher"/>
                 <topic href="html/modeling/tasks/dcps_lib/datawriter_creation.html" label="Creating a DataWriter"/>
-                <topic href="html/modeling/tasks/dcps_lib/sub_datareader_creation.html" label="Creating Subscriber and DataReaders"/>
+                <topic href="html/modeling/tasks/dcps_lib/sub_creation.html" label="Creating a Subscriber"/>
                 <topic href="html/modeling/tasks/dcps_lib/datareader_creation.html" label="Creating a DataReader"/>
                 <topic href="html/modeling/tasks/dcps_lib/topics_usage.html" label="Working with Topics"/>
                <topic href="html/modeling/tasks/dcps_lib/compartments_usage.html" label="Working with compartments within compartments"/>
