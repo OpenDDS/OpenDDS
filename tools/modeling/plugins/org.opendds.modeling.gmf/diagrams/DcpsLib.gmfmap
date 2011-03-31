@@ -90,7 +90,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="DcpsLib.gmftool#//@palette/@tools.0/@tools.7"/>
+              href="DcpsLib.gmftool#//@palette/@tools.0/@tools.6"/>
           <diagramNode
               href="DcpsLib.gmfgraph#PubSub"/>
           <children
@@ -129,7 +129,7 @@
               </labelMappings>
               <tool
                   xsi:type="gmftool:CreationTool"
-                  href="DcpsLib.gmftool#//@palette/@tools.0/@tools.8"/>
+                  href="DcpsLib.gmftool#//@palette/@tools.0/@tools.7"/>
               <diagramNode
                   href="DcpsLib.gmfgraph#DataReaderWriter"/>
               <children
@@ -2020,7 +2020,7 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="DcpsLib.gmftool#//@palette/@tools.0/@tools.11"/>
+          href="DcpsLib.gmftool#//@palette/@tools.0/@tools.9"/>
       <diagramNode
           href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#Class"/>
       <children
@@ -2262,7 +2262,7 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="DcpsLib.gmftool#//@palette/@tools.0/@tools.12"/>
+          href="DcpsLib.gmftool#//@palette/@tools.0/@tools.10"/>
       <diagramNode
           href="DcpsLib.gmfgraph#ContentFilteredTopic"/>
     </ownedChild>
@@ -2302,7 +2302,7 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="DcpsLib.gmftool#//@palette/@tools.0/@tools.13"/>
+          href="DcpsLib.gmftool#//@palette/@tools.0/@tools.11"/>
       <diagramNode
           href="DcpsLib.gmfgraph#MultiTopic"/>
       <children
@@ -2319,9 +2319,6 @@
     </ownedChild>
   </nodes>
   <links>
-    <tool
-        xsi:type="gmftool:CreationTool"
-        href="DcpsLib.gmftool#//@palette/@tools.0/@tools.5"/>
     <diagramLink
         href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassChildren"/>
     <linkMetaFeature
@@ -2329,9 +2326,6 @@
         href="../../org.opendds.modeling.model/model/DCPS.ecore#//DataReader/topic"/>
   </links>
   <links>
-    <tool
-        xsi:type="gmftool:CreationTool"
-        href="DcpsLib.gmftool#//@palette/@tools.0/@tools.9"/>
     <diagramLink
         href="../../org.opendds.modeling.graphics/diagrams/componentDiagram.gmfgraph#ClassChildren"/>
     <linkMetaFeature

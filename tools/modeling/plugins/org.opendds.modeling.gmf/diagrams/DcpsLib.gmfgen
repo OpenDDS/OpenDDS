@@ -6584,11 +6584,6 @@
             description="Create new DataReader"
             genNodes="//@diagram/@childNodes.46"/>
         <entries
-            xsi:type="gmfgen:ToolEntry"
-            title="DataReader-Topic Connector"
-            description="Create new DataReader-Topic Connector"
-            genLinks="//@diagram/@links.0"/>
-        <entries
             xsi:type="gmfgen:Separator"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
@@ -6600,11 +6595,6 @@
             title="DataWriter"
             description="Create new DataWriter"
             genNodes="//@diagram/@childNodes.1"/>
-        <entries
-            xsi:type="gmfgen:ToolEntry"
-            title="DataWriter-Topic Connector"
-            description="Create new DataWriter-Topic Connector"
-            genLinks="//@diagram/@links.1"/>
         <entries
             xsi:type="gmfgen:Separator"/>
         <entries

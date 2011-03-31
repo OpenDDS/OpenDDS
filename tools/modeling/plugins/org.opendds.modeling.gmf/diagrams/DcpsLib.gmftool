@@ -47,15 +47,6 @@
             xsi:type="gmftool:DefaultImage"/>
       </tools>
       <tools
-          xsi:type="gmftool:CreationTool"
-          title="DataReader-Topic Connector"
-          description="Create new DataReader-Topic Connector">
-        <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
-        <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
-      </tools>
-      <tools
           xsi:type="gmftool:PaletteSeparator"/>
       <tools
           xsi:type="gmftool:CreationTool"
@@ -70,15 +61,6 @@
           xsi:type="gmftool:CreationTool"
           title="DataWriter"
           description="Create new DataWriter">
-        <smallIcon
-            xsi:type="gmftool:DefaultImage"/>
-        <largeIcon
-            xsi:type="gmftool:DefaultImage"/>
-      </tools>
-      <tools
-          xsi:type="gmftool:CreationTool"
-          title="DataWriter-Topic Connector"
-          description="Create new DataWriter-Topic Connector">
         <smallIcon
             xsi:type="gmftool:DefaultImage"/>
         <largeIcon

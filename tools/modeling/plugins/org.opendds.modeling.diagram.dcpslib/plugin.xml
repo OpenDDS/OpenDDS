@@ -31,7 +31,7 @@
          contributorClass="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibDiagramActionBarContributor">
       </editor>
    </extension>
-   
+
    <extension point="org.eclipse.ui.contexts" id="ui-context">
       <?gmfgen generated="true"?>
       <context
@@ -52,7 +52,7 @@
       <?gmfgen generated="false"?>
       <!-- Disable initialization of sub-diagram file from .opendds file -->
    </extension>
-	
+
    <extension point="org.eclipse.gmf.runtime.common.ui.services.action.globalActionHandlerProviders" id="global-actions">
       <?gmfgen generated="true"?>
       <GlobalActionHandlerProvider
@@ -251,7 +251,7 @@
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.emf.ui.modelingAssistantProviders" id="modelassist-provider">
-      <?gmfgen generated="true"?>
+      <?gmfgen generated="false"?>
       <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibModelingAssistantProvider">
          <Priority name="Lowest"/>
          <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DcpsLibEditPart" id="DcpsLib_1000"/>
@@ -260,7 +260,15 @@
          <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TopicEditPart" id="Topic_2007"/>
          <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.ContentFilteredTopicEditPart" id="ContentFilteredTopic_2005"/>
          <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.MultiTopicEditPart" id="MultiTopic_2006"/>
-         <context elements="DcpsLib_1000,DomainParticipant_2001,Domain_2002,Topic_2007,ContentFilteredTopic_2005,MultiTopic_2006"/>
+         <!-- Custom changes begin -->
+         <!-- By default only top-level nodes have modeling assistance activated. This means that compartment child
+         like DataReader and DataWriter would not have connection handles available to link to topic figures.
+         Therefore these are manually included. Note that if new elements are added to the DcpsLib diagram it
+         may be necessary to manually update this extension. -->
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DataWriterEditPart" id="DataWriter_3059"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DataReaderEditPart" id="DataReader_3060"/>
+         <context elements="DcpsLib_1000,DomainParticipant_2001,Domain_2002,Topic_2007,ContentFilteredTopic_2005,MultiTopic_2006,DataWriter_3059,DataReader_3060"/>
+         <!-- Custom changes end -->
       </modelingAssistantProvider>
    </extension>
 
@@ -1095,7 +1103,7 @@
          </enablement>
       </actionProvider>
    </extension>
-   
+
 	   <extension point="org.eclipse.ui.navigator.linkHelper" id="navigator-linkhelper">
       <?gmfgen generated="true"?>
       <linkHelper
@@ -1121,7 +1129,7 @@
          id="org.opendds.modeling.diagram.dcpslib.updateDiagram"
          name="%update.diagram.name"/>
    </extension>
-   
+
    <extension point="org.eclipse.ui.bindings" id="update-cmd-binding">
       <?gmfgen generated="true"?>
       <key 
@@ -1174,10 +1182,10 @@
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.DomainParticipantEditPart"
             objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.DomainParticipantEditPart">
-         <menu 
-            id="DomainParticipantInsert" 
-            label="&amp;Add &amp;QoS Policy" 
-            path="additions"> 
+         <menu
+            id="DomainParticipantInsert"
+            label="&amp;Add &amp;QoS Policy"
+            path="additions">
             <separator name="group1"/>
          </menu>
          <action
@@ -1201,10 +1209,10 @@
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.PublisherEditPart"
             objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.PublisherEditPart">
-         <menu 
-            id="PublisherInsert" 
-            label="&amp;Add &amp;QoS Policy" 
-            path="additions"> 
+         <menu
+            id="PublisherInsert"
+            label="&amp;Add &amp;QoS Policy"
+            path="additions">
             <separator name="group1"/>
          </menu>
          <action
@@ -1228,10 +1236,10 @@
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.DataWriterEditPart"
             objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.DataWriterEditPart">
-         <menu 
-            id="DataWriterInsert" 
-            label="&amp;Add &amp;QoS Policy" 
-            path="additions"> 
+         <menu
+            id="DataWriterInsert"
+            label="&amp;Add &amp;QoS Policy"
+            path="additions">
             <separator name="group1"/>
          </menu>
          <action
@@ -1255,10 +1263,10 @@
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.SubscriberEditPart"
             objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.SubscriberEditPart">
-         <menu 
-            id="SubscriberInsert" 
-            label="&amp;Add &amp;QoS Policy" 
-            path="additions"> 
+         <menu
+            id="SubscriberInsert"
+            label="&amp;Add &amp;QoS Policy"
+            path="additions">
             <separator name="group1"/>
          </menu>
          <action
@@ -1282,10 +1290,10 @@
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.DataReaderEditPart"
             objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.DataReaderEditPart">
-         <menu 
-            id="DataReaderInsert" 
-            label="&amp;Add &amp;QoS Policy" 
-            path="additions"> 
+         <menu
+            id="DataReaderInsert"
+            label="&amp;Add &amp;QoS Policy"
+            path="additions">
             <separator name="group1"/>
          </menu>
          <action
@@ -1309,10 +1317,10 @@
             adaptable="false"
             id="org.opendds.modeling.diagram.ui.objectContribution.TopicEditPart"
             objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.TopicEditPart">
-         <menu 
-            id="TopicPolicyInsert" 
-            label="&amp;Add &amp;QoS Policy" 
-            path="additions"> 
+         <menu
+            id="TopicPolicyInsert"
+            label="&amp;Add &amp;QoS Policy"
+            path="additions">
             <separator name="group1"/>
          </menu>
          <action
