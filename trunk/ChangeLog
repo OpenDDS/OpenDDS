@@ -1,3 +1,33 @@
+Thu Mar 31 15:18:14 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+
+	  Included DataReader and DataWriter in collection of figures that have
+	  modeling assistance enabled. This allows connection handles to work
+	  as expected on DataReaders and DataWriters removing the need to have
+	  special connector tools on the palette for connecting these figures
+	  to topic related figures.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmftool:
+
+	  Removed DataReader/DataWriter connection tools from palette.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/dcps_datareader_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/dcps_datawriter_example.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datareader_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datawriter_creation.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
+        * tools/modeling/testdata/DcpsLib/DcpsLibTest_screenshot_2.png:
+
+	  Updated to account for removal of DataReader/DataWriter connection tools from palette.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/datareaderwriter_topic_connection_palette.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/datareaderwriter_topic_connection.html:
+
+          Removed these files.
+
 Wed Mar 30 18:46:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/ReusedExtTypes/ReusedData.codegen:
