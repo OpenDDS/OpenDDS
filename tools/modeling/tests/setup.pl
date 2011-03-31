@@ -54,8 +54,7 @@ sub generate {
   }
 
   print "Running code generation on: $base\n";
-  $status = system("\"$JAVA_HOME/bin/java\" -classpath $bin " .
-                   "-Dopendds.checkXslTimestamps=true $jclass $base");
+  $status = system("\"$JAVA_HOME/bin/java\" -classpath $bin $jclass $base");
   if ($status > 0) {
     print "ERROR: Java SdkGenerator invocation failed with $status\n";
     exit($status >> 8);

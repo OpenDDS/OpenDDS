@@ -1,11 +1,11 @@
 package org.opendds.modeling.sdk.model.GeneratorSpecification.Generator;
 
-import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 
 import javax.xml.transform.Result;
@@ -26,7 +26,6 @@ public class SdkGenerator {
 	protected IFileProvider fileProvider;
 	protected SdkTransformer transformer;
 	protected ParsedGeneratorFile parsedGeneratorFile;
-	private long newestXslTimestamp;
 		
 	/**
 	 * Create a new instance of the SDK code generation class.
@@ -139,7 +138,8 @@ public class SdkGenerator {
 		}
 
 		Result result = null;
-		BufferedOutputStream bos = null;
+		ByteArrayOutputStream bos = null;
+		File output = null;
 		try {
 			URL targetUrl = fileProvider.fromWorkspace(targetDirName, true);
 			if( targetUrl == null) {
@@ -158,13 +158,8 @@ public class SdkGenerator {
 				return;
 			}
 
-			File output = new File( targetFolder, modelname + which.getSuffix());
-
-			if (output.exists() && !outOfDate(output)) {
-				return; // no need to re-generate
-			}
-
-			result = new StreamResult(bos = new BufferedOutputStream(new FileOutputStream(output)));
+			output = new File(targetFolder, modelname + which.getSuffix());
+			result = new StreamResult(bos = new ByteArrayOutputStream());
 
 		} catch (Exception e) {
 			errorHandler.error(IErrorHandler.Severity.ERROR, which.getText(),
@@ -172,11 +167,23 @@ public class SdkGenerator {
 			return;
 		}
 
-		Source source = parsedGeneratorFile.getSource( which.needsResolvedModel()? transformer: null);
-		if( source != null) {
+		Source source = parsedGeneratorFile.getSource(which.needsResolvedModel() ? transformer : null);
+		if (source != null) {
 			transformer.transform(which, source, result);
 			try {
 				bos.close();
+				byte[] bytes = bos.toByteArray();
+				if (output.exists()) {
+					FileInputStream fis = new FileInputStream(output);
+					if (!same(fis, bytes)) {
+						fis.close();
+						writeFile(output, bytes);
+					} else {
+						fis.close();
+					}
+				} else {
+					writeFile(output, bytes);
+				}
 			} catch (IOException ioe) {
 				errorHandler.error(IErrorHandler.Severity.ERROR, ioe.getMessage(),
 						"Unable to close the output file: " , ioe);
@@ -193,6 +200,39 @@ public class SdkGenerator {
 			errorHandler.error(IErrorHandler.Severity.WARNING, which.getText(),
 					"Unable to refresh output folder " + getTargetDirName(), e);
 		}
+	}
+
+	private void writeFile(File output, byte[] bytes) throws IOException {
+		FileOutputStream fos = new FileOutputStream(output);
+		fos.write(bytes);
+		fos.close();
+	}
+
+	/// True if the contents of the file 'fis' are equal to 'bytes'
+	private boolean same(FileInputStream fis, byte[] bytes) throws IOException {
+		final int CHUNK = 4 * 1024;
+		byte[] buf = new byte[CHUNK];
+		int idx = 0; // how far through 'bytes' are we?
+		for (int result = 0; result >= 0; result = fis.read(buf)) {
+			if (result > 0 && !same(buf, result, bytes, idx)) {
+				return false;
+			}
+			idx += result;
+		}
+		return bytes.length == idx;
+	}
+
+	/// True if the first 'n' bytes of 'buf' are equal to the 'n' bytes of 'bytes' starting at 'offset'
+	private boolean same(byte[] buf, int n, byte[] bytes, int offset) {
+		if (offset + n > bytes.length) {
+			return false;
+		}
+		for (int i = 0; i < n; ++i) {
+			if (buf[i] != bytes[offset + i]) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@SuppressWarnings("unused")
@@ -233,50 +273,6 @@ public class SdkGenerator {
         	return false;
         }
         return true;
-	}
-
-	/// is the output file out-of-date with respect to the inputs?
-	private boolean outOfDate(File output) {
-		long genfileTimestamp = parsedGeneratorFile.getTimestamp(),
-			modelTimestamp = parsedGeneratorFile.parsedModelFile.getTimestamp();
-		if (genfileTimestamp == 0 || modelTimestamp == 0) {
-			return true; // assume out-of-date if either timestamp is unknown
-		}
-		long outputTimestamp = output.lastModified();
-		return (outputTimestamp < genfileTimestamp)
-			|| (outputTimestamp < modelTimestamp)
-			|| xslOutOfDate(outputTimestamp);
-	}
-
-	private boolean xslOutOfDate(long outputTimestamp) {
-		String prop = System.getProperty("opendds.checkXslTimestamps");
-		if (prop == null || "false".equalsIgnoreCase(prop)) {
-			return false;
-		}
-
-		if (newestXslTimestamp == 0) { // only need to compute this once, xsl won't change in-session
-			try {
-				for (SdkTransformer.TransformType tt : SdkTransformer.TransformType.values()) {
-					URL xsl = fileProvider.fromBundle(tt.xslFilename());
-					long time = new File(xsl.toURI()).lastModified();
-					if (time > newestXslTimestamp) {
-						newestXslTimestamp = time;
-					}
-				}
-				for (String other : SdkTransformer.UTIL_FILES) {
-					URL xsl = fileProvider.fromBundle(other);
-					long time = new File(xsl.toURI()).lastModified();
-					if (time > newestXslTimestamp) {
-						newestXslTimestamp = time;
-					}					
-				}
-			} catch (MalformedURLException e) {
-				return true; // assume it's out of date if we can't get the xsl
-			} catch (URISyntaxException e) {
-				return true; // assume it's out of date if we can't get the xsl
-			}
-		}
-		return outputTimestamp < newestXslTimestamp;
 	}
 
 	protected URIResolver getResolverFor( String path) {

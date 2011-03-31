@@ -34,7 +34,6 @@ public abstract class ParsedXmlFile {
 	private DocumentBuilder documentBuilder;
 	
 	protected String sourceName;
-	protected Source source = null;
 	protected IErrorHandler errorHandler;
 	protected IFileProvider fileProvider;
 
@@ -99,19 +98,17 @@ public abstract class ParsedXmlFile {
 	 * @return Source suitable for transformation.
 	 */
 	public Source getSource( SdkTransformer transformer) {
-		if( source == null) {
-			Document doc = getModelDocument();
-			if (doc == null) {
-				return null; // messages were generated in the get call.
-			}
+		Document doc = getModelDocument();
+		if (doc == null) {
+			return null; // messages were generated in the get call.
+		}
 
-			source = new DOMSource( doc);
-			if( transformer != null) {
-					DOMResult resolved = new DOMResult();
-					transformer.transform(TransformType.RESOLVED, source, resolved);
+		Source source = new DOMSource( doc);
+		if (transformer != null) {
+			DOMResult resolved = new DOMResult();
+			transformer.transform(TransformType.RESOLVED, source, resolved);
 
-					source = new DOMSource( resolved.getNode());
-			}
+			source = new DOMSource(resolved.getNode());
 		}
 
 		return source;
@@ -120,10 +117,6 @@ public abstract class ParsedXmlFile {
 	protected Document getModelDocument() {
 		if( sourceName == null || sourceName.isEmpty()) {
 			return null;
-		}
-	
-		if (modelDocument != null) {
-			return modelDocument;
 		}
 	
 		try {
