@@ -1,21 +1,28 @@
+Thu Mar 31 18:31:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/Dcps.gif:
+
+	  Changed layer boundary size from 16x11 to 16x16. For some reason original
+	  size was causing rendering problems using Microsoft viewers.
+
 Thu Mar 31 16:48:41 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/pub_creation.html:
 
-	  Removed obsolete content. Added screenshot.
+          Removed obsolete content. Added screenshot.
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/sub_creation.html:
 
-	  Mirrors pub_creation.html instead of refering to pub creation.
+          Mirrors pub_creation.html instead of refering to pub creation.
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/dcps_pub_example.png:
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/dcps_sub_example.png:
 
-	  Pub/sub screenshots.
+          Pub/sub screenshots.
 
         * tools/modeling/plugins/org.opendds.modeling.help/toctasks.xml:
 
-	  Subscriber now mirrors publisher.
+          Subscriber now mirrors publisher.
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/dcps_lib/sub_datareader_creation.html:
 
