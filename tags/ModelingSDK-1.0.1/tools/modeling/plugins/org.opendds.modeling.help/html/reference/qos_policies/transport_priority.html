@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=UTF-8">
+
+  <title>TRANSPORT_PRIORITY</title>
+  <link rel="stylesheet" type="text/css" href="QoS.css">
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+
+<H4 CLASS="Head3">
+<A NAME="pgfId-236659"></A>TRANSPORT_PRIORITY</H4>
+<UL>
+<LI CLASS="BodyNoLead">
+<A NAME="pgfId-236918"></A>The <A NAME="marker-249746"></A>TRANSPORT_PRIORITY policy applies to topic and data writer entities via the <EM CLASS="Code">
+transport_priority</EM>
+ member of their respective QoS policy structures. Below is the IDL related to the TransportPriority QoS policy:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-236936"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-236937"></A>struct TransportPriorityQosPolicy {</P>
+<P CLASS="Code">
+<A NAME="pgfId-236938"></A>  long value;</P>
+<P CLASS="Code">
+<A NAME="pgfId-236939"></A>};</P>
+<P CLASS="Code">
+<A NAME="pgfId-236904"></A>&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-236962"></A>The default <EM CLASS="Code">
+value</EM>
+ member of <EM CLASS="Code">
+transport_priority</EM>
+ is zero. This policy is considered a hint to the transport layer to indicate at what priority to send messages. Higher values indicate higher priority. OpenDDS maps the priority value directly onto thread and DiffServ codepoint values. A default priority of zero will not modify either threads or codepoints in messages.</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-237023"></A>OpenDDS will attempt to set the thread priority of the sending transport as well as any associated receiving transport. Transport priority values are mapped from zero (default) through the maximum thread priority linearly without scaling. If the lowest thread priority is different from zero, then it is mapped to the transport priority value of zero. Where priority values on a system are inverted (higher numeric values are lower priority), OpenDDS maps these to an increasing priority value starting at zero. Priority values lower than the minimum (lowest) thread priority on a system are mapped to that lowest priority. Priority values greater than the maximum (highest) thread priority on a system are mapped to that highest priority. On most systems, thread priorities can only be set when the process scheduler has been set to allow these operations. Setting the process scheduler is generally a privileged operation and will require system privileges to perform. On POSIX based systems, the system calls of <EM CLASS="Code">
+sched_get_priority_min()</EM>
+ and <EM CLASS="Code">
+sched_get_priority_max()</EM>
+ are used to determine the system range of thread priorities.</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-237069"></A>OpenDDS will attempt to set the DiffServ codepoint on the socket used to send data for the data writer if it is supported by the transport implementation. If the network hardware honors the codepoint values, higher codepoint values will result in better (faster) transport for higher priority samples. The default value of zero will be mapped to the (default) codepoint of zero. Priority values from 1 through 63 are then mapped to the corresponding codepoint values, and higher priority values are mapped to the highest codepoint value (63).</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-237149"></A>OpenDDS does not currently support modifications of the <EM CLASS="Code">
+transport_priority</EM>
+ policy values after creation of the data writer. This can be worked around by creating new data writers as different priority values are required.</LI>
+</UL>
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmi:id="_07ZMMHipEd-z-Mm2uzA3lg" type="Ecore" measurementUnit="Pixel">
+  <children xmi:type="notation:Shape" xmi:id="_079z8HipEd-z-Mm2uzA3lg" type="2001" fontName="Sans">
+    <children xmi:type="notation:DecorationNode" xmi:id="_07-bAHipEd-z-Mm2uzA3lg" type="5001"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_07-bAXipEd-z-Mm2uzA3lg" type="7001">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_07-bAnipEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_07-bA3ipEd-z-Mm2uzA3lg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_07-bBHipEd-z-Mm2uzA3lg" type="7002">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_07-bBXipEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_07-bBnipEd-z-Mm2uzA3lg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_07-bB3ipEd-z-Mm2uzA3lg" type="7003">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_07-bCHipEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_07-bCXipEd-z-Mm2uzA3lg"/>
+    </children>
+    <element xmi:type="ecore:EClass" href="Domain.ecore#//QosProperty"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_079z8XipEd-z-Mm2uzA3lg" x="320" y="144"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_07-bCnipEd-z-Mm2uzA3lg" type="2001" fontName="Sans">
+    <children xmi:type="notation:DecorationNode" xmi:id="_07-bDHipEd-z-Mm2uzA3lg" type="5001"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_07_CEHipEd-z-Mm2uzA3lg" type="7001">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_07_CEXipEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_07_CEnipEd-z-Mm2uzA3lg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_07_CE3ipEd-z-Mm2uzA3lg" type="7002">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_07_CFHipEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_07_CFXipEd-z-Mm2uzA3lg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_07_CFnipEd-z-Mm2uzA3lg" type="7003">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_07_CF3ipEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_07_CGHipEd-z-Mm2uzA3lg"/>
+    </children>
+    <element xmi:type="ecore:EClass" href="Domain.ecore#//DomainEntity"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_07-bC3ipEd-z-Mm2uzA3lg" x="78" y="144"/>
+  </children>
+  <styles xmi:type="notation:DiagramStyle" xmi:id="_07ZMMXipEd-z-Mm2uzA3lg"/>
+  <element xmi:type="ecore:EPackage" href="Domain.ecore#/"/>
+  <edges xmi:type="notation:Connector" xmi:id="_08D6kHipEd-z-Mm2uzA3lg" type="4003" source="_07-bCnipEd-z-Mm2uzA3lg" target="_079z8HipEd-z-Mm2uzA3lg">
+    <children xmi:type="notation:DecorationNode" xmi:id="_08D6k3ipEd-z-Mm2uzA3lg" type="6002">
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_08D6lHipEd-z-Mm2uzA3lg" x="35" y="-18"/>
+    </children>
+    <children xmi:type="notation:DecorationNode" xmi:id="_08EhoHipEd-z-Mm2uzA3lg" type="6004">
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_08EhoXipEd-z-Mm2uzA3lg" y="14"/>
+    </children>
+    <styles xmi:type="notation:FontStyle" xmi:id="_08D6kXipEd-z-Mm2uzA3lg" fontName="Sans"/>
+    <element xmi:type="ecore:EReference" href="Domain.ecore#//DomainEntity/qosPolicy"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_08D6knipEd-z-Mm2uzA3lg" points="[0, 0, 0, 60]$[0, -60, 0, 0]"/>
+    <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_08KBMHipEd-z-Mm2uzA3lg" id="(0.9900990099009901,0.4807692307692308)"/>
+    <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_08KBMXipEd-z-Mm2uzA3lg" id="(0.052083333333333336,0.5384615384615384)"/>
+  </edges>
+</notation:Diagram>
