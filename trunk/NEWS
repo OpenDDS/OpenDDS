@@ -10,7 +10,7 @@ Version 2.4 of OpenDDS.
   QoS behavior, see the document in docs/design/CONTENT_SUBSCRIPTION.
 
 - Various enhancements and fixes were made to the diagram modeling portion
-  of the OpenDDS Modeling SDK. These include:
+  of the OpenDDS Modeling SDK. These include:             [Modeling SDK 1.0.1]
     * The property sheet now includes a tab for viewing and editing
       comments related to the selected figure. These comments are
       included in the generated C++ code.
@@ -47,7 +47,7 @@ Version 2.4 of OpenDDS.
   made so that when creating a new element value in the Model
   Customization tab property sheet, the value shown for the element is
   the actual value and not the value from the previous element
-  displayed.
+  displayed.                                              [Modeling SDK 1.0.1]
 
 ========================================================================
 
