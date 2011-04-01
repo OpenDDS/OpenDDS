@@ -29,6 +29,11 @@ Version 2.4 of OpenDDS.
     * Previously, when deleting a figure that included an association
       with a shared policy, the shared policy would also be deleted.
       Now shared policies will be retained in this case.
+    * In the DcpsLib diagram, the special connector tools in
+      the palette for linking DataReaders and DataWriters to
+      topic related figures are no longer needed and have been
+      removed. These links can now be done using connection
+      handles as is done for other figures.
     * Fixed diagram preferences all showing up under the DataLib
       preferences, making it hard to set preferences for the
       different diagram types.
