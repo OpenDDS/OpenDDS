@@ -1,3 +1,17 @@
+Fri Apr  1 21:00:46 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/plugins.html:
+
+	  Added details about supporting custom and shared policies in DcpsLib.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/QosPolicyCreationHelper.java:
+
+	  Simply code and remove assumption about max number of levels in DcpsLib containment a domain element can live.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/part/QosPolicyClassNameToRefName.java:
+
+          This class has not been used for months but I forgot to remove earlier so removing now.
+
 Fri Apr  1 16:36:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:
