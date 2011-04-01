@@ -1,0 +1,64 @@
+
+set loadpath "`echo $DDS_ROOT/performance-tests/Bench/bin`"
+show loadpath
+
+print 'Plotting summary charts'
+call 'plot-transports.gpi' 'data/latency.csv' 'images/transport-latency'
+call 'plot-jitter.gpi'     'data/latency.csv' 'images/transport-jitter'
+
+print 'Plotting TCP charts'
+call 'lj-plots.gpi' 'data/latency-tcp-50.gpd'    'data/latency-tcp-50.stats'    'images/latency-tcp-50.png'    'TCP / Message Size 50 bytes'
+call 'lj-plots.gpi' 'data/latency-tcp-100.gpd'   'data/latency-tcp-100.stats'   'images/latency-tcp-100.png'   'TCP / Message Size 100 bytes'
+call 'lj-plots.gpi' 'data/latency-tcp-250.gpd'   'data/latency-tcp-250.stats'   'images/latency-tcp-250.png'   'TCP / Message Size 250 bytes'
+call 'lj-plots.gpi' 'data/latency-tcp-500.gpd'   'data/latency-tcp-500.stats'   'images/latency-tcp-500.png'   'TCP / Message Size 500 bytes'
+call 'lj-plots.gpi' 'data/latency-tcp-1000.gpd'  'data/latency-tcp-1000.stats'  'images/latency-tcp-1000.png'  'TCP / Message Size 1000 bytes'
+call 'lj-plots.gpi' 'data/latency-tcp-2500.gpd'  'data/latency-tcp-2500.stats'  'images/latency-tcp-2500.png'  'TCP / Message Size 2500 bytes'
+call 'lj-plots.gpi' 'data/latency-tcp-5000.gpd'  'data/latency-tcp-5000.stats'  'images/latency-tcp-5000.png'  'TCP / Message Size 5000 bytes'
+call 'lj-plots.gpi' 'data/latency-tcp-8000.gpd'  'data/latency-tcp-8000.stats'  'images/latency-tcp-8000.png'  'TCP / Message Size 8000 bytes'
+call 'lj-plots.gpi' 'data/latency-tcp-16000.gpd' 'data/latency-tcp-16000.stats' 'images/latency-tcp-16000.png' 'TCP / Message Size 16000 bytes'
+call 'lj-plots.gpi' 'data/latency-tcp-32000.gpd' 'data/latency-tcp-32000.stats' 'images/latency-tcp-32000.png' 'TCP / Message Size 32000 bytes'
+
+print 'Plotting UDP charts'
+call 'lj-plots.gpi' 'data/latency-udp-50.gpd'    'data/latency-udp-50.stats'    'images/latency-udp-50.png'    'UDP / Message Size 50 bytes'
+call 'lj-plots.gpi' 'data/latency-udp-100.gpd'   'data/latency-udp-100.stats'   'images/latency-udp-100.png'   'UDP / Message Size 100 bytes'
+call 'lj-plots.gpi' 'data/latency-udp-250.gpd'   'data/latency-udp-250.stats'   'images/latency-udp-250.png'   'UDP / Message Size 250 bytes'
+call 'lj-plots.gpi' 'data/latency-udp-500.gpd'   'data/latency-udp-500.stats'   'images/latency-udp-500.png'   'UDP / Message Size 500 bytes'
+call 'lj-plots.gpi' 'data/latency-udp-1000.gpd'  'data/latency-udp-1000.stats'  'images/latency-udp-1000.png'  'UDP / Message Size 1000 bytes'
+call 'lj-plots.gpi' 'data/latency-udp-2500.gpd'  'data/latency-udp-2500.stats'  'images/latency-udp-2500.png'  'UDP / Message Size 2500 bytes'
+call 'lj-plots.gpi' 'data/latency-udp-5000.gpd'  'data/latency-udp-5000.stats'  'images/latency-udp-5000.png'  'UDP / Message Size 5000 bytes'
+call 'lj-plots.gpi' 'data/latency-udp-8000.gpd'  'data/latency-udp-8000.stats'  'images/latency-udp-8000.png'  'UDP / Message Size 8000 bytes'
+call 'lj-plots.gpi' 'data/latency-udp-16000.gpd' 'data/latency-udp-16000.stats' 'images/latency-udp-16000.png' 'UDP / Message Size 16000 bytes'
+call 'lj-plots.gpi' 'data/latency-udp-32000.gpd' 'data/latency-udp-32000.stats' 'images/latency-udp-32000.png' 'UDP / Message Size 32000 bytes'
+
+print 'Plotting Multicast / best effort charts'
+call 'lj-plots.gpi' 'data/latency-mbe-50.gpd'    'data/latency-mbe-50.stats'    'images/latency-mbe-50.png'    'Multicast - Best Effort / Message Size 50 bytes'
+call 'lj-plots.gpi' 'data/latency-mbe-100.gpd'   'data/latency-mbe-100.stats'   'images/latency-mbe-100.png'   'Multicast - Best Effort / Message Size 100 bytes'
+call 'lj-plots.gpi' 'data/latency-mbe-250.gpd'   'data/latency-mbe-250.stats'   'images/latency-mbe-250.png'   'Multicast - Best Effort / Message Size 250 bytes'
+call 'lj-plots.gpi' 'data/latency-mbe-500.gpd'   'data/latency-mbe-500.stats'   'images/latency-mbe-500.png'   'Multicast - Best Effort / Message Size 500 bytes'
+call 'lj-plots.gpi' 'data/latency-mbe-1000.gpd'  'data/latency-mbe-1000.stats'  'images/latency-mbe-1000.png'  'Multicast - Best Effort / Message Size 1000 bytes'
+call 'lj-plots.gpi' 'data/latency-mbe-2500.gpd'  'data/latency-mbe-2500.stats'  'images/latency-mbe-2500.png'  'Multicast - Best Effort / Message Size 2500 bytes'
+call 'lj-plots.gpi' 'data/latency-mbe-5000.gpd'  'data/latency-mbe-5000.stats'  'images/latency-mbe-5000.png'  'Multicast - Best Effort / Message Size 5000 bytes'
+call 'lj-plots.gpi' 'data/latency-mbe-8000.gpd'  'data/latency-mbe-8000.stats'  'images/latency-mbe-8000.png'  'Multicast - Best Effort / Message Size 8000 bytes'
+call 'lj-plots.gpi' 'data/latency-mbe-16000.gpd' 'data/latency-mbe-16000.stats' 'images/latency-mbe-16000.png' 'Multicast - Best Effort / Message Size 16000 bytes'
+call 'lj-plots.gpi' 'data/latency-mbe-32000.gpd' 'data/latency-mbe-32000.stats' 'images/latency-mbe-32000.png' 'Multicast - Best Effort / Message Size 32000 bytes'
+
+print 'Plotting Multicast / reliable charts'
+call 'lj-plots.gpi' 'data/latency-mrel-50.gpd'    'data/latency-mrel-50.stats'    'images/latency-mrel-50.png'    'Multicast - Reliable / Message Size 50 bytes'
+call 'lj-plots.gpi' 'data/latency-mrel-100.gpd'   'data/latency-mrel-100.stats'   'images/latency-mrel-100.png'   'Multicast - Reliable / Message Size 100 bytes'
+call 'lj-plots.gpi' 'data/latency-mrel-250.gpd'   'data/latency-mrel-250.stats'   'images/latency-mrel-250.png'   'Multicast - Reliable / Message Size 250 bytes'
+call 'lj-plots.gpi' 'data/latency-mrel-500.gpd'   'data/latency-mrel-500.stats'   'images/latency-mrel-500.png'   'Multicast - Reliable / Message Size 500 bytes'
+call 'lj-plots.gpi' 'data/latency-mrel-1000.gpd'  'data/latency-mrel-1000.stats'  'images/latency-mrel-1000.png'  'Multicast - Reliable / Message Size 1000 bytes'
+call 'lj-plots.gpi' 'data/latency-mrel-2500.gpd'  'data/latency-mrel-2500.stats'  'images/latency-mrel-2500.png'  'Multicast - Reliable / Message Size 2500 bytes'
+call 'lj-plots.gpi' 'data/latency-mrel-5000.gpd'  'data/latency-mrel-5000.stats'  'images/latency-mrel-5000.png'  'Multicast - Reliable / Message Size 5000 bytes'
+call 'lj-plots.gpi' 'data/latency-mrel-8000.gpd'  'data/latency-mrel-8000.stats'  'images/latency-mrel-8000.png'  'Multicast - Reliable / Message Size 8000 bytes'
+call 'lj-plots.gpi' 'data/latency-mrel-16000.gpd' 'data/latency-mrel-16000.stats' 'images/latency-mrel-16000.png' 'Multicast - Reliable / Message Size 16000 bytes'
+call 'lj-plots.gpi' 'data/latency-mrel-32000.gpd' 'data/latency-mrel-32000.stats' 'images/latency-mrel-32000.png' 'Multicast - Reliable / Message Size 32000 bytes'
+
+print 'Plotting Quantile Distributions'
+call 'plot-quantiles.gpi' 'data' 'images'
+
+# Keep this call after all gnuplot < 4.4 calls
+# gnuplot 4.4 functionality in the plot-density.gpi fails on earlier systems.
+print 'Plotting Kernel Density Estimates'
+call 'plot-density.gpi' 'data' 'images'
+

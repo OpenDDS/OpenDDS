@@ -1,0 +1,170 @@
+Starting with release 1.2, OpenDDS provides Java bindings.  Java applications
+can make use of the complete OpenDDS middleware just like C++ applications.
+
+See the java/INSTALL file (in this directory) for information on getting
+started, including the prerequisites and dependencies.
+
+See the java/FAQ file (in this directory) for information on common issues
+encountered while developing with the Java bindings.
+
+
+======================================================================
+* See also
+
+  - OpenDDS website <http://www.opendds.org>
+  - OpenDDS Developer's Guide
+      <http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf>
+  - OMG DDS Portal <http://portals.omg.org/dds>
+  - OMG DDS specifications
+      <http://www.omg.org/technology/documents/dds_spec_catalog.htm>
+  - OMG CORBA 3.1 spec (includes the IDL spec in Part 1, Section 7)
+      <http://www.omg.org/spec/CORBA/3.1>
+  - OMG IDL to Java mapping spec <http://www.omg.org/spec/I2JAV/1.3>
+
+
+======================================================================
+* IDL and code generation
+
+OpenDDS is more than just a library that lives in one or two .jar files.  The
+DDS specification defines the interaction between a DDS application and the DDS
+middleware.  In particular, DDS applications send and receive messages that
+are strongly-typed and those types are defined by the application developer in
+IDL.  OMG IDL is the interface description language used by both CORBA and DDS.
+You can see an example of IDL for DDS in the file Messenger.idl, which can be
+found in java/tests/messenger/messenger_idl.
+
+In order for the application to interact with the middleware in terms of these
+user-defined types, code must be generated at compile-time based on this IDL.
+This will be both C++ and Java code, and even some more IDL.  In most cases,
+application developers will not need to be concerned with the details of all
+the generated files.  Scripts included with OpenDDS automate this process so
+that the developer will end up with a native library (.so or .dll) and a Java
+library (.jar or just a "classes" directory) that together contain all of the
+generated code.  See the next section ("Step-by-step instructions...") for
+details.
+
+Below are "the gory details," a description of the generated files and which
+tools generate them.  In this example, Foo.idl contains a single struct "Bar"
+contained in module "Baz" (IDL modules are similar to C++ namespaces and Java
+packages).  To the right of each file name is the name of the tool that
+generates it, followed by some notes on its purpose.
+
+Foo.idl                       - hand-written description of the DDS sample type
+- Foo{C,S}.{h,inl,cpp}        - tao_idl: C++ representation of the IDL
+- FooTypeSupport.idl          - opendds_idl: DDS-specific code
+  - FooTypeSupport{C,S}.{h,inl,cpp}  - tao_idl
+  - Baz/BarSeq{Helper,Holder}.java   - idl2jni
+  - Baz/BarData{Reader,Writer}*.java - idl2jni
+  - Baz/BarTypeSupport*.java  - idl2jni (except TypeSupportImpl, see below)
+  - FooTypeSupportJC.{h,cpp}  - idl2jni: JNI native method implementations
+- FooTypeSupportImpl.{h,cpp}  - opendds_idl: DDS-specific code
+- Baz/BarTypeSupportImpl.java - opendds_idl: DDS-specific code
+- Baz/Bar*.java               - idl2jni: Java representation of IDL struct
+- FooJC.{h,cpp}               - idl2jni: JNI native method implementations
+
+Foo.idl
+-------
+module Baz {
+#pragma DCPS_DATA_TYPE "Baz::Bar"
+  struct Bar {
+    long x;
+  };
+};
+
+
+======================================================================
+* Step-by-step instructions for setting up a new project
+
+These instructions assume you have completed the installation steps in the
+java/INSTALL document, including having the various environment variables
+defined.
+
+1. Start with an empty directory that will be used for your IDL and the code
+   generated from it.  java/tests/messenger/messenger_idl is set up this way.
+
+2. Create an IDL file describing the data structure you will be using with
+   OpenDDS.  See Messenger.idl for an example.  This file will contain at least
+   one line starting with "#pragma DCPS_DATA_TYPE".  For the sake of these
+   instructions, we'll call the file Foo.idl.
+
+3. Create an export header, Foo_Export.h
+   Unix    => $ACE_ROOT/bin/generate_export_file.pl Foo > Foo_Export.h
+   Windows => %ACE_ROOT%\bin\generate_export_file.pl Foo > Foo_Export.h
+
+4. Create an mpc file, Foo.mpc, from this template:
+   --- BEGIN Foo.mpc ---
+   project: dcps_java {
+
+     idlflags      += -Wb,stub_export_include=Foo_Export.h \
+                      -Wb,stub_export_macro=Foo_Export
+     dcps_ts_flags += -Wb,export_macro=Foo_Export
+     idl2jniflags  += -Wb,stub_export_include=Foo_Export.h \
+                      -Wb,stub_export_macro=Foo_Export
+     dynamicflags  += FOO_BUILD_DLL
+
+     specific {
+       jarname      = DDS_Foo_types
+     }
+
+     TypeSupport_Files {
+       Foo.idl
+     }
+   }
+   --- END Foo.mpc ---
+   You can leave out the specific {...} block if you don't need to create a jar
+   file.  In this case you can directly use the Java .class files which will be
+   generated under the "classes" subdirectory of the current directory.
+
+5. Run MPC to generate platform-specific build files.
+   Unix    => $ACE_ROOT/bin/mwc.pl -type gnuace
+   Windows => %ACE_ROOT%\bin\mwc.pl -type [CompilerType]
+                         ** CompilerType options are: vc71, vc8, vc9, and nmake
+                            Make sure this is running ActiveState Perl.
+
+6. Compile the generated C++ and Java code
+   Unix    => make (GNU make, so this may be "gmake" on Solaris systems)
+   Windows => Build the generated .sln (Solution) file using your preferred
+     method.  This can be either the Visual Studio IDE or one of the
+     command-line tools.  If it's the IDE, start it from a command prompt
+     using "devenv" or "vcexpress" (express edition) so that it inherits the
+     environment variables.  Command-line tools for building include "vcbuild"
+     and invoking the IDE (devenv or vcexpress) with the appropriate arguments.
+   When this completes sucesfully you'll have a native library and a Java jar.
+   The native library names are as follows:
+   Unix => libFoo.so           Windows => Foo.dll (Release) or Food.dll (Debug)
+   You can change the locations of these libraries (including the .jar file)
+   by adding a line such as the following to the Foo.mpc file:
+     libout = $(PROJECT_ROOT)/lib
+   where PROJECT_ROOT can be any environment variable defined at build-time.
+
+7. You now have all of the Java and C++ code needed to compile and run a Java
+   OpenDDS application.  The generated .jar needs to be added to classpath.
+   The generated C++ library needs to be available for loading at runtime:
+   Unix    => Add the directory containing libFoo.so to the LD_LIBRARY_PATH.
+   Windows => Add the directory containing Foo.dll (or Food.dll) to the PATH.
+              If you are using the debug version (Food.dll) you'll need to
+              inform the OpenDDS middleware that it shouldn't look for Foo.dll.
+              To do this, add -Dopendds.native.debug=1 to the Java VM arguments.
+   See the publisher and subscriber directories in java/tests/messenger for
+   examples of publishing and subscribing applications.
+
+8. If you make subsequent changes to Foo.idl, start by re-running MPC (step #5
+   above).  This is needed because certain changes to Foo.idl will affect which
+   files are generated and need to be compiled.
+
+
+======================================================================
+* Directory structure
+
+java                 - this directory
+java/ant             - Ant scripts for use with JMS (see java/jms)
+java/build_scripts   - Perl support scripts that invoke the JDK tools
+java/dds             - the core OpenDDS Java API layer
+java/docs            - generated Javadocs go here by default
+java/idl2jni         - Idl2Jni is a code-generation tool for IDL interfaces
+java/idl2jni/codegen - the code generator itself
+java/idl2jni/runtime - C++ and Java runtime libraries to support generated code
+java/idl2jni/tests   - tests of idl2jni
+java/jms             - an OpenDDS-based implementation of Java Message Service
+java/tao             - Java bindings for a few TAO types that OpenDDS uses
+java/tests           - test Java applications

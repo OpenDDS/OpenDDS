@@ -1,0 +1,43 @@
+June 15, 2008 Christopher Diggins
+* renamed files
+* fixing compilation errors
+* adding Visual C++ 2008 project file
+* removed make files (they were broken)
+
+April 7, 2008 Max Lybbert
+* removed references to missing and unused header, as reported by Andy Elvey
+  and Dan Kosecki.
+* resynced with Christopher Diggins's branch as it exists in Heron,
+  tree-building code is back.
+
+November 26, 2007 Christopher Diggins
+* resynced codebase with Chris's branch
+  * removed tree-building code, as it would compile on Visual C++ but not g++
+  * removed posix and windows input files
+  * added example grammars:
+    * C grammar based on Jeff Lee's classic C lex/yacc grammar
+    * XML parser
+    * Scheme parser
+
+May 19, 2006 Tim Lovell-Smith
+* yard_base_grammar.hpp (bnf_star):  changed behavior to always return true
+* yard_base_grammar.hpp (EndOfInput_T):  new rule
+
+May 12, 2006 Max Lybbert
+* posix_arch/ directory:  removed
+* windows_arch/ directory:  removed
+* yard_posix_input.hpp:  created, filled with code from
+posix_arch/yard_input.hpp
+* yard_windows_input.hpp:  created, filled with Win32 code
+* yard_config.hpp:  created, filled with minimal platform sniffing code
+
+December 1, 2005 Max Lybbert
+* posix_arch/ directory:  created, and filled with platform-specific
+yard_input.hpp file
+* windows_arch/ directory:  created, but empty
+
+February 28, 2005 Christopher Diggins
+* 2.1 release
+
+December 23, 2004 Christopher Diggins
+* original release
