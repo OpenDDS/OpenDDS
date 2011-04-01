@@ -1,3 +1,13 @@
+Fri Apr  1 16:36:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+
+          Labeled the changes that were released with the Modeling SDK 1.0.1.
+
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+
+          Fixed a typo.
+
 Fri Apr  1 15:07:51 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * NEWS:

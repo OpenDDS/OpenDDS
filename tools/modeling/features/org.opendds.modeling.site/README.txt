@@ -18,7 +18,7 @@ inside the site.xml editor.
 
 4. Create a zip file for offline updates.
 cd $DDS_ROOT/tools/modeling/features/org.opendds.modeling.site
-rm content.jar artifacts.jar   # these are for an older Eclispe site format
+rm content.jar artifacts.jar   # these are for an older Eclipse site format
 zip -r opendds_modeling_site . -x README.txt .svn .project
 
 5. Update the opendds.org web site.  Run the following commands with
