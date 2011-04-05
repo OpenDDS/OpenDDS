@@ -1,12 +1,19 @@
+Tue Apr  5 13:40:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/about.properties:
+
+          Updated a Modeling SDK version 1.0.0 that shoul have been changed to
+          1.0.1 before that release.
+
 Fri Apr  1 21:00:46 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/plugins.html:
 
-	  Added details about supporting custom and shared policies in DcpsLib.
+          Added details about supporting custom and shared policies in DcpsLib.
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/QosPolicyCreationHelper.java:
 
-	  Simply code and remove assumption about max number of levels in DcpsLib containment a domain element can live.
+          Simply code and remove assumption about max number of levels in DcpsLib containment a domain element can live.
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/part/QosPolicyClassNameToRefName.java:
 
