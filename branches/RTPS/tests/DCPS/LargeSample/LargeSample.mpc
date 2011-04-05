@@ -1,0 +1,45 @@
+
+project(DDS*idl): dcps_test_lib {
+  idlflags      += -Wb,stub_export_include=LargeSample_export.h \
+                   -Wb,stub_export_macro=LargeSample_Export
+  dcps_ts_flags += -Wb,export_macro=LargeSample_Export
+  dynamicflags  += LARGESAMPLE_BUILD_DLL
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+
+
+}
+
+
+project(DDS*Publisher) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
+
+  exename   = publisher
+  after    += DDS*idl
+  libs   += DDS*idl
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    publisher.cpp
+    Writer.cpp
+  }
+}
+
+project(DDS*Subscriber) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
+
+  exename   = subscriber
+  after    += DDS*idl
+  libs   += DDS*idl
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    subscriber.cpp
+    DataReaderListener.cpp
+  }
+}
+

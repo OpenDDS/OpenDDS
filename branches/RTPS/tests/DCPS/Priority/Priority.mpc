@@ -1,0 +1,44 @@
+project(DDS*idl): dcps_test_lib {
+  idlflags      += -Wb,stub_export_include=Priority_export.h \
+                   -Wb,stub_export_macro=Priority_Export
+  dcps_ts_flags += -Wb,export_macro=Priority_Export
+  dynamicflags  += PRIORITY_BUILD_DLL
+
+  TypeSupport_Files {
+    Test.idl
+  }
+
+
+}
+
+
+project(DDS*Publisher) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
+  exename = publisher
+  after  += DDS*idl
+  libs   += DDS*idl
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    Publisher.cpp
+    Options.cpp
+    publisher_main.cpp
+  }
+}
+
+project(DDS*Subscriber) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
+  exename = subscriber
+  after  += DDS*idl
+  libs   += DDS*idl
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    Subscriber.cpp
+    Options.cpp
+    DataReaderListener.cpp
+    subscriber_main.cpp
+  }
+}
