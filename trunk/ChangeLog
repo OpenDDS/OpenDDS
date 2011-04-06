@@ -1,3 +1,11 @@
+Wed Apr  6 19:15:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/QueryConditionImpl.cpp:
+
+          Fix deadlock: In QueryConditionImpl::get_trigger_value(), acquire 
+          parent_->sample_lock_, before lock_.
+
 Tue Apr  5 13:40:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.common/about.properties:

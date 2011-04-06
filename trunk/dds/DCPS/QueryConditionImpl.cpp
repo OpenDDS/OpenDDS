@@ -56,6 +56,7 @@ QueryConditionImpl::get_trigger_value()
 ACE_THROW_SPEC((CORBA::SystemException))
 {
   if (hasFilter()) {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard2, parent_->sample_lock_, false);
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
     return parent_->contains_sample_filtered(sample_states_, view_states_,
       instance_states_, evaluator_, query_parameters_);
