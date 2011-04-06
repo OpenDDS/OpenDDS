@@ -216,6 +216,7 @@ class OpenDDS_Dcps_Export DataReaderImpl
     public virtual ACE_Event_Handler {
 public:
   friend class RequestedDeadlineWatchdog;
+  friend class QueryConditionImpl;
 
   typedef std::map<DDS::InstanceHandle_t, SubscriptionInstance*> SubscriptionInstanceMapType;
 
