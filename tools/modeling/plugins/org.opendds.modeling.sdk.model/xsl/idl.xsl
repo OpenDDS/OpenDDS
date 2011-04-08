@@ -22,11 +22,17 @@
 <xsl:variable name="types"       select="//types"/>
 <xsl:variable name="local-types" select="//types[not(@model)]"/>
 
-<!-- Terminal user defined types are all unreferenced user defined types -->
-<xsl:variable name="terminals" select="$local-types[not
-                      (@xmi:id  = $local-types//@type or 
-                       @xmi:id=$local-types//@subtype or 
-                       @xmi:id=$local-types//@switch)]"/>
+<!-- Subsets of local types -->
+<xsl:variable name="local-enums" select="$local-types[@xsi:type='types:Enum']"/>
+<xsl:variable name="local-structs-unions" select="$local-types[@xsi:type='types:Struct' 
+                                                            or @xsi:type='types:Union']"/>
+<xsl:variable name="local-fd-deps" select="$local-types
+       [(@xsi:type='types:Sequence' and @subtype = $local-structs-unions/@xmi:id)]"/>
+
+<xsl:variable name="local-remainder" 
+              select="$local-types
+                          [not(@xmi:id = $local-enums/@xmi:id
+                            or @xmi:id = $local-fd-deps/@xmi:id)]"/>
 
 <!-- Index (lookup table is in lut variable) -->
 <xsl:key
@@ -51,7 +57,26 @@
     ** the nodes param, touching all types in model.
     -->
   <xsl:call-template name="generate-idl">
-    <xsl:with-param name="nodes" select="$terminals"/>
+    <xsl:with-param name="nodes" select="$local-enums"/>
+    <xsl:with-param name="universe" select="$local-enums"/>
+  </xsl:call-template>
+  <xsl:call-template name="generate-idl">
+    <xsl:with-param name="nodes" select="$local-fd-deps"/>
+    <xsl:with-param name="excluded">
+      <xsl:call-template name="build-exclude-string">
+        <xsl:with-param name="nodes" select="$local-enums | $local-remainder"/>
+      </xsl:call-template>
+    </xsl:with-param>
+    <xsl:with-param name="universe" select="$local-fd-deps"/>
+  </xsl:call-template>
+  <xsl:call-template name="generate-idl">
+    <xsl:with-param name="nodes" select="$local-remainder"/>
+    <xsl:with-param name="excluded">
+      <xsl:call-template name="build-exclude-string">
+        <xsl:with-param name="nodes" select="$local-enums | $local-fd-deps"/>
+      </xsl:call-template>
+    </xsl:with-param>
+    <xsl:with-param name="universe" select="$local-remainder"/>
   </xsl:call-template>
 </xsl:template>
 <!-- End of main processing template. -->
@@ -64,14 +89,28 @@
   <xsl:value-of select="concat('};', $newline)"/>
 </xsl:template>
 
+<xsl:template name="build-exclude-string">
+  <xsl:param name="nodes"/>     <!-- <types> element nodes -->
+  <xsl:param name="value" select="' '"/>     <!-- current exclude string -->
+
+  <xsl:if test="$nodes">
+    <xsl:value-of select="concat(' ', $nodes[1]/@xmi:id, ' ')"/>
+    <xsl:call-template name="build-exclude-string">
+      <xsl:with-param name="nodes" select="$nodes[position() &gt; 1]"/>
+    </xsl:call-template>
+  </xsl:if>
+</xsl:template>
+
 <!-- Depth first traversal of type nodes processing predecessors first. -->
 <xsl:template name="generate-idl">
   <xsl:param name="nodes"/>     <!-- <types> element nodes -->
   <xsl:param name="excluded"/>  <!-- Space separated string of type ids already processed. -->
+  <xsl:param name="universe" select="/.."/>     <!-- all <types> element nodes to consider -->
 
   <!--
     ** We can't just apply-templates here as we need to keep track of what
-    ** we have already output.
+    ** we have already output.  As we output each node, the list to 
+    ** exclude increases, so we can't just check against $excluded.
     -->
   <xsl:for-each select="$nodes">
     <!-- Collect the previously output types for exclusion.  -->
@@ -79,19 +118,22 @@
     <xsl:variable name="priors" select="$nodes[position() &lt; $curpos]"/>
     <xsl:variable name="exclude-list">
       <xsl:for-each select="$priors">
-        <xsl:call-template name="get-dependencies"/>
+        <xsl:call-template name="get-dependencies">
+          <xsl:with-param name="universe" select="$universe"/>
+        </xsl:call-template>
       </xsl:for-each>
       <xsl:text> </xsl:text>
       <xsl:value-of select="$excluded"/>
     </xsl:variable>
 
     <!-- Process new predecessor types. -->
-    <xsl:variable name="direct-predecessors" select="$local-types[@xmi:id = current()//@type or @xmi:id = current()//@subtype or @xmi:id = current()//@switch]"/>
+    <xsl:variable name="direct-predecessors" select="$universe[@xmi:id = current()//@type or @xmi:id = current()//@subtype or @xmi:id = current()//@switch]"/>
 
     <xsl:call-template name="generate-idl">
       <xsl:with-param name="nodes"
            select="$direct-predecessors[not(contains($exclude-list,concat(' ',@xmi:id,' ')))]"/>
       <xsl:with-param name="excluded" select="$exclude-list"/>
+      <xsl:with-param name="universe" select="$universe"/>
     </xsl:call-template>
 
     <!--
@@ -107,11 +149,12 @@
 
 <!-- Depth first search for type names of predecessors. -->
 <xsl:template name="get-dependencies">
-  <!-- successors is the set of nodes already represented in the get-dependencies output.
-       used to prevent duplicates. -->
+  <!-- successors is the set of nodes already represented in the 
+       get-dependencies output.  used to prevent duplicates. -->
   <xsl:param name="successors" select="/.."/>
+  <xsl:param name="universe" select="/.."/>
 
-  <xsl:variable name="direct-predecessors" select="$local-types[@xmi:id = current()//@type or @xmi:id = current()//@subtype or @xmi:id = current()//@switch]"/>
+  <xsl:variable name="direct-predecessors" select="$universe[@xmi:id = current()//@type or @xmi:id = current()//@subtype or @xmi:id = current()//@switch]"/>
 
   <!-- using a Kaysian intersection predicate causes issues in eclipse here -->
   <xsl:for-each select="$direct-predecessors">
@@ -119,6 +162,7 @@
       <xsl:call-template name="get-dependencies">
         <!-- Kaysian intersection are fine in eclipse without context switch -->
         <xsl:with-param name="successors" select=". | $successors"/>
+        <xsl:with-param name="universe" select="$universe"/>
       </xsl:call-template>
     </xsl:if>
   </xsl:for-each>
