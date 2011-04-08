@@ -1,0 +1,194 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef _RTPS_RTPSBASEMESSAGETYPES_IDL_
+#define _RTPS_RTPSBASEMESSAGETYPES_IDL_
+
+#include "../../DdsDcpsGuid.idl"
+
+module OpenDDS {
+  module RTPS {
+
+    typedef DCPS::GuidPrefix_t GuidPrefix_t;
+    typedef DCPS::EntityId_t EntityId;
+    typedef DCPS::GUID_t GUID_t;
+
+    typedef sequence<GUID_t> GUIDSeq;
+
+    struct Time_t {
+      long seconds;
+      unsigned long fraction;
+    };
+    typedef Time_t Timestamp_t;
+    typedef Timestamp_t Timestamp;
+
+    typedef octet VendorId_vendorId_t[2];
+    struct VendorId_t {
+      VendorId_vendorId_t vendorId;
+    };
+    typedef VendorId_t VendorId;
+
+    struct SequenceNumber_t {
+      long high;
+      unsigned long low;
+    };
+    typedef SequenceNumber_t SequenceNumber;
+
+    struct SequenceNumberSet {
+      SequenceNumber_t bitmapBase;
+      sequence<long, 8> bitmap;
+    };
+
+    struct FragmentNumber_t {
+      unsigned long value;
+    };
+    typedef FragmentNumber_t FragmentNumber;
+
+    struct FragmentNumberSet {
+      FragmentNumber_t bitmapBase;
+      sequence<long, 8> bitmap;
+    };
+
+    typedef octet Locator_address_t[16];
+    struct Locator_t {
+      long kind;
+      unsigned long port;
+      Locator_address_t address;
+    };
+
+    typedef sequence<Locator_t, 8> LocatorList;
+
+    struct LocatorUDPv4_t {
+      unsigned long address;
+      unsigned long port;
+    };
+    typedef LocatorUDPv4_t LocatorUDPv4;
+
+    struct TopicKind_t {
+      long value;
+    };
+
+    struct ReliabilityKind_t {
+      long value;
+    };
+
+    struct Count_t {
+      long value;
+    };
+    typedef Count_t Count;
+
+    struct ProtocolVersion_t {
+      octet major;
+      octet minor;
+    };
+    typedef ProtocolVersion_t ProtocolVersion;
+
+    typedef octet KeyHash_value_t[16];
+    struct KeyHash_t {
+      KeyHash_value_t value;
+    };
+
+    typedef octet StatusInfo_value_t[4];
+    struct StatusInfo_t {
+      StatusInfo_value_t value;
+    };
+
+    struct ParameterId_t {
+      short value;
+    };
+
+    struct ContentFilterProperty_t {
+      char contentFilteredTopicName[256];
+      char relatedTopicName[256];
+      char filterClassName[256];
+      string filterExpression;
+      sequence<string> expressionParameters;
+    };
+
+    typedef sequence<long> FilterResult_t;
+    typedef long FilterSignature_t[4];
+    struct ContentFilterInfo_t {
+      FilterResult_t filterResult;
+      sequence<FilterSignature_t> filterSignatures;
+    };
+
+    struct Property_t {
+      string name;
+      string value;
+    };
+
+    struct EntityName_t {
+      string name;
+    };
+
+    /* requires custom marshalling */
+    struct Parameter {
+      ParameterId_t parameterId;
+      sequence<octet> value;
+    };
+    typedef sequence<Parameter> ParameterList;
+
+    struct OriginalWriterInfo_t {
+      GUID_t originalWriterGUID;
+      SequenceNumber_t originalWriterSN;
+      ParameterList originalWriterQos;
+    };
+
+    typedef unsigned long BuiltinEndpointSet_t;
+
+    typedef sequence<octet> SerializedPayload_t;
+    typedef SerializedPayload_t SerializedPayload;
+
+
+    const octet ENTITYKIND_BUILTIN_UNKNOWN      = 0xc0;
+    const octet ENTITYKIND_BUILTIN_PARTICIPANT  = 0xc1;
+    const octet ENTITYKIND_USER_UNKNOWN         = 0x00;
+    const octet ENTITYKIND_USER_WRITER_WITH_KEY = 0x02;
+    const octet ENTITYKIND_USER_WRITER_NO_KEY   = 0x03;
+    const octet ENTITYKIND_USER_READER_NO_KEY   = 0x04;
+    const octet ENTITYKIND_USER_READER_WITH_KEY = 0x07;
+
+    // Vendor specific Kinds have the following bit pattern: 01xx_xxxx
+    const octet ENTITYKIND_OPENDDS_SUBSCRIBER   = 0x41;
+    const octet ENTITYKIND_OPENDDS_PUBLISHER    = 0x42;
+
+    const octet ENTITYKIND_OPENDDS_TOPIC        = 0x45;
+    const octet ENTITYKIND_OPENDDS_USER         = 0x4a;
+
+    // Used in testing.
+    const octet ENTITYKIND_OPENDDS_NIL_WRITER = 0x4e;
+
+    const long LOCATOR_KIND_INVALID = -1;
+    const unsigned long LOCATOR_PORT_INVALID = 0;
+    const long LOCATOR_KIND_RESERVED = 0;
+    const long LOCATOR_KIND_UDPv4 = 1;
+    const long LOCATOR_KIND_UDPv6  = 2;
+
+    const short NO_KEY = 1;
+    const short WITH_KEY = 2;
+
+    const short BEST_EFFORT = 1;
+    const short RELIABLE = 3;
+
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER = 0x00000001 << 0;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR = 0x00000001 << 1;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER = 0x00000001 << 2;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR = 0x00000001 << 3;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER = 0x00000001 << 4;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR = 0x00000001 << 5;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_ANNOUNCER = 0x00000001 << 6;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_DETECTOR = 0x00000001 << 7;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_ANNOUNCER = 0x00000001 << 8;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_DETECTOR = 0x00000001 << 9;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER = 0x00000001 << 10;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER = 0x00000001 << 11;
+
+  };
+};
+
+#endif /* _RTPS_RTPSBASEMESSAGETYPES_IDL_ */

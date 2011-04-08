@@ -1,0 +1,115 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef _RTPS_RTPSMESSAGETYPES_IDL_
+#define _RTPS_RTPSMESSAGETYPES_IDL_
+
+#include "RtpsBaseMessageTypes.idl"
+
+module OpenDDS {
+  module RTPS {
+
+    // all Submessages are composed of a leading SubmessageHeader
+    struct SubmessageHeader {
+      octet submessageId;
+      octet flags;
+      unsigned short submessageLength; /* octetsToNextHeader */
+    };
+
+    struct AckNakSubmessageBody {
+      EntityId readerId;
+      EntityId writerId;
+      SequenceNumberSet readerSNState;
+    };
+
+    struct DataSubmessageBody {
+      unsigned short extraFlags;
+      unsigned short octetsToInlineQos;
+      EntityId readerId;
+      EntityId writerId;
+      SequenceNumber writerSN;
+      ParameterList inlineQos;
+      SerializedPayload_t serializedPayload;
+    };
+
+    struct DataFragSubmessageBody {
+      unsigned short extraFlags;
+      unsigned short octetsToInlineQos;
+      EntityId readerId;
+      EntityId writerId;
+      SequenceNumber writerSN;
+      FragmentNumber fragmentStartingNum;
+      unsigned short fragmentsInSubmessage;
+      unsigned short fragmentSize;
+      unsigned long sampleSize;
+      ParameterList inlineQos;
+      SerializedPayload_t serializedPayload;
+    };
+
+    struct GapSubmessageBody {
+      EntityId readerId;
+      EntityId writerId;
+      SequenceNumber gapStart;
+      SequenceNumberSet gapList;
+    };
+
+    struct HeartBeatSubmessageBody {
+      EntityId readerId;
+      EntityId writerId;
+      SequenceNumber firstSN;
+      SequenceNumber lastSN;
+      Count_t count;
+    };
+
+    struct HeartBeatFragSubmessageBody {
+      EntityId readerId;
+      EntityId writerId;
+      SequenceNumber writerSN;
+      FragmentNumber fragmentStartingNum;
+      Count_t count;
+    };
+
+    struct InfoDestinationSubmessageBody {
+      GuidPrefix_t guidPrefix;
+    };
+
+    struct InfoReplySubmessageBody {
+      LocatorList unicastLocatorList;
+      LocatorList multicastLocatorList;
+    };
+
+    struct InfoSourceSubmessageBody {
+      long unused;
+      ProtocolVersion version;
+      VendorId_t vendorId;
+      GuidPrefix_t guidPrefix;
+    };
+
+    struct InfoTimestampSubmessageBody {
+      Timestamp_t timestamp;
+    };
+
+    typedef SubmessageHeader PadSubmessageBody;
+
+    struct NackFragSubmessageBody {
+      EntityId readerId;
+      EntityId writerId;
+      SequenceNumber writerSN;
+      FragmentNumberSet fragmentNumberState;
+      Count_t count;
+    };
+
+    struct InfoReplyIp4SubmessageBody {
+      LocatorUDPv4 unicastLocatorList;
+      LocatorUDPv4 multicastLocatorList;
+    };
+
+  };
+};
+
+#endif /* _RTPS_RTPSMESSAGETYPES_IDL_ */
