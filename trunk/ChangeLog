@@ -1,3 +1,31 @@
+Fri Apr  8 18:24:44 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
+
+          Handle cycles in definitions (accomplished with sequences).
+
+        * tools/modeling/tests/Looped:
+        * tools/modeling/tests/Looped/Looped.codegen:
+        * tools/modeling/tests/Looped/Looped.mpc:
+        * tools/modeling/tests/Looped/Looped.mwc:
+        * tools/modeling/tests/Looped/Looped.opendds:
+        * tools/modeling/tests/Looped/publisher.cpp:
+        * tools/modeling/tests/Looped/subscriber.cpp:
+
+          Example of complex loops in type definitions.
+
+        * tools/modeling/tests/StockQuoter:
+        * tools/modeling/tests/StockQuoter/StockQuoter.codegen:
+        * tools/modeling/tests/StockQuoter/StockQuoter.mpc:
+        * tools/modeling/tests/StockQuoter/StockQuoter.mwc:
+        * tools/modeling/tests/StockQuoter/StockQuoter.opendds:
+        * tools/modeling/tests/StockQuoter/publisher.cpp:
+        * tools/modeling/tests/StockQuoter/subscriber.cpp:
+
+          Example of simple loops in type definitions.
+
+        * tools/modeling/tests/modeling_tests.lst:
+
 Wed Apr  6 19:15:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
