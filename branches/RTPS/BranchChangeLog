@@ -1,3 +1,15 @@
+Mon Apr 11 15:03:30 UTC 2011  cjohn  <john_c@ociweb.com>
+
+        * dds/DCPS/RTPS/:
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+        * dds/DCPS/RTPS/BaseMessageTypes.h:
+        * dds/DCPS/RTPS/MessageTypes.h:
+        * dds/DCPS/RTPS/rtps.mpc:
+        * dds/DCPS/RTPS/Test.cpp:
+
+          Create RTPS directory and Base types.
+
 Tue Apr  5 15:02:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * BranchChangeLog:
