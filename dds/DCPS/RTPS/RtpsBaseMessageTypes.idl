@@ -20,6 +20,7 @@ module OpenDDS {
 
     typedef sequence<GUID_t> GUIDSeq;
 
+    /* Type used to hold a timestamp. */
     struct Time_t {
       long seconds;
       unsigned long fraction;
@@ -28,60 +29,84 @@ module OpenDDS {
     typedef Timestamp_t Timestamp;
 
     typedef octet VendorId_vendorId_t[2];
+
+    /* Type used to represent the vendor of the service implementing the RTPS protocol. */
     struct VendorId_t {
       VendorId_vendorId_t vendorId;
     };
     typedef VendorId_t VendorId;
 
+    /* Type used to hold sequence numbers. */
     struct SequenceNumber_t {
       long high;
       unsigned long low;
     };
     typedef SequenceNumber_t SequenceNumber;
 
+    /* SequenceNumberSet SubmessageElements are used as parts of several messages to
+       provide binary information about individual sequence numbers within a range. */
+    /* TBD: requires custom de/serializer */
     struct SequenceNumberSet {
       SequenceNumber_t bitmapBase;
       sequence<long, 8> bitmap;
     };
 
+    /* Type used to hold fragment numbers. */
     struct FragmentNumber_t {
       unsigned long value;
     };
     typedef FragmentNumber_t FragmentNumber;
 
+    /* FragmentNumberSet SubmessageElements are used to provide binary information
+       about individual fragment numbers within a range. */
+    /* TBD: requires custom de/serializer */
     struct FragmentNumberSet {
       FragmentNumber_t bitmapBase;
       sequence<long, 8> bitmap;
     };
 
     typedef octet Locator_address_t[16];
+
+    /* Type used to represent the addressing information needed to send a message
+       to an RTPS Endpoint */
     struct Locator_t {
       long kind;
       unsigned long port;
       Locator_address_t address;
     };
 
+    /* LocatorList is used to specify a list of locators. */
     typedef sequence<Locator_t, 8> LocatorList;
 
+    /* Specialization of Locator_t used to hold UDP IPv4 locators using a more
+       compact representation. */
     struct LocatorUDPv4_t {
       unsigned long address;
       unsigned long port;
     };
     typedef LocatorUDPv4_t LocatorUDPv4;
 
+    /* Enumeration used to distinguish whether a Topic has defined some fields
+       within to be used as the ‘key’ that identifies data-instances within the
+       Topic. */
     struct TopicKind_t {
       long value;
     };
 
+    /* Enumeration used to indicate the level of the reliability used for
+       communications. */
     struct ReliabilityKind_t {
       long value;
     };
 
+    /* Type used to encapsulate a count that is incremented monotonically, used
+       to identify message duplicates. */
     struct Count_t {
       long value;
     };
     typedef Count_t Count;
 
+    /* Identifies the version of the RTPS protocol. */
     struct ProtocolVersion_t {
       octet major;
       octet minor;
@@ -98,20 +123,28 @@ module OpenDDS {
       StatusInfo_value_t value;
     };
 
+    /* Type used to uniquely identify a parameter in a parameter list. */
     struct ParameterId_t {
       short value;
     };
 
+    /* information to enable content filtering */
     struct ContentFilterProperty_t {
-      char contentFilteredTopicName[256];
-      char relatedTopicName[256];
-      char filterClassName[256];
+      string<256> contentFilteredTopicName;
+      string<256> relatedTopicName;
+      string<256> filterClassName;
       string filterExpression;
       sequence<string> expressionParameters;
     };
 
+    /* For each filter signature, the results indicate whether the
+       sample passed the filter. */
     typedef sequence<long> FilterResult_t;
+
+    /* A list of filters that were applied to the sample. */
     typedef long FilterSignature_t[4];
+
+
     struct ContentFilterInfo_t {
       FilterResult_t filterResult;
       sequence<FilterSignature_t> filterSignatures;
@@ -126,11 +159,13 @@ module OpenDDS {
       string name;
     };
 
-    /* requires custom marshalling */
+    /* requires custom de/marshalling */
     struct Parameter {
       ParameterId_t parameterId;
       sequence<octet> value;
     };
+
+    /* contains a list of Parameters, terminated with a sentinel */
     typedef sequence<Parameter> ParameterList;
 
     struct OriginalWriterInfo_t {
@@ -141,27 +176,9 @@ module OpenDDS {
 
     typedef unsigned long BuiltinEndpointSet_t;
 
+    /* TBD: Not sure how best to represent SerializedPayload */
     typedef sequence<octet> SerializedPayload_t;
     typedef SerializedPayload_t SerializedPayload;
-
-
-    const octet ENTITYKIND_BUILTIN_UNKNOWN      = 0xc0;
-    const octet ENTITYKIND_BUILTIN_PARTICIPANT  = 0xc1;
-    const octet ENTITYKIND_USER_UNKNOWN         = 0x00;
-    const octet ENTITYKIND_USER_WRITER_WITH_KEY = 0x02;
-    const octet ENTITYKIND_USER_WRITER_NO_KEY   = 0x03;
-    const octet ENTITYKIND_USER_READER_NO_KEY   = 0x04;
-    const octet ENTITYKIND_USER_READER_WITH_KEY = 0x07;
-
-    // Vendor specific Kinds have the following bit pattern: 01xx_xxxx
-    const octet ENTITYKIND_OPENDDS_SUBSCRIBER   = 0x41;
-    const octet ENTITYKIND_OPENDDS_PUBLISHER    = 0x42;
-
-    const octet ENTITYKIND_OPENDDS_TOPIC        = 0x45;
-    const octet ENTITYKIND_OPENDDS_USER         = 0x4a;
-
-    // Used in testing.
-    const octet ENTITYKIND_OPENDDS_NIL_WRITER = 0x4e;
 
     const long LOCATOR_KIND_INVALID = -1;
     const unsigned long LOCATOR_PORT_INVALID = 0;

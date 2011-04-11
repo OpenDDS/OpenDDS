@@ -30,6 +30,10 @@ namespace OpenDDS {
       DATA_FRAG      = 0x16     /* DataGrag */
     };
 
+    const ParticipantMessageData_kind PARTICIPANT_MESSAGE_DATA_KIND_UNKNOWN = { 0x00, 0x00, 0x00, 0x00 };
+    const ParticipantMessageData_kind PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE = { 0x00, 0x00, 0x00, 0x01 };
+    const ParticipantMessageData_kind PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE = { 0x00, 0x00, 0x00, 0x02 };
+
   }
 }
 

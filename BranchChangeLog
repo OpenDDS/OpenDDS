@@ -1,3 +1,11 @@
+Mon Apr 11 21:49:37 UTC 2011  cjohn  <john_c@ociweb.com>
+
+        * build/d1o0_6a/dds/DCPS/RTPS/RtpsMessageTypes.idl:
+        * build/d1o0_6a/dds/DCPS/RTPS/RtpsBaseMessageTypes.idl
+        * build/d1o0_6a/dds/DCPS/RTPS/MessageTypes.h
+
+        Define RTPS messages.
+
 Mon Apr 11 15:03:30 UTC 2011  cjohn  <john_c@ociweb.com>
 
         * dds/DCPS/RTPS/:
