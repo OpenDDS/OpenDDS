@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef _RTPS_BASEMESSAGETYPES_H_
-#define _RTPS_BASEMESSAGETYPES_H_
+#ifndef RTPS_BASEMESSAGETYPES_H
+#define RTPS_BASEMESSAGETYPES_H
 
 #include "RtpsBaseMessageTypesC.h"
 
@@ -22,7 +22,7 @@ namespace OpenDDS {
 
     const SequenceNumber_t SEQUENCENUMBER_UNKNOWN = { -1, 0 };
 
-    const Locator_address_t LOCATOR_ADDRESS_INVALID = { 0 };
+    const LOctetArray LOCATOR_ADDRESS_INVALID = { 0 };
     const Locator_t LOCATOR_INVALID = { -1, 0, { 0 } };
 
     const LocatorUDPv4_t LOCATORUDPv4_INVALID = {0, 0};
@@ -39,4 +39,4 @@ namespace OpenDDS {
   }
 }
 
-#endif /* _RTPS_BASEMESSAGETYPES_H_ */
+#endif /* RTPS_BASEMESSAGETYPES_H */
