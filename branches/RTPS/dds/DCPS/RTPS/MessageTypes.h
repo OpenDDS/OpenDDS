@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef _RTPS_MESSAGETYPES_H_
-#define _RTPS_MESSAGETYPES_H_
+#ifndef RTPS_MESSAGETYPES_H
+#define RTPS_MESSAGETYPES_H
 
 #include "RtpsMessageTypesC.h"
 
@@ -30,11 +30,11 @@ namespace OpenDDS {
       DATA_FRAG      = 0x16     /* DataGrag */
     };
 
-    const ParticipantMessageData_kind PARTICIPANT_MESSAGE_DATA_KIND_UNKNOWN = { 0x00, 0x00, 0x00, 0x00 };
-    const ParticipantMessageData_kind PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE = { 0x00, 0x00, 0x00, 0x01 };
-    const ParticipantMessageData_kind PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE = { 0x00, 0x00, 0x00, 0x02 };
+    const PMDOctetArray PARTICIPANT_MESSAGE_DATA_KIND_UNKNOWN = { 0x00, 0x00, 0x00, 0x00 };
+    const PMDOctetArray PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE = { 0x00, 0x00, 0x00, 0x01 };
+    const PMDOctetArray PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE = { 0x00, 0x00, 0x00, 0x02 };
 
   }
 }
 
-#endif /* _RTPS_MESSAGETYPES_H_ */
+#endif /* RTPS_MESSAGETYPES_H */

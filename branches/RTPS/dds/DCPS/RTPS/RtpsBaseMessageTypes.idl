@@ -6,10 +6,11 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef _RTPS_RTPSBASEMESSAGETYPES_IDL_
-#define _RTPS_RTPSBASEMESSAGETYPES_IDL_
+#ifndef RTPS_RTPSBASEMESSAGETYPES_IDL
+#define RTPS_RTPSBASEMESSAGETYPES_IDL
 
 #include "../../DdsDcpsGuid.idl"
+#include "../../DdsDcpsInfrastructure.idl"
 
 module OpenDDS {
   module RTPS {
@@ -18,7 +19,9 @@ module OpenDDS {
     typedef DCPS::EntityId_t EntityId;
     typedef DCPS::GUID_t GUID_t;
 
-    typedef sequence<GUID_t> GUIDSeq;
+    typedef DCPS::GUIDSeq GUIDSeq;
+
+    typedef DDS::OctetSeq OctetSeq;
 
     /* Type used to hold a timestamp. */
     struct Time_t {
@@ -26,53 +29,53 @@ module OpenDDS {
       unsigned long fraction;
     };
     typedef Time_t Timestamp_t;
-    typedef Timestamp_t Timestamp;
 
-    typedef octet VendorId_vendorId_t[2];
+    typedef octet VIDOctetArray[2];
 
     /* Type used to represent the vendor of the service implementing the RTPS protocol. */
     struct VendorId_t {
-      VendorId_vendorId_t vendorId;
+      VIDOctetArray vendorId;
     };
-    typedef VendorId_t VendorId;
 
     /* Type used to hold sequence numbers. */
     struct SequenceNumber_t {
       long high;
       unsigned long low;
     };
-    typedef SequenceNumber_t SequenceNumber;
+
+    typedef sequence<long, 8> SNSLongSeq;
 
     /* SequenceNumberSet SubmessageElements are used as parts of several messages to
        provide binary information about individual sequence numbers within a range. */
-    /* TBD: requires custom de/serializer */
+    /* ***ATTENTION***: requires custom de/serializer */
     struct SequenceNumberSet {
       SequenceNumber_t bitmapBase;
-      sequence<long, 8> bitmap;
+      SNSLongSeq bitmap;
     };
 
     /* Type used to hold fragment numbers. */
     struct FragmentNumber_t {
       unsigned long value;
     };
-    typedef FragmentNumber_t FragmentNumber;
+
+    typedef sequence<long, 8> FNSLongSeq;
 
     /* FragmentNumberSet SubmessageElements are used to provide binary information
        about individual fragment numbers within a range. */
-    /* TBD: requires custom de/serializer */
+    /* ***ATTENTION***: requires custom de/serializer */
     struct FragmentNumberSet {
       FragmentNumber_t bitmapBase;
-      sequence<long, 8> bitmap;
+      FNSLongSeq bitmap;
     };
 
-    typedef octet Locator_address_t[16];
+    typedef octet LOctetArray[16];
 
     /* Type used to represent the addressing information needed to send a message
        to an RTPS Endpoint */
     struct Locator_t {
       long kind;
       unsigned long port;
-      Locator_address_t address;
+      LOctetArray address;
     };
 
     /* LocatorList is used to specify a list of locators. */
@@ -84,7 +87,6 @@ module OpenDDS {
       unsigned long address;
       unsigned long port;
     };
-    typedef LocatorUDPv4_t LocatorUDPv4;
 
     /* Enumeration used to distinguish whether a Topic has defined some fields
        within to be used as the ‘key’ that identifies data-instances within the
@@ -104,23 +106,21 @@ module OpenDDS {
     struct Count_t {
       long value;
     };
-    typedef Count_t Count;
 
     /* Identifies the version of the RTPS protocol. */
     struct ProtocolVersion_t {
       octet major;
       octet minor;
     };
-    typedef ProtocolVersion_t ProtocolVersion;
 
-    typedef octet KeyHash_value_t[16];
+    typedef octet KHOctetArray[16];
     struct KeyHash_t {
-      KeyHash_value_t value;
+      KHOctetArray value;
     };
 
-    typedef octet StatusInfo_value_t[4];
+    typedef octet SIOctetArray[4];
     struct StatusInfo_t {
-      StatusInfo_value_t value;
+      SIOctetArray value;
     };
 
     /* Type used to uniquely identify a parameter in a parameter list. */
@@ -128,13 +128,16 @@ module OpenDDS {
       short value;
     };
 
+    typedef string<256> CFPBoundedString;
+    typedef sequence<string> CFPStringSeq;
+
     /* information to enable content filtering */
     struct ContentFilterProperty_t {
-      string<256> contentFilteredTopicName;
-      string<256> relatedTopicName;
-      string<256> filterClassName;
+      CFPBoundedString contentFilteredTopicName;
+      CFPBoundedString relatedTopicName;
+      CFPBoundedString filterClassName;
       string filterExpression;
-      sequence<string> expressionParameters;
+      CFPStringSeq expressionParameters;
     };
 
     /* For each filter signature, the results indicate whether the
@@ -144,10 +147,11 @@ module OpenDDS {
     /* A list of filters that were applied to the sample. */
     typedef long FilterSignature_t[4];
 
+    typedef sequence<FilterSignature_t> CFIFilterSignatureSeq;
 
     struct ContentFilterInfo_t {
       FilterResult_t filterResult;
-      sequence<FilterSignature_t> filterSignatures;
+      CFIFilterSignatureSeq filterSignatures;
     };
 
     struct Property_t {
@@ -162,7 +166,7 @@ module OpenDDS {
     /* requires custom de/marshalling */
     struct Parameter {
       ParameterId_t parameterId;
-      sequence<octet> value;
+      OctetSeq value;
     };
 
     /* contains a list of Parameters, terminated with a sentinel */
@@ -176,9 +180,8 @@ module OpenDDS {
 
     typedef unsigned long BuiltinEndpointSet_t;
 
-    /* TBD: Not sure how best to represent SerializedPayload */
-    typedef sequence<octet> SerializedPayload_t;
-    typedef SerializedPayload_t SerializedPayload;
+    /* ***ATTENTION***: Not sure how best to represent SerializedPayload */
+    typedef OctetSeq SerializedPayload_t;
 
     const long LOCATOR_KIND_INVALID = -1;
     const unsigned long LOCATOR_PORT_INVALID = 0;
@@ -208,4 +211,4 @@ module OpenDDS {
   };
 };
 
-#endif /* _RTPS_RTPSBASEMESSAGETYPES_IDL_ */
+#endif /* RTPS_RTPSBASEMESSAGETYPES_IDL */

@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef _RTPS_RTPSMESSAGETYPES_IDL_
-#define _RTPS_RTPSMESSAGETYPES_IDL_
+#ifndef RTPS_RTPSMESSAGETYPES_IDL
+#define RTPS_RTPSMESSAGETYPES_IDL
 
 #include "RtpsBaseMessageTypes.idl"
 #include "../../DdsDcpsInfrastructure.idl"
@@ -16,15 +16,15 @@ module OpenDDS {
   module RTPS {
 
     /* All messages should include a leading RTPS Header. */
-    typedef octet Header_prefix[4];
+    typedef octet HOctetArray[4];
     struct Header {
-      Header_prefix prefix;
-      ProtocolVersion version;
+      HOctetArray prefix;
+      ProtocolVersion_t version;
       VendorId_t vendorId;
       GuidPrefix_t guidPrefix;
     };
 
-    // all Submessages are composed of a leading SubmessageHeader
+    /* all Submessages are composed of a leading SubmessageHeader */
     struct SubmessageHeader {
       octet submessageId;
       octet flags;
@@ -46,7 +46,7 @@ module OpenDDS {
       unsigned short octetsToInlineQos;
       EntityId readerId;
       EntityId writerId;
-      SequenceNumber writerSN;
+      SequenceNumber_t writerSN;
       ParameterList inlineQos;
       SerializedPayload_t serializedPayload;
     };
@@ -59,8 +59,8 @@ module OpenDDS {
       unsigned short octetsToInlineQos;
       EntityId readerId;
       EntityId writerId;
-      SequenceNumber writerSN;
-      FragmentNumber fragmentStartingNum;
+      SequenceNumber_t writerSN;
+      FragmentNumber_t fragmentStartingNum;
       unsigned short fragmentsInSubmessage;
       unsigned short fragmentSize;
       unsigned long sampleSize;
@@ -73,7 +73,7 @@ module OpenDDS {
     struct GapSubmessageBody {
       EntityId readerId;
       EntityId writerId;
-      SequenceNumber gapStart;
+      SequenceNumber_t gapStart;
       SequenceNumberSet gapList;
     };
 
@@ -82,8 +82,8 @@ module OpenDDS {
     struct HeartBeatSubmessageBody {
       EntityId readerId;
       EntityId writerId;
-      SequenceNumber firstSN;
-      SequenceNumber lastSN;
+      SequenceNumber_t firstSN;
+      SequenceNumber_t lastSN;
       Count_t count;
     };
 
@@ -92,8 +92,8 @@ module OpenDDS {
     struct HeartBeatFragSubmessageBody {
       EntityId readerId;
       EntityId writerId;
-      SequenceNumber writerSN;
-      FragmentNumber fragmentStartingNum;
+      SequenceNumber_t writerSN;
+      FragmentNumber_t fragmentStartingNum;
       Count_t count;
     };
 
@@ -114,7 +114,7 @@ module OpenDDS {
     /* This message modifies the logical source of the Submessages that follow. */
     struct InfoSourceSubmessageBody {
       long unused;
-      ProtocolVersion version;
+      ProtocolVersion_t version;
       VendorId_t vendorId;
       GuidPrefix_t guidPrefix;
     };
@@ -125,16 +125,16 @@ module OpenDDS {
       Timestamp_t timestamp;
     };
 
-    /* The purpose of this Submessage is to allow the introduction of any padding
-       necessary to meet any desired memory-alignment requirements. */
-    typedef SubmessageHeader PadSubmessageBody;
+    /* The purpose of the Pad Submessage is to allow the introduction of any padding
+       necessary to meet any desired memory-alignment requirements. Its body is
+       empty */
 
     /* The NackFrag Submessage is used to communicate the state of a Reader to a
        Writer. */
     struct NackFragSubmessageBody {
       EntityId readerId;
       EntityId writerId;
-      SequenceNumber writerSN;
+      SequenceNumber_t writerSN;
       FragmentNumberSet fragmentNumberState;
       Count_t count;
     };
@@ -142,35 +142,36 @@ module OpenDDS {
     /* InfoReplyIp4 is provided for efficiency reasons and can be used instead
        of the InfoReply Submessage to provide a more compact representation. */
     struct InfoReplyIp4SubmessageBody {
-      LocatorUDPv4 unicastLocatorList;
-      LocatorUDPv4 multicastLocatorList;
+      LocatorUDPv4_t unicastLocatorList;
+      LocatorUDPv4_t multicastLocatorList;
     };
 
-    typedef octet ParticipantMessageData_kind[4];
+    typedef octet PMDOctetArray[4];
 
     /* Type used to hold data exchanged between Participants. */
     struct ParticipantMessageData {
       GuidPrefix_t participantGuidPrefix;
-      ParticipantMessageData_kind kind;
-      sequence<octet> data;
+      PMDOctetArray kind;
+      OctetSeq data;
     };
 
-    /* TBD: requires custom de/serializer */
+    typedef sequence<BuiltinEndpointSet_t> PPBuiltinEndpointsSeq;
+    typedef sequence<Locator_t> PPLocatorSeq;
+    /* ***ATTENTION***: requires custom de/serializer */
     struct ParticipantProxy_t {
       ProtocolVersion_t protocolVersion;
       GuidPrefix_t guidPrefix;
       VendorId_t vendorId;
       boolean expectsInlineQos;
-      sequence<BuiltinEndpointSet_t> availableBuiltinEndpoints;
-      sequence<Locator_t> metatrafficUnicastLocatorList;
-      sequence<Locator_t> metatrafficMulticastLocatorList;
-      sequence<Locator_t> defaultMulticastLocatorList;
-      sequence<Locator_t> defaultUnicastLocatorList;
+      PPBuiltinEndpointsSeq availableBuiltinEndpoints;
+      PPLocatorSeq metatrafficUnicastLocatorList;
+      PPLocatorSeq metatrafficMulticastLocatorList;
+      PPLocatorSeq defaultMulticastLocatorList;
+      PPLocatorSeq defaultUnicastLocatorList;
       Count_t manualLivelinessCount;
     };
-    typedef ParticipantProxy_t ParticipantProxy;
 
-    /* TBD: Duration_t PSM isn't specified. It is used to hold time-differences.
+    /* ***ATTENTION***: Duration_t PSM isn't specified. It is used to hold time-differences.
        Should have at least nano-second resolution. */
     typedef unsigned long Duration_t;
 
@@ -181,25 +182,25 @@ module OpenDDS {
       Duration_t leaseDuration;
     };
 
+    typedef sequence<Locator_t> WPLocatorSeq;
     struct WriterProxy_t {
       GUID_t remoteWriterGuid;
-      sequence<Locator_t> unicastLocatorList;
-      sequence<Locator_t> multicastLocatorList;
+      WPLocatorSeq unicastLocatorList;
+      WPLocatorSeq multicastLocatorList;
     };
-    typedef WriterProxy_t WriterProxy;
 
     struct DiscoveredWriterData {
       DDS::PublicationBuiltinTopicData ddsPublicationData;
       WriterProxy_t writerProxy;
     };
 
+    typedef sequence<Locator_t> RPLocatorSeq;
     struct ReaderProxy_t {
       GUID_t remoteReaderGuid;
       boolean expectsInlineQos;
-      sequence<Locator_t> unicastLocatorList;
-      sequence<Locator_t> multicastLocatorList;
+      RPLocatorSeq unicastLocatorList;
+      RPLocatorSeq multicastLocatorList;
     };
-    typedef ReaderProxy_t ReaderProxy;
 
     struct DiscoveredReaderData {
       DDS::SubscriptionBuiltinTopicData ddsSubscriptionData;
@@ -214,4 +215,4 @@ module OpenDDS {
   };
 };
 
-#endif /* _RTPS_RTPSMESSAGETYPES_IDL_ */
+#endif /* RTPS_RTPSMESSAGETYPES_IDL */
