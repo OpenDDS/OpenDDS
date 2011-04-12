@@ -14,6 +14,7 @@
 ACE_INLINE
 OpenDDS::DCPS::TransportHeader::TransportHeader()
   : byte_order_(TAO_ENCAP_BYTE_ORDER),
+    last_fragment_(false),
     reserved_(0),
     length_(0),
     sequence_(0),
@@ -63,7 +64,7 @@ OpenDDS::DCPS::TransportHeader::max_marshaled_size()
   DBG_ENTRY_LVL("TransportHeader","max_marshaled_size",6);
   // Representation takes no extra space for encoding.
   return sizeof(this->protocol_) +
-         sizeof(this->byte_order_) +
+         1 /*flags*/ +
          sizeof(this->reserved_) +
          sizeof(this->length_) +
          sizeof(this->sequence_) +
@@ -100,17 +101,18 @@ OpenDDS::DCPS::TransportHeader::init(ACE_Message_Block* buffer)
 
   reader.read_octet_array(this->protocol_, sizeof(this->protocol_));
 
-  reader >> ACE_InputCDR::to_octet(this->byte_order_);
+  ACE_CDR::Octet flags;
+  reader >> ACE_InputCDR::to_octet(flags);
+  this->byte_order_= flags & (1 << BYTE_ORDER_FLAG);
+  this->last_fragment_ = flags & (1 << LAST_FRAGMENT_FLAG);
+
   reader >> ACE_InputCDR::to_octet(this->reserved_);
 
   reader.swap_bytes(swap_bytes());
 
-  // Extract the length_ value.
   reader >> this->length_;
 
-  // Extract the sequence_ value.
   reader >> this->sequence_;
 
-  // Extract the source_id_ value.
   reader >> this->source_;
 }

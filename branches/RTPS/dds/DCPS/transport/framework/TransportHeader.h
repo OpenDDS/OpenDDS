@@ -34,8 +34,8 @@ struct OpenDDS_Dcps_Export TransportHeader {
   TransportHeader();
 
   /// Construct with values extracted from a buffer.
-  TransportHeader(ACE_Message_Block* buffer);
-  TransportHeader(ACE_Message_Block& buffer);
+  explicit TransportHeader(ACE_Message_Block* buffer);
+  explicit TransportHeader(ACE_Message_Block& buffer);
 
   /// Assignment from an ACE_Message_Block.
   TransportHeader& operator=(ACE_Message_Block* buffer);
@@ -50,8 +50,13 @@ struct OpenDDS_Dcps_Export TransportHeader {
   /// The protocol of the packet being transmitted.
   ACE_CDR::Octet protocol_[6];
 
-  /// The byte order used to generate the header.
-  ACE_CDR::Octet byte_order_;
+  /// Flags: marshaled as a single byte (ACE_CDR::Octet)
+  bool byte_order_;
+  bool last_fragment_;
+
+  /// Constants for bit masking the marshaled flags byte.
+  /// This needs to match the 'Flags' above.
+  enum { BYTE_ORDER_FLAG, LAST_FRAGMENT_FLAG };
 
   /// Reserved for future use (provides padding for preamble).
   ACE_CDR::Octet reserved_;
@@ -72,7 +77,7 @@ struct OpenDDS_Dcps_Export TransportHeader {
   /// Similar to IDL compiler generated methods.
   size_t max_marshaled_size();
 
-  /// Demarshall transport packet from ACE_Message_Block.
+  /// Demarshal transport packet from ACE_Message_Block.
   void init(ACE_Message_Block* buffer);
 };
 

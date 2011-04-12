@@ -24,9 +24,14 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "EntryExit.h"
 
+#include "ace/Reverse_Lock_T.h"
+
 #if !defined (__ACE_INLINE__)
 #include "TransportSendStrategy.inl"
 #endif /* __ACE_INLINE__ */
+
+namespace OpenDDS {
+namespace DCPS {
 
 //TBD: The number of chunks of the replace element allocator
 //     is hard coded for now. This will be configurable when
@@ -40,7 +45,7 @@
 // occurs every packet and is released after packet is sent.
 // The data block only needs 1 chunk since the duplicate()
 // just increases the ref count.
-OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
+TransportSendStrategy::TransportSendStrategy
 (TransportConfiguration* config,
  ThreadSynchResource*    synch_resource,
  CORBA::Long             priority)
@@ -53,7 +58,7 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
     header_block_(0),
     elems_(new QueueType(1, config->max_samples_per_packet_)),
     pkt_chain_(0),
-    header_complete_(0),
+    header_complete_(false),
     start_counter_(0),
     mode_(MODE_DIRECT),
     mode_before_suspend_(MODE_NOT_SET),
@@ -93,7 +98,7 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
   // don't want to keep asking for it over and over.
   this->max_header_size_ = this->header_.max_marshaled_size();
 
-  if (OpenDDS::DCPS::Transport_debug_level >= 2) {
+  if (Transport_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy replaced_element_allocator %x with %d chunks\n",
                &replaced_element_allocator_, NUM_REPLACED_ELEMENT_CHUNKS));
   }
@@ -102,13 +107,11 @@ OpenDDS::DCPS::TransportSendStrategy::TransportSendStrategy
   this->delayed_notification_mode_ = new SendMode[max_samples_];
 }
 
-OpenDDS::DCPS::TransportSendStrategy::~TransportSendStrategy()
+TransportSendStrategy::~TransportSendStrategy()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","~TransportSendStrategy",6);
 
-  if (this->synch_) {
-    delete this->synch_;
-  }
+  delete this->synch_;
 
   if (this->delayed_delivered_notification_queue_) {
     delete [] this->delayed_delivered_notification_queue_;
@@ -120,16 +123,12 @@ OpenDDS::DCPS::TransportSendStrategy::~TransportSendStrategy()
     this->delayed_notification_mode_ = 0;
   }
 
-  if (this->elems_)
-    delete this->elems_;
-
-  if (this->queue_)
-    delete this->queue_;
+  delete this->elems_;
+  delete this->queue_;
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::send_buffer(
-  OpenDDS::DCPS::TransportSendBuffer* send_buffer)
+TransportSendStrategy::send_buffer(TransportSendBuffer* send_buffer)
 {
   this->send_buffer_ = send_buffer;
 
@@ -138,8 +137,8 @@ OpenDDS::DCPS::TransportSendStrategy::send_buffer(
   }
 }
 
-OpenDDS::DCPS::TransportSendStrategy::WorkOutcome
-OpenDDS::DCPS::TransportSendStrategy::perform_work()
+ThreadSynchWorker::WorkOutcome
+TransportSendStrategy::perform_work()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","perform_work",6);
 
@@ -189,7 +188,7 @@ OpenDDS::DCPS::TransportSendStrategy::perform_work()
     // packet.  When we find the current packet in the "partially sent" state,
     // we will not touch the queue_ - we will just try to send the unsent
     // bytes in the current (partially sent) packet.
-    size_t header_length = this->header_.length_;// + this->not_yet_pac_q_len_;
+    const size_t header_length = this->header_.length_;
 
     if (header_length == 0) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
@@ -270,7 +269,7 @@ OpenDDS::DCPS::TransportSendStrategy::perform_work()
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "The outcome of the send_packet() was %d.\n", outcome), 5);
 
-  TransportSendElement element (0, 0);
+  TransportSendElement element(0, 0);
   // Notify the Elements that were sent.
   this->send_delayed_notifications(element);
 
@@ -304,7 +303,7 @@ OpenDDS::DCPS::TransportSendStrategy::perform_work()
     if (this->mode_ == MODE_SUSPEND) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                 "The reconnect has not done yet and we are still in MODE_SUSPEND. "
-                "Return WORK_OUTCOME_ClOGGED_RESOURCE.\n"), 5);
+                "Return WORK_OUTCOME_CLOGGED_RESOURCE.\n"), 5);
       // Return WORK_OUTCOME_NO_MORE_TO_DO to tell our caller that we
       // don't desire another call to this perform_work() method.
       return WORK_OUTCOME_NO_MORE_TO_DO;
@@ -330,9 +329,9 @@ OpenDDS::DCPS::TransportSendStrategy::perform_work()
   if (outcome == OUTCOME_BACKPRESSURE) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
               "We experienced backpressure on our attempt to send the "
-              "packet.  Return WORK_OUTCOME_ClOGGED_RESOURCE.\n"), 5);
+              "packet.  Return WORK_OUTCOME_CLOGGED_RESOURCE.\n"), 5);
     // We have a "clogged resource".
-    return WORK_OUTCOME_ClOGGED_RESOURCE;
+    return WORK_OUTCOME_CLOGGED_RESOURCE;
   }
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
@@ -369,11 +368,10 @@ OpenDDS::DCPS::TransportSendStrategy::perform_work()
 // may be packet header bytes and shouldn't affect the header_.length_
 // which doesn't include the packet header bytes.
 int
-OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
-(ssize_t num_bytes_sent,
- UseDelayedNotification delay_notification)
+TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
+  UseDelayedNotification delay_notification)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","adjust_packet_after_send",6);
+  DBG_ENTRY_LVL("TransportSendStrategy", "adjust_packet_after_send", 6);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Adjusting the current packet because %d bytes of the packet "
@@ -421,7 +419,7 @@ OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
           "At top of 'num bytes left' loop.  num_bytes_left == [%d].\n",
           num_bytes_left));
 
-    int block_length = static_cast<int>(this->pkt_chain_->length());
+    const int block_length = static_cast<int>(this->pkt_chain_->length());
 
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Length of block at front of pkt_chain_ is [%d].\n",
@@ -460,7 +458,7 @@ OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "Now, num_bytes_left == [%d].\n", num_bytes_left));
 
-      if (this->header_complete_ == 0) {
+      if (!this->header_complete_) {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Since the header_complete_ flag is false, it means "
               "that the packet header block was still in the "
@@ -472,7 +470,7 @@ OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
 
         // That was the packet header block.  And now we know that it
         // has been completely sent.
-        this->header_complete_ = 1;
+        this->header_complete_ = true;
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Release the fully sent block.\n"));
@@ -537,11 +535,9 @@ OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
           // Inform the element that the data has been delivered.
 
           if ((delay_notification == DELAY_NOTIFICATION) &&
-              (num_delayed_notifications_ < max_samples_)) {
+              (this->num_delayed_notifications_ < this->max_samples_)) {
             // If we can delay notification.
-            delayed_delivered_notification_queue_[num_delayed_notifications_] = element;
-            delayed_notification_mode_[num_delayed_notifications_] = this->mode_;
-            ++num_delayed_notifications_;
+            this->add_delayed_notification(element);
 
           } else {
             // Ciju: If not, do a best effort immediate notification.
@@ -552,15 +548,15 @@ OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
             // ciju: We need to release this->lock_ before
             // calling data_dropped/data_delivered. Else we have a potential
             // deadlock in our hands.
-            if (this->mode_ == MODE_TERMINATED) {
-              this->lock_.remove();  // Release and reacquire the lock
-              element->data_dropped(true);
-              this->lock_.acquire_write();
+            const SendMode mode = this->mode_;
+            ACE_Reverse_Lock<LockType> reverse(this->lock_);
+            ACE_Guard<ACE_Reverse_Lock<LockType> > reverseGuard(reverse);
+            if (mode == MODE_TERMINATED) {
+              element->data_dropped(true /*dropped_by_transport*/);
 
             } else {
-              this->lock_.remove();  // Release and reacquire the lock
               element->data_delivered();
-              this->lock_.acquire_write();
+
             }
           }
 
@@ -630,7 +626,7 @@ OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
       // Only part of the current block was sent.
       this->pkt_chain_->rd_ptr(num_bytes_left);
 
-      if (this->header_complete_ == 1) {
+      if (this->header_complete_) {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "And since the packet header block has already been "
               "completely sent, add num_bytes_left to the "
@@ -688,7 +684,7 @@ OpenDDS::DCPS::TransportSendStrategy::adjust_packet_after_send
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications(TransportSendElement& element)
+TransportSendStrategy::send_delayed_notifications(TransportSendElement& element)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_delayed_notifications",6);
 
@@ -787,7 +783,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_delayed_notifications(TransportSendEl
 
 /// Remove all samples in the backpressure queue and packet queue.
 void
-OpenDDS::DCPS::TransportSendStrategy::terminate_send(bool graceful_disconnecting)
+TransportSendStrategy::terminate_send(bool graceful_disconnecting)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","terminate_send",6);
 
@@ -818,7 +814,7 @@ OpenDDS::DCPS::TransportSendStrategy::terminate_send(bool graceful_disconnecting
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::clear(SendMode mode)
+TransportSendStrategy::clear(SendMode mode)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","clear",6);
 
@@ -854,7 +850,7 @@ OpenDDS::DCPS::TransportSendStrategy::clear(SendMode mode)
 
     this->header_.length_ = 0;
     this->pkt_chain_ = 0;
-    this->header_complete_ = 0;
+    this->header_complete_ = false;
     this->start_counter_ = 0;
     this->mode_ = mode;
     this->mode_before_suspend_ = MODE_NOT_SET;
@@ -875,7 +871,7 @@ OpenDDS::DCPS::TransportSendStrategy::clear(SendMode mode)
 }
 
 int
-OpenDDS::DCPS::TransportSendStrategy::start()
+TransportSendStrategy::start()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","start",6);
 
@@ -919,7 +915,7 @@ OpenDDS::DCPS::TransportSendStrategy::start()
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::stop()
+TransportSendStrategy::stop()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","stop",6);
 
@@ -960,17 +956,14 @@ OpenDDS::DCPS::TransportSendStrategy::stop()
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool relink)
+TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","send",6);
-
+  DBG_ENTRY_LVL("TransportSendStrategy", "send", 6);
   {
     GuardType guard(this->lock_);
 
     if (this->link_released_) {
-      delayed_delivered_notification_queue_[num_delayed_notifications_] = element;
-      delayed_notification_mode_[num_delayed_notifications_] = this->mode_;
-      ++num_delayed_notifications_;
+      this->add_delayed_notification(element);
 
     } else {
       if (this->mode_ == MODE_TERMINATED && !this->graceful_disconnecting_) {
@@ -981,7 +974,7 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
         return;
       }
 
-      size_t element_length = element->msg()->total_length();
+      const size_t element_length = element->msg()->total_length();
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "Send element msg() has total_length() == [%d].\n",
@@ -997,22 +990,26 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
 
       // Really an assert.  We can't accept any element that wouldn't fit into
       // a transport packet by itself (ie, it would be the only element in the
-      // packet).
+      // packet).  This max_size_ is the user-configurable maximum, not based
+      // on the transport's inherent maximum message size.
       if (this->max_header_size_ + element_length > this->max_size_) {
         ACE_ERROR((LM_ERROR,
-                   "(%P|%t) ERROR: Element too large - won't fit into packet.\n"));
+                   "(%P|%t) ERROR: Element too large (%Q) "
+                   "- won't fit into packet.\n", ACE_UINT64(element_length)));
         return;
       }
 
       // Check the mode_ to see if we simply put the element on the queue.
       if (this->mode_ == MODE_QUEUE || this->mode_ == MODE_SUSPEND) {
         VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
-                  "this->mode_ == %C, so queue elem and leave.\n", mode_as_str(this->mode_)), 5);
+                  "this->mode_ == %C, so queue elem and leave.\n",
+                  mode_as_str(this->mode_)), 5);
 
         this->queue_->put(element);
 
-        if (this->mode_ != MODE_SUSPEND)
+        if (this->mode_ != MODE_SUSPEND) {
           this->synch_->work_available();
+        }
 
         return;
       }
@@ -1042,17 +1039,17 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
       //        and the current element says that it must be sent in an
       //        exclusive packet (ie, in a packet all by itself).
       //
-      int element_requires_exclusive_packet = element->requires_exclusive_packet();
+      const bool exclusive = element->requires_exclusive_packet();
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "The element %C require an exclusive packet.\n",
-            (element_requires_exclusive_packet? "DOES": "does NOT")
+            (exclusive ? "DOES" : "does NOT")
           ));
 
-      if ((this->max_header_size_ +
-           this->header_.length_  +
-           element_length           > this->max_size_) ||
-          ((this->elems_->size() != 0) && (element_requires_exclusive_packet == 1))) {
+      if ((this->max_header_size_ + this->header_.length_ + element_length
+           > this->max_size_) ||
+          ((this->elems_->size() != 0) && exclusive)) {
+
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Element won't fit in current packet - send current "
               "packet (directly) now.\n"));
@@ -1071,7 +1068,7 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
 
         // Send the current packet, and deal with the current element
         // afterwards.
-        // The invocations relink status shoudl dictate the direct_send's
+        // The invocation's relink status should dictate the direct_send's
         // relink. We don't want a (relink == false) invocation to end up
         // doing a relink. Think of (relink == false) as a non-blocking call.
         this->direct_send(relink);
@@ -1084,10 +1081,6 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
         // Otherwise, if the mode_ is still MODE_DIRECT, we can just
         // "drop" through to the next step in the logic where we append the
         // current element to the current packet.
-
-        //ciju: I guess the logic is that any other mode is an error
-        // which will be dealt with later. For now just push in the element
-        // into the current packet.
         if (this->mode_ == MODE_QUEUE) {
           VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                     "We experienced backpressure on that direct send, as "
@@ -1111,7 +1104,6 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
 
       // Add the current element to the collection of packet elements.
       this->elems_->put(element);
-      //this->not_yet_pac_q_->put(element);
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "Before, the header_.length_ == [%d].\n",
@@ -1119,12 +1111,11 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
 
       // Adjust the header_.length_ to account for the length of the element.
       this->header_.length_ += static_cast<ACE_UINT32>(element_length);
-      size_t header_length = this->header_.length_;// + element_length;
-      //this->not_yet_pac_q_len_ += element_length;
+      const size_t message_length = this->header_.length_;
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "After adding element's length, the header_.length_ == [%d].\n",
-            header_length));
+            message_length));
 
       // The current packet now contains the current element.  We need to
       // check to see if the conditions are such that we should go ahead and
@@ -1141,12 +1132,13 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
       //       requires an exclusive packet.
       //
       if ((this->elems_->size() >= this->max_samples_) ||
-          (this->max_header_size_ + header_length > this->optimum_size_) ||
-          (element_requires_exclusive_packet == 1))
-      {
+          (this->max_header_size_ + message_length > this->optimum_size_) ||
+          exclusive) {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Now the current packet looks full - send it (directly).\n"));
+
         this->direct_send(relink);
+
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Back from the direct_send() attempt.\n"));
 
@@ -1159,13 +1151,14 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Packet not sent. Send conditions weren't satisfied.\n"));
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "elems_->size(): %d, max_samples_: %d\n", this->elems_->size(), this->max_samples_));
+              "elems_->size(): %d, max_samples_: %d\n",
+              this->elems_->size(), this->max_samples_));
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "header_size_: %d, optimum_size_:%d\n"
-              , this->max_header_size_ + header_length
+              "header_size_: %d, optimum_size_: %d\n"
+              , this->max_header_size_ + message_length
               , this->optimum_size_));
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "element_requires_exclusive_packet: %d\n", element_requires_exclusive_packet));
+              "element_requires_exclusive_packet: %d\n", int(exclusive)));
 
         if (this->mode_ == MODE_QUEUE) {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1185,7 +1178,7 @@ OpenDDS::DCPS::TransportSendStrategy::send(TransportQueueElement* element, bool 
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::send_stop()
+TransportSendStrategy::send_stop()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_stop",6);
   {
@@ -1273,7 +1266,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_stop()
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::remove_all_msgs(RepoId pub_id)
+TransportSendStrategy::remove_all_msgs(RepoId pub_id)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_all_msgs",6);
 
@@ -1293,8 +1286,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_all_msgs(RepoId pub_id)
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::remove_all_msgs_i(
-  RepoId /* pub_id */)
+TransportSendStrategy::remove_all_msgs_i(RepoId /* pub_id */)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_all_msgs_i",6);
 
@@ -1302,7 +1294,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_all_msgs_i(
 }
 
 int
-OpenDDS::DCPS::TransportSendStrategy::remove_sample(TransportSendElement& element)
+TransportSendStrategy::remove_sample(TransportSendElement& element)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_sample",6);
 
@@ -1333,7 +1325,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_sample(TransportSendElement& elemen
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::remove_sample_i(
+TransportSendStrategy::remove_sample_i(
   const TransportSendElement& /* element */
 )
 {
@@ -1343,7 +1335,7 @@ OpenDDS::DCPS::TransportSendStrategy::remove_sample_i(
 }
 
 int
-OpenDDS::DCPS::TransportSendStrategy::do_remove_sample(TransportQueueElement& current_sample)
+TransportSendStrategy::do_remove_sample(TransportQueueElement& current_sample)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","do_remove_sample",6);
 
@@ -1454,9 +1446,9 @@ OpenDDS::DCPS::TransportSendStrategy::do_remove_sample(TransportQueueElement& cu
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::direct_send(bool relink)
+TransportSendStrategy::direct_send(bool relink)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","direct_send",6);
+  DBG_ENTRY_LVL("TransportSendStrategy", "direct_send", 6);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Prepare the current packet for a direct send attempt.\n"));
@@ -1468,8 +1460,8 @@ OpenDDS::DCPS::TransportSendStrategy::direct_send(bool relink)
         "Now attempt to send the packet.\n"));
 
   // We will try resend the packet if the send() fails and then connection
-  // is re-established.
-  while (1) {
+  // is re-established.  Only loops if the "continue" line is hit.
+  while (true) {
     // ciju: I have changed the default. Immediate notification
     // path enters the Data Store with the local locks held. This
     // can lead to deadlocks often. I have added temporary fixes
@@ -1487,14 +1479,16 @@ OpenDDS::DCPS::TransportSendStrategy::direct_send(bool relink)
     //UseDelayedNotification when = NOTIFY_IMMEADIATELY;
     UseDelayedNotification when = DELAY_NOTIFICATION;
 
-    // If the thread per connection is used we can not hold the send stratagy lock
-    // and try to call data_delivered since the DataWriterImpl::remove_sample()
-    // might hold the locks in reverse order and cause datalock.
-    if (this->config_->thread_per_connection_ == 1)
+    // If the thread per connection is used we can not hold the send strategy
+    // lock and try to call data_delivered since the
+    // DataWriterImpl::remove_sample() might hold the locks in reverse order
+    // and cause datalock.
+    if (this->config_->thread_per_connection_) {
       when = DELAY_NOTIFICATION;
+    }
 
     // Attempt to send the packet
-    SendPacketOutcome outcome = this->send_packet(when);
+    const SendPacketOutcome outcome = this->send_packet(when);
 
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "The outcome of the send_packet() was %d.\n", outcome));
@@ -1520,7 +1514,7 @@ OpenDDS::DCPS::TransportSendStrategy::direct_send(bool relink)
                    ACE_TEXT("send buffer management: %p.\n"),
                    ACE_TEXT("send_bytes")));
 
-        if (OpenDDS::DCPS::Transport_debug_level > 0) {
+        if (Transport_debug_level > 0) {
           this->config_->dump();
         }
       } else {
@@ -1549,7 +1543,6 @@ OpenDDS::DCPS::TransportSendStrategy::direct_send(bool relink)
         } else if (this->mode_ == MODE_TERMINATED) {
           VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                     "Reconnect failed, we are in MODE_TERMINATED\n"), 5);
-          break;
 
         } else {
           VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1573,32 +1566,32 @@ OpenDDS::DCPS::TransportSendStrategy::direct_send(bool relink)
   }
 
   // We stay in MODE_DIRECT mode if we didn't encounter any backpressure.
-  return;
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
+TransportSendStrategy::get_packet_elems_from_queue()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","get_packet_elems_from_queue",6);
+  DBG_ENTRY_LVL("TransportSendStrategy", "get_packet_elems_from_queue", 6);
 
-  TransportQueueElement* element = this->queue_->peek();
+  for (const TransportQueueElement* element = this->queue_->peek();
+       element != 0; element = this->queue_->peek()) {
 
-  while (element != 0) {
     // Total number of bytes in the current element's message block chain.
-    size_t element_length = element->msg()->total_length();
+    const size_t element_length = element->msg()->total_length();
 
     // Flag used to determine if the element requires a packet all to itself.
-    int exclusive_packet = element->requires_exclusive_packet();
+    const bool exclusive_packet = element->requires_exclusive_packet();
 
     // The total size of the current packet (packet header bytes included)
-    size_t packet_size = this->max_header_size_ + this->header_.length_;
+    const size_t packet_size = this->max_header_size_ + this->header_.length_;
 
     if (packet_size + element_length > this->max_size_) {
-      // The current element won't fit into the current packet.
+      // The current element won't fit into the current packet (based on the
+      // user-configurable max_size_).
       break;
     }
 
-    if (exclusive_packet == 1) {
+    if (exclusive_packet) {
       if (this->elems_->size() == 0) {
         // The current packet is empty so we won't violate the
         // exclusive_packet requirement by put()'ing the element
@@ -1635,16 +1628,13 @@ OpenDDS::DCPS::TransportSendStrategy::get_packet_elems_from_queue()
     if (this->header_.length_ >= this->optimum_size_) {
       break;
     }
-
-    // Set up the element to peek() at the front of the queue.
-    element = this->queue_->peek();
   }
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::prepare_header()
+TransportSendStrategy::prepare_header()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","prepare_header",6);
+  DBG_ENTRY_LVL("TransportSendStrategy", "prepare_header", 6);
 
   // Increment header sequence for packet:
   this->header_.sequence_ = (++this->header_sequence_).getValue();
@@ -1655,7 +1645,7 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_header()
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::prepare_header_i()
+TransportSendStrategy::prepare_header_i()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","prepare_header_i",6);
 
@@ -1663,47 +1653,35 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_header_i()
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
+TransportSendStrategy::prepare_packet()
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","prepare_packet",6);
-  /*
-  // Shift elements from not_yet_pac_q_ to queue_
-  // This is where the intermediary elements finally become
-  // part of a concrete packet.
-  for (TransportQueueElement *tmp = this->not_yet_pac_q_->get();
-  tmp != NULL;
-  tmp = this->not_yet_pac_q_->get()) {
-  this->elems_->put (tmp);
-  }
-  this->header_.length_ += this->not_yet_pac_q_len_;
-  this->not_yet_pac_q_len_ = 0;
-  */
+  DBG_ENTRY_LVL("TransportSendStrategy", "prepare_packet", 6);
 
   // Prepare the header for sending.
   this->prepare_header();
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "Marshall the packet header.\n"));
+        "Marshal the packet header.\n"));
 
   if (this->header_block_ != 0) {
-    this->header_block_->release ();
+    this->header_block_->release();
   }
 
   ACE_NEW_MALLOC(this->header_block_,
-                 static_cast<ACE_Message_Block*>(this->header_mb_allocator_->malloc()),
-                 ACE_Message_Block(this->max_header_size_,
-                                   ACE_Message_Block::MB_DATA,
-                                   0,
-                                   0,
-                                   0,
-                                   0,
-                                   ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                                   ACE_Time_Value::zero,
-                                   ACE_Time_Value::max_time,
-                                   this->header_db_allocator_,
-                                   this->header_mb_allocator_));
+    static_cast<ACE_Message_Block*>(this->header_mb_allocator_->malloc()),
+    ACE_Message_Block(this->max_header_size_,
+                      ACE_Message_Block::MB_DATA,
+                      0,
+                      0,
+                      0,
+                      0,
+                      ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                      ACE_Time_Value::zero,
+                      ACE_Time_Value::max_time,
+                      this->header_db_allocator_,
+                      this->header_mb_allocator_));
 
-  // Marshall the packet header_ into the header_block_.
+  // Marshal the packet header_ into the header_block_.
   this->header_block_ << this->header_;
 
   this->pkt_chain_ = this->header_block_->duplicate();
@@ -1732,16 +1710,16 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet()
   this->prepare_packet_i();
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "Set the header_complete_ flag to false (0).\n"));
+        "Set the header_complete_ flag to false.\n"));
 
-  // Don't forget to set the header_complete_ to false (0) to indicate
+  // Set the header_complete_ to false to indicate
   // that the first block in the pkt_chain_ is the packet header block
   // (actually a duplicate() of the packet header_block_).
-  this->header_complete_ = 0;
+  this->header_complete_ = false;
 }
 
 void
-OpenDDS::DCPS::TransportSendStrategy::prepare_packet_i()
+TransportSendStrategy::prepare_packet_i()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","prepare_packet_i",6);
 
@@ -1749,16 +1727,16 @@ OpenDDS::DCPS::TransportSendStrategy::prepare_packet_i()
 }
 
 ssize_t
-OpenDDS::DCPS::TransportSendStrategy::do_send_packet( ACE_Message_Block* packet, int& bp)
+TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","do_send_packet",6);
+  DBG_ENTRY_LVL("TransportSendStrategy", "do_send_packet", 6);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "Populate the iovec array using the packet.\n"), 5);
 
   iovec iov[MAX_SEND_BLOCKS];
 
-  ACE_Message_Block* block = packet;
+  const ACE_Message_Block* block = packet;
 
   int num_blocks = 0;
 
@@ -1785,7 +1763,7 @@ OpenDDS::DCPS::TransportSendStrategy::do_send_packet( ACE_Message_Block* packet,
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "Attempt to send_bytes() now.\n"), 5);
 
-  ssize_t num_bytes_sent = this->send_bytes(iov, num_blocks, bp);
+  const ssize_t num_bytes_sent = this->send_bytes(iov, num_blocks, bp);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "The send_bytes() said that num_bytes_sent == [%d].\n",
@@ -1794,13 +1772,14 @@ OpenDDS::DCPS::TransportSendStrategy::do_send_packet( ACE_Message_Block* packet,
   return num_bytes_sent;
 }
 
-OpenDDS::DCPS::TransportSendStrategy::SendPacketOutcome
-OpenDDS::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_notification)
+TransportSendStrategy::SendPacketOutcome
+TransportSendStrategy::send_packet(UseDelayedNotification delay_notification)
 {
-  DBG_ENTRY_LVL("TransportSendStrategy","send_packet",6);
+  DBG_ENTRY_LVL("TransportSendStrategy", "send_packet", 6);
 
   int bp_flag = 0;
-  ssize_t num_bytes_sent = this->do_send_packet( this->pkt_chain_, bp_flag);
+  const ssize_t num_bytes_sent =
+    this->do_send_packet(this->pkt_chain_, bp_flag);
 
   if (num_bytes_sent == 0) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1827,7 +1806,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_n
               "OUTCOME_SEND_ERROR.\n"), 5);
 
     // Not backpressure - it's a real error.
-    // Note: moved thisto send_bytes so the errno msg could be written.
+    // Note: moved this to send_bytes so the errno msg could be written.
     //ACE_ERROR((LM_ERROR,
     //           "(%P|%t) ERROR: Call to peer().send() failed with negative "
     //           "return code.\n"));
@@ -1848,7 +1827,8 @@ OpenDDS::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_n
 
   // We sent some bytes - adjust the current packet (elems_ and pkt_chain_)
   // to account for the bytes that have been sent.
-  int result = this->adjust_packet_after_send(num_bytes_sent, delay_notification);
+  const int result =
+    this->adjust_packet_after_send(num_bytes_sent, delay_notification);
 
   if (result == 0) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1865,7 +1845,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_packet(UseDelayedNotification delay_n
 }
 
 ssize_t
-OpenDDS::DCPS::TransportSendStrategy::non_blocking_send(const iovec iov[], int n, int& bp)
+TransportSendStrategy::non_blocking_send(const iovec iov[], int n, int& bp)
 {
   int val = 0;
   ACE_HANDLE handle = this->get_handle();
@@ -1909,4 +1889,18 @@ OpenDDS::DCPS::TransportSendStrategy::non_blocking_send(const iovec iov[], int n
   ACE::restore_non_blocking_mode(handle, val);
 
   return result;
+}
+
+void
+TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
+{
+  const size_t ndn = this->num_delayed_notifications_;
+  this->delayed_delivered_notification_queue_[ndn] = element;
+  this->delayed_notification_mode_[ndn] = this->mode_;
+  ++this->num_delayed_notifications_;
+}
+
+
+// close namespaces
+}
 }

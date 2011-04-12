@@ -140,7 +140,7 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   this->group_coherent_     = byte & mask_flag(GROUP_COHERENT_FLAG);
   this->content_filter_     = byte & mask_flag(CONTENT_FILTER_FLAG);
   this->sequence_repair_    = byte & mask_flag(SEQUENCE_REPAIR_FLAG);
-  this->reserved_4          = byte & mask_flag(RESERVED_4_FLAG);
+  this->more_fragments_     = byte & mask_flag(MORE_FRAGMENTS_FLAG);
 
   // Set swap_bytes flag to the Serializer if data sample from
   // the publisher is in different byte order.
@@ -212,7 +212,7 @@ operator<<(ACE_Message_Block*& buffer, DataSampleHeader& value)
                          | (value.group_coherent_     << GROUP_COHERENT_FLAG)
                          | (value.content_filter_     << CONTENT_FILTER_FLAG)
                          | (value.sequence_repair_    << SEQUENCE_REPAIR_FLAG)
-                         | (value.reserved_4          << RESERVED_4_FLAG)
+                         | (value.more_fragments_     << MORE_FRAGMENTS_FLAG)
                          ;
   writer << ACE_OutputCDR::from_octet(flags);
   writer << value.message_length_;
@@ -353,6 +353,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     if (value.group_coherent_ == 1) str << "Group-Coherent, ";
     if (value.content_filter_ == 1) str << "Content-Filtered, ";
     if (value.sequence_repair_ == 1) str << "Sequence Repair, ";
+    if (value.more_fragments_ == 1) str << "More Fragments, ";
 
     str << "Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
         << value.sequence_ << ", ";
