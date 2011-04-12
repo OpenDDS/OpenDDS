@@ -1,3 +1,37 @@
+Tue Apr 12 18:07:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        Laying the groundwork for generic fragmentation/reassembly in the
+        transport framewowk.
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          Use what was the "reserved_4" flag bit for "more fragments".
+
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.h:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          All: Code cleanup while reviewing to integrate fragmentation.
+          SendStratgey: new max_message_size() method for fragmentation.
+          TransportHeader: changed from an entire byte to hold byte order to
+          a flags byte which has both byte order and a "last fragment" flag.
+
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/udp/UdpSendStrategy.h:
+
+          Override max_message_size() to indicate UDP's size limit.
+
+        * tools/dissector/packet.cpp:
+
+          Wireshark updates for the header changes above.
+
 Tue Apr 12 15:33:01 UTC 2011  cjohn  <john_c@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
@@ -35,7 +69,7 @@ Tue Apr  5 15:02:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * BranchChangeLog:
 
-	  Created branch for DDS-RTPS implementation.
+          Created branch for DDS-RTPS implementation.
 
 Local Variables:
 mode: change-log

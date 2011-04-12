@@ -59,10 +59,20 @@ template <typename T> int enum_value() { return T::value; }
 int proto_opendds    = -1;
 
 int hf_version    = -1;
-int hf_byte_order = -1;
 int hf_length     = -1;
 int hf_sequence   = -1;
 int hf_source     = -1;
+
+int hf_flags               = -1;
+int hf_flags_byte_order    = -1;
+int hf_flags_last_fragment = -1;
+
+const int flags_bits = 8;
+const int* flags_fields[] = {
+  &hf_flags_byte_order,
+  &hf_flags_last_fragment,
+  NULL
+};
 
 int hf_sample             = -1;
 int hf_sample_id          = -1;
@@ -82,7 +92,8 @@ int hf_sample_flags_historic    = -1;
 int hf_sample_flags_lifespan    = -1;
 int hf_sample_flags_group_coh   = -1;
 int hf_sample_flags_content_filt= -1;
-int hf_sample_flags_seq_reapir  = -1;
+int hf_sample_flags_seq_repair  = -1;
+int hf_sample_flags_more_frags  = -1;
 
 const int sample_flags_bits = 8;
 
@@ -93,11 +104,13 @@ const int* sample_flags_fields[] = {
   &hf_sample_flags_lifespan,
   &hf_sample_flags_group_coh,
   &hf_sample_flags_content_filt,
-  &hf_sample_flags_seq_reapir,
+  &hf_sample_flags_seq_repair,
+  &hf_sample_flags_more_frags,
   NULL
 };
 
 gint ett_header       = -1;
+gint ett_flags        = -1;
 gint ett_sample       = -1;
 gint ett_sample_flags = -1;
 
@@ -160,6 +173,7 @@ format_header(const TransportHeader& header)
   std::ostringstream os;
 
   os << "Length: " << std::dec << header.length_;
+  if (header.last_fragment_) os << ", Last Fragment";
   os << ", Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
      << ACE_UINT16(header.sequence_);
   os << ", Source: 0x" << std::hex << std::setw(8) << std::setfill('0')
@@ -185,9 +199,10 @@ dissect_header(tvbuff* tvb, packet_info* pinfo, proto_tree* tree,
     "%d.%d", header.protocol_[4], header.protocol_[5]);
   offset += len;
 
-  // hf_byte_order
-  len = sizeof(header.byte_order_);
-  proto_tree_add_item(tree, hf_byte_order, tvb, offset, len, FALSE);
+  // hf_flags
+  len = sizeof(ACE_CDR::Octet);
+  proto_tree_add_bitmask(tree, tvb, offset, hf_flags, ett_flags,
+    flags_fields, FALSE);
   offset += len;
 
   offset += sizeof(header.reserved_);     // skip reserved
@@ -423,13 +438,35 @@ proto_register_opendds()
         HFILL
       }
     },
-    { &hf_byte_order,
-      { "Byte order",
-        "opendds.byte_order",
+    { &hf_flags,
+      { "Flags",
+        "opendds.flags",
         FT_UINT8,
         BASE_HEX,
-        VALS(byte_order_vals),
+        NULL,
         0,
+        NULL,
+        HFILL
+      }
+    },
+    { &hf_flags_byte_order,
+      { "Byte order",
+        "opendds.flags.byte_order",
+        FT_BOOLEAN,
+        flags_bits,
+        TFS(&byte_order_tfs),
+        1 << 0,
+        NULL,
+        HFILL
+      }
+    },
+    { &hf_flags_last_fragment,
+      { "Last fragment",
+        "opendds.flags.last_fragment",
+        FT_BOOLEAN,
+        flags_bits,
+        NULL,
+        1 << 1,
         NULL,
         HFILL
       }
@@ -577,13 +614,24 @@ proto_register_opendds()
         HFILL
       }
     },
-    { &hf_sample_flags_seq_reapir,
+    { &hf_sample_flags_seq_repair,
       { "Sequence Repair",
         "opendds.sample.flags.sequence_repair",
         FT_BOOLEAN,
         sample_flags_bits,
         NULL,
         1 << 6,
+        NULL,
+        HFILL
+      }
+    },
+    { &hf_sample_flags_more_frags,
+      { "More Fragments",
+        "opendds.sample.flags.more_frags",
+        FT_BOOLEAN,
+        sample_flags_bits,
+        NULL,
+        1 << 7,
         NULL,
         HFILL
       }
@@ -669,6 +717,7 @@ proto_register_opendds()
 
   static gint *ett[] = {
     &ett_header,
+    &ett_flags,
     &ett_sample,
     &ett_sample_flags
   };

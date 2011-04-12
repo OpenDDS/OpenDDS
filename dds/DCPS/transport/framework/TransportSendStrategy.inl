@@ -59,7 +59,7 @@ OpenDDS::DCPS::TransportSendStrategy::resume_send()
   if (this->mode_ == MODE_TERMINATED) {
     this->header_.length_ = 0;
     this->pkt_chain_ = 0;
-    this->header_complete_ = 0;
+    this->header_complete_ = false;
     this->start_counter_ = 0;
     this->mode_ = MODE_DIRECT;
     this->mode_before_suspend_ = MODE_NOT_SET;
@@ -116,4 +116,8 @@ OpenDDS::DCPS::TransportSendStrategy::transport_shutdown ()
   this->transport_shutdown_ = true;
 }
 
-
+ACE_INLINE size_t
+OpenDDS::DCPS::TransportSendStrategy::max_message_size() const
+{
+  return 0;
+}

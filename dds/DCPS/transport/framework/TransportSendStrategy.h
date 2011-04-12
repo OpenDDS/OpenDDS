@@ -46,7 +46,7 @@ class PacketRemoveVisitor;
  */
 class OpenDDS_Dcps_Export TransportSendStrategy
   : public RcObject<ACE_SYNCH_MUTEX>,
-      public ThreadSynchWorker {
+    public ThreadSynchWorker {
 public:
   virtual ~TransportSendStrategy();
 
@@ -130,7 +130,7 @@ public:
 
   /// Informed transport shutdown so no more notifications to
   /// listener.
-  void transport_shutdown ();
+  void transport_shutdown();
 
 protected:
 
@@ -160,11 +160,25 @@ protected:
 
   /// Provide the opportunity to remove a sample from implementation
   /// specific lists as well.
-  virtual void remove_sample_i( const TransportSendElement& element);
+  virtual void remove_sample_i(const TransportSendElement& element);
 
   /// Provide the opportunity to remove control messages from
   /// implementation specific lists as well.
-  virtual void remove_all_msgs_i( RepoId pub_id);
+  virtual void remove_all_msgs_i(RepoId pub_id);
+
+  /// The maximum size of a message allowed by the this TransportImpl, or 0
+  /// if there is such limit.  This is expected to be a constant, for example
+  /// UDP/IPv4 can send messages of up to 65466 bytes.
+  /// The transport framework will use the returned value (if > 0) to
+  /// fragment larger messages.  This fragmentation and
+  /// reassembly will be transparent to the user.
+  virtual size_t max_message_size() const;
+
+  /// Put the maximum UDP payload size here so that it can be shared by all
+  /// UDP-based transports.  This is the worst-case (conservative) value for
+  /// UDP/IPv4.  If there are no IP options, or if IPv6 is used, it could
+  /// actually be a little larger.
+  static const size_t UDP_MAX_MESSAGE_SIZE = 65466;
 
 private:
   typedef BasicQueue<TransportQueueElement> QueueType;
@@ -181,6 +195,8 @@ private:
     NOTIFY_IMMEADIATELY,
     DELAY_NOTIFICATION
   };
+
+  void add_delayed_notification(TransportQueueElement* element);
 
   /// Called from send() when it is time to attempt to send our
   /// current packet to the socket while in MODE_DIRECT mode_.
@@ -217,7 +233,7 @@ private:
   SendPacketOutcome send_packet(UseDelayedNotification delay_notification);
 
   /// Form an IOV and call the send_bytes() template method.
-  ssize_t do_send_packet( ACE_Message_Block* packet, int& bp);
+  ssize_t do_send_packet(const ACE_Message_Block* packet, int& bp);
 
   /// This is called from the send_packet() method after it has
   /// sent at least one byte from the current packet.  This method
@@ -284,11 +300,6 @@ private:
   /// part of a packet.
   QueueType* queue_;
 
-  /// This queue holds elements which haven't yet become part of
-  /// a packet.
-  //QueueType* not_yet_pac_q_;
-  //size_t not_yet_pac_q_len_;
-
   /// Maximum marshalled size of the transport packet header.
   size_t max_header_size_;
 
@@ -306,9 +317,9 @@ private:
   /// current transport packet.
   ACE_Message_Block* pkt_chain_;
 
-  /// Set to 0 (false) when the packet header hasn't been fully sent.
-  /// Set to 1 (true) once the packet header has been fully sent.
-  int header_complete_;
+  /// Set to false when the packet header hasn't been fully sent.
+  /// Set to true once the packet header has been fully sent.
+  bool header_complete_;
 
   /// Counter that, when greater than zero, indicates that we still
   /// expect to receive a send_stop() event.
@@ -375,16 +386,6 @@ private:
 protected:
   /// Current transport packet header.
   TransportHeader header_;
-
-  //remove these are only for debugging: DUMP_FOR_PACKET_INFO
-  ACE_Message_Block*    dup_pkt_chain;
-  ACE_Message_Block*    act_pkt_chain_ptr;
-  void*                 act_elems_head_ptr;
-  ACE_Message_Block*    dup_elems_msg;
-  ACE_Message_Block*    act_elems_msg_ptr;
-  TransportHeader       dup_presend_header;
-  const char*           called_from;
-  const char*           completely_filled;
 };
 
 } // namespace DCPS

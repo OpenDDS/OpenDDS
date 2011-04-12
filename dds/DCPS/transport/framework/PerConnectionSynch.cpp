@@ -129,7 +129,7 @@ OpenDDS::DCPS::PerConnectionSynch::svc()
       this->work_available_ = 0;
     }
 
-    if (work_outcome == ThreadSynchWorker::WORK_OUTCOME_ClOGGED_RESOURCE) {
+    if (work_outcome == ThreadSynchWorker::WORK_OUTCOME_CLOGGED_RESOURCE) {
       VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   Need to wait for clogged resources to open up.\n"), 5);
 
       // Ask the ThreadSynchResource to block us until the clog situation

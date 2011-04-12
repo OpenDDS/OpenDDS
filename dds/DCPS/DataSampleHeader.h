@@ -52,7 +52,7 @@ enum DataSampleHeaderFlag {
   GROUP_COHERENT_FLAG,
   CONTENT_FILTER_FLAG,
   SEQUENCE_REPAIR_FLAG,
-  RESERVED_4_FLAG
+  MORE_FRAGMENTS_FLAG
 };
 
 /// The header message of a data sample.
@@ -94,8 +94,10 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// were filtered-out and are not missing.
   bool sequence_repair_ : 1;
 
-  /// reserved bit
-  bool reserved_4 : 1;
+  /// The current "Data Sample" needs reassembly before further processing.
+  /// Use of this flag is reserved for the Transport Framework, which manages
+  /// fragmentation and reassmebly of DataSampleHeader contents when needed.
+  bool more_fragments_ : 1;
 
   /// The size of the data sample (without header).  After this header is
   /// demarshaled, the transport expects to see this many bytes in the stream
