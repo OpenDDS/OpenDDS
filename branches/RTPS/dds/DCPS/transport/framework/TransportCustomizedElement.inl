@@ -13,31 +13,35 @@ namespace DCPS {
 
 ACE_INLINE
 TransportCustomizedElement::TransportCustomizedElement(
-  TransportSendElement* tse, ACE_Allocator* allocator)
+  TransportQueueElement* orig, ACE_Allocator* allocator)
   : TransportQueueElement(1),
-    tse_(tse),
-    allocator_(allocator)
+    orig_(orig),
+    allocator_(allocator),
+    publication_id_(orig ? orig->publication_id() : GUID_UNKNOWN)
 {
   DBG_ENTRY_LVL("TransportCustomizedElement", "TransportCustomizedElement", 6);
 }
 
 ACE_INLINE /*static*/
 TransportCustomizedElement*
-TransportCustomizedElement::alloc(TransportSendElement* tse)
+TransportCustomizedElement::alloc(TransportQueueElement* orig,
+                                  ACE_Allocator* allocator /* = 0*/)
 {
-  TransportCustomizedElement* ret;
-  TransportCustomizedElementAllocator* al =
-    tse->sample()->transport_customized_element_allocator_;
-  ACE_NEW_MALLOC_RETURN(ret,
-    static_cast<TransportCustomizedElement*>(al->malloc()),
-    TransportCustomizedElement(tse, al),
-    0);
-  return ret;
+  if (allocator) {
+    TransportCustomizedElement* ret;
+    ACE_NEW_MALLOC_RETURN(ret,
+      static_cast<TransportCustomizedElement*>(allocator->malloc(0)),
+      TransportCustomizedElement(orig, allocator),
+      0);
+    return ret;
+  } else {
+    return new TransportCustomizedElement(orig, 0);
+  }
 }
 
 ACE_INLINE
 bool
-TransportCustomizedElement::owned_by_transport ()
+TransportCustomizedElement::owned_by_transport()
 {
   return false;
 }

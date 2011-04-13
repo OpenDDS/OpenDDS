@@ -1,3 +1,81 @@
+Wed Apr 13 21:32:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed a redundant entry.
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          Implemented fragmentation logic in DataSampleHeader::split().
+          Removed extra overloads on ACE_Message_Block* when we already have
+          one for ACE_Message_Block&.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Adjusted to use ACE_Message_Block& overload.
+
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+
+          'port' is a reserved keyword for CCM.
+
+        * dds/DCPS/RTPS/rtps.mpc:
+
+          Simplified mpc file and use consistent shared lib name.
+
+        * dds/DCPS/transport/framework/TransportCustomizedElement.h:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.inl:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+
+          Made this class a more generally applicable so we can use it for
+          fragmented send-data as well.
+
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+
+          Added a fragment() method.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Start of integrating fragmentation.  This is nowhere near done.
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+
+          Removed extra overloads (see DataSampleHeader notes, above).
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.cpp:
+
+          Adjusted to account for the above changes.
+
+        * tests/DCPS/UnitTests/Fragmentation.cpp:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          New unit test for the Fragmentation logic in DataSampleHeader.
+
+        * tests/DCPS/common/TestSupport.h:
+
+          Fixed a wchar bug.
+
+        * tests/transport/dds_comparative/PubWriter.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_n/SimpleDataWriter.cpp:
+
+          Adjusted to account for the above changes.
+
 Tue Apr 12 18:07:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         Laying the groundwork for generic fragmentation/reassembly in the
@@ -51,7 +129,7 @@ Mon Apr 11 21:49:37 UTC 2011  cjohn  <john_c@ociweb.com>
         * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
         * dds/DCPS/RTPS/MessageTypes.h:
 
-        Define RTPS wire message IDL structures and reserved constant values.
+          Define RTPS wire message IDL structures and reserved constant values.
 
 Mon Apr 11 15:03:30 UTC 2011  cjohn  <john_c@ociweb.com>
 

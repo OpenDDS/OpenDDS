@@ -270,7 +270,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
 // since on other platforms iov_len is 64-bit
 #pragma warning(disable : 4267)
 #endif
-    // This check covers the case where we have an unread fragment in
+    // This check covers the case where we have unread data in
     // the first buffer, but no space to write any more data.
     if (this->receive_buffers_[current]->space() > 0) {
       iov[vec_index].iov_len  = this->receive_buffers_[current]->space();
@@ -501,8 +501,8 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
         //
         // Demarshal the transport header.
         //
-        this->receive_transport_header_
-        = this->receive_buffers_[ this->buffer_index_] ;
+        this->receive_transport_header_ =
+          *this->receive_buffers_[this->buffer_index_];
 
         //
         // Check the TransportHeader.
@@ -608,8 +608,8 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
           //
           // Demarshal the sample header.
           //
-          this->receive_sample_.header_
-          = this->receive_buffers_[ this->buffer_index_] ;
+          this->receive_sample_.header_ =
+            *this->receive_buffers_[this->buffer_index_];
 
           //
           // Check the DataSampleHeader.

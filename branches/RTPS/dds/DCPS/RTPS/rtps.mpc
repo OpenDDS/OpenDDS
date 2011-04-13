@@ -1,12 +1,3 @@
 project : dcps {
-  sharedname   = Rtps
-
-  IDL_Files {
-    RtpsBaseMessageTypes.idl
-    RtpsMessageTypes.idl
-  }
-
-  Source_Files {
-    Test.cpp
-  }
+  sharedname = OpenDDS_Rtps
 }

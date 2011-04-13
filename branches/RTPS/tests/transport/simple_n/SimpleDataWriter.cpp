@@ -74,7 +74,7 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
       // The DataSampleHeader is what goes in the "Header Block".
       ACE_Message_Block* header_block =
                           new ACE_Message_Block(header.max_marshaled_size());
-      header_block << header;
+      *header_block << header;
 
       ACE_Message_Block* data_block = new ACE_Message_Block(num_data_bytes);
       data_block->copy(data_str.c_str());

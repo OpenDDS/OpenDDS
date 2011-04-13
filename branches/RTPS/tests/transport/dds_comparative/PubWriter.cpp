@@ -186,7 +186,7 @@ PubWriter::get_element(OpenDDS::DCPS::DataSampleHeader& header)
 
   // TBD SOON - Use an allocator
   elem->sample_ = new ACE_Message_Block(header.max_marshaled_size());
-  elem->sample_ << header;
+  *elem->sample_ << header;
 
   // TBD SOON - Use an allocator
   ssize_t num_data_bytes = 1 << this->data_size_;

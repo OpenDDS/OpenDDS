@@ -95,8 +95,6 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   bool sequence_repair_ : 1;
 
   /// The current "Data Sample" needs reassembly before further processing.
-  /// Use of this flag is reserved for the Transport Framework, which manages
-  /// fragmentation and reassmebly of DataSampleHeader contents when needed.
   bool more_fragments_ : 1;
 
   /// The size of the data sample (without header).  After this header is
@@ -165,19 +163,19 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// new optional header part.  "guids" may be null, same serialization as 0.
   static void add_cfentries(const GUIDSeq* guids, ACE_Message_Block* mb);
 
+  /// Create two new serialized headers (owned by caller), the "head" having at
+  /// most "size" bytes (header + data) and the "tail" having the rest.
+  /// Precondition: size must be larger than the max_marshaled_size().
+  static void split(const ACE_Message_Block& orig, size_t size,
+                    ACE_Message_Block*& head, ACE_Message_Block*& tail);
+
   DataSampleHeader();
 
-  //{@
   /// Construct with values extracted from a buffer.
-  explicit DataSampleHeader(ACE_Message_Block* buffer);
   explicit DataSampleHeader(ACE_Message_Block& buffer);
-  //@}
 
-  //{@
   /// Assignment from an ACE_Message_Block.
-  DataSampleHeader& operator=(ACE_Message_Block* buffer);
   DataSampleHeader& operator=(ACE_Message_Block& buffer);
-  //@}
 
   /// Amount of data read when initializing from a buffer.
   size_t marshaled_size() const;
@@ -195,8 +193,7 @@ private:
 
 /// Marshal/Insertion into a buffer.
 OpenDDS_Dcps_Export
-ACE_CDR::Boolean
-operator<<(ACE_Message_Block*&, DataSampleHeader& value);
+bool operator<<(ACE_Message_Block&, const DataSampleHeader& value);
 
 /// Message Id enumarion insertion onto an ostream.
 OpenDDS_Dcps_Export
