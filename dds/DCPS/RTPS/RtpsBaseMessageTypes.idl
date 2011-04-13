@@ -74,7 +74,7 @@ module OpenDDS {
        to an RTPS Endpoint */
     struct Locator_t {
       long kind;
-      unsigned long port;
+      unsigned long _port;
       LOctetArray address;
     };
 
@@ -85,7 +85,7 @@ module OpenDDS {
        compact representation. */
     struct LocatorUDPv4_t {
       unsigned long address;
-      unsigned long port;
+      unsigned long _port;
     };
 
     /* Enumeration used to distinguish whether a Topic has defined some fields

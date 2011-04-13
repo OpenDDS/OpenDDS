@@ -26,26 +26,10 @@ OpenDDS::DCPS::TransportHeader::TransportHeader()
 }
 
 ACE_INLINE
-OpenDDS::DCPS::TransportHeader::TransportHeader(ACE_Message_Block* buffer)
-{
-  DBG_ENTRY_LVL("TransportHeader","TransportHeader",6);
-  this->init(buffer);
-}
-
-ACE_INLINE
 OpenDDS::DCPS::TransportHeader::TransportHeader(ACE_Message_Block& buffer)
 {
   DBG_ENTRY_LVL("TransportHeader","TransportHeader",6);
   this->init(&buffer);
-}
-
-ACE_INLINE
-OpenDDS::DCPS::TransportHeader&
-OpenDDS::DCPS::TransportHeader::operator=(ACE_Message_Block* buffer)
-{
-  DBG_ENTRY_LVL("TransportHeader","operator=",6);
-  this->init(buffer);
-  return *this;
 }
 
 ACE_INLINE

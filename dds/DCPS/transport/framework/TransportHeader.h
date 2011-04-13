@@ -34,11 +34,9 @@ struct OpenDDS_Dcps_Export TransportHeader {
   TransportHeader();
 
   /// Construct with values extracted from a buffer.
-  explicit TransportHeader(ACE_Message_Block* buffer);
   explicit TransportHeader(ACE_Message_Block& buffer);
 
   /// Assignment from an ACE_Message_Block.
-  TransportHeader& operator=(ACE_Message_Block* buffer);
   TransportHeader& operator=(ACE_Message_Block& buffer);
 
   /// Determine if the serializer should swap bytes.
@@ -81,16 +79,12 @@ struct OpenDDS_Dcps_Export TransportHeader {
   void init(ACE_Message_Block* buffer);
 };
 
+OpenDDS_Dcps_Export
+bool operator<<(ACE_Message_Block&, const TransportHeader& value);
+
 } // namespace DCPS
 } // namespace OpenDDS
 
-extern
-ACE_CDR::Boolean
-operator<<(ACE_Message_Block&, OpenDDS::DCPS::TransportHeader& value);
-
-extern
-ACE_CDR::Boolean
-operator<<(ACE_Message_Block*&, OpenDDS::DCPS::TransportHeader& value);
 
 #if defined(__ACE_INLINE__)
 #include "TransportHeader.inl"

@@ -82,7 +82,7 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
       this->element_->sample_ = new ACE_Message_Block
                                                 (header.max_marshaled_size());
 
-      this->element_->sample_ << header;
+      *this->element_->sample_ << header;
 
       this->element_->sample_->cont
                               (new ACE_Message_Block(header.message_length_));

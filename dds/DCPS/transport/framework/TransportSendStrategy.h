@@ -248,6 +248,11 @@ private:
   /// This is called by perform_work() after it has sent
   void send_delayed_notifications(TransportSendElement& element);
 
+  /// How much space is available in the current packet before we reach one
+  /// of the limits: max_message_size() [transport's inherent limitation]
+  /// or max_size_ [user's configured limit]
+  size_t space_available() const;
+
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
 
@@ -382,6 +387,10 @@ private:
   friend class TransportSendBuffer;
 
   bool transport_shutdown_;
+
+  /// If fragmentation was necessary, this is the remainder of the
+  /// original element which is yet to be put in a transport packet.
+  TransportQueueElement* next_fragment_;
 
 protected:
   /// Current transport packet header.

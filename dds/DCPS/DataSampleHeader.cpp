@@ -65,6 +65,47 @@ namespace {
     return false;
   }
 
+  // Allocate a new message block using the allocators from an existing
+  // message block, "mb".  Use of mb's data_allocator_ is optional.
+  ACE_Message_Block* alloc_msgblock(const ACE_Message_Block& mb,
+                                    size_t size, bool use_data_alloc)
+  {
+    enum { DATA, DB, MB, N_ALLOC };
+    ACE_Allocator* allocators[N_ALLOC];
+    // It's an ACE bug that access_allocators isn't const
+    ACE_Message_Block& mut_mb = const_cast<ACE_Message_Block&>(mb);
+    mut_mb.access_allocators(allocators[DATA], allocators[DB], allocators[MB]);
+    if (allocators[MB]) {
+      ACE_Message_Block* result;
+      ACE_NEW_MALLOC_RETURN(result,
+        static_cast<ACE_Message_Block*>(
+          allocators[MB]->malloc(sizeof(ACE_Message_Block))),
+        ACE_Message_Block(size,
+                          ACE_Message_Block::MB_DATA,
+                          0, // cont
+                          0, // data
+                          use_data_alloc ? allocators[DATA] : 0,
+                          0, // locking_strategy
+                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                          ACE_Time_Value::zero,
+                          ACE_Time_Value::max_time,
+                          allocators[DB],
+                          allocators[MB]),
+        0);
+      return result;
+    } else {
+      return new ACE_Message_Block(size,
+                                   ACE_Message_Block::MB_DATA,
+                                   0, // cont
+                                   0, // data
+                                   use_data_alloc ? allocators[DATA] : 0,
+                                   0, // locking_strategy
+                                   ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                   ACE_Time_Value::zero,
+                                   ACE_Time_Value::max_time,
+                                   allocators[DB]);
+    }
+  }
 }
 
 namespace OpenDDS {
@@ -110,12 +151,9 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   this->marshaled_size_ = 0;
 
   Serializer reader(buffer);
-  // TODO: Now it's ok to serialize the message_id before flag byte
-  // since the message_id_ is defined as char. If the message_id_
-  // is changed to be defined as a type with multiple bytes then
-  // we need define it after the flag byte or serialize flag byte before
-  // serializing the message_id_. I think the former approach is simpler
-  // than the latter approach.
+
+  // Only byte-sized reads until we get the byte_order_ flag.
+
   reader >> this->message_id_;
 
   if (!reader.good_bit()) return;
@@ -196,10 +234,10 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   }
 }
 
-ACE_CDR::Boolean
-operator<<(ACE_Message_Block*& buffer, DataSampleHeader& value)
+bool
+operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 {
-  Serializer writer(buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER);
+  Serializer writer(&buffer, value.byte_order_ != TAO_ENCAP_BYTE_ORDER);
 
   writer << value.message_id_;
   writer << value.submessage_id_;
@@ -242,24 +280,8 @@ operator<<(ACE_Message_Block*& buffer, DataSampleHeader& value)
 void
 DataSampleHeader::add_cfentries(const GUIDSeq* guids, ACE_Message_Block* mb)
 {
-  enum { DATA, DB, MB, N_ALLOC };
-  ACE_Allocator* allocators[N_ALLOC];
-  mb->access_allocators(allocators[DATA], allocators[DB], allocators[MB]);
-  ACE_Message_Block* optHdr;
-  ACE_NEW_MALLOC(optHdr,
-    static_cast<ACE_Message_Block*>(
-      allocators[MB]->malloc(sizeof(ACE_Message_Block))),
-    ACE_Message_Block(guids ? gen_find_size(*guids) : sizeof(CORBA::ULong),
-                      ACE_Message_Block::MB_DATA,
-                      0, // cont
-                      0, // data
-                      0, // data allocator: leave as default
-                      0, // locking_strategy
-                      ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                      ACE_Time_Value::zero,
-                      ACE_Time_Value::max_time,
-                      allocators[DB],
-                      allocators[MB]));
+  ACE_Message_Block* optHdr = alloc_msgblock(*mb,
+    guids ? gen_find_size(*guids) : sizeof(CORBA::ULong), false);
 
   const bool swap = (TAO_ENCAP_BYTE_ORDER != test_flag(BYTE_ORDER_FLAG, mb));
   Serializer ser(optHdr, swap);
@@ -272,6 +294,89 @@ DataSampleHeader::add_cfentries(const GUIDSeq* guids, ACE_Message_Block* mb)
   // New chain: mb (DataSampleHeader), optHdr (GUIDSeq), data (Foo or control)
   optHdr->cont(mb->cont());
   mb->cont(optHdr);
+}
+
+void
+DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
+                        ACE_Message_Block*& head, ACE_Message_Block*& tail)
+{
+  ACE_Message_Block* dup = orig.duplicate();
+  AMB_Releaser rel(dup);
+
+  const size_t length = dup->total_length();
+  DataSampleHeader hdr(*dup); // deserialize entire header (with cfentries)
+  const size_t hdr_len = length - dup->total_length();
+
+  ACE_Message_Block* payload = dup;
+  ACE_Message_Block* prev = 0;
+  for (; payload->length() == 0; payload = payload->cont()) {
+    prev = payload;
+  }
+  prev->cont(0);
+
+  if (size < hdr_len) { // need to fragment the content_filter_entries_
+    head = alloc_msgblock(*dup, max_marshaled_size(), true);
+    hdr.more_fragments_ = true;
+    hdr.message_length_ = 0; // no room for payload data
+    *head << hdr;
+    const size_t avail = size - head->length() - 4 /* sequence length */;
+    const size_t n_entries = avail / gen_max_marshaled_size(GUID_t());
+    GUIDSeq entries(n_entries);
+    entries.length(n_entries);
+    // remove from the end of hdr's entries (order doesn't matter)
+    for (CORBA::ULong i(0), x(hdr.content_filter_entries_.length());
+         i < n_entries; ++i) {
+      entries[i] = hdr.content_filter_entries_[--x];
+      hdr.content_filter_entries_.length(x);
+    }
+    add_cfentries(&entries, head);
+
+    tail = alloc_msgblock(*dup, max_marshaled_size(), true);
+    hdr.more_fragments_ = false;
+    hdr.content_filter_ = (hdr.content_filter_entries_.length() > 0);
+    hdr.message_length_ = static_cast<ACE_UINT32>(payload->total_length());
+    *tail << hdr;
+    tail->cont(payload);
+    if (hdr.content_filter_) {
+      add_cfentries(&hdr.content_filter_entries_, tail);
+    }
+    return;
+  }
+
+  ACE_Message_Block* frag = payload;
+  size_t frag_remain = size - hdr_len;
+  for (; frag_remain > frag->length(); frag = frag->cont()) {
+    frag_remain -= frag->length();
+  }
+
+  ACE_Message_Block* payload_tail;
+  if (frag_remain == frag->length()) { // split at ACE_Message_Block boundary
+    payload_tail = frag->cont();
+  } else {
+    payload_tail = frag->duplicate();
+    frag->wr_ptr(frag->base() + frag_remain);
+    ACE_Message_Block::release(frag->cont());
+    payload_tail->rd_ptr(frag_remain);
+  }
+  frag->cont(0);
+
+  hdr.more_fragments_ = true;
+  hdr.message_length_ = static_cast<ACE_UINT32>(payload->total_length());
+
+  head = alloc_msgblock(*dup, max_marshaled_size(), true);
+  *head << hdr;
+  head->cont(payload);
+  if (hdr.content_filter_) {
+    add_cfentries(&hdr.content_filter_entries_, head);
+  }
+
+  hdr.more_fragments_ = false;
+  hdr.content_filter_ = false;
+  hdr.message_length_ = static_cast<ACE_UINT32>(payload_tail->total_length());
+
+  tail = alloc_msgblock(*dup, max_marshaled_size(), true);
+  *tail << hdr;
+  tail->cont(payload_tail);
 }
 
 /// Message Id enumeration insertion onto an ostream.

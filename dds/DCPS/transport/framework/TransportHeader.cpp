@@ -21,11 +21,12 @@ OpenDDS::DCPS::TransportHeader::DCPS_PROTOCOL[] =
 # include "TransportHeader.inl"
 #endif /* !__ACE_INLINE__ */
 
-ACE_CDR::Boolean
-operator<<(ACE_Message_Block& buffer, OpenDDS::DCPS::TransportHeader& value)
+namespace OpenDDS {
+namespace DCPS {
+
+bool operator<<(ACE_Message_Block& buffer, const TransportHeader& value)
 {
-  using OpenDDS::DCPS::TransportHeader;
-  DBG_ENTRY_LVL("TransportHeader","operator<<",6);
+  DBG_ENTRY_LVL("TransportHeader", "operator<<" ,6);
 
   OpenDDS::DCPS::Serializer writer(&buffer, value.swap_bytes());
 
@@ -45,8 +46,5 @@ operator<<(ACE_Message_Block& buffer, OpenDDS::DCPS::TransportHeader& value)
   return writer.good_bit();
 }
 
-ACE_CDR::Boolean
-operator<<(ACE_Message_Block*& buffer, OpenDDS::DCPS::TransportHeader& value)
-{
-  return *buffer << value;
+}
 }

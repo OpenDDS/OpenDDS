@@ -1607,7 +1607,7 @@ DataReaderImpl::send_sample_ack(
       ACE_Message_Block::MB_DATA,
       data // cont
     ), false);
-  sample_ack << outbound_header;
+  *sample_ack << outbound_header;
 
   if (DCPS_debug_level > 0) {
     RepoIdConverter subscriptionBuffer(this->subscription_id_);

@@ -40,6 +40,14 @@ namespace DCPS {
 //     packet could contain.
 #define NUM_REPLACED_ELEMENT_CHUNKS 20
 
+namespace {
+  /// Arbitrary small constant that represents the minimum
+  /// amount of payload data we'll have in one fragment.
+  /// In this case "payload data" includes the content-filtering
+  /// GUID sequence, so this is chosen to be 4 + (16 * N).
+  static const size_t MIN_FRAG = 68;
+}
+
 // I think 2 chunks for the header message block is enough
 // - one for the original copy and one for duplicate which
 // occurs every packet and is released after packet is sent.
@@ -974,7 +982,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         return;
       }
 
-      const size_t element_length = element->msg()->total_length();
+      size_t element_length = element->msg()->total_length();
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "Send element msg() has total_length() == [%d].\n",
@@ -988,11 +996,15 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
             "this->max_size_ == [%d].\n",
             this->max_size_));
 
+      const size_t max_message_size = this->max_message_size();
+
       // Really an assert.  We can't accept any element that wouldn't fit into
       // a transport packet by itself (ie, it would be the only element in the
       // packet).  This max_size_ is the user-configurable maximum, not based
-      // on the transport's inherent maximum message size.
-      if (this->max_header_size_ + element_length > this->max_size_) {
+      // on the transport's inherent maximum message size.  If max_message_size
+      // is non-zero, we will fragment so max_size_ doesn't apply per-element.
+      if (max_message_size == 0 &&
+          this->max_header_size_ + element_length > this->max_size_) {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) ERROR: Element too large (%Q) "
                    "- won't fit into packet.\n", ACE_UINT64(element_length)));
@@ -1046,13 +1058,17 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
             (exclusive ? "DOES" : "does NOT")
           ));
 
-      if ((this->max_header_size_ + this->header_.length_ + element_length
-           > this->max_size_) ||
-          ((this->elems_->size() != 0) && exclusive)) {
+      const size_t space_needed =
+        (max_message_size > 0)
+        ? /* fragmenting */ DataSampleHeader::max_marshaled_size() + MIN_FRAG
+        : /* not fragmenting */ element_length;
+
+      if ((exclusive && (this->elems_->size() != 0))
+          || (this->space_available() < space_needed)) {
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Element won't fit in current packet - send current "
-              "packet (directly) now.\n"));
+              "Element won't fit in current packet or requires exclusive"
+              " - send current packet (directly) now.\n"));
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "max_header_size_: %d, header_.length_: %d, element_length: %d\n"
@@ -1060,7 +1076,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Tot possible length: %d, max_len: %d\n"
-              , this->max_header_size_ + this->header_.length_  + element_length
+              , this->max_header_size_ + this->header_.length_ + element_length
               , this->max_size_));
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "current elem size: %d\n"
@@ -1089,6 +1105,16 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
           this->queue_->put(element);
           this->synch_->work_available();
           return;
+        }
+      }
+
+      if (max_message_size) { // fragmentation enabled
+        const size_t avail = this->space_available();
+        if (element_length > avail) {
+          ElementPair ep = element->fragment(avail);
+          element = ep.first;
+          this->next_fragment_ = ep.second;
+          element_length = element->msg()->total_length();
         }
       }
 
@@ -1682,7 +1708,7 @@ TransportSendStrategy::prepare_packet()
                       this->header_mb_allocator_));
 
   // Marshal the packet header_ into the header_block_.
-  this->header_block_ << this->header_;
+  *this->header_block_ << this->header_;
 
   this->pkt_chain_ = this->header_block_->duplicate();
 
@@ -1900,6 +1926,16 @@ TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
   ++this->num_delayed_notifications_;
 }
 
+size_t
+TransportSendStrategy::space_available() const
+{
+  const size_t used = this->max_header_size_ + this->header_.length_,
+    max_msg = this->max_message_size();
+  if (max_msg) {
+    return std::min(this->max_size_ - used, max_msg - used);
+  }
+  return this->max_size_ - used;
+}
 
 // close namespaces
 }

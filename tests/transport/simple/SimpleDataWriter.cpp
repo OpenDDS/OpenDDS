@@ -64,7 +64,7 @@ SimpleDataWriter::run(SimplePublisher* publisher)
   // The DataSampleHeader is what goes in the "Header Block".
   ACE_Message_Block* header_block = new ACE_Message_Block
                                                 (header.max_marshaled_size());
-  header_block << header;
+  *header_block << header;
 
   // The +1 makes the null terminator ('/0') get placed into the block.
   ACE_Message_Block* data_block = new ACE_Message_Block(data.length() + 1);

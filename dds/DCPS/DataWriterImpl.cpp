@@ -1866,7 +1866,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
                                           mb_allocator_),
                         0);
 
-  message << header_data;
+  *message << header_data;
   return message;
 }
 
@@ -1904,11 +1904,11 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
   header_data.byte_order_ =
     this->publisher_servant_->swap_bytes()
     ? !TAO_ENCAP_BYTE_ORDER
-  : TAO_ENCAP_BYTE_ORDER;
+    : TAO_ENCAP_BYTE_ORDER;
   header_data.coherent_change_ = this->coherent_;
-  header_data.group_coherent_
-    = this->publisher_servant_->qos_.presentation.access_scope
-      == ::DDS::GROUP_PRESENTATION_QOS;
+  header_data.group_coherent_ =
+    this->publisher_servant_->qos_.presentation.access_scope
+    == DDS::GROUP_PRESENTATION_QOS;
   header_data.content_filter_ = content_filter;
   header_data.sequence_repair_ = needSequenceRepair;
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
@@ -1944,7 +1944,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
                                           mb_allocator_),
                         DDS::RETCODE_ERROR);
 
-  message << header_data;
+  *message << header_data;
   return DDS::RETCODE_OK;
 }
 

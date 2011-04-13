@@ -257,7 +257,7 @@ OpenDDS::DCPS::DummyTcpDataLink::send_graceful_disconnect_message ()
     0,
     0));
 
-  message << header_data;
+  *message << header_data;
 
   TransportControlElement* send_element = 0;
 
@@ -319,7 +319,7 @@ OpenDDS::DCPS::DummyTcpDataLink::fully_associated ()
     0,
     0));
 
-  message << header_data;
+  *message << header_data;
 
   TransportControlElement* send_element = 0;
 

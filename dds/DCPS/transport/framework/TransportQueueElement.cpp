@@ -9,6 +9,8 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportQueueElement.h"
 #include "EntryExit.h"
+#include "TransportCustomizedElement.h"
+#include "dds/DCPS/DataSampleHeader.h"
 
 #if !defined (__ACE_INLINE__)
 # include "TransportQueueElement.inl"
@@ -34,6 +36,22 @@ OpenDDS::DCPS::TransportQueueElement::is_control(RepoId pub_id) const
   return false;
 }
 
+OpenDDS::DCPS::ElementPair
+OpenDDS::DCPS::TransportQueueElement::fragment(size_t size)
+{
+  ACE_Message_Block* head;
+  ACE_Message_Block* tail;
+  DataSampleHeader::split(*msg(), size, head, tail);
+
+  TransportCustomizedElement* frag = TransportCustomizedElement::alloc(0);
+  frag->set_publication_id(publication_id());
+  frag->set_msg(head);
+
+  TransportCustomizedElement* rest = TransportCustomizedElement::alloc(this);
+  rest->set_msg(tail);
+
+  return std::make_pair(frag, rest);
+}
 
 ACE_Message_Block*
 OpenDDS::DCPS::TransportQueueElement::clone(const ACE_Message_Block* msg,
