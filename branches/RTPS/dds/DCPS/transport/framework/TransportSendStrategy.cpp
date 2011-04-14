@@ -78,13 +78,14 @@ TransportSendStrategy::TransportSendStrategy
     synch_(0),
     lock_(),
     replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS),
-    replaced_element_mb_allocator_ (NUM_REPLACED_ELEMENT_CHUNKS * 2),
-    replaced_element_db_allocator_ (NUM_REPLACED_ELEMENT_CHUNKS * 2),
-    retained_element_allocator_( 0),
+    replaced_element_mb_allocator_(NUM_REPLACED_ELEMENT_CHUNKS * 2),
+    replaced_element_db_allocator_(NUM_REPLACED_ELEMENT_CHUNKS * 2),
+    retained_element_allocator_(0),
     graceful_disconnecting_(false),
     link_released_(true),
     send_buffer_(0),
-    transport_shutdown_ (false)
+    transport_shutdown_(false),
+    next_fragment_(0)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
 
@@ -133,6 +134,10 @@ TransportSendStrategy::~TransportSendStrategy()
 
   delete this->elems_;
   delete this->queue_;
+
+  if (this->next_fragment_) {
+    this->next_fragment_->data_dropped(true /* dropped by transport */);
+  }
 }
 
 void

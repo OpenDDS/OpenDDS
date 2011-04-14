@@ -169,6 +169,13 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   static void split(const ACE_Message_Block& orig, size_t size,
                     ACE_Message_Block*& head, ACE_Message_Block*& tail);
 
+  /// If "first" and "second" are two fragments of the same original message
+  /// (as created by split()), return true and set up the "result" header to
+  /// match the original header.  Joining the data payload is the
+  /// responsibility of the caller (manipulate the continuation chain).
+  static bool join(const DataSampleHeader& first,
+                   const DataSampleHeader& second, DataSampleHeader& result);
+
   DataSampleHeader();
 
   /// Construct with values extracted from a buffer.
