@@ -320,7 +320,8 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
     hdr.message_length_ = 0; // no room for payload data
     *head << hdr;
     const size_t avail = size - head->length() - 4 /* sequence length */;
-    const size_t n_entries = avail / gen_max_marshaled_size(GUID_t());
+    const CORBA::ULong n_entries =
+      static_cast<CORBA::ULong>(avail / gen_max_marshaled_size(GUID_t()));
     GUIDSeq entries(n_entries);
     entries.length(n_entries);
     // remove from the end of hdr's entries (order doesn't matter)
@@ -377,6 +378,27 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   tail = alloc_msgblock(*dup, max_marshaled_size(), true);
   *tail << hdr;
   tail->cont(payload_tail);
+}
+
+bool
+DataSampleHeader::join(const DataSampleHeader& first,
+                       const DataSampleHeader& second, DataSampleHeader& result)
+{
+  if (!first.more_fragments_ || first.sequence_ != second.sequence_) {
+    return false;
+  }
+  result = second;
+  result.message_length_ += first.message_length_;
+  if (first.content_filter_) {
+    result.content_filter_ = true;
+    const CORBA::ULong entries = first.content_filter_entries_.length();
+    CORBA::ULong x = result.content_filter_entries_.length();
+    result.content_filter_entries_.length(x + entries);
+    for (CORBA::ULong i(entries); i > 0;) {
+      result.content_filter_entries_[x++] = first.content_filter_entries_[--i];
+    }
+  }
+  return true;
 }
 
 /// Message Id enumeration insertion onto an ostream.

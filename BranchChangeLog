@@ -1,3 +1,28 @@
+Thu Apr 14 17:37:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          Added a join() static function to do the inverse of split().
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+
+          max_marshaled_size() should be static.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          Use TranpsortHeader::max_marshaled_size() to determine how much
+          data to log in the hexdump.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Continue with fragment management.
+
+        * tests/DCPS/UnitTests/Fragmentation.cpp:
+
+          Test DataSampleHeader::join().
+
 Wed Apr 13 21:32:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:

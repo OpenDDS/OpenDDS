@@ -73,10 +73,14 @@ struct OpenDDS_Dcps_Export TransportHeader {
   ACE_INT32 source_;
 
   /// Similar to IDL compiler generated methods.
-  size_t max_marshaled_size();
+  static size_t max_marshaled_size();
 
   /// Demarshal transport packet from ACE_Message_Block.
   void init(ACE_Message_Block* buffer);
+
+private:
+  struct no_init {};
+  explicit TransportHeader(const no_init&);
 };
 
 OpenDDS_Dcps_Export

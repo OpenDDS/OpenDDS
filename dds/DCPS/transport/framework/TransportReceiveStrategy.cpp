@@ -482,20 +482,17 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
         // only do the hexdump if it will be printed - to not impact perfomance.
         if (OpenDDS::DCPS::Transport_debug_level) {
           ACE_TCHAR xbuffer[4096];
-          size_t xbytes =
-            this->receive_buffers_[this->buffer_index_]->length();
+          const ACE_Message_Block& mb =
+            *this->receive_buffers_[this->buffer_index_];
+          size_t xbytes = mb.length();
 
-          if (xbytes > 11) {
-            xbytes = 11;
-          }
+          xbytes = std::min(xbytes, TransportHeader::max_marshaled_size());
 
-          ACE::format_hexdump
-          (this->receive_buffers_[this->buffer_index_]->rd_ptr(),
-           xbytes, xbuffer, sizeof(xbuffer)) ;
+          ACE::format_hexdump(mb.rd_ptr(), xbytes, xbuffer, sizeof(xbuffer)) ;
 
           VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                "Hex Dump of (marshaled) transport header block "
-                "(%d bytes):\n%s\n", xbytes,xbuffer));
+                "Hex Dump of transport header block "
+                "(%d bytes):\n%s\n", xbytes, xbuffer));
         }
 
         //
