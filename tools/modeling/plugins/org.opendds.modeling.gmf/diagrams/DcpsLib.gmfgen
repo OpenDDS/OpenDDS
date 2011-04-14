@@ -25,7 +25,7 @@
         name="DcpsLib Warnings"
         description="Detects questionable modeling constructs."
         path="//@audits/@categories.0 //@audits/@categories.2"
-        audits="//@audits/@rules.1"/>
+        audits="//@audits/@rules.1 //@audits/@rules.2"/>
     <rules
         name="Domain Entity Name Empty"
         description="Domain entity names should not be empty"
@@ -55,8 +55,23 @@
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/DomainParticipant"/>
       </target>
     </rules>
+    <rules
+        name="TransportId not set"
+        description="Publisher/Subscriber TransportId should be explicitly set"
+        id="TransportId not set"
+        rule="//@expressionProviders/@providers.0/@expressions.22"
+        message="TransportId not explicitly set"
+        severity="WARNING"
+        category="//@audits/@categories.2">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel#//dcps/PublisherSubscriber"/>
+      </target>
+    </rules>
     <clientContexts
-        ruleTargets="//@audits/@rules.0/@target //@audits/@rules.1/@target"/>
+        ruleTargets="//@audits/@rules.0/@target //@audits/@rules.1/@target //@audits/@rules.2/@target"/>
   </audits>
   <diagram
       visualID="1000"
@@ -7266,6 +7281,9 @@
       <expressions
           xsi:type="gmfgen:GenConstraint"
           body="self.publishers->size() + self.subscribers->size() > 0"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.transportId &lt;> -1"/>
     </providers>
   </expressionProviders>
   <labelParsers
