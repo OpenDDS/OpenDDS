@@ -2396,6 +2396,20 @@
               href="../../org.opendds.modeling.model/model/DCPS.ecore#//DomainParticipant"/>
         </target>
       </audits>
+      <audits
+          name="TransportId not set"
+          description="Publisher/Subscriber TransportId should be explicitly set"
+          id="TransportId not set"
+          severity="WARNING"
+          message="TransportId not explicitly set">
+        <rule
+            body="self.transportId &lt;> -1"/>
+        <target
+            xsi:type="gmfmap:DomainElementTarget">
+          <element
+              href="../../org.opendds.modeling.model/model/DCPS.ecore#//PublisherSubscriber"/>
+        </target>
+      </audits>
     </childContainers>
   </audits>
 </gmfmap:Mapping>

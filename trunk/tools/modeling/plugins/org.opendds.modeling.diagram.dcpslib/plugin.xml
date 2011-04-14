@@ -1447,6 +1447,16 @@
             <message><![CDATA[A DomainParticipant should have at least one Publisher or Subscriber]]></message>
             <target class="dcps.DomainParticipant"/>
          </constraint>
+                  <constraint id="TransportId not set"
+            lang="OCL"
+            name="TransportId not set"
+            mode="Batch"
+            severity="WARNING" statusCode="200">
+            <![CDATA[self.transportId <> -1]]>
+            <description><![CDATA[Publisher/Subscriber TransportId should be explicitly set]]></description>
+            <message><![CDATA[TransportId should be explicitly set]]></message>
+            <target class="dcps.PublisherSubscriber"/>
+         </constraint>
                   </constraints>
       </constraintProvider>
    </extension>
@@ -1459,6 +1469,7 @@
       <binding context="org.opendds.modeling.diagram.dcpslibDefaultCtx">
                   <constraint ref="org.opendds.modeling.diagram.dcpslib.org.opendds.modeling.model.dcps.validation.error.domain_entity_name_blank"/>
                   <constraint ref="org.opendds.modeling.diagram.dcpslib.org.opendds.modeling.model.dcps.validation.warning.domainparticipant_empty"/>
+                  <constraint ref="org.opendds.modeling.diagram.dcpslib.TransportId not set"/>
                </binding>
 
    </extension>
