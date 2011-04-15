@@ -174,8 +174,8 @@ format_header(const TransportHeader& header)
 
   os << "Length: " << std::dec << header.length_;
   if (header.last_fragment_) os << ", Last Fragment";
-  os << ", Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
-     << ACE_UINT16(header.sequence_);
+  os << ", Sequence: 0x" << std::hex << std::setw(8) << std::setfill('0')
+     << header.sequence_.getValue();
   os << ", Source: 0x" << std::hex << std::setw(8) << std::setfill('0')
      << ACE_UINT32(header.source_);
 
@@ -214,9 +214,9 @@ dissect_header(tvbuff* tvb, packet_info* pinfo, proto_tree* tree,
   offset += len;
 
   // hf_sequence
-  len = sizeof(header.sequence_);
+  len = static_cast<gint>(gen_find_size(header.sequence_));
   proto_tree_add_uint(tree, hf_sequence, tvb, offset, len,
-    guint16(header.sequence_));
+    gint64(header.sequence_.getValue()));
   offset += len;
 
   // hf_source
@@ -245,8 +245,8 @@ format_sample(const DataSampleHeader& sample)
 
   if (sample.message_id_ != TRANSPORT_CONTROL) {
     if (sample.message_id_ == SAMPLE_DATA) {
-      os << ", Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
-         << ACE_UINT16(sample.sequence_);
+      os << ", Sequence: 0x" << std::hex << std::setw(8) << std::setfill('0')
+         << sample.sequence_.getValue();
     }
     os << ", Publication: " << RepoIdConverter(sample.publication_id_);
   }
@@ -287,10 +287,10 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
   offset += len;
 
   // hf_sample_sequence
-  len = sizeof(sample.sequence_);
+  len = static_cast<gint>(gen_find_size(sample.sequence_));
   if (sample.message_id_ == SAMPLE_DATA) {
     proto_tree_add_uint(tree, hf_sample_sequence, tvb, offset, len,
-      guint16(sample.sequence_));
+      gint64(sample.sequence_.getValue()));
   }
   offset += len;
 
@@ -485,7 +485,7 @@ proto_register_opendds()
     { &hf_sequence,
       { "Sequence",
         "opendds.sequence",
-        FT_UINT16,
+        FT_INT64,
         BASE_HEX,
         NULL,
         0,
@@ -650,7 +650,7 @@ proto_register_opendds()
     { &hf_sample_sequence,
       { "Sequence",
         "opendds.sample.sequence",
-        FT_UINT16,
+        FT_INT64,
         BASE_HEX,
         NULL,
         0,
