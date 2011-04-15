@@ -847,13 +847,13 @@ DataWriterImpl::AckToken::expected(const RepoId& subscriber) const
 bool
 DataWriterImpl::AckToken::marshal(ACE_Message_Block*& mblock, bool swap) const
 {
-  const size_t dataSize = sizeof(SequenceNumber::Value)
-    + gen_find_size(max_wait_);
+  const size_t dataSize = gen_find_size(sequence_) 
+                        + gen_find_size(max_wait_);
 
   ACE_NEW_RETURN(mblock, ACE_Message_Block(dataSize), false);
 
   Serializer ser(mblock, swap);
-  ser << sequence_.getValue();
+  ser << sequence_;
   ser << max_wait_;
   return ser.good_bit();
 }
@@ -993,7 +993,7 @@ DataWriterImpl::send_control_customized(const DataLinkSet_rch& links,
         char* wr = data_modified->wr_ptr();
         data_modified->wr_ptr(data_modified->base());   // rewind
         Serializer ser(data_modified, swap);
-        ser << seq.getValue();                          // overwrite Seq#
+        ser << seq;                                     // overwrite Seq#
         data_modified->wr_ptr(wr);                      // wind
 
         // If other targets are listening on the DataLink, filter those out
@@ -1841,7 +1841,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
   : TAO_ENCAP_BYTE_ORDER;
   header_data.coherent_change_ = 0;
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
-  header_data.sequence_ = 0;
+  header_data.sequence_ = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
   header_data.publication_id_ = publication_id_;
@@ -1913,7 +1913,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
   header_data.sequence_repair_ = needSequenceRepair;
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
   ++this->sequence_number_;
-  header_data.sequence_ = this->sequence_number_.getValue();
+  header_data.sequence_ = this->sequence_number_;
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
 
@@ -1983,13 +1983,11 @@ DataWriterImpl::deliver_ack(
   const DataSampleHeader& header,
   DataSample*             data)
 {
-  SequenceNumber::Value seqNum;
-
   Serializer serializer(
     data,
     header.byte_order_ != TAO_ENCAP_BYTE_ORDER);
-  serializer >> seqNum;
-  SequenceNumber ack(seqNum);
+  SequenceNumber ack;
+  serializer >> ack;
 
   if (DCPS_debug_level > 0) {
     RepoIdConverter debugConverter(this->publication_id_);

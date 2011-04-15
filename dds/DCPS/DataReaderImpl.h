@@ -660,7 +660,7 @@ private:
   /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
   bool send_sample_ack(
     const RepoId& publication,
-    SequenceNumber::Value sequence,
+    SequenceNumber sequence,
     DDS::Time_t when);
 
   void notify_subscription_lost(const DDS::InstanceHandleSeq& handles);

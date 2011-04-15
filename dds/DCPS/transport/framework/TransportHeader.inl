@@ -17,7 +17,7 @@ OpenDDS::DCPS::TransportHeader::TransportHeader()
     last_fragment_(false),
     reserved_(0),
     length_(0),
-    sequence_(0),
+    sequence_(),
     source_(0)
 {
   DBG_ENTRY_LVL("TransportHeader","TransportHeader",6);

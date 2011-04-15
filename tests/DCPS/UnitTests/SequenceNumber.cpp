@@ -15,65 +15,91 @@
 using namespace OpenDDS::DCPS;
 
 namespace {
-  const SequenceNumber::Value POSITIVE_RANGE = ACE_INT32_MAX;
-  const SequenceNumber::Value MAX_POSITIVE = ACE_INT32_MAX-1;
+  const SequenceNumber::Value SN_MAX   = SequenceNumber::MAX_VALUE;
+  const SequenceNumber::Value SN_MIN   = SequenceNumber::MIN_VALUE;
+  const SequenceNumber::Value SN_RANGE = SN_MAX-SN_MIN;
+  const SequenceNumber::Value SN_SEAM  = ACE_INT32_MAX;
 }
 
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
   // Construction (default)
-  TEST_CHECK(SequenceNumber(ACE_INT32_MIN) == SequenceNumber());
+  TEST_CHECK(SequenceNumber(SN_MIN) == SequenceNumber());
 
   // testing numerical sequence
-  TEST_CHECK(SequenceNumber(ACE_INT32_MIN) < SequenceNumber(ACE_INT32_MIN+1));
-  TEST_CHECK(!(SequenceNumber(ACE_INT32_MIN+1) < SequenceNumber(ACE_INT32_MIN)));
-  TEST_CHECK(SequenceNumber(-1) < SequenceNumber(0));
-  TEST_CHECK(!(SequenceNumber(0) < SequenceNumber(-1)));
-  TEST_CHECK(SequenceNumber(0) < SequenceNumber(1));
-  TEST_CHECK(!(SequenceNumber(1) < SequenceNumber(0)));
-  TEST_CHECK(SequenceNumber(MAX_POSITIVE-1) < SequenceNumber(MAX_POSITIVE));
-  TEST_CHECK(!(SequenceNumber(MAX_POSITIVE) < SequenceNumber(MAX_POSITIVE-1)));
+  TEST_CHECK(SequenceNumber(SN_MIN) < SequenceNumber(SN_MIN+1));
+  TEST_CHECK(!(SequenceNumber(SN_MIN+1) < SequenceNumber(SN_MIN)));
+  TEST_CHECK(SequenceNumber(SN_SEAM) < SequenceNumber(SN_SEAM+1));
+  TEST_CHECK(!(SequenceNumber(SN_SEAM+1) < SequenceNumber(SN_SEAM)));
+  TEST_CHECK(SequenceNumber(SN_MAX-1) < SequenceNumber(SN_MAX));
+  TEST_CHECK(!(SequenceNumber(SN_MAX) < SequenceNumber(SN_MAX-1)));
 
   // testing wide ranges
-  TEST_CHECK(SequenceNumber(ACE_INT32_MIN) < SequenceNumber(0));
-  TEST_CHECK(!(SequenceNumber(0) < SequenceNumber(ACE_INT32_MIN)));
-  TEST_CHECK(SequenceNumber(0) < SequenceNumber(POSITIVE_RANGE/2));
-  TEST_CHECK(!(SequenceNumber(POSITIVE_RANGE/2) < SequenceNumber(0)));
-  TEST_CHECK(SequenceNumber(POSITIVE_RANGE/2+1) < SequenceNumber(0));
-  TEST_CHECK(!(SequenceNumber(0) < SequenceNumber(POSITIVE_RANGE/2+1)));
-  TEST_CHECK(SequenceNumber(POSITIVE_RANGE/2) < SequenceNumber(MAX_POSITIVE));
-  TEST_CHECK(!(SequenceNumber(MAX_POSITIVE) < SequenceNumber(POSITIVE_RANGE/2)));
-  TEST_CHECK(SequenceNumber(MAX_POSITIVE) < SequenceNumber(POSITIVE_RANGE/2-1));
-  TEST_CHECK(!(SequenceNumber(POSITIVE_RANGE/2-1) < SequenceNumber(MAX_POSITIVE)));
-  TEST_CHECK(SequenceNumber(MAX_POSITIVE) < SequenceNumber(0));
-  TEST_CHECK(!(SequenceNumber(0) < SequenceNumber(MAX_POSITIVE)));
+  TEST_CHECK(SequenceNumber() < SequenceNumber(SN_RANGE/2));
+  TEST_CHECK(!(SequenceNumber(SN_RANGE/2) < SequenceNumber()));
+  TEST_CHECK(SequenceNumber(SN_RANGE/2+1) < SequenceNumber());
+  TEST_CHECK(!(SequenceNumber() < SequenceNumber(SN_RANGE/2+1)));
+  TEST_CHECK(SequenceNumber(SN_RANGE/2+1) < SequenceNumber(SN_MAX));
+  TEST_CHECK(!(SequenceNumber(SN_MAX) < SequenceNumber(SN_RANGE/2+1)));
+  TEST_CHECK(SequenceNumber(SN_MAX) < SequenceNumber(SN_RANGE/2));
+  TEST_CHECK(!(SequenceNumber(SN_RANGE/2) < SequenceNumber(SN_MAX)));
+  TEST_CHECK(SequenceNumber(SN_MAX) < SequenceNumber());
+  TEST_CHECK(!(SequenceNumber() < SequenceNumber(SN_MAX)));
 
   // testing values and increment operator
   {
-    SequenceNumber num(ACE_INT32_MIN);
-    TEST_CHECK(num.getValue() == ACE_INT32_MIN);
-    TEST_CHECK((++num).getValue() == ACE_INT32_MIN+1);
+    SequenceNumber num(SN_MIN);
+    TEST_CHECK(num.getValue() == SN_MIN);
+    TEST_CHECK((++num).getValue() == SN_MIN+1);
   }
 
   {
-    SequenceNumber num(-1);
-    TEST_CHECK(num.getValue() == -1);
-    TEST_CHECK((++num).getValue() == 0);
-    TEST_CHECK((++num).getValue() == 1);
+    SequenceNumber num(SN_SEAM);
+    TEST_CHECK(num.getValue() == SN_SEAM);
+    TEST_CHECK((++num).getValue() == SN_SEAM+1);
+    TEST_CHECK((++num).getValue() == SN_SEAM+2);
   }
 
   {
-    SequenceNumber num(MAX_POSITIVE);
-    TEST_CHECK(num.getValue() == MAX_POSITIVE);
-    TEST_CHECK((++num).getValue() == 0);
+    SequenceNumber num(SN_MAX);
+    TEST_CHECK(num.getValue() == SN_MAX);
+    TEST_CHECK((++num).getValue() == SN_MIN);
     // test post-incrementer
-    TEST_CHECK((num++).getValue() == 0);
+    TEST_CHECK((num++).getValue() == SN_MIN);
+    TEST_CHECK(num.getValue() == SN_MIN+1);
   }
 
-  // testing beyond range
-  TEST_CHECK(SequenceNumber(ACE_INT64(MAX_POSITIVE)+1).getValue() == 0);
-  TEST_CHECK(SequenceNumber(ACE_INT64(MAX_POSITIVE)+ACE_INT32_MAX).getValue() == MAX_POSITIVE);
+  // Test SEQUENCENUMBER_UNKNOWN
+  {
+    SequenceNumber num = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+    TEST_CHECK(num.getValue() == ACE_INT64(0xffffffff) << 32);
+    SequenceNumber min;
+    TEST_CHECK(num != min);
+    TEST_CHECK(num == SequenceNumber::SEQUENCENUMBER_UNKNOWN());
+  }
+
+  // Test previous() member function
+  {
+    SequenceNumber num(SN_MIN);
+    TEST_CHECK(num.previous() == SN_MAX);
+  }
+
+  {
+    SequenceNumber num(SN_SEAM+1);
+    TEST_CHECK(num.previous() == SN_SEAM);
+  }
+
+  {
+    SequenceNumber num(99);
+    TEST_CHECK(num.previous() == 98);
+  }
+
+  {
+    SequenceNumber num(SN_MAX);
+    TEST_CHECK(num.previous() == SN_MAX-1);
+  }
+
 
   return 0;
 }

@@ -64,7 +64,6 @@ public:
 
 private:
   void validate(const SequenceRange& range) const;
-  SequenceNumber previous_sequence_number(SequenceNumber value) const;
 
   RangeSet sequences_;
 };

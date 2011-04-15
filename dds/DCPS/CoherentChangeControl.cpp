@@ -29,7 +29,7 @@ ACE_CDR::Boolean
 operator<<(Serializer& serializer, CoherentChangeControl& value)
 {
   serializer << value.coherent_samples_.num_samples_;
-  serializer << value.coherent_samples_.last_sample_.getValue();
+  serializer << value.coherent_samples_.last_sample_;
   serializer << ACE_OutputCDR::from_boolean(value.group_coherent_);
 
   if (value.group_coherent_) {
@@ -40,7 +40,7 @@ operator<<(Serializer& serializer, CoherentChangeControl& value)
            value.group_coherent_samples_.begin(); it != itEnd; ++it) {
       serializer << it->first;
       serializer << it->second.num_samples_;
-      serializer << it->second.last_sample_.getValue();
+      serializer << it->second.last_sample_;
     }
   }
 
@@ -53,9 +53,7 @@ operator>>(Serializer& serializer, CoherentChangeControl& value)
   serializer >> value.coherent_samples_.num_samples_;
   if (!serializer.good_bit()) return false;
 
-  SequenceNumber::Value seqNum;
-  serializer >> seqNum;
-  value.coherent_samples_.last_sample_.setValue(seqNum);
+  serializer >> value.coherent_samples_.last_sample_;
   if (!serializer.good_bit()) return false;
 
   serializer >> ACE_InputCDR::to_boolean(value.group_coherent_);
