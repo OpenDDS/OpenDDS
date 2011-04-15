@@ -116,8 +116,8 @@ public:
     if (value < MIN_VALUE) {
       value = MIN_VALUE;
     }
-    this->high_ = value / LOW_BASE;
-    this->low_  = value % LOW_BASE;
+    this->high_ = ACE_INT32(value / LOW_BASE);
+    this->low_  = ACE_UINT32(value % LOW_BASE);
   }
  
   Value getValue() const {
