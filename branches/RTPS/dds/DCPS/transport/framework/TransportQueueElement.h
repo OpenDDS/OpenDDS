@@ -99,6 +99,9 @@ public:
   /// DataSampleHeader.
   ElementPair fragment(size_t size);
 
+  /// Is this QueueElement the result of fragmentation?
+  virtual bool is_fragment() const { return false; }
+
 protected:
 
   /// Ctor.  The initial_count is the number of DataLinks to which

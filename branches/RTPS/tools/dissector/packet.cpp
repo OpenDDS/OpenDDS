@@ -215,7 +215,7 @@ dissect_header(tvbuff* tvb, packet_info* pinfo, proto_tree* tree,
 
   // hf_sequence
   len = static_cast<gint>(gen_find_size(header.sequence_));
-  proto_tree_add_uint(tree, hf_sequence, tvb, offset, len,
+  proto_tree_add_uint64(tree, hf_sequence, tvb, offset, len,
     gint64(header.sequence_.getValue()));
   offset += len;
 
@@ -289,7 +289,7 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
   // hf_sample_sequence
   len = static_cast<gint>(gen_find_size(sample.sequence_));
   if (sample.message_id_ == SAMPLE_DATA) {
-    proto_tree_add_uint(tree, hf_sample_sequence, tvb, offset, len,
+    proto_tree_add_uint64(tree, hf_sample_sequence, tvb, offset, len,
       gint64(sample.sequence_.getValue()));
   }
   offset += len;

@@ -32,11 +32,11 @@ public:
     pool_(links_per_pool, initial_pools)
   {}
 
-  virtual ~BasicQueue() {
+  ~BasicQueue() {
   }
 
   /// Put a pointer to an element (T*) on to the queue.
-  virtual int put(T* elem) {
+  int put(T* elem) {
     // Get a "new" link from the pool.
     LinkType* link = pool_.obtain(elem);
 
@@ -70,22 +70,24 @@ public:
 
   /// Peek at the element at the top of the queue.  This is just
   /// like the get() operation except that the queue remains intact.
-  virtual T* peek() {
+  T* peek() const {
     if (this->head_ == 0) {
       // The queue is empty.  Return a NULL pointer (0).
       return 0;
     }
 
-    // Save off the pointer to the head link's elem().
-    T* elem = this->head_->elem();
+    return this->head_->elem();
+  }
 
-    // And return the elem.
-    return elem;
+  void replace_head(T* value) {
+    if (this->head_ != 0) {
+      this->head_->elem(value);
+    }
   }
 
   /// Extract the top element from the queue.  Returns 0 if there
   /// are no elements in the queue.
-  virtual T* get() {
+  T* get() {
     LinkType* link = this->head_;
 
     if (link == 0) {
@@ -128,7 +130,7 @@ public:
   /// once for each element in this BasicQueue<T> object, in order.
   /// The visitor can stop visitation early by returning 0 from
   /// its visit_element(T* element) method.
-  void accept_visitor(VisitorType& visitor) {
+  void accept_visitor(VisitorType& visitor) const {
     LinkType* link = this->head_;
 
     while (link != 0) {

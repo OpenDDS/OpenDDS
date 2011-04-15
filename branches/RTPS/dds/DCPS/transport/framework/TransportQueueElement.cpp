@@ -43,11 +43,12 @@ OpenDDS::DCPS::TransportQueueElement::fragment(size_t size)
   ACE_Message_Block* tail;
   DataSampleHeader::split(*msg(), size, head, tail);
 
-  TransportCustomizedElement* frag = TransportCustomizedElement::alloc(0);
+  TransportCustomizedElement* frag = TransportCustomizedElement::alloc(0, true);
   frag->set_publication_id(publication_id());
   frag->set_msg(head);
 
-  TransportCustomizedElement* rest = TransportCustomizedElement::alloc(this);
+  TransportCustomizedElement* rest =
+    TransportCustomizedElement::alloc(this, true);
   rest->set_msg(tail);
 
   return std::make_pair(frag, rest);
