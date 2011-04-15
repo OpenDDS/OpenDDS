@@ -1,10 +1,18 @@
+Fri Apr 15 14:25:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dds_suppress_any_support.mpb:
+        * dds/DdsDcps.mpc:
+
+          Improved support for building OpenDDS with TAO's Anys and Typecodes.
+          To use, set the MPC feature dds_suppress_anys to 0.
+
 Thu Apr 14 12:07:15 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
 
-	  Added validation warning if Pub/Sub's transportID not explicitly set.
+          Added validation warning if Pub/Sub's transportID not explicitly set.
 
 Fri Apr  8 18:24:44 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
