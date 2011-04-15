@@ -1,3 +1,9 @@
+Fri Apr 15 15:08:28 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/tocreference.xml:
+
+          Removed duplicate policy entry in TOC.
+
 Fri Apr 15 14:50:56 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/be_produce.cpp:

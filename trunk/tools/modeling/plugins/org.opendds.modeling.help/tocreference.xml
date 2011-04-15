@@ -13,7 +13,6 @@
 		<topic href="html/reference/qos_policies/latency_budget.html" label="LATENCY_BUDGET"/>
 		<topic href="html/reference/qos_policies/lifespan.html" label="LIFESPAN"/>
 		<topic href="html/reference/qos_policies/liveliness.html" label="LIVELINESS"/>
-		<topic href="html/reference/qos_policies/liveliness.html" label="LIVELINESS"/>
 		<topic href="html/reference/qos_policies/ownership.html" label="OWNERSHIP"/>
 		<topic href="html/reference/qos_policies/ownership_strength.html" label="OWNERSHIP_STRENGTH"/>
 		<topic href="html/reference/qos_policies/partition.html" label="PARTITION"/>
