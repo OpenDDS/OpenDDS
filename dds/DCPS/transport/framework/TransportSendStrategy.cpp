@@ -84,8 +84,7 @@ TransportSendStrategy::TransportSendStrategy
     graceful_disconnecting_(false),
     link_released_(true),
     send_buffer_(0),
-    transport_shutdown_(false),
-    next_fragment_(0)
+    transport_shutdown_(false)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
 
@@ -105,7 +104,7 @@ TransportSendStrategy::TransportSendStrategy
 
   // We cache this value in data member since it doesn't change, and we
   // don't want to keep asking for it over and over.
-  this->max_header_size_ = this->header_.max_marshaled_size();
+  this->max_header_size_ = TransportHeader::max_marshaled_size();
 
   if (Transport_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy replaced_element_allocator %x with %d chunks\n",
@@ -134,10 +133,6 @@ TransportSendStrategy::~TransportSendStrategy()
 
   delete this->elems_;
   delete this->queue_;
-
-  if (this->next_fragment_) {
-    this->next_fragment_->data_dropped(true /* dropped by transport */);
-  }
 }
 
 void
@@ -1113,91 +1108,118 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         }
       }
 
-      if (max_message_size) { // fragmentation enabled
-        const size_t avail = this->space_available();
-        if (element_length > avail) {
-          ElementPair ep = element->fragment(avail);
-          element = ep.first;
-          this->next_fragment_ = ep.second;
-          element_length = element->msg()->total_length();
+      // Loop for sending 'element', in fragments if needed
+      bool first_pkt = true; // enter the loop 1st time through unconditionally
+      for (TransportQueueElement* next_fragment = 0;
+           (first_pkt || next_fragment) && this->mode_ == MODE_DIRECT;) {
+
+        first_pkt = false;
+        if (next_fragment) {
+          element = next_fragment;
+          element_length = next_fragment->msg()->total_length();
         }
-      }
 
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "Start the 'append elem' to current packet logic.\n"));
-
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "Put element into current packet elems_.\n"));
-
-      // Now that we know the current element should go into the current
-      // packet, we can just go ahead and "append" the current element to
-      // the current packet.
-
-      // Add the current element to the collection of packet elements.
-      this->elems_->put(element);
-
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "Before, the header_.length_ == [%d].\n",
-            this->header_.length_));
-
-      // Adjust the header_.length_ to account for the length of the element.
-      this->header_.length_ += static_cast<ACE_UINT32>(element_length);
-      const size_t message_length = this->header_.length_;
-
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "After adding element's length, the header_.length_ == [%d].\n",
-            message_length));
-
-      // The current packet now contains the current element.  We need to
-      // check to see if the conditions are such that we should go ahead and
-      // attempt to send the packet "directly" now, or if we can just leave
-      // and send the current packet later (in another send() call or in a
-      // send_stop() call).
-
-      // There are three conditions that will cause us to attempt to send the
-      // packet (directly) right now.
-      //
-      //   (1) The current packet has the maximum number of samples per packet.
-      //   (2) The current packet's total length exceeds the optimum packet size.
-      //   (3) The current element (currently part of the packet elems_)
-      //       requires an exclusive packet.
-      //
-      if ((this->elems_->size() >= this->max_samples_) ||
-          (this->max_header_size_ + message_length > this->optimum_size_) ||
-          exclusive) {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Now the current packet looks full - send it (directly).\n"));
-
-        this->direct_send(relink);
+        this->header_.last_fragment_ = false;
+        if (max_message_size) { // fragmentation enabled
+          const size_t avail = this->space_available();
+          if (element_length > avail) {
+            ElementPair ep = element->fragment(avail);
+            element = ep.first;
+            element_length = element->msg()->total_length();
+            next_fragment = ep.second;
+          } else if (next_fragment) {
+            // We are sending the "tail" element of a previous fragment()
+            // operation, and this element didn't itself require fragmentation
+            this->header_.last_fragment_ = true;
+            next_fragment = 0;
+          }
+        }
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Back from the direct_send() attempt.\n"));
+              "Start the 'append elem' to current packet logic.\n"));
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "And we %C as a result of the direct_send() call.\n",
-              ((this->mode_ == MODE_QUEUE)? "flipped into MODE_QUEUE":
-                                            "stayed in MODE_DIRECT")));
+              "Put element into current packet elems_.\n"));
 
-      } else {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Packet not sent. Send conditions weren't satisfied.\n"));
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "elems_->size(): %d, max_samples_: %d\n",
-              this->elems_->size(), this->max_samples_));
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "header_size_: %d, optimum_size_: %d\n"
-              , this->max_header_size_ + message_length
-              , this->optimum_size_));
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "element_requires_exclusive_packet: %d\n", int(exclusive)));
+        // Now that we know the current element should go into the current
+        // packet, we can just go ahead and "append" the current element to
+        // the current packet.
 
-        if (this->mode_ == MODE_QUEUE) {
+        // Add the current element to the collection of packet elements.
+        this->elems_->put(element);
+
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+              "Before, the header_.length_ == [%d].\n",
+              this->header_.length_));
+
+        // Adjust the header_.length_ to account for the length of the element.
+        this->header_.length_ += static_cast<ACE_UINT32>(element_length);
+        const size_t message_length = this->header_.length_;
+
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+              "After adding element's length, the header_.length_ == [%d].\n",
+              message_length));
+
+        // The current packet now contains the current element.  We need to
+        // check to see if the conditions are such that we should go ahead and
+        // attempt to send the packet "directly" now, or if we can just leave
+        // and send the current packet later (in another send() call or in a
+        // send_stop() call).
+
+        // There a few conditions that will cause us to attempt to send the
+        // packet (directly) right now:
+        // - Fragmentation was needed
+        // - The current packet has the maximum number of samples per packet.
+        // - The current packet's total length exceeds the optimum packet size.
+        // - The current element (currently part of the packet elems_)
+        //   requires an exclusive packet.
+        //
+        if (next_fragment || (this->elems_->size() >= this->max_samples_)
+            || (this->max_header_size_ + message_length > this->optimum_size_)
+            || exclusive) {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                "We flipped into MODE_QUEUE.\n"));
+                "Now the current packet looks full - send it (directly).\n"));
+
+          this->direct_send(relink);
+
+          if (next_fragment && this->mode_ != MODE_DIRECT) {
+            if (this->mode_ == MODE_QUEUE) {
+              this->queue_->put(next_fragment);
+              this->synch_->work_available();
+            } else {
+              next_fragment->data_dropped(true /* dropped by transport */);
+            }
+          }
+
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "Back from the direct_send() attempt.\n"));
+
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "And we %C as a result of the direct_send() call.\n",
+                ((this->mode_ == MODE_QUEUE) ? "flipped into MODE_QUEUE"
+                                             : "stayed in MODE_DIRECT")));
 
         } else {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                "We stayed in MODE_DIRECT.\n"));
+                "Packet not sent. Send conditions weren't satisfied.\n"));
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "elems_->size(): %d, max_samples_: %d\n",
+                int(this->elems_->size()), int(this->max_samples_)));
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "header_size_: %d, optimum_size_: %d\n",
+                int(this->max_header_size_ + message_length),
+                int(this->optimum_size_)));
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "element_requires_exclusive_packet: %d\n", int(exclusive)));
+
+          if (this->mode_ == MODE_QUEUE) {
+            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "We flipped into MODE_QUEUE.\n"));
+
+          } else {
+            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "We stayed in MODE_DIRECT.\n"));
+          }
         }
       }
     }
@@ -1604,59 +1626,60 @@ TransportSendStrategy::get_packet_elems_from_queue()
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "get_packet_elems_from_queue", 6);
 
-  for (const TransportQueueElement* element = this->queue_->peek();
-       element != 0; element = this->queue_->peek()) {
+  for (TransportQueueElement* element = this->queue_->peek(); element != 0;
+       element = this->queue_->peek()) {
 
     // Total number of bytes in the current element's message block chain.
-    const size_t element_length = element->msg()->total_length();
+    size_t element_length = element->msg()->total_length();
 
     // Flag used to determine if the element requires a packet all to itself.
     const bool exclusive_packet = element->requires_exclusive_packet();
 
-    // The total size of the current packet (packet header bytes included)
-    const size_t packet_size = this->max_header_size_ + this->header_.length_;
+    const size_t avail = this->space_available();
 
-    if (packet_size + element_length > this->max_size_) {
-      // The current element won't fit into the current packet (based on the
-      // user-configurable max_size_).
-      break;
-    }
-
-    if (exclusive_packet) {
-      if (this->elems_->size() == 0) {
-        // The current packet is empty so we won't violate the
-        // exclusive_packet requirement by put()'ing the element
-        // into the elems_ collection.  We also extract the current
-        // element from the queue_ at this time (we've been peek()'ing
-        // at the element all this time).
-        this->elems_->put(this->queue_->get());
-        this->header_.length_ = static_cast<ACE_UINT32>(element_length);
+    bool frag = false;
+    if (element_length > avail) {
+      // The current element won't fit into the current packet
+      if (this->max_message_size()) { // fragmentation enabled
+        ElementPair ep = element->fragment(avail);
+        element = ep.first;
+        element_length = element->msg()->total_length();
+        this->queue_->replace_head(ep.second);
+        frag = true; // queue_ is already taken care of, don't get() later
+      } else {
+        break;
       }
-
-      // Otherwise (when elems_.size() != 0), we don't use the current
-      // element as part of the packet.  We know that there is already
-      // at least one element in the packet, and the current element
-      // is going to need its own (exclusive) packet.  We will just
-      // use the packet elems_ as it is now.  Always break once
-      // we've encountered and dealt with the exclusive_packet case.
-      break;
     }
 
-    // At this point, we have passed all of the pre-conditions and we can
-    // now extract the current element from the queue_, put it into the
-    // packet elems_, and adjust the packet header_.length_.
-    this->elems_->put(this->queue_->get());
-    this->header_.length_ += static_cast<ACE_UINT32>(element_length);
-
-    // If the current number of packet elems_ has reached the maximum
-    // number of samples per packet, then we are done.
-    if (this->elems_->size() == this->max_samples_) {
-      break;
+    // If exclusive and the current packet is empty, we won't violate the
+    // exclusive_packet requirement by put()'ing the element
+    // into the elems_ collection.
+    if ((exclusive_packet && this->elems_->size() == 0)
+        || !exclusive_packet) {
+      // At this point, we have passed all of the pre-conditions and we can
+      // now extract the current element from the queue_, put it into the
+      // packet elems_, and adjust the packet header_.length_.
+      this->elems_->put(frag ? element : this->queue_->get());
+      if (this->header_.length_ == 0) {
+        this->header_.last_fragment_ = !frag && element->is_fragment();
+      }
+      this->header_.length_ += static_cast<ACE_UINT32>(element_length);
     }
 
-    // If the current value of the header_.length_ exceeds (or equals)
-    // the optimum_size_ for a packet, then we are done.
-    if (this->header_.length_ >= this->optimum_size_) {
+    // With exclusive and elems_.size() != 0), we don't use the current
+    // element as part of the packet.  We know that there is already
+    // at least one element in the packet, and the current element
+    // is going to need its own (exclusive) packet.  We will just
+    // use the packet elems_ as it is now.  Always break once
+    // we've encountered and dealt with the exclusive_packet case.
+    // Also break if fragmentation was required.
+    if (exclusive_packet || frag
+        // If the current number of packet elems_ has reached the maximum
+        // number of samples per packet, then we are done.
+        || this->elems_->size() == this->max_samples_
+        // If the current value of the header_.length_ exceeds (or equals)
+        // the optimum_size_ for a packet, then we are done.
+        || this->header_.length_ >= this->optimum_size_) {
       break;
     }
   }

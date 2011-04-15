@@ -388,10 +388,6 @@ private:
 
   bool transport_shutdown_;
 
-  /// If fragmentation was necessary, this is the remainder of the
-  /// original element which is yet to be put in a transport packet.
-  TransportQueueElement* next_fragment_;
-
 protected:
   /// Current transport packet header.
   TransportHeader header_;
