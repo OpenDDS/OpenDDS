@@ -1,3 +1,49 @@
+Fri Apr 15 15:23:13 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Modify the SequenceNumber class to be compatible with RTPS.  
+          I have also bulked up the abstraction the class provides to 
+          simplify the using code.  The main changes are moving from a
+          32i bit count to 64 bit count and from the lollipop scheme to a 
+          purely positive range (excepting a spec-defined "unknown" value).
+
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/SubscriptionInstance.h:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Related changes to the SequenceNumber changes.  In general we 
+          move away from directly using integral types and towards using
+          the SequenceNumber abstraction.
+
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataReader.h:
+        * tests/transport/simple_bp_rm/SimpleDataReader.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+
+          Fix the details of these tests (as they directly manipulates 
+          sequence numbers).  Mostly involves avoiding non-positive 
+          numbers.
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+        * tests/DCPS/UnitTests/SequenceNumber.cpp:
+
+          Modify the unit tests as necessary.  Add some new tests to 
+          cover new corner cases and functionality.
+
+
 Thu Apr 14 17:37:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.h:

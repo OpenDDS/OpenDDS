@@ -64,15 +64,12 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
   OpenDDS::DCPS::DataSampleHeader header;
   header.publication_id_ = this->pub_id_;
   header.message_id_ = 1;
-  header.sequence_   = 0;
 
   while (this->num_sent_ < this->num_to_send_)
     {
-      ++header.sequence_;
-
       // This is what goes in the "Data Block".
       std::ostringstream ostr;
-      ostr << data << " [" << header.sequence_ << "]";
+      ostr << data << " [" << header.sequence_.getValue() << "]";
 
       std::string data_str = ostr.str();
       header.message_length_ = data_str.length() + 1;
@@ -92,6 +89,8 @@ SimpleDataWriter::run(SimplePublisher* publisher, unsigned num_messages)
 
       GuardType guard(this->lock_);
       ++this->num_sent_;
+
+      ++header.sequence_;
     }
 
   return this->num_sent_ ;

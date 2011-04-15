@@ -44,7 +44,7 @@ DisjointSequence::lowest_valid(SequenceNumber value)
 
   // if the current range goes negative, then assume we can go negative,
   // otherwise it is not important
-  const SequenceNumber validLowWaterMark(previous_sequence_number(value));
+  const SequenceNumber validLowWaterMark(value.previous());
   SequenceRange validLowWaterRange(validLowWaterMark, validLowWaterMark);
 
   RangeSet::iterator low_bound =
@@ -86,7 +86,7 @@ DisjointSequence::update(const SequenceRange& range)
     // move to just past this iterator for the erase
     ++range_above;
   }
-  const SequenceNumber previous(previous_sequence_number(range.first));
+  const SequenceNumber previous(range.first.previous());
   // find the lower_bound for the SequenceNumber just before this range
   // to see if any ranges need to combine
   RangeSet::iterator range_below =
@@ -109,14 +109,6 @@ DisjointSequence::update(const SequenceRange& range)
   return true;
 }
 
-SequenceNumber
-DisjointSequence::previous_sequence_number(const SequenceNumber value) const {
-  // if all of the identifiable sequence is positive, then we do not know
-  return (value.getValue() != 0 || low().getValue() < 0)
-    ? (value.getValue() - 1)
-    : SequenceNumber::MAX_VALUE;
-}
-
 std::vector<SequenceRange>
 DisjointSequence::missing_sequence_ranges() const {
   std::vector<SequenceRange> missing_sequence_ranges;
@@ -128,7 +120,7 @@ DisjointSequence::missing_sequence_ranges() const {
   RangeSet::const_iterator firstIter = secondIter++;
   for(; secondIter != this->sequences_.end(); ++firstIter, ++ secondIter) {
     const SequenceNumber missingLow(++SequenceNumber(firstIter->second)),
-      missingHigh(previous_sequence_number(secondIter->first));
+      missingHigh(secondIter->first.previous());
     if (missingLow <= missingHigh) {
       missing_sequence_ranges.push_back(SequenceRange(missingLow, missingHigh));
     }

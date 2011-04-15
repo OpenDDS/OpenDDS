@@ -471,13 +471,10 @@ ReliableSession::nak_received(ACE_Message_Block* control)
   std::vector<SequenceRange> ranges;
 
   for (CORBA::ULong i = 0; i < size; ++i) {
-    SequenceNumber::Value low;
-    serializer >> low;
-
-    SequenceNumber::Value high;
-    serializer >> high;
-
-    ranges.push_back (SequenceRange (low, high));
+    SequenceRange range;
+    serializer >> range.first;
+    serializer >> range.second;
+    ranges.push_back (range);
   }
 
   // Track peer repair requests for later suppression:
@@ -531,8 +528,8 @@ ReliableSession::send_naks(DisjointSequence& received)
   serializer << size;
   for (std::vector<SequenceRange>::const_iterator iter = ranges.begin();
        iter != ranges.end(); ++iter) {
-    serializer << iter->first.getValue();
-    serializer << iter->second.getValue();
+    serializer << iter->first;
+    serializer << iter->second;
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ReliableSession::send_naks")
                             ACE_TEXT (" %d -> %d %d - %d \n"),
@@ -559,7 +556,7 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
   Serializer serializer(
     control, header.swap_bytes());
 
-  SequenceNumber::Value low;
+  SequenceNumber low;
   serializer >> low;
 
   // MULTICAST_NAKACK control samples indicate data which cannot be
@@ -588,7 +585,7 @@ ReliableSession::send_nakack(SequenceNumber low)
   Serializer serializer(
     data, this->link_->transport()->swap_bytes());
 
-  serializer << low.getValue();
+  serializer << low;
 
   // Broadcast control sample to all peers:
   send_control(MULTICAST_NAKACK, data);

@@ -192,7 +192,7 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   reader >> this->sequence_;
 
   if (!reader.good_bit()) return;
-  this->marshaled_size_ += sizeof(this->sequence_);
+  this->marshaled_size_ += gen_find_size(this->sequence_);
 
   reader >> this->source_timestamp_sec_;
 
@@ -483,7 +483,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     if (value.more_fragments_ == 1) str << "More Fragments, ";
 
     str << "Sequence: 0x" << std::hex << std::setw(4) << std::setfill('0')
-        << value.sequence_ << ", ";
+        << value.sequence_.getValue() << ", ";
 
     str << "Timestamp: " << std::dec << value.source_timestamp_sec_ << "."
         << std::dec << value.source_timestamp_nanosec_ << ", ";

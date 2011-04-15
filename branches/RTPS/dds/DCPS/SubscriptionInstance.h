@@ -40,7 +40,7 @@ public:
                        ACE_Recursive_Thread_Mutex& lock,
                        DDS::InstanceHandle_t handle)
     : instance_state_(reader, lock, handle),
-      last_sequence_(0),
+      last_sequence_(),
       rcvd_samples_(&instance_state_),
       rcvd_strategy_(0),
       instance_handle_(handle),
@@ -76,7 +76,7 @@ public:
   InstanceState instance_state_ ;
 
   /// sequence number of the move recect data sample received
-  SequenceNumber::Value last_sequence_ ;
+  SequenceNumber last_sequence_ ;
 
   /// Data sample(s) in this instance
   ReceivedDataElementList rcvd_samples_ ;
