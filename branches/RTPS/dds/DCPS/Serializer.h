@@ -64,6 +64,9 @@ public:
 
   /// Examine the state of the stream abstraction.
   bool good_bit() const ;
+#ifndef RTPS
+  void good_bit(bool b) { good_bit_ = b; }
+#endif
 
   /// Read a C string.
   void read_string(ACE_CDR::Char*& dest);
@@ -161,6 +164,10 @@ public:
   void write_array(const char *x,
                    size_t size,
                    ACE_CDR::ULong length);
+ 
+#ifdef RTPS 
+  ACE_Message_Block* Current() { return current_ ; }
+#endif
 
 private:
   /// Efficient straight copy for quad words and shorter.  This is
