@@ -1,8 +1,14 @@
+Fri Apr 22 19:36:08 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/tasks/integration.html:
+
+          Further touch up.
+
 Fri Apr 22 19:13:37 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/tasks/integration.html:
 
-	  Removed sections that were a copy from generate.html. Fixed typo.
+          Removed sections that were a copy from generate.html. Fixed typo.
 
 Fri Apr 15 15:08:28 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
