@@ -1,3 +1,11 @@
+Mon Apr 25 12:19:34 UTC 2011  Jim Chappell  <chapell_j@ociweb.com>
+
+        * dds/DCPS/Serializer.cpp:
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+
+          Initial changes for RTPS-style serialization.
+
 Fri Apr 15 21:33:16 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/BasicQueue_T.h:
