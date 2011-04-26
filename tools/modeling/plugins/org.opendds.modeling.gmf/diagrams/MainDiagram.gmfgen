@@ -273,7 +273,7 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0"
-            viewPattern="«dcpslib»">
+            viewPattern="«dcpsLib»">
           <metaFeatures
               href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSLib/name"/>
         </modelFacet>
@@ -426,7 +426,7 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0"
-            viewPattern="«dcpslib»">
+            viewPattern="«dcpsLib»">
           <metaFeatures
               href="../../org.opendds.modeling.model/model/OpenDDS.genmodel#//opendds/OpenDDSLib/name"/>
         </modelFacet>
