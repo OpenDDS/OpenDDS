@@ -1,3 +1,45 @@
+Wed Apr 27 18:21:08 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Serializer.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/marshal_generator.cpp:
+
+          Add support for marshaling just the keys of a DCPS data type
+          (as opposed to the whole sample).  Use the keys-only marshaling
+          in all of the control messages that don't require the whole
+          sample.  This is required for RTPS as well.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/KeyTest:
+        * tests/DCPS/KeyTest/KeyMarshaling.cpp:
+        * tests/DCPS/KeyTest/KeyTest.idl:
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+        * tests/DCPS/KeyTest/KeyTest_export.h:
+        * tests/DCPS/KeyTest/KeyTypeError_array_noindex.idl:
+        * tests/DCPS/KeyTest/KeyTypeError_bad_nesting.idl:
+        * tests/DCPS/KeyTest/KeyTypeError_missing_right_bracket.idl:
+        * tests/DCPS/KeyTest/KeyTypeError_multi_dim_array.idl:
+        * tests/DCPS/KeyTest/KeyTypeError_nofield.idl:
+        * tests/DCPS/KeyTest/KeyTypeError_nonarrayindex.idl:
+        * tests/DCPS/KeyTest/KeyTypeError_nonarrayindex2.idl:
+        * tests/DCPS/KeyTest/KeyTypeError_struct_no_nest.idl:
+        * tests/DCPS/KeyTest/README:
+        * tests/DCPS/KeyTest/run_test.pl:
+
+          Add a new unit test for key-related functionality.  This
+          includes tests of all the different type and varieties of
+          keys that we currently support (the spec if vague as to 
+          what is allowed).  It also verifies the key-only marshaling
+          functionality and a number of error paths in key specification.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Fix this unit test to adhere to marshaling interface changes.
+
 Mon Apr 25 12:19:34 UTC 2011  Jim Chappell  <chapell_j@ociweb.com>
 
         * dds/DCPS/Serializer.cpp:

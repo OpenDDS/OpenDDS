@@ -198,6 +198,11 @@ private:
 
 };
 
+template<typename T> struct KeyOnly {
+  explicit KeyOnly(T& mess) : t(mess) { }
+  T& t;
+};
+
 } // namespace DCPS
 } // namespace OpenDDS
 

@@ -159,6 +159,7 @@ examples/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !MIN_CORBA !CORBA_E_COMPACT !
 
 tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN
 tests/DCPS/UnitTests/run_test.pl: !DCPS_MIN
+tests/DCPS/KeyTest/run_test.pl: !DCPS_MIN
 tests/DCPS/CompatibilityTest/run_test.pl: !DCPS_MIN
 tests/DCPS/Partition/run_test.pl: !DCPS_MIN
 tests/DCPS/Deadline/run_test.pl: !DCPS_MIN

@@ -164,11 +164,14 @@ private:
    *
    * @param instance_data The data to serialize.
    * @param for_write If 1 use the fast allocator; otherwise use the heap.
+   * @param marshaling_type Enumerated type specifying whether to marshal
+   *        just the keys or the entire message.
    * @return returns the serialized data.
    */
   ACE_Message_Block* dds_marshal(
     const ::<%SCOPED%>& instance_data,
-    int  for_write = 1);
+    int  for_write = 1,
+    OpenDDS::DCPS::MarshalingType marshaling_type = OpenDDS::DCPS::FULL_MARSHALING);
 
   /**
    * Find the instance handle for the given instance_data using
@@ -382,7 +385,8 @@ public:
     virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
                                OpenDDS::DCPS::SubscriptionInstance*& instance,
                                bool & just_registered,
-                               bool & filtered);
+                               bool & filtered,
+                               OpenDDS::DCPS::MarshalingType marshaling_type);
 
     virtual void dispose(const OpenDDS::DCPS::ReceivedDataSample& sample,
                          OpenDDS::DCPS::SubscriptionInstance*& instance);
