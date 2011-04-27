@@ -1305,7 +1305,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     SubscriptionInstance* instance = 0;
     bool is_new_instance = false;
     bool filtered = false;
-    dds_demarshal(sample, instance, is_new_instance, filtered);
+    MarshalingType marshaling = FULL_MARSHALING;
+    if (sample.header_.message_id_ == INSTANCE_REGISTRATION) {
+      marshaling = KEY_ONLY_MARSHALING;
+    }
+    dds_demarshal(sample, instance, is_new_instance, filtered, marshaling);
 
     if (DCPS_debug_level  >= 1) {
       RepoIdConverter reader_converter(subscription_id_);

@@ -564,6 +564,89 @@ namespace {
     return cxx_fld + "_forany " + prefix + '_' + local + "(const_cast<"
       + cxx_fld + "_slice*>(" + prefix + "." + fname + "));";
   }
+
+  // This function looks through the fields of a struct for the key
+  // specified and returns the AST_Type associated with that key.
+  // Because the key name can contain indexed arrays and nested 
+  // structures, things can get interesting.
+  AST_Type* find_type(const std::vector<AST_Field*>& fields, 
+                      string key)
+  {
+    string key_base = key;   // the field we are looking for here
+    string key_rem;          // the sub-field we will look for recursively
+    bool is_array = false;
+    size_t pos = key.find_first_of(".[");
+    if (pos != std::string::npos) {
+      key_base = key.substr(0, pos);
+      if (key[pos] == '[') {
+        is_array = true;
+        size_t l_brack = key.find("]");
+        if (l_brack == std::string::npos) {
+          throw std::string("Missing right bracket");
+        } else if (l_brack != key.length()) {
+          key_rem = key.substr(l_brack+1);
+        }
+      } else {
+        key_rem = key.substr(pos+1);
+      }
+    }
+    for (size_t i = 0; i < fields.size(); ++i) {
+      string field_name = fields[i]->local_name()->get_string();
+      if (field_name == key_base) {
+        AST_Type* field_type = fields[i]->field_type();
+        if (!is_array && key_rem == "") {
+          // The requested key field matches this one.  We do not allow
+          // arrays (must be indexed specifically) or structs (must
+          // identify specific sub-fields).
+          AST_Structure* sub_struct = dynamic_cast<AST_Structure*>(field_type);
+          if (sub_struct != 0) {
+            throw std::string("Structs not allowed as keys");
+          }
+          AST_Typedef* typedef_node = dynamic_cast<AST_Typedef*>(field_type);
+          if (typedef_node != 0) {
+            AST_Array* array_node = 
+              dynamic_cast<AST_Array*>(typedef_node->base_type());
+            if (array_node != 0) {
+              throw std::string("Arrays not allowed as keys");
+            }
+          }
+          return field_type;
+        } else if (is_array) {
+          // must be a typedef of an array
+          AST_Typedef* typedef_node = dynamic_cast<AST_Typedef*>(field_type);
+          if (typedef_node == 0) {
+            throw std::string("Indexing for non-array type");
+          }
+          AST_Array* array_node = 
+            dynamic_cast<AST_Array*>(typedef_node->base_type());
+          if (array_node == 0) {
+            throw std::string("Indexing for non-array type");
+          }
+          if (array_node->n_dims() > 1) {
+            throw std::string("Only single dimension arrays allowed in keys");
+          }
+          return array_node->base_type();
+        } else {  // nested structures
+          AST_Structure* sub_struct = dynamic_cast<AST_Structure*>(field_type);
+          if (sub_struct == 0) {
+            throw std::string("Expected structure field for ") + key_base;
+          }
+          size_t nfields = sub_struct->nfields();
+          std::vector<AST_Field*> sub_fields;
+          sub_fields.reserve(nfields);
+
+          for (unsigned long i = 0; i < nfields; ++i) {
+            AST_Field** f;
+            sub_struct->field(f, i);
+            sub_fields.push_back(*f);
+          }
+          // find type of nested struct field
+          return find_type(sub_fields, key_rem);
+        }
+      }
+    }
+    return 0;
+  }
 }
 
 bool marshal_generator::gen_typedef(UTL_ScopedName* name, AST_Type* base,
@@ -772,6 +855,82 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     }
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
+
+  // Generate key marshaling code
+  IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
+  // Only generate if this is a DCPS type
+  if (info != 0) {
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("stru", "KeyOnly<const " + cxx + ">");
+      insertion.endArgs();
+
+      bool first = true;
+      string expr, intro;
+      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+        AST_Type* field_type = 0;
+        try {
+          field_type = find_type(fields, key_name);
+        } catch (const std::string& error) {
+          std::cerr << "ERROR: Invalid key specification for " << cxx 
+                    << " (" << key_name << "). " << error << std::endl;
+          return false;
+        }
+        if (field_type != 0) {
+          if (first) first = false;
+          else       expr += "\n    && ";
+          expr += streamCommon(std::string("t.") + key_name,
+                               field_type, "<< stru", intro);
+        } else {
+          std::cerr << "ERROR: Invalid key specification for " << cxx 
+                    << " (" << key_name << "). " << " Field not found." 
+                    << std::endl;
+          return false;
+        }
+      }
+      if (first) be_global->impl_ << intro << "  return true;\n";
+      else be_global->impl_ << intro << "  return " << expr << ";\n";
+    }
+
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("stru", "KeyOnly<" + cxx + ">");
+      extraction.endArgs();
+
+      bool first = true;
+      string expr, intro;
+      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+        AST_Type* field_type = 0;
+        try {
+          field_type = find_type(fields, key_name);
+        } catch (const std::string& error) {
+          std::cerr << "ERROR: Invalid key specification for " << cxx 
+                    << " (" << key_name << "). " << error << std::endl;
+          return false;
+        }
+        if (field_type != 0) {
+          if (first) first = false;
+          else       expr += "\n    && ";
+          expr += streamCommon(std::string("t.") + key_name,
+                               field_type, ">> stru", intro);
+        } else {
+          std::cerr << "ERROR: Invalid key specification for " << cxx 
+                    << " (" << key_name << "). " << " Field not found." 
+                    << std::endl;
+          return false;
+        }
+      }
+      if (first) be_global->impl_ << intro << "  return true;\n";
+      else be_global->impl_ << intro << "  return " << expr << ";\n";
+    }
+  }
+
   return true;
 }
 

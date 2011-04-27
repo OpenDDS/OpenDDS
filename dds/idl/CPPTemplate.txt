@@ -464,7 +464,8 @@ void
 ACE_Message_Block*
 <%TYPE%>DataWriterImpl::dds_marshal(
   const ::<%SCOPED%>& instance_data,
-  int for_write)
+  int for_write,
+  OpenDDS::DCPS::MarshalingType marshaling_type)
 {
   ACE_Message_Block* mb;
   if (for_write)
@@ -501,7 +502,11 @@ ACE_Message_Block*
 
   ::OpenDDS::DCPS::Serializer serializer (mb,
     this->get_publisher_servant()->swap_bytes());
-  serializer << instance_data;
+  if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
+    serializer << ::OpenDDS::DCPS::KeyOnly<const ::<%SCOPED%> >(instance_data);
+  } else {
+    serializer << instance_data;
+  }
 
   return mb;
 }
@@ -536,7 +541,8 @@ ACE_Message_Block*
   {
     // don't use fast allocator for registration.
     ACE_Message_Block* const marshalled =
-      this->dds_marshal(instance_data, 0); //NOT_FOR_WRITE
+      this->dds_marshal(instance_data, 0,  //NOT_FOR_WRITE
+                        OpenDDS::DCPS::KEY_ONLY_MARSHALING);
 
     // tell DataWriterLocal and Publisher about the instance.
     ::DDS::ReturnCode_t ret = register_instance_i(handle, marshalled, source_timestamp);
@@ -1713,7 +1719,8 @@ void
   const OpenDDS::DCPS::ReceivedDataSample& sample,
   OpenDDS::DCPS::SubscriptionInstance*& instance,
   bool& just_registered,
-  bool& filtered)
+  bool& filtered,
+  OpenDDS::DCPS::MarshalingType marshaling_type)
 {
   ::<%SCOPED%>* data;
 
@@ -1726,7 +1733,11 @@ void
     sample.sample_,
     sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
 
-  ser >> *data;
+  if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
+    ser >> ::OpenDDS::DCPS::KeyOnly< ::<%SCOPED%>>(*data);
+  } else {
+    ser >> *data;
+  }
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   if (!sample.header_.content_filter_) { // if this is true, the writer has already filtered
@@ -2125,7 +2136,8 @@ void
   // can be notified the dispose event.
   bool just_registered = false;
   bool filtered = false;
-  this->dds_demarshal (sample, instance, just_registered, filtered);
+  this->dds_demarshal (sample, instance, just_registered, filtered, 
+                       OpenDDS::DCPS::KEY_ONLY_MARSHALING);
 }
 
 void
@@ -2140,7 +2152,8 @@ void
   // can be notified the unregister event.
   bool just_registered = false;
   bool filtered = false;
-  this->dds_demarshal (sample, instance, just_registered, filtered);
+  this->dds_demarshal (sample, instance, just_registered, filtered,
+                       OpenDDS::DCPS::KEY_ONLY_MARSHALING);
 }
 
 DDS::ReturnCode_t

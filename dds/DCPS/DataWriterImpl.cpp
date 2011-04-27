@@ -1855,7 +1855,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
                           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
                         ACE_Message_Block(max_marshaled_size,
                                           ACE_Message_Block::MB_DATA,
-                                          data, //cont
+                                          data->total_length() ? data : 0, //cont
                                           0, //data
                                           0, //allocator_strategy
                                           0, //locking_strategy
