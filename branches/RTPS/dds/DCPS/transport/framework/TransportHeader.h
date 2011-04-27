@@ -50,11 +50,12 @@ struct OpenDDS_Dcps_Export TransportHeader {
 
   /// Flags: marshaled as a single byte (ACE_CDR::Octet)
   bool byte_order_;
+  bool first_fragment_;
   bool last_fragment_;
 
   /// Constants for bit masking the marshaled flags byte.
   /// This needs to match the 'Flags' above.
-  enum { BYTE_ORDER_FLAG, LAST_FRAGMENT_FLAG };
+  enum { BYTE_ORDER_FLAG, FIRST_FRAGMENT_FLAG, LAST_FRAGMENT_FLAG };
 
   /// Reserved for future use (provides padding for preamble).
   ACE_CDR::Octet reserved_;

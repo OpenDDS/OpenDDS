@@ -14,6 +14,7 @@
 ACE_INLINE
 OpenDDS::DCPS::TransportHeader::TransportHeader()
   : byte_order_(TAO_ENCAP_BYTE_ORDER),
+    first_fragment_(false),
     last_fragment_(false),
     reserved_(0),
     length_(0),
@@ -95,6 +96,7 @@ OpenDDS::DCPS::TransportHeader::init(ACE_Message_Block* buffer)
   ACE_CDR::Octet flags;
   reader >> ACE_InputCDR::to_octet(flags);
   this->byte_order_= flags & (1 << BYTE_ORDER_FLAG);
+  this->first_fragment_ = flags & (1 << FIRST_FRAGMENT_FLAG);
   this->last_fragment_ = flags & (1 << LAST_FRAGMENT_FLAG);
 
   reader >> ACE_InputCDR::to_octet(this->reserved_);

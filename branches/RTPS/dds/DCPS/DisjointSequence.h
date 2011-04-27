@@ -30,8 +30,6 @@ class OpenDDS_Dcps_Export DisjointSequence {
 public:
   typedef std::set<SequenceRange, SequenceRange_LessThan> RangeSet;
 
-  static const size_t MAX_DEPTH;
-
   explicit DisjointSequence(SequenceNumber value = SequenceNumber());
 
   SequenceNumber low() const;

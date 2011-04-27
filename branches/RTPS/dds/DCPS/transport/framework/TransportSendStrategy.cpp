@@ -1113,7 +1113,6 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
       for (TransportQueueElement* next_fragment = 0;
            (first_pkt || next_fragment) && this->mode_ == MODE_DIRECT;) {
 
-        first_pkt = false;
         if (next_fragment) {
           element = next_fragment;
           element_length = next_fragment->msg()->total_length();
@@ -1127,6 +1126,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
             element = ep.first;
             element_length = element->msg()->total_length();
             next_fragment = ep.second;
+            this->header_.first_fragment_ = first_pkt;
           } else if (next_fragment) {
             // We are sending the "tail" element of a previous fragment()
             // operation, and this element didn't itself require fragmentation
@@ -1134,6 +1134,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
             next_fragment = 0;
           }
         }
+        first_pkt = false;
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Start the 'append elem' to current packet logic.\n"));
@@ -1641,6 +1642,7 @@ TransportSendStrategy::get_packet_elems_from_queue()
     if (element_length > avail) {
       // The current element won't fit into the current packet
       if (this->max_message_size()) { // fragmentation enabled
+        this->header_.first_fragment_ = !element->is_fragment();
         ElementPair ep = element->fragment(avail);
         element = ep.first;
         element_length = element->msg()->total_length();

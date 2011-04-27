@@ -22,7 +22,8 @@ OpenDDS::DCPS::TransportReceiveStrategy::TransportReceiveStrategy()
     data_allocator_(DATA_BLOCKS),
     buffer_index_(0),
     good_pdu_(true),
-    pdu_remaining_( 0)
+    pdu_remaining_(0),
+    reassembly_(0)
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy","TransportReceiveStrategy",6);
 
@@ -47,6 +48,8 @@ OpenDDS::DCPS::TransportReceiveStrategy::~TransportReceiveStrategy()
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy","~TransportReceiveStrategy",6);
 
+  delete this->reassembly_;
+
   if (this->receive_buffers_[ this->buffer_index_] != 0) {
     size_t size = this->receive_buffers_[ this->buffer_index_]->total_length();
 
@@ -69,6 +72,12 @@ bool
 OpenDDS::DCPS::TransportReceiveStrategy::check_header(const DataSampleHeader& /*header*/)
 {
   return true;
+}
+
+void
+OpenDDS::DCPS::TransportReceiveStrategy::enable_reassembly()
+{
+  this->reassembly_ = new TransportReassembly;
 }
 
 /// Note that this is just an initial implementation.  We may take
@@ -419,9 +428,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
   //
   // Operate while we have more data to process.
   //
-  bool done = false ;
-
-  while (done == false) {
+  while (true) {
 
     //
     // Manage the current transport header.
@@ -810,7 +817,22 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "Now dispatch the sample to the DataLink\n"));
 
-        this->deliver_sample(this->receive_sample_, remote_address);
+        if (this->reassembly_ &&
+            (this->receive_sample_.header_.more_fragments_
+             || this->receive_transport_header_.last_fragment_)) {
+
+          if (this->reassembly_->reassemble(
+                this->receive_transport_header_.sequence_,
+                this->receive_transport_header_.first_fragment_,
+                this->receive_sample_)) {
+            this->deliver_sample(this->receive_sample_, remote_address);
+          }
+          // If reassemble() returned false, it takes ownership of the data
+          // just like deliver_sample() does.
+
+        } else {
+          this->deliver_sample(this->receive_sample_, remote_address);
+        }
 
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "Release the sample that we just sent.\n"));
@@ -820,21 +842,26 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
         //
         // TODO: Manage this differently if we pass ownership.
         //
-        this->receive_sample_.sample_->release() ;
-        this->receive_sample_.sample_ = 0 ;
+        this->receive_sample_.sample_->release();
+        this->receive_sample_.sample_ = 0;
       }
 
-      if (amount == 0 && this->receive_buffers_[ this->buffer_index_]->length() == 0) {
+      if (amount == 0
+          && this->receive_buffers_[this->buffer_index_]->length() == 0) {
         // Relinquish control if there is no more data to process.
         VDBG((LM_DEBUG,"(%P|%t) DBG:   We are done - no more data.\n"));
         return 0;
       }
 
-    } // End of while( this->pdu_remaining_ > 0)
+      // For the reassmebly algorithm, the 'last_fragment_' header bit only
+      // applies to the first DataSampleHeader in the TransportHeader
+      this->receive_transport_header_.last_fragment_ = false;
+
+    } // End of while (this->pdu_remaining_ > 0)
 
     VDBG((LM_DEBUG,"(%P|%t) DBG:   "
           "Let's try to do some more.\n"));
-  } // End of while( done == false)
+  } // End of while (true)
 
   VDBG((LM_DEBUG,"(%P|%t) DBG:   "
         "It looks like we are done - the done loop has finished.\n"));
@@ -844,7 +871,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
   //   This involves ensuring that when we reenter this method, we will
   //   pick up from where we left off correctly.
   //
-  return 0 ;
+  return 0;
 }
 
 int

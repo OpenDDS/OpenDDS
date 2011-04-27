@@ -65,11 +65,13 @@ int hf_source     = -1;
 
 int hf_flags               = -1;
 int hf_flags_byte_order    = -1;
+int hf_flags_first_fragment= -1;
 int hf_flags_last_fragment = -1;
 
 const int flags_bits = 8;
 const int* flags_fields[] = {
   &hf_flags_byte_order,
+  &hf_flags_first_fragment,
   &hf_flags_last_fragment,
   NULL
 };
@@ -173,6 +175,7 @@ format_header(const TransportHeader& header)
   std::ostringstream os;
 
   os << "Length: " << std::dec << header.length_;
+  if (header.first_fragment_) os << ", First Fragment";
   if (header.last_fragment_) os << ", Last Fragment";
   os << ", Sequence: 0x" << std::hex << std::setw(8) << std::setfill('0')
      << header.sequence_.getValue();
@@ -460,13 +463,24 @@ proto_register_opendds()
         HFILL
       }
     },
+    { &hf_flags_first_fragment,
+      { "First fragment",
+        "opendds.flags.first_fragment",
+        FT_BOOLEAN,
+        flags_bits,
+        NULL,
+        1 << 1,
+        NULL,
+        HFILL
+      }
+    },
     { &hf_flags_last_fragment,
       { "Last fragment",
         "opendds.flags.last_fragment",
         FT_BOOLEAN,
         flags_bits,
         NULL,
-        1 << 1,
+        1 << 2,
         NULL,
         HFILL
       }
@@ -485,7 +499,7 @@ proto_register_opendds()
     { &hf_sequence,
       { "Sequence",
         "opendds.sequence",
-        FT_INT64,
+        FT_UINT64, // wireshark needs an unsigned type for hex
         BASE_HEX,
         NULL,
         0,
@@ -650,7 +664,7 @@ proto_register_opendds()
     { &hf_sample_sequence,
       { "Sequence",
         "opendds.sample.sequence",
-        FT_INT64,
+        FT_UINT64, // wireshark needs an unsigned type for hex
         BASE_HEX,
         NULL,
         0,

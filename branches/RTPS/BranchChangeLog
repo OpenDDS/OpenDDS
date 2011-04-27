@@ -1,3 +1,57 @@
+Wed Apr 27 21:30:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * tools/dissector/packet.cpp:
+
+          Added a "first_fragment" bit to the flags byte.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Use the new "first_fragment" flag.
+
+        * dds/DCPS/transport/framework/ReceivedDataSample.h:
+        * dds/DCPS/transport/framework/ReceivedDataSample.inl:
+
+          Give this class the normal value-semantics with assignment, copy,
+          and swap operations (so we can use it in standard containers).
+
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          Implement reassembly of fragments.  Basic functionality is done,
+          but data_unavailable() still needs to be implemented.
+
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+
+          Enable reassembly with udp and multicast.  Multicast's reliable
+          session still needs to be enhanced to call data_unavailable().
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Removed unused MAX_DEPTH and related #include.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+        * tests/DCPS/LargeSample/Messenger.idl:
+        * tests/DCPS/LargeSample/Writer.cpp:
+
+          Use OctetSeq instead of CharSeq and verify that the correct
+          data is received.
+          Run this test with udp transports in order to test the fragmentation
+          and reassembly features of the transport framework.
+
 Wed Apr 27 21:25:31 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/Definitions.h:
@@ -60,7 +114,7 @@ Wed Apr 27 18:21:08 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
           Add a new unit test for key-related functionality.  This
           includes tests of all the different type and varieties of
-          keys that we currently support (the spec if vague as to
+          keys that we currently support (the spec is vague as to
           what is allowed).  It also verifies the key-only marshaling
           functionality and a number of error paths in key specification.
 
@@ -115,7 +169,7 @@ Fri Apr 15 15:23:13 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
           Modify the SequenceNumber class to be compatible with RTPS.
           I have also bulked up the abstraction the class provides to
           simplify the using code.  The main changes are moving from a
-          32i bit count to 64 bit count and from the lollipop scheme to a
+          32 bit count to 64 bit count and from the lollipop scheme to a
           purely positive range (excepting a spec-defined "unknown" value).
 
         * dds/DCPS/CoherentChangeControl.cpp:
