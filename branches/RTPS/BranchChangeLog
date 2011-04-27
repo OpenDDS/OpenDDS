@@ -1,10 +1,29 @@
+Wed Apr 27 21:25:31 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Remove obsolete lollipop comment.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Fix sequence number debug statements to properly use %q.
+          Some sequence numbers in debug statements change from hex
+          to decimal because of this change.
+
+        * tests/DCPS/KeyTest/README:
+
+          Fix typo.
+
 Wed Apr 27 20:49:47 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/DCPS/KeyTest/KeyMarshaling.cpp:
 
           Fix some portability weirdness with the CORBA long double type
           in TAO.  Note that the long double type works as a key in this
-          unit test but will fail in actual applications on Windows 
+          unit test but will fail in actual applications on Windows
           because of a lack of operator<.
 
 Wed Apr 27 18:21:08 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>

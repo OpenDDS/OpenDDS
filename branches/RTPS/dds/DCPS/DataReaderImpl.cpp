@@ -1408,7 +1408,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       RepoIdConverter debugConverter(sample.header_.publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataReaderImpl::data_received() - ")
-                 ACE_TEXT("publication %C received REQUEST_ACK for sequence 0x%x ")
+                 ACE_TEXT("publication %C received REQUEST_ACK for sequence %q ")
                  ACE_TEXT("valid for the next %d seconds.\n"),
                  std::string(debugConverter).c_str(),
                  ack.getValue(),
@@ -1617,7 +1617,7 @@ DataReaderImpl::send_sample_ack(
     RepoIdConverter publicationBuffer(publication);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataReaderImpl::send_sample_ack() - ")
-               ACE_TEXT("%C sending SAMPLE_ACK message with sequence 0x%x ")
+               ACE_TEXT("%C sending SAMPLE_ACK message with sequence %q ")
                ACE_TEXT("to publication %C.\n"),
                std::string(subscriptionBuffer).c_str(),
                sequence.getValue(),

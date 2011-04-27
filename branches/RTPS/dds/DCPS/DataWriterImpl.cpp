@@ -881,7 +881,7 @@ DataWriterImpl::send_ack_requests(DataWriterImpl::AckToken& token)
     RepoIdConverter converter(this->publication_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::send_ack_requests() - ")
-               ACE_TEXT("%C sending REQUEST_ACK message for sequence 0x%x ")
+               ACE_TEXT("%C sending REQUEST_ACK message for sequence %q ")
                ACE_TEXT("to %d subscriptions.\n"),
                std::string(converter).c_str(),
                token.sequence_.getValue(),
@@ -1020,7 +1020,7 @@ DataWriterImpl::send_control_customized(const DataLinkSet_rch& links,
         if (DCPS_debug_level > 4) {
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataWriterImpl::send_control_customized() - ")
-            ACE_TEXT("sending REQUEST_ACK 0x%x to single data link with%C ")
+            ACE_TEXT("sending REQUEST_ACK %q to single data link with%C ")
             ACE_TEXT("content filtering.\n"), seq.getValue(),
             (allTargets->size() == targets.length()) ? "out" : ""));
         }
@@ -1084,7 +1084,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
             RepoIdConverter conv(*current);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_ack_responses() - ")
-              ACE_TEXT("waiting for seq 0x%x from sub %C, got 0x%x\n"),
+              ACE_TEXT("waiting for seq %q from sub %C, got %q\n"),
               token.expected(*current).getValue(), std::string(conv).c_str(),
               this->idToSequence_[*current].getValue()));
           }
@@ -1098,7 +1098,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
         RepoIdConverter converter(this->publication_id_);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_ack_responses() - ")
-                   ACE_TEXT("%C unblocking for sequence 0x%x.\n"),
+                   ACE_TEXT("%C unblocking for sequence %q.\n"),
                    std::string(converter).c_str(),
                    token.sequence_.getValue()));
       }
@@ -1111,7 +1111,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
   RepoIdConverter converter(this->publication_id_);
   ACE_DEBUG((LM_WARNING,
              ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::wait_for_ack_responses() - ")
-             ACE_TEXT("%C timed out waiting for sequence 0x%x to be acknowledged ")
+             ACE_TEXT("%C timed out waiting for sequence %q to be acknowledged ")
              ACE_TEXT("from %d subscriptions.\n"),
              std::string(converter).c_str(),
              token.sequence_.getValue(),
@@ -1995,7 +1995,7 @@ DataWriterImpl::deliver_ack(
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::deliver_ack() - ")
                ACE_TEXT("publication %C received update for ")
-               ACE_TEXT("sample %x from subscription %C.\n"),
+               ACE_TEXT("sample %q from subscription %C.\n"),
                std::string(debugConverter).c_str(),
                ack.getValue(),
                std::string(debugConverter2).c_str()));
