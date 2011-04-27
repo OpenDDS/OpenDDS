@@ -104,9 +104,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.unsigned_long_long_field = 12345;
     message.char_field = 'x';
     message.wchar_field = 'x';
-    message.float_field = 123.45;
+    message.float_field = 123.45f;
     message.double_field = 123.456;
-    message.long_double_field = 123.4567;
+    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(message.long_double_field, 123.4567L);
     message.boolean_field = true;
     message.octet_field = 12;
     message.enum_field = Messenger4::SECOND;
@@ -130,7 +130,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     dm_message.wchar_field = 0;
     dm_message.float_field = 0;
     dm_message.double_field = 0;
-    dm_message.long_double_field = 0;
+    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(dm_message.long_double_field,0.0L);
     dm_message.boolean_field = 0;
     dm_message.octet_field = 0;
     dm_message.enum_field = Messenger4::FIRST;
@@ -163,9 +163,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.mess.unsigned_long_long_field = 12345;
     message.mess.char_field = 'x';
     message.mess.wchar_field = 'x';
-    message.mess.float_field = 123.45;
+    message.mess.float_field = 123.45f;
     message.mess.double_field = 123.456;
-    message.mess.long_double_field = 123.4567;
+    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(message.mess.long_double_field,123.4567L);
     message.mess.boolean_field = true;
     message.mess.octet_field = 12;
     message.mess.enum_field = Messenger4::SECOND;
@@ -189,7 +189,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     dm_message.mess.wchar_field = 0;
     dm_message.mess.float_field = 0;
     dm_message.mess.double_field = 0;
-    dm_message.mess.long_double_field = 0;
+    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(dm_message.mess.long_double_field,0.0L);
     dm_message.mess.boolean_field = 0;
     dm_message.mess.octet_field = 0;
     dm_message.mess.enum_field = Messenger4::FIRST;
