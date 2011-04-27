@@ -14,6 +14,7 @@ namespace DCPS {
 BestEffortSession::BestEffortSession(MulticastDataLink* link,
                                      MulticastPeer remote_peer)
   : MulticastSession(link, remote_peer)
+  , last_received_()
 {
 }
 
@@ -34,8 +35,17 @@ BestEffortSession::check_header(const TransportHeader& /*header*/)
 }
 
 bool
-BestEffortSession::check_header(const DataSampleHeader& /*header*/)
+BestEffortSession::check_header(const DataSampleHeader& header)
 {
+  SequenceNumber expected(this->last_received_);
+  ++expected;
+  if (header.sequence_ != expected) {
+    SequenceRange range(expected, header.sequence_);
+    this->link_->receive_strategy()->data_unavailable(range);
+  }
+
+  this->last_received_ = header.sequence_;
+
   // Assume header is valid; this does not prevent duplicate
   // delivery of datagrams:
   return true;

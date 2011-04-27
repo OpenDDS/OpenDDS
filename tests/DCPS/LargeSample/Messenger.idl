@@ -5,7 +5,7 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-#include "tao/CharSeq.pidl"
+#include "tao/OctetSeq.pidl"
 module Messenger {
 
 #pragma DCPS_DATA_TYPE "Messenger::Message"
@@ -17,6 +17,6 @@ module Messenger {
     long subject_id;
     string text;
     long   count;
-    CORBA::CharSeq data;
+    CORBA::OctetSeq data;
   };
 };

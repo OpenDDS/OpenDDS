@@ -34,6 +34,7 @@ bool operator<<(ACE_Message_Block& buffer, const TransportHeader& value)
 
   const ACE_CDR::Octet flags =
     (value.byte_order_ << TransportHeader::BYTE_ORDER_FLAG) |
+    (value.first_fragment_ << TransportHeader::FIRST_FRAGMENT_FLAG) |
     (value.last_fragment_ << TransportHeader::LAST_FRAGMENT_FLAG);
   writer << ACE_OutputCDR::from_octet(flags);
 

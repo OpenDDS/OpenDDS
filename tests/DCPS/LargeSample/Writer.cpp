@@ -97,6 +97,11 @@ Writer::svc()
     Messenger::Message message;
     message.subject_id = 99;
 
+    message.data.length(66*1000);
+    for (CORBA::ULong j = 0; j < message.data.length(); ++j) {
+      message.data[j] = j % 256;
+    }
+
     DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
     message.from       = CORBA::string_dup("Comic Book Guy");
@@ -106,7 +111,7 @@ Writer::svc()
 
     for (int i = 0; i < num_messages; i++) {
       ACE_OS::sleep (ACE_Time_Value (0,250000));
-      message.data.length(66*1000);
+
       DDS::ReturnCode_t error = message_dw->write(message, handle);
 
       if (error != DDS::RETCODE_OK) {

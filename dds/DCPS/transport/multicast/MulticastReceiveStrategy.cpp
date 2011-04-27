@@ -80,6 +80,7 @@ MulticastReceiveStrategy::start_i()
                      -1);
   }
 
+  this->enable_reassembly();
   return 0;
 }
 

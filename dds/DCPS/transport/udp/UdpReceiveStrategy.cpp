@@ -16,6 +16,7 @@ namespace DCPS {
 
 UdpReceiveStrategy::UdpReceiveStrategy(UdpDataLink* link)
   : link_(link)
+  , last_received_()
 {
 }
 
@@ -75,6 +76,7 @@ UdpReceiveStrategy::start_i()
                      -1);
   }
 
+  this->enable_reassembly();
   return 0;
 }
 
@@ -91,6 +93,20 @@ UdpReceiveStrategy::stop_i()
   }
 
   reactor->remove_handler(this, ACE_Event_Handler::READ_MASK);
+}
+
+bool
+UdpReceiveStrategy::check_header(const TransportHeader& header)
+{
+  SequenceNumber expected(this->last_received_);
+  ++expected;
+  if (header.sequence_ != expected) {
+    SequenceRange range(expected, header.sequence_);
+    this->data_unavailable(range);
+  }
+
+  this->last_received_ = header.sequence_;
+  return true;
 }
 
 } // namespace DCPS

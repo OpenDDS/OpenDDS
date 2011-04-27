@@ -17,12 +17,8 @@
 # include "DisjointSequence.inl"
 #endif /* __ACE_INLINE__ */
 
-#include <climits>
-
 namespace OpenDDS {
 namespace DCPS {
-
-const size_t DisjointSequence::MAX_DEPTH(SHRT_MAX / 2 - 1);
 
 DisjointSequence::DisjointSequence(SequenceNumber value)
 {
