@@ -52,8 +52,7 @@ namespace DCPS {
 typedef ACE_UINT16 CoherencyGroup;
 typedef RepoId PublicationId;
 
-/// Lolipop sequencing (never wrap to negative).
-/// This helps distinguish new and old sequence numbers. (?)
+/// Sequence number abstraction.  Only allows positive 64 bit values.
 class OpenDDS_Dcps_Export SequenceNumber {
 public:
   typedef ACE_INT64 Value;

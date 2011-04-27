@@ -147,7 +147,7 @@ DisjointSequence::dump() const
     "SequenceNumbers:\n", this));
   for (RangeSet::const_iterator iter = this->sequences_.begin();
        iter != this->sequences_.end(); ++iter) {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DisjointSequence::dump(%X) %d-%d\n",
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DisjointSequence::dump(%X) %q-%q\n",
       this, iter->first.getValue(), iter->second.getValue()));
   }
 }
