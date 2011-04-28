@@ -1,3 +1,10 @@
+Thu Apr 28 19:06:53 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+
+          Added logging for the data_unavailable() cases.
+
 Wed Apr 27 21:30:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportHeader.h:
