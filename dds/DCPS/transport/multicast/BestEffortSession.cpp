@@ -40,6 +40,10 @@ BestEffortSession::check_header(const DataSampleHeader& header)
   SequenceNumber expected(this->last_received_);
   ++expected;
   if (header.sequence_ != expected) {
+    VDBG_LVL((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: BestEffortSession::check_header ")
+               ACE_TEXT("expected %q received %q\n"), expected.getValue(),
+               header.sequence_.getValue()), 2);
     SequenceRange range(expected, header.sequence_);
     this->link_->receive_strategy()->data_unavailable(range);
   }
