@@ -1116,6 +1116,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         if (next_fragment) {
           element = next_fragment;
           element_length = next_fragment->msg()->total_length();
+          this->header_.first_fragment_ = false;
         }
 
         this->header_.last_fragment_ = false;
@@ -1668,7 +1669,7 @@ TransportSendStrategy::get_packet_elems_from_queue()
       this->header_.length_ += static_cast<ACE_UINT32>(element_length);
     }
 
-    // With exclusive and elems_.size() != 0), we don't use the current
+    // With exclusive and (elems_.size() != 0), we don't use the current
     // element as part of the packet.  We know that there is already
     // at least one element in the packet, and the current element
     // is going to need its own (exclusive) packet.  We will just

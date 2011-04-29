@@ -48,7 +48,8 @@ public:
   // be moved to just prior to the next missing Sequence
   // Number).  lowest_valid will return true if invalid
   // values have been dropped.
-  bool lowest_valid(SequenceNumber value);
+  bool lowest_valid(SequenceNumber value,
+                    std::vector<SequenceRange>* dropped = 0);
 
   // add the value or range of values to the set of seen
   // values

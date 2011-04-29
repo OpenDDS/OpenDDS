@@ -44,7 +44,7 @@ BestEffortSession::check_header(const DataSampleHeader& header)
                ACE_TEXT("(%P|%t) WARNING: BestEffortSession::check_header ")
                ACE_TEXT("expected %q received %q\n"), expected.getValue(),
                header.sequence_.getValue()), 2);
-    SequenceRange range(expected, header.sequence_);
+    SequenceRange range(expected, header.sequence_.previous());
     this->link_->receive_strategy()->data_unavailable(range);
   }
 
