@@ -25,18 +25,20 @@ public:
 
   /// Called by TransportReceiveStrategy if the fragmentation header flag
   /// is set.  Returns true/false to indicate if data should be delivered to
-  /// the datalink.  If true, 'data' may be modified by this method to include
-  /// the previously-buffered fragments.
+  /// the datalink.  The 'data' argument may be modified by this method.
   bool reassemble(const SequenceNumber& transportSeq, bool firstFrag,
                   ReceivedDataSample& data);
 
   /// Called by TransportReceiveStrategy to indicate that we can
-  /// stop tracking fragments when we know the remaining fragments
-  /// are not expected to arrive.
+  /// stop tracking partially-reassembled messages when we know the
+  /// remaining fragments are not expected to arrive.
   void data_unavailable(const SequenceRange& dropped);
 
 private:
 
+  // A FragRange represents a chunk of a partially-reassembled message.
+  // The transport_seq_ range is the range of transport sequence numbers
+  // that were used to send the given chunk of data. 
   struct FragRange {
     FragRange(const SequenceNumber& transportSeq,
               const ReceivedDataSample& data);
@@ -45,6 +47,11 @@ private:
     ReceivedDataSample sample_;
   };
 
+  // Each element of the FragMap "fragments_" represents one sent message
+  // (one DataSampleHeader before fragmentation).  The map's key is the
+  // DataSampleHeader sequence_ number.  The list must have at
+  // least one value in it.  If a FragRange in the list has a sample_ with
+  // a null ACE_Message_Block*, it's one that was data_unavailable().
   typedef std::map<SequenceNumber, std::list<FragRange> > FragMap;
   FragMap fragments_;
 
@@ -53,6 +60,8 @@ private:
   static bool insert(std::list<FragRange>& flist,
                      const SequenceNumber& transportSeq,
                      ReceivedDataSample& data);
+
+  void dropped_one(const SequenceNumber& dropped, const SequenceNumber& first);
 };
 
 }

@@ -33,7 +33,8 @@ DisjointSequence::reset(SequenceNumber value)
 }
 
 bool
-DisjointSequence::lowest_valid(SequenceNumber value)
+DisjointSequence::lowest_valid(SequenceNumber value,
+                               std::vector<SequenceRange>* dropped /* = 0 */)
 {
   validate(SequenceRange(value, value));
   if (++low() >= value) return false; // nothing to shift
@@ -53,6 +54,19 @@ DisjointSequence::lowest_valid(SequenceNumber value)
     // move past the low_bound, so that the original low_bound will be erased
     ++low_bound;
   }
+
+  if (dropped) {
+    SequenceNumber last = low();
+    for (RangeSet::iterator i = this->sequences_.begin(); i != low_bound; ++i) {
+      if (i == this->sequences_.begin()) continue;
+      dropped->push_back(SequenceRange(++last, i->first.previous()));
+      last = i->second;
+    }
+    if (last < validLowWaterRange.second) {
+      dropped->push_back(SequenceRange(++last, validLowWaterRange.second));
+    }
+  }
+
   this->sequences_.erase(this->sequences_.begin(), low_bound);
   this->sequences_.insert(validLowWaterRange);
   return true;

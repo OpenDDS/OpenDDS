@@ -842,7 +842,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
         //
         // TODO: Manage this differently if we pass ownership.
         //
-        this->receive_sample_.sample_->release();
+        ACE_Message_Block::release(this->receive_sample_.sample_);
         this->receive_sample_.sample_ = 0;
       }
 
@@ -853,7 +853,7 @@ OpenDDS::DCPS::TransportReceiveStrategy::handle_input()
         return 0;
       }
 
-      // For the reassmebly algorithm, the 'last_fragment_' header bit only
+      // For the reassembly algorithm, the 'last_fragment_' header bit only
       // applies to the first DataSampleHeader in the TransportHeader
       this->receive_transport_header_.last_fragment_ = false;
 

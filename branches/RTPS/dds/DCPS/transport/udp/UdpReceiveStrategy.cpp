@@ -105,7 +105,7 @@ UdpReceiveStrategy::check_header(const TransportHeader& header)
                ACE_TEXT("(%P|%t) WARNING: UdpReceiveStrategy::check_header ")
                ACE_TEXT("expected %q received %q\n"), expected.getValue(),
                header.sequence_.getValue()), 2);
-    SequenceRange range(expected, header.sequence_);
+    SequenceRange range(expected, header.sequence_.previous());
     this->data_unavailable(range);
   }
 

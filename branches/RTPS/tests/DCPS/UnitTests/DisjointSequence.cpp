@@ -316,6 +316,53 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(range.second == SequenceNumber(2));
     TEST_CHECK(++it == missingSet.end());
   }
+  {
+    DisjointSequence sequence(2);
+    sequence.update(5);
+    sequence.update(6);
+    sequence.update(9);
+    sequence.update(10);
+    sequence.update(11);
 
+    std::vector<SequenceRange> dropped;
+    TEST_CHECK(sequence.lowest_valid(13, &dropped));
+    TEST_CHECK(dropped.size() == 3);
+    TEST_CHECK(dropped[0] == SequenceRange(3, 4));
+    TEST_CHECK(dropped[1] == SequenceRange(7, 8));
+    TEST_CHECK(dropped[2] == SequenceRange(12, 12));
+  }
+  {
+    DisjointSequence sequence(3);
+    sequence.update(5);
+    sequence.update(6);
+    sequence.update(7);
+
+    std::vector<SequenceRange> dropped;
+    TEST_CHECK(sequence.lowest_valid(8, &dropped));
+    TEST_CHECK(dropped.size() == 1);
+    TEST_CHECK(dropped[0] == SequenceRange(4, 4));
+  }
+  {
+    DisjointSequence sequence(4);
+    sequence.update(6);
+    sequence.update(10);
+
+    std::vector<SequenceRange> dropped;
+    TEST_CHECK(sequence.lowest_valid(9, &dropped));
+    TEST_CHECK(dropped.size() == 2);
+    TEST_CHECK(dropped[0] == SequenceRange(5, 5));
+    TEST_CHECK(dropped[1] == SequenceRange(7, 8));
+  }
+  {
+    DisjointSequence sequence(5);
+    sequence.update(7);
+    sequence.update(10);
+
+    std::vector<SequenceRange> dropped;
+    TEST_CHECK(sequence.lowest_valid(10, &dropped));
+    TEST_CHECK(dropped.size() == 2);
+    TEST_CHECK(dropped[0] == SequenceRange(6, 6));
+    TEST_CHECK(dropped[1] == SequenceRange(8, 9));
+  }
   return 0;
 }

@@ -212,3 +212,5 @@ tests/DCPS/GroupPresentation/run_test.pl topic: !DCPS_MIN
 tests/DCPS/GroupPresentation/run_test.pl instance: !DCPS_MIN
 tests/DCPS/LargeSample/run_test.pl: !DCPS_MIN
 tests/DCPS/LargeSample/run_test.pl udp: !DCPS_MIN
+tests/DCPS/LargeSample/run_test.pl multicast: !DCPS_MIN
+tests/DCPS/LargeSample/run_test.pl default_multicast: !DCPS_MIN
