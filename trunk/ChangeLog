@@ -1,3 +1,13 @@
+Mon May  2 19:09:03 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/edit/commands/RequestToCommandConverter.java:
+
+          Generalize a cast to extend appliciblility of destroyElementRequestToDestroyReferenceCommand().
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/StructItemSemanticEditPolicy.java:
+
+          Remove Struct's reference instead of deletion when user removes datatype from a Topic or MultiTopic figure.
+
 Tue Apr 26 14:27:11 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
