@@ -1,3 +1,11 @@
+Tue May  3 18:37:46 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/edit/parts:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts:
+
+          Have subversion ignore files removed in previous commit.
+
 Tue May  3 18:10:17 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/edit/parts/DataLibEditPart.java:
