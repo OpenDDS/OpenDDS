@@ -14,11 +14,13 @@
 
 class ReaderListener : public OpenDDS::Model::NullReaderListener {
   public:
-    ReaderListener(OpenDDS::Model::ReaderCondSync& rcs) : rcs_(rcs) {}
+    ReaderListener(OpenDDS::Model::ReaderCondSync& rcs) : rcs_(rcs), 
+        count_(0) {}
     virtual void on_data_available(DDS::DataReader_ptr reader)
         ACE_THROW_SPEC((CORBA::SystemException));
   private:
     OpenDDS::Model::ReaderCondSync& rcs_;
+    int count_;
 
 };
 
@@ -51,6 +53,9 @@ ACE_THROW_SPEC((CORBA::SystemException))
         std::cout << "Message: ticker    = " << msg.ticker.in() << std::endl
                   << "         exchange  = " << msg.exchange.in()   << std::endl
                   << "         full_name = " << msg.full_name.in()    << std::endl;
+        if (++count_ ==10) {
+          rcs_.signal();
+        }
       }
     } else {
       if (error != DDS::RETCODE_NO_DATA) {
