@@ -354,6 +354,7 @@
   <xsl:variable name="typename">
     <xsl:call-template name="typename">
       <xsl:with-param name="target" select="$types[@xmi:id = current()/field/@type]"/>
+      <xsl:with-param name="referrer" select="."/>
     </xsl:call-template>
   </xsl:variable>
 
@@ -366,6 +367,7 @@
   <xsl:variable name="typename">
     <xsl:call-template name="typename">
       <xsl:with-param name="target" select="$types[@xmi:id = current()/@type]"/>
+      <xsl:with-param name="referrer" select="."/>
     </xsl:call-template>
   </xsl:variable>
   <xsl:value-of select="concat('    default: ',$typename,' ',@name,';',$newline)"/>
@@ -379,6 +381,7 @@
   <xsl:variable name="typename">
     <xsl:call-template name="typename">
       <xsl:with-param name="target" select="$target"/>
+      <xsl:with-param name="referrer" select="."/>
     </xsl:call-template>
   </xsl:variable>
 
@@ -417,6 +420,7 @@
   <xsl:text>  typedef </xsl:text>
   <xsl:call-template name="typename">
     <xsl:with-param name="target" select="$types[@xmi:id = $targetid]"/>
+    <xsl:with-param name="referrer" select="."/>
   </xsl:call-template>
   <xsl:value-of select="concat(' ',$name)"/>
   <xsl:call-template name="typesize">
@@ -425,36 +429,10 @@
   <xsl:value-of select="concat(';',$newline)"/>
 </xsl:template>
 
-<!--
-<xsl:template name="ref-scopename">
-  <xsl:param name="target"/>
-  <xsl:param name="referrer" select="."/>
-  <xsl:variable name="target-scopename">
-    <xsl:call-template name="scopename">
-      <xsl:with-param name="target" select="$target"/>
-    </xsl:call-template>
-  </xsl:variable>
-
-  <xsl:variable name="referrer-scopename">
-    <xsl:call-template name="scopename">
-      <xsl:with-param name="target" select="$referrer"/>
-    </xsl:call-template>
-  </xsl:variable>
-
-  <xsl:choose>
-    <xsl:when test="starts-with($target-scopename, $referrer-scopename)">
-      <xsl:value-of select="substring-after($target-scopename, $referrer-scopename)"/>
-    </xsl:when>
-    <xsl:otherwise>
-      <xsl:value-of select="$target-scopename"/>
-    </xsl:otherwise>
-  </xsl:choose>
-</xsl:template>
--->
-
 <!-- Determine the name of a type -->
 <xsl:template name="typename">
   <xsl:param name="target"/>
+  <xsl:param name="referrer"/>
   <xsl:variable name="targetname" select="$target/@name"/>
   <xsl:variable name="targettype" select="$target/@xsi:type"/>
 
@@ -465,7 +443,22 @@
           <xsl:with-param name="target" select="$target"/>
         </xsl:call-template>
       </xsl:variable>
-      <xsl:value-of select="concat($scopename, $targetname)"/>
+      <!-- don't include scope when same as referrer -->
+      <xsl:variable name="referrer-scopename">
+        <xsl:call-template name="scopename">
+          <xsl:with-param name="target" select="$referrer"/>
+        </xsl:call-template>
+      </xsl:variable>
+<xsl:message>Comparing target scope <xsl:value-of select="$scopename"/> to referrer <xsl:value-of select="$referrer-scopename"/>
+</xsl:message>
+      <xsl:choose>
+        <xsl:when test="$referrer-scopename != $scopename">
+          <xsl:value-of select="concat($scopename, $targetname)"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$targetname"/>
+        </xsl:otherwise>
+      </xsl:choose>
     </xsl:when>
     <xsl:when test="string-length($targettype) > 0">
       <xsl:variable name="corbatype">
@@ -477,12 +470,14 @@
         <xsl:when test="$corbatype = 'array'">
           <xsl:call-template name="typename">
             <xsl:with-param name="target" select="$types[@xmi:id = $target/@subtype]"/>
+            <xsl:with-param name="referrer" select="."/>
           </xsl:call-template>
         </xsl:when>
         <xsl:when test="$corbatype = 'sequence'">
           <xsl:text>sequence&lt;</xsl:text>
           <xsl:call-template name="typename">
             <xsl:with-param name="target" select="$types[@xmi:id = $target/@subtype]"/>
+            <xsl:with-param name="referrer" select="."/>
           </xsl:call-template>
           <xsl:if test="$target/@length">
             <xsl:value-of select="concat(', ',$target/@length)"/>
