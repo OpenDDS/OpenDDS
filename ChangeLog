@@ -1,3 +1,23 @@
+Tue May  3 13:25:20 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+
+          Fixed so wdlQosPolicy stereotype (WriterDataLifecycleQosPolicy) can be added as a shared policy for DataWriter.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.trace:
+
+          Auto-generated updates due to changes in mapping.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/WdlQosPolicy2ItemSemanticEditPolicy.java:
+
+          Override destroy command to only remove reference to shared policy.
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts:
+
+          Ignore newly wdlQosPolicy related auto-generated files.
+
 Mon May  2 19:09:03 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/edit/commands/RequestToCommandConverter.java:
