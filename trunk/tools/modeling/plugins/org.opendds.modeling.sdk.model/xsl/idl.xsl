@@ -449,8 +449,6 @@
           <xsl:with-param name="target" select="$referrer"/>
         </xsl:call-template>
       </xsl:variable>
-<xsl:message>Comparing target scope <xsl:value-of select="$scopename"/> to referrer <xsl:value-of select="$referrer-scopename"/>
-</xsl:message>
       <xsl:choose>
         <xsl:when test="$referrer-scopename != $scopename">
           <xsl:value-of select="concat($scopename, $targetname)"/>
