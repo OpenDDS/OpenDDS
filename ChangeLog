@@ -1,3 +1,9 @@
+Tue May  3 22:18:00 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/StockQuoter/subscriber.cpp:
+
+          Signal read cond sync when all messages received.
+
 Tue May  3 19:14:37 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
