@@ -1,3 +1,13 @@
+Tue May  3 18:10:17 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/edit/parts/DataLibEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DcpsLibEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/PolicyLibEditPart.java:
+
+          An attempt was made to remove these files on the RT13927 branch since they're auto-generated
+          (see ChangeLog entry Fri Jan 14 14:52:17 UTC 2011).
+          Attempting to remove again.
+
 Tue May  3 14:03:32 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
