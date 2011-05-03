@@ -369,7 +369,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
       if (DCPS_debug_level > 3) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
           ACE_TEXT("DomainParticipantImpl::create_topic, ")
-          ACE_TEXT("can't create a Topic due to name \"%C\" already in use")
+          ACE_TEXT("can't create a Topic due to name \"%C\" already in use ")
           ACE_TEXT("by a TopicDescription.\n"), topic_name));
       }
       return 0;

@@ -26,8 +26,9 @@ OpenDDS::Model::Delegate::createParticipant(
   DDS::StatusMask           mask
 )
 {
+  DDS::DomainParticipantFactory_var pfact = TheParticipantFactory;
   DDS::DomainParticipant* participant
-    = TheParticipantFactory->create_participant(
+    = pfact->create_participant(
         domain,
         participantQos,
         DDS::DomainParticipantListener::_nil(),

@@ -1,3 +1,16 @@
+Tue May  3 22:32:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Fixed a logging message.
+
+        * tools/modeling/codegen/model/Application.h:
+        * tools/modeling/codegen/model/Application.cpp:
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Use DomainParticipantFactory_var to avoid leaking references.
+
 Tue May  3 22:18:00 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/StockQuoter/subscriber.cpp:
