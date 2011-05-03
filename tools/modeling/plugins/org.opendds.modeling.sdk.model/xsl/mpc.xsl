@@ -18,6 +18,11 @@
 
 <!-- Extract the name of the model once. -->
 <xsl:variable name="modelname" select="$model/@name"/>
+<xsl:variable name="normalized-modelname">
+  <xsl:call-template name="normalize-identifier">
+    <xsl:with-param name="identifier" select="$model/@name"/>
+  </xsl:call-template>
+</xsl:variable>
 
 <xsl:variable name="MODELNAME" select="translate($modelname, $lower, $upper)"/>
 
@@ -43,15 +48,15 @@
   includes += $(DDS_ROOT)/tools/modeling/codegen
 
   idlflags      += -Wb,export_macro=</xsl:text>
-  <xsl:value-of select="$modelname"/>
+  <xsl:value-of select="$normalized-modelname"/>
   <xsl:text>_Export -Wb,export_include=</xsl:text>
-  <xsl:value-of select="$modelname"/>
+  <xsl:value-of select="$normalized-modelname"/>
   <xsl:text>_export.h
   dynamicflags   = </xsl:text>
   <xsl:value-of select="$MODELNAME"/>
   <xsl:text>_BUILD_DLL
   dcps_ts_flags += -Wb,export_macro=</xsl:text>
-  <xsl:value-of select="$modelname"/>
+  <xsl:value-of select="$normalized-modelname"/>
   <xsl:text>_Export
   prebuild      += perl $(DDS_ROOT)/bin/expfile.pl </xsl:text>
   <xsl:value-of select="concat($modelname, $newline, $newline)"/>

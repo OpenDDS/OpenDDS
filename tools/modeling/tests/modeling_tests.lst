@@ -38,3 +38,4 @@ tools/modeling/tests/ReusedTypes/run_test.pl
 tools/modeling/tests/ReusedExtTypes/run_test.pl
 tools/modeling/tests/StockQuoter/run_test.pl
 tools/modeling/tests/Looped/run_test.pl
+tools/modeling/tests/ModuleNameConflict/run_test.pl

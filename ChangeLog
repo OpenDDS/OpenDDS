@@ -1,3 +1,25 @@
+Tue May  3 18:41:55 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
+
+          Fix module name as only case-different from field name - don't output
+          qualified name when in same module.
+          
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+          Typo in comments.
+
+        * tools/modeling/tests/ModuleNameConflict:
+
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.codegen:
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.mpc:
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.mwc:
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.opendds:
+        * tools/modeling/tests/ModuleNameConflict/publisher.cpp:
+        * tools/modeling/tests/ModuleNameConflict/subscriber.cpp:
+        * tools/modeling/tests/modeling_tests.lst:
+
+          Test module name as only case-different from field name.
+
 Tue May  3 18:37:46 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/edit/parts:

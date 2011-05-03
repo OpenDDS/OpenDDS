@@ -21,6 +21,11 @@
 <!-- Extract the name of the model once. -->
 <xsl:variable name="model" select="document(/generator:CodeGen/source/@name)/opendds:OpenDDSModel"/>
 <xsl:variable name="modelname" select="$model/@name"/>
+<xsl:variable name="normalized-modelname">
+  <xsl:call-template name="normalize-identifier">
+    <xsl:with-param name="identifier" select="$model/@name"/>
+  </xsl:call-template>
+</xsl:variable>
 <xsl:variable name="MODELNAME" select="translate($modelname, $lower, $upper)"/>
 <xsl:variable name="instances" select="//instance"/>
 

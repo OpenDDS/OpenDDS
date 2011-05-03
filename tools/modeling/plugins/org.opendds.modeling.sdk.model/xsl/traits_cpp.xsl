@@ -91,7 +91,7 @@
 
 </xsl:template>
 
-<!-- Transports for the instance, ouput case which creates and
+<!-- Transports for the instance, output case which creates and
      registers configuration... -->
 <xsl:template match="transport">
   <xsl:variable name="type">
@@ -158,7 +158,7 @@
 </xsl:text>
 </xsl:template>
 
-<!-- Ouput IP address conversion for local address -->
+<!-- Output IP address conversion for local address -->
 <xsl:template match="local_address_str">
   <xsl:variable name="value">
     <xsl:call-template name="str-value"/>
@@ -192,7 +192,7 @@
                                @value, ';', $newline)"/>
 </xsl:template>
 
-<!-- Ouput IP address conversion for group address -->
+<!-- Output IP address conversion for group address -->
 <xsl:template match="group_address">
   <xsl:variable name="value">
     <xsl:call-template name="str-value"/>
