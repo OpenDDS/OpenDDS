@@ -31,10 +31,11 @@ template< typename ModelName, class InstanceTraits>
 inline
 OpenDDS::Model::Service< ModelName, InstanceTraits>::~Service()
 {
+  DDS::DomainParticipantFactory_var pfact = TheParticipantFactory;
   for( int index = 0; index < Participants::LAST_INDEX; ++index) {
     if( this->participants_[ index]) {
       this->participants_[ index]->delete_contained_entities();
-      TheParticipantFactory->delete_participant( this->participants_[ index]);
+      pfact->delete_participant( this->participants_[ index]);
     }
   }
 }
