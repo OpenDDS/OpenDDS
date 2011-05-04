@@ -1,3 +1,9 @@
+Wed May  4 13:28:46 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/PolicyLib/DefaultPolicyLibTest.opendds:
+
+	  Added missing Period references.
+
 Wed May  4 12:50:21 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/OpenDDSDiagramDomainModelWizardPage.java:
