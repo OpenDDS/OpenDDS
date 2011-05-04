@@ -1,3 +1,9 @@
+Wed May  4 03:58:12 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/modeling_tests.lst:
+
+          don't execute looped test.
+
 Tue May  3 22:32:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:
