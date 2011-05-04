@@ -1,3 +1,10 @@
+Wed May  4 12:50:21 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/OpenDDSDiagramDomainModelWizardPage.java:
+
+          Restrict characters for model name to be valid C++ identifier characters
+          since model name is used as part of export macro in tao_idl generated code.
+
 Wed May  4 03:58:12 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/modeling_tests.lst:

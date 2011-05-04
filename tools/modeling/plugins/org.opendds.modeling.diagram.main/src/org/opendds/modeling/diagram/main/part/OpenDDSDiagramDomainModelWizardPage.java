@@ -40,8 +40,6 @@ public class OpenDDSDiagramDomainModelWizardPage extends WizardPage {
 	@Override
 	public void createControl(Composite parent) {
 
-		final String invalidFilenameChars = "\\\\/:*?\"<>|";
-
 		Composite composite = new Composite(parent, SWT.NULL);
 		composite.setLayout(new GridLayout(1, false));
 		setControl(composite);
@@ -55,22 +53,25 @@ public class OpenDDSDiagramDomainModelWizardPage extends WizardPage {
 		modelNameControl.setLayoutData(data);
 
 		Label modelNameDescription1 = new Label(composite, SWT.SHADOW_IN);
-		modelNameDescription1.setText("This is used in generated file names and to name the resulting");
+		modelNameDescription1.setText("This is used as part of generated file names and is the");
 		Label modelNameDescription2 = new Label(composite, SWT.SHADOW_IN);
-		modelNameDescription2.setText("shared library.");
+		modelNameDescription2.setText("name of library containing the generated code.");
+		Label modelNameDescription3 = new Label(composite, SWT.SHADOW_IN);
+		modelNameDescription3.setText("It is also used in generated code identifiers.");
 
 		// Validate attempt to change model name
 		modelNameControl.addVerifyListener(new VerifyListener() {
 
 			@Override
 			public void verifyText(VerifyEvent event) {
+				String validIdentifierChars = "A-Za-z_";
+				if (event.start > 0) {
+					validIdentifierChars += "0-9";
+				}
 				String errorMessage = null;
-				if (event.text.matches("\\s")) {
+				if (!event.text.isEmpty() &&!event.text.matches("[" + validIdentifierChars+ "]")) {
 					event.doit = false;
-					errorMessage = "Spaces will not be in the generated file names";
-				} else if (event.text.matches("[" + invalidFilenameChars + "]")) {
-						event.doit = false;
-						errorMessage = "Invalid character for a file name";
+					errorMessage = "Invalid character for a C++ identifier";
 				}
 				setErrorMessage(errorMessage);
 			}
