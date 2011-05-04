@@ -23,14 +23,22 @@
     </policies>
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_Ng_MsKGNEd-D-tWBUFz8zw" name="osQosPolicyDefaultTest" value="0"/>
     <policies xsi:type="opendds:ownershipQosPolicy" xmi:id="_ND62MKGNEd-D-tWBUFz8zw" name="ownershipQosPolicyDefaultTest" kind="SHARED"/>
-    <policies xsi:type="opendds:partitionQosPolicy" xmi:id="_XinpsKGNEd-D-tWBUFz8zw" name="partitionQosPolicyDefaultTest"/>
+    <policies xsi:type="opendds:partitionQosPolicy" xmi:id="_XinpsKGNEd-D-tWBUFz8zw" name="partitionQosPolicyDefaultTest">
+      <names>partition1</names>
+      <names>partition2</names>
+    </policies>
     <policies xsi:type="opendds:presentationQosPolicy" xmi:id="_W7gmYKGNEd-D-tWBUFz8zw" name="presentationQosPolicyDefaultTest" access_scope="INSTANCE" coherent_access="false" ordered_access="false"/>
-    <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_PGfK4KGNEd-D-tWBUFz8zw" name="rdlQosPolicyDefaultTest"/>
+    <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_PGfK4KGNEd-D-tWBUFz8zw" name="rdlQosPolicyDefaultTest">
+      <autopurge_nowriter_samples_delay xmi:id="_0wCE0HZREeCMofdxxKhKYQ"/>
+      <autopurge_disposed_samples_delay xmi:id="_3EkTQHZREeCMofdxxKhKYQ"/>
+    </policies>
     <policies xsi:type="opendds:reliabilityQosPolicy" xmi:id="_ZA2iQKGNEd-D-tWBUFz8zw" name="reliabilityQosPolicyDefaultTest" kind="BEST_EFFORT">
       <max_blocking_time xmi:id="_i49zsLeCEd-nAsONlpcwOw"/>
     </policies>
     <policies xsi:type="opendds:rlQosPolicy" xmi:id="_WEYxIKGNEd-D-tWBUFz8zw" name="rlQosPolicyDefaultTest" max_instances="-1" max_samples="-1" max_samples_per_instance="-1"/>
-    <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_Ry9YMKGNEd-D-tWBUFz8zw" name="tbfQosPolicyDefaultTest"/>
+    <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_Ry9YMKGNEd-D-tWBUFz8zw" name="tbfQosPolicyDefaultTest">
+      <minimum_separation xmi:id="_5ueUwHZREeCMofdxxKhKYQ"/>
+    </policies>
     <policies xsi:type="opendds:tdQosPolicy" xmi:id="_QkbIgKGNEd-D-tWBUFz8zw" name="tdQosPolicyDefaultTest"/>
     <policies xsi:type="opendds:tpQosPolicy" xmi:id="_UCLo0KGNEd-D-tWBUFz8zw" name="tpQosPolicyDefaultTest" value="0"/>
     <policies xsi:type="opendds:udQosPolicy" xmi:id="_Pw72EKGNEd-D-tWBUFz8zw" name="udQosPolicyDefaultTest"/>
