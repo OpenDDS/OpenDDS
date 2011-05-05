@@ -1,3 +1,10 @@
+Thu May  5 14:43:06 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Fixed a bug that prevented SimpleTcp from being able to send the
+          GRACEFUL_DISCONNECT message during shutdown.
+
 Fri Apr 29 13:54:43 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DisjointSequence.h:

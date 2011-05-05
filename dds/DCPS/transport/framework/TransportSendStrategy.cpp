@@ -1111,7 +1111,9 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
       // Loop for sending 'element', in fragments if needed
       bool first_pkt = true; // enter the loop 1st time through unconditionally
       for (TransportQueueElement* next_fragment = 0;
-           (first_pkt || next_fragment) && this->mode_ == MODE_DIRECT;) {
+           (first_pkt || next_fragment)
+           && (this->mode_ == MODE_DIRECT || this->mode_ == MODE_TERMINATED);) {
+           // We do need to send in MODE_TERMINATED (GRACEFUL_DISCONNECT msg)
 
         if (next_fragment) {
           element = next_fragment;
@@ -1123,6 +1125,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         if (max_message_size) { // fragmentation enabled
           const size_t avail = this->space_available();
           if (element_length > avail) {
+            VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting\n"), 0);
             ElementPair ep = element->fragment(avail);
             element = ep.first;
             element_length = element->msg()->total_length();
@@ -1644,6 +1647,7 @@ TransportSendStrategy::get_packet_elems_from_queue()
       // The current element won't fit into the current packet
       if (this->max_message_size()) { // fragmentation enabled
         this->header_.first_fragment_ = !element->is_fragment();
+        VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting from queue\n"), 0);
         ElementPair ep = element->fragment(avail);
         element = ep.first;
         element_length = element->msg()->total_length();
@@ -1667,6 +1671,7 @@ TransportSendStrategy::get_packet_elems_from_queue()
         this->header_.last_fragment_ = !frag && element->is_fragment();
       }
       this->header_.length_ += static_cast<ACE_UINT32>(element_length);
+      VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Packetizing from queue\n"), 0);
     }
 
     // With exclusive and (elems_.size() != 0), we don't use the current
