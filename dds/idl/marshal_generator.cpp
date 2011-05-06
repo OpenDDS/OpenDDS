@@ -214,9 +214,9 @@ namespace {
       }
     }
     {
-      Function is_bounded("gen_max_marshaled_size", "size_t");
-      is_bounded.addArg("seq", "const " + cxx + "&");
-      is_bounded.endArgs();
+      Function max_marsh("gen_max_marshaled_size", "size_t");
+      max_marsh.addArg("seq", "const " + cxx + "&");
+      max_marsh.endArgs();
       std::ostringstream expr;
       string intro;
       if (elem_cls & CL_ENUM) {
@@ -425,9 +425,9 @@ namespace {
       n_elems *= arr->dims()[i]->ev()->u.ulval;
     }
     {
-      Function is_bounded("gen_max_marshaled_size", "size_t");
-      is_bounded.addArg("arr", "const " + cxx + "_forany&");
-      is_bounded.endArgs();
+      Function max_marsh("gen_max_marshaled_size", "size_t");
+      max_marsh.addArg("arr", "const " + cxx + "_forany&");
+      max_marsh.endArgs();
       std::ostringstream expr;
       string intro;
       if (elem_cls & CL_ENUM) {
@@ -625,27 +625,41 @@ namespace {
           if (array_node->n_dims() > 1) {
             throw std::string("Only single dimension arrays allowed in keys");
           }
-          return array_node->base_type();
-        } else {  // nested structures
-          AST_Structure* sub_struct = dynamic_cast<AST_Structure*>(field_type);
-          if (sub_struct == 0) {
-            throw std::string("Expected structure field for ") + key_base;
+          if (key_rem == "") {
+            return array_node->base_type();
+          } else {
+            // This must be a struct...
+            if ((key_rem[0] != '.') || (key_rem.length() == 1)) {
+              throw std::string("Unexpected characters after array index");
+            } else {
+              // Set up key_rem and field_type and let things fall into
+              // the struct code below
+              key_rem = key_rem.substr(1);
+              field_type = array_node->base_type();
+              std::cout << key_rem << std::endl;
+            }
           }
-          size_t nfields = sub_struct->nfields();
-          std::vector<AST_Field*> sub_fields;
-          sub_fields.reserve(nfields);
-
-          for (unsigned long i = 0; i < nfields; ++i) {
-            AST_Field** f;
-            sub_struct->field(f, i);
-            sub_fields.push_back(*f);
-          }
-          // find type of nested struct field
-          return find_type(sub_fields, key_rem);
         }
+        
+        // nested structures
+        AST_Structure* sub_struct = dynamic_cast<AST_Structure*>(field_type);
+        if (sub_struct == 0) {
+          throw std::string("Expected structure field for ") + key_base;
+        }
+        size_t nfields = sub_struct->nfields();
+        std::vector<AST_Field*> sub_fields;
+        sub_fields.reserve(nfields);
+
+        for (unsigned long i = 0; i < nfields; ++i) {
+          AST_Field** f;
+          sub_struct->field(f, i);
+          sub_fields.push_back(*f);
+        }
+        // find type of nested struct field
+        return find_type(sub_fields, key_rem);
       }
     }
-    return 0;
+    throw std::string("Field not found.");
   }
 }
 
@@ -856,10 +870,115 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
 
-  // Generate key marshaling code
+  // Generate key-related marshaling code
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
   // Only generate if this is a DCPS type
   if (info != 0) {
+    bool bounded_key = true;
+    {
+      Function is_bounded("gen_is_bounded_size", "bool");
+      is_bounded.addArg("stru", "KeyOnly<const " + cxx + ">");
+      is_bounded.endArgs();
+
+      
+      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+        AST_Type* field_type = 0;
+        try {
+          field_type = find_type(fields, key_name);
+        } catch (const std::string& error) {
+          std::cerr << "ERROR: Invalid key specification for " << cxx 
+                    << " (" << key_name << "). " << error << std::endl;
+          return false;
+        }
+        unTypeDef(field_type);
+        Classification fld_cls = classify(field_type);
+        if ((fld_cls & CL_STRING) ||
+            (fld_cls & CL_WIDE)) {
+          // Currently, the only key types that can make the marshaled
+          // key by unbounded are strings and wstrings.
+          bounded_key = false;
+        }
+      }
+
+      if (bounded_key) {
+        be_global->impl_ << "  return true;\n";
+      } else {
+        be_global->impl_ << "  return false;\n";
+      }
+    }
+
+    {
+      Function max_marsh("gen_max_marshaled_size", "size_t");
+      max_marsh.addArg("stru", "KeyOnly<const " + cxx + ">");
+      max_marsh.endArgs();
+
+      bool first = true;
+      std::ostringstream expr;
+      string intro;
+      if (bounded_key) {  // Only generate a size if the key is bounded
+        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+          string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+          AST_Type* field_type = 0;
+          try {
+            field_type = find_type(fields, key_name);
+          } catch (const std::string& error) {
+            std::cerr << "ERROR: Invalid key specification for " << cxx 
+                      << " (" << key_name << "). " << error << std::endl;
+            return false;
+          }
+          if (first) first = false;
+          else       expr << "\n    + ";
+          unTypeDef(field_type);
+          Classification fld_cls = classify(field_type);
+          if (fld_cls & CL_ENUM) {
+            expr << "max_marshaled_size_ulong()";
+          } else if (fld_cls & CL_STRING) {
+            AST_String* str = AST_String::narrow_from_decl(field_type);
+            expr << "max_marshaled_size_ulong()";
+            if (fld_cls & CL_BOUNDED) {
+              expr << " + " << str->max_size()->ev()->u.ulval;
+            }
+          } else if (fld_cls == CL_UNKNOWN) {
+            expr << "0"; // warning will be issued for the serialize functions
+          } else { // predefined, sequence, struct, union, array
+            string fieldref = string("stru.t.");
+            expr << "gen_max_marshaled_size("
+                 << getWrapper(fieldref + key_name, field_type, WD_OUTPUT) << ")";
+          }
+        }
+      }
+      if (first) expr << "0";  // No key, size = 0
+      be_global->impl_ << intro << "  return " << expr.str() << ";\n";
+    }
+
+    {
+      Function find_size("gen_find_size", "size_t");
+      find_size.addArg("stru", "KeyOnly<const " + cxx + ">");
+      find_size.endArgs();
+      string expr, intro;
+      bool first = true;
+      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+        AST_Type* field_type = 0;
+        try {
+          field_type = find_type(fields, key_name);
+        } catch (const std::string& error) {
+          std::cerr << "ERROR: Invalid key specification for " << cxx 
+                    << " (" << key_name << "). " << error << std::endl;
+          return false;
+        }
+        if (first) first = false;
+        else       expr += "\n    + ";
+        expr += findSizeCommon(key_name, field_type, "stru.t", intro);
+      }
+      if (first) expr += "0";  // No key, size = 0
+      be_global->impl_ << intro << "  return " << expr << ";\n";
+    }
+
     {
       Function insertion("operator<<", "bool");
       insertion.addArg("strm", "Serializer&");
@@ -879,17 +998,9 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
                     << " (" << key_name << "). " << error << std::endl;
           return false;
         }
-        if (field_type != 0) {
-          if (first) first = false;
-          else       expr += "\n    && ";
-          expr += streamCommon(std::string("t.") + key_name,
-                               field_type, "<< stru", intro);
-        } else {
-          std::cerr << "ERROR: Invalid key specification for " << cxx 
-                    << " (" << key_name << "). " << " Field not found." 
-                    << std::endl;
-          return false;
-        }
+        if (first) first = false;
+        else       expr += "\n    && ";
+        expr += streamCommon(key_name, field_type, "<< stru.t", intro);
       }
       if (first) be_global->impl_ << intro << "  return true;\n";
       else be_global->impl_ << intro << "  return " << expr << ";\n";
@@ -914,17 +1025,9 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
                     << " (" << key_name << "). " << error << std::endl;
           return false;
         }
-        if (field_type != 0) {
-          if (first) first = false;
-          else       expr += "\n    && ";
-          expr += streamCommon(std::string("t.") + key_name,
-                               field_type, ">> stru", intro);
-        } else {
-          std::cerr << "ERROR: Invalid key specification for " << cxx 
-                    << " (" << key_name << "). " << " Field not found." 
-                    << std::endl;
-          return false;
-        }
+        if (first) first = false;
+        else       expr += "\n    && ";
+        expr += streamCommon(key_name, field_type, ">> stru.t", intro);
       }
       if (first) be_global->impl_ << intro << "  return true;\n";
       else be_global->impl_ << intro << "  return " << expr << ";\n";
@@ -1090,16 +1193,16 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
     be_global->impl_ << "  return false;\n";
   }
   {
-    Function is_bounded("gen_max_marshaled_size", "size_t");
-    is_bounded.addArg("", "const " + cxx + "&");
-    is_bounded.endArgs();
+    Function max_marsh("gen_max_marshaled_size", "size_t");
+    max_marsh.addArg("", "const " + cxx + "&");
+    max_marsh.endArgs();
     be_global->impl_ << "  return 100000; /* from TAO_IDL_BE */\n";
   }
   const string wrap_out = getWrapper("uni._d()", discriminator, WD_OUTPUT);
   {
-    Function is_bounded("gen_find_size", "size_t");
-    is_bounded.addArg("uni", "const " + cxx + "&");
-    is_bounded.endArgs();
+    Function find_size("gen_find_size", "size_t");
+    find_size.addArg("uni", "const " + cxx + "&");
+    find_size.endArgs();
     be_global->impl_ <<
       "  size_t result = gen_max_marshaled_size(" << wrap_out << ");\n"
       "  switch (uni._d()) {\n";

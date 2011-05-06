@@ -20,8 +20,8 @@ project(DDS*idl): dcps_test_lib {
 project(DDS*KeyMarshaling) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
 
   exename   = KeyMarshaling
-  after    += DDS*idl
-  libs   += DDS*idl
+  after    += DDS*idl OpenDDS_Rtps
+  libs   += DDS*idl OpenDDS_Rtps
 
   Idl_Files {
   }
@@ -30,3 +30,18 @@ project(DDS*KeyMarshaling) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
     KeyMarshaling.cpp
   }
 }
+
+
+project(*MD5): dcpsexe {
+  exename   = *
+  after    += OpenDDS_Rtps
+  libs   += OpenDDS_Rtps
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    md5_test.cpp
+  }
+}
+

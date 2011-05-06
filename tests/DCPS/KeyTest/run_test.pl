@@ -15,11 +15,17 @@ use PerlDDS::Run_Test;
 use FileHandle;
 use Cwd;
 
-my $test = "KeyMarshaling";
 my $status = 0;
 
-$TST = PerlDDS::create_process("$test", "");
-print STDERR "Running $test\n";
+$TST = PerlDDS::create_process("KeyMarshaling", "");
+print STDERR "Running KeyMarshaling\n";
+my $retcode = $TST->SpawnWaitKill(60);
+if ($retcode != 0) {
+    $status = 1;
+}
+
+$TST = PerlDDS::create_process("KeyTest_MD5", "");
+print STDERR "Running KeyTest_MD5\n";
 my $retcode = $TST->SpawnWaitKill(60);
 if ($retcode != 0) {
     $status = 1;
