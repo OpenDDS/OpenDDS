@@ -1,3 +1,10 @@
+Fri May  6 18:22:15 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/RTPS/md5.h:
+        * dds/DCPS/RTPS/rtps_export.h:
+
+          Fix export macros for the RTPS library
+
 Fri May  6 14:50:23 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/RTPS/BaseMessageUtils.h:
@@ -16,7 +23,7 @@ Fri May  6 14:50:23 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
         * dds/idl/HTemplate.txt:
         * dds/idl/marshal_generator.cpp:
 
-          Generate key-only variants of gen_find_size, 
+          Generate key-only variants of gen_find_size,
           gen_is_bounded_size, and gen_max_marshaled_size.
           Clean up some of the existing key marshaling code generation.
 

@@ -28,7 +28,7 @@
 #elif !defined(_MD5_H)
 #define _MD5_H
 
-#include "dds/DCPS/dcps_export.h"
+#include "rtps_export.h"
 
 /* Any 32-bit or wider unsigned integer data type will do */
 typedef unsigned int MD5_u32plus;
@@ -40,8 +40,8 @@ typedef struct {
 	MD5_u32plus block[16];
 } MD5_CTX;
 
-OpenDDS_Dcps_Export void MD5_Init(MD5_CTX *ctx);
-OpenDDS_Dcps_Export void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size);
-OpenDDS_Dcps_Export void MD5_Final(unsigned char *result, MD5_CTX *ctx);
+OpenDDS_Rtps_Export void MD5_Init(MD5_CTX *ctx);
+OpenDDS_Rtps_Export void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size);
+OpenDDS_Rtps_Export void MD5_Final(unsigned char *result, MD5_CTX *ctx);
 
 #endif
