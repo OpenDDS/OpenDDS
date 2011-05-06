@@ -241,3 +241,39 @@ module Messenger10 {
     CountType count;
   };
 };
+
+// Struct with a bound key length exactly 16 bytes
+module Messenger11 {
+
+#pragma DCPS_DATA_TYPE "Messenger11::Message"
+#pragma DCPS_DATA_KEY "Messenger11::Message long_1"
+#pragma DCPS_DATA_KEY "Messenger11::Message long_2"
+#pragma DCPS_DATA_KEY "Messenger11::Message long_3"
+#pragma DCPS_DATA_KEY "Messenger11::Message long_4"
+
+  struct Message {
+    long long_1;
+    long long_2;
+    long long_3;
+    long long_4;
+  };
+};
+
+// Struct with a bound key length greater than 16 bytes
+module Messenger12 {
+
+#pragma DCPS_DATA_TYPE "Messenger12::Message"
+#pragma DCPS_DATA_KEY "Messenger12::Message long_1"
+#pragma DCPS_DATA_KEY "Messenger12::Message long_2"
+#pragma DCPS_DATA_KEY "Messenger12::Message long_3"
+#pragma DCPS_DATA_KEY "Messenger12::Message long_4"
+#pragma DCPS_DATA_KEY "Messenger12::Message long_5"
+
+  struct Message {
+    long long_1;
+    long long_2;
+    long long_3;
+    long long_4;
+    long long_5;
+  };
+};

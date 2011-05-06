@@ -1,3 +1,33 @@
+Fri May  6 14:50:23 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          Add support for Key hashing required for RTPS.  This is
+          done via a template function marshal_key_hash that will
+          take a message type and put the hash in the corresponding
+          IDL data type.
+
+        * dds/DCPS/RTPS/md5.h:
+        * dds/DCPS/RTPS/md5.cpp:
+
+          Add a public domain MD5 implementation to support key hashing.
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/marshal_generator.cpp:
+
+          Generate key-only variants of gen_find_size, 
+          gen_is_bounded_size, and gen_max_marshaled_size.
+          Clean up some of the existing key marshaling code generation.
+
+        * tests/DCPS/KeyTest/KeyMarshaling.cpp:
+        * tests/DCPS/KeyTest/KeyTest.idl:
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+        * tests/DCPS/KeyTest/md5_test.cpp:
+        * tests/DCPS/KeyTest/run_test.pl:
+
+          Add unit testing for MD5 and Key Hashing.
+
 Thu May  5 14:43:06 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
