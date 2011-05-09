@@ -636,7 +636,6 @@ namespace {
               // the struct code below
               key_rem = key_rem.substr(1);
               field_type = array_node->base_type();
-              std::cout << key_rem << std::endl;
             }
           }
         }

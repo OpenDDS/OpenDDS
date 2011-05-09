@@ -1,3 +1,21 @@
+Mon May  9 20:06:02 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          Fix some type conversion warnings from the 64 bit build
+
+        * dds/idl/marshal_generator.cpp:
+
+          Remove a stray debug print.
+
+        * tests/DCPS/KeyTest/KeyMarshaling.cpp:
+        * tests/DCPS/KeyTest/KeyTest.idl:
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+        * tests/DCPS/KeyTest/KeyTest2.idl:
+
+          Split KeyTest.idl into two files as the generated code appears
+          to break some sort of size limitation on the VC 64 bit build.
+
 Fri May  6 20:48:04 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/RTPS/rtps.mpc:
