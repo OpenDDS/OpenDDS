@@ -7,10 +7,12 @@ project(DDS*idl): dcps_test_lib {
 
   TypeSupport_Files {
     KeyTest.idl
+    KeyTest2.idl
   }
 
   Idl_Files {
     KeyTest.idl
+    KeyTest2.idl
   }
 
 

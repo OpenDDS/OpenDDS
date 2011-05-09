@@ -13,6 +13,7 @@
 
 #include "../common/TestSupport.h"
 #include "KeyTestTypeSupportImpl.h"
+#include "KeyTest2TypeSupportImpl.h"
 
 #include <iostream>
 

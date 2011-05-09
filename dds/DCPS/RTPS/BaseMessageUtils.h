@@ -26,11 +26,12 @@ void marshal_key_hash(const T& msg, OpenDDS::RTPS::KeyHash_t& hash) {
   // Native==Little endian means we need to swap
   static bool swap_bytes = ACE_CDR::BYTE_ORDER_NATIVE == 
                                   ACE_CDR::BYTE_ORDER_LITTLE_ENDIAN;
+  size_t HASH_LIMIT = 16;
   if (gen_is_bounded_size(ko) && 
-      gen_max_marshaled_size(ko) <= 16) {
-    // If it is bounded an can always fit in 16 bytes, we will use the 
+      gen_max_marshaled_size(ko) <= HASH_LIMIT) {
+    // If it is bounded and can always fit in 16 bytes, we will use the 
     // marshaled key
-    ACE_Message_Block mb(16);
+    ACE_Message_Block mb(HASH_LIMIT);
     ::OpenDDS::DCPS::Serializer out_serializer (&mb, swap_bytes);
     out_serializer << ko;
     memcpy(hash.value, mb.rd_ptr(), mb.length());
