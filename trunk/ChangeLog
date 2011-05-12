@@ -1,3 +1,10 @@
+Thu May 12 19:34:25 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/Monitor/run_odds_mon.pl:
+
+          Add this script to interactively run this test with the 
+          graphical monitor.
+
 Wed May 11 13:49:07 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/MonitorFactory.h:
