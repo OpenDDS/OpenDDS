@@ -1,6 +1,7 @@
 package org.opendds.modeling.sdk.model.GeneratorSpecification.Generator;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -12,9 +13,13 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
@@ -108,10 +113,29 @@ public abstract class ParsedXmlFile {
 			DOMResult resolved = new DOMResult();
 			transformer.transform(TransformType.RESOLVED, source, resolved);
 
+			// for debugging ====>   dumpToFile(resolved);
+			
 			source = new DOMSource(resolved.getNode());
 		}
 
 		return source;
+	}
+
+	// for debugging the intermediate result (see "for debugging" comment above)
+	@SuppressWarnings("unused")
+	private void dumpToFile(DOMResult resolved) {
+		try {
+			TransformerFactory transfac = TransformerFactory.newInstance();
+			Transformer trans = transfac.newTransformer();
+			trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			trans.setOutputProperty(OutputKeys.INDENT, "yes");
+			FileWriter writer = new FileWriter(new File("temp.xml"));
+			StreamResult result = new StreamResult(writer);
+			DOMSource temp_source = new DOMSource(resolved.getNode());
+			trans.transform(temp_source, result);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	protected Document getModelDocument() {
