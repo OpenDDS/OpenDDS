@@ -1,8 +1,14 @@
+Wed May 18 18:01:58 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/docs/design_notes/plugins.html:
+
+	  Removed EMF/GMF TODO sections as they are no long applicable.
+
 Wed May 18 13:43:22 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
 
-          Force use of qualified typename in sequence typedefs.  This is 
+          Force use of qualified typename in sequence typedefs.  This is
           due to a TAO idl compiler bug, where if the type is not defined
           the sequence type will not be known.  Then bad things happen in
           marshalling and demarshalling.  Fixes issue found in Myra.
