@@ -646,12 +646,6 @@ Details for settings that are different from default EMF settings can be found i
 Issues related to usage can be found in [[EMF Issues]].
 </pre>
 </div>
-<div title="EMF TODO" modifier="Byron" created="201007161342" tags="publish todo" changecount="1">
-<pre>! Check that the Ecore class diagrams are up to date
-
-There are class diagrams (.ecore_diagram) that are visual representations of the .ecore files. Make sure these diagrams reflect the latest version of the .ecore files.
-</pre>
-</div>
 <div title="EnumerationsPackage" modifier="MikeMartinez" created="201006152309" tags="publish" changecount="1">
 <pre>Section 7.1.8 of the specification defines the ''Enumerations'' package of the metamodel.  The ecore model for this includes definitions for enumerations used as field of ~QoS policies.  Inexplicably, this also includes a structure definition for the //Period// classifier which is not an enumeration but a compound type used as a field type for various policies.  This model has the following properties:
 * package: org.opendds.modeling.model
@@ -1096,55 +1090,6 @@ The error is
 <pre>[[GMF Details]] contains instructions not available elsewhere to reproduce the steps needed to for model diagram support.
 [[GMF Issues]] contains known issues with the SDK's usage of GMF.
 [[GMF TODO]] contains skipped tasks related to GMF that still need to be done.</pre>
-</div>
-<div title="GMF TODO" modifier="Byron" created="201006211445" modified="201012031600" tags="publish todo" changecount="13">
-<pre>! Diagrams
-
-!! General
-
-!!! Excessive number of ~Pop-Up Bars
-
-Using the icons specified in the .gmftools file, GMF hovers a ~Pop-Up Bar for all the types that can be top-level nodes on the diagram (this is discussed in the Eclipse Modeling Project book in section 10.1, ~Pop-Up Bars). In our case, because of the large number of QoS policies and Simple types this can result in an excessive number of icons being popped up as shown below.
-
-[img[images/gmf-pop-up-bars.png]]
-
-Unfortunately, it appears the only way to remove these is to modify generated code as discussed
-in a [[GMF form thread|http://www.eclipse.org/forums/index.php?t=tree&amp;th=172966&amp;#page_top]].
-
-If we can't come up with icons that clearly distinguish all these types then we should consider
-making these code modifications.
-
-!! ~DataLib
-
-!!! Handling of Simple types
-
-Right now the user is required to add Simple types (Long, Char, etc.) on a ~DataLib diagram in order
-to be able to refer to it in a Struct Field. Look into ways to avoid this while at the same time making candidate Simple types easily accessible so the user doesn't have to look them up.
-
-!!! Noise in top left corner of the diagram
-
-There is a small region in the top left corner of the ~DataLib diagram with overlapping text.
-Need to investigate what is causing this and remove.
-
-!!! Model validations are not exhaustive
-
-The beginning of model validations using the GMF Auditing framework is in place. Additional validations,
-such as checking that Struct Keys refer to valid types need to be added.
-
-!! ~DcpsLib
-
-!!! Handling of ~DataWriter/~DataReader policies
-
-Look into ways to present ~DataWriter/~DataReader policies in a way that is visually clean
-and easy for the user to manipulate these policies.
-
-! --Attribution for ~UML2 Tools mirrored graphic plug-in--
-
---As discussed in section 4.5.5 of the [[EMP book|http://www.informit.com/store/product.aspx?isbn=0321534077]], a separate plug-in needs to be generated that holds the &quot;mirrored&quot; [[UML2 Tools|http://wiki.eclipse.org/MDT-UML2Tools]] graphic definitions that are used by the SDK if we want to re-use these graphics. It's need to be determine how to properly attribute the ~UML2 Tools project in our mirrored plug-in.--
-
-We are no longer using the Figure Gallery from the UML2 project.  Our graphics Figure Gallery is located in our [[org.opendds.modeling.graphics]] plug-in.
-
-</pre>
 </div>
 <div title="GettingStarted" modifier="MikeMartinez" created="201002011551" modified="201002011553" changecount="3">
 <pre>To get started with this blank [[TiddlyWiki]], you'll need to modify the following tiddlers:
@@ -1742,13 +1687,10 @@ h2,h3 {border-bottom:1px solid [[ColorPalette::TertiaryLight]];}
 #backstageCloak {background:[[ColorPalette::Foreground]]; opacity:0.6; filter:'alpha(opacity=60)';}
 /*}}}*/</pre>
 </div>
-<div title="TODO" modifier="Byron" created="201006211435" modified="201006211438" tags="publish todo" changecount="2">
+<div title="TODO" modifier="Byron" created="201006211435" modified="201105181738" tags="publish todo" changecount="4">
 <pre>Tasks pushed to the side that still need to be done are captured here.
 
-*[[EMF TODO]]
-*[[GMF TODO]]
-*[[Deployment TODO]]
-*[[Dependency TODO]]
+
 *[[Plug-in TODO]]
 
 </pre>
