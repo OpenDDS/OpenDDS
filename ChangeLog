@@ -1,8 +1,19 @@
+Wed May 18 20:27:01 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+
+          set length properly when changing from a zero copy sequence to
+          a single copy sequence.
+
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+          test above change.
+
 Wed May 18 18:01:58 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/docs/design_notes/plugins.html:
 
-	  Removed EMF/GMF TODO sections as they are no long applicable.
+          Removed EMF/GMF TODO sections as they are no long applicable.
 
 Wed May 18 13:43:22 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 

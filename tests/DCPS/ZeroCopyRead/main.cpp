@@ -953,7 +953,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         //    while the instance container loses its
         //    reference because of history.depth.
         //=====================================================
-        ACE_DEBUG((LM_INFO,"==== TEST 3 : Show that zero-copy reference counting works\n"));
+        ACE_DEBUG((LM_INFO,"==== TEST 3 : show that zero-copy reference counting works\n"));
 
         const CORBA::Long max_samples = 2;
         // 0 means zero-copy
@@ -1493,7 +1493,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         //=====================================================
         // 8) Show that an allocator can be provided.
         //=====================================================
-        ACE_DEBUG((LM_INFO,"==== TEST 8 : Show that an allocator can be provided.\n"));
+        ACE_DEBUG((LM_INFO,"==== TEST 8 : show that an allocator can be provided.\n"));
 
         const CORBA::Long max_samples = 2;
         // Note: the default allocator for a ZCSeq is very fast because
@@ -1601,7 +1601,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         //==================================================================
         // 9) Show that the ZC sequence impl meets CORBA C++ mapping reqmts
         //==================================================================
-        ACE_DEBUG((LM_INFO, ACE_TEXT("==== TEST 9 : Show that the ZC sequence")
+        ACE_DEBUG((LM_INFO, ACE_TEXT("==== TEST 9 : show that the ZC sequence")
                    ACE_TEXT(" impl meets CORBA C++ mapping reqmts.\n")));
         using Test::SimpleSeq;
         using Test::Simple;
@@ -1670,7 +1670,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // 10) Show that loans are checked by delete_datareader.
         //=====================================================
       // !!!! note - this test should be the last because it deletes the datareader
-        ACE_DEBUG((LM_INFO,"==== TEST 10: Show that loans are checked by delete_datareader.\n"));
+        ACE_DEBUG((LM_INFO,"==== TEST 10: show that loans are checked by delete_datareader.\n"));
 
         const CORBA::Long max_samples = 2;
         // Initialize the ZeroCopySeq and ZeroCopyInfoSeq objects for read
@@ -1743,6 +1743,20 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
 
+      }
+      {
+        //=====================================================
+        // 11) test length of sequence
+        //=====================================================
+        ACE_DEBUG((LM_INFO,"==== TEST 11: Set length on zero copy sequence.\n"));
+        Test::SimpleSeq      seq;
+        seq.length(7);
+        if (seq.length() != 7) {
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT("(%P|%t) t11 ERROR: length %d when set to 7.\n"),
+                      seq.length()));
+          test_failed = 1;
+        }
       }
     }
   catch (const TestException&)
