@@ -475,7 +475,10 @@
           <xsl:text>sequence&lt;</xsl:text>
           <xsl:call-template name="typename">
             <xsl:with-param name="target" select="$types[@xmi:id = $target/@subtype]"/>
-            <xsl:with-param name="referrer" select="."/>
+            <!-- ignore referrer so sequence target is always qualified.
+                 This is due to a bug in TAO IDL compiler, when the target
+                 type of the sequence defined after the typedef -->
+            <xsl:with-param name="referrer" select="/.."/>
           </xsl:call-template>
           <xsl:if test="$target/@length">
             <xsl:value-of select="concat(', ',$target/@length)"/>
@@ -496,18 +499,6 @@
     <xsl:otherwise>???</xsl:otherwise>
   </xsl:choose>
 </xsl:template>
-
-<!--
-<xsl:template name="qname">
-  <xsl:param name="target" select="."/>
-  <xsl:variable name="scopename">
-    <xsl:call-template name="scopename">
-      <xsl:with-param name="target" select="$target"/>
-    </xsl:call-template>
-  </xsl:variable>
-  <xsl:value-of select="concat($scopename, $target/@name)"/>
-</xsl:template>
--->
 
 <!-- Size of a type 
      You may ask why this is not used for Sequences.  I'm 

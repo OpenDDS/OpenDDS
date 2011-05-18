@@ -22,7 +22,7 @@
 <xsl:template match="/">
   <xsl:variable name="model-refs">
     <xsl:call-template name="data-model-ref-names">
-      <xsl:with-param name="model-refs" select="$model//datatype/@href | $model//libs[@xsi:type='opendds:DataLib']//@href"/>
+      <xsl:with-param name="model-refs" select="$model//datatype/@href | $model//libs[@xsi:type='types:DataLib']//@href"/>
     </xsl:call-template>
   </xsl:variable>
   
