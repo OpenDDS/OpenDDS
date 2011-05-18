@@ -63,9 +63,20 @@
       <xsl:with-param name="value" select="@name"/>
     </xsl:call-template>
   </xsl:variable>
-  <xsl:variable name="classname" select="concat($Instname, $modelname, 'Traits')"/>
-  <xsl:value-of select="concat('void ', $classname)"/>
-  <xsl:text>::transport_config(OpenDDS::DCPS::TransportIdType id) {
+  <xsl:variable name="instance-offset" 
+                select="transportOffset/@value"/>
+  <xsl:choose>
+    <xsl:when test="not($instance-offset)">
+      <xsl:value-of select="concat(
+                '   // Skipping generation for instance &quot;',
+                $Instname,
+                '&quot; with no offset',
+                $newline)"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:variable name="classname" select="concat($Instname, $modelname, 'Traits')"/>
+      <xsl:value-of select="concat('void ', $classname)"/>
+      <xsl:text>::transport_config(OpenDDS::DCPS::TransportIdType id) {
   OpenDDS::DCPS::TransportConfiguration_rch config;
   ACE_TString transport_type;
 
@@ -75,8 +86,8 @@
     // Create configuration for this transport ID
     switch (id) {
 </xsl:text>
-<xsl:apply-templates/>
-<xsl:text>      default:
+    <xsl:apply-templates/>
+    <xsl:text>      default:
         throw std::runtime_error("Invalid transport ID in configuration");
     };
   }
@@ -88,6 +99,8 @@
   }
 }
 </xsl:text>
+    </xsl:otherwise>
+  </xsl:choose>
 
 </xsl:template>
 
@@ -208,9 +221,9 @@
     <xsl:when test="TCPTransport">SimpleTcp</xsl:when>
     <xsl:when test="MulticastTransport">multicast</xsl:when>
     <xsl:when test="UDPTransport">udp</xsl:when>
-    <xsl:otherwise>
+    <xsl:when test="*">
       <xsl:message>Unknown transport_type</xsl:message>
-    </xsl:otherwise>
+    </xsl:when>
   </xsl:choose>
 </xsl:template>
 

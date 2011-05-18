@@ -193,6 +193,14 @@
         </MulticastTransport>
       </transport>
     </instance>
+    <instance name="NoTransport">
+      <transportOffset value="20"/>
+    </instance>
+    <instance name="NoOffset">
+      <transport transportIndex="3"/>
+    </instance>
+    <instance name="Incomplete">
+    </instance>
   </instances>
   <searchPaths/>
 </generator:CodeGen>

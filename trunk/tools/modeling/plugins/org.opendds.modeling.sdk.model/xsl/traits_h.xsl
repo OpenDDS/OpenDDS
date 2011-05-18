@@ -68,32 +68,46 @@
 <xsl:template name="output-instance">
   <xsl:param name="instance"/>
   <xsl:param name="elements-qname"/>
+
   <xsl:variable name="Instname">
     <xsl:call-template name="capitalize">
       <xsl:with-param name="value" select="$instance/@name"/>
     </xsl:call-template>
   </xsl:variable>
-  <xsl:variable name="structname" select="concat($Instname, 
-                                                 $modelname, 
-                                                 'Traits')"/>
-  <xsl:variable name="export" select="concat($modelname, '_Export ')"/>
-  <xsl:variable name="tdname" select="concat($Instname, $modelname, 'Type')"/>
+  <xsl:variable name="instance-offset" 
+                select="$instance/transportOffset/@value"/>
+  <xsl:choose>
+    <xsl:when test="not($instance-offset)">
+      <xsl:value-of select="concat(
+                '   // Skipping generation for instance &quot;',
+                $Instname,
+                '&quot; with no offset',
+                $newline)"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:variable name="structname" select="concat($Instname, 
+                                                     $modelname, 
+                                                     'Traits')"/>
+      <xsl:variable name="export" select="concat($modelname, '_Export ')"/>
+      <xsl:variable name="tdname" select="concat($Instname, $modelname, 'Type')"/>
 
-  <!-- output struct declaration -->
-  <xsl:value-of select="concat($newline,
-    '  struct ', $export, $structname, 
-    ' : OpenDDS::Model::DefaultInstanceTraits {', $newline,
-    '    enum { transport_key_base = ', 
-    $instance/transportOffset/@value, '};', $newline,
-    '    void transport_config(OpenDDS::DCPS::TransportIdType id);', $newline,
-    '  };', $newline
-  )"/>
+      <!-- output struct declaration -->
+      <xsl:value-of select="concat($newline,
+        '  struct ', $export, $structname, 
+        ' : OpenDDS::Model::DefaultInstanceTraits {', $newline,
+        '    enum { transport_key_base = ', 
+        $instance-offset, '};', $newline,
+        '    void transport_config(OpenDDS::DCPS::TransportIdType id);', $newline,
+        '  };', $newline
+      )"/>
 
-  <!-- output typedef-->
-  <xsl:value-of select="concat($newline,
-    '  typedef OpenDDS::Model::Service&lt; ', $elements-qname, ', ',
-    $structname, '&gt; ', $tdname, ';', $newline
-  )"/>
+      <!-- output typedef-->
+      <xsl:value-of select="concat($newline,
+        '  typedef OpenDDS::Model::Service&lt; ', $elements-qname, ', ',
+        $structname, '&gt; ', $tdname, ';', $newline
+      )"/>
+    </xsl:otherwise>
+  </xsl:choose>
 </xsl:template>
 
 <!-- Ignore text -->
