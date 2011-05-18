@@ -33,3 +33,11 @@ project(*DurationToTimeValue): dcpsexe {
     DurationToTimeValue.cpp
   }
 }
+
+project(*Fragmentation): dcpsexe {
+  exename   = *
+
+  Source_Files {
+    Fragmentation.cpp
+  }
+}

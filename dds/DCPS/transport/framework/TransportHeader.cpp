@@ -21,19 +21,23 @@ OpenDDS::DCPS::TransportHeader::DCPS_PROTOCOL[] =
 # include "TransportHeader.inl"
 #endif /* !__ACE_INLINE__ */
 
-// TBD
-//MJM: I am still not sure why this is required by the compiler.  We
-//MJM: should be able to just delegate to the other one.
-ACE_CDR::Boolean
-operator<<(ACE_Message_Block& buffer, OpenDDS::DCPS::TransportHeader& value)
+namespace OpenDDS {
+namespace DCPS {
+
+bool operator<<(ACE_Message_Block& buffer, const TransportHeader& value)
 {
-  DBG_ENTRY_LVL("TransportHeader","operator<<",6);
+  DBG_ENTRY_LVL("TransportHeader", "operator<<" ,6);
 
   OpenDDS::DCPS::Serializer writer(&buffer, value.swap_bytes());
 
   writer.write_octet_array(value.protocol_, sizeof(value.protocol_));
 
-  writer << ACE_OutputCDR::from_octet(value.byte_order_);
+  const ACE_CDR::Octet flags =
+    (value.byte_order_ << TransportHeader::BYTE_ORDER_FLAG) |
+    (value.first_fragment_ << TransportHeader::FIRST_FRAGMENT_FLAG) |
+    (value.last_fragment_ << TransportHeader::LAST_FRAGMENT_FLAG);
+  writer << ACE_OutputCDR::from_octet(flags);
+
   writer << ACE_OutputCDR::from_octet(value.reserved_);
 
   writer << value.length_;
@@ -43,8 +47,5 @@ operator<<(ACE_Message_Block& buffer, OpenDDS::DCPS::TransportHeader& value)
   return writer.good_bit();
 }
 
-ACE_CDR::Boolean
-operator<<(ACE_Message_Block*& buffer, OpenDDS::DCPS::TransportHeader& value)
-{
-  return *buffer << value;
+}
 }

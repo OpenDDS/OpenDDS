@@ -847,13 +847,13 @@ DataWriterImpl::AckToken::expected(const RepoId& subscriber) const
 bool
 DataWriterImpl::AckToken::marshal(ACE_Message_Block*& mblock, bool swap) const
 {
-  const size_t dataSize = sizeof(SequenceNumber::Value)
-    + gen_find_size(max_wait_);
+  const size_t dataSize = gen_find_size(sequence_) 
+                        + gen_find_size(max_wait_);
 
   ACE_NEW_RETURN(mblock, ACE_Message_Block(dataSize), false);
 
   Serializer ser(mblock, swap);
-  ser << sequence_.getValue();
+  ser << sequence_;
   ser << max_wait_;
   return ser.good_bit();
 }
@@ -881,7 +881,7 @@ DataWriterImpl::send_ack_requests(DataWriterImpl::AckToken& token)
     RepoIdConverter converter(this->publication_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::send_ack_requests() - ")
-               ACE_TEXT("%C sending REQUEST_ACK message for sequence 0x%x ")
+               ACE_TEXT("%C sending REQUEST_ACK message for sequence %q ")
                ACE_TEXT("to %d subscriptions.\n"),
                std::string(converter).c_str(),
                token.sequence_.getValue(),
@@ -993,7 +993,7 @@ DataWriterImpl::send_control_customized(const DataLinkSet_rch& links,
         char* wr = data_modified->wr_ptr();
         data_modified->wr_ptr(data_modified->base());   // rewind
         Serializer ser(data_modified, swap);
-        ser << seq.getValue();                          // overwrite Seq#
+        ser << seq;                                     // overwrite Seq#
         data_modified->wr_ptr(wr);                      // wind
 
         // If other targets are listening on the DataLink, filter those out
@@ -1020,7 +1020,7 @@ DataWriterImpl::send_control_customized(const DataLinkSet_rch& links,
         if (DCPS_debug_level > 4) {
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataWriterImpl::send_control_customized() - ")
-            ACE_TEXT("sending REQUEST_ACK 0x%x to single data link with%C ")
+            ACE_TEXT("sending REQUEST_ACK %q to single data link with%C ")
             ACE_TEXT("content filtering.\n"), seq.getValue(),
             (allTargets->size() == targets.length()) ? "out" : ""));
         }
@@ -1084,7 +1084,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
             RepoIdConverter conv(*current);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_ack_responses() - ")
-              ACE_TEXT("waiting for seq 0x%x from sub %C, got 0x%x\n"),
+              ACE_TEXT("waiting for seq %q from sub %C, got %q\n"),
               token.expected(*current).getValue(), std::string(conv).c_str(),
               this->idToSequence_[*current].getValue()));
           }
@@ -1098,7 +1098,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
         RepoIdConverter converter(this->publication_id_);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_ack_responses() - ")
-                   ACE_TEXT("%C unblocking for sequence 0x%x.\n"),
+                   ACE_TEXT("%C unblocking for sequence %q.\n"),
                    std::string(converter).c_str(),
                    token.sequence_.getValue()));
       }
@@ -1111,7 +1111,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
   RepoIdConverter converter(this->publication_id_);
   ACE_DEBUG((LM_WARNING,
              ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::wait_for_ack_responses() - ")
-             ACE_TEXT("%C timed out waiting for sequence 0x%x to be acknowledged ")
+             ACE_TEXT("%C timed out waiting for sequence %q to be acknowledged ")
              ACE_TEXT("from %d subscriptions.\n"),
              std::string(converter).c_str(),
              token.sequence_.getValue(),
@@ -1841,7 +1841,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
   : TAO_ENCAP_BYTE_ORDER;
   header_data.coherent_change_ = 0;
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
-  header_data.sequence_ = 0;
+  header_data.sequence_ = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
   header_data.publication_id_ = publication_id_;
@@ -1855,7 +1855,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
                           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
                         ACE_Message_Block(max_marshaled_size,
                                           ACE_Message_Block::MB_DATA,
-                                          data, //cont
+                                          data->total_length() ? data : 0, //cont
                                           0, //data
                                           0, //allocator_strategy
                                           0, //locking_strategy
@@ -1866,7 +1866,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
                                           mb_allocator_),
                         0);
 
-  message << header_data;
+  *message << header_data;
   return message;
 }
 
@@ -1904,16 +1904,16 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
   header_data.byte_order_ =
     this->publisher_servant_->swap_bytes()
     ? !TAO_ENCAP_BYTE_ORDER
-  : TAO_ENCAP_BYTE_ORDER;
+    : TAO_ENCAP_BYTE_ORDER;
   header_data.coherent_change_ = this->coherent_;
-  header_data.group_coherent_
-    = this->publisher_servant_->qos_.presentation.access_scope
-      == ::DDS::GROUP_PRESENTATION_QOS;
+  header_data.group_coherent_ =
+    this->publisher_servant_->qos_.presentation.access_scope
+    == DDS::GROUP_PRESENTATION_QOS;
   header_data.content_filter_ = content_filter;
   header_data.sequence_repair_ = needSequenceRepair;
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
   ++this->sequence_number_;
-  header_data.sequence_ = this->sequence_number_.getValue();
+  header_data.sequence_ = this->sequence_number_;
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
 
@@ -1944,7 +1944,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
                                           mb_allocator_),
                         DDS::RETCODE_ERROR);
 
-  message << header_data;
+  *message << header_data;
   return DDS::RETCODE_OK;
 }
 
@@ -1983,13 +1983,11 @@ DataWriterImpl::deliver_ack(
   const DataSampleHeader& header,
   DataSample*             data)
 {
-  SequenceNumber::Value seqNum;
-
   Serializer serializer(
     data,
     header.byte_order_ != TAO_ENCAP_BYTE_ORDER);
-  serializer >> seqNum;
-  SequenceNumber ack(seqNum);
+  SequenceNumber ack;
+  serializer >> ack;
 
   if (DCPS_debug_level > 0) {
     RepoIdConverter debugConverter(this->publication_id_);
@@ -1997,7 +1995,7 @@ DataWriterImpl::deliver_ack(
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::deliver_ack() - ")
                ACE_TEXT("publication %C received update for ")
-               ACE_TEXT("sample %x from subscription %C.\n"),
+               ACE_TEXT("sample %q from subscription %C.\n"),
                std::string(debugConverter).c_str(),
                ack.getValue(),
                std::string(debugConverter2).c_str()));

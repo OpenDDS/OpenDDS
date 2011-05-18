@@ -24,38 +24,15 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader()
   , group_coherent_(0)
   , content_filter_(0)
   , sequence_repair_(0)
-  , reserved_4(0)
+  , more_fragments_(0)
   , message_length_(0)
-  , sequence_(0)
+  , sequence_()
   , source_timestamp_sec_(0)
   , source_timestamp_nanosec_(0)
   , publication_id_(GUID_UNKNOWN)
   , publisher_id_(GUID_UNKNOWN)
   , marshaled_size_(0)
 {
-}
-
-ACE_INLINE
-OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block* buffer)
-  : message_id_(0)
-  , submessage_id_(0)
-  , byte_order_(TAO_ENCAP_BYTE_ORDER)
-  , coherent_change_(0)
-  , historic_sample_(0)
-  , lifespan_duration_(0)
-  , group_coherent_(0)
-  , content_filter_(0)
-  , sequence_repair_(0)
-  , reserved_4(0)
-  , message_length_(0)
-  , sequence_(0)
-  , source_timestamp_sec_(0)
-  , source_timestamp_nanosec_(0)
-  , publication_id_(GUID_UNKNOWN)
-  , publisher_id_(GUID_UNKNOWN)
-  , marshaled_size_(0)
-{
-  this->init(buffer);
 }
 
 ACE_INLINE
@@ -69,22 +46,14 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block& buffer)
   , group_coherent_(0)
   , content_filter_(0)
   , sequence_repair_(0)
-  , reserved_4(0)
+  , more_fragments_(0)
   , message_length_(0)
-  , sequence_(0)
+  , sequence_()
   , source_timestamp_sec_(0)
   , source_timestamp_nanosec_(0)
   , publication_id_(GUID_UNKNOWN)
 {
   this->init(&buffer);
-}
-
-ACE_INLINE
-OpenDDS::DCPS::DataSampleHeader&
-OpenDDS::DCPS::DataSampleHeader::operator=(ACE_Message_Block* buffer)
-{
-  this->init(buffer);
-  return *this;
 }
 
 ACE_INLINE
@@ -110,7 +79,7 @@ OpenDDS::DCPS::DataSampleHeader::max_marshaled_size()
          1 + // submessage_id_;
          1 + // flags
          4 + // message_length_;
-         4 + // sequence_;
+         8 + // sequence_;
          4 + // source_timestamp_sec_;
          4 + // source_timestamp_nanosec_;
          4 + // lifespan_duration_sec_;

@@ -17,12 +17,8 @@
 # include "DisjointSequence.inl"
 #endif /* __ACE_INLINE__ */
 
-#include <climits>
-
 namespace OpenDDS {
 namespace DCPS {
-
-const size_t DisjointSequence::MAX_DEPTH(SHRT_MAX / 2 - 1);
 
 DisjointSequence::DisjointSequence(SequenceNumber value)
 {
@@ -37,14 +33,15 @@ DisjointSequence::reset(SequenceNumber value)
 }
 
 bool
-DisjointSequence::lowest_valid(SequenceNumber value)
+DisjointSequence::lowest_valid(SequenceNumber value,
+                               std::vector<SequenceRange>* dropped /* = 0 */)
 {
   validate(SequenceRange(value, value));
   if (++low() >= value) return false; // nothing to shift
 
   // if the current range goes negative, then assume we can go negative,
   // otherwise it is not important
-  const SequenceNumber validLowWaterMark(previous_sequence_number(value));
+  const SequenceNumber validLowWaterMark(value.previous());
   SequenceRange validLowWaterRange(validLowWaterMark, validLowWaterMark);
 
   RangeSet::iterator low_bound =
@@ -57,6 +54,19 @@ DisjointSequence::lowest_valid(SequenceNumber value)
     // move past the low_bound, so that the original low_bound will be erased
     ++low_bound;
   }
+
+  if (dropped) {
+    SequenceNumber last = low();
+    for (RangeSet::iterator i = this->sequences_.begin(); i != low_bound; ++i) {
+      if (i == this->sequences_.begin()) continue;
+      dropped->push_back(SequenceRange(++last, i->first.previous()));
+      last = i->second;
+    }
+    if (last < validLowWaterRange.second) {
+      dropped->push_back(SequenceRange(++last, validLowWaterRange.second));
+    }
+  }
+
   this->sequences_.erase(this->sequences_.begin(), low_bound);
   this->sequences_.insert(validLowWaterRange);
   return true;
@@ -86,7 +96,7 @@ DisjointSequence::update(const SequenceRange& range)
     // move to just past this iterator for the erase
     ++range_above;
   }
-  const SequenceNumber previous(previous_sequence_number(range.first));
+  const SequenceNumber previous(range.first.previous());
   // find the lower_bound for the SequenceNumber just before this range
   // to see if any ranges need to combine
   RangeSet::iterator range_below =
@@ -109,14 +119,6 @@ DisjointSequence::update(const SequenceRange& range)
   return true;
 }
 
-SequenceNumber
-DisjointSequence::previous_sequence_number(const SequenceNumber value) const {
-  // if all of the identifiable sequence is positive, then we do not know
-  return (value.getValue() != 0 || low().getValue() < 0)
-    ? (value.getValue() - 1)
-    : SequenceNumber::MAX_VALUE;
-}
-
 std::vector<SequenceRange>
 DisjointSequence::missing_sequence_ranges() const {
   std::vector<SequenceRange> missing_sequence_ranges;
@@ -128,7 +130,7 @@ DisjointSequence::missing_sequence_ranges() const {
   RangeSet::const_iterator firstIter = secondIter++;
   for(; secondIter != this->sequences_.end(); ++firstIter, ++ secondIter) {
     const SequenceNumber missingLow(++SequenceNumber(firstIter->second)),
-      missingHigh(previous_sequence_number(secondIter->first));
+      missingHigh(secondIter->first.previous());
     if (missingLow <= missingHigh) {
       missing_sequence_ranges.push_back(SequenceRange(missingLow, missingHigh));
     }
@@ -155,7 +157,7 @@ DisjointSequence::dump() const
     "SequenceNumbers:\n", this));
   for (RangeSet::const_iterator iter = this->sequences_.begin();
        iter != this->sequences_.end(); ++iter) {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DisjointSequence::dump(%X) %d-%d\n",
+    ACE_DEBUG ((LM_DEBUG, "(%P|%t) DisjointSequence::dump(%X) %q-%q\n",
       this, iter->first.getValue(), iter->second.getValue()));
   }
 }

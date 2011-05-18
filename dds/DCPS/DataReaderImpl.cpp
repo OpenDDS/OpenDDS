@@ -378,7 +378,7 @@ ACE_THROW_SPEC((CORBA::SystemException))
             DDS::Time_t timenow = time_value_to_time(now);
             bool result = this->send_sample_ack(
                             writers[ index].writerId,
-                            sequence.getValue(),
+                            sequence,
                             timenow);
 
             if (result) {
@@ -1305,7 +1305,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     SubscriptionInstance* instance = 0;
     bool is_new_instance = false;
     bool filtered = false;
-    dds_demarshal(sample, instance, is_new_instance, filtered);
+    MarshalingType marshaling = FULL_MARSHALING;
+    if (sample.header_.message_id_ == INSTANCE_REGISTRATION) {
+      marshaling = KEY_ONLY_MARSHALING;
+    }
+    dds_demarshal(sample, instance, is_new_instance, filtered, marshaling);
 
     if (DCPS_debug_level  >= 1) {
       RepoIdConverter reader_converter(subscription_id_);
@@ -1352,7 +1356,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
                           timenow);
 
           if (result) {
-            where->second->clear_acks(SequenceNumber(header.sequence_));
+            where->second->clear_acks(header.sequence_);
           }
         }
       } else {
@@ -1396,16 +1400,15 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     Serializer serializer(
       sample.sample_,
       sample.header_.byte_order_ != TAO_ENCAP_BYTE_ORDER);
-    SequenceNumber::Value seqNum;
-    serializer >> seqNum;
-    SequenceNumber ack(seqNum);
+    SequenceNumber ack;
+    serializer >> ack;
     serializer >> delay;
 
     if (DCPS_debug_level > 9) {
       RepoIdConverter debugConverter(sample.header_.publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataReaderImpl::data_received() - ")
-                 ACE_TEXT("publication %C received REQUEST_ACK for sequence 0x%x ")
+                 ACE_TEXT("publication %C received REQUEST_ACK for sequence %q ")
                  ACE_TEXT("valid for the next %d seconds.\n"),
                  std::string(debugConverter).c_str(),
                  ack.getValue(),
@@ -1428,7 +1431,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           DDS::Time_t timenow = time_value_to_time(now);
           bool result = this->send_sample_ack(
                           sample.header_.publication_id_,
-                          ack.getValue(),
+                          ack,
                           timenow);
 
           if (result) {
@@ -1573,11 +1576,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 bool
 DataReaderImpl::send_sample_ack(
   const RepoId& publication,
-  SequenceNumber::Value sequence,
+  SequenceNumber sequence,
   DDS::Time_t when)
 {
-  size_t dataSize = sizeof(sequence);
-  dataSize += gen_find_size(publication);
+  static const size_t dataSize = gen_find_size(sequence) 
+                                 + gen_find_size(publication);
 
   ACE_Message_Block* data;
   ACE_NEW_RETURN(data, ACE_Message_Block(dataSize), false);
@@ -1594,7 +1597,7 @@ DataReaderImpl::send_sample_ack(
   outbound_header.byte_order_               = byteOrder,
   outbound_header.coherent_change_          = 0;
   outbound_header.message_length_           = static_cast<ACE_UINT32>(data->total_length());
-  outbound_header.sequence_                 = 0;
+  outbound_header.sequence_                 = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
   outbound_header.source_timestamp_sec_     = when.sec;
   outbound_header.source_timestamp_nanosec_ = when.nanosec;
   outbound_header.publication_id_           = this->subscription_id_;
@@ -1607,17 +1610,17 @@ DataReaderImpl::send_sample_ack(
       ACE_Message_Block::MB_DATA,
       data // cont
     ), false);
-  sample_ack << outbound_header;
+  *sample_ack << outbound_header;
 
   if (DCPS_debug_level > 0) {
     RepoIdConverter subscriptionBuffer(this->subscription_id_);
     RepoIdConverter publicationBuffer(publication);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataReaderImpl::send_sample_ack() - ")
-               ACE_TEXT("%C sending SAMPLE_ACK message with sequence 0x%x ")
+               ACE_TEXT("%C sending SAMPLE_ACK message with sequence %q ")
                ACE_TEXT("to publication %C.\n"),
                std::string(subscriptionBuffer).c_str(),
-               sequence,
+               sequence.getValue(),
                std::string(publicationBuffer).c_str()));
   }
 

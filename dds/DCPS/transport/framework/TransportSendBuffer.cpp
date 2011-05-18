@@ -120,7 +120,7 @@ TransportSendBuffer::insert(SequenceNumber sequence, const buffer_type& value)
     if ( OpenDDS::DCPS::Transport_debug_level >= 10) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) TransportSendBuffer::insert() - ")
-        ACE_TEXT("aging off PDU: 0x%x as buffer(0x%x,0x%x)\n"),
+        ACE_TEXT("aging off PDU: %q as buffer(%q,%q)\n"),
         it->first.getValue(),
         it->second.first, it->second.second
       ));

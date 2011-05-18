@@ -214,9 +214,9 @@ namespace {
       }
     }
     {
-      Function is_bounded("gen_max_marshaled_size", "size_t");
-      is_bounded.addArg("seq", "const " + cxx + "&");
-      is_bounded.endArgs();
+      Function max_marsh("gen_max_marshaled_size", "size_t");
+      max_marsh.addArg("seq", "const " + cxx + "&");
+      max_marsh.endArgs();
       std::ostringstream expr;
       string intro;
       if (elem_cls & CL_ENUM) {
@@ -425,9 +425,9 @@ namespace {
       n_elems *= arr->dims()[i]->ev()->u.ulval;
     }
     {
-      Function is_bounded("gen_max_marshaled_size", "size_t");
-      is_bounded.addArg("arr", "const " + cxx + "_forany&");
-      is_bounded.endArgs();
+      Function max_marsh("gen_max_marshaled_size", "size_t");
+      max_marsh.addArg("arr", "const " + cxx + "_forany&");
+      max_marsh.endArgs();
       std::ostringstream expr;
       string intro;
       if (elem_cls & CL_ENUM) {
@@ -563,6 +563,102 @@ namespace {
     }
     return cxx_fld + "_forany " + prefix + '_' + local + "(const_cast<"
       + cxx_fld + "_slice*>(" + prefix + "." + fname + "));";
+  }
+
+  // This function looks through the fields of a struct for the key
+  // specified and returns the AST_Type associated with that key.
+  // Because the key name can contain indexed arrays and nested 
+  // structures, things can get interesting.
+  AST_Type* find_type(const std::vector<AST_Field*>& fields, 
+                      string key)
+  {
+    string key_base = key;   // the field we are looking for here
+    string key_rem;          // the sub-field we will look for recursively
+    bool is_array = false;
+    size_t pos = key.find_first_of(".[");
+    if (pos != std::string::npos) {
+      key_base = key.substr(0, pos);
+      if (key[pos] == '[') {
+        is_array = true;
+        size_t l_brack = key.find("]");
+        if (l_brack == std::string::npos) {
+          throw std::string("Missing right bracket");
+        } else if (l_brack != key.length()) {
+          key_rem = key.substr(l_brack+1);
+        }
+      } else {
+        key_rem = key.substr(pos+1);
+      }
+    }
+    for (size_t i = 0; i < fields.size(); ++i) {
+      string field_name = fields[i]->local_name()->get_string();
+      if (field_name == key_base) {
+        AST_Type* field_type = fields[i]->field_type();
+        if (!is_array && key_rem == "") {
+          // The requested key field matches this one.  We do not allow
+          // arrays (must be indexed specifically) or structs (must
+          // identify specific sub-fields).
+          AST_Structure* sub_struct = dynamic_cast<AST_Structure*>(field_type);
+          if (sub_struct != 0) {
+            throw std::string("Structs not allowed as keys");
+          }
+          AST_Typedef* typedef_node = dynamic_cast<AST_Typedef*>(field_type);
+          if (typedef_node != 0) {
+            AST_Array* array_node = 
+              dynamic_cast<AST_Array*>(typedef_node->base_type());
+            if (array_node != 0) {
+              throw std::string("Arrays not allowed as keys");
+            }
+          }
+          return field_type;
+        } else if (is_array) {
+          // must be a typedef of an array
+          AST_Typedef* typedef_node = dynamic_cast<AST_Typedef*>(field_type);
+          if (typedef_node == 0) {
+            throw std::string("Indexing for non-array type");
+          }
+          AST_Array* array_node = 
+            dynamic_cast<AST_Array*>(typedef_node->base_type());
+          if (array_node == 0) {
+            throw std::string("Indexing for non-array type");
+          }
+          if (array_node->n_dims() > 1) {
+            throw std::string("Only single dimension arrays allowed in keys");
+          }
+          if (key_rem == "") {
+            return array_node->base_type();
+          } else {
+            // This must be a struct...
+            if ((key_rem[0] != '.') || (key_rem.length() == 1)) {
+              throw std::string("Unexpected characters after array index");
+            } else {
+              // Set up key_rem and field_type and let things fall into
+              // the struct code below
+              key_rem = key_rem.substr(1);
+              field_type = array_node->base_type();
+            }
+          }
+        }
+        
+        // nested structures
+        AST_Structure* sub_struct = dynamic_cast<AST_Structure*>(field_type);
+        if (sub_struct == 0) {
+          throw std::string("Expected structure field for ") + key_base;
+        }
+        size_t nfields = sub_struct->nfields();
+        std::vector<AST_Field*> sub_fields;
+        sub_fields.reserve(nfields);
+
+        for (unsigned long i = 0; i < nfields; ++i) {
+          AST_Field** f;
+          sub_struct->field(f, i);
+          sub_fields.push_back(*f);
+        }
+        // find type of nested struct field
+        return find_type(sub_fields, key_rem);
+      }
+    }
+    throw std::string("Field not found.");
   }
 }
 
@@ -772,6 +868,171 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     }
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
+
+  // Generate key-related marshaling code
+  IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
+  // Only generate if this is a DCPS type
+  if (info != 0) {
+    bool bounded_key = true;
+    {
+      Function is_bounded("gen_is_bounded_size", "bool");
+      is_bounded.addArg("stru", "KeyOnly<const " + cxx + ">");
+      is_bounded.endArgs();
+
+      
+      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+        AST_Type* field_type = 0;
+        try {
+          field_type = find_type(fields, key_name);
+        } catch (const std::string& error) {
+          std::cerr << "ERROR: Invalid key specification for " << cxx 
+                    << " (" << key_name << "). " << error << std::endl;
+          return false;
+        }
+        unTypeDef(field_type);
+        Classification fld_cls = classify(field_type);
+        if ((fld_cls & CL_STRING) ||
+            (fld_cls & CL_WIDE)) {
+          // Currently, the only key types that can make the marshaled
+          // key by unbounded are strings and wstrings.
+          bounded_key = false;
+        }
+      }
+
+      if (bounded_key) {
+        be_global->impl_ << "  return true;\n";
+      } else {
+        be_global->impl_ << "  return false;\n";
+      }
+    }
+
+    {
+      Function max_marsh("gen_max_marshaled_size", "size_t");
+      max_marsh.addArg("stru", "KeyOnly<const " + cxx + ">");
+      max_marsh.endArgs();
+
+      bool first = true;
+      std::ostringstream expr;
+      string intro;
+      if (bounded_key) {  // Only generate a size if the key is bounded
+        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+          string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+          AST_Type* field_type = 0;
+          try {
+            field_type = find_type(fields, key_name);
+          } catch (const std::string& error) {
+            std::cerr << "ERROR: Invalid key specification for " << cxx 
+                      << " (" << key_name << "). " << error << std::endl;
+            return false;
+          }
+          if (first) first = false;
+          else       expr << "\n    + ";
+          unTypeDef(field_type);
+          Classification fld_cls = classify(field_type);
+          if (fld_cls & CL_ENUM) {
+            expr << "max_marshaled_size_ulong()";
+          } else if (fld_cls & CL_STRING) {
+            AST_String* str = AST_String::narrow_from_decl(field_type);
+            expr << "max_marshaled_size_ulong()";
+            if (fld_cls & CL_BOUNDED) {
+              expr << " + " << str->max_size()->ev()->u.ulval;
+            }
+          } else if (fld_cls == CL_UNKNOWN) {
+            expr << "0"; // warning will be issued for the serialize functions
+          } else { // predefined, sequence, struct, union, array
+            string fieldref = string("stru.t.");
+            expr << "gen_max_marshaled_size("
+                 << getWrapper(fieldref + key_name, field_type, WD_OUTPUT) << ")";
+          }
+        }
+      }
+      if (first) expr << "0";  // No key, size = 0
+      be_global->impl_ << intro << "  return " << expr.str() << ";\n";
+    }
+
+    {
+      Function find_size("gen_find_size", "size_t");
+      find_size.addArg("stru", "KeyOnly<const " + cxx + ">");
+      find_size.endArgs();
+      string expr, intro;
+      bool first = true;
+      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+        AST_Type* field_type = 0;
+        try {
+          field_type = find_type(fields, key_name);
+        } catch (const std::string& error) {
+          std::cerr << "ERROR: Invalid key specification for " << cxx 
+                    << " (" << key_name << "). " << error << std::endl;
+          return false;
+        }
+        if (first) first = false;
+        else       expr += "\n    + ";
+        expr += findSizeCommon(key_name, field_type, "stru.t", intro);
+      }
+      if (first) expr += "0";  // No key, size = 0
+      be_global->impl_ << intro << "  return " << expr << ";\n";
+    }
+
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("stru", "KeyOnly<const " + cxx + ">");
+      insertion.endArgs();
+
+      bool first = true;
+      string expr, intro;
+      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+        AST_Type* field_type = 0;
+        try {
+          field_type = find_type(fields, key_name);
+        } catch (const std::string& error) {
+          std::cerr << "ERROR: Invalid key specification for " << cxx 
+                    << " (" << key_name << "). " << error << std::endl;
+          return false;
+        }
+        if (first) first = false;
+        else       expr += "\n    && ";
+        expr += streamCommon(key_name, field_type, "<< stru.t", intro);
+      }
+      if (first) be_global->impl_ << intro << "  return true;\n";
+      else be_global->impl_ << intro << "  return " << expr << ";\n";
+    }
+
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("stru", "KeyOnly<" + cxx + ">");
+      extraction.endArgs();
+
+      bool first = true;
+      string expr, intro;
+      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+        AST_Type* field_type = 0;
+        try {
+          field_type = find_type(fields, key_name);
+        } catch (const std::string& error) {
+          std::cerr << "ERROR: Invalid key specification for " << cxx 
+                    << " (" << key_name << "). " << error << std::endl;
+          return false;
+        }
+        if (first) first = false;
+        else       expr += "\n    && ";
+        expr += streamCommon(key_name, field_type, ">> stru.t", intro);
+      }
+      if (first) be_global->impl_ << intro << "  return true;\n";
+      else be_global->impl_ << intro << "  return " << expr << ";\n";
+    }
+  }
+
   return true;
 }
 
@@ -931,16 +1192,16 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
     be_global->impl_ << "  return false;\n";
   }
   {
-    Function is_bounded("gen_max_marshaled_size", "size_t");
-    is_bounded.addArg("", "const " + cxx + "&");
-    is_bounded.endArgs();
+    Function max_marsh("gen_max_marshaled_size", "size_t");
+    max_marsh.addArg("", "const " + cxx + "&");
+    max_marsh.endArgs();
     be_global->impl_ << "  return 100000; /* from TAO_IDL_BE */\n";
   }
   const string wrap_out = getWrapper("uni._d()", discriminator, WD_OUTPUT);
   {
-    Function is_bounded("gen_find_size", "size_t");
-    is_bounded.addArg("uni", "const " + cxx + "&");
-    is_bounded.endArgs();
+    Function find_size("gen_find_size", "size_t");
+    find_size.addArg("uni", "const " + cxx + "&");
+    find_size.endArgs();
     be_global->impl_ <<
       "  size_t result = gen_max_marshaled_size(" << wrap_out << ");\n"
       "  switch (uni._d()) {\n";

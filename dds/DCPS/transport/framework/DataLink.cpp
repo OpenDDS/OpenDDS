@@ -586,7 +586,7 @@ OpenDDS::DCPS::DataLink::create_control(char submessage_id,
                                           this->mb_allocator_),
                         0);
 
-  message << header;
+  *message << header;
 
   return message;
 }

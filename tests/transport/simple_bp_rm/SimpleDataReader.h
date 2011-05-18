@@ -32,7 +32,7 @@ class SimpleDataReader : public OpenDDS::DCPS::TransportReceiveListener
     OpenDDS::DCPS::RepoId sub_id_;
     int num_messages_expected_;
     int num_messages_received_;
-    int sequence_;
+    OpenDDS::DCPS::SequenceNumber sequence_;
 };
 
 #endif  /* SIMPLEDATAREADER_H */

@@ -14,7 +14,7 @@ SimpleDataReader::SimpleDataReader()
   : sub_id_ (OpenDDS::DCPS::GuidBuilder::create ()),
     num_messages_expected_(0),
     num_messages_received_(0),
-    sequence_(0)
+    sequence_()
 {
 }
 
@@ -81,5 +81,5 @@ SimpleDataReader::transport_lost()
 int
 SimpleDataReader::received_test_message() const
 {
-  return this->sequence_ ;
+  return this->sequence_.getValue();
 }

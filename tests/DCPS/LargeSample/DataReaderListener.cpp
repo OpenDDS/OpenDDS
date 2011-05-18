@@ -60,6 +60,11 @@ throw(CORBA::SystemException)
                   << "         text       = " << message.text.in()    << std::endl
                   << "         data.length  = " << message.data.length() << std::endl;
 
+        for (CORBA::ULong i = 0; i < message.data.length(); ++i) {
+          if (message.data[i] != i % 256) {
+            std::cout << "ERROR: Bad data at " << i << std::endl;
+          }
+        }
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
 

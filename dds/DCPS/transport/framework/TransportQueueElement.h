@@ -14,12 +14,17 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "ace/Synch.h"
 
+#include <utility>
+
 class ACE_Message_Block;
 
 namespace OpenDDS {
 namespace DCPS {
 
 struct DataSampleListElement;
+
+class TransportQueueElement;
+typedef std::pair<TransportQueueElement*, TransportQueueElement*> ElementPair;
 
 /**
  * @class TransportQueueElement
@@ -83,13 +88,25 @@ public:
                                   DataBlockAllocator* db_allocator);
 
   /// Is the sample created by the transport?
-  virtual bool owned_by_transport () = 0;
+  virtual bool owned_by_transport() = 0;
+
+  /// Create two TransportQueueElements representing the same data payload
+  /// as the current TransportQueueElement, with the first one (including its
+  /// DataSampleHeader) fitting in "size" bytes.  This method leaves the
+  /// current TransportQueueElement alone (but can't be made const because
+  /// the newly-created elements will need to invoke non-const methods on it).
+  /// Each element in the pair will contain its own serialized modified
+  /// DataSampleHeader.
+  ElementPair fragment(size_t size);
+
+  /// Is this QueueElement the result of fragmentation?
+  virtual bool is_fragment() const { return false; }
 
 protected:
 
   /// Ctor.  The initial_count is the number of DataLinks to which
   /// this TransportQueueElement will be sent.
-  TransportQueueElement(int initial_count);
+  explicit TransportQueueElement(int initial_count);
 
   /// Invoked when the counter reaches 0.
   virtual void release_element(bool dropped_by_transport) = 0;

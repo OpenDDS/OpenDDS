@@ -30,8 +30,6 @@ class OpenDDS_Dcps_Export DisjointSequence {
 public:
   typedef std::set<SequenceRange, SequenceRange_LessThan> RangeSet;
 
-  static const size_t MAX_DEPTH;
-
   explicit DisjointSequence(SequenceNumber value = SequenceNumber());
 
   SequenceNumber low() const;
@@ -50,7 +48,8 @@ public:
   // be moved to just prior to the next missing Sequence
   // Number).  lowest_valid will return true if invalid
   // values have been dropped.
-  bool lowest_valid(SequenceNumber value);
+  bool lowest_valid(SequenceNumber value,
+                    std::vector<SequenceRange>* dropped = 0);
 
   // add the value or range of values to the set of seen
   // values
@@ -64,7 +63,6 @@ public:
 
 private:
   void validate(const SequenceRange& range) const;
-  SequenceNumber previous_sequence_number(SequenceNumber value) const;
 
   RangeSet sequences_;
 };
