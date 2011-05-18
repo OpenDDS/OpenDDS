@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmi:id="_BD-5cKGNEd-D-tWBUFz8zw" name="NonDefaultPolicyLibTest">
+  <libs xsi:type="opendds:PolicyLib" xmi:id="_U54321GNEd-D-nAsONlpcwOw" name="NonDefaultPolicyLibTest">
+    <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_VizHAKGNEd-D-tWBUFz8zw" name="deadlineQosPolicyNonDefaultTest">
+      <period xmi:id="_cGnWILeCEd-nAsONlpcwOw" nanosecond="1000" second="1"/>
+    </policies>
+    <policies xsi:type="opendds:destinationOrderQosPolicy" xmi:id="_cOcfoKGNEd-D-tWBUFz8zw" name="destinationOrderQosPolicyNonDefaultTest" kind="BY_RECEPTION_TIMESTAMP"/>
+    <policies xsi:type="opendds:dsQosPolicy" xmi:id="_aC4nAKGNEd-D-tWBUFz8zw" name="dsQosPolicyNonDefaultTest" history_depth="10" history_kind="KEEP_LAST" max_instances="2" max_samples="4" max_samples_per_instance="8">
+      <service_cleanup_delay xmi:id="_drqoYLeCEd-nAsONlpcwOw" nanosecond="1000" second="1"/>
+    </policies>
+    <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_bS-V4KGNEd-D-tWBUFz8zw" name="durabilityQosPolicyNonDefaultTest" kind="PERSISTENT"/>
+    <policies xsi:type="opendds:efQosPolicy" xmi:id="_U5UFIKGNEd-D-tWBUFz8zw" name="efQosPolicyNonDefaultTest" autoenable_created_entities="false"/>
+    <policies xsi:type="opendds:gdQosPolicy" xmi:id="_TCOAoKGNEd-D-tWBUFz8zw" name="gdQosPolicyNonDefaultTest" datavalue="test"/>
+    <policies xsi:type="opendds:historyQosPolicy" xmi:id="_LopLAKGNEd-D-tWBUFz8zw" name="historyQosPolicyNonDefaultTest" depth="2" kind="KEEP_ALL"/>
+    <policies xsi:type="opendds:lbQosPolicy" xmi:id="_RIxywKGNEd-D-tWBUFz8zw" name="lbQosPolicyNonDefaultTest">
+      <duration xmi:id="_fvln8LeCEd-nAsONlpcwOw" nanosecond="1000" second="1"/>
+    </policies>
+    <policies xsi:type="opendds:lifespanQosPolicy" xmi:id="_MiaroKGNEd-D-tWBUFz8zw" name="lifespanQosPolicyNonDefaultTest">
+      <duration xmi:id="_hBVjsLeCEd-nAsONlpcwOw" nanosecond="1000" second="1"/>
+    </policies>
+    <policies xsi:type="opendds:livelinessQosPolicy" xmi:id="_aqZS8KGNEd-D-tWBUFz8zw" name="livelinessQosPolicyNonDefaultTest" kind="MANUAL_BY_TOPIC">
+      <lease_duration xmi:id="_lssfkLeCEd-nAsONlpcwOw" nanosecond="1000" second="1"/>
+    </policies>
+    <policies xsi:type="opendds:osQosPolicy" xmi:id="_Ng_MsKGNEd-D-tWBUFz8zw" name="osQosPolicyNonDefaultTest" value="10"/>
+    <policies xsi:type="opendds:ownershipQosPolicy" xmi:id="_ND62MKGNEd-D-tWBUFz8zw" name="ownershipQosPolicyNonDefaultTest" kind="EXCLUSIVE"/>
+    <policies xsi:type="opendds:partitionQosPolicy" xmi:id="_XinpsKGNEd-D-tWBUFz8zw" name="partitionQosPolicyNonDefaultTest">
+      <names>fred</names>
+      <names>wilma</names>
+    </policies>
+    <policies xsi:type="opendds:presentationQosPolicy" xmi:id="_W7gmYKGNEd-D-tWBUFz8zw" name="presentationQosPolicyNonDefaultTest" access_scope="GROUP" coherent_access="true" ordered_access="true"/>
+    <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_ZPGwwBHHEeCmp_ILxDaakg" name="rdlQosPolicyNonDefaultTest">
+      <autopurge_nowriter_samples_delay xmi:id="_eW3UwBHHEeCmp_ILxDaakg" nanosecond="1000" second="1"/>
+      <autopurge_disposed_samples_delay xmi:id="_qTA9sBHHEeCmp_ILxDaakg" nanosecond="1000" second="1"/>
+    </policies>
+    <policies xsi:type="opendds:reliabilityQosPolicy" xmi:id="_ZA2iQKGNEd-D-tWBUFz8zw" name="reliabilityQosPolicyNonDefaultTest" kind="RELIABLE">
+      <max_blocking_time xmi:id="_i49zsLeCEd-nAsONlpcwOw" nanosecond="1000" second="1"/>
+    </policies>
+    <policies xsi:type="opendds:rlQosPolicy" xmi:id="_WEYxIKGNEd-D-tWBUFz8zw" name="rlQosPolicyNonDefaultTest" max_instances="2" max_samples="4" max_samples_per_instance="8"/>
+    <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_uYaFwBHHEeCmp_ILxDaakg" name="tbfQosPolicyNonDefaultTest">
+      <minimum_separation xmi:id="_xW6eQBHHEeCmp_ILxDaakg" nanosecond="1000" second="1"/>
+    </policies>
+    <policies xsi:type="opendds:tdQosPolicy" xmi:id="_QkbIgKGNEd-D-tWBUFz8zw" name="tdQosPolicyNonDefaultTest" value="test"/>
+    <policies xsi:type="opendds:tpQosPolicy" xmi:id="_UCLo0KGNEd-D-tWBUFz8zw" name="tpQosPolicyNonDefaultTest" value="0"/>
+    <policies xsi:type="opendds:udQosPolicy" xmi:id="_Pw72EKGNEd-D-tWBUFz8zw" name="udQosPolicyNonDefaultTest"/>
+    <policies xsi:type="opendds:wdlQosPolicy" xmi:id="_OEdGIKGNEd-D-tWBUFz8zw" name="wdlQosPolicyNonDefaultTest" autodispose_unregistered_instances="true"/>
+  </libs>
+</opendds:OpenDDSModel>

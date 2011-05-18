@@ -1,0 +1,214 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef RTPS_RTPSBASEMESSAGETYPES_IDL
+#define RTPS_RTPSBASEMESSAGETYPES_IDL
+
+#include "../../DdsDcpsGuid.idl"
+#include "../../DdsDcpsInfrastructure.idl"
+
+module OpenDDS {
+  module RTPS {
+
+    typedef DCPS::GuidPrefix_t GuidPrefix_t;
+    typedef DCPS::EntityId_t EntityId;
+    typedef DCPS::GUID_t GUID_t;
+
+    typedef DCPS::GUIDSeq GUIDSeq;
+
+    typedef DDS::OctetSeq OctetSeq;
+
+    /* Type used to hold a timestamp. */
+    struct Time_t {
+      long seconds;
+      unsigned long fraction;
+    };
+    typedef Time_t Timestamp_t;
+
+    typedef octet VIDOctetArray[2];
+
+    /* Type used to represent the vendor of the service implementing the RTPS protocol. */
+    struct VendorId_t {
+      VIDOctetArray vendorId;
+    };
+
+    /* Type used to hold sequence numbers. */
+    struct SequenceNumber_t {
+      long high;
+      unsigned long low;
+    };
+
+    typedef sequence<long, 8> SNSLongSeq;
+
+    /* SequenceNumberSet SubmessageElements are used as parts of several messages to
+       provide binary information about individual sequence numbers within a range. */
+    /* ***ATTENTION***: requires custom de/serializer */
+    struct SequenceNumberSet {
+      SequenceNumber_t bitmapBase;
+      SNSLongSeq bitmap;
+    };
+
+    /* Type used to hold fragment numbers. */
+    struct FragmentNumber_t {
+      unsigned long value;
+    };
+
+    typedef sequence<long, 8> FNSLongSeq;
+
+    /* FragmentNumberSet SubmessageElements are used to provide binary information
+       about individual fragment numbers within a range. */
+    /* ***ATTENTION***: requires custom de/serializer */
+    struct FragmentNumberSet {
+      FragmentNumber_t bitmapBase;
+      FNSLongSeq bitmap;
+    };
+
+    typedef octet LOctetArray[16];
+
+    /* Type used to represent the addressing information needed to send a message
+       to an RTPS Endpoint */
+    struct Locator_t {
+      long kind;
+      unsigned long _port;
+      LOctetArray address;
+    };
+
+    /* LocatorList is used to specify a list of locators. */
+    typedef sequence<Locator_t, 8> LocatorList;
+
+    /* Specialization of Locator_t used to hold UDP IPv4 locators using a more
+       compact representation. */
+    struct LocatorUDPv4_t {
+      unsigned long address;
+      unsigned long _port;
+    };
+
+    /* Enumeration used to distinguish whether a Topic has defined some fields
+       within to be used as the ‘key’ that identifies data-instances within the
+       Topic. */
+    struct TopicKind_t {
+      long value;
+    };
+
+    /* Enumeration used to indicate the level of the reliability used for
+       communications. */
+    struct ReliabilityKind_t {
+      long value;
+    };
+
+    /* Type used to encapsulate a count that is incremented monotonically, used
+       to identify message duplicates. */
+    struct Count_t {
+      long value;
+    };
+
+    /* Identifies the version of the RTPS protocol. */
+    struct ProtocolVersion_t {
+      octet major;
+      octet minor;
+    };
+
+    typedef octet KHOctetArray[16];
+    struct KeyHash_t {
+      KHOctetArray value;
+    };
+
+    typedef octet SIOctetArray[4];
+    struct StatusInfo_t {
+      SIOctetArray value;
+    };
+
+    /* Type used to uniquely identify a parameter in a parameter list. */
+    struct ParameterId_t {
+      short value;
+    };
+
+    typedef string<256> CFPBoundedString;
+    typedef sequence<string> CFPStringSeq;
+
+    /* information to enable content filtering */
+    struct ContentFilterProperty_t {
+      CFPBoundedString contentFilteredTopicName;
+      CFPBoundedString relatedTopicName;
+      CFPBoundedString filterClassName;
+      string filterExpression;
+      CFPStringSeq expressionParameters;
+    };
+
+    /* For each filter signature, the results indicate whether the
+       sample passed the filter. */
+    typedef sequence<long> FilterResult_t;
+
+    /* A list of filters that were applied to the sample. */
+    typedef long FilterSignature_t[4];
+
+    typedef sequence<FilterSignature_t> CFIFilterSignatureSeq;
+
+    struct ContentFilterInfo_t {
+      FilterResult_t filterResult;
+      CFIFilterSignatureSeq filterSignatures;
+    };
+
+    struct Property_t {
+      string name;
+      string value;
+    };
+
+    struct EntityName_t {
+      string name;
+    };
+
+    /* requires custom de/marshalling */
+    struct Parameter {
+      ParameterId_t parameterId;
+      OctetSeq value;
+    };
+
+    /* contains a list of Parameters, terminated with a sentinel */
+    typedef sequence<Parameter> ParameterList;
+
+    struct OriginalWriterInfo_t {
+      GUID_t originalWriterGUID;
+      SequenceNumber_t originalWriterSN;
+      ParameterList originalWriterQos;
+    };
+
+    typedef unsigned long BuiltinEndpointSet_t;
+
+    /* ***ATTENTION***: Not sure how best to represent SerializedPayload */
+    typedef OctetSeq SerializedPayload_t;
+
+    const long LOCATOR_KIND_INVALID = -1;
+    const unsigned long LOCATOR_PORT_INVALID = 0;
+    const long LOCATOR_KIND_RESERVED = 0;
+    const long LOCATOR_KIND_UDPv4 = 1;
+    const long LOCATOR_KIND_UDPv6  = 2;
+
+    const short NO_KEY = 1;
+    const short WITH_KEY = 2;
+
+    const short BEST_EFFORT = 1;
+    const short RELIABLE = 3;
+
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER = 0x00000001 << 0;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR = 0x00000001 << 1;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER = 0x00000001 << 2;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR = 0x00000001 << 3;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER = 0x00000001 << 4;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR = 0x00000001 << 5;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_ANNOUNCER = 0x00000001 << 6;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_DETECTOR = 0x00000001 << 7;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_ANNOUNCER = 0x00000001 << 8;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_DETECTOR = 0x00000001 << 9;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER = 0x00000001 << 10;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER = 0x00000001 << 11;
+
+  };
+};
+
+#endif /* RTPS_RTPSBASEMESSAGETYPES_IDL */

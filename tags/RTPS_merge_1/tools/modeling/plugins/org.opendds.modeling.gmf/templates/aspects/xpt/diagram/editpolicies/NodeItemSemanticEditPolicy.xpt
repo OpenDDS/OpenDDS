@@ -1,0 +1,29 @@
+«AROUND addDestroyChildNodesCommand FOR gmfgen::GenNode-»
+
+	«EXPAND xpt::Common::generatedMemberComment»
+	private void addDestroyChildNodesCommand(org.eclipse.gmf.runtime.common.core.command.ICompositeCommand cmd) {
+		org.eclipse.gmf.runtime.notation.View view = (org.eclipse.gmf.runtime.notation.View) getHost().getModel();
+		for (java.util.Iterator nit = view.getChildren().iterator(); nit.hasNext();) {
+			org.eclipse.gmf.runtime.notation.Node node = (org.eclipse.gmf.runtime.notation.Node) nit.next();
+			switch («EXPAND xpt::editor::VisualIDRegistry::getVisualIDMethodCall FOR getDiagram()»(node)) {
+			«EXPAND xpt::diagram::editpolicies::NodeItemSemanticEditPolicy::destroyChildNodes('node', self) FOREACH childNodes-»
+			«IF compartments->notEmpty()»«FOREACH compartments AS compartment-»
+			«EXPAND xpt::Common::caseVisualID FOR compartment»
+				for (java.util.Iterator cit = node.getChildren().iterator(); cit.hasNext();) {
+					org.eclipse.gmf.runtime.notation.Node cnode = (org.eclipse.gmf.runtime.notation.Node) cit.next();
+					// For the OpenDDS Modeling SDK, elements behind compartment children may not necessarily be in the same
+					// library as the element behind the compartment's parent (e.g. a DataReader's shared policies).
+					// In this case avoid destroying the child.
+					if (! org.opendds.modeling.common.gmf.OpenDDSLibHelper.areElementsInSameLib(view.getElement(), cnode.getElement())) {
+						break;
+					}
+					switch («EXPAND xpt::editor::VisualIDRegistry::getVisualIDMethodCall FOR getDiagram()»(cnode)) {
+					«EXPAND xpt::diagram::editpolicies::NodeItemSemanticEditPolicy::destroyChildNodes('cnode', self) FOREACH compartment.childNodes-»
+					}
+				}
+				break;
+			«ENDFOREACH»«ENDIF-»
+			}
+		}
+	}
+«ENDAROUND»
