@@ -164,11 +164,13 @@ private:
    *
    * @param instance_data The data to serialize.
    * @param for_write If 1 use the fast allocator; otherwise use the heap.
+   * @param marshaling_type Enumerated type specifying whether to marshal
+   *        just the keys or the entire message.
    * @return returns the serialized data.
    */
   ACE_Message_Block* dds_marshal(
     const ::<%SCOPED%>& instance_data,
-    int  for_write = 1);
+    OpenDDS::DCPS::MarshalingType marshaling_type);
 
   /**
    * Find the instance handle for the given instance_data using
@@ -182,6 +184,7 @@ private:
 
    InstanceMap  instance_map_;
    size_t       marshaled_size_;
+   size_t       key_marshaled_size_;
    // The lock pool will be thread safe because
    // only one write call is allowed at a time.
    DataBlockLockPool*  db_lock_pool_;
@@ -382,7 +385,8 @@ public:
     virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
                                OpenDDS::DCPS::SubscriptionInstance*& instance,
                                bool & just_registered,
-                               bool & filtered);
+                               bool & filtered,
+                               OpenDDS::DCPS::MarshalingType marshaling_type);
 
     virtual void dispose(const OpenDDS::DCPS::ReceivedDataSample& sample,
                          OpenDDS::DCPS::SubscriptionInstance*& instance);

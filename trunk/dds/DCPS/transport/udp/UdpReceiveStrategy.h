@@ -40,8 +40,11 @@ protected:
   virtual int start_i();
   virtual void stop_i();
 
+  virtual bool check_header(const TransportHeader& header);
+
 private:
   UdpDataLink* link_;
+  SequenceNumber last_received_;
 };
 
 } // namespace DCPS

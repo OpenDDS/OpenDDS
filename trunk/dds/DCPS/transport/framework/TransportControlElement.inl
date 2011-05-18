@@ -20,7 +20,7 @@ ACE_INLINE
 void
 OpenDDS::DCPS::TransportControlElement::data_delivered()
 {
-  DBG_ENTRY_LVL("TransportSendControlElement","data_delivered",6);
+  DBG_ENTRY_LVL("TransportControlElement","data_delivered",6);
 }
 
 ACE_INLINE

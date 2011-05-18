@@ -1,3 +1,15 @@
+Wed May 18 21:32:29 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged the branch "RTPS", which includes the start of the DDS
+          Interoperability specification (OMG formal/2010-11-01).  This
+          is not yet a complete implementation, but it contains changes
+          that impact the existing OpenDDS transport protocol, including
+          64-bit sequence numbers, support for fragmentation and
+          reassembly in UDP-based transports, and the ability to marshal
+          only the key fields for registration/unregistration/disposal
+          messages.  For full details of the changes see the branch-specific
+          change log at docs/history/ChangeLog-RTPS-1.
+
 Wed May 18 20:27:01 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/ZeroCopySeq_T.cpp:

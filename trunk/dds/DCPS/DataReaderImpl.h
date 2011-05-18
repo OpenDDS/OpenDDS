@@ -67,6 +67,11 @@ enum Coherent_State {
   REJECTED
 };
 
+enum MarshalingType {
+  FULL_MARSHALING,
+  KEY_ONLY_MARSHALING
+};
+
 /// Keeps track of a DataWriter's liveliness for a DataReader.
 class OpenDDS_Dcps_Export WriterInfo {
   friend class DataReaderImpl;
@@ -443,7 +448,8 @@ public:
   virtual void dds_demarshal(const ReceivedDataSample& sample,
                              SubscriptionInstance*& instance,
                              bool & is_new_instance,
-                             bool & filtered)= 0;
+                             bool & filtered,
+                             MarshalingType marshaling_type)= 0;
   virtual void dispose(const ReceivedDataSample& sample,
                        SubscriptionInstance*& instance);
   virtual void unregister(const ReceivedDataSample& sample,
@@ -661,7 +667,7 @@ private:
   /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
   bool send_sample_ack(
     const RepoId& publication,
-    SequenceNumber::Value sequence,
+    SequenceNumber sequence,
     DDS::Time_t when);
 
   void notify_subscription_lost(const DDS::InstanceHandleSeq& handles);

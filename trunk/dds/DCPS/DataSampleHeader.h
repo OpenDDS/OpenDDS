@@ -52,7 +52,7 @@ enum DataSampleHeaderFlag {
   GROUP_COHERENT_FLAG,
   CONTENT_FILTER_FLAG,
   SEQUENCE_REPAIR_FLAG,
-  RESERVED_4_FLAG
+  MORE_FRAGMENTS_FLAG
 };
 
 /// The header message of a data sample.
@@ -94,8 +94,8 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// were filtered-out and are not missing.
   bool sequence_repair_ : 1;
 
-  /// reserved bit
-  bool reserved_4 : 1;
+  /// The current "Data Sample" needs reassembly before further processing.
+  bool more_fragments_ : 1;
 
   /// The size of the data sample (without header).  After this header is
   /// demarshaled, the transport expects to see this many bytes in the stream
@@ -105,7 +105,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// The sequence number is obtained from the Publisher
   /// associated with the DataWriter based on the PRESENTATION
   /// requirement for the sequence value (access_scope == GROUP).
-  SequenceNumber::Value sequence_;
+  SequenceNumber sequence_;
 
   //{@
   /// The SOURCE_TIMESTAMP field is generated from the DataWriter
@@ -163,19 +163,26 @@ struct OpenDDS_Dcps_Export DataSampleHeader {
   /// new optional header part.  "guids" may be null, same serialization as 0.
   static void add_cfentries(const GUIDSeq* guids, ACE_Message_Block* mb);
 
+  /// Create two new serialized headers (owned by caller), the "head" having at
+  /// most "size" bytes (header + data) and the "tail" having the rest.
+  /// Precondition: size must be larger than the max_marshaled_size().
+  static void split(const ACE_Message_Block& orig, size_t size,
+                    ACE_Message_Block*& head, ACE_Message_Block*& tail);
+
+  /// If "first" and "second" are two fragments of the same original message
+  /// (as created by split()), return true and set up the "result" header to
+  /// match the original header.  Joining the data payload is the
+  /// responsibility of the caller (manipulate the continuation chain).
+  static bool join(const DataSampleHeader& first,
+                   const DataSampleHeader& second, DataSampleHeader& result);
+
   DataSampleHeader();
 
-  //{@
   /// Construct with values extracted from a buffer.
-  explicit DataSampleHeader(ACE_Message_Block* buffer);
   explicit DataSampleHeader(ACE_Message_Block& buffer);
-  //@}
 
-  //{@
   /// Assignment from an ACE_Message_Block.
-  DataSampleHeader& operator=(ACE_Message_Block* buffer);
   DataSampleHeader& operator=(ACE_Message_Block& buffer);
-  //@}
 
   /// Amount of data read when initializing from a buffer.
   size_t marshaled_size() const;
@@ -193,8 +200,7 @@ private:
 
 /// Marshal/Insertion into a buffer.
 OpenDDS_Dcps_Export
-ACE_CDR::Boolean
-operator<<(ACE_Message_Block*&, DataSampleHeader& value);
+bool operator<<(ACE_Message_Block&, const DataSampleHeader& value);
 
 /// Message Id enumarion insertion onto an ostream.
 OpenDDS_Dcps_Export

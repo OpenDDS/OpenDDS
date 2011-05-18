@@ -12,6 +12,7 @@
 #include "Cached_Allocator_With_Overflow_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DCPS/Serializer.h"
 #include "ace/Message_Block.h"
 #include "ace/Global_Macros.h"
 
@@ -51,13 +52,12 @@ namespace DCPS {
 typedef ACE_UINT16 CoherencyGroup;
 typedef RepoId PublicationId;
 
-/// Lolipop sequencing (never wrap to negative).
-/// This helps distinguish new and old sequence numbers. (?)
+/// Sequence number abstraction.  Only allows positive 64 bit values.
 class OpenDDS_Dcps_Export SequenceNumber {
 public:
-  typedef ACE_INT32 Value;
+  typedef ACE_INT64 Value;
   /// Construct with a value, default to negative starting point.
-  SequenceNumber(ACE_INT64 value = MIN_VALUE) {
+  SequenceNumber(Value value = MIN_VALUE) {
     setValue(value);
   }
 
@@ -65,15 +65,26 @@ public:
 
   /// Allow assignments.
   SequenceNumber& operator=(const SequenceNumber& rhs) {
-    value_ = rhs.value_;
+    high_ = rhs.high_;
+    low_  = rhs.low_;
     return *this;
   }
 
   /// Pre-increment.
   SequenceNumber& operator++() {
-    /// Lolipop sequencing (never wrap to negative).
-    if (this->value_ == MAX_VALUE) this->value_ = 0x0;
-    else                           ++this->value_;
+    if (this->low_ == ACE_UINT32_MAX) {
+      if (this->high_ == ACE_INT32_MAX) {
+        // this code is here, despite the RTPS spec statement: 
+        // "sequence numbers never wrap"
+        this->high_ = 0;
+        this->low_ = 1;
+      } else {
+        ++this->high_;
+        this->low_ = 0;
+      }
+    } else {
+      ++this->low_;
+    }
     return *this ;
   }
 
@@ -84,16 +95,34 @@ public:
     return value ;
   }
 
-  void setValue(ACE_INT64 value) {
-    if (value > MAX_VALUE) this->value_ = Value(value % (MAX_VALUE+1));
-    else                   this->value_ = Value(value);
+  SequenceNumber previous() const {
+    SequenceNumber retVal(*this);
+    if ((this->low_ == 1) && (this->high_ == 0)) {
+      retVal.high_ = ACE_INT32_MAX;
+      retVal.low_  = ACE_UINT32_MAX;
+      return retVal;
+    }
+    if (this->low_ == 0) {
+      --retVal.high_;
+      retVal.low_ = ACE_UINT32_MAX;
+    } else {
+      --retVal.low_;
+    }
+    return retVal ;
   }
 
+  void setValue(Value value) {
+    if (value < MIN_VALUE) {
+      value = MIN_VALUE;
+    }
+    this->high_ = ACE_INT32(value / LOW_BASE);
+    this->low_  = ACE_UINT32(value % LOW_BASE);
+  }
+ 
   Value getValue() const {
-    return value_;
+    return LOW_BASE * this->high_ + this->low_;
   }
 
-  /// This is the magic of the lollipop.
   /// N.B. This comparison assumes that the shortest distance between
   ///      the values being compared is the positive counting
   ///      sequence between them.  This means that MAX-2 is less
@@ -101,20 +130,22 @@ public:
   ///      MAX-2 to 2.  But that 2 is less than MAX/2 since the
   ///      shortest distance is from 2 to MAX/2.
   bool operator<(const SequenceNumber& rvalue) const {
-    // double the distance and SHRT_MAX/2, to avoid rounding error
-    const ACE_INT64 distance = (ACE_INT64(rvalue.value_) - value_)*2;
-    return (distance == 0)? false:                // Equal is not less than.
-       (value_ < 0 || rvalue.value_ < 0) ? (value_ < rvalue.value_): // Stem of lollipop.
-       (distance <  0)? (MAX_VALUE+1 < -distance): // Closest distance dominates.
-       (distance < MAX_VALUE+1);
+    const ACE_INT64 distance = ACE_INT64(rvalue.high_ - high_)*2;
+    return (distance == 0) ? 
+             (this->low_ < rvalue.low_) :   // High values equal, compare low
+             (distance < 0) ?               // Otherwise just use high
+               (ACE_INT32_MAX < -distance) :
+               (distance < ACE_INT32_MAX);
   }
 
   /// Derive a full suite of logical operations.
   bool operator==(const SequenceNumber& rvalue) const {
-    return value_ == rvalue.value_ ;
+    return (this->high_ == rvalue.high_) &&
+           (this->low_ == rvalue.low_) ;
   }
   bool operator!=(const SequenceNumber& rvalue) const {
-    return value_ != rvalue.value_ ;
+    return (this->high_ != rvalue.high_) ||
+           (this->low_ != rvalue.low_) ;
   }
   bool operator>=(const SequenceNumber& rvalue) const {
     return !(*this  < rvalue);
@@ -127,12 +158,60 @@ public:
            && (*this != rvalue);
   }
 
-  static const Value MAX_VALUE = ACE_INT32_MAX - 1;
-  static const Value MIN_VALUE = ACE_INT32_MIN;
+  ACE_INT32 getHigh() const { 
+    return high_;
+  }
+  ACE_UINT32 getLow() const {
+    return low_;
+  }
+
+  // SEQUENCENUMBER_UNKOWN is defined by the RTPS spec.
+  static SequenceNumber SEQUENCENUMBER_UNKNOWN() {
+    return SequenceNumber(-1, 0);
+  }
+
+  static const Value MAX_VALUE = ACE_INT64_MAX;
+  static const Value MIN_VALUE = 1;
+  static const Value LOW_BASE = 0x0000000100000000;
+
+  friend ACE_CDR::Boolean operator>>(Serializer& s, SequenceNumber& x);
 
 private:
-  Value value_;
+
+  // Private constructor used to force construction of SEQUENCENUMBER_UNKNOWN.
+  // Also used by operator>> to allow deserialization of the same value.
+  SequenceNumber(ACE_INT32 high, ACE_UINT32 low)
+    : high_(high), low_(low) {
+  }
+
+  //Value value_;
+  ACE_INT32  high_;
+  ACE_UINT32 low_;
 };
+
+inline ACE_CDR::Boolean 
+operator<<(Serializer& s, const SequenceNumber& x) {
+  s << x.getHigh();
+  s << x.getLow();
+  return s.good_bit();
+}
+
+inline ACE_CDR::Boolean
+operator>>(Serializer& s, SequenceNumber& x) {
+  ACE_INT32 high;
+  ACE_UINT32 low;
+  s >> high;
+  if (!s.good_bit()) return false;
+  s >> low;
+  if (!s.good_bit()) return false;
+  x = SequenceNumber(high, low);
+  return true;
+}
+
+inline size_t gen_find_size(const SequenceNumber& sn) {
+  ACE_UNUSED_ARG(sn);
+  return max_marshaled_size_ulong() + gen_max_marshaled_size(CORBA::Long());
+}
 
 typedef std::pair<SequenceNumber, SequenceNumber> SequenceRange;
 

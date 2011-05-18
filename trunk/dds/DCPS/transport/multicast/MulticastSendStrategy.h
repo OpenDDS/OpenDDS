@@ -30,6 +30,11 @@ protected:
 
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
 
+  virtual size_t max_message_size() const
+  {
+    return UDP_MAX_MESSAGE_SIZE;
+  }
+
 private:
   MulticastDataLink* link_;
 };

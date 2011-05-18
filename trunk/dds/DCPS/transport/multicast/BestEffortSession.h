@@ -32,6 +32,9 @@ public:
 
   virtual bool start(bool active);
   virtual void stop();
+
+private:
+  SequenceNumber last_received_;
 };
 
 } // namespace DCPS

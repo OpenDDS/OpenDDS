@@ -56,7 +56,6 @@ SimpleDataWriter::run(SimplePublisher* publisher)
   // The +1 makes the null terminator ('/0') get placed into the block.
   header.message_length_ = data.length() + 1;
   header.message_id_ = 1;
-  header.sequence_ = 0;
   // TMB - Compiler no longer likes the next line...  source_timestamp_ is gone.
   //header.source_timestamp_ = ACE_OS::gettimeofday().msec();
   header.publication_id_ = this->pub_id_;
@@ -64,7 +63,7 @@ SimpleDataWriter::run(SimplePublisher* publisher)
   // The DataSampleHeader is what goes in the "Header Block".
   ACE_Message_Block* header_block = new ACE_Message_Block
                                                 (header.max_marshaled_size());
-  header_block << header;
+  *header_block << header;
 
   // The +1 makes the null terminator ('/0') get placed into the block.
   ACE_Message_Block* data_block = new ACE_Message_Block(data.length() + 1);

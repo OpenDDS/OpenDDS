@@ -1,0 +1,49 @@
+
+project(DDS*idl): dcps_test_lib {
+  idlflags      += -Wb,stub_export_include=KeyTest_export.h \
+                   -Wb,stub_export_macro=KeyTest_Export
+  dcps_ts_flags += -Wb,export_macro=KeyTest_Export
+  dynamicflags  += KEYTEST_BUILD_DLL
+
+  TypeSupport_Files {
+    KeyTest.idl
+    KeyTest2.idl
+  }
+
+  Idl_Files {
+    KeyTest.idl
+    KeyTest2.idl
+  }
+
+
+}
+
+
+project(DDS*KeyMarshaling) : dcpsexe_with_tcp, dcps_udp, dcps_multicast {
+
+  exename   = KeyMarshaling
+  after    += DDS*idl rtps
+  libs     += DDS*idl OpenDDS_Rtps
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    KeyMarshaling.cpp
+  }
+}
+
+
+project(*MD5): dcpsexe {
+  exename   = *
+  after    += rtps
+  libs     += OpenDDS_Rtps
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    md5_test.cpp
+  }
+}
+

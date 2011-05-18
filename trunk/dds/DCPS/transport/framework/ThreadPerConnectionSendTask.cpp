@@ -194,7 +194,6 @@ OpenDDS::DCPS::ThreadPerConnectionSendTask::remove_sample(TransportSendElement& 
 
   GuardType guard(this->lock_);
 
-  // Construct a PacketRemoveVisitor object.
   ThreadPerConRemoveVisitor vistor(element.msg());
 
   // Let it visit our elems_ collection as a "replace" visitor.

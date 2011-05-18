@@ -31,10 +31,12 @@ namespace DCPS {
 class OpenDDS_Dcps_Export ReceivedDataSample {
 public:
 
-  /// Default ctor
   ReceivedDataSample();
 
-  /// Dtor
+  ReceivedDataSample(const ReceivedDataSample&);
+
+  ReceivedDataSample& operator=(const ReceivedDataSample&);
+
   ~ReceivedDataSample();
 
   /// The demarshalled sample header.
@@ -43,6 +45,8 @@ public:
   /// The "data" part (ie, no "header" part) of the sample.
   ACE_Message_Block* sample_;
 };
+
+void swap(ReceivedDataSample&, ReceivedDataSample&);
 
 } // namespace DCPS
 } // namespace OpenDDS

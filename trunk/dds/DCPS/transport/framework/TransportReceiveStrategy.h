@@ -19,6 +19,9 @@
 
 namespace OpenDDS {
 namespace DCPS {
+
+class TransportReassembly;
+
 /**
  * This class provides buffer for data received by transports, de-assemble
  * the data to individual samples and deliver them.
@@ -66,6 +69,18 @@ protected:
 
   /// Let the subclass stop.
   virtual void stop_i() = 0;
+
+  /// If the specific transport implementation is using a lossy protocol,
+  /// it should call this method when a range of Transport sequence numbers will
+  /// not be available (the case where retry mechanisms, if any, have failed to
+  /// recover the data).  This allows reassembly to discard data fragments that
+  /// will never be able to be reassembled.
+  void data_unavailable(const SequenceRange& dropped);
+ 
+  /// If the specific transport implementation may fragment data (see
+  /// TransportSendStrategy::max_message_size()), it should call this
+  /// method in start_i().
+  void enable_reassembly();
 
   /// Ignore bad PDUs by skipping over them.
   int skip_bad_pdus();
@@ -127,6 +142,8 @@ private:
 
   /// Amount of the current PDU that has not been processed yet.
   size_t pdu_remaining_;
+
+  TransportReassembly* reassembly_;
 };
 
 } // namespace DCPS */
