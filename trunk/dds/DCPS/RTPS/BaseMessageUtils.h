@@ -25,9 +25,9 @@ void marshal_key_hash(const T& msg, OpenDDS::RTPS::KeyHash_t& hash) {
   // Key Hash must use big endian ordering.
   // Native==Little endian means we need to swap
 #if defined ACE_LITTLE_ENDIAN
-  static bool swap_bytes = true;
+  static const bool swap_bytes = true;
 #else
-  static bool swap_bytes = false;
+  static const bool swap_bytes = false;
 #endif
 
   size_t HASH_LIMIT = 16;
@@ -47,7 +47,7 @@ void marshal_key_hash(const T& msg, OpenDDS::RTPS::KeyHash_t& hash) {
 
     MD5_CTX ctx;
     MD5_Init(&ctx);
-    MD5_Update(&ctx, mb.rd_ptr(), mb.length());
+    MD5_Update(&ctx, mb.rd_ptr(), static_cast<unsigned long>(mb.length()));
     MD5_Final(hash.value, &ctx);
   }
 }

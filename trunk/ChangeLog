@@ -1,3 +1,18 @@
+Thu May 19 17:51:20 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Typo fix in comment.
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          Use const for swap_bytes.
+          Cast to avoid warnings on 64-bit platforms.
+
+        * tools/dissector/packet.cpp:
+
+          Cast to avoid warnings on 64-bit platforms.
+
 Thu May 19 16:05:34 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
