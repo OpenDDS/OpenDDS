@@ -1,3 +1,9 @@
+Thu May 19 14:23:50 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Change literal to explicitly be a 64 bit value.
+
 Wed May 18 21:32:29 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * Merged the branch "RTPS", which includes the start of the DDS
