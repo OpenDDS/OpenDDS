@@ -847,7 +847,7 @@ DataWriterImpl::AckToken::expected(const RepoId& subscriber) const
 bool
 DataWriterImpl::AckToken::marshal(ACE_Message_Block*& mblock, bool swap) const
 {
-  const size_t dataSize = gen_find_size(sequence_) 
+  const size_t dataSize = gen_find_size(sequence_)
                         + gen_find_size(max_wait_);
 
   ACE_NEW_RETURN(mblock, ACE_Message_Block(dataSize), false);

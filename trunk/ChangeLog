@@ -1,3 +1,22 @@
+Thu May 19 14:31:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+        * dds/DCPS/RTPS/md5.cpp:
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/marshal_generator.cpp:
+        * tests/DCPS/KeyTest/md5_test.cpp:
+        * tests/DCPS/KeyTest/run_test.pl:
+        * tests/transport/dds_comparative/SubReader.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataReader.cpp:
+
+          Clean up from yesterday's merge.  Fuzz and portability problems.
+
 Thu May 19 14:23:50 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/Definitions.h:

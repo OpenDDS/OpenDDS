@@ -45,7 +45,7 @@ my @error_files = ("KeyTypeError_array_noindex.idl",
                    "KeyTypeError_struct_no_nest.idl",
                    );
 foreach my $file (@error_files) {
-  my $idl = PerlDDS::create_process ("$ENV{DDS_ROOT}/dds/idl/opendds_idl", 
+  my $idl = PerlDDS::create_process ("$ENV{DDS_ROOT}/dds/idl/opendds_idl",
                                      $file);
   open(SAVEOUT, ">&STDOUT");
   open(SAVEERR, ">&STDERR");
@@ -55,7 +55,8 @@ foreach my $file (@error_files) {
   open(STDOUT, ">&SAVEOUT");
   open(STDERR, ">&SAVEERR");
   if ($idl_ret == 0) {
-    print STDERR "ERROR: opendds_idl processed $file cleanly when expecting error";
+    print STDERR "ERROR: opendds_idl processed $file cleanly when expecting " .
+        error\n";
     $status = 1;
   }
 }

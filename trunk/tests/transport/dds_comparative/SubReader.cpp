@@ -59,6 +59,6 @@ SubReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
 {
   ++this->num_received_;
   ACE_DEBUG((LM_DEBUG,
-             "(%P|%t) Received message with sequence == %d\n",
-             sample.header_.sequence_));
+             "(%P|%t) Received message with sequence == %q\n",
+             sample.header_.sequence_.getValue()));
 }

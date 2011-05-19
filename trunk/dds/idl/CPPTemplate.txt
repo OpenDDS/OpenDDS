@@ -2142,8 +2142,8 @@ void
   // can be notified the dispose event.
   bool just_registered = false;
   bool filtered = false;
-  this->dds_demarshal (sample, instance, just_registered, filtered, 
-                       OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+  this->dds_demarshal(sample, instance, just_registered, filtered,
+                      OpenDDS::DCPS::KEY_ONLY_MARSHALING);
 }
 
 void

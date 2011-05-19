@@ -74,7 +74,7 @@ public:
   SequenceNumber& operator++() {
     if (this->low_ == ACE_UINT32_MAX) {
       if (this->high_ == ACE_INT32_MAX) {
-        // this code is here, despite the RTPS spec statement: 
+        // this code is here, despite the RTPS spec statement:
         // "sequence numbers never wrap"
         this->high_ = 0;
         this->low_ = 1;
@@ -118,7 +118,7 @@ public:
     this->high_ = ACE_INT32(value / LOW_BASE);
     this->low_  = ACE_UINT32(value % LOW_BASE);
   }
- 
+
   Value getValue() const {
     return LOW_BASE * this->high_ + this->low_;
   }
@@ -131,7 +131,7 @@ public:
   ///      shortest distance is from 2 to MAX/2.
   bool operator<(const SequenceNumber& rvalue) const {
     const ACE_INT64 distance = ACE_INT64(rvalue.high_ - high_)*2;
-    return (distance == 0) ? 
+    return (distance == 0) ?
              (this->low_ < rvalue.low_) :   // High values equal, compare low
              (distance < 0) ?               // Otherwise just use high
                (ACE_INT32_MAX < -distance) :
@@ -158,7 +158,7 @@ public:
            && (*this != rvalue);
   }
 
-  ACE_INT32 getHigh() const { 
+  ACE_INT32 getHigh() const {
     return high_;
   }
   ACE_UINT32 getLow() const {
@@ -189,7 +189,7 @@ private:
   ACE_UINT32 low_;
 };
 
-inline ACE_CDR::Boolean 
+inline ACE_CDR::Boolean
 operator<<(Serializer& s, const SequenceNumber& x) {
   s << x.getHigh();
   s << x.getLow();

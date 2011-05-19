@@ -567,9 +567,9 @@ namespace {
 
   // This function looks through the fields of a struct for the key
   // specified and returns the AST_Type associated with that key.
-  // Because the key name can contain indexed arrays and nested 
+  // Because the key name can contain indexed arrays and nested
   // structures, things can get interesting.
-  AST_Type* find_type(const std::vector<AST_Field*>& fields, 
+  AST_Type* find_type(const std::vector<AST_Field*>& fields,
                       string key)
   {
     string key_base = key;   // the field we are looking for here
@@ -604,7 +604,7 @@ namespace {
           }
           AST_Typedef* typedef_node = dynamic_cast<AST_Typedef*>(field_type);
           if (typedef_node != 0) {
-            AST_Array* array_node = 
+            AST_Array* array_node =
               dynamic_cast<AST_Array*>(typedef_node->base_type());
             if (array_node != 0) {
               throw std::string("Arrays not allowed as keys");
@@ -617,7 +617,7 @@ namespace {
           if (typedef_node == 0) {
             throw std::string("Indexing for non-array type");
           }
-          AST_Array* array_node = 
+          AST_Array* array_node =
             dynamic_cast<AST_Array*>(typedef_node->base_type());
           if (array_node == 0) {
             throw std::string("Indexing for non-array type");
@@ -639,7 +639,7 @@ namespace {
             }
           }
         }
-        
+
         // nested structures
         AST_Structure* sub_struct = dynamic_cast<AST_Structure*>(field_type);
         if (sub_struct == 0) {
@@ -879,7 +879,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
       is_bounded.addArg("stru", "KeyOnly<const " + cxx + ">");
       is_bounded.endArgs();
 
-      
+
       IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
       for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
         string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
@@ -887,7 +887,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
         try {
           field_type = find_type(fields, key_name);
         } catch (const std::string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << cxx 
+          std::cerr << "ERROR: Invalid key specification for " << cxx
                     << " (" << key_name << "). " << error << std::endl;
           return false;
         }
@@ -924,7 +924,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
           try {
             field_type = find_type(fields, key_name);
           } catch (const std::string& error) {
-            std::cerr << "ERROR: Invalid key specification for " << cxx 
+            std::cerr << "ERROR: Invalid key specification for " << cxx
                       << " (" << key_name << "). " << error << std::endl;
             return false;
           }
@@ -945,7 +945,8 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
           } else { // predefined, sequence, struct, union, array
             string fieldref = string("stru.t.");
             expr << "gen_max_marshaled_size("
-                 << getWrapper(fieldref + key_name, field_type, WD_OUTPUT) << ")";
+                 << getWrapper(fieldref + key_name, field_type, WD_OUTPUT)
+                 << ")";
           }
         }
       }
@@ -966,7 +967,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
         try {
           field_type = find_type(fields, key_name);
         } catch (const std::string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << cxx 
+          std::cerr << "ERROR: Invalid key specification for " << cxx
                     << " (" << key_name << "). " << error << std::endl;
           return false;
         }
@@ -993,7 +994,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
         try {
           field_type = find_type(fields, key_name);
         } catch (const std::string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << cxx 
+          std::cerr << "ERROR: Invalid key specification for " << cxx
                     << " (" << key_name << "). " << error << std::endl;
           return false;
         }
@@ -1020,7 +1021,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
         try {
           field_type = find_type(fields, key_name);
         } catch (const std::string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << cxx 
+          std::cerr << "ERROR: Invalid key specification for " << cxx
                     << " (" << key_name << "). " << error << std::endl;
           return false;
         }
