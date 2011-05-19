@@ -1,3 +1,9 @@
+Thu May 19 20:18:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/rtps.mpc:
+
+          Install headers and library.
+
 Thu May 19 19:44:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
