@@ -42,6 +42,11 @@ protected:
 
   virtual bool check_header(const TransportHeader& header);
 
+  virtual bool check_header(const DataSampleHeader& header)
+  {
+    return TransportReceiveStrategy::check_header(header);
+  }
+
 private:
   UdpDataLink* link_;
   SequenceNumber last_received_;
