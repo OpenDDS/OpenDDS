@@ -1,3 +1,17 @@
+Thu May 19 16:05:34 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Add the "." path (ACE 5.5a does not do so).
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          Change to byte ordering macros compatible with TAO 1.5a.
+
+        * tests/DCPS/KeyTest/run_test.pl:
+
+          Fix a typo caused by the fuzz cleanup.
+
 Thu May 19 15:56:10 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportQueueElement.cpp:

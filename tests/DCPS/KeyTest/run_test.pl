@@ -56,7 +56,7 @@ foreach my $file (@error_files) {
   open(STDERR, ">&SAVEERR");
   if ($idl_ret == 0) {
     print STDERR "ERROR: opendds_idl processed $file cleanly when expecting " .
-        error\n";
+        "error\n";
     $status = 1;
   }
 }
