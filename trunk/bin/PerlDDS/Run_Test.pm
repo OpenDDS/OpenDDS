@@ -99,9 +99,8 @@ sub add_lib_path {
   my($dir) = shift;
 
   # add the cwd to the directory if it is relative
-  if(($dir =~ /$\.\//)||
-     ($dir =~ /$\.\.\//)) {
-      $dir = Cwd::getcwd() . "/$dir";
+  if (($dir =~ /^\.\//) || ($dir =~ /^\.\.\//)) {
+    $dir = Cwd::getcwd() . "/$dir";
   }
 
   PerlACE::add_lib_path($dir);
