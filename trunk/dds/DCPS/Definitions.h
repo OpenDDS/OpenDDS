@@ -172,7 +172,7 @@ public:
 
   static const Value MAX_VALUE = ACE_INT64_MAX;
   static const Value MIN_VALUE = 1;
-  static const Value LOW_BASE = 0x0000000100000000;
+  static const Value LOW_BASE = 0x0000000100000000LL;
 
   friend ACE_CDR::Boolean operator>>(Serializer& s, SequenceNumber& x);
 
