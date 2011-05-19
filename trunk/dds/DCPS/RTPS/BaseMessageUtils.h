@@ -24,8 +24,12 @@ void marshal_key_hash(const T& msg, OpenDDS::RTPS::KeyHash_t& hash) {
   memset(hash.value, 0, 16);
   // Key Hash must use big endian ordering.
   // Native==Little endian means we need to swap
-  static bool swap_bytes = ACE_CDR::BYTE_ORDER_NATIVE ==
-                                  ACE_CDR::BYTE_ORDER_LITTLE_ENDIAN;
+#if defined ACE_LITTLE_ENDIAN
+  static bool swap_bytes = true;
+#else
+  static bool swap_bytes = false;
+#endif
+
   size_t HASH_LIMIT = 16;
   if (gen_is_bounded_size(ko) &&
       gen_max_marshaled_size(ko) <= HASH_LIMIT) {

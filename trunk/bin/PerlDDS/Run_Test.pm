@@ -107,6 +107,9 @@ sub add_lib_path {
   PerlACE::add_lib_path($dir);
 }
 
+# Add PWD to the load library path
+add_lib_path ('.');
+
 $sleeptime = 5;
 
 1;
