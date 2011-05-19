@@ -475,19 +475,26 @@ dissect_opendds_heur(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 
   if ( pinfo->ptype == PT_TCP )
   {
-    /*
-     * Make the DCPS dissector the dissector for this conversation.
-     *
-     * If this isn't the first time this packet has been processed,
-     * we've already done this work, so we don't need to do it
-     * again.
-     */
+    // A converstion is used to keep track of a series of frames that carry
+    // data between a connected pair of TCP endpoints.
+
     if (!pinfo->fd->flags.visited)
     {
-      conversation_t *conversation = find_or_create_conversation(pinfo);
+      // adapted this from the implementation of find_or_create_converation
+      // which was not available pre 1.4.x wireshark.
+      conversation_t *conv =
+        find_conversation(pinfo->fd->num, &pinfo->src, &pinfo->dst,
+                          pinfo->ptype, pinfo->srcport,
+                          pinfo->destport, 0);
+      if (conv == 0)
+        {
+          // this is a new conversation
+          conv = conversation_new(pinfo->fd->num, &pinfo->src,
+                                  &pinfo->dst, pinfo->ptype,
+                                  pinfo->srcport, pinfo->destport, 0);
+        }
 
-      /* Set dissector */
-      conversation_set_dissector(conversation, dcps_tcp_handle);
+      conversation_set_dissector(conv, dcps_tcp_handle);
     }
 
     dissect_opendds (tvb, pinfo, tree);

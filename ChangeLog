@@ -1,3 +1,10 @@
+Thu May 19 18:49:19 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/packet.cpp:
+
+          Reimplemented use of a Wireshark 1.4.x-specific function to
+          be compatible with older implementations.
+
 Thu May 19 17:51:20 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
