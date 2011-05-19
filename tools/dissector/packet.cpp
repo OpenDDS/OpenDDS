@@ -393,7 +393,7 @@ get_dcps_pdu_len(packet_info *, tvbuff_t *tvb, int offset)
 
   TransportHeader header = demarshal_data<TransportHeader>(tvb, offset);
 
-  return header.length_ + header.max_marshaled_size();
+  return header.length_ + static_cast<guint>(header.max_marshaled_size());
 }
 
 
