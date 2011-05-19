@@ -1,3 +1,13 @@
+Thu May 19 15:56:10 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+
+          Fix for SunCC.
+
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+
+          Need to override both overloads of check_header().
+
 Thu May 19 15:36:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportHeader.h:
