@@ -1,3 +1,11 @@
+Thu May 19 15:36:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+
+          Further clean-up from the merge: fix for GCC 3.3.x.
+
 Thu May 19 14:46:17 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/packet.cpp:
