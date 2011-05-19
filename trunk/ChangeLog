@@ -1,3 +1,14 @@
+Thu May 19 19:38:05 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/auto_run_tests.pl:
+
+          Cleaned up the script.  Use Getopt::Long to allow repeated arguments
+          with cumulative effect (-l listone.lst -l listtwo.lst).
+
+        * dds/DCPS/RTPS/md5.h:
+
+          Fuzz.
+
 Thu May 19 18:49:19 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/packet.cpp:
