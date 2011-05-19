@@ -16,6 +16,7 @@ extern "C" {
 #include <epan/value_string.h>
 #include <epan/ipproto.h>
 #include <epan/packet.h>
+#include <epan/dissectors/packet-tcp.h>
 
 } // extern "C"
 
@@ -57,6 +58,10 @@ template <int V> int enum_value() { return V; }
 template <typename T> int enum_value() { return T::value; }
 
 int proto_opendds    = -1;
+
+gboolean opendds_desegment = TRUE;
+const char * DCPS_MAGIC = "DCPS";
+dissector_handle_t dcps_tcp_handle;
 
 int hf_version    = -1;
 int hf_length     = -1;
@@ -300,8 +305,10 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
   // hf_sample_timestamp
   len = sizeof(sample.source_timestamp_sec_) +
         sizeof(sample.source_timestamp_nanosec_);
-  if (sample.message_id_ != TRANSPORT_CONTROL) {
-    nstime_t ns = {
+  if (sample.message_id_ != TRANSPORT_CONTROL)
+  {
+    nstime_t ns =
+    {
       sample.source_timestamp_sec_,
       sample.source_timestamp_nanosec_
     };
@@ -326,10 +333,16 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
   // hf_sample_publication
   len = static_cast<gint>(gen_find_size(sample.publication_id_));
   if (sample.message_id_ != TRANSPORT_CONTROL) {
-    RepoIdConverter converter(sample.publication_id_);
-    proto_tree_add_bytes_format_value(tree, hf_sample_publication, tvb, offset, len,
-      reinterpret_cast<const guint8*>(&sample.publication_id_),
-      std::string(converter).c_str());
+    RepoIdConverter converter (sample.publication_id_);
+    proto_tree_add_bytes_format_value
+      (tree,
+       hf_sample_publication,
+       tvb, offset,
+       len,
+       reinterpret_cast<const guint8*>(&sample.publication_id_),
+       "%s",
+       std::string(converter).c_str()
+       );
   }
   offset += len;
 
@@ -338,9 +351,16 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
     len = static_cast<gint>(gen_find_size(sample.publisher_id_));
     if (sample.message_id_ != TRANSPORT_CONTROL) {
       RepoIdConverter converter(sample.publisher_id_);
-      proto_tree_add_bytes_format_value(tree, hf_sample_publisher, tvb, offset,
-        len, reinterpret_cast<const guint8*>(&sample.publisher_id_),
-        std::string(converter).c_str());
+      proto_tree_add_bytes_format_value
+        (tree,
+         hf_sample_publisher,
+         tvb,
+         offset,
+         len,
+         reinterpret_cast<const guint8*>(&sample.publisher_id_),
+         "%s",
+         std::string(converter).c_str()
+         );
     }
     offset += len;
   }
@@ -365,8 +385,21 @@ dissect_sample(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree,
 } // namespace
 
 extern "C"
+guint
+get_dcps_pdu_len(packet_info *, tvbuff_t *tvb, int offset)
+{
+  if ( tvb_memeql(tvb, 0, reinterpret_cast<const guint8*>(DCPS_MAGIC) ,4) != 0)
+    return 0;
+
+  TransportHeader header = demarshal_data<TransportHeader>(tvb, offset);
+
+  return header.length_ + header.max_marshaled_size();
+}
+
+
+extern "C"
 dissector_Export void
-dissect_opendds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
+dissect_dcps_common(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
 {
   gint offset = 0;
 
@@ -399,9 +432,12 @@ dissect_opendds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
       std::string sample_str(format_sample(sample));
 
       proto_item* item =
-        proto_tree_add_none_format(header_tree, hf_sample, tvb, offset,
-          static_cast<gint>(sample.marshaled_size()) + sample.message_length_,
-          sample_str.c_str());
+        proto_tree_add_none_format
+        (header_tree, hf_sample, tvb, offset,
+         static_cast<gint>(sample.marshaled_size()) + sample.message_length_,
+         "%s",
+         sample_str.c_str()
+         );
 
       proto_tree* sample_tree = proto_item_add_subtree(item, ett_sample);
 
@@ -409,6 +445,22 @@ dissect_opendds(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
     }
   }
 }
+
+
+extern "C"
+dissector_Export void
+dissect_opendds (tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
+{
+  // this can filter between DCPS and RTPS as needed.
+  tcp_dissect_pdus(tvb,
+                   pinfo,
+                   tree,
+                   opendds_desegment,
+                   sizeof (TransportHeader),
+                   get_dcps_pdu_len,
+                   dissect_dcps_common);
+}
+
 
 extern "C"
 dissector_Export gboolean
@@ -420,6 +472,31 @@ dissect_opendds_heur(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
   if (std::memcmp(data, TransportHeader::DCPS_PROTOCOL, len) != 0) {
     return FALSE;
   }
+
+  if ( pinfo->ptype == PT_TCP )
+  {
+    /*
+     * Make the DCPS dissector the dissector for this conversation.
+     *
+     * If this isn't the first time this packet has been processed,
+     * we've already done this work, so we don't need to do it
+     * again.
+     */
+    if (!pinfo->fd->flags.visited)
+    {
+      conversation_t *conversation = find_or_create_conversation(pinfo);
+
+      /* Set dissector */
+      conversation_set_dissector(conversation, dcps_tcp_handle);
+    }
+
+    dissect_opendds (tvb, pinfo, tree);
+  }
+  else
+  {
+    dissect_dcps_common (tvb, pinfo, tree);
+  }
+
 
   dissect_opendds(tvb, pinfo, tree);
   return TRUE;
@@ -749,11 +826,11 @@ extern "C"
 dissector_Export void
 proto_reg_handoff_opendds()
 {
-  static dissector_handle_t opendds_handle =
-    create_dissector_handle(dissect_opendds, proto_opendds);
-
-  ACE_UNUSED_ARG(opendds_handle);
+  dcps_tcp_handle = create_dissector_handle(dissect_opendds, proto_opendds);
 
   heur_dissector_add("tcp", dissect_opendds_heur, proto_opendds);
   heur_dissector_add("udp", dissect_opendds_heur, proto_opendds);
+
+  dissector_add_handle("tcp.port", dcps_tcp_handle);  /* for "decode-as" */
+
 }

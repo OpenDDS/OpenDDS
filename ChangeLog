@@ -1,3 +1,10 @@
+Thu May 19 14:46:17 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/packet.cpp:
+
+          Fix for dissecting TCP frames that contain multiple DCPS messages.
+          Also works for DCPS messages that span TCP frames.
+
 Thu May 19 14:31:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
