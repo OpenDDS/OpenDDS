@@ -17,7 +17,7 @@ void print_hex(void* d)
   }
   printf("\n");
 }
- 
+
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {

@@ -1579,7 +1579,7 @@ DataReaderImpl::send_sample_ack(
   SequenceNumber sequence,
   DDS::Time_t when)
 {
-  static const size_t dataSize = gen_find_size(sequence) 
+  static const size_t dataSize = gen_find_size(sequence)
                                  + gen_find_size(publication);
 
   ACE_Message_Block* data;

@@ -81,5 +81,5 @@ SimpleDataReader::transport_lost()
 int
 SimpleDataReader::received_test_message() const
 {
-  return this->sequence_.getValue();
+  return static_cast<int>(this->sequence_.getValue());
 }

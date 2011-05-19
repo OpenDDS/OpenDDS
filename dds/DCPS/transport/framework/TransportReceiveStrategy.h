@@ -76,7 +76,7 @@ protected:
   /// recover the data).  This allows reassembly to discard data fragments that
   /// will never be able to be reassembled.
   void data_unavailable(const SequenceRange& dropped);
- 
+
   /// If the specific transport implementation may fragment data (see
   /// TransportSendStrategy::max_message_size()), it should call this
   /// method in start_i().

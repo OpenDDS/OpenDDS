@@ -38,7 +38,7 @@ private:
 
   // A FragRange represents a chunk of a partially-reassembled message.
   // The transport_seq_ range is the range of transport sequence numbers
-  // that were used to send the given chunk of data. 
+  // that were used to send the given chunk of data.
   struct FragRange {
     FragRange(const SequenceNumber& transportSeq,
               const ReceivedDataSample& data);

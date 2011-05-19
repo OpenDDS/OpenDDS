@@ -175,12 +175,13 @@ module OpenDDS {
        Should have at least nano-second resolution. */
     typedef unsigned long Duration_t;
 
-
+#ifndef DDS_HAS_MINIMUM_BIT
     struct SPDPdiscoveredParticipantData {
       DDS::ParticipantBuiltinTopicData ddsParticipantData;
       ParticipantProxy_t participantProxy;
       Duration_t leaseDuration;
     };
+#endif
 
     typedef sequence<Locator_t> WPLocatorSeq;
     struct WriterProxy_t {
@@ -189,10 +190,12 @@ module OpenDDS {
       WPLocatorSeq multicastLocatorList;
     };
 
+#ifndef DDS_HAS_MINIMUM_BIT
     struct DiscoveredWriterData {
       DDS::PublicationBuiltinTopicData ddsPublicationData;
       WriterProxy_t writerProxy;
     };
+#endif
 
     typedef sequence<Locator_t> RPLocatorSeq;
     struct ReaderProxy_t {
@@ -202,6 +205,7 @@ module OpenDDS {
       RPLocatorSeq multicastLocatorList;
     };
 
+#ifndef DDS_HAS_MINIMUM_BIT
     struct DiscoveredReaderData {
       DDS::SubscriptionBuiltinTopicData ddsSubscriptionData;
       ReaderProxy_t readerProxy;
@@ -211,6 +215,7 @@ module OpenDDS {
     struct DiscoveredTopicData {
       DDS::TopicBuiltinTopicData ddsTopicData;
     };
+#endif
 
   };
 };
