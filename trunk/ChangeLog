@@ -1,3 +1,14 @@
+Fri May 20 12:46:44 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/tasks/customization.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/tasks/generate.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/diagrams/moving_between_diagrams.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/model_population.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/opendds_models/using_packages.html:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/reference/qos_policies/index.html:
+
+          Fixed typos in help text.
+
 Thu May 19 20:18:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/rtps.mpc:
