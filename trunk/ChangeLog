@@ -1,3 +1,14 @@
+Fri May 20 20:03:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/LargeSample/pub_multicast.ini:
+        * tests/DCPS/LargeSample/pub_udp.ini:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/LargeSample/sub_multicast.ini:
+        * tests/DCPS/LargeSample/sub_udp.ini:
+
+          Use consistent logging and built-in topic settings for all of the
+          transport types.
+
 Fri May 20 12:46:44 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/codegen/tasks/customization.html:

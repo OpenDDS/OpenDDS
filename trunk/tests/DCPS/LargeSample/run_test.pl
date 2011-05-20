@@ -15,46 +15,44 @@ $status = 0;
 $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
 $opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
-$repo_bit_opt = $opts;
 
-$pub_opts = "$opts -ORBDebugLevel 1 -ORBVerboseLogging 1 -DCPSTransportDebugLevel 6 -ORBLogFile pub.log -DCPSConfigFile pub.ini ";
-$sub_opts = "$opts -ORBDebugLevel 1 -ORBVerboseLogging 1 -DCPSTransportDebugLevel 6 -ORBLogFile sub.log -DCPSConfigFile sub.ini ";
+$logging = "-ORBDebugLevel 1 -ORBVerboseLogging 1 -DCPSTransportDebugLevel 6";
+$pub_opts = "$opts $logging -ORBLogFile pub.log ";
+$sub_opts = "$opts $logging -ORBLogFile sub.log ";
 
 if ($ARGV[0] eq 'udp') {
-    $opts .= ($use_svc_config ? " -ORBSvcConf udp.conf " : '') . "-t udp";
-    $pub_opts = "$opts -DCPSConfigFile pub_udp.ini";
-    $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
+    $udp_opts = ($use_svc_config ? " -ORBSvcConf udp.conf " : '') . "-t udp";
+    $pub_opts .= "$udp_opts -DCPSConfigFile pub_udp.ini";
+    $sub_opts .= "$udp_opts -DCPSConfigFile sub_udp.ini";
 }
 elsif ($ARGV[0] eq 'multicast') {
-    $opts .= ($use_svc_config ? " -ORBSvcConf multicast.conf " : '') . "-t multicast";
-    $pub_opts = "$opts -DCPSConfigFile pub_multicast.ini";
-    $sub_opts = "$opts -DCPSConfigFile sub_multicast.ini";
+    $mc_opts = ($use_svc_config ? " -ORBSvcConf multicast.conf " : '')
+        . "-t multicast";
+    $pub_opts .= "$mc_opts -DCPSConfigFile pub_multicast.ini";
+    $sub_opts .= "$mc_opts -DCPSConfigFile sub_multicast.ini";
 }
 elsif ($ARGV[0] eq 'default_tcp') {
-    $opts .= " -t default_tcp";
-    $pub_opts = "$opts";
-    $sub_opts = "$opts";
-}
-elsif ($ARGV[0] eq 'default_udp') {
-    $opts .= ($use_svc_config ? " -ORBSvcConf udp.conf " : '')
-        . " -t default_udp";
-    $pub_opts = "$opts";
-    $sub_opts = "$opts";
+    $pub_opts .= " -t default_tcp";
+    $sub_opts .= " -t default_tcp";
 }
 elsif ($ARGV[0] eq 'default_multicast') {
-    $opts .= ($use_svc_config ? " -ORBSvcConf multicast.conf " : '')
+    $dmopts = ($use_svc_config ? " -ORBSvcConf multicast.conf " : '')
         . "-t default_multicast";
-    $pub_opts = "$opts";
-    $sub_opts = "$opts";
+    $pub_opts .= $dm_opts;
+    $sub_opts .= $dm_opts;
 }
 elsif ($ARGV[0] eq 'nobits') {
     $repo_bit_opt = '-NOBITS';
-    $pub_opts .= ' -DCPSBit 0';
-    $sub_opts .= ' -DCPSBit 0';
+    $pub_opts .= ' -DCPSBit 0 -DCPSConfigFile pub.ini';
+    $sub_opts .= ' -DCPSBit 0 -DCPSConfigFile sub.ini';
 }
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";
     exit 1;
+}
+else {
+    $pub_opts .= ' -DCPSConfigFile pub.ini';
+    $sub_opts .= ' -DCPSConfigFile sub.ini';
 }
 
 $dcpsrepo_ior = "repo.ior";
