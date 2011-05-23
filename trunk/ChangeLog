@@ -1,3 +1,10 @@
+Mon May 23 18:14:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/modeling_tests.lst:
+
+          ...and don't attempt to run RemoteInstHandles when Built-In Topics
+          are not available in the build.
+
 Mon May 23 16:29:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * configure:
