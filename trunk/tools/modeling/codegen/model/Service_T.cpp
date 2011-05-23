@@ -7,7 +7,7 @@ inline
 OpenDDS::Model::Service<ModelName, InstanceTraits>::Service(
   const Application& application,
   int& argc,
-  char** argv)
+  ACE_TCHAR* argv[])
   : Entities(argc, argv)
   , application_(application)
   , modelData_()

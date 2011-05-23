@@ -1,3 +1,25 @@
+Mon May 23 15:15:24 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Reconnect/Reconnect.mpc:
+        * tests/DCPS/Reconnect/Reconnect_export.h:
+
+          Create a library of generated code to work better
+          with parallel builds.
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Use proper type for 'argv', matching the Entities class.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          Generate ACE_TEXT() around string literals where needed.
+
+        * tools/modeling/tests/setup.pl:
+
+          Fix for the case where the 'bin' subdirectory of the plugin doesn't
+          exist yet.
+
 Fri May 20 20:03:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/LargeSample/pub_multicast.ini:

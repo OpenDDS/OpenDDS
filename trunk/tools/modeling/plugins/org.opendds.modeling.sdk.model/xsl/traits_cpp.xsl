@@ -113,7 +113,7 @@
 
   <xsl:variable name="label" select="../transportOffset/@value + @transportIndex"/>
   <xsl:value-of select="concat('      case ', $label, ':', $newline)"/>
-  <xsl:value-of select="concat('        transport_type = &quot;', $type, '&quot;;', $newline)"/>
+  <xsl:value-of select="concat('        transport_type = ACE_TEXT(&quot;', $type, '&quot;);', $newline)"/>
   <xsl:text>        config = TheTransportFactory->create_configuration(id, transport_type);
 </xsl:text>
   <xsl:apply-templates/>

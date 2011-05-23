@@ -34,15 +34,15 @@ sub generate {
   my $base = shift;
   my $status;
 
-  my $bin = "$DDS_ROOT/tools/modeling/plugins/$plugin/bin";
+  my $plugdir = "$DDS_ROOT/tools/modeling/plugins/$plugin";
   my $jclass = "$javapkg.model.GeneratorSpecification.Generator.SdkGenerator";
   my $classfile = $jclass;
   $classfile =~ s!\.!/!g;
   $classfile .= '.class';
-  if (! -r "$bin/$classfile") {
+  if (! -r "$plugdir/bin/$classfile") {
     print "Compiling Java SdkGenerator\n";
     my $cwd = getcwd();
-    chdir "$bin/../src";
+    chdir "$plugdir/src";
     $classfile =~ s/\.class$/.java/;
     mkdir '../bin' unless -d '../bin';
     $status = system("\"$JAVA_HOME/bin/javac\" -g -d ../bin $classfile");
@@ -54,7 +54,8 @@ sub generate {
   }
 
   print "Running code generation on: $base\n";
-  $status = system("\"$JAVA_HOME/bin/java\" -classpath $bin $jclass $base");
+  $status = system("\"$JAVA_HOME/bin/java\" -classpath $plugdir/bin " .
+                   "$jclass $base");
   if ($status > 0) {
     print "ERROR: Java SdkGenerator invocation failed with $status\n";
     exit($status >> 8);
