@@ -29,6 +29,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'host=s', 'Host (auto detect: linux, win32, solaris, macosx)',
     'compiler=s', 'Compiler (auto detect / guess by searching PATH)',
     'target=s', 'Cross-compile target (none)',
+    'prefix=s', 'Installation prefix (none)',
    ],
    ['Build flags:',
     'debug!', 'Debugging (yes)',
@@ -451,10 +452,8 @@ else {
         print $PMG "$macro = $opts{$key}\n";
       }
     }
-    if ($opts{'nonstdcompiler'}) {
-      for my $var ('CC', 'CXX', 'LD') {
-        print $PMG "$var = $opts{'compiler'}\n";
-      }
+    if ($opts{'prefix'}) {
+      print $PMG "INSTALL_PREFIX=" . $opts{'prefix'} . "\n";
     }
     my $plat = $opts{'host'};
     if ($pi->{'aceplatform'}) {
@@ -463,6 +462,11 @@ else {
     }
     $plat .= '_' . $opts{'host_version'} if $opts{'host_version'};
     print $PMG "include \$(ACE_ROOT)/include/makeinclude/platform_$plat.GNU\n";
+    if ($opts{'nonstdcompiler'}) {
+      for my $var ('CC', 'CXX', 'LD') {
+        print $PMG "$var = $opts{'compiler'}\n";
+      }
+    }
     $PMG->close;
     print "Wrote platform_macros.GNU\n" if $opts{'verbose'};
   }
