@@ -36,7 +36,7 @@ namespace OpenDDS { namespace Model {
       typedef typename ModelName::DataWriters  DataWriters;
       typedef typename ModelName::DataReaders  DataReaders;
 
-      Service(const Application& application, int& argc, char** argv);
+      Service(const Application& application, int& argc, ACE_TCHAR* argv[]);
       ~Service();
 
       ///{ @name DDS API Entity accessors.
