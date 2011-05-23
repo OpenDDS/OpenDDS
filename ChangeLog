@@ -1,3 +1,9 @@
+Mon May 23 16:00:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/RemoteInstHandles/RemoteInstHandles.mpc:
+
+          This test requires Built-In Topics.
+
 Mon May 23 15:15:24 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Reconnect/Reconnect.mpc:
