@@ -15,6 +15,9 @@
 
 #include "ace/OS_NS_stdlib.h"
 
+#include <iostream>
+#include <iomanip>
+
 void
 BE_version()
 {
@@ -32,6 +35,13 @@ BE_init(int&, ACE_TCHAR*[])
 void
 BE_post_init(char*[], long)
 {
+  std::ostringstream version;
+  version << "-D__OPENDDS_IDL=0x"
+          << std::setw(2) << std::setfill('0') << DDS_MAJOR_VERSION
+          << std::setw(2) << std::setfill('0') << DDS_MINOR_VERSION
+          << std::setw(2) << std::setfill('0') << DDS_MICRO_VERSION;
+  DRV_cpp_putarg(version.str().c_str());
+
   const char* env = ACE_OS::getenv("DDS_ROOT");
   if (env && env[0]) {
     std::string dds_root = env;
