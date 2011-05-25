@@ -1,3 +1,13 @@
+Wed May 25 15:11:25 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/be_init.cpp:
+
+          Define the __OPENDDS_IDL preprocessor macro, similar to __TAO_IDL.
+
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+
+          Use __OPENDDS_IDL in the test.
+
 Mon May 23 19:30:10 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/LargeSample/run_test.pl:
