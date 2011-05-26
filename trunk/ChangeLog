@@ -1,3 +1,18 @@
+Thu May 26 17:13:09 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/figures/UmlPackageFig.java:
+        * tools/modeling/plugins/org.opendds.modeling.graphics/diagrams/classDiagram.gmfgraph:
+
+          Fixed so that when a lib (or package) on the canvas is dragged
+          inside a parent package, visual feedback will occur that the
+          lib will be owned by the package and when mouse button is released
+          the lib will actually be own the package. Previously, unless
+          moving to the top region of the package compartment, after moving
+          the lib inside a package it would appear that the lib was inside
+          the package but it really wasn't. This problem arose because
+          libs and packages can be both top nodes on the canvas and compartment
+          children.
+
 Wed May 25 15:11:25 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/be_init.cpp:
