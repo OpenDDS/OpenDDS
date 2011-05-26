@@ -36,9 +36,8 @@
           name="UmlPackageFigure"
           qualifiedClassName="com.ociweb.gmf.figures.UmlPackageFig">
         <layout
-            xsi:type="gmfgraph:FlowLayout"
-            vertical="true"
-            forceSingleLine="true"/>
+            xsi:type="gmfgraph:GridLayout"
+            equalWidth="false"/>
         <insets
             top="15"/>
         <children
