@@ -1,3 +1,12 @@
+Fri May 27 20:00:24 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackage2EditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackageEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+
+          Files that should have been checked in as part of the "Thu May 26 17:13:09 UTC 2011"
+          commit.
+
 Fri May 27 07:54:36 UTC 2011  Johnny Willemsen  <jwillemsen@remedy.nl>
 
         * dds/DCPS/InstanceState.cpp:
