@@ -426,8 +426,6 @@ OwnershipManager::remove_owner (const ::DDS::InstanceHandle_t& instance_handle)
             guard,
             this->instance_lock_);
 
-  InstanceOwnershipWriterInfos::iterator const the_end = instance_ownership_infos_.end ();
-
   InstanceOwnershipWriterInfos::iterator iter
     = instance_ownership_infos_.find (instance_handle);
 

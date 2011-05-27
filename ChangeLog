@@ -1,3 +1,11 @@
+Fri May 27 07:54:36 UTC 2011  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/InstanceState.cpp:
+          Typo fix
+
+        * dds/DCPS/OwnershipManager.cpp:
+          Fixed GCC 4.6 warnings
+
 Thu May 26 17:13:09 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/com.ociweb.gmf/src/com/ociweb/gmf/figures/UmlPackageFig.java:
