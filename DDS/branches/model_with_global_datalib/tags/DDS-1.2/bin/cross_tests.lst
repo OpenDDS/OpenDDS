@@ -1,5 +1,0 @@
-tests/DCPS/Crossplatform/Messenger_run_test.pl tcp: !DCPS_MIN
-tests/DCPS/Crossplatform/Messenger_run_test.pl udp: !DCPS_MIN
-tests/DCPS/Crossplatform/Messenger_run_test.pl mcast: !DCPS_MIN
-tests/DCPS/Crossplatform/Messenger_run_test.pl default_mcast: !DCPS_MIN
-tests/DCPS/Crossplatform/Messenger_run_test.pl reliable_mcast: !DCPS_MIN

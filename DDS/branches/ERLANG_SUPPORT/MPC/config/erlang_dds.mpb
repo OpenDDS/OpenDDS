@@ -1,8 +1,0 @@
-//
-// $Id$
-//
-
-project : erlang {
-  after      += dds
-  erlcflags  += -I$(DDS_ROOT)/lang/erlang/include
-}

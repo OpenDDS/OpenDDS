@@ -1,6 +1,0 @@
-project: dcpsexe_with_tcp {
-  exename = QueryConditionTest
-  TypeSupport_Files {
-    Messenger.idl
-  }
-}

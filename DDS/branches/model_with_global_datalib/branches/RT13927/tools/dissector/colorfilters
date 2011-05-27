@@ -1,6 +1,0 @@
-#
-# $Id$
-#
-
-@OpenDDS (Important)@opendds.sample.sub_id == MULTICAST_NAK || opendds.sample.sub_id == MULTICAST_NAKACK@[24672,0,0][61166,61166,61166]
-@OpenDDS@opendds@[61166,61166,61166][24672,0,0]

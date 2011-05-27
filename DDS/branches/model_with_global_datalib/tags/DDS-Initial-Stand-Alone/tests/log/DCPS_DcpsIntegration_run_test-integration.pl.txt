@@ -1,1 +1,0 @@
-INFO: ../../../dds/InfoRepo/DCPSInfoRepo being killed.

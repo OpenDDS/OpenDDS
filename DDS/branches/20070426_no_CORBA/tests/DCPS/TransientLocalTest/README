@@ -1,3 +1,0 @@
-A test for TRANSIENT_LOCAL_DURABILITY_QOS implementation. 
-The datawriter with the TRANSIENT_LOCAL_DURABILITY_QOS durability should
-resend the sending and sent samples to the newly associated datareaders.

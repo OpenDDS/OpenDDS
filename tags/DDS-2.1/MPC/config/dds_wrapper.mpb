@@ -1,6 +1,0 @@
-project : dcps_tcp, dcps_udp, dcps_multicast {
-  after += DDSWrapper_OpenDDS
-  libs  += DDSWrapper
-
-  includes += $(DDS_ROOT)/wrapper
-}

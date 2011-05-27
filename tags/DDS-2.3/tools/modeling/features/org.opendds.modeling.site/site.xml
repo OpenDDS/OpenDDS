@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<site>
-   <feature url="features/org.opendds.modeling.feature_1.0.0.qualifier.jar" id="org.opendds.modeling.feature" version="1.0.0.qualifier">
-      <category name="org.opendds.modeling.category"/>
-   </feature>
-   <category-def name="org.opendds.modeling.category" label="OpenDDS Modeling SDK"/>
-</site>

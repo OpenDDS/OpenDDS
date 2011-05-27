@@ -1,4 +1,0 @@
-We expect to see an error message from delete_participant
-(3908|3840) ERROR: DomainParticipantFactoryImpl::delete_participant, The participant(repo_id=2) is not empty.
-We expect to see an error message from delete_topic
-(3908|3840) ERROR: DomainParticipantImpl::delete_topic_i, find: No such file or directory

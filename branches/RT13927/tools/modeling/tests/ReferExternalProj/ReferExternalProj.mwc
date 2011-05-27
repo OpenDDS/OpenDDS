@@ -1,3 +1,0 @@
-workspace {
-  cmdline += -include ReferExternalProj/model -include MessengerMixed/model
-}

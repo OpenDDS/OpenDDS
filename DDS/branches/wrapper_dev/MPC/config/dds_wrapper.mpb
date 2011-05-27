@@ -1,4 +1,0 @@
-project : wrapper_base {
-  after += DDSWrapper
-  libs  += DDSWrapper
-}

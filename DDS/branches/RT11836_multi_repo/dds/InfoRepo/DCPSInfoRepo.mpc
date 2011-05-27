@@ -1,4 +1,0 @@
-project : dcpsexe, iortable, DCPSInfoRepo_bits {
-  exename = DCPSInfoRepo
-  exeout  = $(DDS_ROOT)/bin
-}

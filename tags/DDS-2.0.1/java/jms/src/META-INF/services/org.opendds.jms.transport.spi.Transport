@@ -1,8 +1,0 @@
-#
-# $Id$
-#
-
-org.opendds.jms.transport.spi.ReliableMulticastTransport
-org.opendds.jms.transport.spi.SimpleMcastTransport
-org.opendds.jms.transport.spi.SimpleTcpTransport
-org.opendds.jms.transport.spi.SimpleUdpTransport

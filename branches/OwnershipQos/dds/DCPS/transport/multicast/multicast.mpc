@@ -1,8 +1,0 @@
-//
-// $Id$
-//
-
-project : dcps {
-  sharedname    = OpenDDS_Multicast
-  dynamicflags  = OPENDDS_MULTICAST_BUILD_DLL
-}

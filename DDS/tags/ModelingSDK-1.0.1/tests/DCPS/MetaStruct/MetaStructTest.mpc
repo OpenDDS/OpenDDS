@@ -1,6 +1,0 @@
-project: dcps {
-  requires += content_subscription
-  TypeSupport_Files {
-    MetaStructTest.idl
-  }
-}

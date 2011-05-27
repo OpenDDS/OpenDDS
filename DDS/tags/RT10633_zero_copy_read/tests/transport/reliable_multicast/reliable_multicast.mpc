@@ -1,7 +1,0 @@
-// -*- MPC -*-
-//
-// $Id$
-
-project : dcpsexe_with_reliable_multicast {
-  exename = unittest
-}

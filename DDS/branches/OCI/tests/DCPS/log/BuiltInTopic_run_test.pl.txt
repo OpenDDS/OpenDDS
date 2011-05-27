@@ -1,3 +1,0 @@
-ERROR: Cannot Spawn: <..\..\..\dds\InfoRepo\.\DCPSInfoRepo.EXE> not found
-ERROR: cannot find file <C:\projects\dds\ACE_wrappers\TAO\DDS\tests\DCPS\BuiltInTopic\repo.ior>
-cP is not of type Win32::Process at ../../../../../bin/PerlACE/Process_Win32.pm line 366.

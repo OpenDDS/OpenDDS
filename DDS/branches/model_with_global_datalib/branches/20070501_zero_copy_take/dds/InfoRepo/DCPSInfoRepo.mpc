@@ -1,4 +1,0 @@
-project : dcpsexe, portableserver, iortable {
-  exename = DCPSInfoRepo
-  exeout  = $(DDS_ROOT)/bin
-}

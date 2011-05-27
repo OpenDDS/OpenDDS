@@ -1,7 +1,0 @@
-// -*- MPC -*-
-// $Id$
-
-project : dcpsexe {
-  libs        += SimpleTcp
-  after       += SimpleTcp
-}

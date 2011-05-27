@@ -1,7 +1,0 @@
-/*
- * $Id$
- */
-
-module foo {
-  enum enum_0 { a, b, c, d, e };
-};

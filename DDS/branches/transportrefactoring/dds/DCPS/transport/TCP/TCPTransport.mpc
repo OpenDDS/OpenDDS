@@ -1,4 +1,0 @@
-project : dcps {
-  sharedname   = Tcp
-  dynamicflags = TCP_BUILD_DLL
-}

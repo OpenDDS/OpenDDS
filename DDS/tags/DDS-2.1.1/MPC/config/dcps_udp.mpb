@@ -1,8 +1,0 @@
-//
-// $Id$
-//
-
-project {
-  libs        += OpenDDS_Udp
-  after       += opendds_udp
-}

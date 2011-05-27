@@ -1,5 +1,0 @@
-// -*- MPC -*-
-// $Id$
-
-project : orbsvcsexe, dcps {
-}
