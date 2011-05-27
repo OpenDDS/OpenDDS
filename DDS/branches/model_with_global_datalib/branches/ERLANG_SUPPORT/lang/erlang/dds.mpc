@@ -1,0 +1,19 @@
+//
+// $Id$
+//
+
+project : erlang_otp, erlang_tao, tao_ic_otp {
+  erlcflags    += -I./include -Wall
+  taoicflags   += -I$(DDS_ROOT) -SS
+
+  TAO_IC_Files {
+    $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl
+    $(DDS_ROOT)/dds/DdsDcpsTopic.idl
+    $(DDS_ROOT)/dds/DdsDcpsDomain.idl
+    $(DDS_ROOT)/dds/DdsDcpsDomainExt.idl
+    $(DDS_ROOT)/dds/DdsDcpsTypeSupportExt.idl
+    $(DDS_ROOT)/dds/DdsDcpsPublication.idl
+    $(DDS_ROOT)/dds/DdsDcpsSubscription.idl
+    $(DDS_ROOT)/dds/DdsDcpsSubscriptionExt.idl
+  }
+}

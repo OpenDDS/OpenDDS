@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="application"
+    nsURI="http://www.opendds.org/modeling/schemas/Application/1.0" nsPrefix="application">
+  <eClassifiers xsi:type="ecore:EClass" name="ApplicationTarget" eSuperTypes="Core.ecore#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="participant" eType="ecore:EClass DCPS.ecore#//DomainParticipant"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="language" eType="#//LanguageType"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="platform" eType="#//PlatformType"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="component_type" eType="#//ComponentType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="LanguageType">
+    <eLiterals name="CXX"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="PlatformType">
+    <eLiterals name="MPC_CDT"/>
+    <eLiterals name="MPC_GNUACE" value="1"/>
+    <eLiterals name="MPC_NMAKE" value="2"/>
+    <eLiterals name="MPC_VC71" value="3"/>
+    <eLiterals name="MPC_VC8" value="4"/>
+    <eLiterals name="MPC_VC9" value="5"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="ComponentType">
+    <eLiterals name="EXECUTABLE"/>
+    <eLiterals name="STATIC_LIBRARY" value="1"/>
+    <eLiterals name="SHARED_LIBRARY" value="2"/>
+  </eClassifiers>
+</ecore:EPackage>

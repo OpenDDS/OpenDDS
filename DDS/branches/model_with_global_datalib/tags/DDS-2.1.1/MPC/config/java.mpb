@@ -1,0 +1,39 @@
+// $Id$
+
+project {
+
+  requires += java
+
+  // Compile .java files to .class files, and optionally create a .jar archive
+  // .class files will be generated into a "classes" subdirectory of the
+  // project directory, which will be removed during a "clean".
+  // If you'd like to create a jar file (which will be placed in libout),
+  // add a "specific" assignment to your .mpc file:
+  //   specific {
+  //     jarname = foo
+  //   }
+
+  Define_Custom(Java) {
+    automatic            = 1
+    inputext             = .java
+    command              = perl $(DDS_ROOT)/java/build_scripts/javac_wrapper.pl
+    commandflags         = -sourcepath . -d classes -classpath .
+    generic_outputext    = .class
+    generic_pre_dirname  = classes/
+    keyword javacflags   = commandflags
+  }
+
+  // JAVAHHelper.pm contains the logic to determine the output file name
+  Define_Custom(JavaH) {
+    automatic_in  = 0
+    automatic_out = 1
+    inputext      = .class
+    command       = perl $(DDS_ROOT)/java/build_scripts/javah_wrapper.pl
+  }
+
+  // Make the directory but ensure there are no error messages displayed and
+  // a "0" is returned on all platforms.
+  prebuild  += <%mkdir%> classes 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+  postbuild += <%if(jarname)%><%quote%>$(JAVA_HOME)/bin/jar<%quote%> -cf <%libout%>/<%jarname%>.jar -C classes .<%endif%>
+  postclean += <%rmdir%> classes<%if(jarname)%> <%cmdsep%> <%rm%> <%libout%><%slash%><%jarname%>.jar<%endif%>
+}

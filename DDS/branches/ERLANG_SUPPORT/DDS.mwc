@@ -1,0 +1,16 @@
+// $Id$
+
+workspace {
+
+  // These projects use apache ant to control the build, however
+  // they also contain .mpc files which should be ignored:
+  exclude {
+    java/jms
+  }
+
+  // These projects use separate workspaces:
+//  exclude {
+//    lang
+//  }
+}
+

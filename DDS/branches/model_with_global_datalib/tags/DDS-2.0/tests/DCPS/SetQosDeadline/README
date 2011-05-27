@@ -1,0 +1,28 @@
+# $Id$
+
+This is to test the behavior how DCPSInfoRepo re-evaluate the 
+compatibility and associations when the DEADLINE QoS policy
+is changed. The dealine change may fail on compatibility checking
+and may change associations.
+
+
+Test cases:
+
+- The DataWriter has compatible deadline with first DataReader, but
+  not second DataReader. So first DataReader receives samples but 
+  second does not receive samples.
+  
+- The DataWriter reset deadline but it is not compatible with first
+  DataReader so set_qos () return error and the new deadline QoS is not 
+  applied.  
+  
+- Change the second DataReader deadline to be compatible with DataWriter
+  and it is associated with the DataWriter after the change and receives
+  samples.
+  
+- Test the new deadline of second DataReader take effect.
+
+
+
+
+ 

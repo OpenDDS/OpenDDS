@@ -1,0 +1,22 @@
+project(*) : dcps, portableserver {
+  libout       = .
+  idlflags    += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h
+  dynamicflags = FOOLIB_BUILD_DLL
+  pch_header   =
+  pch_source   =
+  dcps_ts_flags += --export=FooLib_Export --module=Mine
+
+  TypeSupport_Files {
+    FooDef.idl >> FooTypeSupport.idl FooTypeSupportImpl.h FooTypeSupportImpl.cpp
+  }
+
+  IDL_Files {
+    FooDef.idl
+    FooTypeSupport.idl
+  }
+
+  Source_Files {
+    FooTypeSupportImpl.cpp
+  }
+}
+

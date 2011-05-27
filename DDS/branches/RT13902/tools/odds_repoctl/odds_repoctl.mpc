@@ -1,0 +1,11 @@
+project: dcpsexe_with_tcp {
+  exename   = odds_repoctl
+  exeout    = $(DDS_ROOT)/bin
+  libs     += Federator
+  after    += DCPSInfoRepo_Federator
+
+  Source_Files {
+    odds_repoctl.cpp
+  }
+}
+

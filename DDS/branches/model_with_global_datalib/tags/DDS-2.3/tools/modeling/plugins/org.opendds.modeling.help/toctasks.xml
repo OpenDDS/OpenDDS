@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+
+<toc label="Tasks" link_to="toc.xml#tasks"> 
+	<topic label="Modeling"> 
+    <anchor id="modelingtasks"/>
+        <topic href="html/modeling/tasks/workingwithdiagrams.html" label="Working with Diagrams"/>
+		<topic href="html/modeling/tasks/workingwithopenddsmodels.html" label="Working with OpenDDS Models"/>
+		<topic href="html/modeling/tasks/workingwithpolicylib.html" label="Working with Policy Libraries"/>
+		<topic href="html/modeling/tasks/workingwithdatalib.html" label="Working with Data Libraries"/>
+		<topic href="html/modeling/tasks/workingwithdcpslib.html" label="Working with DCPS Libraries"/>
+        <topic href="html/modeling/tasks/performingvalidations.html" label="Performing Validations"/>
+    </topic>
+	<topic label="Codegen">
+	<anchor id="codegentasks"/>
+        <topic href="html/codegen/tasks/generate.html" label="Selecting Generate Parameters"/>
+        <topic href="html/codegen/tasks/customization.html" label="Customizing Transports"/>
+        <topic href="html/codegen/tasks/integration.html" label="Integrating with Other Models"/>
+    </topic>
+</toc>

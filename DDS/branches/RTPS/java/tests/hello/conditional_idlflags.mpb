@@ -1,0 +1,4 @@
+//This feature is disabled for 1.4a, which doesn't recognize -SS
+feature(dds_suppress_anys) {
+  idlflags     += -SS
+}

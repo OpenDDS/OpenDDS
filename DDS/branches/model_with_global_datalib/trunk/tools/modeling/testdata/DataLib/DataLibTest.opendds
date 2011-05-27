@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_7w7mIRN0EeCZGfFbfO1234" name="DataLibTest">
+  <libs xsi:type="types:DataLib" xmi:id="_W-U8gf7lEd-9W4ll_I0Ewg" name="DataLibTest">
+    <comment xmi:id="_jWph4EqFEeCGX-h1UW7MpA" body="A DataLib that contains all the&#xA;types available."/>
+    <types xsi:type="types:Boolean" xmi:id="_YQlOkP7lEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:Double" xmi:id="_ZGos0P7lEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:Enum" xmi:id="_Z_FXwP7lEd-9W4ll_I0Ewg" name="Color">
+      <literals>RED</literals>
+      <literals>GREEN</literals>
+      <literals>BLUE</literals>
+    </types>
+    <types xsi:type="types:Float" xmi:id="_fDQcQP7lEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:Long" xmi:id="_f1E6wP7lEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:LongLong" xmi:id="_gez0QP7lEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:Short" xmi:id="_g88hwP7lEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:ULong" xmi:id="_hY3owP7lEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:ULongLong" xmi:id="_jaapwP7lEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:WChar" xmi:id="_kW11wP7lEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:WString" xmi:id="_lNUKwP7lEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:String" xmi:id="_lwa30P7lEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:Octet" xmi:id="_n17LwP7lEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:UShort" xmi:id="_oW4jwP7lEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:Array" xmi:id="_pCJHQP7lEd-9W4ll_I0Ewg" length="10" subtype="_n17LwP7lEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:Typedef" xmi:id="_swQXwP7lEd-9W4ll_I0Ewg" type="_pCJHQP7lEd-9W4ll_I0Ewg" name="Bytes10"/>
+    <types xsi:type="types:Sequence" xmi:id="_v9GuQP7lEd-9W4ll_I0Ewg" length="42" subtype="_oW4jwP7lEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:Typedef" xmi:id="_0m4VwP7lEd-9W4ll_I0Ewg" type="_v9GuQP7lEd-9W4ll_I0Ewg" name="UShorts42"/>
+    <types xsi:type="types:Union" xmi:id="_MNMfwP7mEd-9W4ll_I0Ewg" name="U" switch="_UgWowP7mEd-9W4ll_I0Ewg">
+      <branches xmi:id="_YIcJwP7mEd-9W4ll_I0Ewg">
+        <field xmi:id="_aS_VwP7mEd-9W4ll_I0Ewg" name="long_mem" type="_ywgM0ymAEeC5SJoU11wzDw"/>
+        <cases xmi:id="_ei-kQP7mEd-9W4ll_I0Ewg" literal="'L'"/>
+      </branches>
+      <branches xmi:id="_iBTFQP7mEd-9W4ll_I0Ewg">
+        <field xmi:id="_i4J0wP7mEd-9W4ll_I0Ewg" name="char_mem" type="_ywgM0CmAEeC5SJoU11wzDw"/>
+        <cases xmi:id="_ldTSEP7mEd-9W4ll_I0Ewg" literal="'c'"/>
+        <cases xmi:id="_oFVEQP7mEd-9W4ll_I0Ewg" literal="'C'"/>
+      </branches>
+      <default xmi:id="_SYjOwP7mEd-9W4ll_I0Ewg" name="string_mem" type="_lwa30P7lEd-9W4ll_I0Ewg"/>
+    </types>
+    <types xsi:type="types:Char" xmi:id="_UgWowP7mEd-9W4ll_I0Ewg"/>
+    <types xsi:type="types:Struct" xmi:id="_tWeNwP7mEd-9W4ll_I0Ewg" name="TestStruct" isDcpsDataType="true">
+      <comment xmi:id="_ZNT6YEqFEeCGX-h1UW7MpA" body="This is a comment about the Struct."/>
+      <fields xmi:id="_xsB4wP7mEd-9W4ll_I0Ewg" name="bytes" type="_swQXwP7lEd-9W4ll_I0Ewg"/>
+      <fields xmi:id="_zP-XwP7mEd-9W4ll_I0Ewg" name="shorts" type="_0m4VwP7lEd-9W4ll_I0Ewg"/>
+      <fields xmi:id="_1faDwP7mEd-9W4ll_I0Ewg" name="size" type="_ywgM0ymAEeC5SJoU11wzDw">
+        <comment xmi:id="_dFbbcEqFEeCGX-h1UW7MpA" body="This is a comment about a Field.&#xA;It is in fact&#xA;multi-lined."/>
+      </fields>
+      <fields xmi:id="_3jFywP7mEd-9W4ll_I0Ewg" name="id" type="_ywgz4imAEeC5SJoU11wzDw"/>
+      <fields xmi:id="_bC1bcBN4EeC-y-hUB_78XA" name="substruct">
+        <type xsi:type="types:Struct" href="DataLib2.opendds#_BwbDYBN1EeCZGfFbfO9QSA"/>
+      </fields>
+      <keys xmi:id="_64VQQP7mEd-9W4ll_I0Ewg" field="_3jFywP7mEd-9W4ll_I0Ewg">
+        <comment xmi:id="_gKERIEqFEeCGX-h1UW7MpA" body="The id is key."/>
+      </keys>
+    </types>
+    <types xsi:type="types:Typedef" xmi:id="_RGVgoBN5EeCLmZr0-O4PNA" name="Struct2Typedef">
+      <type xsi:type="types:Struct" href="DataLib2.opendds#_BwbDYBN1EeCZGfFbfO9QSA"/>
+    </types>
+    <types xsi:type="types:UShort" xmi:id="_cKZ44CMNEeCFpfZ6Zl7cEQ"/>
+  </libs>
+  <basicTypes xmi:id="_ywflwCmAEeC5SJoU11wzDw">
+    <types xsi:type="types:Boolean" xmi:id="_ywflwSmAEeC5SJoU11wzDw"/>
+    <types xsi:type="types:Char" xmi:id="_ywgM0CmAEeC5SJoU11wzDw"/>
+    <types xsi:type="types:Double" xmi:id="_ywgM0SmAEeC5SJoU11wzDw"/>
+    <types xsi:type="types:Float" xmi:id="_ywgM0imAEeC5SJoU11wzDw"/>
+    <types xsi:type="types:Long" xmi:id="_ywgM0ymAEeC5SJoU11wzDw"/>
+    <types xsi:type="types:LongDouble" xmi:id="_ywgM1CmAEeC5SJoU11wzDw"/>
+    <types xsi:type="types:LongLong" xmi:id="_ywgM1SmAEeC5SJoU11wzDw"/>
+    <types xsi:type="types:Octet" xmi:id="_ywgz4CmAEeC5SJoU11wzDw"/>
+    <types xsi:type="types:Short" xmi:id="_ywgz4SmAEeC5SJoU11wzDw"/>
+    <types xsi:type="types:String" xmi:id="_ywgz4imAEeC5SJoU11wzDw"/>
+    <types xsi:type="types:ULong" xmi:id="_ywgz4ymAEeC5SJoU11wzDw"/>
+    <types xsi:type="types:ULongLong" xmi:id="_ywgz5CmAEeC5SJoU11wzDw"/>
+    <types xsi:type="types:UShort" xmi:id="_ywgz5SmAEeC5SJoU11wzDw"/>
+    <types xsi:type="types:WChar" xmi:id="_ywgz5imAEeC5SJoU11wzDw"/>
+    <types xsi:type="types:WString" xmi:id="_ywha8CmAEeC5SJoU11wzDw"/>
+  </basicTypes>
+</opendds:OpenDDSModel>

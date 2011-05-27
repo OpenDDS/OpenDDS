@@ -1,0 +1,14 @@
+// $Id$
+
+module Test {
+
+typedef sequence<octet> OctetSeq;
+
+#pragma DCPS_DATA_TYPE "Test::Data"
+#pragma DCPS_DATA_KEY  "Test::Data pid"
+  struct Data {
+    long     pid;
+    long     seq;
+  };
+
+};

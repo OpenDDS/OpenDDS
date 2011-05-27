@@ -1,0 +1,15 @@
+
+project(*federation): dcpsexe_with_tcp {
+  exename   = federation
+  exeout    = $(DDS_ROOT)/bin
+  includes += $(DDS_ROOT)
+  libpaths += $(DDS_ROOT)/lib
+  libs     += Federator
+  after    += DCPSInfoRepo_Federator
+
+  Source_Files {
+    federation.cpp
+  }
+
+}
+

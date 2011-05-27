@@ -1,0 +1,41 @@
+project(DDS*idl): dcps {
+  // This project ensures the common components get built first.
+
+  TypeSupport_Files {
+    Test.idl
+  }
+
+  custom_only = 1
+}
+
+
+project(DDS*Publisher) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, dcps_tcp {
+  exename = publisher
+  after  += DDS*idl
+
+  TypeSupport_Files {
+    Test.idl
+  }
+
+  Source_Files {
+    Publisher.cpp
+    Options.cpp
+    publisher_main.cpp
+  }
+}
+
+project(DDS*Subscriber) : dcpsexe_with_unreliable_dgram, dcps_reliable_multicast, dcps_tcp {
+  exename = subscriber
+  after  += DDS*idl
+
+  TypeSupport_Files {
+    Test.idl
+  }
+
+  Source_Files {
+    Subscriber.cpp
+    Options.cpp
+    DataReaderListener.cpp
+    subscriber_main.cpp
+  }
+}

@@ -1,0 +1,12 @@
+To create new HTML documentation, copy the 'template' directory,
+to a new directory named with the documents content:
+
+  > svn copy template target
+
+Follow the directions on the initial page labeled "Getting Started".
+
+To publish static HTML pages, follow the instructions on the "Getting
+Started" page.  A static HTML page for each published tiddler will be
+created in a 'publish' subdirectory.  You will need to ensure that
+relative paths (such as those in the "StyleSheet" tiddler) are correct
+for the final target location of the HTML pages.

@@ -1,0 +1,126 @@
+#include "tao/ShortSeq.pidl"
+
+module Xyz {
+
+
+//  typedef long TheKeyType;
+
+  typedef short ArrayOfShorts[5];
+
+  typedef short ArrayOfShorts2[3];
+
+  typedef string MultiDimArray[2][3][4][5];
+
+  typedef ArrayOfShorts2 ArrayOfArrayOfShorts2[3];
+  struct StructOfArrayOfArrayOfShorts2 {
+    ArrayOfArrayOfShorts2 f1;
+  };
+
+  // +4
+  enum ColorX { redx, greenx, bluex };
+
+  // +4+6
+  typedef sequence<unsigned short,3> UShortSeq;
+
+  typedef sequence<ArrayOfShorts> ArrayOfShortsSeq;
+
+#pragma DCPS_DATA_TYPE "Xyz::AStruct"
+#pragma DCPS_DATA_KEY "Xyz::AStruct v1"
+  // +12
+  typedef sequence<short> ShortSeq;
+  struct AStruct {
+    long v1;
+    ShortSeq v2s; //,2 -- was bounded with
+  };
+
+  typedef AStruct ArrayOfAStruct[3];
+  struct StructContainingArrayOfAStruct {
+    ArrayOfAStruct f1;
+  };
+
+  union AUnion switch (ColorX) {
+    case redx:
+      //long rlv;
+      string rsv;
+    case greenx:
+      //short gsv;
+      AStruct gsv;
+    default:
+      unsigned short usv;
+  };
+
+  struct StructAUnion {
+    AUnion sau_f1;
+  };
+
+  typedef sequence<AUnion,3> AUnionSeq;
+
+  typedef sequence<char, 2> AcharSeq;
+  typedef sequence<string, 4> AStringSeq;
+
+  typedef sequence<AcharSeq> AcharSeqSeq;
+
+  typedef char MyChar;
+  typedef sequence<MyChar, 5> AMyCharSeq;
+
+  // +4+(3*12)
+  typedef sequence<AStruct,3> AStructSeqX;
+
+  typedef AStructSeqX ArrayOfAStructSeq[3];
+
+#pragma DCPS_DATA_TYPE "Xyz::StructContainingArrayOfAStructSeq"
+  struct StructContainingArrayOfAStructSeq {
+    ArrayOfAStructSeq f1;
+  };
+
+  // not currently supported by the TAO IDL compiler; even without -Gdcps
+  //typedef fixed<10,4> AFixed;
+
+#pragma DCPS_DATA_TYPE "Xyz::Foo"
+#pragma DCPS_DATA_KEY "Xyz::Foo key"
+#pragma DCPS_DATA_KEY "Xyz::Foo xcolor"
+
+  typedef octet OctetArray[3];
+
+  // Example user defined "Foo" structure
+  struct Foo {
+    long key;  //4
+//    TheKeyType key; // no different than without typedef
+    //ArrayOfShorts shorts;
+    octet octer; //+1 > 5
+    ColorX xcolor; //+4 > 9
+    OctetArray ooo; //+3 > 12
+    UShortSeq ushrtseq; //+4+6 > 22
+    AStruct thestruct; //+4+8 > 34
+    AStructSeqX theStructSeq; //+4+36 > 74
+    //string<5> theString; //+4+5 > 83
+    string theString;
+    ArrayOfAStruct structArray; //+36 > 119
+    float x; //+4 > 123
+    float y; //+4 = 127
+    AUnion theUnion; //+4+4 =135
+  };
+
+  // regression test for typedef'ed enum (metaclass_generator.cpp)
+  enum TestEnum {TE_1, TE_2};
+  typedef TestEnum TypedefTestEnum;
+  struct StructWithTypedefedEnum {
+    TypedefTestEnum tte;
+  };
+
+  // regression test for boolean-discriminated union (marshal_generator.cpp)
+  union TestUnion switch (boolean) {
+  case FALSE:
+    TestEnum te;
+  case TRUE:
+    StructWithTypedefedEnum swte;
+  };
+
+};
+
+//Need to verify that we can have a "Foo" (or in this case, a "Bar") outside
+//of a module in IDL.
+#pragma DCPS_DATA_TYPE "Bar"
+struct Bar {
+  unsigned long data;
+};

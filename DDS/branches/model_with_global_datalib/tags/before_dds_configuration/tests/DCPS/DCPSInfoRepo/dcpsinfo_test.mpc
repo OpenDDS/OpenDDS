@@ -1,0 +1,17 @@
+project(*publisher): dcpsexe, portableserver {
+  exename  = publisher
+
+  Source_Files {
+    publisher.cpp
+    DCPSDataWriterI.cpp
+  }
+}
+
+project(*subscriber): dcpsexe, portableserver {
+  exename = subscriber
+
+  Source_Files {
+    subscriber.cpp
+    DCPSDataReaderI.cpp
+  }
+}

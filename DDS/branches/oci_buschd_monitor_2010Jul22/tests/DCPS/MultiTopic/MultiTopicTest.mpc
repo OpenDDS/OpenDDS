@@ -1,0 +1,6 @@
+project: dcps, dcps_tcp {
+  requires += content_subscription
+  TypeSupport_Files {
+    MultiTopicTest.idl
+  }
+}

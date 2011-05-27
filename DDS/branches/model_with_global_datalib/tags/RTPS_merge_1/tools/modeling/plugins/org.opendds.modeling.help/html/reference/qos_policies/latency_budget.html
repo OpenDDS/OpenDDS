@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=UTF-8">
+
+  <title>LATENCY_BUDGET</title>
+  <link rel="stylesheet" type="text/css" href="QoS.css">
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+
+<H4 CLASS="Head3">
+<A NAME="pgfId-236670"></A>LATENCY_BUDGET</H4>
+<UL>
+<LI CLASS="BodyNoLead">
+<A NAME="pgfId-237715"></A>The <A NAME="marker-249733"></A>LATENCY_BUDGET policy applies to topic, data reader, and data writer entities via the <EM CLASS="Code">
+latency_budget</EM>
+ member of their respective QoS policy structures. Below is the IDL related to the LatencyBudget QoS policy:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-237754"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-237755"></A>struct LatencyBudgetQosPolicy {</P>
+<P CLASS="Code">
+<A NAME="pgfId-237756"></A>  Duration_t duration;</P>
+<P CLASS="Code">
+<A NAME="pgfId-237757"></A>};</P>
+<P CLASS="Code">
+<A NAME="pgfId-237758"></A>&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-237808"></A>The default value of <EM CLASS="Code">
+duration</EM>
+ is zero indicating that the delay should be minimized. This policy is considered a hint to the transport layer to indicate the urgency of samples being sent. OpenDDS uses the value to bound a delay interval for reporting unacceptable delay in transporting samples from publication to subscription. This policy is used for monitoring purposes only at this time. Use the TRANSPORT_PRIORITY policy to modify the sending of samples. The data writer policy value is used only for compatibility comparisons and if left at the default value of zero will result in all requested <EM CLASS="Code">
+duration</EM>
+ values from data readers being matched.</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-237914"></A>An additional listener extension has been added to allow reporting delays in excess of the policy <EM CLASS="Code">
+duration</EM>
+ setting. The <EM CLASS="Code">
+OpenDDS::DCPS::DataReaderListener</EM>
+ interface has an additional operation for notification that samples were received with a measured transport delay greater than the <EM CLASS="Code">
+latency_budget</EM>
+ policy duration. The IDL for this method is:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-237949"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-237950"></A>  struct BudgetExceededStatus {</P>
+<P CLASS="Code">
+<A NAME="pgfId-237951"></A>    long total_count;</P>
+<P CLASS="Code">
+<A NAME="pgfId-237952"></A>    long total_count_change;</P>
+<P CLASS="Code">
+<A NAME="pgfId-237953"></A>    DDS::InstanceHandle_t last_instance_handle;</P>
+<P CLASS="Code">
+<A NAME="pgfId-237954"></A>  };</P>
+<P CLASS="Code">
+<A NAME="pgfId-237955"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-237956"></A>  void on_budget_exceeded(</P>
+<P CLASS="Code">
+<A NAME="pgfId-237957"></A>         in DDS::DataReader reader,</P>
+<P CLASS="Code">
+<A NAME="pgfId-237958"></A>         in BudgetExceededStatus status);</P>
+<P CLASS="Code">
+<A NAME="pgfId-237959"></A>&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-238029"></A>To use the extended listener callback you will need to derive the listener implementation from the extended interface, as shown in the following code fragment:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-238046"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238047"></A>  class DataReaderListenerImpl</P>
+<P CLASS="Code">
+<A NAME="pgfId-238048"></A>        : public virtual</P>
+<P CLASS="Code">
+<A NAME="pgfId-238090"></A>          OpenDDS::DCPS::LocalObject&lt;OpenDDS::DCPS::DataReaderListener&gt;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238050"></A>&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-238106"></A>Then you must provide a non-null implementation for the <EM CLASS="Code">
+on_budget_exceeded()</EM>
+ operation. Note that you will need to provide empty implementations for the following extended operations as well:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-238132"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238133"></A>  on_subscription_disconnected()</P>
+<P CLASS="Code">
+<A NAME="pgfId-238134"></A>  on_subscription_reconnected()</P>
+<P CLASS="Code">
+<A NAME="pgfId-238135"></A>  on_subscription_lost()</P>
+<P CLASS="Code">
+<A NAME="pgfId-238136"></A>  on_connection_deleted()</P>
+<P CLASS="Code">
+<A NAME="pgfId-238137"></A>&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-238376"></A>OpenDDS also makes the summary latency statistics available via an extended interface of the data reader. This extended interface is located in the <EM CLASS="Code">
+OpenDDS::DCPS</EM>
+ module and the IDL is defined as:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-238673"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238674"></A>  struct LatencyStatistics {</P>
+<P CLASS="Code">
+<A NAME="pgfId-238675"></A>    GUID_t        publication;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238676"></A>    unsigned long n;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238677"></A>    double        maximum;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238678"></A>    double        minimum;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238679"></A>    double        mean;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238680"></A>    double        variance;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238681"></A>  };</P>
+<P CLASS="Code">
+<A NAME="pgfId-238682"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238683"></A>  typedef sequence&lt;LatencyStatistics&gt; LatencyStatisticsSeq;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238684"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238685"></A>  local interface DataReaderEx : DDS::DataReader {</P>
+<P CLASS="Code">
+<A NAME="pgfId-238686"></A>    /// Obtain a sequence of statistics summaries.</P>
+<P CLASS="Code">
+<A NAME="pgfId-238687"></A>    void get_latency_stats( inout LatencyStatisticsSeq stats);</P>
+<P CLASS="Code">
+<A NAME="pgfId-238688"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238689"></A>    /// Clear any intermediate statistical values.</P>
+<P CLASS="Code">
+<A NAME="pgfId-238690"></A>    void reset_latency_stats();</P>
+<P CLASS="Code">
+<A NAME="pgfId-238691"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238692"></A>    /// Statistics gathering enable state.</P>
+<P CLASS="Code">
+<A NAME="pgfId-238693"></A>    attribute boolean statistics_enabled;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238694"></A>  };</P>
+<P CLASS="Code">
+<A NAME="pgfId-238695"></A>&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-238786"></A>To gather this statistical summary data you will need to use the extended interface. You can do so simply by dynamically casting the OpenDDS data reader pointer and calling the operations directly. In the following example, we assume that <EM CLASS="Code">
+reader</EM>
+ is initialized correctly by calling <EM CLASS="Code">
+DDS::Subscriber::create_datareader()</EM>
+:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-238820"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238821"></A>  DDS::DataReader_var reader;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238822"></A>  // ...</P>
+<P CLASS="Code">
+<A NAME="pgfId-238823"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238824"></A>  // To start collecting new data.</P>
+<P CLASS="Code">
+<A NAME="pgfId-238825"></A>  dynamic_cast&lt;OpenDDS::DCPS::DataReaderImpl*&gt;(reader.in())-&gt;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238826"></A>    reset_latency_stats();</P>
+<P CLASS="Code">
+<A NAME="pgfId-238827"></A>  dynamic_cast&lt;OpenDDS::DCPS::DataReaderImpl*&gt;(reader.in())-&gt;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238828"></A>    statistics_enabled(true);</P>
+<P CLASS="Code">
+<A NAME="pgfId-238829"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238830"></A>  // ...</P>
+<P CLASS="Code">
+<A NAME="pgfId-238831"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238832"></A>  // To collect data.</P>
+<P CLASS="Code">
+<A NAME="pgfId-238833"></A>  OpenDDS::DCPS::LatencyStatisticsSeq stats;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238834"></A>  dynamic_cast&lt;OpenDDS::DCPS::DataReaderImpl*&gt;(reader.in())-&gt;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238835"></A>    get_latency_stats(stats);</P>
+<P CLASS="Code">
+<A NAME="pgfId-238836"></A>  for (unsigned long i = 0; i &lt; stats.length(); ++i)</P>
+<P CLASS="Code">
+<A NAME="pgfId-238837"></A>  {</P>
+<P CLASS="Code">
+<A NAME="pgfId-238838"></A>    std::cout &lt;&lt; &quot;stats[&quot; &lt;&lt; i &lt;&lt; &quot;]:&quot; &lt;&lt; std::endl;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238839"></A>    std::cout &lt;&lt; &quot;         n = &quot; &lt;&lt; stats[i].n &lt;&lt; std::endl;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238840"></A>    std::cout &lt;&lt; &quot;       max = &quot; &lt;&lt; stats[i].maximum &lt;&lt; std::endl;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238841"></A>    std::cout &lt;&lt; &quot;       min = &quot; &lt;&lt; stats[i].minimum &lt;&lt; std::endl;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238842"></A>    std::cout &lt;&lt; &quot;      mean = &quot; &lt;&lt; stats[i].mean &lt;&lt; std::endl;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238843"></A>    std::cout &lt;&lt; &quot;  variance = &quot; &lt;&lt; stats[i].variance &lt;&lt; std::endl;</P>
+<P CLASS="Code">
+<A NAME="pgfId-238844"></A>  }</P>
+<P CLASS="Code">
+<A NAME="pgfId-258115"></A>&nbsp;</P>
+
+</body>
+</html>

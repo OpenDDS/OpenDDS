@@ -1,0 +1,8 @@
+//
+// $Id$
+//
+
+project : erlang {
+  after      += tao
+  erlcflags  += -I$(DDS_ROOT)/lang/erlang/lib/tao/include
+}

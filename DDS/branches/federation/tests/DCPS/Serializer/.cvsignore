@@ -1,0 +1,5 @@
+*makefile*
+SerializerTest
+.depend*
+.obj
+.shobj

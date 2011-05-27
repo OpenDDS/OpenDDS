@@ -1,0 +1,172 @@
+Wed Feb 10 22:38:46 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * java/build_scripts/JavaTypeSupportImpl.pm:
+
+          Fixed a bug that generates incorrect jni class name when the
+          module name contains underscore and causes UnsatisfiedLinkError.
+          The "_1" needs be used to replace the underscore. 
+          
+        * java/tests/complex_idl/ComplexIDLTest.java:
+        * java/tests/complex_idl/Complex_Idl.idl:
+        * java/tests/complex_idl/QuoteSupport.java:
+        * java/tests/complex_idl/complex_idl_test.mpc:
+        * java/tests/complex_idl/Complex.idl:
+
+          Renamed Complex.idl to Complex_Idl.idl file and changed
+          module name from Complex to Complex_Idl to verify the bug fix.
+
+Wed Feb 10 21:55:26 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/codegen/im_java.cpp:
+
+          For IDL unions without an explicit default that need a generated
+          default (because the branches don't cover all possible discriminator
+          values), if the discriminator type is an enum we need to wrap the
+          primitive (int) value of the enum in the Java object for the enum.
+
+Wed Feb 10 00:11:21 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/tests/thru/pub-*-*-*.ini:
+        * performance-tests/Bench/tests/thru/pub-*-*.ini:
+        * performance-tests/Bench/tests/thru/sub-*.ini:
+
+          New set of tests for publication bound and subscription bound
+          throughput testing.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Added documentation of new publication bound and subscription
+          bound tests.
+
+Tue Feb  9 16:58:50 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          If ant returns non-zero and at least one test has failed,
+          don't output an additional line that will be flagged as an error
+          by the scoreboard parser.
+
+Tue Feb  9 15:24:05 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * MPC/config/dcps_monitor.mpb:
+        * tools/odds_monitor/Monitor.mpc:
+
+          Added a new base project for including the monitor library.
+          Thanks to Adam Mitz for helping me understand Johnny's original
+          suggestion.
+
+Tue Feb  9 15:02:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor.mpc:
+
+          Make the project build after the OpenDDS_monitor project it
+          depends on.  Thanks to Johnny Willemsen for this correction.
+
+Tue Feb  9 13:08:49 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+          Initialise a pointer with 0
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+          Fix invalid logging mask
+
+Tue Feb  9 04:38:49 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Debugged statistics collecting.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Added statistics gathering argument to p2 command lines.
+
+Mon Feb  8 18:03:34 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Added script PID to system statistics output file.  This will
+          allow statistics to be gathered in a loopback test without
+          conflicts.
+          Corrected a documentation issue.
+
+        * performance-tests/Bench/tests/thru/p1-be-*.ini:
+
+          Updated Topics to be BEST_EFFORT.  This was preventing
+          associations on the return trip from being made.
+
+Mon Feb  8 16:17:24 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+
+          Updated ast_visitor interface for upcoming DOC x.7.7 release.
+
+Mon Feb  8 15:32:31 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Use correct configuration file source for package.
+
+Mon Feb  8 15:10:54 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Correct a syntax error.
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Add the new througput test configuration files to the built
+          package.  Added a note about versions on the transport library
+          link establishment as well.
+
+Sat Feb  6 00:01:39 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Added new '-C' option to indicate that process and system
+          statistics should be collected.  System statistics are gathered
+          using a single 'vmstat' command during the test, while process
+          statistics are gathered for each sub-process using a batch
+          'top' command.  This is useful only on *nix derived platforms
+          and so is restricted to them.
+
+        * performance-tests/Bench/src/Publication.cpp:
+
+          Hoisted sample stack allocation out of sending loop.  Invariant
+          sample sizes will no longer result in byte sequence needing to
+          be extended for each sample.
+
+        * performance-tests/Bench/src/Subscription.cpp:
+
+          Added count summary output regardless of statistics collection
+          to remove a need to calculate statistics to count samples.
+
+        * performance-tests/Bench/tests/latency/test-commands.txt:
+
+          Added '.txt' extension for convenience.
+
+        * performance-tests/Bench/tests/thru:
+
+          Added new pre-configured test.  This includes 13 conditions
+          covering the message size/ message rate space to send from
+          76 Mibps (100Mbps) through 1907 Mibps (2500Mbps) of data
+          through the test path.
+
+Fri Feb  5 22:37:05 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * README:
+
+          Corrected spelling (SPARC is an initialism).
+
+Fri Feb  5 22:07:54 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+        * README:
+
+          Updated documentation for next release.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

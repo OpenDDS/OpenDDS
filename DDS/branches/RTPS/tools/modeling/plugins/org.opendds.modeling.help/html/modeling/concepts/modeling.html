@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>OpenDDS Modeling SDK</title>
+</head>
+<body>
+
+<h1>OpenDDS Modeling SDK</h1>
+
+<div align="center">
+  <a href="../images/opendds_modeling_editors_examples.png">
+  <img alt="OpenDDS modeling editors example" src="../images/opendds_modeling_editors_examples.png" width=500>
+  <p>[Click to enlarge]</p>
+  </a>
+</div>
+
+<p>Graphical modeling Eclipse plug-ins are provided for constructing the OpenDDS models that will be
+transformed into C++ code.</p>
+
+<p>The modeling is done in one of the following diagram types:
+<ul>
+	<li><b>Main Diagram</b> This is the entry point for the modeling and can include "libraries", which are
+	reusable packages. The description of the libraries follows.</li>
+	<li><b>Policy Library</b> This contains a collection of QoS Policies that typically work together
+	to achieve an overall QoS characteristic. For example, one policy library may have policies tuned
+	for reliable data transmission, while another library has policies tuned for high-performance
+	data transmission.</li>
+	<li><b>Data Library</b> This contains the data types used to define the structure of the data
+	being published.</li>
+	<li><b>DCPS Library</b> This is where topology for the publishing and subscribing entities are defined.
+	The elements from the other libraries, such as QoS Policies, and Structs, will be used in this
+	library.</li> 
+</ul>
+</p>
+</body>
+</html>

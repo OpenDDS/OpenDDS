@@ -1,0 +1,163 @@
+Fri Oct 23 19:58:26 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * OpenDDS version 2.0.1 released.
+
+Fri Oct 23 19:53:37 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+        * README:
+
+          Updated documentation for next release.
+
+Wed Oct 21 17:34:45 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+
+          Remoted temporary forward decls in ast_visitor impl; obviated
+          by TAO 1.7.4 release.
+
+Tue Oct 20 01:36:51 UTC 2009  Scott Harris  <harris_s@ociweb.com>
+
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.h
+
+          Fix build against SunCC with STLport.
+
+Fri Oct 16 18:35:38 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/FooTest4/Reader.cpp:
+
+          Fixed access violation on zero length SampleInfoSeq
+          returned from read_next_instance or take_next_instance.
+
+Tue Oct 13 22:45:56 UTC 2009  Scott Harris  <harris_s@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp
+
+          Update test per default DataWriter ReliablityQos fix.
+
+Fri Oct  9 20:49:09 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fixed default DataWriter ReliablityQos policy; default is now RELIABLE
+          (reported by Scott Harris).
+
+Wed Oct  7 16:07:02 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Subscriber.cpp:
+
+          Updates to the Developer's Guide examples to make them
+          more consistent with the OpenDDS 2.0 DevGuide.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Clean up an ACE_DEBUG message.
+
+Mon Oct  5 22:34:17 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/dcps_java_optional.mpb:
+
+          More adjustments for Windows builds.
+
+Mon Oct  5 15:44:59 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+
+          Added forward decls to fix compilation issues on older releases
+          of TAO. Due to DOC release practices, there is no way to
+          conditionally compile changes in the ast_visitor interface.
+          Don't complain; this is as good as it gets.
+
+Fri Oct  2 21:00:44 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/dcps_java_optional.mpb:
+
+          Attempted fix for for MPC dependency issues for Java bindings on
+          Windows platforms.
+
+Fri Oct  2 19:32:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/META-INF/ra.xml:
+
+          Updated LICENSE verbiage.
+
+Fri Oct  2 19:19:54 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+
+          Added additional virtual functions added by recent commit to
+          DOC trunk.
+
+Wed Sep 30 05:03:35 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/dcps_java_optional.mpb:
+
+          Attempted fix for for MPC dependency issues for Java bindings.
+
+Tue Sep 29 16:39:52 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/TestFramework/TestFramework_T.h:
+        * tests/DCPS/TestFramework/TestFramework_T.cpp:
+
+          Fixes for Windows and Linux hosts.
+
+Mon Sep 28 21:13:53 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/DestinationOrder/TestCase.h:
+        * tests/DCPS/TestFramework/TestFramework.h:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+        * tests/DCPS/TestFramework/TestFramework.mpc:
+        * tests/DCPS/TestFramework/TestFramework_T.h:
+        * tests/DCPS/TestFramework/TestFramework_T.cpp:
+
+          TestFramework updates; fixed template issues on non-Solaris
+          platforms.
+
+Thu Sep 24 21:33:28 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/DestinationOrder/DestinationOrder.mpc:
+        * tests/DCPS/DestinationOrder/TestCase.h:
+        * tests/DCPS/DestinationOrder/TestCase.cpp:
+        * tests/DCPS/TestFramework/TestFramework.h:
+        * tests/DCPS/TestFramework/TestFramework.idl:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+        * tests/DCPS/TestFramework/TestFramework.mpc:
+
+          TestFramework updates; converted DestinationOrder test.
+
+Wed Sep 23 23:09:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/dcps_test.mpb:
+        * MPC/config/dcps_test_tcp.mpb:
+        * tests/DCPS/TestFramework:
+        * tests/DCPS/TestFramework/Test.idl:
+        * tests/DCPS/TestFramework/TestFramework.h:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+        * tests/DCPS/TestFramework/TestFramework.mpc:
+        * tests/DCPS/TestFramework/TestFramework_Export.h:
+
+          Initial commit of DCPS TestFramework harness.
+
+Wed Sep 23 21:36:29 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * LICENSE:
+
+          Updated LICENSE verbiage.
+
+Wed Sep 23 16:27:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+        * README:
+
+          Updated documentation for next release.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

@@ -1,0 +1,599 @@
+..\..\..\dds\InfoRepo\.\DCPSInfoRepo.EXE -NOBITS -ORBDebugLevel 1 -o C:\projects\dds\ACE_wrappers\TAO\DDS\tests\DCPS\MultiTopicTest\repo.ior
+.\.\subscriber.EXE -t all
+.\.\publisher.EXE  -t 1 
+.\.\publisher.EXE  -t 2 
+.\.\publisher.EXE  -t 3 
+(3268|3292)  11:16:36.640000 Repo main
+TAO (3268|3292) Loaded default protocol <IIOP_Factory>
+TAO_DDS_DCPSInfo_i::load_domains Successfully loaded domain 1200150 id: 411
+(3400|3284)  11:16:37.671000 publisher main
+(3116|3104)  11:16:37.703000 publisher main
+(3260|3176)  11:16:37.718000 subscriber main
+(3096|3188)  11:16:37.750000 publisher main
+TAO (3268|3292) - Transport_Cache_Manager::fill_set_i, current_size = 0, cache_maximum = 512
+TAO (3268|3292) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.0.90:1980> on 308
+TAO (3268|3292) - Transport_Cache_Manager::bind_i, 0x12e958 -> 0x11ff470 Transport[308]
+DCPS_IR_Domain::add_participant Domain 411 successfully added participant 1208370 id: 1
+DCPS_IR_Domain::find_participant Domain 411 located participant 1208370 id: 1
+DCPS_IR_Domain::add_topic_description Domain 411 Successfully added Topic Description 12145D8
+DCPS_IR_Topic_Description::add_topic Successfully added topic 1214748
+DCPS_IR_Participant::add_topic_reference Successfully added topic reference 1214748 id: 1
+DCPS_IR_Domain::add_topic Successfully added topic 1214748 id: 1
+TAO (3268|3292) - Transport_Cache_Manager::fill_set_i, current_size = 1, cache_maximum = 512
+TAO (3268|3292) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.0.90:1983> on 320
+TAO (3268|3292) - Transport_Cache_Manager::bind_i, 0x12e958 -> 0x12149c0 Transport[320]
+DCPS_IR_Domain::add_participant Domain 411 successfully added participant 12151F8 id: 2
+DCPS_IR_Domain::find_participant Domain 411 located participant 12151F8 id: 2
+DCPS_IR_Domain::add_topic_description Domain 411 Successfully added Topic Description 1221498
+DCPS_IR_Topic_Description::add_topic Successfully added topic 12215D8
+DCPS_IR_Participant::add_topic_reference Successfully added topic reference 12215D8 id: 2
+DCPS_IR_Domain::add_topic Successfully added topic 12215D8 id: 2
+DCPS_IR_Domain::find_participant Domain 411 located participant 1208370 id: 1
+DCPS_IR_Participant::find_topic_reference Found topic reference 1214748 id: 1
+DCPS_IR_Participant::add_publication Participant id 1 added publication 1221E90 id: 1
+DCPS_IR_Topic::add_publication_reference Successfully added publication reference 1221E90
+(3400|3284) Writer::start 
+TAO (3268|3292) - Transport_Cache_Manager::fill_set_i, current_size = 2, cache_maximum = 512
+TAO (3268|3292) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.0.90:1987> on 332
+TAO (3268|3292) - Transport_Cache_Manager::bind_i, 0x12e958 -> 0x1222170 Transport[332]
+DCPS_IR_Domain::add_participant Domain 411 successfully added participant 1222990 id: 3
+DCPS_IR_Domain::find_participant Domain 411 located participant 1222990 id: 3
+DCPS_IR_Domain::find_topic_description Domain 411 Located topic description T1 foo1 12145D8
+DCPS_IR_Topic_Description::add_topic Successfully added topic 122EC30
+DCPS_IR_Participant::add_topic_reference Successfully added topic reference 122EC30 id: 3
+DCPS_IR_Domain::add_topic Successfully added topic 122EC30 id: 3
+DCPS_IR_Domain::find_participant Domain 411 located participant 1222990 id: 3
+DCPS_IR_Domain::find_topic_description Domain 411 Located topic description T2 foo2 1221498
+DCPS_IR_Topic_Description::add_topic Successfully added topic 122ED30
+DCPS_IR_Participant::add_topic_reference Successfully added topic reference 122ED30 id: 4
+DCPS_IR_Domain::add_topic Successfully added topic 122ED30 id: 4
+DCPS_IR_Domain::find_participant Domain 411 located participant 1222990 id: 3
+DCPS_IR_Domain::add_topic_description Domain 411 Successfully added Topic Description 122EE68
+DCPS_IR_Topic_Description::add_topic Successfully added topic 122EFD8
+DCPS_IR_Participant::add_topic_reference Successfully added topic reference 122EFD8 id: 5
+DCPS_IR_Domain::add_topic Successfully added topic 122EFD8 id: 5
+(3400|896) T1: Writer::svc begins.
+TAO (3268|3292) - Transport_Cache_Manager::fill_set_i, current_size = 3, cache_maximum = 512
+TAO (3268|3292) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.0.90:1990> on 344
+TAO (3268|3292) - Transport_Cache_Manager::bind_i, 0x12e958 -> 0x122f278 Transport[344]
+DCPS_IR_Domain::add_participant Domain 411 successfully added participant 122FA98 id: 4
+DCPS_IR_Domain::find_participant Domain 411 located participant 122FA98 id: 4
+DCPS_IR_Domain::find_topic_description Domain 411 Located topic description T3 foo3 122EE68
+DCPS_IR_Topic_Description::add_topic Successfully added topic 123BD38
+DCPS_IR_Participant::add_topic_reference Successfully added topic reference 123BD38 id: 6
+DCPS_IR_Domain::add_topic Successfully added topic 123BD38 id: 6
+DCPS_IR_Domain::find_participant Domain 411 located participant 12151F8 id: 2
+DCPS_IR_Participant::find_topic_reference Found topic reference 12215D8 id: 2
+DCPS_IR_Participant::add_publication Participant id 2 added publication 123C600 id: 2
+DCPS_IR_Topic::add_publication_reference Successfully added publication reference 123C600
+(3116|3104) Writer::start 
+(3116|3048) T2: Writer::svc begins.
+(3260|3176) DataReaderListenerImpl::DataReaderListenerImpl
+(3260|3176) DataReaderListenerImpl::DataReaderListenerImpl
+(3260|3176) DataReaderListenerImpl::DataReaderListenerImpl
+DCPS_IR_Domain::find_participant Domain 411 located participant 1222990 id: 3
+DCPS_IR_Participant::find_topic_reference Found topic reference 122EC30 id: 3
+DCPS_IR_Participant::add_subscription Successfully added subscription 123CF10 id: 3
+Checking compatiblility of publication 1 and subscription 3
+Associating publication 1 and subscription 3
+(3268|3292) DCPS_IR_Publication::add_associated_subscription: calling pub 1 with sub 3
+TAO (3268|3292) - Transport_Cache_Manager::fill_set_i, current_size = 4, cache_maximum = 512
+TAO (3268|3292) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.0.90:1979> on 356
+TAO (3268|3292) - Transport_Cache_Manager::bind_i, 0x12e548 -> 0x123d458 Transport[356]
+DCPS_IR_Publication::add_associated_subscription Successfully added subscription 123CF10
+(3268|3292) DCPS_IR_Subscription::add_associated_publication: calling sub 3 with pub 1
+TAO (3268|3292) - Transport_Cache_Manager::fill_set_i, current_size = 5, cache_maximum = 512
+TAO (3268|3292) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.0.90:1986> on 380
+TAO (3268|3292) - Transport_Cache_Manager::bind_i, 0x12e548 -> 0x123ddd0 Transport[380]
+DCPS_IR_Subscription::add_associated_publication Successfully added publication 1221E90
+DCPS_IR_Topic_Description::add_subscription_reference Successfully added subscription 123CF10
+DCPS_IR_Domain::find_participant Domain 411 located participant 122FA98 id: 4
+DCPS_IR_Participant::find_topic_reference Found topic reference 123BD38 id: 6
+DCPS_IR_Participant::add_publication Participant id 4 added publication 123FBD0 id: 4
+DCPS_IR_Topic::add_publication_reference Successfully added publication reference 123FBD0
+(3096|3188) Writer::start 
+(3096|3508) T3: Writer::svc begins.
+DCPS_IR_Domain::find_participant Domain 411 located participant 1222990 id: 3
+DCPS_IR_Participant::find_topic_reference Found topic reference 122ED30 id: 4
+DCPS_IR_Participant::add_subscription Successfully added subscription 1240510 id: 5
+Checking compatiblility of publication 2 and subscription 5
+Associating publication 2 and subscription 5
+(3268|3292) DCPS_IR_Publication::add_associated_subscription: calling pub 2 with sub 5
+TAO (3268|3292) - Transport_Cache_Manager::fill_set_i, current_size = 6, cache_maximum = 512
+(3260|1332) DataReaderListenerImpl::on_subscription_match 
+TAO (3268|3292) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.0.90:1982> on 396
+TAO (3268|3292) - Transport_Cache_Manager::bind_i, 0x12e548 -> 0x1240a58 Transport[396]
+DCPS_IR_Publication::add_associated_subscription Successfully added subscription 1240510
+(3268|3292) DCPS_IR_Subscription::add_associated_publication: calling sub 5 with pub 2
+TAO (3268|3292) - Transport_Cache_Manager::is_entry_idle, state is [0]
+(3260|3176) DataReaderListenerImpl::on_subscription_match 
+DCPS_IR_Subscription::add_associated_publication Successfully added publication 123C600
+DCPS_IR_Topic_Description::add_subscription_reference Successfully added subscription 1240510
+DCPS_IR_Domain::find_participant Domain 411 located participant 1222990 id: 3
+DCPS_IR_Participant::find_topic_reference Found topic reference 122EFD8 id: 5
+DCPS_IR_Participant::add_subscription Successfully added subscription 12417D8 id: 6
+Checking compatiblility of publication 4 and subscription 6
+Associating publication 4 and subscription 6
+(3268|3292) DCPS_IR_Publication::add_associated_subscription: calling pub 4 with sub 6
+TAO (3268|3292) - Transport_Cache_Manager::fill_set_i, current_size = 7, cache_maximum = 512
+TAO (3268|3292) - IIOP_Connection_Handler::open, IIOP connection to peer <192.168.0.90:1989> on 408
+TAO (3268|3292) - Transport_Cache_Manager::bind_i, 0x12e548 -> 0x1241d20 Transport[408]
+DCPS_IR_Publication::add_associated_subscription Successfully added subscription 12417D8
+(3268|3292) DCPS_IR_Subscription::add_associated_publication: calling sub 6 with pub 4
+TAO (3268|3292) - Transport_Cache_Manager::is_entry_idle, state is [0]
+(3260|3176) DataReaderListenerImpl::on_subscription_match 
+DCPS_IR_Subscription::add_associated_publication Successfully added publication 123FBD0
+DCPS_IR_Topic_Description::add_subscription_reference Successfully added subscription 12417D8
+ 11:16:39.843000 (3400|896) Writer::svc starting to write.
+ 11:16:40.156000 (3116|3048) Writer::svc starting to write.
+ 11:16:40.468000 (3096|3508) Writer::svc starting to write.
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118340999 937500000
+  instance_handle: 148fc00
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 31250000
+  instance_handle: 148fc00
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 125000000
+  instance_handle: 148fc00
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 218750000
+  instance_handle: 148fc00
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 250000000
+  instance_handle: 148fcf0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 312500000
+  instance_handle: 148fc00
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 343750000
+  instance_handle: 148fcf0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 406250000
+  instance_handle: 148fc00
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 437500000
+  instance_handle: 148fcf0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 500000000
+  instance_handle: 148fc00
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 531250000
+  instance_handle: 148fcf0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 562500000
+  instance_handle: 1928488
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 593750000
+  instance_handle: 148fc00
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_S(3400|896) Writer::svc finished.
+(3116|3048) Writer::svc finished.
+TATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 625000000
+  instance_handle: 148fcf0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 656250000
+  instance_handle: 1928488
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 687500000
+  instance_handle: 148fc00
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 718750000
+  instance_handle: 148fcf0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 750000000
+  instance_handle: 1928488
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 781250000
+  instance_handle: 148fc00
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 812500000
+  instance_handle: 148fcf0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 843750000
+  instance_handle: 1928488
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 875000000
+  instance_handle: 148fcf0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 906250000
+  instance_handle: 1928488
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 937500000
+  instance_handle: 148fcf0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341000 968750000
+  instance_handle: 1928488
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341001 0
+  instance_handle: 148fcf0
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestam(3096|3508) Writer::svc finished.
+DCPS_IR_Domain::find_participant Domain 411 located participant 1208370 id: 1
+DCPS_IR_Topic::remove_publication_reference Removed publication reference 1221E90
+TAO (3268|3292) - Transport_Cache_Manager::is_entry_idle, state is [0]
+DCPS_IR_Subscription::remove_associated_publication Removed publication 1221E90
+DCPS_IR_Publication::remove_associated_subscription Removed subscription 123CF10
+TAO (3268|3292) - Transport_Cache_Manager::is_entry_idle, state is [0]
+DCPS_IR_Participant::remove_publication Removed publication id: 1
+p: 1118341001 31250000
+  instance_handle: 1928488
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341001 62500000
+  instance_handle: 1928488
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341001 93750000
+  instance_handle: 1928488
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1118341001 125000000
+  instance_handle: 1928488
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(3260|3960) Peer has disconnected.
+DCPS_IR_Domain::find_participant Domain 411 located participant 1208370 id: 1
+DCPS_IR_Participant::find_topic_reference Found topic reference 1214748 id: 1
+DCPS_IR_Topic_Description::remove_topic Removed topic 1214748
+DCPS_IR_Participant::remove_topic_reference Removed topic reference 1214748 id: 1
+DCPS_IR_Domain::remove_participant Domain 411 removed participant 1208370 id: 1
+TAO (3268|3292) - Connection_Handler[308]::close_connection_eh, purging entry from cache
+TAO (3268|3292) - Connection_Handler[308]::close_connection_eh, removing from the reactor
+TAO (3268|3292) - Connection_Handler[308]::close_connection_eh, cancel all timers
+TAO (3268|3292) - Connection_Handler[308]::close_connection_eh
+TAO (3268|3292) - Connection_Handler[356]::close_connection_eh, purging entry from cache
+TAO (3268|3292) - Connection_Handler[356]::close_connection_eh, removing from the reactor
+TAO (3268|3292) - Connection_Handler[356]::close_connection_eh, cancel all timers
+TAO (3268|3292) - Connection_Handler[356]::close_connection_eh
+DCPS_IR_Domain::find_participant Domain 411 located participant 12151F8 id: 2
+DCPS_IR_Topic::remove_publication_reference Removed publication reference 123C600
+TAO (3268|3292) - Transport_Cache_Manager::is_entry_idle, state is [0]
+DCPS_IR_Subscription::remove_associated_publication Removed publication 123C600
+DCPS_IR_Publication::remove_associated_subscription Removed subscription 1240510
+TAO (3268|3292) - Transport_Cache_Manager::is_entry_idle, state is [0]
+DCPS_IR_Participant::remove_publication Removed publication id: 2
+(3260|3960) Peer has disconnected.
+DCPS_IR_Domain::find_participant Domain 411 located participant 12151F8 id: 2
+DCPS_IR_Participant::find_topic_reference Found topic reference 12215D8 id: 2
+DCPS_IR_Topic_Description::remove_topic Removed topic 12215D8
+DCPS_IR_Participant::remove_topic_reference Removed topic reference 12215D8 id: 2
+DCPS_IR_Domain::remove_participant Domain 411 removed participant 12151F8 id: 2
+TAO (3268|3292) - Connection_Handler[320]::close_connection_eh, purging entry from cache
+TAO (3268|3292) - Connection_Handler[320]::close_connection_eh, removing from the reactor
+TAO (3268|3292) - Connection_Handler[320]::close_connection_eh, cancel all timers
+TAO (3268|3292) - Connection_Handler[320]::close_connection_eh
+TAO (3268|3292) - Connection_Handler[396]::close_connection_eh, purging entry from cache
+TAO (3268|3292) - Connection_Handler[396]::close_connection_eh, removing from the reactor
+TAO (3268|3292) - Connection_Handler[396]::close_connection_eh, cancel all timers
+TAO (3268|3292) - Connection_Handler[396]::close_connection_eh
+DCPS_IR_Domain::find_participant Domain 411 located participant 122FA98 id: 4
+DCPS_IR_Topic::remove_publication_reference Removed publication reference 123FBD0
+TAO (3268|3292) - Transport_Cache_Manager::is_entry_idle, state is [0]
+DCPS_IR_Subscription::remove_associated_publication Removed publication 123FBD0
+DCPS_IR_Publication::remove_associated_subscription Removed subscription 12417D8
+TAO (3268|3292) - Transport_Cache_Manager::is_entry_idle, state is [0]
+DCPS_IR_Participant::remove_publication Removed publication id: 4
+(3260|3960) Peer has disconnected.
+DCPS_IR_Domain::find_participant Domain 411 located participant 122FA98 id: 4
+DCPS_IR_Participant::find_topic_reference Found topic reference 123BD38 id: 6
+DCPS_IR_Topic_Description::remove_topic Removed topic 123BD38
+DCPS_IR_Participant::remove_topic_reference Removed topic reference 123BD38 id: 6
+DCPS_IR_Domain::remove_participant Domain 411 removed participant 122FA98 id: 4
+TAO (3268|3292) - Connection_Handler[344]::close_connection_eh, purging entry from cache
+TAO (3268|3292) - Connection_Handler[344]::close_connection_eh, removing from the reactor
+TAO (3268|3292) - Connection_Handler[344]::close_connection_eh, cancel all timers
+TAO (3268|3292) - Connection_Handler[344]::close_connection_eh
+TAO (3268|3292) - Connection_Handler[408]::close_connection_eh, purging entry from cache
+TAO (3268|3292) - Connection_Handler[408]::close_connection_eh, removing from the reactor
+TAO (3268|3292) - Connection_Handler[408]::close_connection_eh, cancel all timers
+TAO (3268|3292) - Connection_Handler[408]::close_connection_eh
+DCPS_IR_Domain::find_participant Domain 411 located participant 1222990 id: 3
+DCPS_IR_Topic_Description::remove_subscription Removed subscription 123CF10
+DCPS_IR_Participant::remove_subscription Removed subscription id: 3
+DCPS_IR_Domain::find_participant Domain 411 located participant 1222990 id: 3
+DCPS_IR_Topic_Description::remove_subscription Removed subscription 1240510
+DCPS_IR_Participant::remove_subscription Removed subscription id: 5
+DCPS_IR_Domain::find_participant Domain 411 located participant 1222990 id: 3
+DCPS_IR_Topic_Description::remove_subscription Removed subscription 12417D8
+DCPS_IR_Participant::remove_subscription Removed subscription id: 6
+DCPS_IR_Domain::find_participant Domain 411 located participant 1222990 id: 3
+DCPS_IR_Participant::find_topic_reference Found topic reference 122EC30 id: 3
+DCPS_IR_Topic_Description::remove_topic Removed topic 122EC30
+DCPS_IR_Domain::remove_topic_description Domain 411 Removed Topic Description 12145D8
+DCPS_IR_Participant::remove_topic_reference Removed topic reference 122EC30 id: 3
+DCPS_IR_Domain::find_participant Domain 411 located participant 1222990 id: 3
+DCPS_IR_Participant::find_topic_reference Found topic reference 122ED30 id: 4
+DCPS_IR_Topic_Description::remove_topic Removed topic 122ED30
+DCPS_IR_Domain::remove_topic_description Domain 411 Removed Topic Description 1221498
+DCPS_IR_Participant::remove_topic_reference Removed topic reference 122ED30 id: 4
+DCPS_IR_Domain::find_participant Domain 411 located participant 1222990 id: 3
+DCPS_IR_Participant::find_topic_reference Found topic reference 122EFD8 id: 5
+DCPS_IR_Topic_Description::remove_topic Removed topic 122EFD8
+DCPS_IR_Domain::remove_topic_description Domain 411 Removed Topic Description 122EE68
+DCPS_IR_Participant::remove_topic_reference Removed topic reference 122EFD8 id: 5
+DCPS_IR_Domain::remove_participant Domain 411 removed participant 1222990 id: 3
+(3260|3176) DataReaderListenerImpl::~DataReaderListenerImpl
+(3260|3176) DataReaderListenerImpl::~DataReaderListenerImpl
+(3260|3176) DataReaderListenerImpl::~DataReaderListenerImpl
+foo1[0]: c = A, x = 0.000000 y = -1.000000, key = 896
+foo1[0]: c = B, x = 1.000000 y = -1.000000, key = 896
+foo1[0]: c = C, x = 2.000000 y = -1.000000, key = 896
+foo1[0]: c = D, x = 3.000000 y = -1.000000, key = 896
+foo2[0]: text = message 1, key = 3048
+foo1[0]: c = E, x = 4.000000 y = -1.000000, key = 896
+foo2[0]: text = message 2, key = 3048
+foo1[0]: c = F, x = 5.000000 y = -1.000000, key = 896
+foo2[0]: text = message 3, key = 3048
+foo1[0]: c = G, x = 6.000000 y = -1.000000, key = 896
+foo2[0]: text = message 4, key = 3048
+foo3[0]: c = A,  s = 1, l = 0, text = message 1, key = 3508
+foo1[0]: c = H, x = 7.000000 y = -1.000000, key = 896
+foo2[0]: text = message 5, key = 3048
+foo3[0]: c = B,  s = 2, l = 100, text = message 2, key = 3508
+foo1[0]: c = I, x = 8.000000 y = -1.000000, key = 896
+foo2[0]: text = message 6, key = 3048
+foo3[0]: c = C,  s = 3, l = 200, text = message 3, key = 3508
+foo1[0]: c = J, x = 9.000000 y = -1.000000, key = 896
+foo2[0]: text = message 7, key = 3048
+foo3[0]: c = D,  s = 4, l = 300, text = message 4, key = 3508
+foo2[0]: text = message 8, key = 3048
+foo3[0]: c = E,  s = 5, l = 400, text = message 5, key = 3508
+foo2[0]: text = message 9, key = 3048
+foo3[0]: c = F,  s = 6, l = 500, text = message 6, key = 3508
+foo2[0]: text = message 10, key = 3048
+foo3[0]: c = G,  s = 7, l = 600, text = message 7, key = 3508
+foo3[0]: c = H,  s = 8, l = 700, text = message 8, key = 3508
+foo3[0]: c = I,  s = 9, l = 800, text = message 9, key = 3508
+foo3[0]: c = J,  s = 10, l = 900, text = message 10, key = 3508
+
+*** T1 received 10 samples.
+
+*** T2 received 10 samples.
+
+*** T3 received 10 samples.
+TAO (3268|3292) - Connection_Handler[332]::close_connection_eh, purging entry from cache
+TAO (3268|3292) - Connection_Handler[332]::close_connection_eh, removing from the reactor
+TAO (3268|3292) - Connection_Handler[332]::close_connection_eh, cancel all timers
+TAO (3268|3292) - Connection_Handler[332]::close_connection_eh
+TAO (3268|3292) - Connection_Handler[380]::close_connection_eh, purging entry from cache
+TAO (3268|3292) - Connection_Handler[380]::close_connection_eh, removing from the reactor
+TAO (3268|3292) - Connection_Handler[380]::close_connection_eh, cancel all timers
+TAO (3268|3292) - Connection_Handler[380]::close_connection_eh
+INFO: ../../../dds/InfoRepo/DCPSInfoRepo being killed.
+test PASSED.

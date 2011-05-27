@@ -1,0 +1,16 @@
+..\..\..\dds\InfoRepo\.\DCPSInfoRepo.EXE -NOBITS -o C:\projects\dds\ACE_wrappers\TAO\DDS\performance-tests\DCPS\SimpleE2ETest\repo.ior -d C:\projects\dds\ACE_wrappers\TAO\DDS\performance-tests\DCPS\SimpleE2ETest\domain_ids
+.\.\subscriber.EXE -p 1 -n 5000 -d 7 -msi 5000 -mxs 5000
+.\.\publisher.EXE -p 1 -n 5000 -d 7 -msi 1000 -mxs 1000
+(1940|1928)  10:24:41.406000 Repo main
+ 2012|2028  10:24:42.000000 publisher main
+ 2024|1972  10:24:42.015000 subscriber main
+ 10:24:42.046000 Reader::svc begins 
+ 2012|2028 Writer::start 
+ 2012|312 Writer::svc begins samples with 128 floats.
+ 10:24:47.062000 Still waiting for data
+ 10:24:47.093000 (2012|312) Writer::svc starting to write.
+samples = 5000 reads = 57 zero_reads =11 samples per read = 87
+ Reader::svc finished.
+(2024|1972) Results: [1:5000:5000:5000:7:128:520:2328125.000000:465.625000]
+(2024|176) Peer has disconnected.
+INFO: ../../../dds/InfoRepo/DCPSInfoRepo being killed.

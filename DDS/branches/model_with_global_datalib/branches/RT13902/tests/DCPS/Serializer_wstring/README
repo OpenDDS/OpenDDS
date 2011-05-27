@@ -1,0 +1,9 @@
+This test verifies the bug fix for wstring serialize and de-serialize.
+
+The test is based on the DevGuideExample Messenger test and added
+wstring and wstring sequence to the data structure. The subscriber
+verifies if the received data are same as the samples sent by the
+DataWriter.
+
+
+

@@ -1,0 +1,1036 @@
+Mon May 12 20:28:20 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/NotifyTest/subscriber.cpp:
+
+          Moved listener object to the heap so reference counting works as
+          expected.  The merge from trunk takes care of this for other tests,
+          but this test doesn't exist yet on the trunk.
+
+Wed May  9 23:06:17 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/InfoRepo/DCPS_Utils.cpp (matching_partitions):
+
+          Use ACE::wild_match() instead of the POSIX fnmatch() function to
+          maximize portability.  fnmatch() is not supported on all
+          platforms.
+
+Fri May  9 15:34:40 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * bin/dcps_tests.lst:
+          Remove removed test from list of tests to execute.
+
+Thu May  8 20:12:39 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/TransientDataDurabilityCache.cpp:
+        * dds/DCPS/Watchdog.cpp:
+        * dds/DCPS/WatchdogTimer.cpp:
+
+          Further fixed for Visual C++.
+
+Thu May  8 19:56:56 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/TransientDataDurabilityCache.cpp:
+
+          Added the required pre-compiled header include.
+
+Wed May  8 20:20:03 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp (execute):
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp (execute):
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+
+          Made the reverse lock a member of the class since it only needs
+          to be instantiated once.
+
+          Added missing ACE_GUARD that actually acquires and releases the
+          reverse lock.  Thanks to Adam and Mike for pointing out the
+          missing guard.
+
+Wed May  8 19:16:33 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl (valid):
+
+          Work around "INFINITY" preprocessor macro namespace pollution.
+          s/INFINITY/DDS_DURATION_INFINITY/g.  Thanks to Adam for pointing
+          out the error.
+
+Wed May  8 07:32:53 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/WatchdogTimer.h:
+
+          Removed unnecessary include directive for "ace/Atomic_Op_T.h"
+          header.
+
+Wed May  8 06:47:12 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+        * dds/DCPS/Watchdog.cpp:
+        * dds/DCPS/Watchdog.h:
+        * dds/DCPS/WatchdogTimer.cpp:
+        * dds/DCPS/WatchdogTimer.h:
+
+          New "watchdog" implementations responsible for reporting missed
+          offered and requested deadlines, i.e. deadlines corresponding to
+          the "Deadline" QoS policy.
+
+        * dds/DCPS/DataReaderImpl.cpp (init):
+
+          Initialize the new RequestedDeadlineWatchdog member if a finite
+          deadline period is configured.
+
+          (get_requested_deadline_missed_status):
+
+          Implemented this method (except for "last_instance_handle"
+          updates).
+
+          (data_received):
+
+          Signal the RequestedDeadlineWatchdog to prevent it from calling
+          back on the DataReaderListener::on_requested_deadline_missed()
+          method.
+
+        * dds/DCPS/DataReaderImpl.h:
+
+          Added new RequestedDeadlineWatchdog member.
+
+        * dds/DCPS/DataWriterImpl.cpp (init):
+
+          Initialize the new OfferedDeadlineWatchdog member if a finite
+          deadline period is configured.
+
+          (get_offered_deadline_missed_status):
+
+          Implemented this method.
+
+          (data_received):
+
+          Signal the OfferedDeadlineWatchdog to prevent it from calling
+          back on the DataReaderListener::on_offered_deadline_missed()
+          method.
+
+        * dds/DCPS/DataWriterImpl.h:
+
+          Added new OfferedDeadlineWatchdog member.
+
+        * dds/DCPS/Qos_Helper.inl (valid):
+
+          Implemented this method for the DDS::DeadlineQosPolicy case.
+
+        * dds/DCPS/WriteDataContainer.cpp (last_unsent_instance_handle):
+        * dds/DCPS/WriteDataContainer.h (last_unsent_instance_handle):
+
+          New method that returns the InstanceHandle_t value of unsent
+          data head sample.
+
+Mon May  5 21:09:03 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+
+        * tests/DCPS/LinkState:
+        * tests/DCPS/LinkState/DiagnosticManager.h:
+        * tests/DCPS/LinkState/DiagnosticManager.cpp:
+        * tests/DCPS/LinkState/LinkState.mpc:
+        * tests/DCPS/LinkState/README:
+        * tests/DCPS/LinkState/TestConfig.h:
+        * tests/DCPS/LinkState/TestConfig.cpp:
+        * tests/DCPS/LinkState/TestException.h:
+        * tests/DCPS/LinkState/TestRouter.h:
+        * tests/DCPS/LinkState/TestRouter.cpp:
+        * tests/DCPS/LinkState/router.cpp:
+        * tests/DCPS/LinkState/run_test.pl:
+
+          Removed these files.  Tests for a removed feature.
+
+Mon May  5 19:06:34 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+          Removed references to federation files.
+
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.inl:
+        * dds/InfoRepo/FederatorConfig.cpp:
+        * dds/InfoRepo/FederatorLinkListener.h:
+        * dds/InfoRepo/FederatorLinkListener.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorManager_T.cpp:
+        * dds/InfoRepo/FederatorManager_T_Impl.cpp:
+        * dds/InfoRepo/FederatorPublications.h:
+        * dds/InfoRepo/FederatorPublications.inl:
+        * dds/InfoRepo/FederatorPublications.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.h:
+        * dds/InfoRepo/FederatorRemoteLink.inl:
+        * dds/InfoRepo/FederatorRemoteLink.cpp:
+        * dds/InfoRepo/FederatorSubscriptions.h:
+        * dds/InfoRepo/FederatorSubscriptions.inl:
+        * dds/InfoRepo/FederatorSubscriptions.cpp:
+        * dds/InfoRepo/LinkStateManager.h:
+        * dds/InfoRepo/LinkStateManager.cpp:
+        * dds/InfoRepo/federator_export.h:
+
+          Removed these files.  These have been retaines on the
+          branches/federation branch.
+
+Mon May  5 14:58:27 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/LinkStateManager.cpp:
+          Updated diagnostic messages.
+
+Thu May  1 07:03:00 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/InstanceState.cpp:
+
+          Added unregister notification support.
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+        * DevGuideExamples/DCPS/Messenger/Writer.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+
+          Removed dispose notification test code since a new test was
+          added for notification test.
+
+        * bin/dcps_tests.lst:
+
+          Added NotifyTest test.
+
+        * tests/DCPS/NotifyTest/DataReaderListener.h:
+        * tests/DCPS/NotifyTest/DataReaderListener.cpp:
+        * tests/DCPS/NotifyTest/Messenger.idl:
+        * tests/DCPS/NotifyTest/NotifyTest.mpc:
+        * tests/DCPS/NotifyTest/Writer.h:
+        * tests/DCPS/NotifyTest/Writer.cpp:
+        * tests/DCPS/NotifyTest/domain_ids:
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/NotifyTest/publisher.cpp:
+        * tests/DCPS/NotifyTest/run_test.pl:
+        * tests/DCPS/NotifyTest/sub.ini:
+        * tests/DCPS/NotifyTest/subscriber.cpp:
+        * tests/DCPS/NotifyTest/tcp.conf:
+
+          Added dispose and unregister notification test.
+
+Tue Apr 29 19:41:12 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/TransientDataDurabilityCache.cpp:
+        * dds/DCPS/TransientDataDurabilityCache.h:
+
+          Rewrote interface and implementation to expect unsent data to be
+          inserted into the cache when a DataWriter is destroyed.
+
+          Implemented DURABILITY_SERVICE support.
+
+          Implemented service_cleanup_delay support.
+
+          Addressed a problem where marshaled sample message containing a
+          header ended up with an additional header.
+
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+
+          Added STL-style iterator support.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Refactored history depth computation code so that it could be
+          used by similar DURABILITY_SERVICE code.
+
+          Samples are no longer made durable by caching each time samples
+          are written by the user.  Instead, unsent samples are made
+          durable when the DataWriter is destroyed.
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+
+          Data durability caches are now owned by the Publisher.  This
+          makes them domain-specific.
+
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+
+          Refactored history depth computation code from DataWriterImpl so
+          that it may be used by similar DURABILITY_SERVICE code.
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+
+          Data durability caches are now owned by the Publisher.  This
+          makes them domain-specific.
+
+          Added default values for Topic and DataWriter DURABILITY_SERVICE
+          QoS.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+
+          Transfer remaining unsent data to data DURABILITY cache.
+
+Fri Apr 25 14:40:37 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+          Take ownership of the contained repository when directly
+          loaded.
+
+Tue Apr 22 20:16:03 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Added DURABILITY_SERVICE related IDL.
+
+          Incremented TRANSPORTTYPE_QOS_POLICY_ID value since its previous
+          value conflicted with the DURABILITY_SERVICE policy ID value.
+
+Fri Apr 11 20:10:23 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+          Updated to allow PARTITION QoS policies to have values.
+          Changed operator==() for these policy values to actually
+          compare the strings rather than the pointers.
+
+Fri Apr 11 18:42:03 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+          Use the previously processed command line arguments when
+          parsing the local options.
+
+Fri Apr 11 16:42:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/LinkStateManager.cpp:
+          Disambiguate some comparisons after adding type conversion.
+
+Fri Apr 11 16:12:53 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+          Added conversion to integer type for SequenceNumber.
+
+Sat Apr  5 08:11:03 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * DCPS/DataDurabilityCache.cpp:
+        * DCPS/DataDurabilityCache.h:
+        * DCPS/TransientDataDurabilityCache.cpp:
+        * DCPS/TransientDataDurabilityCache.h:
+
+          New DURABILITY QoS related source files.  Support for publisher
+          side LIFESPAN QoS is also implemented in these files.
+
+        * DCPS/DataWriterImpl.cpp:
+        * DCPS/DataWriterImpl.h (create_sample_data_message):
+
+          Made this method public.
+
+          (get_type_name):
+
+          Added new method to retrieve topic type name.
+
+        * DCPS/Service_Participant.cpp:
+        * DCPS/Service_Participant.h:
+
+          Added data cache members for TRANSIENT and PERSISTENT DURABILITY
+          QoS.  PERSISTENT support is temporarily disabled.
+
+        * DCPS/WriteDataContainer.cpp:
+        * DCPS/WriteDataContainer.h:
+
+          Added support for TRANSIENT and PERSISTENT DURABILITY QoS.
+          The changes strive to keep WriteDataContainer interaction with
+          the underlying durability cache through an abstract interface
+          and factory method to minimize knowledge of the cache
+          internals.
+
+        * tests/DCPS/TransientTest:
+
+          Initial test for TRANSIENT DURABILITY QoS based entirely on the
+          TransientLocalTest.
+
+Fri Apr  4 19:15:45 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+          Added set_repo() method to allow installation of repositories
+          directly by reference.
+
+Fri Apr  4 14:24:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.cpp:
+          Some minor cleanup.
+
+Thu Apr  3 06:22:21 UTC 2008  Ossama Othman  <othman_o@ociweb.com>
+
+        * dds/InfoRepo/DCPS_Utils.cpp (compatibleQOS):
+
+          Prevent PARTITION matching result from overriding previously
+          established QoS incompatibilities.  Thanks to Mike for the
+          patch.
+
+Wed Apr  2 20:26:58 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.cpp:
+          Disable intialization of the federation mechanisms if not
+          federation Id value is supplied.
+
+        * dds/InfoRepo/DCPS_Utils.cpp:
+          Changed the sense of compatibility for PARTITION QoS policy
+          matching.
+
+Wed Apr  2 15:25:42 UTC 2008  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          Corrected problems with SunCC and Visual C++.
+
+Wed Apr  2 14:49:02 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.cpp:
+          Changed to require the ORB to be explicitly passed in during
+          configuration.  This removes the use of a more modern
+          mechanism for accessing the ORB from the servant.
+
+Tue Apr  1 23:06:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorManager_T_Impl.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.h:
+        * dds/InfoRepo/FederatorRemoteLink.inl:
+          Continued federation implementation.
+
+Tue Apr  1 19:48:17 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/FederatorPublications.h:
+        * dds/InfoRepo/FederatorPublications.inl:
+        * dds/InfoRepo/FederatorPublications.cpp:
+          And more forgotten files added.
+
+Tue Apr  1 19:40:01 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.h:
+        * dds/InfoRepo/FederatorRemoteLink.cpp:
+        * dds/InfoRepo/FederatorSubscriptions.h:
+          Implemented remote repository publications.
+
+Tue Apr  1 14:57:49 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+          Implemented minimum spanning tree maintenance.
+
+        * dds/InfoRepo/FederatorManager_T.cpp:
+        * dds/InfoRepo/FederatorManager_T_Impl.cpp:
+        * dds/InfoRepo/UpdateListener_T.h:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+          Added some files that should have been added with yesterdays
+          work.
+
+Tue Apr  1 14:32:49 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/FederatorLinkListener.h:
+        * dds/InfoRepo/FederatorLinkListener.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.h:
+        * dds/InfoRepo/FederatorRemoteLink.cpp:
+        * dds/InfoRepo/FederatorSubscriptions.h:
+        * dds/InfoRepo/FederatorSubscriptions.cpp:
+          Changed FederatorManager to ManagerImpl to remove gratuitous
+          redundancy.
+
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+          Renamed these files.
+
+Mon Mar 31 22:24:47 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/FederatorConfig.cpp:
+        * dds/InfoRepo/FederatorLinkListener.h:
+        * dds/InfoRepo/FederatorLinkListener.cpp:
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.h:
+        * dds/InfoRepo/FederatorRemoteLink.inl:
+        * dds/InfoRepo/FederatorSubscriptions.h:
+        * dds/InfoRepo/FederatorSubscriptions.cpp:
+          Continue to implement federation.
+
+Fri Mar 28 22:15:18 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/FederatorLinkListener.h:
+        * dds/InfoRepo/FederatorLinkListener.cpp:
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+        * dds/InfoRepo/FederatorRemoteLink.h:
+        * dds/InfoRepo/FederatorRemoteLink.inl:
+        * dds/InfoRepo/FederatorRemoteLink.cpp:
+        * dds/InfoRepo/FederatorSubscriptions.h:
+        * dds/InfoRepo/FederatorSubscriptions.inl:
+        * dds/InfoRepo/FederatorSubscriptions.cpp:
+          Continue to implement federation.
+
+        * dds/InfoRepo/FederatorRemoteData.h:
+        * dds/InfoRepo/FederatorRemoteData.inl:
+        * dds/InfoRepo/FederatorRemoteData.cpp:
+          Renamed these files to FederatorRemoteLink.
+
+Fri Mar 28 02:58:18 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+        * dds/InfoRepo/FederatorRemoteData.h:
+        * dds/InfoRepo/FederatorRemoteData.cpp:
+          Continue to implement federation.
+
+Thu Mar 27 16:35:37 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DdsDcpsInfrastructure.idl (DURATION_INFINITY_NSEC):
+
+          Reverted correction to this constant.  It will be corrected at a
+          later point after some discussion.
+
+Thu Mar 27 13:25:08 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/FederatorRemoteData.h:
+        * dds/InfoRepo/FederatorRemoteData.inl:
+        * dds/InfoRepo/FederatorRemoteData.cpp:
+          Forgot to add these files.
+
+Thu Mar 27 09:43:22 UTC 2008  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DdsDcpsInfrastructure.idl (DURATION_INFINITY_NSEC):
+
+          Corrected value (s/0x7ffffff/0xffffffff/).  The
+          DDS::Duration_t::nanosec field is a 32 bit unsigned integer.
+          The previous "infinity" value appeared to be a typo that was
+          based on a signed 32 bit integer.
+
+        * dds/DCPS/Qos_Helper.h (truncate_cast):
+        * dds/DCPS/Qos_Helper.inl (time_t_to_long, truncate_cast):
+
+          Generalized time_t_to_long convenience function to a truncating
+          cast function.
+
+        * dds/DCPS/Service_Participant.h:
+
+          Preprocessor directives should start in column 1 (at least the
+          '#' should).
+
+        * dds/InfoRepo/DCPS_Utils.h (operator==, compatibleQOS):
+
+          Return bool instead of int to better reflect the type of value
+          being returned.
+
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+          Likewise.
+
+          (matching_partitions, compatibleQOS):
+
+          Added simple PARTITION publisher/subscriber QoS implementation.
+          Updates to established associations upon change of the PARTITION
+          will be added at a later date.
+
+        * dds/InfoRepo/Federator.idl:
+
+          Corrected use of deprecated anonymous sequences.
+
+Wed Mar 26 23:10:43 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.inl:
+        * dds/InfoRepo/FederatorConfig.cpp:
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+          Continued implementation of federation.
+
+Wed Mar 26 18:09:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.inl:
+        * dds/InfoRepo/FederatorConfig.cpp:
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+          Implemented configuration file processing and argument vector
+          management.  Incorporated into repository process and
+          federation manager.
+
+Wed Mar 26 15:16:48 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/FederatorConfig.inl:
+          Forgot to add this file.
+
+Wed Mar 26 15:00:48 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.cpp:
+          Some refactoring to simplify the implementaion.
+
+Wed Mar 26 00:50:18 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/Federator.idl:
+          Added a constant and an additional status value.
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.cpp:
+          Added abstraction for Federator configuration from file
+          specified on command line.
+
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+          Continue implementation.
+
+Fri Mar 21 23:45:20 UTC 2008  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+        * dds/InfoRepo/LinkStateManager.h:
+        * dds/InfoRepo/LinkStateManager.cpp:
+        * dds/InfoRepo/federator_export.h:
+
+          Fixed compilation errors on windows due to precompiled
+          header not included.
+
+Fri Mar 21 20:19:02 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Federation:
+          Added new test directory.
+
+        * tests/DCPS/Federation/DataReaderListener.h:
+        * tests/DCPS/Federation/DataReaderListener.cpp:
+        * tests/DCPS/Federation/Federation.mpc:
+        * tests/DCPS/Federation/Publisher.h:
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/README:
+        * tests/DCPS/Federation/Subscriber.h:
+        * tests/DCPS/Federation/Subscriber.cpp:
+        * tests/DCPS/Federation/TestConfig.h:
+        * tests/DCPS/Federation/TestConfig.cpp:
+        * tests/DCPS/Federation/TestException.h:
+        * tests/DCPS/Federation/domain1_ids:
+        * tests/DCPS/Federation/domain2_ids:
+        * tests/DCPS/Federation/publisher_main.cpp:
+        * tests/DCPS/Federation/run_test.pl:
+        * tests/DCPS/Federation/subscriber_main.cpp:
+          Initial setup of test for repository federation.
+
+Wed Mar 19 22:35:55 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+          Added federator to repository process.  Added to IORTable as
+          well.
+
+        * dds/InfoRepo/Federator.idl:
+          Added additional status to use during join operations.
+
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+          Starting to implement federation.
+
+Wed Mar 19 18:59:24 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+          Simplified join_federation() signature and added federationId()
+          accessor.
+
+        * docs/design/federation.txt:
+          Updated with Use Cases and Scenarios.
+
+Tue Mar 18 20:41:14 UTC 2008   Yan Dai  <dai_y@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+
+          Added debug logging for the instance state.
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          - Moved instance state update for dispose before listener callback
+            instead after so the dispose notification SampleInfo has the
+            correct instance state - NOT_ALIVE_DISPOSED_INSTANCE_STATE.
+          - Fixed a bug that cause samples rejected mistakenly.
+
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/ViewState/Reader.cpp
+
+          Accommodated to the changes of dispose notification support.
+          The sample_rank is changed to count the dispose sample as well.
+
+Fri Mar 14 00:26:30 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+        * DevGuideExamples/DCPS/Messenger/Writer.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DdsDcpsInfrastructure.idl:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+          Patched in Yan's implementation to correct the dispose()
+          behavior.  Issues remain with some tests that will need to
+          be resolved before merging back with the trunk.
+          NOTE! This moves the SampleInfo IDL definition from the
+          specfication version 1.0 to specification version 1.2
+          structure.  It also requires that applications check to
+          determine if a sample has been made available of if only
+          a state change is being reported by an invocation of
+          on_data_available().
+
+Thu Mar 13 22:37:04 UTC 2007  Ossama Othman  <othmano@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl (time_t_to_long):
+
+          Declare this convenience function as inline.  Addresses multiple
+          definition link-time errors in inline-enabled builds.
+
+Thu Mar 13 19:05:54 UTC 2007  Ossama Othman  <othmano@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+
+          Reintroduced exception specifications that were removed in my
+          earlier commit.  TAO 1.5a does not include the upstream TAO_IDL
+          changes that remove C++ exception specifications from
+          IDL-defined operations.
+
+        * bin/DCPS/HTemplate.pm:
+        * bin/DCPS/IDLTemplate.pm:
+
+          Reverted OMG DDS specification document number update.  OpenDDS
+          more closely conforms to the earlier spec.
+
+        * dds/DCPS/QoS_Helper.inl:
+
+          Make use of ACE_Utils::truncate_cast<> conditional on the
+          version of ACE that supports it.
+
+Thu Mar 13 04:17:31 UTC 2007  Ossama Othman  <othmano@ociweb.com>
+
+        * AUTHORS:
+
+          Added myself to the list of authors.
+
+        * DDS_TAO.mwc:
+
+          Added TAO ImR_Client.mpc to MPC workspace.  The DCPSInfoRepo
+          project depends on it.
+
+        * LICENSE:
+
+          Cosmetic clean-up.  Wrapped text at canonical column 74.
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Favor standard C++ method for marking an argument as unused
+          instead of using the ACE_UNUSED_ARG macro.
+
+          Favor pre-increment over post-increment, particularly for STL
+          map iterators.  Better performance.
+
+          Obtain a copy of the "end()" map iterator once before running a
+          loop rather than during each loop iteration.  Better
+          performance.
+
+          Removed a number of exception specifications.  Most C++ gurus
+          believe them to be a misfeature of C++, and should in general
+          not be used.
+
+          Added missing initialization of data_allocator_ member in
+          DataReaderImpl constructor.
+
+          Const-correctness improvements.
+
+          Made code indentation consistent with dominant OpenDDS
+          indentation style.
+
+          Code clean-up.
+
+        * bin/DCPS/HTemplate.pm:
+
+          Removed a number of exception specifications.  See above for
+          rationale.
+
+          Made code indentation consistent with dominant OpenDDS
+          indentation style.
+
+          Updated OMG DDS specification document number in documentation.
+          s/04-12-02/07-01-01/g
+
+          Code clean-up.
+
+        * bin/DCPS/IDLTemplate.pm:
+
+          Updated OMG DDS specification document number in documentation.
+          s/04-12-02/07-01-01/g
+
+          Nuked trailing whitespace.
+
+        * dds/DCPS/BuiltInTopicUtils.cpp:
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Const-correctness improvements.
+
+          Favor pre-increment over post-increment.
+
+          Code clean-up and cosmetic improvements.
+
+        * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/DataBlockLockPool.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/ZeroCopyAllocator_T.cpp:
+        * dds/InfoRepo/FederatorManager.cpp:
+
+          Favor standard C++ method for marking an argument as unused
+          instead of using the ACE_UNUSED_ARG macro.
+
+        * dds/DCPS/Definitions.h (SequenceNumber):
+
+          Removed const qualifer from constructor parameter of built-in
+          type that was passed in by value.  There is no need for a const
+          qualifier in this case.
+
+          (operator++):
+
+          Implement post-increment operator in terms of pre-increment
+          operator.  It's good style to do so.
+
+
+        * dds/DCPS/Marked_Default_Qos.cpp (INVALID_ENUM_VALUE):
+
+          Declare this variable as a constant.
+
+        * dds/DCPS/Qos_Helper.h:
+
+          Coding style consistency update.  Removed white space before
+          trailing semi-colons.
+
+        * dds/DCPS/Qos_Helper.inl (time_value_to_time):
+          (time_value_to_duration):
+
+          Replaced static_cast<> of time_t type to a CORBA::Long with an
+          ACE_Utils::truncate_cast<>.  The latter is safer in the case
+          where the ACE_Time_Value seconds field (time_t) is larger than a
+          CORBA::Long.
+
+          (valid, consistent, operator==):
+
+          Removed redundant and unnecessary "if" statements.
+
+          Replaced use of ACE_UNUSED_ARG macro in favor of standard C++
+          method of marking an argument as unused (comment out the
+          argument name).
+
+        * dds/DCPS/RcHandle_T.h (operator=):
+
+          Improved exception-safety by using canonical copy/swap idiom.
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Improved exception-safety by taking advantage of
+          ACE_Auto_Array_Ptr<>.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Improved const-correctness.
+
+          (register_instance):
+
+          Improved exception safety by taking advantage of an auto_ptr<>.
+
+        * dds/DCPS/WriteDataContainer.h:
+
+          Documentation clean-up.
+
+        * dds/InfoRepo/ArrDelAdapter.h:
+
+          No need to include <memory>.
+
+        * tests/DCPS/README:
+
+          New simple/placeholder file containing description of DCPS
+          tests.
+
+Wed Mar  5 19:29:15 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+          Changed to obtain Topic from Domain for add_publication() and
+          add_subscription() methods.
+
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+          Added storage and a method to grab a Topic by RepoId value.
+
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+          Added Process and Thread identifiers to ERROR messages.
+
+Tue Mar  4 02:47:12 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/Federator.idl:
+          Added topic and type name constants for convenience.
+
+Fri Feb 29 23:20:35 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/LinkState/TestRouter.cpp:
+          Removed some silliness in the test loops.
+
+Fri Feb 29 01:37:08 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/LinkState/DiagnosticManager.cpp:
+        * tests/DCPS/LinkState/TestRouter.cpp:
+          Simplify the output formatting a bit.
+
+Fri Feb 29 00:14:41 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+          Updating the weak strict ordering operations.  Again.
+
+        * dds/InfoRepo/LinkStateManager.cpp:
+          Added diagnostic messages.
+
+        * tests/DCPS/LinkState:
+        * tests/DCPS/LinkState/DiagnosticManager.h:
+        * tests/DCPS/LinkState/DiagnosticManager.cpp:
+        * tests/DCPS/LinkState/LinkState.mpc:
+        * tests/DCPS/LinkState/README:
+        * tests/DCPS/LinkState/TestConfig.h:
+        * tests/DCPS/LinkState/TestConfig.cpp:
+        * tests/DCPS/LinkState/TestException.h:
+        * tests/DCPS/LinkState/TestRouter.h:
+        * tests/DCPS/LinkState/TestRouter.cpp:
+        * tests/DCPS/LinkState/router.cpp:
+        * tests/DCPS/LinkState/run_test.pl:
+        * bin/dcps_tests.lst:
+          Added rudimentary LinkStateManager unit test.
+
+Thu Feb 28 19:56:58 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/LinkStateManager.h:
+        * dds/InfoRepo/LinkStateManager.cpp:
+          Initial implementation of Prim's algorithm.  The
+          LinkStateManager is now complete.
+
+Wed Feb 27 22:26:19 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+          Made the ordering operations correct with respect to the
+          lollipop "candy" portion.  N.B. The ordering will fail if the
+          distance reaches or exceeds 1/2 of the "candy" size.
+
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+          Added additional parameters to the join_federation() method.
+
+        * dds/InfoRepo/LinkStateManager.h:
+        * dds/InfoRepo/LinkStateManager.cpp:
+          Implemented structures and processing other than Prim's
+          algorithm.
+
+Wed Feb 27 02:16:42 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/FederatorManager.h:
+        * dds/InfoRepo/FederatorManager.cpp:
+          More stubs for federation implementation.
+
+Wed Feb 27 00:12:39 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/LinkStateManager.h:
+        * dds/InfoRepo/LinkStateManager.cpp:
+          Starting to implement the federation interfaces.
+
+Fri Feb 22 22:44:24 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+          Added BuiltinTopicKeyLess functor to simplify using
+          BuiltinTopicKey_t values as map keys.
+
+Wed Feb 20 22:47:54 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+          PARTITION QoS is now valid.
+
+Tue Feb 19 17:17:31 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * docs/design/partition.txt:
+          Added some explicit information about fnmatch().
+
+Tue Feb 19 16:05:47 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * docs/design/partition.txt:
+          Added documentation about the PARTITION Qos policy
+          implementation.
+
+Tue Feb 12 23:05:29 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+          Added DCPSBitTransportIPAddress and DCPSBitTransportPort key
+          specifications to the [repostory] sections.
+
+        * docs/DomainRepoConfig.html:
+        * docs/design/federation.txt:
+          Updated documentation.
+
+Mon Feb  4 23:31:34 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * docs/design/deadline.txt:
+        * docs/design/durability.txt:
+        * docs/design/federation.txt:
+        * docs/design/lifespan.txt:
+
+          Adding design documentation for features we will be adding on
+          this branch.

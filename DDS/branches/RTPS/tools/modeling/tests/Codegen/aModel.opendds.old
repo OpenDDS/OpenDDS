@@ -1,0 +1,1016 @@
+<?xml version="1.0"?>
+
+<generator:model name='aModel'
+                 xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'
+                 xmlns:generator='http://www.opendds.org/modeling/schemas/Generator/1.0'>
+
+<generator:typelib name="structlib"/>
+
+<opendds:application name="aPublisher"/>
+<opendds:application name="aSubscriber"/>
+
+<opendds:domainParticipant name="part1"
+                           domain="1"
+                           mask="DEFAULT_STATUS_MASK">
+  <opendds:qosPolicy name="part1userdata"/>
+  <opendds:qosPolicy name="part1entityfactory"/>
+  <opendds:publisher name="pub1"
+                     transport="transport1"
+                     mask="DEFAULT_STATUS_MASK">
+    <opendds:qosPolicy name="pub1presentation"/>
+    <opendds:qosPolicy name="pub1partition"/>
+    <opendds:qosPolicy name="pub1groupdata"/>
+    <opendds:qosPolicy name="pub1entityfactory"/>
+    <opendds:dataWriter name="writer1"
+                        topic="topic1"
+                        mask="DEFAULT_STATUS_MASK">
+      <opendds:qosPolicy name="writer1durability"/>
+      <opendds:qosPolicy name="writer1dservice"/>
+      <opendds:qosPolicy name="writer1deadline"/>
+      <opendds:qosPolicy name="writer1latency"/>
+      <opendds:qosPolicy name="writer1liveliness"/>
+      <opendds:qosPolicy name="writer1reliability"/>
+      <opendds:qosPolicy name="writer1dorder"/>
+      <opendds:qosPolicy name="writer1history"/>
+      <opendds:qosPolicy name="writer1limits"/>
+      <opendds:qosPolicy name="writer1priority"/>
+      <opendds:qosPolicy name="writer1lifespan"/>
+      <opendds:qosPolicy name="writer1userdata"/>
+      <opendds:qosPolicy name="writer1ownership"/>
+      <opendds:qosPolicy name="writer1strength"/>
+      <opendds:qosPolicy name="writer1lifecycle"/>
+    </opendds:dataWriter>
+  </opendds:publisher>
+  <opendds:publisher name="pub3"
+                     transport="transport1"
+                     mask="DEFAULT_STATUS_MASK">
+    <opendds:qosPolicy name="pub3presentation"/>
+    <opendds:qosPolicy name="pub3partition"/>
+    <opendds:qosPolicy name="pub3groupdata"/>
+    <opendds:qosPolicy name="pub3entityfactory"/>
+    <opendds:dataWriter name="writer2"
+                        topic="topic2"
+                        mask="DEFAULT_STATUS_MASK">
+      <opendds:qosPolicy name="writer2durability"/>
+      <opendds:qosPolicy name="writer2dservice"/>
+      <opendds:qosPolicy name="writer2deadline"/>
+      <opendds:qosPolicy name="writer2latency"/>
+      <opendds:qosPolicy name="writer2liveliness"/>
+      <opendds:qosPolicy name="writer2reliability"/>
+      <opendds:qosPolicy name="writer2dorder"/>
+      <opendds:qosPolicy name="writer2history"/>
+      <opendds:qosPolicy name="writer2limits"/>
+      <opendds:qosPolicy name="writer2priority"/>
+      <opendds:qosPolicy name="writer2lifespan"/>
+      <opendds:qosPolicy name="writer2userdata"/>
+      <opendds:qosPolicy name="writer2ownership"/>
+      <opendds:qosPolicy name="writer2strength"/>
+      <opendds:qosPolicy name="writer2lifecycle"/>
+    </opendds:dataWriter>
+  </opendds:publisher>
+  <opendds:subscriber name="sub1"
+                      transport="transport3"
+                      mask="DEFAULT_STATUS_MASK">
+    <opendds:qosPolicy name="sub1presentation"/>
+    <opendds:qosPolicy name="sub1partition"/>
+    <opendds:qosPolicy name="sub1groupdata"/>
+    <opendds:qosPolicy name="sub1entityfactory"/>
+    <opendds:dataReader name="reader1"
+                        topic="topic1"
+                        mask="DEFAULT_STATUS_MASK">
+      <opendds:qosPolicy name="reader1durability"/>
+      <opendds:qosPolicy name="reader1deadline"/>
+      <opendds:qosPolicy name="reader1latency"/>
+      <opendds:qosPolicy name="reader1liveliness"/>
+      <opendds:qosPolicy name="reader1reliability"/>
+      <opendds:qosPolicy name="reader1dorder"/>
+      <opendds:qosPolicy name="reader1history"/>
+      <opendds:qosPolicy name="reader1limits"/>
+      <opendds:qosPolicy name="reader1userdata"/>
+      <opendds:qosPolicy name="reader1ownership"/>
+      <opendds:qosPolicy name="reader1filter"/>
+      <opendds:qosPolicy name="reader1lifecycle"/>
+    </opendds:dataReader>
+  </opendds:subscriber>
+  <opendds:subscriber name="sub3"
+                      transport="transport3"
+                      mask="DEFAULT_STATUS_MASK">
+    <opendds:qosPolicy name="sub3presentation"/>
+    <opendds:qosPolicy name="sub3partition"/>
+    <opendds:qosPolicy name="sub3groupdata"/>
+    <opendds:qosPolicy name="sub3entityfactory"/>
+    <opendds:dataReader name="reader2"
+                        topic="topic2"
+                        mask="DEFAULT_STATUS_MASK">
+      <opendds:qosPolicy name="reader2durability"/>
+      <opendds:qosPolicy name="reader2deadline"/>
+      <opendds:qosPolicy name="reader2latency"/>
+      <opendds:qosPolicy name="reader2liveliness"/>
+      <opendds:qosPolicy name="reader2reliability"/>
+      <opendds:qosPolicy name="reader2dorder"/>
+      <opendds:qosPolicy name="reader2history"/>
+      <opendds:qosPolicy name="reader2limits"/>
+      <opendds:qosPolicy name="reader2userdata"/>
+      <opendds:qosPolicy name="reader2ownership"/>
+      <opendds:qosPolicy name="reader2filter"/>
+      <opendds:qosPolicy name="reader2lifecycle"/>
+    </opendds:dataReader>
+  </opendds:subscriber>
+</opendds:domainParticipant>
+
+<opendds:domainParticipant name="part2"
+                           domain="2"
+                           mask="DEFAULT_STATUS_MASK">
+  <opendds:qosPolicy name="part2userdata"/>
+  <opendds:qosPolicy name="part2entityfactory"/>
+  <opendds:publisher name="pub2"
+                     transport="transport2"
+                     mask="DEFAULT_STATUS_MASK">
+    <opendds:qosPolicy name="pub2presentation"/>
+    <opendds:qosPolicy name="pub2partition"/>
+    <opendds:qosPolicy name="pub2groupdata"/>
+    <opendds:qosPolicy name="pub2entityfactory"/>
+    <opendds:dataWriter name="writer3"
+                        topic="topic1"
+                        mask="DEFAULT_STATUS_MASK">
+      <opendds:qosPolicy name="writer3durability"/>
+      <opendds:qosPolicy name="writer3dservice"/>
+      <opendds:qosPolicy name="writer3deadline"/>
+      <opendds:qosPolicy name="writer3latency"/>
+      <opendds:qosPolicy name="writer3liveliness"/>
+      <opendds:qosPolicy name="writer3reliability"/>
+      <opendds:qosPolicy name="writer3dorder"/>
+      <opendds:qosPolicy name="writer3history"/>
+      <opendds:qosPolicy name="writer3limits"/>
+      <opendds:qosPolicy name="writer3priority"/>
+      <opendds:qosPolicy name="writer3lifespan"/>
+      <opendds:qosPolicy name="writer3userdata"/>
+      <opendds:qosPolicy name="writer3ownership"/>
+      <opendds:qosPolicy name="writer3strength"/>
+      <opendds:qosPolicy name="writer3lifecycle"/>
+    </opendds:dataWriter>
+  </opendds:publisher>
+  <opendds:publisher name="pub4"
+                     transport="transport2"
+                     mask="DEFAULT_STATUS_MASK">
+    <opendds:qosPolicy name="pub4presentation"/>
+    <opendds:qosPolicy name="pub4partition"/>
+    <opendds:qosPolicy name="pub4groupdata"/>
+    <opendds:qosPolicy name="pub4entityfactory"/>
+    <opendds:dataWriter name="writer4"
+                        topic="topic2"
+                        mask="DEFAULT_STATUS_MASK">
+      <opendds:qosPolicy name="writer4durability"/>
+      <opendds:qosPolicy name="writer4dservice"/>
+      <opendds:qosPolicy name="writer4deadline"/>
+      <opendds:qosPolicy name="writer4latency"/>
+      <opendds:qosPolicy name="writer4liveliness"/>
+      <opendds:qosPolicy name="writer4reliability"/>
+      <opendds:qosPolicy name="writer4dorder"/>
+      <opendds:qosPolicy name="writer4history"/>
+      <opendds:qosPolicy name="writer4limits"/>
+      <opendds:qosPolicy name="writer4priority"/>
+      <opendds:qosPolicy name="writer4lifespan"/>
+      <opendds:qosPolicy name="writer4userdata"/>
+      <opendds:qosPolicy name="writer4ownership"/>
+      <opendds:qosPolicy name="writer4strength"/>
+      <opendds:qosPolicy name="writer4lifecycle"/>
+    </opendds:dataWriter>
+  </opendds:publisher>
+  <opendds:subscriber name="sub2"
+                      transport="transport4"
+                      mask="DEFAULT_STATUS_MASK">
+    <opendds:qosPolicy name="sub2presentation"/>
+    <opendds:qosPolicy name="sub2partition"/>
+    <opendds:qosPolicy name="sub2groupdata"/>
+    <opendds:qosPolicy name="sub2entityfactory"/>
+    <opendds:dataReader name="reader3"
+                        topic="topic1"
+                        mask="DEFAULT_STATUS_MASK">
+      <opendds:qosPolicy name="reader3durability"/>
+      <opendds:qosPolicy name="reader3deadline"/>
+      <opendds:qosPolicy name="reader3latency"/>
+      <opendds:qosPolicy name="reader3liveliness"/>
+      <opendds:qosPolicy name="reader3reliability"/>
+      <opendds:qosPolicy name="reader3dorder"/>
+      <opendds:qosPolicy name="reader3history"/>
+      <opendds:qosPolicy name="reader3limits"/>
+      <opendds:qosPolicy name="reader3userdata"/>
+      <opendds:qosPolicy name="reader3ownership"/>
+      <opendds:qosPolicy name="reader3filter"/>
+      <opendds:qosPolicy name="reader3lifecycle"/>
+    </opendds:dataReader>
+  </opendds:subscriber>
+  <opendds:subscriber name="sub4"
+                      transport="transport4"
+                      mask="DEFAULT_STATUS_MASK">
+    <opendds:qosPolicy name="sub4presentation"/>
+    <opendds:qosPolicy name="sub4partition"/>
+    <opendds:qosPolicy name="sub4groupdata"/>
+    <opendds:qosPolicy name="sub4entityfactory"/>
+    <opendds:dataReader name="reader4"
+                        topic="topic2"
+                        mask="DEFAULT_STATUS_MASK">
+      <opendds:qosPolicy name="reader4durability"/>
+      <opendds:qosPolicy name="reader4deadline"/>
+      <opendds:qosPolicy name="reader4latency"/>
+      <opendds:qosPolicy name="reader4liveliness"/>
+      <opendds:qosPolicy name="reader4reliability"/>
+      <opendds:qosPolicy name="reader4dorder"/>
+      <opendds:qosPolicy name="reader4history"/>
+      <opendds:qosPolicy name="reader4limits"/>
+      <opendds:qosPolicy name="reader4userdata"/>
+      <opendds:qosPolicy name="reader4ownership"/>
+      <opendds:qosPolicy name="reader4filter"/>
+      <opendds:qosPolicy name="reader4lifecycle"/>
+    </opendds:dataReader>
+  </opendds:subscriber>
+</opendds:domainParticipant>
+
+<opendds:topic name="topic1"
+               mask="DEFAULT_STATUS_MASK">
+  <opendds:datatype name="type1"/>
+  <opendds:qosPolicy name="topic1topicdata"/>
+  <opendds:qosPolicy name="topic1durability"/>
+  <opendds:qosPolicy name="topic1dservice"/>
+  <opendds:qosPolicy name="topic1deadline"/>
+  <opendds:qosPolicy name="topic1latency"/>
+  <opendds:qosPolicy name="topic1liveliness"/>
+  <opendds:qosPolicy name="topic1reliability"/>
+  <opendds:qosPolicy name="topic1dorder"/>
+  <opendds:qosPolicy name="topic1history"/>
+  <opendds:qosPolicy name="topic1limits"/>
+  <opendds:qosPolicy name="topic1priority"/>
+  <opendds:qosPolicy name="topic1lifespan"/>
+  <opendds:qosPolicy name="topic1ownership"/>
+</opendds:topic>
+
+<opendds:topic name="topic2"
+               mask="DEFAULT_STATUS_MASK">
+  <opendds:datatype name="type2"/>
+  <opendds:qosPolicy name="topic2topicdata"/>
+  <opendds:qosPolicy name="topic2durability"/>
+  <opendds:qosPolicy name="topic2dservice"/>
+  <opendds:qosPolicy name="topic2deadline"/>
+  <opendds:qosPolicy name="topic2latency"/>
+  <opendds:qosPolicy name="topic2liveliness"/>
+  <opendds:qosPolicy name="topic2reliability"/>
+  <opendds:qosPolicy name="topic2dorder"/>
+  <opendds:qosPolicy name="topic2history"/>
+  <opendds:qosPolicy name="topic2limits"/>
+  <opendds:qosPolicy name="topic2priority"/>
+  <opendds:qosPolicy name="topic2lifespan"/>
+  <opendds:qosPolicy name="topic2ownership"/>
+</opendds:topic>
+
+<opendds:topic name="topic3"
+               mask="DEFAULT_STATUS_MASK">
+  <opendds:datatype name="type1"/>
+</opendds:topic>
+
+<opendds:topic name="topic4"
+               mask="DEFAULT_STATUS_MASK">
+  <opendds:datatype name="type2"/>
+</opendds:topic>
+
+<opendds:typeLibrary>
+  <opendds:type name="type2" type="opendds:idlStruct">
+    <opendds:member name="id"         type="opendds:Short"/>
+    <opendds:member name="address"    type="opendds:String"/>
+    <opendds:member name="number"     type="opendds:Double"/>
+    <opendds:member name="otherstuff" type="type1"/>
+    <opendds:member name="carol"      type="structtypedef"/>
+    <opendds:member name="ted"        type="HistoryQosPolicyKind"/>
+    <opendds:member name="aseqseq"    type="shortseqseq"/>
+    <opendds:member name="tarr"  type="type1array"/>
+    <opendds:key member="id"/>
+    <opendds:key member="number"/>
+  </opendds:type>
+
+  <opendds:type name="type1" type="opendds:idlStruct">
+    <opendds:member name="key"   type="opendds:Short"/>
+    <opendds:member name="name"  type="opendds:String"/>
+    <opendds:member name="code"  type="opendds:WChar"/>
+    <opendds:member name="trans"  type="opendds:WString"/>
+    <opendds:member name="value" type="opendds:ULong"/>
+    <opendds:member name="bseq"  type="shortseq"/>
+    <opendds:member name="aarr"  type="shortarray"/>
+    <opendds:key member="key"/>
+  </opendds:type>
+
+  <opendds:type name="anOnion" type="opendds:idlUnion" switch="opendds:Short">
+    <opendds:case label="1" name="l1value" type="type1array"/>
+    <opendds:case label="2" name="l2value" type="opendds:ULong"/>
+    <opendds:case label="5" name="l5value" type="opendds:Octet"/>
+    <opendds:default label="default" name="defvalue" type="shortseq"/>
+  </opendds:type>
+
+  <opendds:type name="chives" type="opendds:idlUnion" switch="HistoryQosPolicyKind">
+    <opendds:case label="KEEP_LAST_HISTORY_QOS" name="last" type="type2"/>
+    <opendds:case label="KEEP_ALL_HISTORY_QOS" name="all" type="anOnion"/>
+  </opendds:type>
+
+  <opendds:type name="HistoryQosPolicyKind" type="opendds:idlEnum">
+    <opendds:member name="KEEP_LAST_HISTORY_QOS" type="opendds:idlEnum"/>
+    <opendds:member name="KEEP_ALL_HISTORY_QOS" type="opendds:idlEnum"/>
+  </opendds:type>
+
+  <opendds:type name="type1array" type="opendds:idlArray">
+    <opendds:member name="myType1Array" type="type1" size="5"/>
+  </opendds:type>
+
+  <opendds:type name="shortarray" type="opendds:idlArray">
+    <opendds:member name="myShortArray" type="opendds:Short" size="3"/>
+  </opendds:type>
+
+  <opendds:type name="shortseq" type="opendds:idlSequence">
+    <opendds:member name="myShortSeq" type="opendds:Short"/>
+  </opendds:type>
+
+  <opendds:type name="type1seq" type="opendds:idlSequence">
+    <opendds:member name="myType1Seq" type="type1"/>
+  </opendds:type>
+
+  <opendds:type name="shortseqseq" type="opendds:idlSequence">
+    <opendds:member name="myShortSeqSeq" type="shortseq"/>
+  </opendds:type>
+
+  <opendds:type name="shorttypedef" type="opendds:idlTypedef">
+    <opendds:member name="myShort" type="opendds:Short"/>
+  </opendds:type>
+
+  <opendds:type name="structtypedef" type="opendds:idlTypedef">
+    <opendds:member name="myType1" type="type1"/>
+  </opendds:type>
+</opendds:typeLibrary>
+
+<opendds:policyLib>
+  <!-- User Data QoS Policy is a string in the profile - and bytes in reality. -->
+  <opendds:policy name="part1userdata"      type="opendds:udQosPolicy"
+                  value="participant1ud"/>
+  <opendds:policy name="part1entityfactory" type="opendds:efQosPolicy"
+                  autoenable_created_entities="true"/>
+
+  <opendds:policy name="part2userdata"      type="opendds:udQosPolicy"
+                  value="participant2ud"/>
+  <opendds:policy name="part2entityfactory" type="opendds:efQosPolicy"
+                  autoenable_created_entities="true"/>
+
+  <opendds:policy name="topic1topicdata"    type="opendds:tdQosPolicy"
+                  value="topic1td"/>
+  <opendds:policy name="topic1durability"   type="opendds:durabilityQosPolicy"
+                  kind="VOLATILE_DURABILITY_QOS"/>
+  <opendds:policy name="topic1dservice"     type="opendds:dsQosPolicy"
+                  history_depth="1"
+                  history_kind="KEEP_LAST_HISTORY_QOS"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED">
+    <opendds:service_cleanup_delay sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="topic1deadline"     type="opendds:deadlineQosPolicy">
+    <opendds:period sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="topic1latency"      type="opendds:lbQosPolicy">
+    <opendds:duration sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="topic1liveliness"   type="opendds:livelinessQosPolicy"
+                  kind="AUTOMATIC_LIVELINESS_QOS">
+    <opendds:lease_duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="topic1reliability"  type="opendds:reliabilityQosPolicy"
+                  kind="BEST_EFFORT_RELIABILITY_QOS">
+    <opendds:max_blocking_time sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="topic1dorder"       type="opendds:destinationOrderQosPolicy"
+                  kind="BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS"/>
+  <opendds:policy name="topic1history"      type="opendds:historyQosPolicy"
+                  kind="KEEP_LAST_HISTORY_QOS"
+                  depth="1"/>
+  <opendds:policy name="topic1limits"       type="opendds:rlQosPolicy"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED"/>
+  <opendds:policy name="topic1priority"     type="opendds:tpQosPolicy"
+                  value="0"/>
+  <opendds:policy name="topic1lifespan"     type="opendds:lifespanQosPolicy">
+    <opendds:duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="topic1ownership"    type="opendds:ownershipQosPolicy"
+                  kind="SHARED_OWNERSHIP_QOS"/>
+
+  <opendds:policy name="topic2topicdata"    type="opendds:tdQosPolicy"
+                  value="topic2td"/>
+  <opendds:policy name="topic2durability"   type="opendds:durabilityQosPolicy"
+                  kind="VOLATILE_DURABILITY_QOS"/>
+  <opendds:policy name="topic2dservice"     type="opendds:dsQosPolicy"
+                  history_depth="1"
+                  history_kind="KEEP_LAST_HISTORY_QOS"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED">
+    <opendds:service_cleanup_delay sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="topic2deadline"     type="opendds:deadlineQosPolicy">
+    <opendds:period sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="topic2latency"      type="opendds:lbQosPolicy">
+    <opendds:duration sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="topic2liveliness"   type="opendds:livelinessQosPolicy"
+                  kind="AUTOMATIC_LIVELINESS_QOS">
+    <opendds:lease_duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="topic2reliability"  type="opendds:reliabilityQosPolicy"
+                  kind="BEST_EFFORT_RELIABILITY_QOS">
+    <opendds:max_blocking_time sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="topic2dorder"       type="opendds:destinationOrderQosPolicy"
+                  kind="BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS"/>
+  <opendds:policy name="topic2history"      type="opendds:historyQosPolicy"
+                  kind="KEEP_LAST_HISTORY_QOS"
+                  depth="1"/>
+  <opendds:policy name="topic2limits"       type="opendds:rlQosPolicy"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED"/>
+  <opendds:policy name="topic2priority"     type="opendds:tpQosPolicy"
+                  value="0"/>
+  <opendds:policy name="topic2lifespan"     type="opendds:lifespanQosPolicy">
+    <opendds:duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="topic2ownership"    type="opendds:ownershipQosPolicy"
+                  kind="SHARED_OWNERSHIP_QOS"/>
+
+  <opendds:policy name="pub1presentation"   type="opendds:presentationQosPolicy"
+                  access_scope="INSTANCE_PRESENTATION_QOS"
+                  coherent_access="false"
+                  ordered_access="false"/>
+  <opendds:policy name="pub1partition"      type="opendds:partitionQosPolicy">
+    <opendds:name>bob</opendds:name>
+    <opendds:name>carol</opendds:name>
+  </opendds:policy>
+  <opendds:policy name="pub1groupdata"      type="opendds:gdQosPolicy"
+                  value="pub1groupdata"/>
+  <opendds:policy name="pub1entityfactory"  type="opendds:efQosPolicy"
+                  autoenable_created_entities="true"/>
+
+  <opendds:policy name="pub2presentation"   type="opendds:presentationQosPolicy"
+                  access_scope="INSTANCE_PRESENTATION_QOS"
+                  coherent_access="false"
+                  ordered_access="false"/>
+  <opendds:policy name="pub2partition"      type="opendds:partitionQosPolicy">
+    <opendds:name>bob</opendds:name>
+    <opendds:name>carol</opendds:name>
+  </opendds:policy>
+  <opendds:policy name="pub2groupdata"      type="opendds:gdQosPolicy"
+                  value="pub2groupdata"/>
+  <opendds:policy name="pub2entityfactory"  type="opendds:efQosPolicy"
+                  autoenable_created_entities="true"/>
+
+  <opendds:policy name="pub3presentation"   type="opendds:presentationQosPolicy"
+                  access_scope="INSTANCE_PRESENTATION_QOS"
+                  coherent_access="false"
+                  ordered_access="false"/>
+  <opendds:policy name="pub3partition"      type="opendds:partitionQosPolicy">
+    <opendds:name>bob</opendds:name>
+    <opendds:name>carol</opendds:name>
+  </opendds:policy>
+  <opendds:policy name="pub3groupdata"      type="opendds:gdQosPolicy"
+                  value="pub3groupdata"/>
+  <opendds:policy name="pub3entityfactory"  type="opendds:efQosPolicy"
+                  autoenable_created_entities="true"/>
+
+  <opendds:policy name="pub4presentation"   type="opendds:presentationQosPolicy"
+                  access_scope="INSTANCE_PRESENTATION_QOS"
+                  coherent_access="false"
+                  ordered_access="false"/>
+  <opendds:policy name="pub4partition"      type="opendds:partitionQosPolicy">
+    <opendds:name>bob</opendds:name>
+    <opendds:name>carol</opendds:name>
+  </opendds:policy>
+  <opendds:policy name="pub4groupdata"      type="opendds:gdQosPolicy"
+                  value="pub4groupdata"/>
+  <opendds:policy name="pub4entityfactory"  type="opendds:efQosPolicy"
+                  autoenable_created_entities="true"/>
+
+  <opendds:policy name="sub1presentation"   type="opendds:presentationQosPolicy"
+                  access_scope="INSTANCE_PRESENTATION_QOS"
+                  coherent_access="false"
+                  ordered_access="false"/>
+  <opendds:policy name="sub1partition"      type="opendds:partitionQosPolicy">
+    <opendds:name>bob</opendds:name>
+    <opendds:name>carol</opendds:name>
+  </opendds:policy>
+  <opendds:policy name="sub1groupdata"      type="opendds:gdQosPolicy"
+                  value="sub1groupdata"/>
+  <opendds:policy name="sub1entityfactory"  type="opendds:efQosPolicy"
+                  autoenable_created_entities="true"/>
+
+  <opendds:policy name="sub2presentation"   type="opendds:presentationQosPolicy"
+                  access_scope="INSTANCE_PRESENTATION_QOS"
+                  coherent_access="false"
+                  ordered_access="false"/>
+  <opendds:policy name="sub2partition"      type="opendds:partitionQosPolicy">
+    <opendds:name>bob</opendds:name>
+    <opendds:name>carol</opendds:name>
+  </opendds:policy>
+  <opendds:policy name="sub2groupdata"      type="opendds:gdQosPolicy"
+                  value="sub2groupdata"/>
+  <opendds:policy name="sub2entityfactory"  type="opendds:efQosPolicy"
+                  autoenable_created_entities="true"/>
+
+  <opendds:policy name="sub3presentation"   type="opendds:presentationQosPolicy"
+                  access_scope="INSTANCE_PRESENTATION_QOS"
+                  coherent_access="false"
+                  ordered_access="false"/>
+  <opendds:policy name="sub3partition"      type="opendds:partitionQosPolicy">
+    <opendds:name>bob</opendds:name>
+    <opendds:name>carol</opendds:name>
+  </opendds:policy>
+  <opendds:policy name="sub3groupdata"      type="opendds:gdQosPolicy"
+                  value="sub3groupdata"/>
+  <opendds:policy name="sub3entityfactory"  type="opendds:efQosPolicy"
+                  autoenable_created_entities="true"/>
+
+  <opendds:policy name="sub4presentation"   type="opendds:presentationQosPolicy"
+                  access_scope="INSTANCE_PRESENTATION_QOS"
+                  coherent_access="false"
+                  ordered_access="false"/>
+  <opendds:policy name="sub4partition"      type="opendds:partitionQosPolicy">
+    <opendds:name>bob</opendds:name>
+    <opendds:name>carol</opendds:name>
+  </opendds:policy>
+  <opendds:policy name="sub4groupdata"      type="opendds:gdQosPolicy"
+                  value="sub4groupdata"/>
+  <opendds:policy name="sub4entityfactory"  type="opendds:efQosPolicy"
+                  autoenable_created_entities="true"/>
+
+  <opendds:policy name="writer1durability"  type="opendds:durabilityQosPolicy"
+                  kind="VOLATILE_DURABILITY_QOS"/>
+  <opendds:policy name="writer1dservice"    type="opendds:dsQosPolicy"
+                  history_depth="1"
+                  history_kind="KEEP_LAST_HISTORY_QOS"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED">
+    <opendds:service_cleanup_delay sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="writer1deadline"    type="opendds:deadlineQosPolicy">
+    <opendds:period sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer1latency"     type="opendds:lbQosPolicy">
+    <opendds:duration sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="writer1liveliness"  type="opendds:livelinessQosPolicy"
+                  kind="AUTOMATIC_LIVELINESS_QOS">
+    <opendds:lease_duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer1reliability" type="opendds:reliabilityQosPolicy"
+                  kind="BEST_EFFORT_RELIABILITY_QOS">
+    <opendds:max_blocking_time sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer1dorder"      type="opendds:destinationOrderQosPolicy"
+                  kind="BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS"/>
+  <opendds:policy name="writer1history"     type="opendds:historyQosPolicy"
+                  kind="KEEP_LAST_HISTORY_QOS"
+                  depth="1"/>
+  <opendds:policy name="writer1limits"      type="opendds:rlQosPolicy"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED"/>
+  <opendds:policy name="writer1priority"    type="opendds:tpQosPolicy"
+                  value="0"/>
+  <opendds:policy name="writer1lifespan"    type="opendds:lifespanQosPolicy">
+    <opendds:duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer1userdata"    type="opendds:udQosPolicy"
+                  value="writer1ud"/>
+  <opendds:policy name="writer1ownership"   type="opendds:ownershipQosPolicy"
+                  kind="SHARED_OWNERSHIP_QOS"/>
+  <opendds:policy name="writer1strength"    type="opendds:osQosPolicy"
+                  value="0"/>
+  <opendds:policy name="writer1lifecycle"   type="opendds:wdlQosPolicy"
+                  autodispose_unregistered_instances="true"/>
+
+  <opendds:policy name="writer2durability"  type="opendds:durabilityQosPolicy"
+                  kind="VOLATILE_DURABILITY_QOS"/>
+  <opendds:policy name="writer2dservice"    type="opendds:dsQosPolicy"
+                  history_depth="1"
+                  history_kind="KEEP_LAST_HISTORY_QOS"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED">
+    <opendds:service_cleanup_delay sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="writer2deadline"    type="opendds:deadlineQosPolicy">
+    <opendds:period sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer2latency"     type="opendds:lbQosPolicy">
+    <opendds:duration sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="writer2liveliness"  type="opendds:livelinessQosPolicy"
+                  kind="AUTOMATIC_LIVELINESS_QOS">
+    <opendds:lease_duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer2reliability" type="opendds:reliabilityQosPolicy"
+                  kind="BEST_EFFORT_RELIABILITY_QOS">
+    <opendds:max_blocking_time sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer2dorder"      type="opendds:destinationOrderQosPolicy"
+                  kind="BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS"/>
+  <opendds:policy name="writer2history"     type="opendds:historyQosPolicy"
+                  kind="KEEP_LAST_HISTORY_QOS"
+                  depth="1"/>
+  <opendds:policy name="writer2limits"      type="opendds:rlQosPolicy"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED"/>
+  <opendds:policy name="writer2priority"    type="opendds:tpQosPolicy"
+                  value="0"/>
+  <opendds:policy name="writer2lifespan"    type="opendds:lifespanQosPolicy">
+    <opendds:duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer2userdata"    type="opendds:udQosPolicy"
+                  value="writer2ud"/>
+  <opendds:policy name="writer2ownership"   type="opendds:ownershipQosPolicy"
+                  kind="SHARED_OWNERSHIP_QOS"/>
+  <opendds:policy name="writer2strength"    type="opendds:osQosPolicy"
+                  value="0"/>
+  <opendds:policy name="writer2lifecycle"   type="opendds:wdlQosPolicy"
+                  autodispose_unregistered_instances="true"/>
+
+  <opendds:policy name="writer3durability"  type="opendds:durabilityQosPolicy"
+                  kind="VOLATILE_DURABILITY_QOS"/>
+  <opendds:policy name="writer3dservice"    type="opendds:dsQosPolicy"
+                  history_depth="1"
+                  history_kind="KEEP_LAST_HISTORY_QOS"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED">
+    <opendds:service_cleanup_delay sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="writer3deadline"    type="opendds:deadlineQosPolicy">
+    <opendds:period sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer3latency"     type="opendds:lbQosPolicy">
+    <opendds:duration sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="writer3liveliness"  type="opendds:livelinessQosPolicy"
+                  kind="AUTOMATIC_LIVELINESS_QOS">
+    <opendds:lease_duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer3reliability" type="opendds:reliabilityQosPolicy"
+                  kind="BEST_EFFORT_RELIABILITY_QOS">
+    <opendds:max_blocking_time sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer3dorder"      type="opendds:destinationOrderQosPolicy"
+                  kind="BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS"/>
+  <opendds:policy name="writer3history"     type="opendds:historyQosPolicy"
+                  kind="KEEP_LAST_HISTORY_QOS"
+                  depth="1"/>
+  <opendds:policy name="writer3limits"      type="opendds:rlQosPolicy"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED"/>
+  <opendds:policy name="writer3priority"    type="opendds:tpQosPolicy"
+                  value="0"/>
+  <opendds:policy name="writer3lifespan"    type="opendds:lifespanQosPolicy">
+    <opendds:duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer3userdata"    type="opendds:udQosPolicy"
+                  value="writer3ud"/>
+  <opendds:policy name="writer3ownership"   type="opendds:ownershipQosPolicy"
+                  kind="SHARED_OWNERSHIP_QOS"/>
+  <opendds:policy name="writer3strength"    type="opendds:osQosPolicy"
+                  value="0"/>
+  <opendds:policy name="writer3lifecycle"   type="opendds:wdlQosPolicy"
+                  autodispose_unregistered_instances="true"/>
+
+  <opendds:policy name="writer4durability"  type="opendds:durabilityQosPolicy"
+                  kind="VOLATILE_DURABILITY_QOS"/>
+  <opendds:policy name="writer4dservice"    type="opendds:dsQosPolicy"
+                  history_depth="1"
+                  history_kind="KEEP_LAST_HISTORY_QOS"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED">
+    <opendds:service_cleanup_delay sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="writer4deadline"    type="opendds:deadlineQosPolicy">
+    <opendds:period sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer4latency"     type="opendds:lbQosPolicy">
+    <opendds:duration sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="writer4liveliness"  type="opendds:livelinessQosPolicy"
+                  kind="AUTOMATIC_LIVELINESS_QOS">
+    <opendds:lease_duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer4reliability" type="opendds:reliabilityQosPolicy"
+                  kind="BEST_EFFORT_RELIABILITY_QOS">
+    <opendds:max_blocking_time sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer4dorder"      type="opendds:destinationOrderQosPolicy"
+                  kind="BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS"/>
+  <opendds:policy name="writer4history"     type="opendds:historyQosPolicy"
+                  kind="KEEP_LAST_HISTORY_QOS"
+                  depth="1"/>
+  <opendds:policy name="writer4limits"      type="opendds:rlQosPolicy"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED"/>
+  <opendds:policy name="writer4priority"    type="opendds:tpQosPolicy"
+                  value="0"/>
+  <opendds:policy name="writer4lifespan"    type="opendds:lifespanQosPolicy">
+    <opendds:duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="writer4userdata"    type="opendds:udQosPolicy"
+                  value="writer4ud"/>
+  <opendds:policy name="writer4ownership"   type="opendds:ownershipQosPolicy"
+                  kind="SHARED_OWNERSHIP_QOS"/>
+  <opendds:policy name="writer4strength"    type="opendds:osQosPolicy"
+                  value="0"/>
+  <opendds:policy name="writer4lifecycle"   type="opendds:wdlQosPolicy"
+                  autodispose_unregistered_instances="true"/>
+
+  <opendds:policy name="reader1durability"  type="opendds:durabilityQosPolicy"
+                  kind="VOLATILE_DURABILITY_QOS"/>
+  <opendds:policy name="reader1deadline"    type="opendds:deadlineQosPolicy">
+    <opendds:period sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="reader1latency"     type="opendds:lbQosPolicy">
+    <opendds:duration sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="reader1liveliness"  type="opendds:livelinessQosPolicy"
+                  kind="AUTOMATIC_LIVELINESS_QOS">
+    <opendds:lease_duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="reader1reliability" type="opendds:reliabilityQosPolicy"
+                  kind="BEST_EFFORT_RELIABILITY_QOS">
+    <opendds:max_blocking_time sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="reader1dorder"      type="opendds:destinationOrderQosPolicy"
+                  kind="BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS"/>
+  <opendds:policy name="reader1history"     type="opendds:historyQosPolicy"
+                  kind="KEEP_LAST_HISTORY_QOS"
+                  depth="1"/>
+  <opendds:policy name="reader1limits"      type="opendds:rlQosPolicy"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED"/>
+  <opendds:policy name="reader1userdata"    type="opendds:udQosPolicy"
+                  value="reader1ud"/>
+  <opendds:policy name="reader1ownership"   type="opendds:ownershipQosPolicy"
+                  kind="SHARED_OWNERSHIP_QOS"/>
+  <opendds:policy name="reader1filter"      type="opendds:tbfQosPolicy">
+    <opendds:minimum_separation sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="reader1lifecycle"   type="opendds:rdlQosPolicy">
+    <opendds:autopurge_nowriter_samples_delay sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+    <opendds:autopurge_disposed_samples_delay sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+
+  <opendds:policy name="reader2durability"  type="opendds:durabilityQosPolicy"
+                  kind="VOLATILE_DURABILITY_QOS"/>
+  <opendds:policy name="reader2deadline"    type="opendds:deadlineQosPolicy">
+    <opendds:period sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="reader2latency"     type="opendds:lbQosPolicy">
+    <opendds:duration sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="reader2liveliness"  type="opendds:livelinessQosPolicy"
+                  kind="AUTOMATIC_LIVELINESS_QOS">
+    <opendds:lease_duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="reader2reliability" type="opendds:reliabilityQosPolicy"
+                  kind="BEST_EFFORT_RELIABILITY_QOS">
+    <opendds:max_blocking_time sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="reader2dorder"      type="opendds:destinationOrderQosPolicy"
+                  kind="BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS"/>
+  <opendds:policy name="reader2history"     type="opendds:historyQosPolicy"
+                  kind="KEEP_LAST_HISTORY_QOS"
+                  depth="1"/>
+  <opendds:policy name="reader2limits"      type="opendds:rlQosPolicy"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED"/>
+  <opendds:policy name="reader2userdata"    type="opendds:udQosPolicy"
+                  value="reader2ud"/>
+  <opendds:policy name="reader2ownership"   type="opendds:ownershipQosPolicy"
+                  kind="SHARED_OWNERSHIP_QOS"/>
+  <opendds:policy name="reader2filter"      type="opendds:tbfQosPolicy">
+    <opendds:minimum_separation sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="reader2lifecycle"   type="opendds:rdlQosPolicy">
+    <opendds:autopurge_nowriter_samples_delay sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+    <opendds:autopurge_disposed_samples_delay sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+
+  <opendds:policy name="reader3durability"  type="opendds:durabilityQosPolicy"
+                  kind="VOLATILE_DURABILITY_QOS"/>
+  <opendds:policy name="reader3deadline"    type="opendds:deadlineQosPolicy">
+    <opendds:period sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="reader3latency"     type="opendds:lbQosPolicy">
+    <opendds:duration sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="reader3liveliness"  type="opendds:livelinessQosPolicy"
+                  kind="AUTOMATIC_LIVELINESS_QOS">
+    <opendds:lease_duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="reader3reliability" type="opendds:reliabilityQosPolicy"
+                  kind="BEST_EFFORT_RELIABILITY_QOS">
+    <opendds:max_blocking_time sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="reader3dorder"      type="opendds:destinationOrderQosPolicy"
+                  kind="BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS"/>
+  <opendds:policy name="reader3history"     type="opendds:historyQosPolicy"
+                  kind="KEEP_LAST_HISTORY_QOS"
+                  depth="1"/>
+  <opendds:policy name="reader3limits"      type="opendds:rlQosPolicy"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED"/>
+  <opendds:policy name="reader3userdata"    type="opendds:udQosPolicy"
+                  value="reader3ud"/>
+  <opendds:policy name="reader3ownership"   type="opendds:ownershipQosPolicy"
+                  kind="SHARED_OWNERSHIP_QOS"/>
+  <opendds:policy name="reader3filter"      type="opendds:tbfQosPolicy">
+    <opendds:minimum_separation sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="reader3lifecycle"   type="opendds:rdlQosPolicy">
+    <opendds:autopurge_nowriter_samples_delay sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+    <opendds:autopurge_disposed_samples_delay sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+
+  <opendds:policy name="reader4durability"  type="opendds:durabilityQosPolicy"
+                  kind="VOLATILE_DURABILITY_QOS"/>
+  <opendds:policy name="reader4deadline"    type="opendds:deadlineQosPolicy">
+    <opendds:period sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="reader4latency"     type="opendds:lbQosPolicy">
+    <opendds:duration sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="reader4liveliness"  type="opendds:livelinessQosPolicy"
+                  kind="AUTOMATIC_LIVELINESS_QOS">
+    <opendds:lease_duration sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="reader4reliability" type="opendds:reliabilityQosPolicy"
+                  kind="BEST_EFFORT_RELIABILITY_QOS">
+    <opendds:max_blocking_time sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+  <opendds:policy name="reader4dorder"      type="opendds:destinationOrderQosPolicy"
+                  kind="BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS"/>
+  <opendds:policy name="reader4history"     type="opendds:historyQosPolicy"
+                  kind="KEEP_LAST_HISTORY_QOS"
+                  depth="1"/>
+  <opendds:policy name="reader4limits"      type="opendds:rlQosPolicy"
+                  max_samples="LENGTH_UNLIMITED"
+                  max_instances="LENGTH_UNLIMITED"
+                  max_samples_per_instance="LENGTH_UNLIMITED"/>
+  <opendds:policy name="reader4userdata"    type="opendds:udQosPolicy"
+                  value="reader4ud"/>
+  <opendds:policy name="reader4ownership"   type="opendds:ownershipQosPolicy"
+                  kind="SHARED_OWNERSHIP_QOS"/>
+  <opendds:policy name="reader4filter"      type="opendds:tbfQosPolicy">
+    <opendds:minimum_separation sec="0" nanosec="0"/>
+  </opendds:policy>
+  <opendds:policy name="reader4lifecycle"   type="opendds:rdlQosPolicy">
+    <opendds:autopurge_nowriter_samples_delay sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+    <opendds:autopurge_disposed_samples_delay sec="DURATION_INFINITE_SEC" nanosec="DURATION_INFINITE_NSEC"/>
+  </opendds:policy>
+
+</opendds:policyLib>
+
+<opendds:transportLibrary>
+  <opendds:transport name="transport1" key="1">
+    <opendds:commonConfig>
+      <opendds:swap_bytes               value="false"/>
+      <opendds:queue_messages_per_pool  value="10"/>
+      <opendds:queue_initial_pools      value="10"/>
+      <opendds:max_packet_size          value="65536"/>
+      <opendds:max_samples_per_packet   value="20"/>
+      <opendds:optimum_packet_size      value="1450"/>
+      <opendds:transport_type           value="SimpleTcp"/>
+      <opendds:thread_per_connection    value="false"/>
+      <opendds:datalink_release_delay   value="10000"/>
+      <opendds:datalink_control_chunks  value="32"/>
+    </opendds:commonConfig>
+    <opendds:tcpConfig>
+      <opendds:local_address_str             value="127.0.0.1"/>
+      <opendds:enable_nagle_algorithm        value="false"/>
+      <opendds:conn_retry_initial_delay      value="500"/>
+      <opendds:conn_retry_backoff_multiplier value="2.0"/>
+      <opendds:conn_retry_attempts           value="3"/>
+      <opendds:max_output_pause_period       value="0"/>
+      <opendds:passive_reconnect_duration    value="2000"/>
+      <opendds:passive_connect_duration      value="0"/>
+    </opendds:tcpConfig>
+  </opendds:transport>
+
+  <opendds:transport name="transport2" key="2">
+    <opendds:commonConfig>
+      <opendds:swap_bytes               value="false"/>
+      <opendds:queue_messages_per_pool  value="10"/>
+      <opendds:queue_initial_pools      value="10"/>
+      <opendds:max_packet_size          value="65536"/>
+      <opendds:max_samples_per_packet   value="20"/>
+      <opendds:optimum_packet_size      value="1450"/>
+      <opendds:transport_type           value="multicast"/>
+      <opendds:thread_per_connection    value="false"/>
+      <opendds:datalink_release_delay   value="10000"/>
+      <opendds:datalink_control_chunks  value="32"/>
+    </opendds:commonConfig>
+    <opendds:multicastConfig>
+      <opendds:default_to_ipv6 value="false"/>
+      <opendds:port_offset     value="49400"/>
+      <opendds:group_address   value="224.0.0.128"/>
+      <opendds:reliable        value="true"/>
+      <opendds:syn_backoff     value="2.0"/>
+      <opendds:syn_interval    value="250"/>
+      <opendds:syn_timeout     value="30000"/>
+      <opendds:nak_depth       value="32"/>
+      <opendds:nak_interval    value="500"/>
+      <opendds:nak_timeout     value="30000"/>
+      <opendds:ttl             value="1"/>
+      <opendds:rcv_buffer_size value="0"/>
+    </opendds:multicastConfig>
+  </opendds:transport>
+
+  <opendds:transport name="transport3" key="3">
+    <opendds:commonConfig>
+      <opendds:swap_bytes               value="false"/>
+      <opendds:queue_messages_per_pool  value="10"/>
+      <opendds:queue_initial_pools      value="10"/>
+      <opendds:max_packet_size          value="65536"/>
+      <opendds:max_samples_per_packet   value="20"/>
+      <opendds:optimum_packet_size      value="1450"/>
+      <opendds:transport_type           value="SimpleTcp"/>
+      <opendds:thread_per_connection    value="false"/>
+      <opendds:datalink_release_delay   value="10000"/>
+      <opendds:datalink_control_chunks  value="32"/>
+    </opendds:commonConfig>
+    <opendds:tcpConfig>
+      <opendds:local_address_str             value="127.0.0.1"/>
+      <opendds:enable_nagle_algorithm        value="false"/>
+      <opendds:conn_retry_initial_delay      value="500"/>
+      <opendds:conn_retry_backoff_multiplier value="2.0"/>
+      <opendds:conn_retry_attempts           value="3"/>
+      <opendds:max_output_pause_period       value="0"/>
+      <opendds:passive_reconnect_duration    value="2000"/>
+      <opendds:passive_connect_duration      value="0"/>
+    </opendds:tcpConfig>
+  </opendds:transport>
+
+  <opendds:transport name="transport4" key="4">
+    <opendds:commonConfig>
+      <opendds:swap_bytes               value="false"/>
+      <opendds:queue_messages_per_pool  value="10"/>
+      <opendds:queue_initial_pools      value="10"/>
+      <opendds:max_packet_size          value="65536"/>
+      <opendds:max_samples_per_packet   value="20"/>
+      <opendds:optimum_packet_size      value="1450"/>
+      <opendds:transport_type           value="multicast"/>
+      <opendds:thread_per_connection    value="false"/>
+      <opendds:datalink_release_delay   value="10000"/>
+      <opendds:datalink_control_chunks  value="32"/>
+    </opendds:commonConfig>
+    <opendds:multicastConfig>
+      <opendds:default_to_ipv6 value="false"/>
+      <opendds:port_offset     value="49400"/>
+      <opendds:group_address   value="224.0.0.128"/>
+      <opendds:reliable        value="true"/>
+      <opendds:syn_backoff     value="2.0"/>
+      <opendds:syn_interval    value="250"/>
+      <opendds:syn_timeout     value="30000"/>
+      <opendds:nak_depth       value="32"/>
+      <opendds:nak_interval    value="500"/>
+      <opendds:nak_timeout     value="30000"/>
+      <opendds:ttl             value="1"/>
+      <opendds:rcv_buffer_size value="0"/>
+    </opendds:multicastConfig>
+  </opendds:transport>
+
+  <opendds:transport name="transport5" key="5">
+    <opendds:commonConfig>
+      <opendds:swap_bytes               value="false"/>
+      <opendds:queue_messages_per_pool  value="10"/>
+      <opendds:queue_initial_pools      value="10"/>
+      <opendds:max_packet_size          value="65536"/>
+      <opendds:max_samples_per_packet   value="20"/>
+      <opendds:optimum_packet_size      value="1450"/>
+      <opendds:transport_type           value="udp"/>
+      <opendds:thread_per_connection    value="false"/>
+      <opendds:datalink_release_delay   value="10000"/>
+      <opendds:datalink_control_chunks  value="32"/>
+    </opendds:commonConfig>
+    <opendds:udpConfig>
+      <opendds:local_address_str             value="127.0.0.1"/>
+    </opendds:udpConfig>
+  </opendds:transport>
+</opendds:transportLibrary>
+
+</generator:model>
+

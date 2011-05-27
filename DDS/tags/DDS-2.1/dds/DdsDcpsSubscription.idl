@@ -1,0 +1,275 @@
+/*
+ * $Id$
+ *
+ * Copyright 2010 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef TAO_DDS_DCPS_SUBSCRIPTION_IDL
+#define TAO_DDS_DCPS_SUBSCRIPTION_IDL
+
+#include "dds/DdsDcpsInfrastructure.idl"
+
+module DDS {
+    local interface TopicDescription;
+    local interface DomainParticipant;
+    local interface DataReader;
+    local interface Subscriber;
+
+    typedef sequence<DataReader> DataReaderSeq;
+
+
+    local interface DataReaderListener : Listener {
+    void on_requested_deadline_missed(
+      in DataReader reader,
+      in RequestedDeadlineMissedStatus status);
+
+    void on_requested_incompatible_qos(
+      in DataReader reader,
+      in RequestedIncompatibleQosStatus status);
+
+    void on_sample_rejected(
+      in DataReader reader,
+      in SampleRejectedStatus status);
+
+    void on_liveliness_changed(
+      in DataReader reader,
+      in LivelinessChangedStatus status);
+
+    void on_data_available(
+      in DataReader reader);
+
+    void on_subscription_matched(
+      in DataReader reader,
+      in SubscriptionMatchedStatus status);
+
+    void on_sample_lost(
+      in DataReader reader,
+      in SampleLostStatus status);
+    };
+
+    local interface SubscriberListener : DataReaderListener {
+    void on_data_on_readers(
+      in Subscriber subs);
+    };
+
+
+    local interface ReadCondition : Condition {
+        SampleStateMask     get_sample_state_mask();
+        ViewStateMask       get_view_state_mask();
+        InstanceStateMask   get_instance_state_mask();
+        DataReader          get_datareader();
+    };
+
+
+    local interface QueryCondition : ReadCondition {
+        string         get_query_expression();
+        ReturnCode_t   get_query_parameters(
+            inout StringSeq query_parameters);
+        ReturnCode_t   set_query_parameters(
+            in StringSeq query_parameters);
+    };
+
+
+    local interface DataReader : Entity {
+    // ReturnCode_t read(
+    // 		inout DataSeq received_data,
+    // 		inout SampleInfoSeq info_seq,
+    // 		in long max_samples,
+    //		in SampleStateMask sample_states,
+    //		in ViewStateMask view_states,
+    //		in InstanceStateMask instance_states);
+    // ReturnCode_t take(
+    //		inout DataSeq received_data,
+    //		inout SampleInfoSeq info_seq,
+    //		in long max_samples,
+    //		in SampleStateMask sample_states,
+    //		in ViewStateMask view_states,
+    //		in InstanceStateMask instance_states);
+    // ReturnCode_t read_w_condition(
+    //		inout DataSeq received_data,
+    //		inout SampleInfoSeq info_seq,
+    //		in long max_samples,
+    //		in ReadCondition a_condition);
+    // ReturnCode_t take_w_condition(
+    //		inout DataSeq received_data,
+    //		inout SampleInfoSeq info_seq,
+    //		in long max_samples,
+    //		in ReadCondition a_condition);
+    // ReturnCode_t read_next_sample(
+    //		inout Data received_data,
+    //		inout SampleInfo sample_info);
+    // ReturnCode_t take_next_sample(
+    //		inout Data received_data,
+    //		inout SampleInfo sample_info);
+    // ReturnCode_t read_instance(
+    //		inout DataSeq received_data,
+    //		inout SampleInfoSeq info_seq,
+    //		in long max_samples,
+    //		in InstanceHandle_t a_handle,
+    //		in SampleStateMask sample_states,
+    //		in ViewStateMask view_states,
+    //		in InstanceStateMask instance_states);
+    // ReturnCode_t take_instance(
+    //		inout DataSeq received_data,
+    //		inout SampleInfoSeq info_seq,
+    //		in long max_samples,
+    //		in InstanceHandle_t a_handle,
+    //		in SampleStateMask sample_states,
+    //		in ViewStateMask view_states,
+    //		in InstanceStateMask instance_states);
+    // ReturnCode_t read_next_instance(
+    //		inout DataSeq received_data,
+    //		inout SampleInfoSeq info_seq,
+    //		in long max_samples,
+    //		in InstanceHandle_t a_handle,
+    //		in SampleStateMask sample_states,
+    //		in ViewStateMask view_states,
+    //		in InstanceStateMask instance_states);
+    // ReturnCode_t take_next_instance(
+    //		inout DataSeq received_data,
+    //		inout SampleInfoSeq info_seq,
+    //		in long max_samples,
+    //		in InstanceHandle_t a_handle,
+    //		in SampleStateMask sample_states,
+    //		in ViewStateMask view_states,
+    //		in InstanceStateMask instance_states);
+    // ReturnCode_t read_next_instance_w_condition(
+    //		inout DataSeq received_data,
+    //		inout SampleInfoSeq info_seq,
+    //		in long max_samples,
+    //		in InstanceHandle_t a_handle,
+    //		in ReadCondition a_condition);
+    // ReturnCode_t take_next_instance_w_condition(
+    //		inout DataSeq received_data,
+    //		inout SampleInfoSeq info_seq,
+    //		in long max_samples,
+    //		in InstanceHandle_t a_handle,
+    //		in ReadCondition a_condition);
+    // ReturnCode_t return_loan(
+    //		inout DataSeq received_data,
+    //		inout SampleInfoSeq info_seq);
+    // ReturnCode_t get_key_value(
+    //		inout Data key_holder,
+    //		in InstanceHandle_t handle);
+
+    //  InstanceHandle_t lookup_instance(
+    //      in Data instance_data);
+    ReadCondition create_readcondition(
+      in SampleStateMask sample_states, 
+      in ViewStateMask view_states,
+      in InstanceStateMask instance_states);
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    QueryCondition create_querycondition(
+      in SampleStateMask sample_states, 
+      in ViewStateMask view_states,
+      in InstanceStateMask instance_states,
+      in string query_expression,
+      in StringSeq query_parameters);
+#endif
+
+    ReturnCode_t delete_readcondition(
+      in ReadCondition a_condition);
+
+    ReturnCode_t delete_contained_entities();
+
+    ReturnCode_t set_qos(
+      in DataReaderQos qos);
+
+    ReturnCode_t get_qos(inout DataReaderQos qos);
+
+    ReturnCode_t set_listener(
+      in DataReaderListener a_listener,
+      in StatusMask mask);
+
+    DataReaderListener get_listener();
+
+    TopicDescription get_topicdescription();
+
+    Subscriber get_subscriber();
+
+    ReturnCode_t get_sample_rejected_status(
+        inout SampleRejectedStatus status);
+    ReturnCode_t get_liveliness_changed_status(
+        inout LivelinessChangedStatus status);
+    ReturnCode_t get_requested_deadline_missed_status(
+        inout RequestedDeadlineMissedStatus status);
+    ReturnCode_t get_requested_incompatible_qos_status(
+        inout RequestedIncompatibleQosStatus status);
+    ReturnCode_t get_subscription_matched_status(
+        inout SubscriptionMatchedStatus status);
+    ReturnCode_t get_sample_lost_status(
+        inout SampleLostStatus status); 
+
+    ReturnCode_t wait_for_historical_data(
+      in Duration_t max_wait);
+
+    ReturnCode_t get_matched_publications(
+        inout InstanceHandleSeq publication_handles);
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+    ReturnCode_t get_matched_publication_data(
+        inout PublicationBuiltinTopicData publication_data,
+        in InstanceHandle_t publication_handle);
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+
+    };
+
+    // ----------------------------------------------------------------------
+    local interface Subscriber : Entity {
+    DataReader create_datareader(
+      in TopicDescription a_topic,
+      in DataReaderQos qos,
+      in DataReaderListener a_listener,
+      in StatusMask mask);
+
+    ReturnCode_t delete_datareader(
+      in DataReader a_datareader);
+
+    ReturnCode_t delete_contained_entities();
+
+    DataReader lookup_datareader(
+      in string topic_name);
+
+    ReturnCode_t get_datareaders(
+      inout DataReaderSeq readers,
+      in SampleStateMask sample_states,
+      in ViewStateMask view_states,
+      in InstanceStateMask instance_states);
+
+    ReturnCode_t notify_datareaders();
+
+    ReturnCode_t set_qos(
+      in SubscriberQos qos);
+
+    ReturnCode_t get_qos(
+      inout SubscriberQos qos);
+
+    ReturnCode_t set_listener(
+      in SubscriberListener a_listener,
+      in StatusMask mask);
+
+    SubscriberListener get_listener();
+
+    ReturnCode_t begin_access();
+
+    ReturnCode_t end_access();
+
+    DomainParticipant get_participant();
+
+    ReturnCode_t set_default_datareader_qos(
+      in DataReaderQos qos);
+
+    ReturnCode_t get_default_datareader_qos(inout DataReaderQos qos);
+
+    ReturnCode_t copy_from_topic_qos(
+      inout DataReaderQos a_datareader_qos,
+      in TopicQos a_topic_qos);
+    };
+
+};
+
+#endif /* TAO_DDS_DCPS_SUBSCRIPTION_IDL */

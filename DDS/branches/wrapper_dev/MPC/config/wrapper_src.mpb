@@ -1,0 +1,23 @@
+feature (ospl) : wrapper_base {
+
+  libout = $(OSPL_HOME)/lib
+
+  Source_Files {
+    OpenSplice/OpenSplice_Domain_Manager.cpp
+    OpenSplice/OpenSplice_Subscription_Manager.cpp
+    OpenSplice/OpenSplice_Publication_Manager.cpp
+    OpenSplice/OpenSplice_create_domain_manager.cpp
+  }
+
+}
+
+feature (!ospl) : wrapper_base {
+
+  Source_Files {
+    OpenDDS/OpenDDS_Domain_Manager.cpp
+    OpenDDS/OpenDDS_Subscription_Manager.cpp
+    OpenDDS/OpenDDS_Publication_Manager.cpp
+    OpenDDS/OpenDDS_create_domain_manager.cpp
+  }
+
+}

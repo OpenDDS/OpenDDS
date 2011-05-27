@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=UTF-8">
+
+  <title>RELIABILITY</title>
+  <link rel="stylesheet" type="text/css" href="QoS.css">
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+<H4 CLASS="Head3">
+<A NAME="pgfId-190140"></A>RELIABILITY</H4>
+<UL>
+<LI CLASS="BodyNoLead">
+<A NAME="pgfId-108223"></A>The <A NAME="marker-121659"></A>RELIABILITY policy applies to the <A NAME="marker-119015"></A>topic, <A NAME="marker-120060"></A>data reader, and <A NAME="marker-119352"></A>data writer entities via the <EM CLASS="Code">
+reliability</EM>
+ member of their respective QoS structures. Below is the IDL related to the reliability QoS policy:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-108252"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-108275"></A>enum ReliabilityQosPolicyKind {</P>
+<P CLASS="Code">
+<A NAME="pgfId-108276"></A>  BEST_EFFORT_RELIABILITY_QOS,</P>
+<P CLASS="Code">
+<A NAME="pgfId-108277"></A>  RELIABLE_RELIABILITY_QOS</P>
+<P CLASS="Code">
+<A NAME="pgfId-108278"></A>};</P>
+<P CLASS="Code">
+<A NAME="pgfId-108279"></A> &nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-108280"></A>struct ReliabilityQosPolicy {</P>
+<P CLASS="Code">
+<A NAME="pgfId-108307"></A>  ReliabilityQosPolicyKind kind;</P>
+<P CLASS="Code">
+<A NAME="pgfId-108282"></A>  Duration_t max_blocking_time;</P>
+<P CLASS="Code">
+<A NAME="pgfId-108283"></A>};</P>
+<P CLASS="Code">
+<A NAME="pgfId-108269"></A>&nbsp;</P>
+<UL>
+<LI CLASS="BodyNoLead">
+<A NAME="pgfId-199207"></A>This policy controls how <A NAME="marker-199204"></A>data readers and <A NAME="marker-199205"></A>writers treat the data <A NAME="marker-199206"></A>samples they process. The “best effort” value (<EM CLASS="Code">
+BEST_EFFORT_RELIABILITY_QOS</EM>
+) makes no promises as to the reliability of the samples and could be expected to drop samples under some circumstances. The “reliable” value (<EM CLASS="Code">
+RELIABLE_RELIABILITY_QOS</EM>
+) indicates that the service should eventually deliver all values to eligible <A NAME="marker-199208"></A>data readers.</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-108477"></A>The <EM CLASS="Code">
+max_blocking_time</EM>
+ member of this policy is used when the history QoS policy is set to “keep all” and the writer is unable to return because of resource limits (due to transport backpressure—see <A HREF="resource_limits.html" >RESOURCE_LIMITS</A> for details). When this situation occurs and the writer blocks for more than the specified time, then the write fails with a timeout return code. The default for this policy for data readers and topics is “best effort,” while the default value for data writers is “reliable.”</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-190287"></A>This policy is considered during the creation of associations between data writers and data readers. The value of both sides of the association must be compatible in order for an association to be created. The reliability kind of data writer must be greater than or equal to the value of data reader.</LI>
+</UL>
+
+</body>
+</html>

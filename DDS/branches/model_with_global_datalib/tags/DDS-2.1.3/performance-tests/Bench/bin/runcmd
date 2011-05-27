@@ -1,0 +1,9 @@
+#!/bin/bash
+
+PROJECT=$1;shift
+CMD=$1;shift
+
+ROOT=$PWD/$PROJECT
+export LD_LIBRARY_PATH=$ROOT/lib
+$ROOT/bin/$CMD -ORBSvcConf $ROOT/etc/svc.conf $*
+

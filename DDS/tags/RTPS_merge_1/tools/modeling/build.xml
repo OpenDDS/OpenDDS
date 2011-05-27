@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="create.buildxml" name="build">
+    <property name="extra.plugins" value=""/>
+    <target name="create.buildxml">
+        <path id="pluginpath">
+            <pathelement location="${eclipse.home}"/>
+            <pathelement path="${extra.plugins}"/>
+        </path>
+        <echo>${toString:pluginpath}</echo>
+        <eclipse.buildScript elements="feature@org.opendds.modeling.feature"
+                             buildDirectory="${basedir}"
+                             pluginPath="${toString:pluginpath}"/>
+    </target>
+</project>

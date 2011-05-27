@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_7w7mIRN0EeCZGfFbfO9QSA" name="DataLib2">
+  <libs xsi:type="types:DataLib" xmi:id="_8gO8IBN0EeCZGfFbfO9QSA" name="DataLib2">
+    <types xsi:type="types:Long" xmi:id="__c3FUBN0EeCZGfFbfO9QSA"/>
+    <types xsi:type="types:Struct" xmi:id="_BwbDYBN1EeCZGfFbfO9QSA" name="Struct2" isDcpsDataType="true">
+      <fields xmi:id="_GKez4BN1EeCZGfFbfO9QSA" name="size" type="__c3FUBN0EeCZGfFbfO9QSA"/>
+    </types>
+  </libs>
+</opendds:OpenDDSModel>

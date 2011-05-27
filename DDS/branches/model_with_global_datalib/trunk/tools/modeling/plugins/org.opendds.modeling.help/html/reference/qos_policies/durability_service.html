@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=UTF-8">
+
+  <title>DURABILITY_SERVICE</title>
+  <link rel="stylesheet" type="text/css" href="QoS.css">
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+
+<H4 CLASS="Head3">
+<A NAME="pgfId-199399"></A>DURABILITY_SERVICE</H4>
+<UL>
+<LI CLASS="BodyNoLead">
+<A NAME="pgfId-199400"></A>The <A NAME="marker-249649"></A>DURABILITY_SERVICE policy controls deletion of samples in TRANSIENT or PERSISTENT durability cache. This policy applies to the <A NAME="marker-267672"></A>topic and <A NAME="marker-267662"></A>data writer entities via the <EM CLASS="Code">
+durability_service</EM>
+ member of their respective QoS structures and provides a way to specify HISTORY and RESOURCE_LIMITS for the sample cache. Below is the IDL related to the durability service QoS policy:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-183552"></A><EM CLASS="Code">
+</EM>
+&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-192643"></A><EM CLASS="Code">
+struct DurabilityServiceQosPolicy {</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-183172"></A><EM CLASS="Code">
+  Duration_t              service_cleanup_delay;</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-192662"></A><EM CLASS="Code">
+  HistoryQosPolicyKind    history_kind;</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-183174"></A><EM CLASS="Code">
+  long                    history_depth;</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-183175"></A><EM CLASS="Code">
+  long                    max_samples;</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-183176"></A><EM CLASS="Code">
+  long                    max_instances;</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-183177"></A><EM CLASS="Code">
+  long                    max_samples_per_instance;</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-183135"></A><EM CLASS="Code">
+};</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-192714"></A>&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-267677"></A>The history and resource limits members are analogous to, although independent of, those found in the HISTORY and RESOURCE_LIMITS policies. The <EM CLASS="Code">
+service_cleanup_delay </EM>
+can be set to a desired value. By default, it is set to zero, which means never clean up cached samples.</LI>
+</UL>
+
+</body>
+</html>

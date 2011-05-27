@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=UTF-8">
+
+  <title>TOPIC_DATA</title>
+  <link rel="stylesheet" type="text/css" href="QoS.css">
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+
+<H4 CLASS="Head3">
+<A NAME="pgfId-194375"></A>TOPIC_DATA</H4>
+<UL>
+<LI CLASS="BodyNoLead">
+<A NAME="pgfId-194387"></A>The <A NAME="marker-249691"></A>TOPIC_DATA policy applies to <A NAME="marker-268211"></A>topic entities via the <EM CLASS="Code">
+topic_data</EM>
+ member of TopicQoS structures. Below is the IDL related to the topic data QoS policy:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-194410"></A><EM CLASS="Code">
+</EM>
+&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-194460"></A><EM CLASS="Code">
+struct TopicDataQosPolicy {</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-194411"></A><EM CLASS="Code">
+  sequence&lt;octet&gt; value;</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-194412"></A><EM CLASS="Code">
+};</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-194388"></A><EM CLASS="Code">
+</EM>
+&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-268358"></A>By default, the <EM CLASS="Code">
+value</EM>
+ is not set. It can be set to attach additional information to the created <A NAME="marker-268361"></A>topic. The value of the TOPIC_DATA policy is available in <A NAME="marker-268370"></A>data writer, <A NAME="marker-268375"></A>data reader, and <A NAME="marker-268380"></A>topic <A NAME="marker-268394"></A>built-in topic data. The remote application can obtain the information via the built-in topic and use it in an application-defined way.</LI>
+</UL>
+
+</body>
+</html>

@@ -1,0 +1,133 @@
+
+# $Id$
+
+Overall test configuration requires that each process be identified.
+Each process can then be configured using the configuration file format
+below.  The overall test topology is then completely determined by the
+Topic and Partition values for individual publications and subscriptions.
+
+#
+# Individual scenario definition configuration file contents are
+# described below.  Files with this format can be specified to a
+# testprocess executable and will configure that process to create the
+# specified entities with the specified characteristics.
+#
+
+[participant/<name>]
+  # Participant Qos Policy values
+  UserData      = <string>
+  EntityFactory = <bool> # Boolean: numeric 0 or 1
+
+  # Test execution parameters
+  DomainId      = <number>
+
+[topic/<name>]
+  # Topic Qos Policy values
+  TopicData                           = <string>
+  Durability                          = <string> # One of VOLATILE, LOCAL, TRANSIENT, PERSISTENT
+  DurabilityServiceDuration           = <number>
+  DurabilityServiceHistoryKind        = <string> # One of ALL, LAST
+  DurabilityServiceHistoryDepth       = <number>
+  DurabilityServiceSamples            = <number>
+  DurabilityServiceInstances          = <number>
+  DurabilityServiceSamplesPerInstance = <number>
+  Deadline                            = <number>
+  LatencyBudget                       = <number>
+  LivelinessKind                      = <string> # One of AUTOMATIC, PARTICIPANT, TOPIC
+  LivelinessDuration                  = <number>
+  ReliabilityKind                     = <string> # One of BEST_EFFORT, RELIABLE
+  ReliabilityMaxBlocking              = <number>
+  DestinationOrder                    = <string> # One of SOURCE, RECEPTION
+  HistoryKind                         = <string> # One of ALL, LAST
+  HistoryDepth                        = <number>
+  ResourceMaxSamples                  = <number>
+  ResourceMaxInstances                = <number>
+  ResourceMaxSamplesPerInstance       = <number>
+  TransportPriority                   = <number>
+  LifespanDuration                    = <number>
+  OwnershipKind                       = <string> # One of SHARED, EXCLUSIVE
+
+  # Test execution parameters
+  Participant                         = <string> # One of participant <name>
+
+[publication/<name>]
+  # Publisher Qos Policy values
+  Presentation                        = <string> # One of INSTANCE, TOPIC, GROUP
+  PresentationCoherent                = <bool> # Boolean: numeric 0 or 1
+  PresentationOrdered                 = <bool> # Boolean: numeric 0 or 1
+  Partition                           = <string> # Only single value supported
+  GroupData                           = <string>
+  EntityFactory                       = <bool> # Boolean: numeric 0 or 1
+
+  # DataWriter Qos Policy values
+  Durability                          = <string> # One of VOLATILE, LOCAL, TRANSIENT, PERSISTENT
+  DurabilityServiceDuration           = <number>
+  DurabilityServiceHistoryKind        = <string> # One of ALL, LAST
+  DurabilityServiceHistoryDepth       = <number>
+  DurabilityServiceSamples            = <number>
+  DurabilityServiceInstances          = <number>
+  DurabilityServiceSamplesPerInstance = <number>
+  Deadline                            = <number>
+  LatencyBudget                       = <number>
+  LivelinessKind                      = <string> # One of AUTOMATIC, PARTICIPANT, TOPIC
+  LivelinessDuration                  = <number>
+  ReliabilityKind                     = <string> # One of BEST_EFFORT, RELIABLE
+  ReliabilityMaxBlocking              = <number>
+  DestinationOrder                    = <string> # One of SOURCE, RECEPTION
+  HistoryKind                         = <string> # One of ALL, LAST
+  HistoryDepth                        = <number>
+  ResourceMaxSamples                  = <number>
+  ResourceMaxInstances                = <number>
+  ResourceMaxSamplesPerInstance       = <number>
+  TransportPriority                   = <number>
+  Lifespan                            = <number>
+  UserData                            = <string>
+  #VERSION1.2# OwnershipKind                       = <string> # One of SHARED, EXCLUSIVE
+  OwnershipStrength                   = <number>
+  WriterDataLifecycle                 = <bool> # Boolean: numeric 0 or 1
+
+  # Test execution parameters
+  Topic                               = <string> # One of topic <name>
+  TransportIndex                      = <number> # Index into transport configurations
+  MessageSource                       = <string> # One of subscription <name>
+  MessageFixedRate                    = <number> # Samples per second, 0 indicates use MessageRate
+  MessageRate                         = <number> # Samples per second, Poisson arrival times
+  MessageSize                         = <number> # bytes per sample
+  MessageMax                          = <number> # upper bound for size
+  MessageMin                          = <number> # lower bound for size
+  MessageDeviation                    = <number> # standard deviation for size
+
+[subscription/<name>]
+  # Subscriber Qos Policy values
+  Presentation                        = <string> # One of INSTANCE, TOPIC, GROUP
+  PresentationCoherent                = <bool> # Boolean: numeric 0 or 1
+  PresentationOrdered                 = <bool> # Boolean: numeric 0 or 1
+  Partition                           = <string> # Only single value supported
+  GroupData                           = <string>
+  EntityFactory                       = <bool> # Boolean: numeric 0 or 1
+
+  # DataReader Qos Policy values
+  Durability                          = <string> # One of VOLATILE, LOCAL, TRANSIENT, PERSISTENT
+  Deadline                            = <number>
+  LatencyBudget                       = <number>
+  LivelinessKind                      = <string> # One of AUTOMATIC, PARTICIPANT, TOPIC
+  LivelinessDuration                  = <number>
+  ReliabilityKind                     = <string> # One of BEST_EFFORT, RELIABLE
+  ReliabilityMaxBlocking              = <number>
+  DestinationOrder                    = <string> # One of SOURCE, RECEPTION
+  HistoryKind                         = <string> # One of ALL, LAST
+  HistoryDepth                        = <number>
+  ResourceMaxSamples                  = <number>
+  ResourceMaxInstances                = <number>
+  ResourceMaxSamplesPerInstance       = <number>
+  UserData                            = <string>
+  TimeBasedFilter                     = <number>
+  ReaderDataLifecycle                 = <bool> # Boolean: numeric 0 or 1
+
+  # Test execution parameters
+  Topic                               = <string> # One of topic <name>
+  TransportIndex                      = <number> # Index into transport configurations
+  DataCollectionFile                  = <string> # Filename for collected data
+  DataCollectionBound                 = <number>
+  DataCollectionRetention             = <string> # One of ALL, OLDEST, NEWEST
+

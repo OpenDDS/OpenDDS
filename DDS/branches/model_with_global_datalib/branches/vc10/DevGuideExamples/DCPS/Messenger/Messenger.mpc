@@ -1,0 +1,38 @@
+//
+// $Id$
+//
+
+project(*idl): dcps {
+  TypeSupport_Files {
+    Messenger.idl
+  }
+
+  custom_only = 1
+}
+
+project(*publisher) : dcpsexe_with_tcp {
+  exename   = publisher
+  after    += *idl
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+
+  Source_Files {
+    Publisher.cpp
+  }
+}
+
+project(*subscriber) : dcpsexe_with_tcp {
+  exename   = subscriber
+  after    += *publisher
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+
+  Source_Files {
+    DataReaderListenerImpl.cpp
+    Subscriber.cpp
+  }
+}

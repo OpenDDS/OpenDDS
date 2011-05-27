@@ -1,0 +1,32 @@
+project : dcps {
+  after       += MultiTopicTypes
+  libout       = .
+
+  idlflags    += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h
+  dynamicflags = FOOLIB_BUILD_DLL
+  pch_header   =
+  pch_source   =
+  dcps_ts_flags += --export=FooLib_Export
+
+  TypeSupport_Files {
+    Foo1Def.idl >> Foo1TypeSupport.idl Foo1TypeSupportImpl.h Foo1TypeSupportImpl.cpp
+    Foo2Def.idl >> Foo2TypeSupport.idl Foo2TypeSupportImpl.h Foo2TypeSupportImpl.cpp
+    Foo3Def.idl >> Foo3TypeSupport.idl Foo3TypeSupportImpl.h Foo3TypeSupportImpl.cpp
+  }
+
+  IDL_Files {
+    Foo1Def.idl
+    Foo1TypeSupport.idl
+    Foo2Def.idl
+    Foo2TypeSupport.idl
+    Foo3Def.idl
+    Foo3TypeSupport.idl
+  }
+  
+  Source_Files {
+    Foo1TypeSupportImpl.cpp
+    Foo2TypeSupportImpl.cpp
+    Foo3TypeSupportImpl.cpp
+  }
+}
+

@@ -1,0 +1,17 @@
+//
+// $Id$
+//
+
+project : erlang {
+  after      += tao_ic
+
+  Define_Custom(TAO_IC) {
+    automatic_in        = 1
+    automatic_out       = 1
+    command             = tao_ic
+    commandflags        =
+    dependent           = $(DDS_ROOT)/bin/tao_ic
+    inputext            = .idl
+    keyword taoicflags  = commandflags
+  }
+}

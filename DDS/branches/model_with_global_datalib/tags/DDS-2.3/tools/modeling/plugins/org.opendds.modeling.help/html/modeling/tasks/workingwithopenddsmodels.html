@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=us-ascii">
+
+  <title>Creating a Model</title>
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+  <script type="text/javascript" src=
+  "PLUGINS_ROOT/org.eclipse.help/livehelp.js">
+</script>
+</head>
+
+<body>
+  <h2>Working with OpenDDS Models</h2>
+
+  <h3>The OpenDDS Model</h3>The OpenDDS Model consists of
+  "libraries" of possibly re-usable OpenDDS elements and optionally
+  Packages that can contain these libraries.
+
+  <div class="note">
+    <p>Library in this context is different than the concept of C++
+    object file libraries used in OpenDDS. Even though you may be
+    working with different modeling libraries the generated code
+    will target a single object file library.</p>
+  </div>
+
+  <h3>Creating a Model</h3>
+
+  <p>To create an OpenDDS model, from the <a href=
+  'javascript:executeCommand("org.eclipse.ui.newWizard")'><b>Eclipse
+  File -&gt; New</b></a> -&gt; Other... (Ctrl+N) menu item select
+  OpenDDS Diagram under the OpenDDS Models category as shown in the
+  figure below.</p><img alt="Creating new OpenDDS diagram" src=
+  "../images/new_diagram_selection.png">
+
+  <p>The Create OpenDDS Diagram wizard will prompt for the name of
+  the model. This name is used in auto-generated source file names
+  and is used as the name of the shared library. It is also used as
+  the identifier for a C++ namespace.</p>
+
+  <div class="note">
+    <p>If you decide to later change the model name, click on an
+    emtpy portion of the main diagram to bring up the name in the
+    property sheet in the Properties tab below the diagram.</p>
+  </div>
+
+  <p>After selecting a model name the Create OpenDDS Diagram wizard
+  will then prompt for the name of the diagram file and the name of
+  the file containing domain model itself. It is recommended that
+  when specifying these names that you use the default which is the
+  name of the model itself.</p>
+
+  <div class="caution">
+    <p>Many diagram-based modeling tools keep both the model and
+    diagram elements in a single file. In the case of the OpenDDS
+    SDK these files are kept separate. Although this will enable
+    alternative representations of the model to be considered, care
+    should be taken that both the domain model file and diagram
+    file are included when sharing OpenDDS models.</p>
+  </div><br>
+
+  <h3>Populating the Model</h3>
+
+  <p>After the selection of a new OpenDDS Diagram you will then be
+  presented with an editor that consists of a canvas and a palette
+  of "libraries" that can dragged onto the canvas. An example of
+  this editor is shown in the following figure.</p><img alt=
+  "Creating new OpenDDS diagram" src=
+  "../images/new_diagram_editor.png">
+
+  <p>You can open a library that is on the canvas by first
+  selecting it and then double-clicking on it or pressing the Enter
+  key. You can verify it is selected when you see a thick border
+  around the figure with re-sizing handles on it as shown
+  below.</p><img alt="Selected library" src=
+  "../images/main_diagram_selected_lib.png">
+
+  <p>When you open up a library there will be a new editor window
+  in your editor window. See <a href=
+  "workingwithdiagrams.html#moving_between_diagrams">Moving between
+  Diagrams</a> for information on working with multiple diagram
+  editors.</p>
+
+  <h3>Using Packages</h3>
+
+  <p>Although you can partition libraries by placing them in
+  separate model files, packages provides a way to organize
+  libraries within the same model file. Packages can be
+  hierarchical and can contain libraries or other
+  packages:</p><img alt="Packages" src=
+  "../images/main_diagram_packages.png">
+
+  <p>When generating C++ code, packages will map to namespaces.</p>
+
+  <div class="note">
+    <p>If you have numerous nested packages you may want to review
+    <a href="workingwithdiagrams.html#arranging_figures">arranging
+    figures</a> on how to automatically resize and reposition your
+    packages and package contents so they don't overlap.</p>
+  </div>
+
+  <h3>Using Libraries from other Model Files</h3>
+
+  <p>You can make it explicit that you will be using libraries from
+  other OpenDDS model files by dragging those libraries from the
+  Project Explorer view to the main diagram canvas. These shortcuts
+  will have an arrow attached to them indicating they are aliases
+  to elements in other files.</p>
+
+  <p>For example, in the figure below, the ReliabilityPolicies
+  library from the Policies.opendds file is shown as a shortcut on
+  the main diagram. The policies from this library will then be
+  available to select from when referencing shared
+  policies.</p><img alt="Library shortcut on main diagram" src=
+  "../images/main_diagram_lib_shortcut.png">
+
+<div class="note">
+<p>Multiple packages (e.g. the four
+"Model Policies" shown in the above figure) may be displayed.
+This is harmless and any one of the packages can be used.</p><
+/div>
+
+  <h3>Validation of Libraries and Packages</h3>
+
+  <p>Before using your model to for code generation you should
+  perform validations first. See <a href=
+  "performingvalidations.html">Performing Validations</a> to learn
+  how to do validations.</p>
+</body>
+</html>

@@ -1,0 +1,805 @@
+(2060|1804) SimpleDataReader initialized to expect 200 messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [1]"
+(2060|1560) SimpleDataReader has now received 1 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [2]"
+(2060|1560) SimpleDataReader has now received 2 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [3]"
+(2060|1560) SimpleDataReader has now received 3 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [4]"
+(2060|1560) SimpleDataReader has now received 4 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [5]"
+(2060|1560) SimpleDataReader has now received 5 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [6]"
+(2060|1560) SimpleDataReader has now received 6 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [7]"
+(2060|1560) SimpleDataReader has now received 7 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [8]"
+(2060|1560) SimpleDataReader has now received 8 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [9]"
+(2060|1560) SimpleDataReader has now received 9 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [10]"
+(2060|1560) SimpleDataReader has now received 10 of the 200 expected messages.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [11]"
+(2060|1560) SimpleDataReader has now received 11 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [12]"
+(2060|1560) SimpleDataReader has now received 12 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [13]"
+(2060|1560) SimpleDataReader has now received 13 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [14]"
+(2060|1560) SimpleDataReader has now received 14 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [15]"
+(2060|1560) SimpleDataReader has now received 15 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [16]"
+(2060|1560) SimpleDataReader has now received 16 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [17]"
+(2060|1560) SimpleDataReader has now received 17 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [18]"
+(2060|1560) SimpleDataReader has now received 18 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [19]"
+(2060|1560) SimpleDataReader has now received 19 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [20]"
+(2060|1560) SimpleDataReader has now received 20 of the 200 expected messages.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [21]"
+(2060|1560) SimpleDataReader has now received 21 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [22]"
+(2060|1560) SimpleDataReader has now received 22 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [23]"
+(2060|1560) SimpleDataReader has now received 23 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [24]"
+(2060|1560) SimpleDataReader has now received 24 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [25]"
+(2060|1560) SimpleDataReader has now received 25 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [26]"
+(2060|1560) SimpleDataReader has now received 26 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [27]"
+(2060|1560) SimpleDataReader has now received 27 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [28]"
+(2060|1560) SimpleDataReader has now received 28 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [29]"
+(2060|1560) SimpleDataReader has now received 29 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [30]"
+(2060|1560) SimpleDataReader has now received 30 of the 200 expected messages.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [31]"
+(2060|1560) SimpleDataReader has now received 31 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [32]"
+(2060|1560) SimpleDataReader has now received 32 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [33]"
+(2060|1560) SimpleDataReader has now received 33 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [34]"
+(2060|1560) SimpleDataReader has now received 34 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [35]"
+(2060|1560) SimpleDataReader has now received 35 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [36]"
+(2060|1560) SimpleDataReader has now received 36 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [37]"
+(2060|1560) SimpleDataReader has now received 37 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [38]"
+(2060|1560) SimpleDataReader has now received 38 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [39]"
+(2060|1560) SimpleDataReader has now received 39 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [40]"
+(2060|1560) SimpleDataReader has now received 40 of the 200 expected messages.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [41]"
+(2060|1560) SimpleDataReader has now received 41 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [42]"
+(2060|1560) SimpleDataReader has now received 42 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [43]"
+(2060|1560) SimpleDataReader has now received 43 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [44]"
+(2060|1560) SimpleDataReader has now received 44 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [45]"
+(2060|1560) SimpleDataReader has now received 45 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [46]"
+(2060|1560) SimpleDataReader has now received 46 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [47]"
+(2060|1560) SimpleDataReader has now received 47 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [48]"
+(2060|1560) SimpleDataReader has now received 48 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [49]"
+(2060|1560) SimpleDataReader has now received 49 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [50]"
+(2060|1560) SimpleDataReader has now received 50 of the 200 expected messages.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [51]"
+(2060|1560) SimpleDataReader has now received 51 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [52]"
+(2060|1560) SimpleDataReader has now received 52 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [53]"
+(2060|1560) SimpleDataReader has now received 53 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [54]"
+(2060|1560) SimpleDataReader has now received 54 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [55]"
+(2060|1560) SimpleDataReader has now received 55 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [56]"
+(2060|1560) SimpleDataReader has now received 56 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [57]"
+(2060|1560) SimpleDataReader has now received 57 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [58]"
+(2060|1560) SimpleDataReader has now received 58 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [59]"
+(2060|1560) SimpleDataReader has now received 59 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [60]"
+(2060|1560) SimpleDataReader has now received 60 of the 200 expected messages.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [61]"
+(2060|1560) SimpleDataReader has now received 61 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [62]"
+(2060|1560) SimpleDataReader has now received 62 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [63]"
+(2060|1560) SimpleDataReader has now received 63 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [64]"
+(2060|1560) SimpleDataReader has now received 64 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [65]"
+(2060|1560) SimpleDataReader has now received 65 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [66]"
+(2060|1560) SimpleDataReader has now received 66 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [67]"
+(2060|1560) SimpleDataReader has now received 67 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [68]"
+(2060|1560) SimpleDataReader has now received 68 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [69]"
+(2060|1560) SimpleDataReader has now received 69 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [70]"
+(2060|1560) SimpleDataReader has now received 70 of the 200 expected messages.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [71]"
+(2060|1560) SimpleDataReader has now received 71 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [72]"
+(2060|1560) SimpleDataReader has now received 72 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [73]"
+(2060|1560) SimpleDataReader has now received 73 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [74]"
+(2060|1560) SimpleDataReader has now received 74 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [75]"
+(2060|1560) SimpleDataReader has now received 75 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [76]"
+(2060|1560) SimpleDataReader has now received 76 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [77]"
+(2060|1560) SimpleDataReader has now received 77 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [78]"
+(2060|1560) SimpleDataReader has now received 78 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [79]"
+(2060|1560) SimpleDataReader has now received 79 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [80]"
+(2060|1560) SimpleDataReader has now received 80 of the 200 expected messages.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [81]"
+(2060|1560) SimpleDataReader has now received 81 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [82]"
+(2060|1560) SimpleDataReader has now received 82 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [83]"
+(2060|1560) SimpleDataReader has now received 83 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [84]"
+(2060|1560) SimpleDataReader has now received 84 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [85]"
+(2060|1560) SimpleDataReader has now received 85 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [86]"
+(2060|1560) SimpleDataReader has now received 86 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [87]"
+(2060|1560) SimpleDataReader has now received 87 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [88]"
+(2060|1560) SimpleDataReader has now received 88 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [89]"
+(2060|1560) SimpleDataReader has now received 89 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [90]"
+(2060|1560) SimpleDataReader has now received 90 of the 200 expected messages.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [91]"
+(2060|1560) SimpleDataReader has now received 91 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [92]"
+(2060|1560) SimpleDataReader has now received 92 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [93]"
+(2060|1560) SimpleDataReader has now received 93 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [94]"
+(2060|1560) SimpleDataReader has now received 94 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [95]"
+(2060|1560) SimpleDataReader has now received 95 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [96]"
+(2060|1560) SimpleDataReader has now received 96 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [97]"
+(2060|1560) SimpleDataReader has now received 97 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [98]"
+(2060|1560) SimpleDataReader has now received 98 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [99]"
+(2060|1560) SimpleDataReader has now received 99 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [100]"
+(2060|1560) SimpleDataReader has now received 100 of the 200 expected messages.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) The transport has confirmed that a sample has been delivered.
+(2104|2664) Transport has detached from SimplePublisher.
+(2104|2664) The transport has been lost.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [101]"
+(2060|1560) SimpleDataReader has now received 101 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [102]"
+(2060|1560) SimpleDataReader has now received 102 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [103]"
+(2060|1560) SimpleDataReader has now received 103 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [104]"
+(2060|1560) SimpleDataReader has now received 104 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [105]"
+(2060|1560) SimpleDataReader has now received 105 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [106]"
+(2060|1560) SimpleDataReader has now received 106 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [107]"
+(2060|1560) SimpleDataReader has now received 107 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [108]"
+(2060|1560) SimpleDataReader has now received 108 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [109]"
+(2060|1560) SimpleDataReader has now received 109 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [110]"
+(2060|1560) SimpleDataReader has now received 110 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [111]"
+(2060|1560) SimpleDataReader has now received 111 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [112]"
+(2060|1560) SimpleDataReader has now received 112 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [113]"
+(2060|1560) SimpleDataReader has now received 113 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [114]"
+(2060|1560) SimpleDataReader has now received 114 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [115]"
+(2060|1560) SimpleDataReader has now received 115 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [116]"
+(2060|1560) SimpleDataReader has now received 116 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [117]"
+(2060|1560) SimpleDataReader has now received 117 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [118]"
+(2060|1560) SimpleDataReader has now received 118 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [119]"
+(2060|1560) SimpleDataReader has now received 119 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [120]"
+(2060|1560) SimpleDataReader has now received 120 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [121]"
+(2060|1560) SimpleDataReader has now received 121 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [122]"
+(2060|1560) SimpleDataReader has now received 122 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [123]"
+(2060|1560) SimpleDataReader has now received 123 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [124]"
+(2060|1560) SimpleDataReader has now received 124 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [125]"
+(2060|1560) SimpleDataReader has now received 125 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [126]"
+(2060|1560) SimpleDataReader has now received 126 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [127]"
+(2060|1560) SimpleDataReader has now received 127 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [128]"
+(2060|1560) SimpleDataReader has now received 128 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [129]"
+(2060|1560) SimpleDataReader has now received 129 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [130]"
+(2060|1560) SimpleDataReader has now received 130 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [131]"
+(2060|1560) SimpleDataReader has now received 131 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [132]"
+(2060|1560) SimpleDataReader has now received 132 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [133]"
+(2060|1560) SimpleDataReader has now received 133 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [134]"
+(2060|1560) SimpleDataReader has now received 134 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [135]"
+(2060|1560) SimpleDataReader has now received 135 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [136]"
+(2060|1560) SimpleDataReader has now received 136 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [137]"
+(2060|1560) SimpleDataReader has now received 137 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [138]"
+(2060|1560) SimpleDataReader has now received 138 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [139]"
+(2060|1560) SimpleDataReader has now received 139 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [140]"
+(2060|1560) SimpleDataReader has now received 140 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [141]"
+(2060|1560) SimpleDataReader has now received 141 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [142]"
+(2060|1560) SimpleDataReader has now received 142 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [143]"
+(2060|1560) SimpleDataReader has now received 143 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [144]"
+(2060|1560) SimpleDataReader has now received 144 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [145]"
+(2060|1560) SimpleDataReader has now received 145 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [146]"
+(2060|1560) SimpleDataReader has now received 146 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [147]"
+(2060|1560) SimpleDataReader has now received 147 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [148]"
+(2060|1560) SimpleDataReader has now received 148 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [149]"
+(2060|1560) SimpleDataReader has now received 149 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [150]"
+(2060|1560) SimpleDataReader has now received 150 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [151]"
+(2060|1560) SimpleDataReader has now received 151 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [152]"
+(2060|1560) SimpleDataReader has now received 152 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [153]"
+(2060|1560) SimpleDataReader has now received 153 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [154]"
+(2060|1560) SimpleDataReader has now received 154 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [155]"
+(2060|1560) SimpleDataReader has now received 155 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [156]"
+(2060|1560) SimpleDataReader has now received 156 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [157]"
+(2060|1560) SimpleDataReader has now received 157 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [158]"
+(2060|1560) SimpleDataReader has now received 158 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [159]"
+(2060|1560) SimpleDataReader has now received 159 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [160]"
+(2060|1560) SimpleDataReader has now received 160 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [161]"
+(2060|1560) SimpleDataReader has now received 161 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [162]"
+(2060|1560) SimpleDataReader has now received 162 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [163]"
+(2060|1560) SimpleDataReader has now received 163 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [164]"
+(2060|1560) SimpleDataReader has now received 164 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [165]"
+(2060|1560) SimpleDataReader has now received 165 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [166]"
+(2060|1560) SimpleDataReader has now received 166 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [167]"
+(2060|1560) SimpleDataReader has now received 167 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [168]"
+(2060|1560) SimpleDataReader has now received 168 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [169]"
+(2060|1560) SimpleDataReader has now received 169 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [170]"
+(2060|1560) SimpleDataReader has now received 170 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [171]"
+(2060|1560) SimpleDataReader has now received 171 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [172]"
+(2060|1560) SimpleDataReader has now received 172 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [173]"
+(2060|1560) SimpleDataReader has now received 173 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [174]"
+(2060|1560) SimpleDataReader has now received 174 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [175]"
+(2060|1560) SimpleDataReader has now received 175 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [176]"
+(2060|1560) SimpleDataReader has now received 176 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [177]"
+(2060|1560) SimpleDataReader has now received 177 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [178]"
+(2060|1560) SimpleDataReader has now received 178 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [179]"
+(2060|1560) SimpleDataReader has now received 179 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [180]"
+(2060|1560) SimpleDataReader has now received 180 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [181]"
+(2060|1560) SimpleDataReader has now received 181 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [182]"
+(2060|1560) SimpleDataReader has now received 182 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [183]"
+(2060|1560) SimpleDataReader has now received 183 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [184]"
+(2060|1560) SimpleDataReader has now received 184 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [185]"
+(2060|1560) SimpleDataReader has now received 185 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [186]"
+(2060|1560) SimpleDataReader has now received 186 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [187]"
+(2060|1560) SimpleDataReader has now received 187 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [188]"
+(2060|1560) SimpleDataReader has now received 188 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [189]"
+(2060|1560) SimpleDataReader has now received 189 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [190]"
+(2060|1560) SimpleDataReader has now received 190 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [191]"
+(2060|1560) SimpleDataReader has now received 191 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [192]"
+(2060|1560) SimpleDataReader has now received 192 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [193]"
+(2060|1560) SimpleDataReader has now received 193 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [194]"
+(2060|1560) SimpleDataReader has now received 194 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [195]"
+(2060|1560) SimpleDataReader has now received 195 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [196]"
+(2060|1560) SimpleDataReader has now received 196 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [197]"
+(2060|1560) SimpleDataReader has now received 197 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [198]"
+(2060|1560) SimpleDataReader has now received 198 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [199]"
+(2060|1560) SimpleDataReader has now received 199 of the 200 expected messages.
+(2060|1560) Data has been received:
+(2060|1560) Message: "Hello World! [200]"
+(2060|1560) SimpleDataReader has now received 200 of the 200 expected messages.
+(2060|1804) Transport has detached from SimpleSubscriber.
+(2060|1804) The transport has been lost.

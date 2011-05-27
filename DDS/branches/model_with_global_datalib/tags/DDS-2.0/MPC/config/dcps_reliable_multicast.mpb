@@ -1,0 +1,4 @@
+project: dcps {
+  libs  += ReliableMulticast
+  after += ReliableMulticast
+}

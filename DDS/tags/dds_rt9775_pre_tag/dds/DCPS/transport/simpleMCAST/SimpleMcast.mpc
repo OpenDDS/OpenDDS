@@ -1,0 +1,34 @@
+project(SimpleMcast) : dcps {
+  sharedname = SimpleMcast
+  dynamicflags = SIMPLEMCAST_BUILD_DLL
+
+  // override the orbsvcslib default library output directory
+  libout      = $(DDS_ROOT)/lib
+
+  includes    += $(DDS_ROOT) $(DDS_ROOT)/dds
+  pch_header   = SimpleMcast_pch.h
+  pch_source   = SimpleMcast_pch.cpp
+
+  Source_Files {
+    SimpleMcast.cpp
+    SimpleMcastConfiguration.cpp
+    SimpleMcastDataLink.cpp
+    SimpleMcastFactory.cpp
+    SimpleMcastGenerator.cpp
+    SimpleMcastLoader.cpp
+    SimpleMcastReceiveStrategy.cpp
+    SimpleMcastSendStrategy.cpp
+    SimpleMcastTransport.cpp
+    SimpleMcastSocket.cpp
+    SimpleMcastSynchResource.cpp
+  }
+
+  Header_Files {
+  }
+
+  Inline_Files {
+  }
+
+  Template_Files {
+  }
+}

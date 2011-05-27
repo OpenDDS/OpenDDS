@@ -1,0 +1,19 @@
+project(*pub) : dcpsexe, dds_model {
+  after    += Codegen
+  libs     += Codegen
+  libpaths += model
+
+  Source_Files {
+    aPublisher.cpp
+  }
+}
+
+project(*sub) : dcpsexe, dds_model {
+  after    += Codegen
+  libs     += Codegen
+  libpaths += model
+
+  Source_Files {
+    aSubscriber.cpp
+  }
+}

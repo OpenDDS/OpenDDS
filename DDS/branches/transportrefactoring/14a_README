@@ -1,0 +1,15 @@
+Additional instructions for building OpenDDS with TAO 1.4a
+==========================================================
+
+See $DDS_ROOT/docs/INSTALL for general build instructions.
+
+This note only applies if you have obtained a released verison of OpenDDS.  If
+you have obtained OpenDDS from subversion, the rest fo this file doesn't apply
+to you.
+
+The release includes an extra archive file at the top level ($DDS_ROOT) named
+TAO_14a_projects.tar.gz (Unix line endings) or TAO_14a_projects.zip (Windows
+line endings).  This archive contains separate copies of all of the
+GNUmakefile* and *.vcproj, *.sln files.  Extract this archive to $DDS_ROOT
+before proceeding to build.  This will replace all of the makefiles and project
+files with 1.4a-compatible versions.

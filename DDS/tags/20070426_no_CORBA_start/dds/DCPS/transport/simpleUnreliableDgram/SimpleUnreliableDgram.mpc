@@ -1,0 +1,4 @@
+project : dcps {
+  sharedname   = SimpleUnreliableDgram
+  dynamicflags = SIMPLEUNRELIABLEDGRAM_BUILD_DLL
+}

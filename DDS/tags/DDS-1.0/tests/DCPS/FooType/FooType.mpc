@@ -1,0 +1,18 @@
+project(DcpsFooType) : dcps {
+  libout       = .
+  idlflags    += -Wb,export_macro=FooType_Export -Wb,export_include=footype_export.h
+  dynamicflags = FOOTYPE_BUILD_DLL
+  pch_header   =
+  pch_source   =
+  dcps_ts_flags += --export=FooType_Export
+
+  TypeSupport_Files {
+    FooType.idl >> FooTypeSupport.idl FooTypeSupportImpl.h FooTypeSupportImpl.cpp
+  }
+
+  IDL_Files {
+    FooType.idl
+    FooTypeSupport.idl
+  }
+}
+

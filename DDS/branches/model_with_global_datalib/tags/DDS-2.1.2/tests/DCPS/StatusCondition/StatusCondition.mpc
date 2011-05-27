@@ -1,0 +1,6 @@
+project: dcpsexe_with_tcp {
+  exename = StatusConditionTest
+  TypeSupport_Files {
+    Messenger.idl
+  }
+}

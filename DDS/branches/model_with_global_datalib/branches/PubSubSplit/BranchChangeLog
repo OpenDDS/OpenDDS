@@ -1,0 +1,140 @@
+Fri Mar  9 18:59:25 UTC 2007  Jonathan S. Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/Publication/Publication.mpc:
+        * dds/DCPS/Publication/PublicationFactory.h:
+        * dds/DCPS/Publication/PublicationFactory.cpp:
+        * dds/DCPS/Publication/PublisherImpl.h:
+        * dds/DCPS/PublisherFactory.h:
+        * dds/DCPS/PublisherFactory.cpp:
+        * dds/DCPS/Subscription/Subscription.mpc:
+
+          Allow the Publication side of things to register itself
+          on demand.
+
+Fri Mar  9 16:17:13 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/Publication/Publication.mpc:
+        * dds/DCPS/Subscription/Subscription.mpc:
+
+          Fixed BIT problems.
+
+Fri Mar  9 15:14:24 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/Publication/Publication.mpc:
+        * dds/DCPS/Subscription/Subscription.mpc:
+        * dds/DdsDcps.mpc:
+        * dds/DdsIDL.mpc:
+        * dds/dcps_bits.mpb:
+        * dds/dcps_bits_idl.mpb:
+
+          Working on splitting pub/sub.
+
+        * dds/Publication.mpc:
+        * dds/Subscription.mpc:
+
+          Removed these files.
+
+Thu Mar  8 16:09:27 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/Publication/Publication_pch.h:
+        * dds/DCPS/Publication/Publication_pch.cpp:
+        * dds/DCPS/Subscription/Subscription_pch.h:
+        * dds/DCPS/Subscription/Subscription_pch.cpp:
+
+          Fixed guards and include file names.
+
+Wed Mar  7 21:53:39 UTC 2007  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * DevGuideExamples/DDS/Messenger/publisher.cpp:
+        * DevGuideExamples/DDS/Messenger/subscriber.cpp:
+        * MPC/config/dcps.mpb:
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/Publication:
+        * dds/DCPS/Publication/DataWriterImpl.h:
+        * dds/DCPS/Publication/DataWriterImpl.cpp:
+        * dds/DCPS/Publication/Publication_pch.h:
+        * dds/DCPS/Publication/Publication_pch.cpp:
+        * dds/DCPS/Publication/PublisherImpl.h:
+        * dds/DCPS/Publication/PublisherImpl.cpp:
+        * dds/DCPS/Publication/publication_export.h:
+        * dds/DCPS/Subscription:
+        * dds/DCPS/Subscription/DataReaderImpl.h:
+        * dds/DCPS/Subscription/DataReaderImpl.inl:
+        * dds/DCPS/Subscription/DataReaderImpl.cpp:
+        * dds/DCPS/Subscription/SubscriberImpl.h:
+        * dds/DCPS/Subscription/SubscriberImpl.cpp:
+        * dds/DCPS/Subscription/Subscription_pch.h:
+        * dds/DCPS/Subscription/Subscription_pch.cpp:
+        * dds/DCPS/Subscription/subscription_export.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkCleanupTask.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/Publication.mpc:
+        * dds/Subscription.mpc:
+        * performance-tests/DCPS/McastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/McastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+        * tests/DCPS/BuiltInTopic/common.h:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/Writer.h:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/Writer.h:
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/FooType/FooDataReaderImpl.h:
+        * tests/DCPS/FooType/FooDataWriterImpl.h:
+        * tests/DCPS/FooType2/FooDataReaderImpl.h:
+        * tests/DCPS/FooType2/FooDataWriterImpl.h:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
+
+          Began the process of moving publisher and subscriber behavior into
+          new libraries to reduce footprint. These libraries are Publication
+          and Subscription.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Removed these files.
+

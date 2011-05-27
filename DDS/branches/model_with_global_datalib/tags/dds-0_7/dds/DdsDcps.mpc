@@ -1,0 +1,195 @@
+project(DdsDcps) : orbsvcslib, core, portableserver, dcps_ts_defaults {
+  sharedname = TAO_DdsDcps
+
+  // override the orbsvcslib default library output directory
+  libout      = $(DDS_ROOT)/lib
+
+  includes    += $(DDS_ROOT) $(DDS_ROOT)/dds
+  idlflags    += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=TAO_DdsDcps_Export -Wb,export_include=DCPS/dcps_export.h -I $(DDS_ROOT)
+  dynamicflags = TAO_DDSDCPS_BUILD_DLL
+  pch_header   = DCPS/DdsDcps_pch.h
+  pch_source   = DCPS/DdsDcps_pch.cpp
+  dcps_ts_flags += --module DDS --export TAO_DdsDcps_Export --pch DCPS/DdsDcps_pch.h
+
+  TypeSupport_Files {
+    DdsDcpsInfrastructure.idl >> ParticipantBuiltinTopicDataTypeSupport.idl ParticipantBuiltinTopicDataTypeSupportImpl.h ParticipantBuiltinTopicDataTypeSupportImpl.cpp PublicationBuiltinTopicDataTypeSupport.idl PublicationBuiltinTopicDataTypeSupportImpl.h PublicationBuiltinTopicDataTypeSupportImpl.cpp SubscriptionBuiltinTopicDataTypeSupport.idl SubscriptionBuiltinTopicDataTypeSupportImpl.h SubscriptionBuiltinTopicDataTypeSupportImpl.cpp TopicBuiltinTopicDataTypeSupport.idl TopicBuiltinTopicDataTypeSupportImpl.h TopicBuiltinTopicDataTypeSupportImpl.cpp
+  }
+
+
+  IDL_Files {
+    // only need DDS DCPS type support for Built-In Topic types.
+    // Reduce generated code size by not using -Gdcps with other IDL files.
+    idlflags    += -Gdcps
+    DdsDcpsInfrastructure.idl
+
+    // Built-In Topic Support
+    ParticipantBuiltinTopicDataTypeSupport.idl
+    PublicationBuiltinTopicDataTypeSupport.idl
+    SubscriptionBuiltinTopicDataTypeSupport.idl
+    TopicBuiltinTopicDataTypeSupport.idl
+  }
+
+  IDL_Files {
+    DdsDcpsDomain.idl
+    DdsDcpsPublication.idl
+    DdsDcpsSubscription.idl
+    DdsDcpsTopic.idl
+    DdsDcps.idl
+    DdsDcpsInfo.idl
+    DdsDcpsDataReaderRemote.idl
+    DdsDcpsDataWriterRemote.idl
+    DdsDcpsInfoUtils.idl
+    DdsDcpsTypeSupportTao.idl
+  }
+
+  Header_Files {
+    DCPS/dcps_export.h
+
+    // Why does MPC only add XXXBuiltinTopicDataTypeSupportS_T.h to a project?
+    ParticipantBuiltinTopicDataTypeSupportC.h
+    ParticipantBuiltinTopicDataTypeSupportS.h
+    PublicationBuiltinTopicDataTypeSupportC.h
+    PublicationBuiltinTopicDataTypeSupportS.h
+    SubscriptionBuiltinTopicDataTypeSupportC.h
+    SubscriptionBuiltinTopicDataTypeSupportS.h
+    TopicBuiltinTopicDataTypeSupportC.h
+    TopicBuiltinTopicDataTypeSupportS.h
+  }
+
+  Source_Files {
+    DdsDcpsDomainC.cpp
+    DdsDcpsDomainS.cpp
+    DdsDcpsInfrastructureC.cpp
+    DdsDcpsInfrastructureS.cpp
+    DdsDcpsPublicationC.cpp
+    DdsDcpsPublicationS.cpp
+    DdsDcpsSubscriptionC.cpp
+    DdsDcpsSubscriptionS.cpp
+    DdsDcpsTopicC.cpp
+    DdsDcpsTopicS.cpp
+    DdsDcpsC.cpp
+    DdsDcpsS.cpp
+    DdsDcpsInfoC.cpp
+    DdsDcpsInfoS.cpp
+    DdsDcpsDataReaderRemoteC.cpp
+    DdsDcpsDataReaderRemoteS.cpp
+    DdsDcpsDataWriterRemoteC.cpp
+    DdsDcpsDataWriterRemoteS.cpp
+    DdsDcpsInfoUtilsC.cpp
+    DdsDcpsInfoUtilsS.cpp
+    DdsDcpsTypeSupportTaoC.cpp
+    DdsDcpsTypeSupportTaoS.cpp
+
+    DCPS/debug.cpp
+    DCPS/DataReaderImpl.cpp
+    DCPS/WriteDataContainer.cpp
+    DCPS/DataWriterImpl.cpp
+    DCPS/DomainParticipantFactoryImpl.cpp
+    DCPS/DomainParticipantImpl.cpp
+    DCPS/EntityImpl.cpp
+    DCPS/PublisherImpl.cpp
+    DCPS/SubscriberImpl.cpp
+    DCPS/TopicDescriptionImpl.cpp
+    DCPS/TopicImpl.cpp
+    DCPS/Service_Participant.cpp  
+    DCPS/Qos_Helper.cpp
+    DCPS/Marked_Default_Qos.cpp
+    DCPS/Registered_Data_Types.cpp
+    DCPS/DataSampleList.cpp
+    DCPS/Serializer.cpp
+    DCPS/DataSampleHeader.cpp
+    DCPS/InstanceState.cpp
+    DCPS/ReceivedDataElementList.cpp
+    DCPS/Transient_Kludge.cpp
+    DCPS/BuiltInTopicUtils.cpp
+    DCPS/DataBlockLockPool.cpp
+
+    // Built-In Topic Support
+    ParticipantBuiltinTopicDataTypeSupportImpl.cpp
+    PublicationBuiltinTopicDataTypeSupportImpl.cpp
+    SubscriptionBuiltinTopicDataTypeSupportImpl.cpp
+    TopicBuiltinTopicDataTypeSupportImpl.cpp
+
+    // Why does MPC only add XXXBuiltinTopicDataTypeSupportS_T.cpp to a project?
+    ParticipantBuiltinTopicDataTypeSupportC.cpp
+    ParticipantBuiltinTopicDataTypeSupportS.cpp
+    PublicationBuiltinTopicDataTypeSupportC.cpp
+    PublicationBuiltinTopicDataTypeSupportS.cpp
+    SubscriptionBuiltinTopicDataTypeSupportC.cpp
+    SubscriptionBuiltinTopicDataTypeSupportS.cpp
+    TopicBuiltinTopicDataTypeSupportC.cpp
+    TopicBuiltinTopicDataTypeSupportS.cpp
+    
+
+    DCPS/transport/framework/BuildChainVisitor.cpp
+    DCPS/transport/framework/DataLink.cpp
+    DCPS/transport/framework/DataLinkSet.cpp
+    DCPS/transport/framework/DataLinkSetMap.cpp
+    DCPS/transport/framework/TransportDebug.cpp
+    DCPS/transport/framework/NetworkAddress.cpp
+    DCPS/transport/framework/NullSynch.cpp
+    DCPS/transport/framework/NullSynchStrategy.cpp
+    DCPS/transport/framework/PacketRemoveVisitor.cpp
+    DCPS/transport/framework/PerConnectionSynch.cpp
+    DCPS/transport/framework/PerConnectionSynchStrategy.cpp
+    DCPS/transport/framework/PoolSynch.cpp
+    DCPS/transport/framework/PoolSynchStrategy.cpp
+    DCPS/transport/framework/QueueRemoveVisitor.cpp
+    DCPS/transport/framework/ReceivedDataSample.cpp
+    DCPS/transport/framework/ReceiveListenerSet.cpp
+    DCPS/transport/framework/ReceiveListenerSetMap.cpp
+    DCPS/transport/framework/RepoIdSet.cpp
+    DCPS/transport/framework/RepoIdSetMap.cpp
+    DCPS/transport/framework/TheTransportFactory.cpp
+    DCPS/transport/framework/ThreadSynch.cpp
+    DCPS/transport/framework/ThreadSynchResource.cpp
+    DCPS/transport/framework/ThreadSynchStrategy.cpp
+    DCPS/transport/framework/ThreadSynchWorker.cpp
+    DCPS/transport/framework/TransportConfiguration.cpp
+    DCPS/transport/framework/TransportFactory.cpp
+    DCPS/transport/framework/TransportHeader.cpp
+    DCPS/transport/framework/TransportImpl.cpp
+    DCPS/transport/framework/TransportImplFactory.cpp
+    DCPS/transport/framework/TransportInterface.cpp
+    DCPS/transport/framework/TransportQueueElement.cpp
+    DCPS/transport/framework/TransportReactorTask.cpp
+    DCPS/transport/framework/TransportReceiveListener.cpp
+    DCPS/transport/framework/TransportReceiveStrategy.cpp
+    DCPS/transport/framework/TransportReplacedElement.cpp
+    DCPS/transport/framework/TransportSendControlElement.cpp
+    DCPS/transport/framework/TransportSendElement.cpp
+    DCPS/transport/framework/TransportSendListener.cpp
+    DCPS/transport/framework/TransportSendStrategy.cpp
+
+    DCPS/transport/simpleTCP/SimpleTcpAcceptor.cpp
+    DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp
+    DCPS/transport/simpleTCP/SimpleTcpConnection.cpp
+    DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp
+    DCPS/transport/simpleTCP/SimpleTcpFactory.cpp
+    DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp
+    DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp
+    DCPS/transport/simpleTCP/SimpleTcpSynchResource.cpp
+    DCPS/transport/simpleTCP/SimpleTcpTransport.cpp
+
+    DCPS/transport/simpleUDP/SimpleUdpConfiguration.cpp
+    DCPS/transport/simpleUDP/SimpleUdpDataLink.cpp
+    DCPS/transport/simpleUDP/SimpleUdpFactory.cpp
+    DCPS/transport/simpleUDP/SimpleUdpReceiveStrategy.cpp
+    DCPS/transport/simpleUDP/SimpleUdpSendStrategy.cpp
+    DCPS/transport/simpleUDP/SimpleUdpSocket.cpp
+    DCPS/transport/simpleUDP/SimpleUdpTransport.cpp
+  }
+
+  Inline_Files {  
+      // Why does MPC only add XXXBuiltinTopicDataTypeSupportS_T.inl to a project?
+    ParticipantBuiltinTopicDataTypeSupportC.inl
+    ParticipantBuiltinTopicDataTypeSupportS.inl
+    PublicationBuiltinTopicDataTypeSupportC.inl
+    PublicationBuiltinTopicDataTypeSupportS.inl
+    SubscriptionBuiltinTopicDataTypeSupportC.inl
+    SubscriptionBuiltinTopicDataTypeSupportS.inl
+    TopicBuiltinTopicDataTypeSupportC.inl
+    TopicBuiltinTopicDataTypeSupportS.inl
+  }
+
+}

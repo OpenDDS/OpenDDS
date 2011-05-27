@@ -1,0 +1,50 @@
+
+project(DDS*idl): dcps {
+  // This project ensures the common components get built first.
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+
+  custom_only = 1
+}
+
+project(DDS*Aggregator) : portableserver, orbsvcsexe, iormanip, ftorb, dds_macros {
+  exename = Aggregator
+  requires += tao_orbsvcs
+
+  IDL_Files {
+  }
+
+  Source_Files {
+    Aggregator.cpp
+  }
+}
+
+project(DDS*Publisher) : dcpsexe {
+  exename = publisher
+  after  += DDS*idl
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+
+  Source_Files {
+    publisher.cpp
+    Writer.cpp
+  }
+}
+
+project(DDS*Subscriber) : dcpsexe {
+  exename = subscriber
+  after  += DDS*idl
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+
+  Source_Files {
+    subscriber.cpp
+    DataReaderListener.cpp
+  }
+}

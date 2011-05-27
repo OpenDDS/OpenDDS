@@ -1,0 +1,13 @@
+// -*- MPC -*-
+// $Id$
+
+project: taolib, portableserver, dcps_ts_defaults, dcps_optional_features, dds_suppress_any_support, taoidldefaults, coverage_optional, dds_macros {
+  // override the taolib default library output directory
+  libout      = $(DDS_ROOT)/lib
+  libs        += OpenDDS_Dcps
+  after       += DdsDcps
+  libpaths    += $(DDS_ROOT)/lib
+
+  includes    += $(DDS_ROOT)
+  idlflags    += -I$(DDS_ROOT)
+}

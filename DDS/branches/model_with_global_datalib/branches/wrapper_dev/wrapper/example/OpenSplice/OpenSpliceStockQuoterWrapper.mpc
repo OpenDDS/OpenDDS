@@ -1,0 +1,88 @@
+
+project(*Common) : dds_wrapper, splicelib_with_idl {
+  sharedname     = StockQuoterCommon
+  dynamicflags  += STOCKQUOTERCOMMON_BUILD_DLL
+  libpaths      += ../..
+  libout         = .
+  includes      += $(TAO_ROOT)/orbsvcs
+  idlflags      += -I$(TAO_ROOT)/orbsvcs \
+                   -Wb,export_macro=StockQuoterCommon_Export \
+                   -Wb,export_include=StockQuoterCommon_Export.h \
+                   -SS
+
+  macros += DDS_API=StockQuoterCommon_Export
+
+  verbatim(gnuace, macros) {
+    override no_hidden_visibility = 1
+  } 
+
+  SpliceTypeSupport_Files {
+    StockQuoter.idl >> StockQuoterDcps.idl StockQuoterDcps_impl.cpp StockQuoterSplDcps.cpp
+  }
+
+  IDL_Files {
+    StockQuoterDcps.idl
+    StockQuoter.idl
+  }
+
+  // We only want the generated files
+  Header_Files {
+  }
+
+  // We only want the generated files
+  Source_Files {
+    StockQuoterC.cpp
+    StockQuoterDcps_impl.cpp
+    StockQuoterDcpsC.cpp
+    StockQuoterSplDcps.cpp
+  }
+}
+
+project(*Publisher) : svc_utils, dds_wrapper {
+  after    += *Common
+  exename   = publisher
+  includes += $(TAO_ROOT)/orbsvcs ../..
+  libs     += StockQuoterCommon
+  libpaths += ../..
+
+  IDL_Files {
+  }
+
+  Header_Files {
+  }
+
+  Source_Files {
+    publisher.cpp
+  }
+
+  Documentation_Files {
+    README.txt
+  }
+}
+
+
+project(*Subscriber) : dds_wrapper {
+  after    += *Common
+  exename   = subscriber
+  includes += $(TAO_ROOT)/orbsvcs ../..
+  libs     += StockQuoterCommon
+  libpaths += ../..
+
+  IDL_Files {
+  }
+
+  Header_Files {
+    ExchangeEventDataReaderListenerImpl.h
+    QuoteDataReaderListenerImpl.h
+  }
+
+  Source_Files {
+    ExchangeEventDataReaderListenerImpl.cpp
+    QuoteDataReaderListenerImpl.cpp
+    subscriber.cpp
+  }
+
+  Documentation_Files {
+    README.txt
+  }
+}

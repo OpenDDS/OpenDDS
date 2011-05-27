@@ -1,0 +1,46 @@
+//
+// $Id$
+//
+
+project: dcps_java {
+
+    // Ensure sharedname matches the opendds-jms jar naming scheme:
+    sharedname       = opendds-jms-native
+
+    after           += InfoRepoLib Federator DCPSInfoRepoServ
+
+    dcps_ts_flags   += -Wb,export_macro=opendds_jms_native_Export
+
+    idlflags        += -Wb,stub_export_include=opendds_jms_native_Export.h \
+                       -Wb,stub_export_macro=opendds_jms_native_Export
+    idl2jniflags    += -Wb,stub_export_include=opendds_jms_native_Export.h \
+                       -Wb,stub_export_macro=opendds_jms_native_Export
+
+    dynamicflags    += OPENDDS_JMS_NATIVE_BUILD_DLL
+
+    includes        += $(TAO_ROOT)/orbsvcs $(ACE_ROOT) 
+
+    libs            += DCPSInfoRepoServ InfoRepoLib Federator
+    libout           = $(DDS_ROOT)/lib
+
+    // Older versions of Visual Studio will create the intermediate directories
+    // in all-lowercase, so we have to create them first to get the correct case.
+    specific(vc71, vc8) {
+        prebuild    += <%mkdir%> OpenDDS 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+        prebuild    += <%mkdir%> OpenDDS<%slash%>JMS 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+        prebuild    += <%mkdir%> classes<%slash%>OpenDDS 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+        prebuild    += <%mkdir%> classes<%slash%>OpenDDS<%slash%>JMS 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+    }
+
+    Java_Files {
+        org/opendds/jms/DCPSInfoRepo.java
+    }
+
+    JavaH_Files {
+        classes/org/opendds/jms/DCPSInfoRepo.class
+    }
+
+    TypeSupport_Files {
+        Message.idl
+    }
+}

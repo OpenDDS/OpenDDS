@@ -1,0 +1,10 @@
+%%%---------------------------------------------------------------------
+%%% $Id$
+%%%---------------------------------------------------------------------
+
+@title    tao_ic
+@version  $Revision$
+@author   Steven Stallion <stallions@ociweb.com>
+
+@doc The {@link tao_ic} module is a wrapper for invoking the tao_ic
+IDL compiler, which is responsible for generating Erlang/C++ entities.

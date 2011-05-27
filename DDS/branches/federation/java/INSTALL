@@ -1,0 +1,229 @@
+Starting with release 1.2, OpenDDS provides Java bindings.  Java applications
+can make use of the complete OpenDDS middleware just like C++ applications.
+
+See the README file in the $DDS_ROOT directory (one level above here) for a
+general overview of OpenDDS.
+
+
+======================================================================
+* Prerequisites
+
+  - Sun JDK (Java Development Kit) for Java SE 5 or 6
+
+    <http://java.sun.com/javase/downloads>
+    Sun distributes the JDK for Windows, Linux, and Solaris.  OpenDDS supports
+    these three platforms in both 32-bit and 64-bit variants.  If you will be
+    using a 64-bit JDK, make sure all the native libraries are also built for
+    64 bits.  Similarly, a 32-bit JDK must be matched with 32-bit native libs.
+
+  - C++ Compiler
+
+    These instructions assume that you will be using the "native" compiler for
+    your chosen platform, namely:
+    Windows => Microsoft Visual C++ <http://msdn.microsoft.com/en-us/visualc>
+    Linux   => GNU Compiler Collection (GCC) <http://gcc.gnu.org>
+    Solaris => Sun Studio (SunCC) <http://developers.sun.com/sunstudio>
+
+    Other combinations are possible (gcc on Windows, SunCC on Linux, etc.) but
+    these have not been tested and will not be covered by this document.
+
+    The following versions are supported:
+    - Visual C++ 9 SP1 (part of Visual Studio 2008), Visual C++ 8 SP1 (part of
+      Visual Studio 2005), Visual C++ 7.1 (part of Visual Studio .NET 2003)
+      VC++ 8 and 9 have free "express editions" -- these will work fine, see
+      <http://www.microsoft.com/express/vc/>.
+      If possible use the VC9 (VS2008) version because it fixes some annoying
+      bugs with creating mixed-case directory names (which OpenDDS uses).
+    - GCC 4.1.x or later (earlier versions may work but haven't been tested)
+      Preferably, use the default gcc from your Linux distribution.
+    - Sun Studio 12 (SunCC 5.9) Earlier versions are known to have problems
+      with some of the code in the OpenDDS Java bindings.
+
+    On Linux and Solaris, GNU make is also required.  It will almost certainly
+    be installed by default on Linux (if not use your platform's package
+    management system).  On Solaris be sure that you are using GNU make, which
+    may be invoked as "gmake".
+
+  - Perl v5.8 or later
+
+    On Unix platforms, perl will be pre-installed or easily installed by the
+    platform's package management system.
+    On Windows install ActiveState's ActivePerl.  Download it for free from
+    <http://www.activestate.com/downloads> -> scroll down to "ActivePerl" and
+    click "Get Current Release" -> select the "Download" link.
+
+  - The ACE ORB (TAO), which includes ACE and MPC as subprojects
+
+    OpenDDS requires the use of TAO.  Three "branches" of TAO are supported as
+    of this writing:
+    - OCI TAO 1.5a <http://download.ociweb.com/TAO-1.5a>
+    - OCI TAO 1.4a <http://download.ociweb.com/TAO-1.4a>
+    - DOC Group    <http://download.dre.vanderbilt.edu>
+
+    From each branch only the current patch release (OCI) or beta/micro release
+    (DOC) is supported.  The "current" releases are the latest public releases
+    of TAO at the time of the OpenDDS release.  These are listed in the "TAO"
+    section of the OpenDDS README file (in the parent directory).
+
+    For responsive support from OCI it is recommended that the latest version
+    of the OCI release of TAO used for OpenDDS development and testing be used.
+
+    The detailed instructions below are written assuming OCI TAO 1.5a is used.
+
+
+======================================================================
+* Building OpenDDS, including dependencies and Java bindings
+
+  1. Set up the build environment
+
+     Unix    => Any shell should be OK.  Make sure you can run "perl", "make",
+                and your C++ compiler (g++ or CC) -- i.e. they are found on
+                the PATH.
+     Windows => Run the Visual Studio Command Prompt
+                Start -> All Programs -> Visual C++ 2005 Express Edition (or)
+                Micorsoft Visual C++ 2008 Express Edition (or) Microsoft Visual
+                Studio 2008 (or) Microsoft Visual Studio 2005 (or) Microsoft
+                Visual Studio .NET 2003 -> Visual Studio Tools (or) Visual
+                Studio .NET Tools -> Visual Studio Command Prompt
+
+  2. Extract source code archives
+
+     Unix    => Start with the .tar.gz archives of both TAO and OpenDDS
+     Windows => Start with the .zip archives of both TAO and OpenDDS
+
+     Extract these to locations of your chosing.  On Windows it is simpler to
+     use paths with no spaces (true on Unix too but spaces are rarely seen).
+     The top level of the TAO distribution is a directory called ACE_wrappers.
+     The top level of the OpenDDS distribution is a directory called DDS.
+
+  3. Define environment variables
+
+     Unix:
+       export ACE_ROOT=<full path to the ACE_wrappers directory>
+       export TAO_ROOT=$ACE_ROOT/TAO
+       export MPC_ROOT=$ACE_ROOT/MPC
+       export DDS_ROOT=<full path to the DDS directory>
+       export PATH=$ACE_ROOT/bin:$DDS_ROOT/bin:$PATH
+       export LD_LIBRARY_PATH=$ACE_ROOT/lib:$DDS_ROOT/lib:$LD_LIBRARY_PATH
+       export JAVA_HOME=<full path to the Sun JDK>
+       export JAVA_PLATFORM=linux    --OR--    export JAVA_PLATFORM=solaris
+     Windows:
+       set ACE_ROOT=<full path to the ACE_wrappers directory>
+       set TAO_ROOT=%ACE_ROOT%\TAO
+       set MPC_ROOT=%ACE_ROOT%\MPC
+       set DDS_ROOT=<full path to the DDS directory>
+       set PATH=%ACE_ROOT%\bin;%ACE_ROOT%\lib;%PATH%
+       set PATH=%DDS_ROOT%\bin;%DDS_ROOT%\lib;%PATH%
+       set JAVA_HOME=<full path to the Sun JDK>
+       set JAVA_PLATFORM=win32
+
+  4. Configure TAO
+
+     Unix =>
+       Create the file $ACE_ROOT/include/makeinclude/platform_macros.GNU
+       with two lines of contents.
+       For Linux:
+         include $(ACE_ROOT)/include/makeinclude/platform_linux.GNU
+         java=1
+       For Solaris:
+         include $(ACE_ROOT)/include/makeinclude/platform_sunos5_sunc++.GNU
+         java=1
+
+     All platforms =>
+       i.  Create the file
+           $ACE_ROOT/bin/MakeProjectCreator/config/default.features,
+           containing just the line:
+             java=1
+       ii. Create the file $ACE_ROOT/ace/config.h, containing just
+           the line as shown below.
+           Windows:
+             #include "ace/config-win32.h"
+           Linux:
+             #include "ace/config-linux.h"
+           Solaris:
+             #include "ace/config-sunos5.10.h"    (or 5.9, 5.8, etc.)
+
+  5. Build the TAO core libraries and their dependencies
+
+     Unix    => cd $ACE_ROOT/ace
+                make ACE
+                cd $ACE_ROOT/apps/gperf/src
+                make
+                cd $TAO_ROOT/TAO_IDL
+                make
+                cd $TAO_ROOT/tao
+                make
+                cd $TAO_ROOT/orbsvcs/orbsvcs
+                make Svc_Utils
+
+     Windows => cd %TAO_ROOT%
+                Use either TAO_ACE.sln (VC 7.1) or TAO_ACE_vc8.sln (VC8, VC9)**
+                Visual Studio: devenv TAO_ACE.sln (or TAO_ACE_vc8.sln)
+                Visual C++ Express: vcexpress TAO_ACE.sln (or TAO_ACE_vc8.sln)
+                Select "Debug" or "Release" mode on the toolbar
+                Select the Naming_Service project in Solution Explorer
+                Build this project (right-click on it and select Build)
+                  - All dependent projects will be built automatically
+                **TAO_ACE_vc8.sln is provided starting with 1.5a_p10
+
+  6. Build the OpenDDS C++ libraries
+
+     Note: If you've obtained OpenDDS from the subversion repository, you need
+           to generate makefiles (or Visual Studio project files) before
+           proceeding with this step.  See the section "Running MPC", below.
+
+     Unix    => cd $DDS_ROOT/dds
+                make
+
+     Windows => cd %DDS_ROOT%\dds
+                Use either dds.sln (VC 7.1) or dds_vc8.sln (VC8, VC9)
+                Visual Studio: devenv dds.sln (OR dds_vc8.sln)
+                Visual C++ Express: vcexpress dds.sln (OR dds_vc8.sln)
+                Select "Debug" or "Release" mode on the toolbar (matching your
+                selection from step 5)
+                Build this entire solution (Build menu -> Build Solution)
+
+  7. Build the OpenDDS Java Bindings
+
+     Unix    => cd $DDS_ROOT/java
+                make
+
+     Windows => cd %DDS_ROOT%/java
+                Use either java.sln (VC 7.1) or java_vc8.sln (VC8, VC9)
+                Visual Studio: devenv java.sln (OR java_vc8.sln)
+                Visual C++ Express: vcexpress java.sln (OR java_vc8.sln)
+                Select "Debug" or "Release" mode on the toolbar (matching your
+                selection from step 5)
+                Build this entire solution (Build menu -> Build Solution)
+
+  8. Run a test Java application to verify the build
+
+     Unix    => cd $DDS_ROOT/java/tests/multirepo
+                ./run_test.pl
+     Windows => cd %DDS_ROOT%\java\tests\multirepo
+                run_test.pl
+
+
+======================================================================
+* Next Steps: Developing Java applications with OpenDDS
+
+  See the README file in this directory.
+
+
+======================================================================
+* Running MPC
+
+  This is only necessary if you've obtained the OpenDDS code directly from the
+  subversion repository.  First complete steps 1-5 of the "Building OpenDDS..."
+  section above.
+
+  Unix    => cd $DDS_ROOT
+             mwc.pl -type gnuace dds java
+  Windows => cd %DDS_ROOT%
+             mwc.pl -type [CompilerType] dds java
+             ** CompilerType options are: vc71, vc8, vc9, and nmake
+             This guide is not written with instructions for "nmake" -- if you
+             generate NMake makefiles we assume you know how to run them.
+             Make sure this is running ActiveState Perl.
+
+  Continue with step 6 of the "Building OpenDDS..." section above.

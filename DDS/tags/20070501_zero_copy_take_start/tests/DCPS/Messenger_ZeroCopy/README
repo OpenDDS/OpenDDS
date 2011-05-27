@@ -1,0 +1,4 @@
+$Id$
+
+This is a copy of the $DDS_ROOT/DevGuideExamples/DDS/Messenger test
+to demonstrate the zero-copy read semantics.

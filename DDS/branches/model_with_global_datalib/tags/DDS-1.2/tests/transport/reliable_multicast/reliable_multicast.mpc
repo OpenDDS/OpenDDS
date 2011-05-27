@@ -1,0 +1,9 @@
+// -*- MPC -*-
+//
+// $Id$
+
+project : aceexe, dcps_reliable_multicast, coverage_optional {
+  exename = unittest
+  includes += $(DDS_ROOT)
+  libpaths += $(DDS_ROOT)/lib
+}

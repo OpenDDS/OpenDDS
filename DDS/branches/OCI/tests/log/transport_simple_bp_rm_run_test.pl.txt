@@ -1,0 +1,8 @@
+(1316|3912) SimpleDataReader initialized to expect 1000 messages.
+(3928|332) Sent 1000 of 1000 samples.
+(1316|3912) Received 1000 of 1000 messages.
+(1316|3912) Transport has detached from SimpleSubscriber.
+(1316|3912) The transport has been lost.
+(3928|1888) Peer has disconnected.
+(3928|332) Transport has detached from SimplePublisher.
+(3928|332) The transport has been lost.

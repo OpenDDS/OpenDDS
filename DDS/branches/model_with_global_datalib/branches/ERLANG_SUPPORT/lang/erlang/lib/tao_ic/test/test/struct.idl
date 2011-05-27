@@ -1,0 +1,14 @@
+/*
+ * $Id$
+ */
+
+module foo {
+  struct struct_0 {
+    long x;
+  };
+
+  struct struct_1 {
+    string s;
+    struct_0 t;
+  };
+};

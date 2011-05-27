@@ -1,0 +1,49 @@
+
+$Id$
+
+This is a simple unit test for the code generation from XML data.  The
+test data contains examples of most constructs that can be generated and
+the generated files should be compilable.
+
+The following files are part of this example:
+  Codegen.mpc     - MPC file to create the build files for the example.
+  Codegen.opendds - XML file with the DCPS model definition.
+  aPublisher.cpp  - Publisher application code.
+  aSubscriber.cpp - Subscriber application code.
+  svc.conf        - Service configuration directives to load the
+                    transport implementations.
+
+----------------------------------------
+Quick Start:
+  shell> mwc.pl -type gnuace && make && mwc.pl -type gnuace && make && ./run_test.pl
+  shell> make realclean && rm -f GNU* .depend* *.log
+
+----------------------------------------
+Build and Test:
+
+1) Generate the build files:
+
+  shell> mwc.pl -type gnuace
+
+2) Generate the model source files:
+
+  shell> make
+
+3) Regenerate the build files (to include the generated model project):
+
+  shell> mwc.pl -type gnuace
+
+4) Build the model library and applications:
+
+  shell> make
+
+5) Execute the example:
+
+  shell> ./run_test.pl
+
+----------------------------------------
+Clean up:
+
+  shell> make realclean
+  shell> rm -f GNU* .depend* *.log
+

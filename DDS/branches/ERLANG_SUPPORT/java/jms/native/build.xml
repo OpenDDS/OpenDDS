@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Id$
+
+    Author:  Weiqi Gao
+    Version: $Revision$
+-->
+<project name="opendds-jms-native" default="compile" basedir=".">
+    <property name="perl.executable" value="perl"/>
+
+    <property environment="env"/>
+
+    <property file="${basedir}/../build.properties"/>
+
+    <condition property="makefile" value="${basedir}/GNUmakefile">
+        <os family="unix"/>
+    </condition>
+    <condition property="makefile" value="${basedir}/opendds_jms_native.vcproj">
+        <os family="windows"/>
+    </condition>
+
+    <available property="makefile.available"
+               file="${makefile}"/>
+
+    <!-- MPC features and type -->
+    <condition property="mwc.features" value="java=1,no_platform_include=1">
+        <os family="mac"/>
+    </condition>    
+    <property name="mwc.features" value="java=1"/>
+
+    <condition property="mwc.type" value="gnuace">
+        <os family="unix"/>
+    </condition>
+    <condition property="mwc.type" value="vc9">
+        <and>
+            <os family="windows"/>
+            <isset property="env.VS90COMNTOOLS"/>
+        </and>
+    </condition>
+    <condition property="mwc.type" value="vc8">
+        <and>
+            <os family="windows"/>
+            <isset property="env.VS80COMNTOOLS"/>
+        </and>
+    </condition>
+    <condition property="mwc.type" value="vc71">
+        <and>
+            <os family="windows"/>
+            <isset property="env.VS71COMNTOOLS"/>
+        </and>
+    </condition>
+
+    <uptodate property="mwc.uptodate"
+              targetfile="${makefile}">
+        <srcfiles dir="${basedir}">
+            <include name="opendds_jms_native.mpc"/>
+            <include name="Message.idl"/>
+        </srcfiles>
+    </uptodate>
+
+    <!-- gmake or make or vcbuild or devenv -->
+    <condition property="make.executable" value="gmake">
+        <os name="SunOS"/>
+    </condition>
+    <condition property="make.executable" value="make">
+        <os family="unix"/>
+    </condition>
+    <condition property="make.executable" value="vcbuild">
+        <and>
+            <os family="windows"/>
+            <or>
+                <isset property="env.VS90COMNTOOLS"/>
+                <isset property="env.VS80COMNTOOLS"/>
+            </or>
+        </and>
+    </condition>
+    <condition property="make.executable" value="devenv">
+        <os family="windows"/>
+    </condition>
+
+    <!-- command line arguments -->
+    <condition property="vcbuild.config" value="Debug">
+        <and>
+            <os family="windows"/>
+            <istrue value="${compile.debug}"/>
+        </and>
+    </condition>
+    <condition property="vcbuild.config" value="Release">
+        <and>
+            <os family="windows"/>
+            <isfalse value="${compile.debug}"/>
+        </and>
+    </condition>
+
+    <condition property="make.compile.arguments" value="">
+        <os family="unix"/>
+    </condition>
+    <condition property="make.compile.arguments"
+               value="${makefile} ${vcbuild.config}">
+        <and>
+            <os family="windows"/>
+            <or>
+                <isset property="env.VS90COMNTOOLS"/>
+                <isset property="env.VS80COMNTOOLS"/>
+            </or>
+        </and>
+    </condition>
+    <condition property="make.compile.arguments"
+               value="/build ${vcbuild.config} ${makefile}">
+        <os family="windows"/>
+    </condition>
+
+    <condition property="make.clean.arguments"
+               value="realclean">
+        <os family="unix"/>
+    </condition>
+    <condition property="make.clean.arguments"
+               value="${makefile} /c">
+        <and>
+            <os family="windows"/>
+            <or>
+                <isset property="env.VS90COMNTOOLS"/>
+                <isset property="env.VS80COMNTOOLS"/>
+            </or>
+        </and>
+    </condition>
+    <condition property="make.clean.arguments"
+               value="/clean ${vcbuild.config} ${makefile}">
+        <os family="windows"/>
+    </condition>
+
+    <!--
+        Project Targets
+    -->
+    <target name="all" depends="clean, compile"/>
+
+    <target name="clean" if="makefile.available">
+        <exec executable="${make.executable}" failonerror="true">
+            <arg line="${make.clean.arguments}"/>
+        </exec>
+    </target>
+
+    <target name="mwc" unless="mwc.uptodate">
+        <exec executable="${perl.executable}" failonerror="true">
+            <arg value="${env.ACE_ROOT}/bin/mwc.pl"/>
+            <arg line="-type ${mwc.type}"/>
+            <arg line="-features ${mwc.features}"/>
+        </exec>
+    </target>
+
+    <target name="compile" depends="mwc">
+        <exec executable="${make.executable}" failonerror="true">
+            <arg line="${make.compile.arguments}"/>
+        </exec>
+    </target>
+</project>

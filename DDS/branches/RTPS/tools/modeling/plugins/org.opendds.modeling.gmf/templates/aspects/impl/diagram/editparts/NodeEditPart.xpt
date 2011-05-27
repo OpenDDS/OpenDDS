@@ -1,0 +1,8 @@
+«AROUND getPrimaryChildEditPart FOR gmfgen::GenNode-»
+	«IF not labels->select(n | not n.readOnly)->isEmpty()-»
+		«EXPAND xpt::Common::generatedMemberComment»
+		public org.eclipse.gef.EditPart getPrimaryChildEditPart() {
+			return getChildBySemanticHint(«EXPAND xpt::editor::VisualIDRegistry::typeMethodCall FOR labels->select(n | not n.readOnly)->first().oclAsType(gmfgen::GenLabel)»);
+		}
+	«ENDIF-»
+«ENDAROUND»

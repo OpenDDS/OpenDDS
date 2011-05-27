@@ -1,0 +1,59 @@
+# $Id$
+
+This test verifies the PARTITION QoS support in OpenDDS.  It does so
+by creating publishers that offer a number of partitions.  Only
+subscribers with matching requested partitions will be associated with
+the given publisher.
+
+Publisher Partitions
+====================
+A number of publishers with the following partition lists will be
+created:
+
+Partition Contents      Description
+--------- --------      -----------
+1         ""            Explicitly created sequence of length one
+                        containing an empty string.
+
+2         Loner         Should not match since it will not be requested.
+
+3         Amadeus       Will be matched by two different subscribers.
+          Ziggie*dust
+
+4         Wun?Two*Tree  Will be matched by one subscribed.
+
+5         Not*A Match   Should not match, by design, since the closest
+                        matching requested partition will also contain
+                        a wildcard.
+
+
+Subscriber Partitions
+=====================
+A number of subscriber with the following partition lists will be
+created:
+
+Partition Contents        Description
+--------- --------        -----------
+1         Zero length     Should match the empty string "" partition,
+          sequence        offered partition 1.
+
+2         Amadeus         Should match offered partitions 3 and 4,
+          Wun1Two23Tree   i.e. an exact match and a wildcard match.
+
+
+3         ZiggieStardust  Should match offered (wildcard) partition 3.
+
+
+4         Not?A*Match     Should not match partition 5, or any other
+                          partition, since the both the offered and
+                          requested partition will by design contain a
+                          wildcard.
+
+Summary of Expected Results
+===========================
+1. Requested partition 1 should match offered partition 1.
+2. Requested partition 2 should match offered partitions 3 and 4.
+3. Requested partition 3 should match offered partition 3.
+4. Requested partition 4 should not be matched.
+4. Offered partition 2 should not be matched.
+5. Offered partition 5 should not be matched.

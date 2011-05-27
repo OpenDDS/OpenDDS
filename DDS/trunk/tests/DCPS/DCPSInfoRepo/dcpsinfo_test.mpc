@@ -1,0 +1,17 @@
+project(*publisher): dcpsexe {
+  exename  = publisher
+
+  Source_Files {
+    publisher.cpp
+    DCPSDataWriterI.cpp
+  }
+}
+
+project(*subscriber): dcpsexe {
+  exename = subscriber
+
+  Source_Files {
+    subscriber.cpp
+    DCPSDataReaderI.cpp
+  }
+}

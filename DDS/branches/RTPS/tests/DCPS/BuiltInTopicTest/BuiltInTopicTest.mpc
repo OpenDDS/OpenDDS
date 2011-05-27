@@ -1,0 +1,56 @@
+project(DDS*idl): dcps_test_lib {
+  idlflags      += -Wb,stub_export_include=BuiltInTopicTest_export.h \
+                   -Wb,stub_export_macro=BuiltInTopicTest_Export
+  dcps_ts_flags += -Wb,export_macro=BuiltInTopicTest_Export
+  dynamicflags  += BUILTINTOPICTEST_BUILD_DLL
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+
+
+}
+
+
+project(DDS*Publisher) : dcpsexe_with_tcp {
+  exename = publisher
+  after  += DDS*idl
+  libs   += DDS*idl
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    publisher.cpp
+    Writer.cpp
+  }
+}
+
+project(DDS*Subscriber) : dcpsexe_with_tcp {
+  exename = subscriber
+  after  += DDS*idl
+  libs   += DDS*idl
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    subscriber.cpp
+    DataReaderListener.cpp
+  }
+}
+
+
+project(DDS*Monitor) : dcpsexe_with_tcp {
+  exename   = monitor
+  requires += built_in_topics
+  after  += DDS*idl
+  libs   += DDS*idl
+
+  Source_Files {
+    monitor.cpp
+  }
+
+  Idl_Files {
+  }
+}

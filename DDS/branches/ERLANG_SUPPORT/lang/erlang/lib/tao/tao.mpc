@@ -1,0 +1,27 @@
+//
+// $Id$
+//
+
+project : erlang_otp, tao_ic_otp {
+  erlcflags    += -I./include -Wall
+  taoicflags   += -SS
+
+  Erlang_Files {
+    src
+  }
+
+  TAO_IC_Files {
+    $(TAO_ROOT)/tao/BooleanSeq.pidl
+    $(TAO_ROOT)/tao/CharSeq.pidl
+    $(TAO_ROOT)/tao/DoubleSeq.pidl
+    $(TAO_ROOT)/tao/FloatSeq.pidl
+    $(TAO_ROOT)/tao/LongLongSeq.pidl
+    $(TAO_ROOT)/tao/LongSeq.pidl
+    $(TAO_ROOT)/tao/OctetSeq.pidl
+    $(TAO_ROOT)/tao/ShortSeq.pidl
+    $(TAO_ROOT)/tao/StringSeq.pidl
+    $(TAO_ROOT)/tao/ULongLongSeq.pidl
+    $(TAO_ROOT)/tao/ULong.pidl
+    $(TAO_ROOT)/tao/UShortSeq.pidl
+  }
+}

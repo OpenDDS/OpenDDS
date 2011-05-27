@@ -1,0 +1,25 @@
+// $Id$
+
+workspace {
+  dds
+  //tests/DCPS/Messenger_ZeroCopy
+  // a zero-copy type test
+  tests/DCPS/ZeroCopyRead
+  // an old single-copy type test
+  tests/DCPS/FooType5
+  tests/DCPS/FooTest5
+  tests/DCPS/Reconnect
+  //performance-tests/DCPS/SimpleLatency/SimpleLatency.mpc
+  performance-tests/DCPS/TCPListenerTest/TCPListener.mpc
+  performance-tests/DCPS/TypeNoKeyBounded/TypeNoKeyBounded.mpc
+
+  //These are the tests that use FooType4 (and their dependencies)
+  tests/DCPS/common
+  tests/DCPS/FooType4
+  tests/DCPS/LivelinessTest
+  tests/DCPS/FooTest4
+  tests/DCPS/FooTest4_0
+  tests/DCPS/FooTest5_0
+  tests/DCPS/BuiltInTopic
+}
+

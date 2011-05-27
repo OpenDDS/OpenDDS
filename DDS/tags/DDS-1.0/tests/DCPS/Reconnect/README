@@ -1,0 +1,6 @@
+$Id$
+
+The new test script option 'sub_init_crash' tests the scenario in rt 9123
+
+The Subscriber is killed (simulating a crash) after initialization.
+The Publisher then crashes during its initialization.

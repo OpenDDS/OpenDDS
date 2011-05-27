@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=UTF-8">
+
+  <title>USER_DATA</title>
+  <link rel="stylesheet" type="text/css" href="QoS.css">
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+
+<H4 CLASS="Head3">
+<A NAME="pgfId-193394"></A>USER_DATA</H4>
+<UL>
+<LI CLASS="BodyNoLead">
+<A NAME="pgfId-193395"></A>The <A NAME="marker-199675"></A>USER_DATA policy applies to the <A NAME="marker-268164"></A>domain participant, <A NAME="marker-268169"></A>data reader, and <A NAME="marker-268174"></A>data writer entities via the <EM CLASS="Code">
+user_data</EM>
+ member of their respective QoS structures. Below is the IDL related to the user data QoS policy:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-193396"></A><EM CLASS="Code">
+</EM>
+&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-193397"></A><EM CLASS="Code">
+struct UserDataQosPolicy {</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-193398"></A><EM CLASS="Code">
+  sequence&lt;octet&gt; value;</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-193399"></A><EM CLASS="Code">
+};</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-199682"></A>&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-268194"></A>By default, the <EM CLASS="Code">
+value</EM>
+ member is not set. It can be set to any sequence of octets which can be used to attach information to the created entity. The value of the USER_DATA policy is available in respective <A NAME="marker-268385"></A>built-in topic data. The remote application can obtain the information via the built-in topic and use it for its own purposes. For example, the application could attach security credentials via the USER_DATA policy that can be used by the remote application to authenticate the source.</LI>
+</UL>
+
+</body>
+</html>

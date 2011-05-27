@@ -1,0 +1,33 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_DOMAIN_EXT_IDL
+#define OPENDDS_DCPS_DOMAIN_EXT_IDL
+
+/// OpenDDS extensions to the DDS Domain Module
+
+#include "dds/DdsDcpsDomain.idl"
+
+module OpenDDS
+{
+
+  module DCPS
+  {
+
+    local interface DomainParticipantExt : DDS::DomainParticipant
+    {
+      long get_federation_id();
+      long get_participant_id();
+    };
+
+  };
+
+};
+
+#endif /* OPENDDS_DCPS_DOMAIN_EXT_IDL */

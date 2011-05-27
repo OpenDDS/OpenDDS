@@ -1,0 +1,14 @@
+This is another unit test for the subscriber.
+
+
+Each test case needs to launch DCPSInfoRepo:
+
+  ../../../../DDS/DCPSInfoRepo -o repo.ior -d domain_ids
+
+
+Command line option:
+
+
+run_test.pl
+
+tests various read scenarios and get_datareaders

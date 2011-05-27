@@ -1,0 +1,9 @@
+feature(ospl) : splicelib, portableserver {
+  macros += OPEN_SPLICE_CONFIG
+
+  includes += $(DDS_ROOT)/wrapper
+}
+
+feature (!ospl) : dcpsexe_with_tcp, dcps_unreliable_dgram, dcps_reliable_multicast {
+  includes += $(DDS_ROOT)/wrapper
+}

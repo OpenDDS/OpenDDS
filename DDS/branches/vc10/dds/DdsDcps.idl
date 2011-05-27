@@ -1,0 +1,15 @@
+/*
+ * $Id$
+ *
+ * Copyright 2010 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_IDL
+#define OPENDDS_DCPS_IDL
+
+#include "dds/DdsDcpsDomain.idl"
+
+#endif /* OPENDDS_DCPS_IDL */

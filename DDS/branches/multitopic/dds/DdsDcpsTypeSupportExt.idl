@@ -1,0 +1,50 @@
+/*
+ * $Id$
+ *
+ * Copyright 2010 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_TYPE_SUPPORT_IDL
+#define OPENDDS_DCPS_TYPE_SUPPORT_IDL
+
+#include "dds/DdsDcpsTopic.idl"
+//x #include "dds/DdsDcpsDataWriterRemote.idl"
+#include "dds/DdsDcpsPublication.idl"
+//x #include "dds/DdsDcpsDataReaderRemote.idl"
+#include "dds/DdsDcpsSubscription.idl"
+
+
+module OpenDDS {
+  module DCPS {
+
+    local interface TypeSupport : ::DDS::TypeSupport {
+
+    /**
+    * create and activate a FooDataWriter.
+    * Implemented by FooTypeSupportImpl.
+    * Publisher::create_datawriter() will set the topic, listener, qos and
+    * other initialization so the implementation of this method
+    * is as small and simple as possible.
+    */
+    ::DDS::DataWriter create_datawriter();
+
+    /**
+    * create and activate a FooDataReader.
+    * Implemented by FooTypeSupportImpl.
+    * Subscriber::create_datareader() will set the topic, listener, qos and
+    * other initialization so the implementation of this method
+    * is as small and simple as possible.
+    */
+    ::DDS::DataReader create_datareader();
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    ::DDS::DataReader create_multitopic_datareader();
+#endif
+    };
+  };
+};
+
+#endif /* OPENDDS_DCPS_TYPE_SUPPORT_IDL */

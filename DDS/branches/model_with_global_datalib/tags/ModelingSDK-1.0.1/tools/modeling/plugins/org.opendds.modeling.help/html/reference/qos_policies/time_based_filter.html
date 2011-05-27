@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=UTF-8">
+
+  <title>TIME_BASED_FILTER</title>
+  <link rel="stylesheet" type="text/css" href="QoS.css">
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+
+<H4 CLASS="Head3">
+<A NAME="pgfId-266314"></A>TIME_BASED_FILTER</H4>
+<UL>
+<LI CLASS="BodyNoLead">
+<A NAME="pgfId-266217"></A>The <A NAME="marker-266328"></A>TIME_BASED_FILTER QoS policy controls how often a data reader may be interested in changes in values to a data instance. Here is the IDL for the Time Based Filter QoS:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-277132"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-277162"></A>struct TimeBasedFilterQosPolicy {</P>
+<P CLASS="Code">
+<A NAME="pgfId-277163"></A>  Duration_t minimum_separation;</P>
+<P CLASS="Code">
+<A NAME="pgfId-277164"></A>};</P>
+<P CLASS="Code">
+<A NAME="pgfId-277144"></A>&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-277151"></A>An interval (<EM CLASS="Code">
+minimum_separation</EM>
+) may be specified on the data reader. This interval defines a minimum delay between instance value changes; this permits the data reader to throttle changes without affecting the state of the associated data writer. By default, <EM CLASS="Code">
+minimum_separation</EM>
+ is zero, which indicates that no data is filtered. This QoS policy does not conserve bandwidth as instance value changes are still sent to the subscriber process. It only affects which samples are made available via the data reader.</LI>
+</UL>
+
+</body>
+</html>

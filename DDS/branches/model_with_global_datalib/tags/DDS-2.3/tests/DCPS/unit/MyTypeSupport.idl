@@ -1,0 +1,12 @@
+
+//#include "orbsvcs/dds/DdsDcpsInfrastructure.idl"
+//#include "orbsvcs/dds/DdsDcpsTopic.idl"
+//#include "orbsvcs/dds/DdsDcpsDataWriterRemote.idl"
+//#include "orbsvcs/dds/DdsDcpsDataReaderRemote.idl"
+#include "dds/DdsDcpsTypeSupportExt.idl"
+
+
+local interface MyTypeSupport : OpenDDS::DCPS::TypeSupport {
+};
+
+

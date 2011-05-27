@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_xq-wofNFEd-3w-8mZYQ1uw" name="aModel">
+  <libs xsi:type="opendds:PolicyLib" xmi:id="_H7hcsPNVEd-3w-8mZYQ1uw" name="policy1">
+    <policies xsi:type="opendds:udQosPolicy" xmi:id="_PLd1MPNVEd-3w-8mZYQ1uw" name="part1userdata" value="participant1ud"/>
+    <policies xsi:type="opendds:efQosPolicy" xmi:id="_Sw98QPNVEd-3w-8mZYQ1uw" name="part1entityfactory"/>
+    <policies xsi:type="opendds:udQosPolicy" xmi:id="_Q00jMPNWEd-3w-8mZYQ1uw" name="part2userdata" value="participant2ud"/>
+    <policies xsi:type="opendds:efQosPolicy" xmi:id="_VYpTsPNWEd-3w-8mZYQ1uw" name="part2entityfactory"/>
+    <policies xsi:type="opendds:tdQosPolicy" xmi:id="_iWzMMPNWEd-3w-8mZYQ1uw" name="topic1topicdata" value="topic1td"/>
+  </libs>
+  <libs xsi:type="opendds:DcpsLib" xmi:id="_793VsPNFEd-3w-8mZYQ1uw" name="dcps1">
+    <domains xmi:id="_F1tSoPNIEd-3w-8mZYQ1uw" name="domain1" domainId="1"/>
+    <domains xmi:id="_z9cJMPNKEd-3w-8mZYQ1uw" name="domain2" domainId="2"/>
+    <participants xmi:id="_-PWQIPNFEd-3w-8mZYQ1uw" name="part1" domain="_F1tSoPNIEd-3w-8mZYQ1uw" entity_factory="_Sw98QPNVEd-3w-8mZYQ1uw" user_data="_PLd1MPNVEd-3w-8mZYQ1uw">
+      <publishers xsi:type="opendds:publisher" xmi:id="_Py47MPNNEd-3w-8mZYQ1uw" name="pub1" transportId="1">
+        <writers xsi:type="opendds:dataWriter" xmi:id="_V4zwkPNNEd-3w-8mZYQ1uw" name="writer1" topic="_93D5sPNKEd-3w-8mZYQ1uw"/>
+      </publishers>
+      <publishers xsi:type="opendds:publisher" xmi:id="_uzK1APNQEd-3w-8mZYQ1uw" name="pub3" transportId="1">
+        <writers xsi:type="opendds:dataWriter" xmi:id="_xa66YPNQEd-3w-8mZYQ1uw" name="writer2" topic="_DMZmsPNLEd-3w-8mZYQ1uw"/>
+      </publishers>
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_2JBoQPNQEd-3w-8mZYQ1uw" name="sub1" transportId="3">
+        <readers xsi:type="opendds:dataReader" xmi:id="_4lHQMPNQEd-3w-8mZYQ1uw" name="reader1" topic="_93D5sPNKEd-3w-8mZYQ1uw"/>
+      </subscribers>
+      <subscribers xsi:type="opendds:subscriber" xmi:id="__q_twPNQEd-3w-8mZYQ1uw" name="sub3" transportId="3">
+        <readers xsi:type="opendds:dataReader" xmi:id="_B_W9EPNREd-3w-8mZYQ1uw" name="reader2" topic="_DMZmsPNLEd-3w-8mZYQ1uw"/>
+      </subscribers>
+    </participants>
+    <participants xmi:id="_x4YhMPNKEd-3w-8mZYQ1uw" name="part2" domain="_z9cJMPNKEd-3w-8mZYQ1uw" entity_factory="_VYpTsPNWEd-3w-8mZYQ1uw" user_data="_Q00jMPNWEd-3w-8mZYQ1uw">
+      <publishers xsi:type="opendds:publisher" xmi:id="_Gnx5sPNREd-3w-8mZYQ1uw" name="pub2" transportId="2">
+        <writers xsi:type="opendds:dataWriter" xmi:id="_JUbGIPNREd-3w-8mZYQ1uw" name="writer3" topic="_93D5sPNKEd-3w-8mZYQ1uw"/>
+      </publishers>
+      <publishers xsi:type="opendds:publisher" xmi:id="_OvMswPNREd-3w-8mZYQ1uw" name="pub4" transportId="2">
+        <writers xsi:type="opendds:dataWriter" xmi:id="_RHO7IPNREd-3w-8mZYQ1uw" name="writer4" topic="_DMZmsPNLEd-3w-8mZYQ1uw"/>
+      </publishers>
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_VBB3MPNREd-3w-8mZYQ1uw" name="sub2" transportId="4">
+        <readers xsi:type="opendds:dataReader" xmi:id="_WqcsEPNREd-3w-8mZYQ1uw" name="reader3" topic="_93D5sPNKEd-3w-8mZYQ1uw"/>
+      </subscribers>
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_aOW3sPNREd-3w-8mZYQ1uw" name="sub4" transportId="4">
+        <readers xsi:type="opendds:dataReader" xmi:id="_cQ0esPNREd-3w-8mZYQ1uw" name="reader4" topic="_DMZmsPNLEd-3w-8mZYQ1uw"/>
+      </subscribers>
+    </participants>
+    <topics xmi:id="_93D5sPNKEd-3w-8mZYQ1uw" name="topic1" datatype="_WZMLsPNLEd-3w-8mZYQ1uw"/>
+    <topics xmi:id="_DMZmsPNLEd-3w-8mZYQ1uw" name="topic2" datatype="_Q9IysPNLEd-3w-8mZYQ1uw"/>
+    <topics xmi:id="_EjJXMPNLEd-3w-8mZYQ1uw" name="topic3" datatype="_WZMLsPNLEd-3w-8mZYQ1uw"/>
+    <topics xmi:id="_Fze9sPNLEd-3w-8mZYQ1uw" name="topic4" datatype="_Q9IysPNLEd-3w-8mZYQ1uw"/>
+  </libs>
+  <libs xsi:type="types:DataLib" xmi:id="_y3NTMPNFEd-3w-8mZYQ1uw" name="typeLibrary">
+    <types xsi:type="types:Struct" xmi:id="_Q9IysPNLEd-3w-8mZYQ1uw" name="type2">
+      <fields xmi:id="_iCxPMPNREd-3w-8mZYQ1uw" name="id" type="_e0mRwPNLEd-3w-8mZYQ1uw"/>
+      <fields xmi:id="_j0ENsPNREd-3w-8mZYQ1uw" name="address" type="_lRhDIPNREd-3w-8mZYQ1uw"/>
+      <fields xmi:id="_n0fWMPNREd-3w-8mZYQ1uw" name="number" type="_pPlbMPNREd-3w-8mZYQ1uw"/>
+      <fields xmi:id="_qxLJwPNREd-3w-8mZYQ1uw" name="otherstuff" type="_WZMLsPNLEd-3w-8mZYQ1uw"/>
+      <fields xmi:id="_yxyKMPNREd-3w-8mZYQ1uw" name="carol" type="_vruYMPNREd-3w-8mZYQ1uw"/>
+      <fields xmi:id="_9XHxMPNREd-3w-8mZYQ1uw" name="ted" type="_3Io1sPNREd-3w-8mZYQ1uw"/>
+      <fields xmi:id="_JQ_iMPNSEd-3w-8mZYQ1uw" name="aseqseq" type="_Fh9rsPNSEd-3w-8mZYQ1uw"/>
+      <fields xmi:id="_Ms4aQPNSEd-3w-8mZYQ1uw" name="tarr" type="_q_ZasPNLEd-3w-8mZYQ1uw"/>
+      <keys xmi:id="_PMQmwPNSEd-3w-8mZYQ1uw" field="_iCxPMPNREd-3w-8mZYQ1uw"/>
+      <keys xmi:id="_QyLbsPNSEd-3w-8mZYQ1uw" field="_n0fWMPNREd-3w-8mZYQ1uw" index="1"/>
+    </types>
+    <types xsi:type="types:Struct" xmi:id="_WZMLsPNLEd-3w-8mZYQ1uw" name="type1">
+      <fields xmi:id="_V-DqsPNSEd-3w-8mZYQ1uw" name="key" type="_e0mRwPNLEd-3w-8mZYQ1uw"/>
+      <fields xmi:id="_q-gJMPNTEd-3w-8mZYQ1uw" name="name" type="_lRhDIPNREd-3w-8mZYQ1uw"/>
+      <fields xmi:id="_uKqjMPNTEd-3w-8mZYQ1uw" name="code" type="_tfLWMPNTEd-3w-8mZYQ1uw"/>
+      <fields xmi:id="_xueoMPNTEd-3w-8mZYQ1uw" name="trans" type="_wsLdsPNTEd-3w-8mZYQ1uw"/>
+      <fields xmi:id="_zwVLMPNTEd-3w-8mZYQ1uw" name="value" type="_9uCrIPNLEd-3w-8mZYQ1uw"/>
+      <fields xmi:id="_2GGIsPNTEd-3w-8mZYQ1uw" name="bseq" type="_JFSQMPNMEd-3w-8mZYQ1uw"/>
+      <fields xmi:id="_-k7WMPNTEd-3w-8mZYQ1uw" name="aarr" type="_7xQUsPNTEd-3w-8mZYQ1uw"/>
+      <keys xmi:id="_XKzxsPNSEd-3w-8mZYQ1uw" field="_V-DqsPNSEd-3w-8mZYQ1uw"/>
+    </types>
+    <types xsi:type="types:Array" xmi:id="_6BfnQPNTEd-3w-8mZYQ1uw" length="3" subtype="_e0mRwPNLEd-3w-8mZYQ1uw"/>
+    <types xsi:type="types:Typedef" xmi:id="_7xQUsPNTEd-3w-8mZYQ1uw" type="_6BfnQPNTEd-3w-8mZYQ1uw" name="shortarray"/>
+    <types xsi:type="types:WString" xmi:id="_wsLdsPNTEd-3w-8mZYQ1uw"/>
+    <types xsi:type="types:Union" xmi:id="_dE0WMPNLEd-3w-8mZYQ1uw" name="anOnion" switch="_e0mRwPNLEd-3w-8mZYQ1uw">
+      <branches xmi:id="_jV0aMPNLEd-3w-8mZYQ1uw">
+        <field xmi:id="_kqNaQPNLEd-3w-8mZYQ1uw" name="l1value" type="_q_ZasPNLEd-3w-8mZYQ1uw"/>
+        <cases xmi:id="_h2W9IPNMEd-3w-8mZYQ1uw" literal="1"/>
+      </branches>
+      <branches xmi:id="_AVNhsPNMEd-3w-8mZYQ1uw">
+        <field xmi:id="_CDm9MPNMEd-3w-8mZYQ1uw" name="l2value" type="_9uCrIPNLEd-3w-8mZYQ1uw"/>
+        <cases xmi:id="_lKoKQPNMEd-3w-8mZYQ1uw" literal="2"/>
+      </branches>
+      <branches xmi:id="_E4anIPNMEd-3w-8mZYQ1uw">
+        <field xmi:id="_FVHKMPNMEd-3w-8mZYQ1uw" name="l5value" type="_-FUisPNLEd-3w-8mZYQ1uw"/>
+        <cases xmi:id="_mC2LsPNMEd-3w-8mZYQ1uw" literal="5"/>
+      </branches>
+      <default xmi:id="_mvZvsPNMEd-3w-8mZYQ1uw" name="defval" type="_JFSQMPNMEd-3w-8mZYQ1uw"/>
+    </types>
+    <types xsi:type="types:Union" xmi:id="_Ef9xQPNUEd-3w-8mZYQ1uw" name="chives" switch="_3Io1sPNREd-3w-8mZYQ1uw">
+      <branches xmi:id="_IgYSsPNUEd-3w-8mZYQ1uw">
+        <field xmi:id="_OrRHoPNUEd-3w-8mZYQ1uw" name="last" type="_Q9IysPNLEd-3w-8mZYQ1uw"/>
+        <cases xmi:id="_JpnysPNUEd-3w-8mZYQ1uw" literal="KEEP_LAST_HISTORY_QOS"/>
+      </branches>
+      <branches xmi:id="_RhyBwPNUEd-3w-8mZYQ1uw">
+        <field xmi:id="_UL10QPNUEd-3w-8mZYQ1uw" name="all" type="_dE0WMPNLEd-3w-8mZYQ1uw"/>
+        <cases xmi:id="_SZFdMPNUEd-3w-8mZYQ1uw" literal="KEEP_ALL_HISTORY_QOS"/>
+      </branches>
+    </types>
+    <types xsi:type="types:Short" xmi:id="_e0mRwPNLEd-3w-8mZYQ1uw"/>
+    <types xsi:type="types:Array" xmi:id="_oULxoPNLEd-3w-8mZYQ1uw" length="5" subtype="_WZMLsPNLEd-3w-8mZYQ1uw"/>
+    <types xsi:type="types:Typedef" xmi:id="_q_ZasPNLEd-3w-8mZYQ1uw" type="_oULxoPNLEd-3w-8mZYQ1uw" name="type1array"/>
+    <types xsi:type="types:ULong" xmi:id="_9uCrIPNLEd-3w-8mZYQ1uw"/>
+    <types xsi:type="types:Octet" xmi:id="_-FUisPNLEd-3w-8mZYQ1uw"/>
+    <types xsi:type="types:Typedef" xmi:id="_JFSQMPNMEd-3w-8mZYQ1uw" type="_K0SIoPNMEd-3w-8mZYQ1uw" name="shortseq"/>
+    <types xsi:type="types:Sequence" xmi:id="_K0SIoPNMEd-3w-8mZYQ1uw" subtype="_e0mRwPNLEd-3w-8mZYQ1uw"/>
+    <types xsi:type="types:String" xmi:id="_lRhDIPNREd-3w-8mZYQ1uw"/>
+    <types xsi:type="types:Double" xmi:id="_pPlbMPNREd-3w-8mZYQ1uw"/>
+    <types xsi:type="types:Typedef" xmi:id="_vruYMPNREd-3w-8mZYQ1uw" type="_WZMLsPNLEd-3w-8mZYQ1uw" name="structtypedef"/>
+    <types xsi:type="types:Typedef" xmi:id="_b5sQwPNUEd-3w-8mZYQ1uw" type="_e0mRwPNLEd-3w-8mZYQ1uw" name="shorttypedef"/>
+    <types xsi:type="types:Enum" xmi:id="_3Io1sPNREd-3w-8mZYQ1uw" name="myHistoryQosPolicyKind">
+      <literals>KEEP_LAST_HISTORY_QOS</literals>
+      <literals>KEEP_ALL_HISTORY_QOS</literals>
+    </types>
+    <types xsi:type="types:Sequence" xmi:id="_BYwaoPNSEd-3w-8mZYQ1uw" subtype="_JFSQMPNMEd-3w-8mZYQ1uw"/>
+    <types xsi:type="types:Sequence" xmi:id="_lpJ_sPNUEd-3w-8mZYQ1uw" subtype="_WZMLsPNLEd-3w-8mZYQ1uw"/>
+    <types xsi:type="types:Typedef" xmi:id="_nR6GMPNUEd-3w-8mZYQ1uw" type="_lpJ_sPNUEd-3w-8mZYQ1uw" name="type1seq"/>
+    <types xsi:type="types:Typedef" xmi:id="_Fh9rsPNSEd-3w-8mZYQ1uw" type="_BYwaoPNSEd-3w-8mZYQ1uw" name="shortseqseq"/>
+    <types xsi:type="types:WChar" xmi:id="_tfLWMPNTEd-3w-8mZYQ1uw"/>
+  </libs>
+</opendds:OpenDDSModel>

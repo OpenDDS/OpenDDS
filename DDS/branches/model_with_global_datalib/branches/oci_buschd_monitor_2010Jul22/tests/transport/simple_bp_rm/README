@@ -1,0 +1,13 @@
+(1) Launch the simple_subscriber:
+
+  simple_subscriber -p 1:localhost:5555 -s 2:localhost:6666 -n 10000
+
+
+(2) Launch the simple_publisher:
+
+  simple_publisher -p 1:localhost:5555 -s 2:localhost:6666 -n 10000
+
+
+The -n is optional, and will default to 10000.  Make sure to provide the same
+-n value to both processes.  This is the number of messages that will be
+sent by the publisher, and the number of messages expected by the subscriber.

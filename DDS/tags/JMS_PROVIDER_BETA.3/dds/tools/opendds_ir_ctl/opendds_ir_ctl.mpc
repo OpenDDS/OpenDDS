@@ -1,0 +1,12 @@
+project: dcpsexe_with_tcp {
+  exename   = opendds_ir_ctl
+  exeout    = $(DDS_ROOT)/bin
+  libs     += Federator
+  after    += DCPSInfoRepo_Federator
+
+  Source_Files {
+    opendds_ir_ctl.cpp
+  }
+
+}
+

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<generator:CodeGen xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:generator="http://www.opendds.org/modeling/schemas/Generator/1.0">
+  <source name="UDP.opendds"/>
+  <target name="model"/>
+  <instances>
+    <instance name="default">
+      <transportOffset value="0"/>
+      <transport transportIndex="6">
+        <UDPTransport>
+          <swap_bytes value="false"/>
+          <queue_messages_per_pool value="10"/>
+          <queue_initial_pools value="10"/>
+          <max_packet_size value="65533"/>
+          <max_samples_per_packet value="10"/>
+          <optimum_packet_size value="4096"/>
+          <thread_per_connection value="false"/>
+          <datalink_release_delay value="10000"/>
+          <datalink_control_chunks value="32"/>
+          <local_address_str value="&quot;localhost:52000&quot;"/>
+        </UDPTransport>
+      </transport>
+      <transport transportIndex="8">
+        <UDPTransport>
+          <swap_bytes value="false"/>
+          <queue_messages_per_pool value="10"/>
+          <queue_initial_pools value="10"/>
+          <max_packet_size value="65533"/>
+          <max_samples_per_packet value="10"/>
+          <optimum_packet_size value="4096"/>
+          <thread_per_connection value="false"/>
+          <datalink_release_delay value="10000"/>
+          <datalink_control_chunks value="32"/>
+          <local_address_str value="localhost:52001"/>
+        </UDPTransport>
+      </transport>
+    </instance>
+  </instances>
+</generator:CodeGen>

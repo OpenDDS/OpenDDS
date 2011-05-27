@@ -1,0 +1,223 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef RTPS_RTPSMESSAGETYPES_IDL
+#define RTPS_RTPSMESSAGETYPES_IDL
+
+#include "RtpsBaseMessageTypes.idl"
+#include "../../DdsDcpsInfrastructure.idl"
+
+module OpenDDS {
+  module RTPS {
+
+    /* All messages should include a leading RTPS Header. */
+    typedef octet HOctetArray[4];
+    struct Header {
+      HOctetArray prefix;
+      ProtocolVersion_t version;
+      VendorId_t vendorId;
+      GuidPrefix_t guidPrefix;
+    };
+
+    /* all Submessages are composed of a leading SubmessageHeader */
+    struct SubmessageHeader {
+      octet submessageId;
+      octet flags;
+      unsigned short submessageLength; /* octetsToNextHeader */
+    };
+
+    /* Provides information on the state of a Reader to a Writer. AckNack
+       messages are sent by a Reader to one or more Writers. */
+    struct AckNakSubmessageBody {
+      EntityId readerId;
+      EntityId writerId;
+      SequenceNumberSet readerSNState;
+    };
+
+    /* Sent from an RTPS Writer to an RTPS Reader. Notifies the RTPS Reader of a
+       change to a data-object belonging to the RTPS Writer */
+    struct DataSubmessageBody {
+      unsigned short extraFlags;
+      unsigned short octetsToInlineQos;
+      EntityId readerId;
+      EntityId writerId;
+      SequenceNumber_t writerSN;
+      ParameterList inlineQos;
+      SerializedPayload_t serializedPayload;
+    };
+
+    /* Sent from an RTPS Writer to an RTPS Reader. Wxtends the Data Submessage
+       by enabling the serializedData to be fragmented and sent as multiple
+       DataFrag Submessages. */
+    struct DataFragSubmessageBody {
+      unsigned short extraFlags;
+      unsigned short octetsToInlineQos;
+      EntityId readerId;
+      EntityId writerId;
+      SequenceNumber_t writerSN;
+      FragmentNumber_t fragmentStartingNum;
+      unsigned short fragmentsInSubmessage;
+      unsigned short fragmentSize;
+      unsigned long sampleSize;
+      ParameterList inlineQos;
+      SerializedPayload_t serializedPayload;
+    };
+
+    /* Sent from an RTPS Writer to an RTPS Reader. Indicates to the RTPS
+       Reader that a range of sequence numbers is no longer relevant. */
+    struct GapSubmessageBody {
+      EntityId readerId;
+      EntityId writerId;
+      SequenceNumber_t gapStart;
+      SequenceNumberSet gapList;
+    };
+
+    /* Sent from an RTPS Writer to an RTPS Reader to communicate the sequence
+       numbers of changes that the Writer has available. */
+    struct HeartBeatSubmessageBody {
+      EntityId readerId;
+      EntityId writerId;
+      SequenceNumber_t firstSN;
+      SequenceNumber_t lastSN;
+      Count_t count;
+    };
+
+    /* Sent from an RTPS Writer to an RTPS Reader to communicate which fragments
+       the Writer has available. */
+    struct HeartBeatFragSubmessageBody {
+      EntityId readerId;
+      EntityId writerId;
+      SequenceNumber_t writerSN;
+      FragmentNumber_t fragmentStartingNum;
+      Count_t count;
+    };
+
+    /* Sent from an RTPS Writer to an RTPS Reader to modify the GuidPrefix used
+       to interpret the Reader entityIds appearing in the Submessages that follow it. */
+    struct InfoDestinationSubmessageBody {
+      GuidPrefix_t guidPrefix;
+    };
+
+    /* Sent from an RTPS Reader to an RTPS Writer. It contains explicit
+       information on where to send a reply to the Submessages that follow it
+       within the same message. */
+    struct InfoReplySubmessageBody {
+      LocatorList unicastLocatorList;
+      LocatorList multicastLocatorList;
+    };
+
+    /* This message modifies the logical source of the Submessages that follow. */
+    struct InfoSourceSubmessageBody {
+      long unused;
+      ProtocolVersion_t version;
+      VendorId_t vendorId;
+      GuidPrefix_t guidPrefix;
+    };
+
+    /* This Submessage is used to send a timestamp which applies to the Submessages
+       that follow within the same message. */
+    struct InfoTimestampSubmessageBody {
+      Timestamp_t timestamp;
+    };
+
+    /* The purpose of the Pad Submessage is to allow the introduction of any padding
+       necessary to meet any desired memory-alignment requirements. Its body is
+       empty */
+
+    /* The NackFrag Submessage is used to communicate the state of a Reader to a
+       Writer. */
+    struct NackFragSubmessageBody {
+      EntityId readerId;
+      EntityId writerId;
+      SequenceNumber_t writerSN;
+      FragmentNumberSet fragmentNumberState;
+      Count_t count;
+    };
+
+    /* InfoReplyIp4 is provided for efficiency reasons and can be used instead
+       of the InfoReply Submessage to provide a more compact representation. */
+    struct InfoReplyIp4SubmessageBody {
+      LocatorUDPv4_t unicastLocatorList;
+      LocatorUDPv4_t multicastLocatorList;
+    };
+
+    typedef octet PMDOctetArray[4];
+
+    /* Type used to hold data exchanged between Participants. */
+    struct ParticipantMessageData {
+      GuidPrefix_t participantGuidPrefix;
+      PMDOctetArray kind;
+      OctetSeq data;
+    };
+
+    typedef sequence<BuiltinEndpointSet_t> PPBuiltinEndpointsSeq;
+    typedef sequence<Locator_t> PPLocatorSeq;
+    /* ***ATTENTION***: requires custom de/serializer */
+    struct ParticipantProxy_t {
+      ProtocolVersion_t protocolVersion;
+      GuidPrefix_t guidPrefix;
+      VendorId_t vendorId;
+      boolean expectsInlineQos;
+      PPBuiltinEndpointsSeq availableBuiltinEndpoints;
+      PPLocatorSeq metatrafficUnicastLocatorList;
+      PPLocatorSeq metatrafficMulticastLocatorList;
+      PPLocatorSeq defaultMulticastLocatorList;
+      PPLocatorSeq defaultUnicastLocatorList;
+      Count_t manualLivelinessCount;
+    };
+
+    /* ***ATTENTION***: Duration_t PSM isn't specified. It is used to hold time-differences.
+       Should have at least nano-second resolution. */
+    typedef unsigned long Duration_t;
+
+#ifndef DDS_HAS_MINIMUM_BIT
+    struct SPDPdiscoveredParticipantData {
+      DDS::ParticipantBuiltinTopicData ddsParticipantData;
+      ParticipantProxy_t participantProxy;
+      Duration_t leaseDuration;
+    };
+#endif
+
+    typedef sequence<Locator_t> WPLocatorSeq;
+    struct WriterProxy_t {
+      GUID_t remoteWriterGuid;
+      WPLocatorSeq unicastLocatorList;
+      WPLocatorSeq multicastLocatorList;
+    };
+
+#ifndef DDS_HAS_MINIMUM_BIT
+    struct DiscoveredWriterData {
+      DDS::PublicationBuiltinTopicData ddsPublicationData;
+      WriterProxy_t writerProxy;
+    };
+#endif
+
+    typedef sequence<Locator_t> RPLocatorSeq;
+    struct ReaderProxy_t {
+      GUID_t remoteReaderGuid;
+      boolean expectsInlineQos;
+      RPLocatorSeq unicastLocatorList;
+      RPLocatorSeq multicastLocatorList;
+    };
+
+#ifndef DDS_HAS_MINIMUM_BIT
+    struct DiscoveredReaderData {
+      DDS::SubscriptionBuiltinTopicData ddsSubscriptionData;
+      ReaderProxy_t readerProxy;
+      ContentFilterProperty_t contentFilterProperty;
+    };
+
+    struct DiscoveredTopicData {
+      DDS::TopicBuiltinTopicData ddsTopicData;
+    };
+#endif
+
+  };
+};
+
+#endif /* RTPS_RTPSMESSAGETYPES_IDL */

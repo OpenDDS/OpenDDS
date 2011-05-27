@@ -1,0 +1,7 @@
+project: dcpsexe_with_tcp {
+  exename = ContentFilteredTopicTest
+  requires += content_subscription
+  TypeSupport_Files {
+    Messenger.idl
+  }
+}

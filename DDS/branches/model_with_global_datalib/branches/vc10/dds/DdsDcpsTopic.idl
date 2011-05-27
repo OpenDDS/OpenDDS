@@ -1,0 +1,77 @@
+/*
+ * $Id$
+ *
+ * Copyright 2010 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_TOPIC_IDL
+#define OPENDDS_DCPS_TOPIC_IDL
+
+#include "dds/DdsDcpsInfrastructure.idl"
+
+#pragma ciao lem "dds/DdsDcpsTopicE.idl"
+
+module DDS {
+    local interface DomainParticipant;
+    local interface Topic;
+
+    // ----------------------------------------------------------------------
+    local interface TopicDescription {
+                string get_type_name();
+                string get_name();
+                DomainParticipant get_participant();
+                };
+
+    local interface TopicListener : Listener {
+                void on_inconsistent_topic(
+                        in Topic the_topic,
+                        in InconsistentTopicStatus status);
+                };
+
+    local interface Topic : Entity, TopicDescription {
+        ReturnCode_t set_qos(
+            in TopicQos qos);
+        ReturnCode_t get_qos(
+            inout TopicQos qos);
+        ReturnCode_t set_listener(
+            in TopicListener a_listener,
+            in StatusMask mask);
+        TopicListener get_listener();
+        // Access the status
+        ReturnCode_t get_inconsistent_topic_status(
+            inout InconsistentTopicStatus a_status);
+    };
+
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
+    local interface ContentFilteredTopic : TopicDescription {
+        string get_filter_expression();
+        ReturnCode_t get_expression_parameters(inout StringSeq params);
+        ReturnCode_t set_expression_parameters(
+            in StringSeq expression_parameters);
+        Topic get_related_topic();
+    };
+
+    local interface MultiTopic : TopicDescription {
+        string get_subscription_expression();
+        ReturnCode_t get_expression_parameters(inout StringSeq params);
+        ReturnCode_t set_expression_parameters(
+            in StringSeq expression_parameters);
+    };
+
+#endif
+
+    local interface TypeSupport {
+                         ReturnCode_t register_type(
+                                 in DomainParticipant domain,
+                                 in string type_name);
+
+                         string get_type_name ();
+                };
+};
+
+#endif /* OPENDDS_DCPS_TOPIC_IDL */

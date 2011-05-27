@@ -1,0 +1,40 @@
+// This .mpb represents the parts of the DdsDcps project that depend on whether
+// or not the built_in_topics feature is enabled (which it is by default).
+
+feature (built_in_topics) : dcps_ts_defaults, built_in_topic_support, taoidldefaults, dds_suppress_any_support {
+
+  custom_only = 1
+
+  dcps_ts_flags += --module DDS --export TAO_DdsDcps_Export --pch DCPS/DdsDcps_pch.h
+
+  TypeSupport_Files {
+    DdsDcpsInfrastructure.idl >> ParticipantBuiltinTopicDataTypeSupport.idl ParticipantBuiltinTopicDataTypeSupportImpl.h ParticipantBuiltinTopicDataTypeSupportImpl.cpp PublicationBuiltinTopicDataTypeSupport.idl PublicationBuiltinTopicDataTypeSupportImpl.h PublicationBuiltinTopicDataTypeSupportImpl.cpp SubscriptionBuiltinTopicDataTypeSupport.idl SubscriptionBuiltinTopicDataTypeSupportImpl.h SubscriptionBuiltinTopicDataTypeSupportImpl.cpp TopicBuiltinTopicDataTypeSupport.idl TopicBuiltinTopicDataTypeSupportImpl.h TopicBuiltinTopicDataTypeSupportImpl.cpp
+  }
+
+  idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=TAO_DdsDcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
+
+  IDL_Files {
+    idlflags += -Gdcps
+    DdsDcpsInfrastructure.idl
+  }
+
+  IDL_Files {
+    ParticipantBuiltinTopicDataTypeSupport.idl
+    PublicationBuiltinTopicDataTypeSupport.idl
+    SubscriptionBuiltinTopicDataTypeSupport.idl
+    TopicBuiltinTopicDataTypeSupport.idl
+  }
+
+}
+
+feature (!built_in_topics) : built_in_topic_support, taoidldefaults, dds_suppress_any_support {
+
+  custom_only = 1
+
+  idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=TAO_DdsDcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
+
+  IDL_Files {
+    DdsDcpsInfrastructure.idl
+  }
+
+}

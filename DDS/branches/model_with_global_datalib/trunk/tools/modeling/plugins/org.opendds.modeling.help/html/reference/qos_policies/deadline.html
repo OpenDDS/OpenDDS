@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=UTF-8">
+
+  <title>DEADLINE</title>
+  <link rel="stylesheet" type="text/css" href="QoS.css">
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+
+<H4 CLASS="Head3">
+<A NAME="pgfId-181228"></A>DEADLINE</H4>
+<UL>
+<LI CLASS="BodyNoLead">
+<A NAME="pgfId-187687"></A>The <A NAME="marker-199602"></A>DEADLINE QoS policy allows the application to detect when data is not written or read within a specified amount of time. This policy applies to the <A NAME="marker-267779"></A>topic, <A NAME="marker-267788"></A>data writer, and <A NAME="marker-267793"></A>data reader entities via the <EM CLASS="Code">
+deadline</EM>
+ member of their respective QoS structures. Below is the IDL related to the deadline QoS policy.</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-186940"></A><EM CLASS="Code">
+</EM>
+&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-186738"></A><EM CLASS="Code">
+struct DeadlineQosPolicy {</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-186341"></A><EM CLASS="Code">
+  Duration_t period;</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-186276"></A><EM CLASS="Code">
+};</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-187935"></A><EM CLASS="Code">
+</EM>
+&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-186948"></A>The default value of the <EM CLASS="Code">
+period</EM>
+ member is infinite, which requires no behavior. When this policy is set to a finite value, then the <A NAME="marker-267804"></A>data writer monitors the changes to data made by the application and indicates failure to honor the policy by setting the corresponding status condition and triggering the <EM CLASS="Code">
+on_offered_deadline_missed()</EM>
+<A NAME="marker-199626"></A> <A NAME="marker-267809"></A>listener callback. A <A NAME="marker-267827"></A>data reader that detects that the data has not changed before the <EM CLASS="Code">
+period</EM>
+ has expired sets the corresponding status condition and triggers the <EM CLASS="Code">
+on_requested_deadline_missed()</EM>
+<A NAME="marker-249680"></A> <A NAME="marker-267822"></A>listener callback.<A NAME="marker-199633"></A></LI>
+<LI CLASS="Body">
+<A NAME="pgfId-190841"></A>This policy is considered during the creation of associations between <A NAME="marker-267836"></A>data writers and <A NAME="marker-267841"></A>data readers. The value of both sides of the association must be compatible in order for an association to be created. The deadline period of the <A NAME="marker-267936"></A>data reader must be greater than or equal to the corresponding value of <A NAME="marker-267941"></A>data writer.</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-190838"></A>The value of this policy may change after the associated entity is enabled. In the case where the policy of a <A NAME="marker-267961"></A>data reader or <A NAME="marker-267966"></A>data writer is made, the change is successfully applied only if the change remains consistent with the remote end of all associations in which the reader or writer is participating. If the policy of a <A NAME="marker-267956"></A>topic is changed, it will affect only data readers and writers that are created after the change has been made. Any existing readers or writers, and any existing associations between them, will not be affected by the topic policy value change.</LI>
+</UL>
+
+</body>
+</html>

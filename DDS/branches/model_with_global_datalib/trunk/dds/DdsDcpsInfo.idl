@@ -1,0 +1,255 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPSINFO_IDL
+#define OPENDDS_DCPSINFO_IDL
+
+#include "dds/DdsDcpsInfrastructure.idl"
+#include "dds/DdsDcpsPublication.idl"
+#include "dds/DdsDcpsSubscription.idl"
+
+#include "dds/DdsDcpsInfoUtils.idl"
+
+#include "dds/DdsDcpsDataWriterRemote.idl"
+#include "dds/DdsDcpsDataReaderRemote.idl"
+
+module OpenDDS {
+  module DCPS {
+    interface DCPSInfo {
+
+      // Attach a DomainParticipant and assert that ownership resides
+      // with the called repository.
+      boolean attach_participant(in ::DDS::DomainId_t domainId,
+                                 in RepoId            participantId)
+        raises (Invalid_Domain,
+                Invalid_Participant);
+
+
+      // Domain participant calls to notify of a new topic
+      TopicStatus assert_topic (out RepoId topicId,
+                                in ::DDS::DomainId_t domainId,
+                                in RepoId  participantId,
+                                in string          topicName,
+                                in string          DataTypeName,
+                                in ::DDS::TopicQos   qos)
+        raises (Invalid_Domain,
+                Invalid_Participant);
+
+
+      // Domain participant calls to locate a topic
+      // Arbitrarily returns a topic of this topicName
+      TopicStatus find_topic (in ::DDS::DomainId_t domainId,
+                              in string          topicName,
+                              out string         DataTypeName,
+                              out ::DDS::TopicQos  qos,
+                              out RepoId topicId)
+        raises (Invalid_Domain);
+
+
+      // Domain participant calls to remove a topic
+      TopicStatus remove_topic (in ::DDS::DomainId_t domainId,
+                                        in RepoId  participantId,
+                                        in RepoId  topicId)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Topic);
+
+
+      // Topic entity calls to enable a topic
+      TopicStatus enable_topic (in ::DDS::DomainId_t domainId,
+                                in RepoId  participantId,
+                                in RepoId  topicId)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Topic);
+
+
+
+      // publisher calls to create new publication
+      // returns the id of the added publication
+      // 0 is an invalid id
+      RepoId add_publication (in ::DDS::DomainId_t domainId,
+                              in RepoId participantId,
+                              in RepoId topicId,
+                              in DataWriterRemote publication,
+                              in ::DDS::DataWriterQos qos,
+                              in TransportInterfaceInfo transInfo,
+                              in ::DDS::PublisherQos publisherQos)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Topic);
+
+
+      // publisher calls to remove a publication
+      void remove_publication (in ::DDS::DomainId_t domainId,
+                               in RepoId participantId,
+                               in RepoId publicationId)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Publication);
+
+
+
+      // subscriber calls to create new subscription
+      // returns the id of the added subscription
+      // 0 is an invalid id
+      RepoId add_subscription (in ::DDS::DomainId_t domainId,
+                               in RepoId participantId,
+                               in RepoId topicId,
+                               in DataReaderRemote subscription,
+                               in ::DDS::DataReaderQos qos,
+                               in TransportInterfaceInfo transInfo,
+                               in ::DDS::SubscriberQos subscriberQos,
+                               in string filterExpression,
+                               in ::DDS::StringSeq exprParams)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Topic);
+
+
+      // subscriber calls to remove a subscription
+      void remove_subscription (in ::DDS::DomainId_t domainId,
+                                in RepoId participantId,
+                                in RepoId subscriptionId)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Subscription);
+
+
+
+      // DomainParticipantFactory calls to add a new domain participant
+      // returns the id of the added participant and indication that the
+      // repository is federated.
+      // 0 is an invalid id
+      AddDomainStatus add_domain_participant (in ::DDS::DomainId_t domain,
+                                              in ::DDS::DomainParticipantQos qos)
+        raises (Invalid_Domain);
+
+
+      // DomainParticipantFactory calls to remove a domain participant
+      void remove_domain_participant (in ::DDS::DomainId_t domainId,
+                                      in RepoId participantId)
+        raises (Invalid_Domain,
+                Invalid_Participant);
+
+      /// Forces associatios to dissolve by participant.
+      void disassociate_participant(in DDS::DomainId_t domainId,
+                                    in RepoId local_id,
+                                    in RepoId remote_id)
+        raises(Invalid_Domain,
+               Invalid_Participant);
+
+      /// Forces an association to dissolve by subscription.
+      void disassociate_subscription(in DDS::DomainId_t domainId,
+                                     in RepoId participantId,
+                                     in RepoId local_id,
+                                     in RepoId remote_id)
+        raises(Invalid_Domain,
+               Invalid_Participant,
+               Invalid_Subscription);
+
+      /// Forces an association to dissolve by publication.
+      void disassociate_publication(in DDS::DomainId_t domainId,
+                                    in RepoId participantId,
+                                    in RepoId local_id,
+                                    in RepoId remote_id)
+        raises(Invalid_Domain,
+               Invalid_Participant,
+               Invalid_Publication);
+
+      //Note: the ignore_xxx methods are not reversable - per DDS spec.
+
+      // ignore participant when matching/associating pubs & subs
+      void ignore_domain_participant (in ::DDS::DomainId_t domainId,
+                                      in RepoId myParticipantId,
+                                      in RepoId ignoreId)
+        raises (Invalid_Domain,
+                Invalid_Participant);
+
+
+      // ignore topic when matching/associating pubs & subs
+      void ignore_topic (in ::DDS::DomainId_t domainId,
+                         in RepoId myParticipantId,
+                         in RepoId ignoreId)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Topic);
+
+
+      // ignore subscription when matching/associating pubs & subs
+      void ignore_subscription (in ::DDS::DomainId_t domainId,
+                                in RepoId myParticipantId,
+                                in RepoId ignoreId)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Subscription);
+
+
+      // ignore publication when matching/associating pubs & subs
+      void ignore_publication (in ::DDS::DomainId_t domainId,
+                               in RepoId myParticipantId,
+                               in RepoId ignoreId)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Publication);
+
+      //=======================================================
+      // Update the QoS of an enitity to support Built-in Topics
+      // and updating the other side of assocations.
+      // The caller will have already checked that the QoS
+      // values are valid, consistent and changeable.
+      // The repo will break any assocations that become
+      // incompatible.
+      //
+      boolean update_domain_participant_qos (in ::DDS::DomainId_t domain,
+                                          in RepoId participantId,
+                                          in ::DDS::DomainParticipantQos qos)
+        raises (Invalid_Domain,
+                Invalid_Participant);
+
+      boolean update_topic_qos (in RepoId topicId,
+                             in ::DDS::DomainId_t domainId,
+                             in RepoId  participantId,
+                             in ::DDS::TopicQos   qos)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Topic);
+
+      boolean update_publication_qos (in ::DDS::DomainId_t domainId,
+                                   in RepoId participantId,
+                                   in RepoId publicationId,
+                                   in ::DDS::DataWriterQos qos,
+                                   in ::DDS::PublisherQos publisherQos)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Publication);
+
+      boolean update_subscription_qos (in ::DDS::DomainId_t domainId,
+                                    in RepoId participantId,
+                                    in RepoId subscriptionId,
+                                    in ::DDS::DataReaderQos qos,
+                                    in ::DDS::SubscriberQos subscriberQos)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Subscription);
+
+      boolean update_subscription_params(in ::DDS::DomainId_t domainId,
+                                         in RepoId participantId,
+                                         in RepoId subscriptionId,
+                                         in ::DDS::StringSeq exprParams)
+        raises (Invalid_Domain,
+                Invalid_Participant,
+                Invalid_Subscription);
+
+      void shutdown();
+    };
+
+  }; // module DDS
+}; // module OpenDDS
+
+#endif /* OPENDDS_DCPSINFO_IDL */

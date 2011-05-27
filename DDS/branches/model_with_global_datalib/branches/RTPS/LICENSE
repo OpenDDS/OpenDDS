@@ -1,0 +1,50 @@
+OpenDDS (Licensed Product) is protected by copyright, and is
+distributed under the following terms.
+
+OpenDDS is an open source implementation of the Object Management Group
+(OMG) Data Distribution Service (DDS), developed and copyrighted by
+Object Computing Incorporated (OCI). OpenDDS is both a multi-language
+and multi-platform implementation. The OMG DDS specification is intended
+to be suitable for systems whose requirements include real-time, high
+volume, robustness, failure tolerant data distribution utilizing a
+publish and subscribe model.
+
+Since OpenDDS is open source and free of licensing fees, you are free
+to use, modify, and distribute the source code, as long as you include
+this copyright statement.
+
+In particular, you can use OpenDDS to build proprietary software and
+are under no obligation to redistribute any of your source code that
+is built using OpenDDS. Note however, that you may not do anything to
+the OpenDDS code, such as copyrighting it yourself or claiming
+authorship of the OpenDDS code, that will prevent OpenDDS from being
+distributed freely using an open source development model.
+
+Warranty
+
+LICENSED PRODUCT IS PROVIDED AS IS WITH NO WARRANTIES OF ANY KIND
+INCLUDING THE WARRANTIES OF DESIGN, MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE, NON-INFRINGEMENT, OR ARISING FROM A COURSE OF
+DEALING, USAGE OR TRADE PRACTICE.
+
+Support
+
+LICENSED PRODUCT IS PROVIDED WITH NO SUPPORT AND WITHOUT ANY
+OBLIGATION ON THE PART OF OCI OR ANY OF ITS SUBSIDIARIES OR AFFILIATES
+TO ASSIST IN ITS USE, CORRECTION, MODIFICATION OR ENHANCEMENT.
+
+Support may be available from OCI to users who have agreed to a
+support contract.
+
+Liability
+
+OCI OR ANY OF ITS SUBSIDIARIES OR AFFILIATES SHALL HAVE NO LIABILITY
+WITH RESPECT TO THE INFRINGEMENT OF COPYRIGHTS, TRADE SECRETS OR ANY
+PATENTS BY LICENSED PRODUCT OR ANY PART THEREOF.
+
+IN NO EVENT WILL OCI OR ANY OF ITS SUBSIDIARIES OR AFFILIATES BE
+LIABLE FOR ANY LOST REVENUE OR PROFITS OR OTHER SPECIAL, INDIRECT AND
+CONSEQUENTIAL DAMAGES, EVEN IF OCI HAS BEEN ADVISED OF THE POSSIBILITY
+OF SUCH DAMAGES.
+
+OpenDDS copyright OCI. St. Louis MO USA, 2005

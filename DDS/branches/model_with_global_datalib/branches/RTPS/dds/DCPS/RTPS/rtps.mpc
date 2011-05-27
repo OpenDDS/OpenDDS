@@ -1,0 +1,4 @@
+project : dcps {
+  sharedname = OpenDDS_Rtps
+  dynamicflags = OPENDDS_RTPS_BUILD_DLL
+}

@@ -1,0 +1,22 @@
+project(*xmlPublisher) : dcpsexe, dds_model {
+  exename   = publisher
+  after    += ReusedTypes
+  libs     += ReusedTypes
+  libpaths += model
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(*xmlSubscriber) : dcpsexe, dds_model {
+  exename   = subscriber
+  after    += ReusedTypes
+  libs     += ReusedTypes
+  libpaths += model
+
+  Source_Files {
+    subscriber.cpp
+  }
+}
+

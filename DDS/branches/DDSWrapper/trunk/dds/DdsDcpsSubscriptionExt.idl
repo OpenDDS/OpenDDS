@@ -1,0 +1,44 @@
+// -*- C++ -*-
+// $Id$
+#ifndef OPENDDS_DCPS_SUBSCRIPTION_EXT_IDL
+#define OPENDDS_DCPS_SUBSCRIPTION_EXT_IDL
+
+/// OpenDDS extensions to the DDS Subscription Module
+
+#include "dds/DdsDcpsSubscription.idl"
+
+module OpenDDS
+{
+
+  module DCPS
+  {
+
+    struct DurabilityQosPolicyExt
+    {
+      /// A DataReader with always_get_history set to true will receive
+      /// "historic" samples from durable writers regardless of the reader's
+      /// DURABILITY.kind setting.  Does not impact RxO.  Not changeable.
+      boolean always_get_history;
+    };
+
+    struct DataReaderQosExt
+    {
+      DurabilityQosPolicyExt durability;
+    };
+
+    local interface SubscriberExt : DDS::Subscriber
+    {
+      void get_default_datareader_qos_ext(inout DataReaderQosExt qos);
+
+      DDS::DataReader create_opendds_datareader(
+        in DDS::TopicDescription a_topic,
+        in DDS::DataReaderQos qos,
+        in DataReaderQosExt ext_qos,
+        in DDS::DataReaderListener a_listener);
+    };
+
+  };
+
+};
+
+#endif

@@ -1,0 +1,8 @@
+(4020|4036) Data has been received:
+(4020|4036) Message: [Hello World!]
+(4004|4008) The transport has confirmed that a sample has been delivered.
+(4004|4008) Transport has detached from SimplePublisher.
+(4004|4008) The transport has been lost.
+(4020|4036) Peer has disconnected.
+(4020|4000) Transport has detached from SimpleSubscriber.
+(4020|4000) The transport has been lost.

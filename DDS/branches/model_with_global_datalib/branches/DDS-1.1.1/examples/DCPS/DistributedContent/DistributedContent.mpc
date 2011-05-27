@@ -1,0 +1,19 @@
+project(DDS*Node) : dcpsexe {
+  
+  exename   = node
+  requires += built_in_topics
+
+  TypeSupport_Files {
+    FileInfo.idl >> FileDiffTypeSupport.idl FileDiffTypeSupportImpl.h FileDiffTypeSupportImpl.cpp
+  }
+
+  IDL_Files {
+    *.idl
+    FileDiffTypeSupport.idl
+  }
+
+  Source_Files {
+    *.cpp
+    FileDiffTypeSupportImpl.cpp
+  }
+}

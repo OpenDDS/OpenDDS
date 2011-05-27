@@ -1,0 +1,8 @@
+// -*- MPC -*-
+// $Id$
+
+project {
+  includes  += $(DDS_ROOT)/tools/modeling/codegen
+  libs      += OpenDDS_Model
+  after     += Model_Lib
+}

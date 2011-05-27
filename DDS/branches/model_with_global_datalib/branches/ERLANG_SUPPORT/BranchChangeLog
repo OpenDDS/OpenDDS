@@ -1,0 +1,638 @@
+Tue Jul  7 14:42:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/modules/IDL2JNIHelper.pm:
+        * MPC/modules/IDLBase.pm:
+        * MPC/modules/TAO_ICHelper.pm:
+
+	  Re-factored IDLHelper.pm to IDLBase.pm (fixes implicit instantiation
+	  issue within MPC).
+
+        * MPC/modules/IDLHelper.pm:
+
+          Removed this file.
+
+Tue Mar 17 04:13:00 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang/erlang/lib/tao_ic/cpp_src/be_global.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/erl_utility.h:
+        * lang/erlang/lib/tao_ic/cpp_src/erl_utility.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/generator.h:
+        * lang/erlang/lib/tao_ic/cpp_src/generator.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.h:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+
+          Nightly commit.
+
+Tue Mar 17 03:08:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang/erlang/lib/tao_ic/cpp_src/ace_compat.h:
+        * lang/erlang/lib/tao_ic/cpp_src/be_extern.h:
+        * lang/erlang/lib/tao_ic/cpp_src/be_global.h:
+        * lang/erlang/lib/tao_ic/cpp_src/be_visitor.h:
+        * lang/erlang/lib/tao_ic/cpp_src/erl_utility.h:
+        * lang/erlang/lib/tao_ic/cpp_src/erl_utility.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/generator.h:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_cpp.h:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.h:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+
+          Nightly updates.
+
+Tue Mar 10 02:10:29 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang/erlang/lib/tao_ic/cpp_src/erl_utility.h:
+        * lang/erlang/lib/tao_ic/cpp_src/erl_utility.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+
+          Minor updates to stream handling.
+
+Tue Mar 10 01:16:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/modules/TAO_ICHelper.pm:
+        * lang/erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/generator.h:
+        * lang/erlang/lib/tao_ic/cpp_src/generator.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.h:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+
+          Reverted const refactoring; old method was better!
+
+Mon Mar  9 05:20:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/erlang_dds.mpb:
+        * MPC/config/erlang_tao.mpb:
+        * MPC/modules/IDLHelper.pm:
+        * MPC/modules/TAO_ICHelper.pm:
+        * lang/erlang/dds.mpc:
+        * lang/erlang/lib/tao/tao.mpc:
+        * lang/erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/generator.h:
+        * lang/erlang/lib/tao_ic/cpp_src/generator.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.h:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+        * lang/erlang/lib/tao_ic/tao_ic.mpc:
+        * lang/erlang/lib/tao_ic/test/tao_ic_test.mpc:
+
+          Refactored const generation.
+
+        * lang/erlang/lib/tao_ic/cpp_src/idl_utility.h:
+        * lang/erlang/lib/tao_ic/cpp_src/idl_utility.cpp:
+
+          Removed these files.
+
+Sat Mar  7 01:45:51 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang/erlang/lib/tao/doc/generate_edoc.pl:
+        * lang/erlang/lib/tao_ic/doc/generate_edoc.pl:
+        * lib/perl/Erlang/EDoc.pm:
+
+          Fixed refactored perl modules.
+
+Thu Mar  5 06:26:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS.mwc:
+        * MPC/config/erlang_dds.mpb:
+        * MPC/config/erlang_tao.mpb:
+        * MPC/config/tao_ic.mpb:
+        * lang/erlang/dds.mpc:
+        * lang/erlang/lib/tao/tao.mpc:
+        * lang/erlang/lib/tao_ic/test/tao_ic_test.mpc:
+        * lang/erlang/lib/tao_ic/test/test/const.idl:
+        * lang/erlang/lib/tao_ic/test/test/enum.idl:
+        * lang/erlang/lib/tao_ic/test/test/struct.idl:
+        * lang/erlang/lib/tao_ic/test/test/union.idl:
+
+          Various MPC tweaks and test updates.
+
+Wed Mar  4 16:37:25 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang/erlang/lib/tao_ic/tao_ic.mpc:
+
+          Fixes for non-gnuace builds.
+
+Tue Mar  3 18:31:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang/erlang/lib/tao_ic/cpp_src/be_global.h:
+        * lang/erlang/lib/tao_ic/cpp_src/be_global.cpp:
+
+          Corrected includes for std::string.
+
+Mon Mar  2 18:45:06 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang/erlang/lib/tao_ic/cpp_src/erl_utility.h:
+        * lang/erlang/lib/tao_ic/cpp_src/erl_utility.cpp:
+
+          Moved template definitions into header.
+
+Mon Mar  2 14:49:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+
+          Minor formatting changes.
+
+Thu Feb 26 17:25:50 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang/erlang/lib/tao/doc/generate_edoc.pl:
+        * lang/erlang/lib/tao_ic/doc/generate_edoc.pl:
+        * lib/perl:
+        * lib/perl/Erlang:
+        * lib/perl/Erlang/EDoc.pm:
+
+          Moved perl modules to proposed perl library path.
+
+        * bin/PerlDDS/EDoc.pm:
+
+          Removed this file.
+
+Thu Feb 26 16:55:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang/erlang/lib/tao_ic/cpp_src/be_extern.h:
+        * lang/erlang/lib/tao_ic/cpp_src/be_global.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/be_init.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/erl_utility.h:
+        * lang/erlang/lib/tao_ic/cpp_src/erl_utility.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/generator.h:
+        * lang/erlang/lib/tao_ic/cpp_src/generator.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+        * lang/erlang/lib/tao_ic/cpp_src/idl_utility.h:
+        * lang/erlang/lib/tao_ic/cpp_src/idl_utility.cpp:
+
+          Various code cleanups and improvements.
+
+Sat Feb 21 22:17:58 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/tao_ic.mpb:
+        * lang/erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+
+          Updated tao_ic MPC config; cleaned up enum generation.
+
+Sat Feb 21 21:29:28 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/tao_ic.mpb:
+        * MPC/config/tao_ic_otp.mpb:
+        * MPC/modules/TAO_ICHelper.pm:
+        * bin/PerlDDS/EDoc.pm:
+        * lang/erlang/lib/tao/doc/generate_edoc.pl:
+        * lang/erlang/lib/tao_ic/doc/generate_edoc.pl:
+        * lang/erlang/lib/tao_ic/tao_ic.mpc:
+
+          Moved MPC and perl module artifacts to $DDS_ROOT for nightly
+          builds to function correctly.
+
+        * lang/erlang/MPC:
+        * lang/erlang/MPC/config:
+        * lang/erlang/MPC/config/MPC.cfg:
+        * lang/erlang/MPC/config/tao_ic.mpb:
+        * lang/erlang/MPC/config/tao_ic_otp.mpb:
+        * lang/erlang/MPC/modules:
+        * lang/erlang/MPC/modules/TAO_ICHelper.pm:
+        * lang/erlang/bin:
+        * lang/erlang/bin/Erlang:
+        * lang/erlang/bin/Erlang/EDoc.pm:
+        * lang/erlang/bin/mwc.pl:
+        * lang/erlang/dds.mwc:
+
+          Removed these files.
+
+Sat Feb 21 21:02:48 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * lang:
+        * erlang:
+
+          Moved erlang support under new lang subdirectory.
+
+Sat Feb  7 21:50:27 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/MPC/modules/TAO_ICHelper.pm:
+        * erlang/lib/tao_ic/cpp_src/be_extern.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.cpp:
+        * erlang/lib/tao_ic/cpp_src/be_visitor.h:
+        * erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * erlang/lib/tao_ic/cpp_src/erl_utility.h:
+        * erlang/lib/tao_ic/cpp_src/erl_utility.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator.h:
+        * erlang/lib/tao_ic/cpp_src/generator.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator_cpp.h:
+        * erlang/lib/tao_ic/cpp_src/generator_cpp.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.h:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+        * erlang/lib/tao_ic/cpp_src/idl_utility.h:
+        * erlang/lib/tao_ic/cpp_src/idl_utility.cpp:
+
+          Added support for IDL structs.
+
+Fri Jan 23 23:35:48 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao_ic/cpp_src/ace_compat.h:
+        * erlang/lib/tao_ic/cpp_src/be_extern.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.cpp:
+        * erlang/lib/tao_ic/cpp_src/be_init.cpp:
+        * erlang/lib/tao_ic/cpp_src/be_visitor.h:
+        * erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * erlang/lib/tao_ic/cpp_src/erl_utility.h:
+        * erlang/lib/tao_ic/cpp_src/erl_utility.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator.h:
+        * erlang/lib/tao_ic/cpp_src/generator.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator_cpp.h:
+        * erlang/lib/tao_ic/cpp_src/generator_cpp.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.h:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+
+          Updated per new DDS style guidelines.
+
+Thu Jan 22 05:47:01 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * erlang/lib/tao_ic/cpp_src/erl_utility.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+
+          General cleanup and refactoring.
+
+Wed Jan 21 02:13:47 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/MPC/modules/TAO_ICHelper.pm:
+        * erlang/dds.mpc:
+        * erlang/dds.mwc:
+        * erlang/lib/tao_ic/cpp_src/be_global.cpp:
+        * erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * erlang/lib/tao_ic/cpp_src/erl_utility.h:
+        * erlang/lib/tao_ic/cpp_src/erl_utility.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator.h:
+        * erlang/lib/tao_ic/cpp_src/generator.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.h:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+        * erlang/lib/tao_ic/test/test/const.idl:
+        * erlang/lib/tao_ic/test/test/enum.idl:
+
+          Added support for enums.
+
+        * erlang/DDS_erlang.mwc:
+        * erlang/lib/tao_ic/test/test/constant.idl:
+        * erlang/opendds.mpc:
+
+          Removed these files.
+
+Sun Jan 18 05:56:46 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/MPC/config/tao_ic.mpb:
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+        * erlang/lib/tao_ic/src/tao_ic.hrl:
+        * erlang/opendds.mpc:
+
+          Project build updates.
+
+Sun Jan 18 05:28:41 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/modules/IDL2JNIHelper.pm:
+        * MPC/modules/IDLHelper.pm:
+
+          Refactored idl2jni to use the new IDLHelper module.
+
+Sun Jan 18 04:20:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/modules/IDL2JNIHelper.pm:
+        * MPC/modules/IDLHelper.pm:
+        * erlang/MPC:
+        * erlang/MPC/config:
+        * erlang/MPC/config/MPC.cfg:
+        * erlang/MPC/config/tao_ic.mpb:
+        * erlang/MPC/config/tao_ic_otp.mpb:
+        * erlang/MPC/modules:
+        * erlang/MPC/modules/TAO_ICHelper.pm:
+        * erlang/bin/mwc.pl:
+        * erlang/lib/tao_ic/test/.erlang:
+        * erlang/lib/tao_ic/test/cpp_src:
+        * erlang/lib/tao_ic/test/ebin:
+        * erlang/lib/tao_ic/test/include:
+        * erlang/lib/tao_ic/test/src:
+        * erlang/lib/tao_ic/test/tao_ic_test.mpc:
+        * erlang/lib/tao_ic/test/test:
+        * erlang/lib/tao_ic/test/test/constant.idl:
+
+          MPC updates to support tao_ic.
+
+Thu Jan 15 04:33:41 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao_ic:
+        * erlang/lib/tao_ic/cpp_src/ace_compat.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.cpp:
+        * erlang/lib/tao_ic/cpp_src/be_visitor.h:
+        * erlang/lib/tao_ic/cpp_src/erl_utility.h:
+        * erlang/lib/tao_ic/cpp_src/erl_utility.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator.h:
+        * erlang/lib/tao_ic/cpp_src/generator.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator_cpp.h:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.h:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+
+          General updates and refactorings.
+
+        * erlang/lib/tao_ic/cpp_src/erl_helper.h:
+        * erlang/lib/tao_ic/cpp_src/erl_helper.cpp:
+
+          Removed these files.
+
+Tue Jan 13 07:17:07 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao_ic:
+        * erlang/lib/tao_ic/cpp_src/ace_compat.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.cpp:
+        * erlang/lib/tao_ic/cpp_src/be_init.cpp:
+        * erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * erlang/lib/tao_ic/cpp_src/erl_helper.h:
+        * erlang/lib/tao_ic/cpp_src/erl_helper.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator.h:
+        * erlang/lib/tao_ic/cpp_src/generator.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator_cpp.h:
+        * erlang/lib/tao_ic/cpp_src/generator_cpp.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.h:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+
+          Added support for constants.
+
+Fri Jan  9 20:57:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao_ic/cpp_src/be_visitor.h:
+        * erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator.h:
+        * erlang/lib/tao_ic/cpp_src/generator.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator_cpp.h:
+        * erlang/lib/tao_ic/cpp_src/generator_cpp.cpp:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.h:
+        * erlang/lib/tao_ic/cpp_src/generator_erl.cpp:
+
+          tao_ic updates.
+
+Thu Jan  8 06:08:16 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao/src/tao_error.erl:
+        * erlang/lib/tao_ic/cpp_src:
+        * erlang/lib/tao_ic/cpp_src/be_extern.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.cpp:
+        * erlang/lib/tao_ic/cpp_src/be_init.cpp:
+        * erlang/lib/tao_ic/cpp_src/be_visitor.h:
+        * erlang/lib/tao_ic/cpp_src/be_visitor.cpp:
+        * erlang/lib/tao_ic/tao_ic.mpc:
+
+          Initial support for be_visitor.
+
+Wed Jan  7 04:21:01 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/.erlang:
+        * erlang/DDS_erlang.mwc:
+        * erlang/lib/tao/.erlang:
+        * erlang/lib/tao/doc/generate_edoc.pl:
+        * erlang/lib/tao/doc/overview.edoc:
+        * erlang/lib/tao/src/tao_error.erl:
+        * erlang/lib/tao/src/tao_util.erl:
+        * erlang/lib/tao/src/tao_util.hrl:
+        * erlang/lib/tao/tao.mpc:
+        * erlang/lib/tao_ic/.erlang:
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+        * erlang/lib/tao_ic/tao_ic.mpc:
+
+          Refactored tao and common libraries.
+
+        * erlang/lib/common:
+        * erlang/lib/common/.erlang:
+        * erlang/lib/common/common.mpc:
+        * erlang/lib/common/doc:
+        * erlang/lib/common/doc/generate_edoc.pl:
+        * erlang/lib/common/doc/html:
+        * erlang/lib/common/ebin:
+        * erlang/lib/common/include:
+        * erlang/lib/common/src:
+        * erlang/lib/common/src/error.erl:
+        * erlang/lib/common/src/lists@.erl:
+        * erlang/lib/common/src/os@.erl:
+        * erlang/lib/common/src/os@.hrl:
+        * erlang/lib/tao/include:
+
+          Removed these files.
+
+Mon Jan  5 19:58:53 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/common/src/os@.erl:
+        * erlang/lib/common/src/os@.hrl:
+
+          Added new os extension module.
+
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+        * erlang/lib/tao_ic/src/tao_ic.hrl:
+
+          Refactored out exec/2 behavior to os@.
+
+Mon Jan  5 01:31:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/bin/Erlang/EDoc.pm:
+        * erlang/lib/common/doc/generate_edoc.pl:
+        * erlang/lib/tao_ic/doc/generate_edoc.pl:
+        * erlang/lib/tao_ic/doc/overview.edoc:
+        * erlang/lib/tao_ic/tao_ic.mpc:
+
+          Documentation updates.
+
+Sun Jan  4 18:51:09 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/bin/Erlang/EDoc.pm:
+        * erlang/lib/common/doc:
+        * erlang/lib/common/doc/generate_edoc.pl:
+        * erlang/lib/common/doc/html:
+        * erlang/lib/tao/doc/generate_edoc.pl:
+        * erlang/lib/tao/doc/html:
+        * erlang/lib/tao_ic/doc/generate_edoc.pl:
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+        * erlang/lib/tao_ic/tao_ic.mpc:
+
+          Added scripts for generating edoc information.
+
+        * erlang/lib/common/src/lists@.erl:
+
+          Renamed the lists_ module.
+
+        * erlang/lib/common/src/lists_.erl:
+
+          Removed this file.
+
+Wed Dec 31 20:45:06 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang:
+        * erlang/.erlang:
+        * erlang/DDS_erlang.mwc:
+        * erlang/lib/common:
+        * erlang/lib/common/.erlang:
+        * erlang/lib/common/common.mpc:
+        * erlang/lib/common/ebin:
+        * erlang/lib/common/include:
+        * erlang/lib/common/src:
+        * erlang/lib/common/src/error.erl:
+        * erlang/lib/common/src/lists_.erl:
+        * erlang/lib/tao:
+        * erlang/lib/tao/.erlang:
+        * erlang/lib/tao/tao.mpc:
+        * erlang/lib/tao_ic:
+        * erlang/lib/tao_ic/.erlang:
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+        * erlang/lib/tao_ic/tao_ic.mpc:
+        * erlang/opendds.mpc:
+
+          Build changes; refactored tao_ic.erl.
+
+Wed Dec 31 15:01:22 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+
+          Added exception for invalid be options.
+
+Tue Dec 30 23:44:39 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+
+          Added missing be option for -Wb,port_driver_name.
+
+Tue Dec 30 21:50:30 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao_ic/cpp_src/ace_compat.h:
+        * erlang/lib/tao_ic/cpp_src/be_extern.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.cpp:
+        * erlang/lib/tao_ic/cpp_src/be_init.cpp:
+        * erlang/lib/tao_ic/tao_ic.mpc:
+
+          Formatting changes, fixed segfault caused by be_global.cpp.
+
+Mon Dec 29 22:25:44 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao_ic/cpp_src/be_global.cpp:
+
+          Finalized arg parsing.
+
+Sat Dec 27 21:48:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/tao_ic/cpp_src/ace_compat.h:
+        * erlang/lib/tao_ic/cpp_src/be_extern.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.cpp:
+        * erlang/lib/tao_ic/cpp_src/be_init.cpp:
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+
+          ACEified tao_ic; added skel options.
+
+        * erlang/lib/tao_ic/cpp_src/14a_compat.h:
+
+          Removed this file.
+
+Sat Dec 27 19:47:40 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/DDS_erlang.mwc:
+        * erlang/lib/tao_ic/cpp_src/14a_compat.h:
+        * erlang/lib/tao_ic/cpp_src/be_extern.h:
+        * erlang/lib/tao_ic/cpp_src/be_global.h:
+        * erlang/lib/tao_ic/cpp_src/be_init.cpp:
+        * erlang/lib/tao_ic/include/tao_ic.hrl:
+        * erlang/lib/tao_ic/src/tao_ic.erl:
+        * erlang/lib/tao_ic/tao_ic.mpc:
+
+          Renamed opendds_ic to tao_idl; renamed opendds_tao to
+          tao.
+
+        * erlang/lib/tao_ic/include/opendds_ic.hrl:
+        * erlang/lib/tao_ic/opendds_ic.mpc:
+        * erlang/lib/tao_ic/src/opendds_ic.erl:
+
+          Removed these files.
+
+Sat Dec 27 05:42:32 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/opendds_ic/cpp_src/be_global.h:
+        * erlang/lib/opendds_ic/cpp_src/be_global.cpp:
+        * erlang/lib/opendds_ic/cpp_src/be_init.cpp:
+        * erlang/lib/opendds_ic/cpp_src/main.cpp:
+        * erlang/lib/opendds_ic/src/opendds_ic.erl:
+
+          Added additional command line arguments to opendds_ic.
+
+Thu Dec 25 05:27:56 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/opendds_ic/include/opendds_ic.hrl:
+        * erlang/lib/opendds_ic/opendds_ic.mpc:
+        * erlang/lib/opendds_ic/src/opendds_ic.erl:
+
+          Initial support for invoking opendds_ic via opendds_ic:gen/*.
+
+        * MPC/config/erlang.mpb:
+
+          Moved erlang project definition to MPC trunk.
+
+Tue Dec 23 23:58:10 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/opendds_ic/cpp_src:
+        * erlang/lib/opendds_ic/cpp_src/be_init.cpp:
+        * erlang/lib/opendds_ic/src/opendds_ic.erl:
+
+          Updated opendds_ic support.
+
+Tue Dec 23 18:55:25 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/erlang.mpb:
+        * erlang/DDS_erlang.mwc:
+        * erlang/lib/opendds_ic/opendds_ic.mpc:
+
+          More MPC updates.
+
+        * erlang/lib/opendds_ic/cpp_src/main.cpp:
+
+          Cleaned up TAO_IDL includes.
+
+Tue Dec 23 03:31:07 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/opendds_ic/cpp_src/be_extern.h:
+
+          Corrected issue with incorrect dependencies.
+
+Mon Dec 22 03:32:55 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/opendds_ic/ebin:
+        * erlang/lib/opendds_ic/opendds_ic.mpc:
+
+          Added initial MPC support for erlc.
+
+Sun Dec 21 15:16:16 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/opendds_ic/cpp_src/be_extern.h:
+        * erlang/lib/opendds_ic/cpp_src/be_global.h:
+        * erlang/lib/opendds_ic/cpp_src/be_init.cpp:
+        * erlang/lib/opendds_ic/opendds_ic.mpc:
+
+          Trivial updates.
+
+Sun Dec 21 05:51:24 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang/lib/opendds_ic/cpp_src/14a_compat.h:
+        * erlang/lib/opendds_ic/cpp_src/be_extern.h:
+        * erlang/lib/opendds_ic/cpp_src/be_global.h:
+        * erlang/lib/opendds_ic/cpp_src/be_global.cpp:
+        * erlang/lib/opendds_ic/cpp_src/be_init.cpp:
+        * erlang/lib/opendds_ic/cpp_src/main.cpp:
+        * erlang/lib/opendds_ic/opendds_ic.mpc:
+
+          Stubbed in minimal TAO_IDL BE support.
+
+Sun Dec 21 03:07:17 UTC 2008  Steven Stallion  <stallions@ociweb.com>
+
+        * erlang:
+
+          Committed initial project structure.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

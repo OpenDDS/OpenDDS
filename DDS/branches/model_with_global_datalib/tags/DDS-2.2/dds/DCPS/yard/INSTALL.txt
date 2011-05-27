@@ -1,0 +1,2 @@
+Because YARD is a header-only library, installation consists of copying the
+files in the include/ directory to wherever you think you can find them again.

@@ -1,0 +1,20 @@
+//
+// $Id$
+//
+
+project(*DisjointSequence): dcpsexe {
+  exename   = *
+
+  Source_Files {
+    DisjointSequence.cpp
+  }
+}
+
+project(*LivelinessCompatibility): dcpsexe {
+  exename   = *
+
+  Source_Files {
+    LivelinessCompatibility.cpp
+  }
+}
+

@@ -1,0 +1,15 @@
+
+module profilingTest {
+
+#pragma DCPS_DATA_TYPE "profilingTest::testMsg"
+#pragma DCPS_DATA_KEY  "profilingTest::testMsg msgID"
+
+  struct testMsg {
+    unsigned long         msgID; 
+    unsigned long         count;
+    sequence<octet>       contents;
+  };
+
+
+
+};

@@ -1,0 +1,12 @@
+project (DCPS_Perf*): aceexe {
+  exename = raw_tcp_publisher
+  exeout  = ..
+
+  includes += ../common
+
+  Source_Files {
+    TcpPublisher.cpp
+    TestDriver.cpp
+    main.cpp
+  }
+}

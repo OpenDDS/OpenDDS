@@ -1,0 +1,27 @@
+//
+// $Id$
+//
+
+project : erlang_otp {
+  custom_only   = 1
+  after        += *cpp
+  erlcflags    += -Wall
+ 
+  Erlang_Files {
+    src
+  }
+}
+
+project(*cpp) : aceexe {
+  exename       = tao_ic
+  exeout        = $(DDS_ROOT)/bin
+  after        += TAO_IDL_FE
+  
+  includes     += ./cpp_src $(TAO_ROOT) \
+                  $(TAO_ROOT)/TAO_IDL $(TAO_ROOT)/TAO_IDL/include
+  libs         += TAO_IDL_FE
+  
+  Source_Files {
+    cpp_src
+  }
+}

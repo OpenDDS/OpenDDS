@@ -1,0 +1,22 @@
+/*
+ * $Id$
+ */
+
+module foo {
+  const short short_0 = 0;
+  const unsigned short short_1 = 0;
+
+  const long long_0 = 0;
+  const unsigned long long_1 = 0;
+
+  const float float_0 = 0.0;
+  const double double_0 = 0.0;
+
+  const char char_0 = ' ';
+
+  const octet octet_0 = 0;
+
+  const boolean boolean_0 = FALSE;
+
+  const string string_0 = "";
+};

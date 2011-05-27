@@ -1,0 +1,6 @@
+%%
+%% $Id$
+%%
+
+code:add_patha("ebin").
+

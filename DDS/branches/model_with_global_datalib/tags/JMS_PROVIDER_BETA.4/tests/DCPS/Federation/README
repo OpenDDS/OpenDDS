@@ -1,0 +1,17 @@
+This test verifies the basics of the repository federation operation.
+This work was done as part if RT11951.  It includes:
+
+1) start 2 repositories;
+   attach a publisher to one repository;
+   attach a subscriber to the other repository;
+   federate the repositories;
+   send data.
+
+NOTE!
+Currently this test is a placeholder for verifying the implementation of
+repository federation.  This will be extended as federation is
+implemented.
+
+Until federation is implemented, this test does not check any additional
+features of DDS.
+

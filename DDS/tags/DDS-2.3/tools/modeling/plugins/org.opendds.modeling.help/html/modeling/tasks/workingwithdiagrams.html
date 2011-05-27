@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=us-ascii">
+
+  <title>Working with Diagrams</title>
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+  <h2>Working with Diagrams</h2>
+
+  <h3>Using the OpenDDS Modeling SDK Perspective</h3>
+  
+  <p>Eclipse has the concept of a <i>perspective</i> that shows
+  predefined views such as Project Explorer and Properties in
+  particular positions on the workbench. A perspective for
+  the OpenDDS Modeling SDK is available to make it convenient to work with
+  model diagrams.</p>
+  
+  <p>This perceptive can be activated by</p>
+    <ol>
+      <li>Clicking on the Perspective button and then Other...</li>
+      <li>Selecting OpenDDS Modeling</li>
+    </ol>
+  <p>These steps are shown in the following figure.</p>
+  <img alt="Eclipse perspective setting" src="../images/opendds_modeling_perspective_setting.png">
+
+  <p>You should then see an Eclipse workbench that looks something like
+  the following:</p>
+  
+  <img alt="OpenDDS modeling perspective example" src="../images/opendds_modeling_perspective_example.png" width="500">
+    
+  <h3>Setting element attributes</h3>
+
+  <p>Many of the OpenDDS modeling elements have attributes for you to
+  set. To set an attribute, after the attribute is selected, click
+  on it and enter the value for it. The steps are shown below,
+  using a QoS Policy as an example.</p>
+
+  <p>Create the element. For example, double-click on the element
+  in the Palette. This will put the element with undefined
+  attributes on it (in this example, the policy name and
+  value):</p><img alt="Attribute undefined" src=
+  "../images/attribute_undefined_example.png">
+
+  <p>To set the value attribute, first select it. (It may be
+  necessary to first click somewhere outside the figure to have it
+  un-selected, and then re-select the figure.)</p><img alt=
+  "Attribute selected" src=
+  "../images/attribute_selected_example.png">
+
+  <p>Now click on the attribute and an input box will appear
+  allowing you to type in the attribute value. The name of the
+  attribute will temporarily disappear while you are
+  editing.</p><img alt="Attribute editing" src=
+  "../images/attribute_editing_example.png">
+
+  <p>After editing you should see the name of the attribute
+  followed by it's value:</p><img alt="Attribute defined" src=
+  "../images/attribute_defined_example.png"> 
+
+  <h3>Connecting Figures</h3>
+
+  <p>For figures that are intended to be connected to each other,
+  connection creation assistants can be used. When hovering your
+  mouse over a figure to be connected, connection handlers will
+  appear as shown below.</p><img alt="Connection handles" src=
+  "../images/diagram_connection_handles.png">
+
+  <p>If both the source and target figures already exist on the
+  diagram, you can directly connect them in one of two ways:</p>
+
+  <ul>
+    <li>If the selected figure is to be the connection
+    <i>source</i>, you can then connect to a target figure by
+    clicking on the box on the outgoing arrow and dragging to the
+    target.</li>
+
+    <li>If the selected figure is to be the connection
+    <i>target</i>, you can click on the box on the incoming arrow
+    and drag to the source figure.</li>
+  </ul>
+
+  <p>An alternative way to make connections is as follows:</p>
+
+  <ul>
+    <li>If the selected figure is to be the <i>source</i> figure,
+    click on the box connected to the connection handle's outgoing
+    arrow and drag to empty portion of the canvas. You will then be
+    prompted to create allowed target figures, or to select from
+    existing figures on the diagram.</li>
+
+    <li>If the selected figure is to be the <i>target</i> figure,
+    click on the box connected to the connection handle's incoming
+    arrow and drag to empty portion of the canvas. You will then be
+    prompted to create allowed source figures,</li>
+  </ul>
+
+  <p>An example connection menu for source figure is shown
+  below.</p><img alt="Source's target menu" src=
+  "../images/diagram_connection_sources_target_menu.png">
+
+  <div class="note">
+    <p>As you may have discovered by now, you can also create a
+    connection to a Note figure. While this is a great way to help
+    document your model, keep in mind that notes are associated
+    with the diagram only and are not part of the domain model
+    itself.</p>
+  </div>
+
+  <p>Once connected, the target figure will have the arrow
+  connected to it. An example connection is shown
+  below.</p><img alt="Connected figures" src=
+  "../images/diagram_connected_figures.png"> <a name=
+  "moving_between_diagrams" id="moving_between_diagrams"></a>
+
+  <h3>Moving between diagrams</h3>
+
+  <p>In the course of working with the various libraries in an
+  OpenDDS model, you may find yourself with numerous diagram
+  edit windows open. To make it easy to move and forth between
+  these windows you can use the Back and Forward buttons on the
+  Eclipse toolbar that are shown below.</p>
+
+  <p><img alt="Back forward buttons" src=
+  "../images/diagram_back_forward_buttons.png"> <a name=
+  "arranging_figures" id="arranging_figures"></a></p>
+
+  <div class="caution">
+    <p>If you are making changes in a diagram and activate another
+    diagram, or any other window in your Eclipse session, the model
+    and diagram files will automatically be saved. This is done to
+    avoid conflicts that can occur when changes are made in
+    different diagram editors that refer to the same files.</p>
+
+    <p>Note that undo spans file saving so that you can undo
+    changes that were saved if you later decide you did not want to
+    save them.</p>
+  </div>
+
+  <h3>Arranging Figures</h3>
+
+  <p>Some OpenDDS modeling elements, such as Packages and
+  Domain Participants, can have nested compartments of figures.
+  Sometimes these compartments can become cluttered as you add
+  figures to them, as shown below.</p><img alt=
+  "Cluttered compartment" src=
+  "../images/diagram_compartments_cluttered.png">
+
+  <p>The diagram toolbar includes some buttons to automatically
+  resize and reposition your figure elements:</p><img alt=
+  "Diagram toolbar positioning buttons" src=
+  "../images/diagram_toolbar_positioning_buttons.png">
+
+  <p>The Arrange button will reposition figures so they will not
+  overlap. If you select a figure within a compartment and then
+  select Arrange All, that figure and the others within the
+  compartment will be rearranged.</p>
+
+  <p>The Auto Size button will expand a parent figure as needed to
+  accommodate its children. Auto Size will also shrink a figure if
+  it has unused space.</p>
+
+  <div class="note">
+    <p>If you manually resize a figure with compartments,
+    collapsing a compartment will not result in a figure being
+    reduced in size as you might expect. Select the figure and then
+    enable Auto Size to have the figure shrink too.</p>
+  </div>
+
+  <p>After issuing Auto Size and Arrange All a few times you can
+  un-clutter your compartments:</p><img alt=
+  "Uncluttered compartment" src=
+  "../images/diagram_compartments_uncluttered.png">
+
+  <h3>Exporting diagrams as images</h3>
+
+  <p>Although not entirely obvious, you can save your diagram as an
+  image by right clicking anywhere on the diagram to bring up the
+  context menu and then selecting <b>File -&gt; Save As Image
+  File...</b>.</p>
+</body>
+</html>

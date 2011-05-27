@@ -1,0 +1,31 @@
+project : orbsvcslib, core, portableserver, dcps_bits {
+
+  requires    += exceptions
+
+  sharedname   = TAO_DdsDcps
+  dynamicflags = TAO_DDSDCPS_BUILD_DLL
+  libout       = $(DDS_ROOT)/lib
+  includes    += $(DDS_ROOT)
+  after       += DdsIDL
+
+  pch_header   = DCPS/DdsDcps_pch.h
+  pch_source   = DCPS/DdsDcps_pch.cpp
+
+  //The following is only to make the PCH work, client projects should not have
+  //this as an include path.
+  includes    += $(DDS_ROOT)/dds
+
+  Source_Files {
+    *.cpp
+    DCPS/*.cpp
+    DCPS/transport/framework/*.cpp
+  }
+
+  Header_Files {
+    DCPS/dcps_export.h
+  }
+
+  IDL_Files {
+  }
+
+}

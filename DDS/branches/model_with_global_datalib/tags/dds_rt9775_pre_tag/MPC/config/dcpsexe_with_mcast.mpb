@@ -1,0 +1,7 @@
+// -*- MPC -*-
+// $Id$
+
+project : orbsvcsexe, dcps {
+  libs        += SimpleMcast
+  after       += SimpleMcast
+}

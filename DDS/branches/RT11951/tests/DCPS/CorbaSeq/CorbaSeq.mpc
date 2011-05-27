@@ -1,0 +1,50 @@
+
+project(*Publisher) : dcpsexe_with_tcp {
+  requires += exceptions
+  exename   = publisher
+
+  TypeSupport_Files {
+    Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
+    Messenger2.idl >> Message2TypeSupport.idl Message2TypeSupportImpl.h Message2TypeSupportImpl.cpp
+  }
+
+  IDL_Files {
+    Messenger.idl
+    MessageTypeSupport.idl
+    Messenger2.idl
+    Message2TypeSupport.idl
+  }
+
+  Source_Files {
+    publisher.cpp
+    Writer.cpp
+    MessageTypeSupportImpl.cpp
+    Message2TypeSupportImpl.cpp
+  }
+}
+
+project(*Subscriber) : dcpsexe_with_tcp {
+  requires += exceptions
+  exename   = subscriber
+
+  TypeSupport_Files {
+    Messenger.idl >> MessageTypeSupport.idl MessageTypeSupportImpl.h MessageTypeSupportImpl.cpp
+    Messenger2.idl >> Message2TypeSupport.idl Message2TypeSupportImpl.h Message2TypeSupportImpl.cpp
+  }
+
+  IDL_Files {
+    Messenger.idl
+    MessageTypeSupport.idl
+    Messenger2.idl
+    Message2TypeSupport.idl
+  }
+
+  Source_Files {
+    subscriber.cpp
+    DataReaderListener.cpp
+    MessageTypeSupportImpl.cpp
+    Message2TypeSupportImpl.cpp
+  }
+}
+
+

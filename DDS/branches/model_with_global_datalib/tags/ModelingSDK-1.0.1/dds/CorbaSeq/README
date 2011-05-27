@@ -1,0 +1,5 @@
+NOTE:
+   These files are copies of tao/*Seq*.pidl files. They are used internally by DDS
+   to support the built in sequence.
+
+   Please DO NOT include them in your idl files.

@@ -1,0 +1,21 @@
+#include <tao/LongSeq.pidl>
+module Test {
+
+#pragma DCPS_DATA_TYPE "Test::Simple"
+#pragma DCPS_DATA_KEY "Test::Simple key"
+
+    typedef sequence<long> MyLongSeq; 
+    //struct MoreComplex {
+    //    string comment;
+    //    sequence<long> sl;
+    //};
+
+  struct Simple {
+    long   key;
+    long   count;
+    string text;
+    //CORBA::LongSeq ls; // type not supported by OpenDDS
+    //      SimpleC.cpp(106) : error C2665: '_dcps_max_marshaled_size' : none of the 14 overloads can convert parameter 1 from type 'const CORBA::LongSeq'
+    MyLongSeq ls;
+  };
+};

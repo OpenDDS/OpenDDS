@@ -1,0 +1,63 @@
+/*
+ * $Id$
+ *
+ * Copyright 2009 Object Computing, Inc.
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef TAO_DDS_DCPS_DATAWRITER_IDL
+#define TAO_DDS_DCPS_DATAWRITER_IDL
+
+#include "dds/DdsDcpsInfoUtils.idl"
+#include "dds/DdsDcpsInfrastructure.idl"
+#include "dds/DdsDcpsPublication.idl"
+
+module OpenDDS {
+  module DCPS {
+
+    struct ReaderAssociation {
+      OpenDDS::DCPS::TransportInterfaceInfo readerTransInfo;
+      OpenDDS::DCPS::RepoId     readerId;
+      ::DDS::SubscriberQos subQos;
+      ::DDS::DataReaderQos readerQos;
+    };
+
+    typedef sequence<ReaderAssociation> ReaderAssociationSeq;
+
+    typedef sequence<OpenDDS::DCPS::RepoId> ReaderIdSeq;
+
+    // This interface contains TAO specific interfaces
+    // related to a DDS::DataWriter servant.
+    // It is split out so the DDS::DataWriter interface can be local.
+    interface DataWriterRemote { //x : ::DDS::DataWriter {
+
+      // will tell transport and call on_publication_matched() 
+      oneway void add_associations(
+        in OpenDDS::DCPS::RepoId yourId,
+        in ReaderAssociationSeq readers
+        );
+
+      // will tell transport that associations are going away 
+      // The notify_lost flag true indicates the remove_association is invoked
+      // by the InfoRepo after it detected a lost reader. The InfoRepo detects
+      // the lost reader when the add_association/remove_association invocations
+      // on the reader object reference fail. The datawriter need notify the
+      // the DataWriterListener on_subscription_lost.
+      oneway void remove_associations(
+        in ReaderIdSeq readers,
+        in boolean notify_lost
+        );
+
+      // supporting DataWriterListener::on_offered_incompatible_qos()
+      // May get called even if add_associations() is not called.
+      oneway void update_incompatible_qos(
+        in OpenDDS::DCPS::IncompatibleQosStatus status
+        );
+
+    };
+  }; // module DDS
+}; // module OpenDDS
+
+#endif /* TAO_DDS_DCPS_DATAWRITER_IDL */

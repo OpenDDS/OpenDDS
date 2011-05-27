@@ -1,0 +1,5 @@
+project {
+  verbatim(gnuace, extension, 1) {
+    include $(DDS_ROOT)/rules.dds.GNU
+  }
+}

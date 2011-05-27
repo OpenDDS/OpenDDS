@@ -1,0 +1,87 @@
+#!/bin/bash -x
+
+PKG=$1
+if test x"$PKG" -eq x""
+then
+  PKG=pkg
+fi
+
+rm -rf $PKG
+
+mkdir -p $PKG/lib
+
+# Statically linked
+cp $DDS_ROOT/lib/libDCPSInfoRepoServ.so.1.2.1 $PKG/lib/libDCPSInfoRepoServ.so.1.2.1
+cp $DDS_ROOT/lib/libFederator.so.1.2.1        $PKG/lib/libFederator.so.1.2.1
+cp $DDS_ROOT/lib/libInfoRepoLib.so.1.2.1      $PKG/lib/libInfoRepoLib.so.1.2.1
+cp $DDS_ROOT/lib/libOpenDDS_Dcps.so.1.2.1     $PKG/lib/libOpenDDS_Dcps.so.1.2.1
+
+# For statically linked
+cp $DDS_ROOT/lib/libReliableMulticast.so.1.2.1     $PKG/lib/libReliableMulticast.so.1.2.1
+cp $DDS_ROOT/lib/libSimpleTcp.so.1.2.1             $PKG/lib/libSimpleTcp.so.1.2.1
+cp $DDS_ROOT/lib/libSimpleUnreliableDgram.so.1.2.1 $PKG/lib/libSimpleUnreliableDgram.so.1.2.1
+
+# For dynamic linking
+(cd $PKG/lib; ln -s libReliableMulticast.so.1.2.1     libReliableMulticast.so)
+(cd $PKG/lib; ln -s libSimpleTcp.so.1.2.1             libSimpleTcp.so)
+(cd $PKG/lib; ln -s libSimpleUnreliableDgram.so.1.2.1 libSimpleUnreliableDgram.so)
+
+# Statically linked
+cp $ACE_ROOT/lib/libACE.so.5.5a_p10                $PKG/lib/libACE.so.5.5a_p10
+cp $ACE_ROOT/lib/libTAO_AnyTypeCode.so.1.5a_p10    $PKG/lib/libTAO_AnyTypeCode.so.1.5a_p10
+cp $ACE_ROOT/lib/libTAO_ImR_Client.so.1.5a_p10     $PKG/lib/libTAO_ImR_Client.so.1.5a_p10
+cp $ACE_ROOT/lib/libTAO_IORTable.so.1.5a_p10       $PKG/lib/libTAO_IORTable.so.1.5a_p10
+cp $ACE_ROOT/lib/libTAO_PortableServer.so.1.5a_p10 $PKG/lib/libTAO_PortableServer.so.1.5a_p10
+cp $ACE_ROOT/lib/libTAO.so.1.5a_p10                $PKG/lib/libTAO.so.1.5a_p10
+cp $ACE_ROOT/lib/libTAO_Svc_Utils.so.1.5a_p10      $PKG/lib/libTAO_Svc_Utils.so.1.5a_p10
+
+# Dynamically linked
+cp $ACE_ROOT/lib/libTAO_Codeset.so               $PKG/lib/libTAO_Codeset.so
+cp $ACE_ROOT/lib/libTAO_PI.so                    $PKG/lib/libTAO_PI.so
+cp $ACE_ROOT/lib/libTAO_CodecFactory.so.1.5a_p10 $PKG/lib/libTAO_CodecFactory.so.1.5a_p10
+cp $ACE_ROOT/lib/libTAO_AnyTypeCode.so.1.5a_p10  $PKG/lib/libTAO_AnyTypeCode.so.1.5a_p10
+
+mkdir -p $PKG/bin/PerlDDS
+mkdir -p $PKG/bin/PerlACE
+
+# Perl modules
+cp $DDS_ROOT/bin/DDS_Run_Test.pm            $PKG/bin/DDS_Run_Test.pm
+cp $DDS_ROOT/bin/PerlDDS/ProcessFactory.pm  $PKG/bin/PerlDDS/ProcessFactory.pm
+cp $DDS_ROOT/bin/PerlDDS/Process.pm         $PKG/bin/PerlDDS/Process.pm
+
+cp $ACE_ROOT/bin/PerlACE/ConfigList.pm      $PKG/bin/PerlACE/ConfigList.pm
+cp $ACE_ROOT/bin/PerlACE/Process_Unix.pm    $PKG/bin/PerlACE/Process_Unix.pm
+cp $ACE_ROOT/bin/PerlACE/ProcessVX_Win32.pm $PKG/bin/PerlACE/ProcessVX_Win32.pm
+cp $ACE_ROOT/bin/PerlACE/TestTarget.pm      $PKG/bin/PerlACE/TestTarget.pm
+cp $ACE_ROOT/bin/PerlACE/MSProject.pm       $PKG/bin/PerlACE/MSProject.pm
+cp $ACE_ROOT/bin/PerlACE/Process_VMS.pm     $PKG/bin/PerlACE/Process_VMS.pm
+cp $ACE_ROOT/bin/PerlACE/Process_Win32.pm   $PKG/bin/PerlACE/Process_Win32.pm
+cp $ACE_ROOT/bin/PerlACE/ProcessLVRT.pm     $PKG/bin/PerlACE/ProcessLVRT.pm
+cp $ACE_ROOT/bin/PerlACE/ProcessVX.pm       $PKG/bin/PerlACE/ProcessVX.pm
+cp $ACE_ROOT/bin/PerlACE/Run_Test.pm        $PKG/bin/PerlACE/Run_Test.pm
+cp $ACE_ROOT/bin/PerlACE/Process.pm         $PKG/bin/PerlACE/Process.pm
+cp $ACE_ROOT/bin/PerlACE/ProcessVX_Unix.pm  $PKG/bin/PerlACE/ProcessVX_Unix.pm
+cp $ACE_ROOT/bin/PerlACE/TestTarget_LVRT.pm $PKG/bin/PerlACE/TestTarget_LVRT.pm
+
+# Executables
+cp $DDS_ROOT/bin/DCPSInfoRepo                                   $PKG/bin/DCPSInfoRepo
+cp $DDS_ROOT/bin/opendds_ir_ctl                                 $PKG/bin/opendds_ir_ctl
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/bin/testprocess $PKG/bin/testprocess
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/bin/run_test    $PKG/bin/run_test
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/bin/runcmd      $PKG/bin/runcmd
+
+mkdir -p $PKG/etc
+
+# Configuration
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/etc/svc.conf      $PKG/etc/svc.conf
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/etc/transport.ini $PKG/etc/transport.ini
+
+mkdir -p $PKG/tests
+
+# Test scenarios
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/scenario1.ini $PKG/tests/scenario1.ini
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/scenario1.ini $PKG/tests/scenario2.ini
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/scenario1.ini $PKG/tests/scenario2b.ini
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/scenario1.ini $PKG/tests/scenario3.ini
+cp $DDS_ROOT/performance-tests/DCPS/Distributed/tests/scenario1.ini $PKG/tests/scenario6.ini
+

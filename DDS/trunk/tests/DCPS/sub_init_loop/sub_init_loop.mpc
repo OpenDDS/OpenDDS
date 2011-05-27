@@ -1,0 +1,39 @@
+// $Id$
+
+project(*idl): dcps_test_lib {
+  idlflags      += -Wb,stub_export_include=SubInitLoop_export.h \
+                   -Wb,stub_export_macro=SubInitLoop_Export
+  dcps_ts_flags += -Wb,export_macro=SubInitLoop_Export
+  dynamicflags  += SUBINITLOOP_BUILD_DLL
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+}
+
+project(*Publisher): dcpsexe_with_tcp {
+  exename = publisher
+  libs   += *idl
+  after  += *idl
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    publisher.cpp
+    Writer.cpp
+  }
+}
+
+project(*Subscriber): dcpsexe_with_tcp {
+  exename = subscriber
+  libs   += *idl
+  after  += *idl
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    subscriber.cpp
+  }
+}

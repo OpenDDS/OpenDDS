@@ -1,0 +1,37 @@
+#if ! defined PTDEF_IDL
+#define PTDEF_IDL
+
+module Xyz {
+
+// No key in struct.
+#pragma DCPS_DATA_TYPE "Xyz::Pt128"
+#pragma DCPS_DATA_TYPE "Xyz::Pt512"
+#pragma DCPS_DATA_TYPE "Xyz::Pt2048"
+#pragma DCPS_DATA_TYPE "Xyz::Pt8192"
+
+  struct Pt128 {
+    long data_source;
+    long sequence_num;
+    sequence <float, 128> values;
+  };
+
+  struct Pt512 {
+    long data_source;
+    long sequence_num;
+    sequence <float, 512> values;
+  };
+
+  struct Pt2048 {
+    long data_source;
+    long sequence_num;
+    sequence <float, 2048> values;
+  };
+
+  struct Pt8192 {
+    long data_source;
+    long sequence_num;
+    sequence <float, 8192> values;
+  };
+};
+
+#endif /* PTDEF_IDL */

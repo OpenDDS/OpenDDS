@@ -1,0 +1,37 @@
+// *******************************************************************
+//
+// (c) Copyright 2006, Object Computing, Inc.
+// All Rights Reserved.
+//
+// *******************************************************************
+
+module TimeBase
+{
+  typedef unsigned long long TimeT;
+};
+
+module StockQuoter
+{
+  struct Quote {
+    string ticker;
+    string exchange;
+    string full_name;
+    double value;
+    TimeBase::TimeT timestamp;
+  };
+
+#pragma keylist Quote
+
+  enum ExchangeEventType { TRADING_OPENED, 
+                           TRADING_CLOSED,
+                           TRADING_SUSPENDED, 
+                           TRADING_RESUMED }; 
+  struct ExchangeEvent {
+    string exchange;
+    ExchangeEventType event;
+    TimeBase::TimeT timestamp;
+  };
+
+#pragma keylist ExchangeEvent
+};
+

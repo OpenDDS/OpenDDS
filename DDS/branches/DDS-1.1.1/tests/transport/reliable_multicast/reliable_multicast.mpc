@@ -1,0 +1,11 @@
+// -*- MPC -*-
+//
+// $Id$
+
+project : aceexe, coverage_optional {
+  exename = unittest
+  libs  += ReliableMulticast
+  after += ReliableMulticast
+  includes += $(DDS_ROOT)
+  libpaths += $(DDS_ROOT)/lib
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=UTF-8">
+
+  <title>ENTITY_FACTORY</title>
+  <link rel="stylesheet" type="text/css" href="QoS.css">
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+
+<H4 CLASS="Head3">
+<A NAME="pgfId-258450"></A>ENTITY_FACTORY</H4>
+<UL>
+<LI CLASS="BodyNoLead">
+<A NAME="pgfId-258452"></A>The <A NAME="marker-258451"></A>ENTITY_FACTORY policy controls whether entities are automatically enabled when they are created. Below is the IDL related to the Entity Factory QoS policy:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-258587"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-258558"></A>struct EntityFactoryQosPolicy {</P>
+<P CLASS="Code">
+<A NAME="pgfId-258559"></A>  boolean autoenable_created_entities;</P>
+<P CLASS="Code">
+<A NAME="pgfId-258560"></A>};</P>
+<P CLASS="Code">
+<A NAME="pgfId-258542"></A>&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-258576"></A>This policy can be applied to entities that serve as factories for other entities and controls whether or not entities created by those factories are automatically enabled upon creation. This policy can be applied to the <A NAME="marker-258874"></A>domain participant factory (as a factory for domain participants), <A NAME="marker-258883"></A>domain participant (as a factory for publishers, subscribers, and topics), <A NAME="marker-258888"></A>publisher (as a factory for data writers), or <A NAME="marker-258893"></A>subscriber (as a factory for data readers). The default value for the <EM CLASS="Code">
+autoenable_created_entities</EM>
+ member is <EM CLASS="Code">
+true</EM>
+, indicating that entities are automatically enabled when they are created. Applications that wish to explicitly enable entities some time after they are created should set the value of the <EM CLASS="Code">
+autoenable_created_entities</EM>
+ member of this policy to <EM CLASS="Code">
+false</EM>
+ and apply the policy to the appropriate factory entities. The application must then manually enable the entity by calling the entity’s <A NAME="marker-258898"></A><EM CLASS="Code">
+enable()</EM>
+ operation.</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-258845"></A>The value of this policy may be changed at any time. Changes to this policy affect only entities created after the change.</LI>
+</UL>
+
+</body>
+</html>
