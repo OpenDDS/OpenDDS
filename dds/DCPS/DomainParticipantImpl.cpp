@@ -85,8 +85,7 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
       OpenDDS::DCPS::RepoIdConverter(this->dp_id_).participantId(),
       OpenDDS::DCPS::KIND_PUBLISHER)
 {
-  DDS::ReturnCode_t ret;
-  ret = this->set_listener(a_listener, mask);
+  (void) this->set_listener(a_listener, mask);
   monitor_ = TheServiceParticipant->monitor_factory_->create_dp_monitor(this);
 }
 

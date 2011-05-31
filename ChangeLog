@@ -1,3 +1,12 @@
+Tue May 31 23:24:43 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/InstanceState.cpp:
+
+          RT14752: removed unused variables to avoid compiler warnings
+                   from gcc 4.6.  Thanks to Johnny Willemsen (jwillemsen
+                   at remedy dot nl) for reporting this.
+
 Tue May 31 20:04:00 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
@@ -8,8 +17,8 @@ Tue May 31 20:04:00 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tools/monitor/MonitorDataStorage.inl:
 
-          Don't generate entries for a transport with a key of zero.  This 
-          is really a nil-reference.  In addition, don't show QoS data 
+          Don't generate entries for a transport with a key of zero.  This
+          is really a nil-reference.  In addition, don't show QoS data
           when it is not found.  There are still additional QoS-related
           problems that prevent the proper display of this data, but this
           change prevents the display of uninitialized data.
