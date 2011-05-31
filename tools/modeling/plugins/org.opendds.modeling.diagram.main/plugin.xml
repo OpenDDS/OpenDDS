@@ -99,18 +99,7 @@
             </ElementType>
          </ViewId>
       </GlobalActionHandlerProvider>
-      <GlobalActionHandlerProvider
-            class="org.eclipse.gmf.runtime.diagram.ui.render.providers.DiagramUIRenderGlobalActionHandlerProvider"
-            id="OpenDDSRender">
-         <Priority name="Lowest"/>
-         <ViewId id="org.opendds.modeling.diagram.main.part.OpenDDSDiagramEditorID">
-            <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
-               <GlobalActionId actionId="cut"/>
-               <GlobalActionId actionId="copy"/>
-               <GlobalActionId actionId="paste"/>
-            </ElementType>
-         </ViewId>
-      </GlobalActionHandlerProvider>
+      <!-- Copy and paste disabled because of issues found in GMF 2.2.2 -->
    </extension>
 
 
