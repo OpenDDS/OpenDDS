@@ -2,17 +2,17 @@ Tue May 31 12:43:14 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/xpt/plugin/plugin.xpt:
 
-	  Modify menu template to not enable cut, copy and paste of figure elements
-	  because copy and paste are broken in GMF 2.2.2 (see
-	  http://esalagea.wordpress.com/2011/04/13/lets-solve-once-for-all-the-gmf-copy-paste-problem-and-then-forget-about-it/
-	  for more information).
+          Modify menu template to not enable cut, copy and paste of figure elements
+          because copy and paste are broken in GMF 2.2.2 (see
+          http://esalagea.wordpress.com/2011/04/13/lets-solve-once-for-all-the-gmf-copy-paste-problem-and-then-forget-about-it/
+          for more information).
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
         * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:
         * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
 
-	  Updates due to addition of AROUND template in plugin.xpt.
+          Updates due to addition of AROUND template in plugin.xpt.
 
 Fri May 27 20:00:24 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
