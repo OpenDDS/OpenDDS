@@ -1,3 +1,19 @@
+Tue May 31 20:04:00 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Move the point where the initial monitor message is published.
+          The message was being sent before the GUID was initialized.
+
+        * tools/monitor/MonitorDataStorage.inl:
+
+          Don't generate entries for a transport with a key of zero.  This 
+          is really a nil-reference.  In addition, don't show QoS data 
+          when it is not found.  There are still additional QoS-related
+          problems that prevent the proper display of this data, but this
+          change prevents the display of uninitialized data.
+
 Tue May 31 12:43:14 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/xpt/plugin/plugin.xpt:

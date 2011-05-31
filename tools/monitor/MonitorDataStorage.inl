@@ -187,8 +187,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::DomainParticipantReport>(
 
   // QOS
   DDS::ParticipantBuiltinTopicData qosData;
-  this->model_->getBuiltinTopicData( data.dp_id, qosData);
-  this->manageParticipantQos( node, qosData, layoutChanged, dataChanged);
+  if (this->model_->getBuiltinTopicData( data.dp_id, qosData)) {
+    this->manageParticipantQos( node, qosData, layoutChanged, dataChanged);
+  }
 
   // Domain Id value.
   QString label( QObject::tr( "Domain Id"));
@@ -271,8 +272,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::TopicReport>(
 
   // QOS
   DDS::TopicBuiltinTopicData qosData;
-  this->model_->getBuiltinTopicData( data.topic_id, qosData);
-  this->manageTopicQos( node, qosData, layoutChanged, dataChanged);
+  if (this->model_->getBuiltinTopicData( data.topic_id, qosData)) {
+    this->manageTopicQos( node, qosData, layoutChanged, dataChanged);
+  }
 
   // Topic name value.
   TreeNode* nameNode = 0;
@@ -357,7 +359,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::PublisherReport>(
 
   // TRANSPORT
   create = true;
-  this->manageTransportLink( node, data.transport_id, create);
+  if (data.transport_id != 0) {
+    this->manageTransportLink( node, data.transport_id, create);
+  }
   layoutChanged |= create;
 
   // WRITERS
@@ -431,7 +435,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::SubscriberReport>(
 
   // TRANSPORT
   create = true;
-  this->manageTransportLink( node, data.transport_id, create);
+  if (data.transport_id != 0) {
+    this->manageTransportLink( node, data.transport_id, create);
+  }
   layoutChanged |= create;
 
   // READERS
@@ -513,8 +519,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataWriterReport>(
 
   // QOS
   DDS::PublicationBuiltinTopicData qosData;
-  this->model_->getBuiltinTopicData( data.dw_id, qosData);
-  this->managePublicationQos( node, qosData, layoutChanged, dataChanged);
+  if (this->model_->getBuiltinTopicData( data.dw_id, qosData)) {
+    this->managePublicationQos( node, qosData, layoutChanged, dataChanged);
+  }
 
   // TOPIC
   create = true;
@@ -752,8 +759,9 @@ MonitorDataStorage::update< OpenDDS::DCPS::DataReaderReport>(
 
   // QOS
   DDS::SubscriptionBuiltinTopicData qosData;
-  this->model_->getBuiltinTopicData( data.dr_id, qosData);
-  this->manageSubscriptionQos( node, qosData, layoutChanged, dataChanged);
+  if (this->model_->getBuiltinTopicData( data.dr_id, qosData)) {
+    this->manageSubscriptionQos( node, qosData, layoutChanged, dataChanged);
+  }
 
   // TOPIC
   create = true;

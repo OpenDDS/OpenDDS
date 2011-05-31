@@ -1464,10 +1464,6 @@ ACE_THROW_SPEC((CORBA::SystemException))
                          this->last_deadline_missed_total_count_));
   }
 
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-
   this->set_enabled();
 
   DDS::ReturnCode_t const writer_enabled_result =
@@ -1475,6 +1471,10 @@ ACE_THROW_SPEC((CORBA::SystemException))
                                        dw_local_objref_.in(),
                                        topic_name_.in(),
                                        topic_id_);
+
+  if (this->monitor_) {
+    this->monitor_->report();
+  }
 
   // Move cached data from the durability cache to the unsent data
   // queue.

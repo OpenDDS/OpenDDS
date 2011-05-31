@@ -1176,21 +1176,24 @@ ACE_THROW_SPEC((CORBA::SystemException))
                          this->last_deadline_missed_total_count_));
   }
 
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-
   this->set_enabled();
 
   if (topic_servant_) {
     CORBA::String_var name = topic_servant_->get_name();
 
-    return subscriber_servant_->reader_enabled(
+    DDS::ReturnCode_t return_value;
+    return_value = subscriber_servant_->reader_enabled(
              dr_remote_objref_.in(),
              dr_local_objref_.in(),
              this,
              name.in(),
              topic_servant_->get_id());
+
+    if (this->monitor_) {
+      this->monitor_->report();
+    }
+
+    return return_value;
   } else {
     return DDS::RETCODE_OK;
   }
