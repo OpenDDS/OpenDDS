@@ -1,3 +1,42 @@
+Wed Jun  1 15:37:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+          In anticipation of publishing the schemas for model files,
+          enable generation of schema files.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDSXMI.xsd:
+
+          The schema file for .opendds files.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/ApplicationXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/CoreXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DCPSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DomainXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/EnumerationsXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/QoSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/TopicsXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/TypesXMI.xsd:
+
+          Schema files imported by OpenDDSXMI.xsd.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/XMI.xsd:
+
+          The schema for XMI used by EMF. This is identical to
+          platform:/plugin/org.eclipse.emf.ecore/model/XMI.xsd except for
+          standalone="no" in the header.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+
+          Update to track the change in OpenDDS.genmodel.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model:
+
+          Ignore the .xsd2ecore files that are generated along with the
+          .xsd files.
+
 Tue May 31 23:24:43 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:
