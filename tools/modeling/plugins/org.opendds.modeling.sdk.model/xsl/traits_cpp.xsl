@@ -73,6 +73,13 @@
                 '&quot; with no offset',
                 $newline)"/>
     </xsl:when>
+    <xsl:when test="not(transport)">
+      <xsl:value-of select="concat(
+                '   // Skipping generation for instance &quot;',
+                $Instname,
+                '&quot; with no transport',
+                $newline)"/>
+    </xsl:when>
     <xsl:otherwise>
       <xsl:variable name="classname" select="concat($Instname, $modelname, 'Traits')"/>
       <xsl:value-of select="concat('void ', $classname)"/>

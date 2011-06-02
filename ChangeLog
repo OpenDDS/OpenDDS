@@ -1,3 +1,10 @@
+Thu Jun  2 03:20:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          Don't output a switch with no cases (warning) for incomplete
+          transports.
+
 Wed Jun  1 15:37:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
