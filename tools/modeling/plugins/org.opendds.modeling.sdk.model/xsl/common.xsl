@@ -31,6 +31,9 @@
     </xsl:when>
     <xsl:when test="name($target) = 'external-refs'">
     </xsl:when>
+    <xsl:when test="$target/@scope">
+      <xsl:value-of select="$target/@scope"/>
+    </xsl:when>
     <xsl:when test="name($target) = 'libs'">
       <xsl:call-template name="scopename">
         <xsl:with-param name="target" select="$target/.."/>
@@ -62,7 +65,8 @@
 <xsl:template name="type-enum">
   <xsl:param name="type" select="."/>
   <xsl:call-template name="normalize-identifier">
-    <xsl:with-param name="identifier" select="$type/@name"/>
+    <xsl:with-param name="identifier" 
+                    select="concat($type/@scope, $type/@name)"/>
   </xsl:call-template>
 </xsl:template>
 

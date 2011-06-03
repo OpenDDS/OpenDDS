@@ -1,23 +1,23 @@
-Fri Jun  3 20:35:05 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+Fri Jun  3 21:40:54 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
-        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/error.gif:
-        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/obj16/warning.gif:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/common.xsl:
 
-          A couple of handy icons to use for visual indication that something is wrong
-          with an input field.
+          Use scope in type-name, if available.
+          Use scope in scopename, if available.
 
-        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorTab.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
 
-          Fixing a problem caused by not cleansing user input. Any
-          leading and/or trailing spaces must not be considered as part 
-          of the file name, otherwice a missing file to pop up shows up.
-          Improved user feedback on input errors due to non-existing model file,
-          or incorrect destination directory. Added a visual warning when the
-          chosen destination does not exist yet. A combination of visual clues
-          is used: a) errorneous input changes the text color to red; 
-          b) generation buttons are disabled when model file is not accessible, 
-          or if the target directory is invalid; c) if the target directory path
-          does not exist, the target dir label is decorated with info-level icon.
+          Comment.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/preprocess.xsl:
+          Separate scope from name in external-ref type.
+
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.codegen:
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.mpc:
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.mwc:
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.opendds:
+
+          Refer to external type with conflicting module name.
 
 Thu Jun  2 03:20:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 

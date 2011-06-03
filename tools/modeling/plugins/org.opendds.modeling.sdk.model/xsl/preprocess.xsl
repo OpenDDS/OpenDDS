@@ -200,15 +200,12 @@
           <xsl:attribute name="model">
             <xsl:call-template name="modelname"/>
           </xsl:attribute>
-          <xsl:if test="@name">
-            <xsl:variable name="scopename">
+          <xsl:if test="name(.) = 'types'">
+            <xsl:attribute name="scope">
               <xsl:call-template name="scopename"/>
-            </xsl:variable>
-            <xsl:attribute name="name">
-              <xsl:value-of select="concat($scopename, @name)"/>
             </xsl:attribute>
           </xsl:if>
-          <xsl:apply-templates select="@*[name() != 'name'] | node()"/>
+          <xsl:apply-templates select="@* | node()"/>
         </xsl:copy>
       </xsl:for-each>
     </xsl:if>

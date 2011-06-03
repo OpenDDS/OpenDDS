@@ -99,5 +99,10 @@
       </transport>
     </instance>
   </instances>
-  <searchPaths/>
+  <searchPaths>
+    <searchLocation>
+      <variable value="DDS_ROOT"/>
+      <path value="tools/modeling/tests/MessengerMixed"/>
+    </searchLocation>
+  </searchPaths>
 </generator:CodeGen>

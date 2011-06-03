@@ -429,7 +429,7 @@
   <xsl:value-of select="concat(';',$newline)"/>
 </xsl:template>
 
-<!-- Determine the name of a type -->
+<!-- Determine the name of a type with respect to a referrer -->
 <xsl:template name="typename">
   <xsl:param name="target"/>
   <xsl:param name="referrer"/>
