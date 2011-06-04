@@ -21,6 +21,11 @@ cd $DDS_ROOT/tools/modeling/features/org.opendds.modeling.site
 rm content.jar artifacts.jar   # these are for an older Eclipse site format
 zip -r opendds_modeling_site . -x README.txt .svn .project
 
+NOTE: On an Ubuntu 10.04 using zip 3.0 (built with gcc 4.4), I needed to
+      do the following to zip the archive:
+
+  bash> zip -r opendds_modeling_site . -x README.txt .svn/\* web/.svn/\* .project
+
 5. Update the opendds.org web site.  Run the following commands with
 $WEBSITE replaced by the root of the opendds.org subversion checkout.
 tar --exclude=README.txt --exclude='.*' -ch * | tar -C $WEBSITE/modeling/eclipse -x
