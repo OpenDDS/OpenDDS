@@ -781,6 +781,12 @@ void
 OpenDDS::DCPS::TransportImpl::dump(ostream& os)
 {
   os << TransportConfiguration::formatNameForDump(ACE_TEXT("id"))
-     << get_transport_id_description() << std::endl;
-  this->config_->dump(os);
+     << get_transport_id_description();
+
+  if (this->config_.is_nil()) {
+    os << " (not configured)" << std::endl;
+  } else {
+    os << std::endl;
+    this->config_->dump(os);
+  }
 }

@@ -1,11 +1,22 @@
+Mon Jun  6 21:24:45 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Don't try to dump the config to the log if there's no config.
+          Thanks to levent sevil <levent dot sevil at gmail dot com>.
+
+        * tests/DCPS/KeyTest:
+
+          svn property change only
+
 Mon Jun  6 21:08:34 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/tests/DataLibRef/DataLibRef.opendds:
         * tools/modeling/tests/MessengerMixed/MessengerMixed.opendds:
         * tools/modeling/tests/MessengerMulti/MessengerMulti.opendds:
         * tools/modeling/tests/MessengerSplit/MessengerSplit.opendds:
-        
-          Fixed problem with duplicated xmi:id values (which prevents XML Schema 
+
+          Fixed problem with duplicated xmi:id values (which prevents XML Schema
           validation)
 
 Mon Jun  6 19:19:03 UTC 2011  Don Hudson  <hudsond@ociweb.com>
