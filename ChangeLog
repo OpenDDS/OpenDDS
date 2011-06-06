@@ -1,3 +1,9 @@
+Mon Jun  6 15:17:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.codegen:
+
+          Add model to codegen paths.
+
 Sat Jun  4 04:42:53 UTC 2011  Mike Martinez  <martinez_m@ociweb.com>
 
         * tools/modeling/features/org.opendds.modeling.site/README.txt:

@@ -102,7 +102,7 @@
   <searchPaths>
     <searchLocation>
       <variable value="DDS_ROOT"/>
-      <path value="tools/modeling/tests/MessengerMixed"/>
+      <path value="tools/modeling/tests/MessengerMixed/model"/>
     </searchLocation>
   </searchPaths>
 </generator:CodeGen>
