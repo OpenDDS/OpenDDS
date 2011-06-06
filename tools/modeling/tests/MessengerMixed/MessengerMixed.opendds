@@ -16,7 +16,7 @@
       <datatype href="MessengerTypesMixed.opendds#_5STIgPDuEd-I4rwicuuPOw"/>
     </topicDescriptions>
     <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw2" name="Movie Discussion Responses" datatype="_5STIgPDuEd-I4rwicuuPOw27"/>
-    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw2" name="Movie Discussion Replay" datatype="_H1e6wB0FEeC07OZrGTNj1A"/>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw3" name="Movie Discussion Replay" datatype="_H1e6wB0FEeC07OZrGTNj1A"/>
   </libs>
   <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw7" name="data1">
     <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw27" name="Response" isDcpsDataType="true">

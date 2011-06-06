@@ -1,3 +1,13 @@
+Mon Jun  6 21:08:34 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/tests/DataLibRef/DataLibRef.opendds:
+        * tools/modeling/tests/MessengerMixed/MessengerMixed.opendds:
+        * tools/modeling/tests/MessengerMulti/MessengerMulti.opendds:
+        * tools/modeling/tests/MessengerSplit/MessengerSplit.opendds:
+        
+          Fixed problem with duplicated xmi:id values (which prevents XML Schema 
+          validation)
+
 Mon Jun  6 19:19:03 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
         * tools/modeling/codegen/model/Service_T.cpp:

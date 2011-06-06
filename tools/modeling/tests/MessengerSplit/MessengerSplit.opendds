@@ -18,7 +18,7 @@
     <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw2" name="Movie Discussion Responses">
       <datatype href="MessengerTypes.opendds#_5STIgPDuEd-I4rwicuuPOw2"/>
     </topicDescriptions>
-    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw2" name="Movie Discussion Replay">
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw3" name="Movie Discussion Replay">
       <datatype href="MessengerTypes.opendds#_5STIgPDuEd-I4rwicuuPOw"/>
     </topicDescriptions>
   </libs>
