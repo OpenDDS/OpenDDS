@@ -194,7 +194,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createContentFilteredTopic(
         domain_participant->create_contentfilteredtopic(topicName,
                                                         related_topic,
                                                         filter_expression,
-                                                        StringSeq());
+                                                        DDS::StringSeq());
 }
 
 template< typename ModelName, class InstanceTraits>
@@ -220,7 +220,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createMultiTopic(
         domain_participant->create_multitopic(topicName,
                                               this->modelData_.typeName(type),
                                               topicExpression,
-                                              StringSeq());
+                                              DDS::StringSeq());
 }
 
 template< typename ModelName, class InstanceTraits>

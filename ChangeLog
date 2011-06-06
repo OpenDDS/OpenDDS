@@ -1,3 +1,13 @@
+Mon Jun  6 19:19:03 UTC 2011  Don Hudson  <hudsond@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Changed calls to create_contentfilteredtopic() and
+          create_multitopic() to qualify StringSeq() with DDS:: as there is
+          an OpenDDS::DCPS::StringSeq() which was causing the Modeling SDK
+          generated code to not compile when the monitor support was included
+          (at least under vc9).
+
 Mon Jun  6 15:17:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/ModuleNameConflict/ModuleNameConflict.codegen:
