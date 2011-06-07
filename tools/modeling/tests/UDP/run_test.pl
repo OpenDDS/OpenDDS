@@ -14,9 +14,9 @@ use PerlDDS::Run_Test;
 $status = 0;
 $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
-$opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
+$opts = ''; 
 $repo_bit_opt = $opts;
-$udp_opts = $opts . ($use_svc_config ? " -ORBSvcConf udp.conf" : '') . " -t udp";
+$udp_opts = '';
 
 $pub_opts = "$udp_opts -ORBDebugLevel 10 -ORBLogFile publisher.log -DCPSDebugLevel 10";
 $sub_opts = "$udp_opts -DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile subscriber.log -DCPSDebugLevel 10";

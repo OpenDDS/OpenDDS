@@ -22,6 +22,12 @@
 <xsl:variable name="model" select="document(/generator:CodeGen/source/@name)/opendds:OpenDDSModel"/>
 <xsl:variable name="modelname" select="$model/@name"/>
 <xsl:variable name="instances" select="//instance"/>
+<xsl:variable name="tcp-transport-enum" 
+            select="'OpenDDS::Model::Transport::Type::tcp'"/>
+<xsl:variable name="multicast-transport-enum"
+            select="'OpenDDS::Model::Transport::Type::multicast'"/>
+<xsl:variable name="udp-transport-enum"
+            select="'OpenDDS::Model::Transport::Type::udp'"/>
 
 <!-- process the entire genfile document to produce the C++ code. -->
 <xsl:template match="/">
@@ -33,6 +39,8 @@
 #include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
 #include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
 #include "dds/DCPS/transport/udp/UdpConfiguration.h"
+#include &lt;model/TransportDirectives.h&gt;
+
 #include &lt;stdexcept&gt;
 </xsl:text>
   <xsl:apply-templates select="$model"/>
@@ -120,6 +128,7 @@
 
   <xsl:variable name="label" select="../transportOffset/@value + @transportIndex"/>
   <xsl:value-of select="concat('      case ', $label, ':', $newline)"/>
+  <xsl:call-template name="loadTransportLibraries"/>
   <xsl:value-of select="concat('        transport_type = ACE_TEXT(&quot;', $type, '&quot;);', $newline)"/>
   <xsl:text>        config = TheTransportFactory->create_configuration(id, transport_type);
 </xsl:text>
@@ -234,6 +243,41 @@
   </xsl:choose>
 </xsl:template>
 
+<xsl:template name="loadTransportLibraries">
+  <xsl:variable name="type-enum">
+    <xsl:call-template name="transport-type-enum"/>
+  </xsl:variable>
+  <!-- if its not a TCP transport, load it anyway for BIT -->
+  <xsl:if test="$type-enum != $tcp-transport-enum">
+    <xsl:text>#if !defined (DDS_HAS_MINIMUM_BIT)
+        if (TheServiceParticipant->get_BIT()) {
+</xsl:text>
+    <xsl:value-of select="concat('          loadTransportLibraryIfNeeded(',
+                                 $tcp-transport-enum, ');', $newline)"/>
+    <xsl:text>        }
+#endif
+</xsl:text>
+  </xsl:if>
+  <xsl:value-of select="concat('        loadTransportLibraryIfNeeded(',
+                               $type-enum, ');', $newline)"/>
+</xsl:template>
+
+<xsl:template name="transport-type-enum">
+  <xsl:choose>
+    <xsl:when test="TCPTransport">
+      <xsl:value-of select="$tcp-transport-enum"/>
+    </xsl:when>
+    <xsl:when test="MulticastTransport">
+      <xsl:value-of select="$multicast-transport-enum"/>
+    </xsl:when>
+    <xsl:when test="UDPTransport">
+      <xsl:value-of select="$udp-transport-enum"/>
+    </xsl:when>
+    <xsl:when test="*">
+      <xsl:message>OpenDDS::Model::Transport::Type::unknown</xsl:message>
+    </xsl:when>
+  </xsl:choose>
+</xsl:template>
 <!-- Handle string values with and without quotes -->
 <xsl:template name="str-value">
   <xsl:param name="value" select="@value"/>

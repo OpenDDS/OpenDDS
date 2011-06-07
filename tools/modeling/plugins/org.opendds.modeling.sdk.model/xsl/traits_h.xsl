@@ -34,6 +34,9 @@
   <xsl:value-of select="concat('#ifndef ', $MODELNAME, '_TRAITS_H', $newline)"/>
   <xsl:value-of select="concat('#define ', $MODELNAME, '_TRAITS_H', $newline)"/>
   <xsl:value-of select="concat('#include &quot;', $modelname, '_T.h&quot;', $newline)"/>
+  <xsl:text>#include &lt;model/TransportDirectives.h&gt;
+
+</xsl:text>
 
   <xsl:apply-templates select="$model"/>
 <xsl:text>
@@ -94,10 +97,18 @@
       <!-- output struct declaration -->
       <xsl:value-of select="concat($newline,
         '  struct ', $export, $structname, 
-        ' : OpenDDS::Model::DefaultInstanceTraits {', $newline,
-        '    enum { transport_key_base = ', 
-        $instance-offset, '};', $newline,
-        '    void transport_config(OpenDDS::DCPS::TransportIdType id);', $newline,
+        ' : OpenDDS::Model::DefaultInstanceTraits {', $newline)"/>
+      <xsl:value-of select="concat('    enum { transport_key_base = ', 
+        $instance-offset, '};', $newline)"/>
+      <xsl:value-of select="concat(
+        '    void transport_config(OpenDDS::DCPS::TransportIdType id);', 
+        $newline)"/>
+      <xsl:value-of select="concat(
+        '    virtual void loadTransportLibraryIfNeeded(', $newline,
+        '                    ',
+        'OpenDDS::Model::Transport::Type::Values transport_type) = 0;',
+        $newline)"/>
+      <xsl:value-of select="concat(
         '  };', $newline
       )"/>
 

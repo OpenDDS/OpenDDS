@@ -12,6 +12,7 @@
 #include "CopyQos.h"
 #include "Entities.h"
 #include "DefaultInstanceTraits.h"
+#include "TransportDirectives.h"
 #include "dds/DdsDcpsC.h"
 #include "dds/DCPS/Service_Participant.h"
 
@@ -85,6 +86,10 @@ namespace OpenDDS { namespace Model {
              typename DataReaders::Values reader
            );
       ///}
+
+      /// @brief load a transport libray
+      virtual void loadTransportLibraryIfNeeded(
+             typename Transport::Type::Values transport_type);
 
       ///{ @name Delegate Callbacks
       virtual void copyPublicationQos(

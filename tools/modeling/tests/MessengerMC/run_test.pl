@@ -14,17 +14,14 @@ use PerlDDS::Run_Test;
 $status = 0;
 $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
-$opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
+$opts = "";
 $repo_bit_opt = $opts;
-$mc_opts = $opts . ($use_svc_config ? " -ORBSvcConf multicast.conf" : '') . " -t multicast";
 
 unlink "fs_signal_1";
 unlink "fs_signal_2";
 
-$pub_opts = "$mc_opts -DCPSTransportDebugLevel 6 -ORBVerboseLogging 1 -ORBDebugLevel 10 -ORBLogFile publisher.log -DCPSDebugLevel 10";
-$sub_opts = "$mc_opts -DCPSTransportDebugLevel 6 -ORBVerboseLogging 1 -ORBDebugLevel 10 -ORBLogFile subscriber.log -DCPSDebugLevel 10";
-# $pub_opts = "$mc_opts -ORBVerboseLogging 1 -ORBDebugLevel 10 -ORBLogFile publisher.log -DCPSDebugLevel 10";
-# $sub_opts = "$mc_opts -ORBVerboseLogging 1 -ORBDebugLevel 10 -ORBLogFile subscriber.log -DCPSDebugLevel 10";
+$pub_opts = "-DCPSTransportDebugLevel 6 -ORBVerboseLogging 1 -ORBDebugLevel 10 -ORBLogFile publisher.log -DCPSDebugLevel 10";
+$sub_opts = "-DCPSTransportDebugLevel 6 -ORBVerboseLogging 1 -ORBDebugLevel 10 -ORBLogFile subscriber.log -DCPSDebugLevel 10";
 
 $dcpsrepo_ior = "repo.ior";
 

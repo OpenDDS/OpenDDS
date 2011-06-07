@@ -1,3 +1,31 @@
+Tue Jun  7 19:51:46 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          implement loadTransportLibraryIfNeeded(), processing required
+          directives.
+
+        * tools/modeling/codegen/model/TransportDirectives.h:
+        * tools/modeling/codegen/model/TransportDirectives.cpp:
+
+          added files to hold enums and literal directives
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          invoke loadTransportLibraryIfNeeded() to load transport
+          libraries.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_h.xsl:
+
+          added loadTransportLibraryIfNeeded() abstract method.
+
+        * tools/modeling/tests/UDP/run_test.pl:
+        * tools/modeling/tests/Messenger/run_test.pl:
+        * tools/modeling/tests/MessengerMC/run_test.pl:
+
+          remove -ORBSvcConfig command line args
+
 Tue Jun  7 15:57:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/tests/ModuleNameConflict/run_test.pl:

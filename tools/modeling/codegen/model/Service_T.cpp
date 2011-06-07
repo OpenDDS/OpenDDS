@@ -1,6 +1,7 @@
 
 #include "Service_T.h"
 #include "Application.h"
+#include <ace/Log_Msg.h>
 
 template< typename ModelName, class InstanceTraits>
 inline
@@ -233,11 +234,11 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createPublisher(
   typename Participants::Values participant = this->modelData_.participant( publisher);
   OpenDDS::DCPS::TransportIdType transport = this->modelData_.transport( publisher);
 
+  this->transport_config(transport + this->transport_key_base);
+
   if( !this->participants_[ participant]) {
     this->createParticipant( participant);
   }
-
-  this->transport_config(transport + this->transport_key_base);
 
   this->publishers_[ publisher] = this->delegate_.createPublisher(
     this->participants_[ participant],
@@ -257,11 +258,11 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscriber(
   typename Participants::Values participant = this->modelData_.participant( subscriber);
   OpenDDS::DCPS::TransportIdType transport = this->modelData_.transport( subscriber);
 
+  this->transport_config(transport + this->transport_key_base);
+
   if( !this->participants_[ participant]) {
     this->createParticipant( participant);
   }
-
-  this->transport_config(transport + this->transport_key_base);
 
   this->subscribers_[ subscriber] = this->delegate_.createSubscriber(
     this->participants_[ participant],
@@ -324,6 +325,42 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscription( typenam
   );
 }
 
+template< typename ModelName, class InstanceTraits>
+inline 
+void 
+OpenDDS::Model::Service< ModelName, InstanceTraits>::loadTransportLibraryIfNeeded(
+  typename Transport::Type::Values transport_type
+)
+{
+  const ACE_TCHAR *svcName; 
+  const ACE_TCHAR *svcConfDir;
+
+  if (transport_type == Transport::Type::tcp)
+  {
+    svcName    = OpenDDS::Model::Transport::Tcp::svcName;
+    svcConfDir = OpenDDS::Model::Transport::Tcp::svcConfDir;
+  } else if (transport_type == Transport::Type::udp) {
+    svcName    = OpenDDS::Model::Transport::Udp::svcName;
+    svcConfDir = OpenDDS::Model::Transport::Udp::svcConfDir;
+  } else if (transport_type == Transport::Type::multicast) {
+    svcName    = OpenDDS::Model::Transport::Multicast::svcName;
+    svcConfDir = OpenDDS::Model::Transport::Multicast::svcConfDir;
+  } else {
+    throw std::runtime_error("unknown transport type");
+  }
+
+  ACE_Service_Gestalt *asg = ACE_Service_Config::current();
+
+  if (asg->find(svcName) == -1 /*not found*/) {
+    int errors = ACE_Service_Config::process_directive(svcConfDir);
+    if (errors) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("Had %d errors processing directive for %s\n"),
+                 errors, svcName));
+    }
+  }
+
+}
 
 template< typename ModelName, class InstanceTraits>
 inline

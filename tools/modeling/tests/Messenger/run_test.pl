@@ -14,7 +14,7 @@ use PerlDDS::Run_Test;
 $status = 0;
 $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
-$opts = $use_svc_config ? "-ORBSvcConf tcp.conf" : '';
+$opts = $use_svc_config ? '' : '';
 $repo_bit_opt = $opts;
 
 $pub_opts = "$opts -ORBDebugLevel 10 -ORBLogFile publisher.log -DCPSDebugLevel 10";
