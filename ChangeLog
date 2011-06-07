@@ -1,3 +1,9 @@
+Tue Jun  7 15:57:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/tests/ModuleNameConflict/run_test.pl:
+
+          add library path for MessengerMixed library.
+
 Mon Jun  6 21:24:45 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:
