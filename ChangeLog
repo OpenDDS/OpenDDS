@@ -1,3 +1,35 @@
+Tue Jun  7 22:37:49 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/be_produce.cpp:
+
+          Add a few random characters to the end of the #ifndef macro,
+          similar to what tao_idl does.  This avoids possible conflicts when
+          combining includes generated from two same-named files in different
+          directories.
+
+        * dds/idl/marshal_generator.cpp:
+
+          Improve the warning generated when a struct/union field has a type
+          that we don't support in OpenDDS custom marshaling.  The warning now
+          indicates the name of the struct/union and not just the field.
+
+        * dds/idl/ts_generator.h:
+        * dds/idl/ts_generator.cpp:
+
+          Issue an error if a union type is used for DCPS_DATA_TYPE.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+          Fixed GCC 4.6 unused local variable warning.
+
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+
+          Simplified instructions for creating zip file.
+
 Tue Jun  7 19:51:46 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Service_T.h:

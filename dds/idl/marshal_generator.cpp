@@ -681,7 +681,8 @@ bool marshal_generator::gen_typedef(UTL_ScopedName* name, AST_Type* base,
 namespace {
   // common to both fields (in structs) and branches (in unions)
   string findSizeCommon(const string& name, AST_Type* type,
-                        const string& prefix, string& intro)
+                        const string& prefix, string& intro,
+                        const string& unused = "") // same sig as streamCommon
   {
     AST_Type* typedeff = type;
     unTypeDef(type);
@@ -715,7 +716,8 @@ namespace {
 
   // common to both fields (in structs) and branches (in unions)
   string streamCommon(const string& name, AST_Type* type,
-                      const string& prefix, string& intro)
+                      const string& prefix, string& intro,
+                      const string& stru = "")
   {
     AST_Type* typedeff = type;
     unTypeDef(type);
@@ -730,8 +732,8 @@ namespace {
     } else if (fld_cls == CL_UNKNOWN) {
       if (dir == WD_INPUT) { // no need to warn twice
         std::cerr << "WARNING: field " << name << " can not be serialized.  "
-          "The struct or union it belongs to can not be used in an OpenDDS "
-          "topic type." << std::endl;
+          "The struct or union it belongs to (" << stru <<
+          ") can not be used in an OpenDDS topic type." << std::endl;
       }
       return "false";
     } else { // sequence, struct, union, array, enum, string(insertion)
@@ -851,7 +853,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     for (size_t i = 0; i < fields.size(); ++i) {
       if (i) expr += "\n    && ";
       expr += streamCommon(fields[i]->local_name()->get_string(),
-        fields[i]->field_type(), "<< stru", intro);
+                           fields[i]->field_type(), "<< stru", intro, cxx);
     }
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
@@ -864,7 +866,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     for (size_t i = 0; i < fields.size(); ++i) {
       if (i) expr += "\n    && ";
       expr += streamCommon(fields[i]->local_name()->get_string(),
-        fields[i]->field_type(), ">> stru", intro);
+                           fields[i]->field_type(), ">> stru", intro, cxx);
     }
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
@@ -1118,10 +1120,12 @@ namespace {
   }
 
   typedef string (*CommonFn)(const string& name, AST_Type* type,
-                             const string& prefix, string& intro);
+                             const string& prefix, string& intro,
+                             const string&);
   void generateSwitchBodyForUnion(CommonFn commonFn,
     const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
-    const char* statementPrefix, const char* namePrefix = "")
+    const char* statementPrefix, const char* namePrefix = "",
+    const string& uni = "")
   {
     size_t n_labels = 0;
     bool has_default = false;
@@ -1161,7 +1165,7 @@ namespace {
           "    }\n";
       } else {
         string expr = commonFn(name + "()", branch->field_type(),
-          string(namePrefix) + "uni", intro);
+                               string(namePrefix) + "uni", intro, uni);
         be_global->impl_ <<
           "    {\n" <<
           (intro.length() ? "    " : "") << intro <<
@@ -1207,7 +1211,7 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
       "  size_t result = gen_max_marshaled_size(" << wrap_out << ");\n"
       "  switch (uni._d()) {\n";
     generateSwitchBodyForUnion(findSizeCommon, branches, discriminator,
-      "result +=");
+                               "result +=", "", cxx);
     be_global->impl_ <<
       "  }\n"
       "  return result;\n";
@@ -1221,7 +1225,7 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
       streamAndCheck("<< " + wrap_out) <<
       "  switch (uni._d()) {\n";
     generateSwitchBodyForUnion(streamCommon, branches, discriminator,
-      "return", "<< ");
+                               "return", "<< ", cxx);
     be_global->impl_ <<
       "  }\n"
       "  return true;\n";
@@ -1236,7 +1240,7 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
       streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT)) <<
       "  switch (disc) {\n";
     generateSwitchBodyForUnion(streamCommon, branches, discriminator,
-      "if", ">> ");
+                               "if", ">> ", cxx);
     be_global->impl_ <<
       "  }\n"
       "  return true;\n";

@@ -72,7 +72,6 @@ int try_marshaling(const FOO &in_foo, FOO &out_foo,
 
 
   ACE_TCHAR ebuffer[51200] ; ebuffer[0] = ACE_TEXT('\0') ;
-  ACE_TCHAR obuffer[51200] ; obuffer[0] = ACE_TEXT('\0') ;
 
   OpenDDS::DCPS::Serializer ss(mb);
 

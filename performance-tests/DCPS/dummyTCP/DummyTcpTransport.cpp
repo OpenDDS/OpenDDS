@@ -227,10 +227,6 @@ OpenDDS::DCPS::DummyTcpTransport::configure_i(TransportConfiguration* config)
                           "(%P|%t) ERROR: DummyTcpTransport::configure_i"
                           " could not get host name!!\n"),
                          -1);
-
-      const char *tmp = 0; // just to help debugging
-      tmp = new_addr.get_host_addr ();
-
       this->tcp_config_->local_address_ = new_addr;
     }
 

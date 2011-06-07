@@ -73,6 +73,8 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 #include "utl_string.h"
 
 #include "ace/OS_NS_strings.h"
+#include "ace/OS_NS_sys_time.h"
+#include "ace/OS_NS_unistd.h"
 
 #include "../Version.h"
 #include "ace/Version.h"
@@ -81,6 +83,7 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <limits>
 #include <cassert>
 
 using namespace std;
@@ -110,7 +113,41 @@ string to_macro(const char* fn)
   string ret = "OPENDDS_IDL_GENERATED_";
 
   for (size_t i = 0; i < strlen(fn); ++i) {
-    ret += isalnum(fn[i]) ? static_cast<char>(toupper(fn[i])) : '_';
+    if (isalnum(fn[i])) {
+      ret += static_cast<char>(toupper(fn[i]));
+    } else if (ret[ret.size() - 1] != '_') {
+      ret += '_';
+    }
+  }
+
+  // Add some random characters since two files of the same name (in different
+  // directories) could be used in the same translation unit.  The algorithm
+  // for randomness comes from TAO_IDL's implementation.
+
+  const size_t NUM_CHARS = 6;
+
+  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  ACE_UINT64 msec;
+  now.msec(msec);
+
+  msec += ACE_OS::getpid() + (size_t) ACE_OS::thr_self();
+
+  unsigned int seed = static_cast<unsigned int>(msec);
+#ifdef max
+#undef max
+#endif
+  const float MAX_VAL = static_cast<float>(numeric_limits<char>::max());
+  const float coefficient = static_cast<float>(MAX_VAL / (RAND_MAX + 1.0f));
+
+  if (ret[ret.size() - 1] != '_') ret += '_';
+
+  for (unsigned int n = 0; n < NUM_CHARS; ++n) {
+    char r;
+    do {
+      r = static_cast<char>(coefficient * ACE_OS::rand_r(&seed));
+    } while (!isalnum(r));
+
+    ret += static_cast<char>(toupper(r));
   }
 
   return ret;
