@@ -22,7 +22,6 @@ Tue Jun  7 22:37:49 UTC 2011  Adam Mitz  <mitza@ociweb.com>
         * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
         * tests/DCPS/Priority/Publisher.cpp:
         * tests/DCPS/Compiler/idl_test3_main/main.cpp:
-        * tests/DCPS/ZeroCopyRead/main.cpp:
 
           Fixed GCC 4.6 unused local variable warning.
 
