@@ -1,3 +1,11 @@
+Wed Jun  8 20:01:13 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.cpp:
+        * tools/modeling/codegen/model/TransportDirectives.cpp:
+        * tools/modeling/tests/UDP/run_test.pl:
+
+          fuzz.
+
 Tue Jun  7 22:37:49 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/be_produce.cpp:

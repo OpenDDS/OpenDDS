@@ -17,7 +17,7 @@ OpenDDS::Model::Transport::Udp::svcConfDir =
     ACE_TEXT(" OpenDDS_Udp:_make_UdpLoader()");
 
 const ACE_TCHAR*
-OpenDDS::Model::Transport::Multicast::svcName = 
+OpenDDS::Model::Transport::Multicast::svcName =
     ACE_TEXT("OpenDDS_DCPS_Multicast_Service");
 
 const ACE_TCHAR*

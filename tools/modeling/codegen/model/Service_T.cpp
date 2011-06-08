@@ -326,13 +326,13 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createSubscription( typenam
 }
 
 template< typename ModelName, class InstanceTraits>
-inline 
-void 
+inline
+void
 OpenDDS::Model::Service< ModelName, InstanceTraits>::loadTransportLibraryIfNeeded(
   typename Transport::Type::Values transport_type
 )
 {
-  const ACE_TCHAR *svcName; 
+  const ACE_TCHAR *svcName;
   const ACE_TCHAR *svcConfDir;
 
   if (transport_type == Transport::Type::tcp)

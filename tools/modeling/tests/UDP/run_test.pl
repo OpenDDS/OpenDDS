@@ -14,7 +14,7 @@ use PerlDDS::Run_Test;
 $status = 0;
 $use_svc_config = !new PerlACE::ConfigList->check_config ('STATIC');
 
-$opts = ''; 
+$opts = '';
 $repo_bit_opt = $opts;
 $udp_opts = '';
 
