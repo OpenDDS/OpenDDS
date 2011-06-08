@@ -682,7 +682,7 @@ namespace {
   // common to both fields (in structs) and branches (in unions)
   string findSizeCommon(const string& name, AST_Type* type,
                         const string& prefix, string& intro,
-                        const string& unused = "") // same sig as streamCommon
+                        const string& = "") // same sig as streamCommon
   {
     AST_Type* typedeff = type;
     unTypeDef(type);

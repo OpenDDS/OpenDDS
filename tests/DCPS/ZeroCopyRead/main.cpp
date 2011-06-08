@@ -644,22 +644,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // =============== do the test ====
 
 
-      ::DDS::OfferedIncompatibleQosStatus incomp;
-      if (foo_dw->get_offered_incompatible_qos_status (incomp) != ::DDS::RETCODE_OK)
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-          ACE_TEXT ("ERROR: failed to get offered incompatible qos status\n")),
-          1);
-      }
-
-      int incompatible_transport_found = 0;
-      for (CORBA::ULong ii =0; ii < incomp.policies.length (); ii++)
-        {
-          if (incomp.policies[ii].policy_id
-                        == ::OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID)
-            incompatible_transport_found = 1;
-        }
-
       ::DDS::SubscriptionMatchedStatus matched;
 
       if (foo_dr->get_subscription_matched_status (matched) != ::DDS::RETCODE_OK)
