@@ -144,7 +144,13 @@ string to_macro(const char* fn)
   for (unsigned int n = 0; n < NUM_CHARS; ++n) {
     char r;
     do {
+#if ACE_MAJOR_VERSION * 256 * 256 + ACE_MINOR_VERSION * 256 + ACE_BETA_VERSION > 0x060001
+      // ACE 6.0.2 and later
       r = static_cast<char>(coefficient * ACE_OS::rand_r(&seed));
+#else
+      // Prior to ACE 6.0.2
+      r = static_cast<char>(coefficient * ACE_OS::rand_r(seed));
+#endif
     } while (!isalnum(r));
 
     ret += static_cast<char>(toupper(r));

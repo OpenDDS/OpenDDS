@@ -1,3 +1,10 @@
+Wed Jun  8 20:45:56 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/idl/be_produce.cpp:
+
+          Add some #if code to make the rand_r calls work with older
+          ACE versions.
+
 Wed Jun  8 20:01:13 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/codegen/model/Service_T.cpp:
