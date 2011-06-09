@@ -1,3 +1,30 @@
+Thu Jun  9 19:25:27 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+          Disabled schema generation. As discussed in EMF book,
+          12.3 Generator Model Properties, p353, schema generation should
+          instead be done using the Generator pull-down menu to get
+          "higher quality XML Schema."
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/ApplicationXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DCPSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DomainXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/QoSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/TopicsXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/TypesXMI.xsd:
+
+          Generated using Generator menu which fixes import statements to
+          use correct file names. Note that these auto-generated schemas are not suitable
+          for validation.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+
+          Updates to account for OpenDDS.genmodel change.
+
 Wed Jun  8 22:49:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * dds/idl/marshal_generator.cpp:

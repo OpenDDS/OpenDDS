@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <xsd:schema xmlns:application="http://www.opendds.org/modeling/schemas/Application/1.0" xmlns:core="http://www.opendds.org/modeling/schemas/Core/1.0" xmlns:dcps="http://www.opendds.org/modeling/schemas/DCPS/1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.opendds.org/modeling/schemas/Application/1.0">
-  <xsd:import namespace="http://www.opendds.org/modeling/schemas/DCPS/1.0" schemaLocation="dcps.xsd"/>
-  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Core/1.0" schemaLocation="core.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/DCPS/1.0" schemaLocation="DCPSXMI.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Core/1.0" schemaLocation="CoreXMI.xsd"/>
   <xsd:simpleType name="LanguageType">
     <xsd:restriction base="xsd:NCName">
       <xsd:enumeration value="CXX"/>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <xsd:schema xmlns:core="http://www.opendds.org/modeling/schemas/Core/1.0" xmlns:enumerations="http://www.opendds.org/modeling/schemas/Enumerations/1.0" xmlns:qos="http://www.opendds.org/modeling/schemas/QoS/1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.opendds.org/modeling/schemas/QoS/1.0">
-  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Enumerations/1.0" schemaLocation="enumerations.xsd"/>
-  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Core/1.0" schemaLocation="core.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Enumerations/1.0" schemaLocation="EnumerationsXMI.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Core/1.0" schemaLocation="CoreXMI.xsd"/>
   <xsd:complexType abstract="true" name="QosPolicy">
     <xsd:complexContent>
       <xsd:extension base="core:Specification"/>
