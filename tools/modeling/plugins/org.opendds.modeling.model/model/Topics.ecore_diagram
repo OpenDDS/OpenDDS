@@ -73,7 +73,7 @@
       <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_FBP6UThpEeC6hfdwLDlJWw" key="modelID" value="Ecore"/>
     </eAnnotations>
     <children xmi:type="notation:DecorationNode" xmi:id="_E_52gDhpEeC6hfdwLDlJWw" type="5001"/>
-    <children xmi:type="notation:BasicCompartment" xmi:id="_E_52gThpEeC6hfdwLDlJWw" type="7001">
+    <children xmi:type="notation:BasicCompartment" xmi:id="_E_52gThpEeC6hfdwLDlJWw" type="7001" collapsed="true">
       <styles xmi:type="notation:SortingStyle" xmi:id="_E_52gjhpEeC6hfdwLDlJWw"/>
       <styles xmi:type="notation:FilteringStyle" xmi:id="_E_52gzhpEeC6hfdwLDlJWw"/>
     </children>
@@ -87,6 +87,26 @@
     </children>
     <element xmi:type="ecore:EClass" href="Types.ecore#//Struct"/>
     <layoutConstraint xmi:type="notation:Bounds" xmi:id="_E-x1IjhpEeC6hfdwLDlJWw" x="300" y="324"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_d5SkcY04EeCFFp5YOguy_Q" type="2001" fontName="Sans">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_d6WUYI04EeCFFp5YOguy_Q" source="Shortcut">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_d6WUYY04EeCFFp5YOguy_Q" key="modelID" value="Ecore"/>
+    </eAnnotations>
+    <children xmi:type="notation:DecorationNode" xmi:id="_d5YEAI04EeCFFp5YOguy_Q" type="5001"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_d5YEAY04EeCFFp5YOguy_Q" type="7001">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_d5YEAo04EeCFFp5YOguy_Q"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_d5YEA404EeCFFp5YOguy_Q"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_d5YEBI04EeCFFp5YOguy_Q" type="7002">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_d5YEBY04EeCFFp5YOguy_Q"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_d5YEBo04EeCFFp5YOguy_Q"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_d5YrEI04EeCFFp5YOguy_Q" type="7003">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_d5YrEY04EeCFFp5YOguy_Q"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_d5YrEo04EeCFFp5YOguy_Q"/>
+    </children>
+    <element xmi:type="ecore:EClass" href="Domain.ecore#//DomainEntity"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_d5Skco04EeCFFp5YOguy_Q" x="48" y="36"/>
   </children>
   <styles xmi:type="notation:DiagramStyle" xmi:id="_wpZDIYnOEd-oEPV18zd1Wg"/>
   <element xmi:type="ecore:EPackage" href="Topics.ecore#/"/>
