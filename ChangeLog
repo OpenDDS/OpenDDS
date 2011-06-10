@@ -1,3 +1,11 @@
+Fri Jun 10 19:36:23 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/parsers/PredefinedParser.xpt:
+
+	  Generate code allowing infinity to be specified and displayed
+	  for ELong types to support infinite duration for QoS policy
+	  periods.
+
 Thu Jun  9 22:06:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/scripts/dds_fuzz.pl:
