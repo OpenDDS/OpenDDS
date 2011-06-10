@@ -1,10 +1,17 @@
+Fri Jun 10 23:25:44 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_h.xsl:
+          make destructor virtual
+
+
 Fri Jun 10 19:36:23 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/parsers/PredefinedParser.xpt:
 
-	  Generate code allowing infinity to be specified and displayed
-	  for ELong types to support infinite duration for QoS policy
-	  periods.
+          Generate code allowing infinity to be specified and displayed
+          for ELong types to support infinite duration for QoS policy
+          periods.
 
 Thu Jun  9 22:06:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 

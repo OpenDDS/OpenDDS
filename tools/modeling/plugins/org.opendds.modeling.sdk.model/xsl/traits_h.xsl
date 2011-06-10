@@ -98,6 +98,8 @@
       <xsl:value-of select="concat($newline,
         '  struct ', $export, $structname, 
         ' : OpenDDS::Model::DefaultInstanceTraits {', $newline)"/>
+      <xsl:value-of select="concat('    virtual ~', $structname, '();',
+                                   $newline)"/>
       <xsl:value-of select="concat('    enum { transport_key_base = ', 
         $instance-offset, '};', $newline)"/>
       <xsl:value-of select="concat(

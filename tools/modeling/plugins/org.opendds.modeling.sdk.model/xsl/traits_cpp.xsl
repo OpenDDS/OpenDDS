@@ -90,6 +90,8 @@
     </xsl:when>
     <xsl:otherwise>
       <xsl:variable name="classname" select="concat($Instname, $modelname, 'Traits')"/>
+      <xsl:value-of select="concat($classname, '::~', $classname,
+      '() { }', $newline, $newline)"/>
       <xsl:value-of select="concat('void ', $classname)"/>
       <xsl:text>::transport_config(OpenDDS::DCPS::TransportIdType id) {
   OpenDDS::DCPS::TransportConfiguration_rch config;
