@@ -72,7 +72,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="topicDescriptions" upperBound="-1"
         eType="ecore:EClass Topics.ecore#//TopicDescription" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="policies" upperBound="-1"
-        eType="#//qosPolicy" containment="true">
+        eType="ecore:EClass QoS.ecore#//QosPolicy" containment="true">
       <eAnnotations source="GenModel">
         <details key="documentation" value="This is an extension to the DDS Profile specification to allow domain entities policies to be either from a policy lib or custom to the entity. If custom, then the owner of the policy is the DCPS lib."/>
       </eAnnotations>

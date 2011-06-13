@@ -114,16 +114,16 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	 * @generated
 	 */
 	protected boolean addFixedChild(EditPart childEditPart) {
-		if (childEditPart instanceof DomainParticipantName2EditPart) {
-			((DomainParticipantName2EditPart) childEditPart)
-					.setLabel(getPrimaryShape()
-							.getFigureStereotypedElementStereotypeFigure());
-			return true;
-		}
 		if (childEditPart instanceof DomainParticipantNameEditPart) {
 			((DomainParticipantNameEditPart) childEditPart)
 					.setLabel(getPrimaryShape()
 							.getFigureStereotypedElementNameFigure());
+			return true;
+		}
+		if (childEditPart instanceof DomainParticipantName2EditPart) {
+			((DomainParticipantName2EditPart) childEditPart)
+					.setLabel(getPrimaryShape()
+							.getFigureStereotypedElementStereotypeFigure());
 			return true;
 		}
 		return false;
@@ -133,10 +133,10 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	 * @generated
 	 */
 	protected boolean removeFixedChild(EditPart childEditPart) {
-		if (childEditPart instanceof DomainParticipantName2EditPart) {
+		if (childEditPart instanceof DomainParticipantNameEditPart) {
 			return true;
 		}
-		if (childEditPart instanceof DomainParticipantNameEditPart) {
+		if (childEditPart instanceof DomainParticipantName2EditPart) {
 			return true;
 		}
 		return false;

@@ -1,3 +1,12 @@
+Mon Jun 13 20:52:15 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/QosPolicyCreationHelper.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:
+
+          Further updates that should have been commited as part of then profile-driven
+          inheritance removal commit.
+
 Mon Jun 13 20:01:44 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/Topics.ecore_diagram:
