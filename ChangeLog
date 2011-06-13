@@ -1,3 +1,21 @@
+Mon Jun 13 21:11:15 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+	  Decision was made to use the "lower quality" schema generator
+	  invoked by setting Generate Schema property to true and fix
+	  as necessary using XSL stylesheets.
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/ApplicationXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DCPSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DomainXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/QoSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/TopicsXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/TypesXMI.xsd:
+
+	  Generated automatically as part of model generation.
+
 Mon Jun 13 20:52:15 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/QosPolicyCreationHelper.java:

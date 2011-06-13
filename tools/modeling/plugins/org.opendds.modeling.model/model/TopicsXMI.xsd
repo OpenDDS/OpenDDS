@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <xsd:schema xmlns:core="http://www.opendds.org/modeling/schemas/Core/1.0" xmlns:domain="http://www.opendds.org/modeling/schemas/Domain/1.0" xmlns:qos="http://www.opendds.org/modeling/schemas/QoS/1.0" xmlns:topics="http://www.opendds.org/modeling/schemas/Topics/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.opendds.org/modeling/schemas/Topics/1.0">
-  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Types/1.0" schemaLocation="TypesXMI.xsd"/>
-  <xsd:import namespace="http://www.opendds.org/modeling/schemas/QoS/1.0" schemaLocation="QoSXMI.xsd"/>
-  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Domain/1.0" schemaLocation="DomainXMI.xsd"/>
-  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Core/1.0" schemaLocation="CoreXMI.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Types/1.0" schemaLocation="types.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/QoS/1.0" schemaLocation="qos.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Domain/1.0" schemaLocation="domain.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Core/1.0" schemaLocation="core.xsd"/>
   <xsd:complexType abstract="true" name="TopicDescription">
     <xsd:complexContent>
       <xsd:extension base="core:Entity"/>

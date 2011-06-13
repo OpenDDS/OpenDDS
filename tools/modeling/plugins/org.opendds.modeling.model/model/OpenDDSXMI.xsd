@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <xsd:schema xmlns:application="http://www.opendds.org/modeling/schemas/Application/1.0" xmlns:core="http://www.opendds.org/modeling/schemas/Core/1.0" xmlns:dcps="http://www.opendds.org/modeling/schemas/DCPS/1.0" xmlns:domain="http://www.opendds.org/modeling/schemas/Domain/1.0" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:qos="http://www.opendds.org/modeling/schemas/QoS/1.0" xmlns:topics="http://www.opendds.org/modeling/schemas/Topics/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
   <xsd:import namespace="http://www.omg.org/XMI" schemaLocation="platform:/plugin/org.eclipse.emf.ecore/model/XMI.xsd"/>
-  <xsd:import namespace="http://www.opendds.org/modeling/schemas/QoS/1.0" schemaLocation="QoSXMI.xsd"/>
-  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Application/1.0" schemaLocation="ApplicationXMI.xsd"/>
-  <xsd:import namespace="http://www.opendds.org/modeling/schemas/DCPS/1.0" schemaLocation="DCPSXMI.xsd"/>
-  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Types/1.0" schemaLocation="TypesXMI.xsd"/>
-  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Topics/1.0" schemaLocation="TopicsXMI.xsd"/>
-  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Domain/1.0" schemaLocation="DomainXMI.xsd"/>
-  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Core/1.0" schemaLocation="CoreXMI.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/QoS/1.0" schemaLocation="qos.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Application/1.0" schemaLocation="application.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/DCPS/1.0" schemaLocation="dcps.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Types/1.0" schemaLocation="types.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Topics/1.0" schemaLocation="topics.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Domain/1.0" schemaLocation="domain.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Core/1.0" schemaLocation="core.xsd"/>
   <xsd:complexType abstract="true" name="ddsSpecification">
     <xsd:complexContent>
       <xsd:extension base="core:Specification"/>
@@ -34,12 +34,7 @@
   <xsd:element name="qosPolicy" type="opendds:qosPolicy"/>
   <xsd:complexType name="topic">
     <xsd:complexContent>
-      <xsd:extension base="topics:Topic">
-        <xsd:choice maxOccurs="unbounded" minOccurs="0">
-          <xsd:element name="type" type="core:Specification"/>
-        </xsd:choice>
-        <xsd:attribute name="type" type="xsd:string"/>
-      </xsd:extension>
+      <xsd:extension base="topics:Topic"/>
     </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="topic" type="opendds:topic"/>
@@ -69,9 +64,7 @@
   <xsd:element name="subscriber" type="opendds:subscriber"/>
   <xsd:complexType name="domain">
     <xsd:complexContent>
-      <xsd:extension base="opendds:ddsProperty">
-        <xsd:attribute name="domainId" type="xsd:long"/>
-      </xsd:extension>
+      <xsd:extension base="dcps:Domain"/>
     </xsd:complexContent>
   </xsd:complexType>
   <xsd:element name="domain" type="opendds:domain"/>
@@ -262,7 +255,7 @@
     <xsd:complexContent>
       <xsd:extension base="opendds:OpenDDSLib">
         <xsd:choice maxOccurs="unbounded" minOccurs="0">
-          <xsd:element name="policies" type="opendds:qosPolicy"/>
+          <xsd:element name="policies" type="qos:QosPolicy"/>
         </xsd:choice>
       </xsd:extension>
     </xsd:complexContent>
@@ -275,7 +268,7 @@
           <xsd:element name="domains" type="opendds:domain"/>
           <xsd:element name="participants" type="opendds:domainParticipant"/>
           <xsd:element name="topicDescriptions" type="topics:TopicDescription"/>
-          <xsd:element name="policies" type="opendds:qosPolicy"/>
+          <xsd:element name="policies" type="qos:QosPolicy"/>
         </xsd:choice>
       </xsd:extension>
     </xsd:complexContent>
