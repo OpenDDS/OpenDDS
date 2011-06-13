@@ -3715,6 +3715,7 @@
         visualID="3061"
         editPartClassName="WdlQosPolicy2EditPart"
         itemSemanticEditPolicyClassName="WdlQosPolicy2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="WdlQosPolicyViewFactory"
         canonicalEditPolicyClassName="WdlQosPolicy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="WdlQosPolicy2GraphicalNodeEditPolicy"
         createCommandClassName="WdlQosPolicy2CreateCommand"
@@ -3741,6 +3742,7 @@
           visualID="5269"
           editPartClassName="WdlQosPolicyName3EditPart"
           itemSemanticEditPolicyClassName="WdlQosPolicyName3ItemSemanticEditPolicy"
+          notationViewFactoryClassName="WdlQosPolicyNameViewFactory"
           readOnly="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -3760,6 +3762,7 @@
           visualID="5270"
           editPartClassName="WdlQosPolicyName4EditPart"
           itemSemanticEditPolicyClassName="WdlQosPolicyName4ItemSemanticEditPolicy"
+          notationViewFactoryClassName="WdlQosPolicyNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -3777,7 +3780,8 @@
       <labels
           visualID="5271"
           editPartClassName="WdlQosPolicyAutodispose_unregistere2EditPart"
-          itemSemanticEditPolicyClassName="WdlQosPolicyAutodispose_unregistere2ItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="WdlQosPolicyAutodispose_unregistere2ItemSemanticEditPolicy"
+          notationViewFactoryClassName="WdlQosPolicyAutodispose_unregistered_instancesViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
