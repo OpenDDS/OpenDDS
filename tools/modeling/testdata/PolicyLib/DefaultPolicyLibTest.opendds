@@ -2,7 +2,7 @@
 <opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmi:id="_BD-5cKGNEd-D-tWBUFz8zw" name="DefaultPolicyLibTest">
   <libs xsi:type="opendds:PolicyLib" xmi:id="_U54321GNEd-D-tWBUFz8zw" name="DefaultPolicyLibTest">
     <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_VizHAKGNEd-D-tWBUFz8zw" name="deadlineQosPolicyDefaultTestt">
-      <period xmi:id="_cGnWILeCEd-nAsONlpcwOw"/>
+      <period xmi:id="_cGnWILeCEd-nAsONlpcwOw" nanosecond="2147483647" second="2147483647"/>
     </policies>
     <policies xsi:type="opendds:destinationOrderQosPolicy" xmi:id="_cOcfoKGNEd-D-tWBUFz8zw" name="destinationOrderQosPolicyDefaultTest" kind="BY_RECEPTION_TIMESTAMP"/>
     <policies xsi:type="opendds:dsQosPolicy" xmi:id="_aC4nAKGNEd-D-tWBUFz8zw" name="dsQosPolicyDefaultTest" history_depth="1" history_kind="KEEP_LAST" max_instances="-1" max_samples="-1" max_samples_per_instance="-1">
@@ -16,10 +16,10 @@
       <duration xmi:id="_fvln8LeCEd-nAsONlpcwOw"/>
     </policies>
     <policies xsi:type="opendds:lifespanQosPolicy" xmi:id="_MiaroKGNEd-D-tWBUFz8zw" name="lifespanQosPolicyDefaultTest">
-      <duration xmi:id="_hBVjsLeCEd-nAsONlpcwOw"/>
+      <duration xmi:id="_hBVjsLeCEd-nAsONlpcwOw" nanosecond="2147483647" second="2147483647"/>
     </policies>
     <policies xsi:type="opendds:livelinessQosPolicy" xmi:id="_aqZS8KGNEd-D-tWBUFz8zw" name="livelinessQosPolicyDefaultTest" kind="AUTOMATIC">
-      <lease_duration xmi:id="_lssfkLeCEd-nAsONlpcwOw"/>
+      <lease_duration xmi:id="_lssfkLeCEd-nAsONlpcwOw" nanosecond="2147483647" second="2147483647"/>
     </policies>
     <policies xsi:type="opendds:osQosPolicy" xmi:id="_Ng_MsKGNEd-D-tWBUFz8zw" name="osQosPolicyDefaultTest" value="0"/>
     <policies xsi:type="opendds:ownershipQosPolicy" xmi:id="_ND62MKGNEd-D-tWBUFz8zw" name="ownershipQosPolicyDefaultTest" kind="SHARED"/>
@@ -33,7 +33,7 @@
       <autopurge_disposed_samples_delay xmi:id="_3EkTQHZREeCMofdxxKhKYQ"/>
     </policies>
     <policies xsi:type="opendds:reliabilityQosPolicy" xmi:id="_ZA2iQKGNEd-D-tWBUFz8zw" name="reliabilityQosPolicyDefaultTest" kind="BEST_EFFORT">
-      <max_blocking_time xmi:id="_i49zsLeCEd-nAsONlpcwOw"/>
+      <max_blocking_time xmi:id="_i49zsLeCEd-nAsONlpcwOw" nanosecond="2147483647" second="2147483647"/>
     </policies>
     <policies xsi:type="opendds:rlQosPolicy" xmi:id="_WEYxIKGNEd-D-tWBUFz8zw" name="rlQosPolicyDefaultTest" max_instances="-1" max_samples="-1" max_samples_per_instance="-1"/>
     <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_Ry9YMKGNEd-D-tWBUFz8zw" name="tbfQosPolicyDefaultTest">

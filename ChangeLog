@@ -1,3 +1,22 @@
+Tue Jun 14 19:29:20 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfmap:
+
+          Set default durations for deadlineQosPolicy, lifespanQosPolicy,
+          livelinessQosPolicy, and reliabilityQosPolicy to infinity per
+          DDS spec.
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+          GMF-generated changes based on map file modifications.
+
+        * tools/modeling/testdata/PolicyLib/DefaultPolicyLibTest.opendds:
+
+          Updated to account for change in default durations.
+
 Tue Jun 14 13:06:17 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:

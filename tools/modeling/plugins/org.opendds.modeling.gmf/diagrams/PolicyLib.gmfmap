@@ -25,7 +25,7 @@
                   xsi:type="ecore:EAttribute"
                   href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
               <value
-                  body="0"/>
+                  body="2147483647"/>
             </initializers>
             <initializers
                 xsi:type="gmfmap:FeatureValueSpec">
@@ -33,7 +33,7 @@
                   xsi:type="ecore:EAttribute"
                   href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
               <value
-                  body="0"/>
+                  body="2147483647"/>
             </initializers>
           </newElementInitializers>
         </initializers>
@@ -556,7 +556,7 @@
                   xsi:type="ecore:EAttribute"
                   href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
               <value
-                  body="0"/>
+                  body="2147483647"/>
             </initializers>
             <initializers
                 xsi:type="gmfmap:FeatureValueSpec">
@@ -564,7 +564,7 @@
                   xsi:type="ecore:EAttribute"
                   href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
               <value
-                  body="0"/>
+                  body="2147483647"/>
             </initializers>
           </newElementInitializers>
         </initializers>
@@ -648,7 +648,7 @@
                   xsi:type="ecore:EAttribute"
                   href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
               <value
-                  body="0"/>
+                  body="2147483647"/>
             </initializers>
             <initializers
                 xsi:type="gmfmap:FeatureValueSpec">
@@ -656,7 +656,7 @@
                   xsi:type="ecore:EAttribute"
                   href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
               <value
-                  body="0"/>
+                  body="2147483647"/>
             </initializers>
           </newElementInitializers>
         </initializers>
@@ -1018,7 +1018,7 @@
                   xsi:type="ecore:EAttribute"
                   href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/second"/>
               <value
-                  body="0"/>
+                  body="2147483647"/>
             </initializers>
             <initializers
                 xsi:type="gmfmap:FeatureValueSpec">
@@ -1026,7 +1026,7 @@
                   xsi:type="ecore:EAttribute"
                   href="../../org.opendds.modeling.model/model/Enumerations.ecore#//Period/nanosecond"/>
               <value
-                  body="0"/>
+                  body="2147483647"/>
             </initializers>
           </newElementInitializers>
         </initializers>
