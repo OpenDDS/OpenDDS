@@ -1,3 +1,10 @@
+Tue Jun 14 20:44:31 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/policy_duration_infinite.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/policy_lib/adding_policies.html:
+
+          Added information about policies with infinite durations.
+
 Tue Jun 14 19:29:20 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
 
