@@ -8,7 +8,6 @@
   <eClassifiers xsi:type="ecore:EClass" name="qosProperty" eSuperTypes="Domain.ecore#//QosProperty #//ddsProperty"/>
   <eClassifiers xsi:type="ecore:EClass" name="qosPolicy" abstract="true" eSuperTypes="#//ddsSpecification QoS.ecore#//QosPolicy"/>
   <eClassifiers xsi:type="ecore:EClass" name="topic" eSuperTypes="Topics.ecore#//Topic"/>
-  <eClassifiers xsi:type="ecore:EClass" name="topicField" abstract="true" eSuperTypes="Types.ecore#//Field"/>
   <eClassifiers xsi:type="ecore:EClass" name="domainParticipant" eSuperTypes="DCPS.ecore#//DomainParticipant"/>
   <eClassifiers xsi:type="ecore:EClass" name="publisher" eSuperTypes="DCPS.ecore#//Publisher"/>
   <eClassifiers xsi:type="ecore:EClass" name="subscriber" eSuperTypes="DCPS.ecore#//Subscriber"/>

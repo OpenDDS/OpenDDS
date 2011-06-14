@@ -1,10 +1,27 @@
+Tue Jun 14 13:06:17 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.ecore:
+
+          Removed unused class topicField left over from attempt to follow
+          DDS profile spec.
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling/model/opendds/presentation/OpenDDSEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDSXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DataLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_DcpsLib.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel:
+
+          Updates due to the removal of element from OpenDDS.ecore.
+
 Mon Jun 13 21:11:15 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
 
-	  Decision was made to use the "lower quality" schema generator
-	  invoked by setting Generate Schema property to true and fix
-	  as necessary using XSL stylesheets.
+          Decision was made to use the "lower quality" schema generator
+          invoked by setting Generate Schema property to true and fix
+          as necessary using XSL stylesheets.
 
         * tools/modeling/plugins/org.opendds.modeling.model/model/ApplicationXMI.xsd:
         * tools/modeling/plugins/org.opendds.modeling.model/model/DCPSXMI.xsd:
@@ -14,7 +31,7 @@ Mon Jun 13 21:11:15 UTC 2011  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.model/model/TopicsXMI.xsd:
         * tools/modeling/plugins/org.opendds.modeling.model/model/TypesXMI.xsd:
 
-	  Generated automatically as part of model generation.
+          Generated automatically as part of model generation.
 
 Mon Jun 13 20:52:15 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
