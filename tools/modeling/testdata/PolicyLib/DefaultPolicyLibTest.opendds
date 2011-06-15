@@ -29,8 +29,8 @@
     </policies>
     <policies xsi:type="opendds:presentationQosPolicy" xmi:id="_W7gmYKGNEd-D-tWBUFz8zw" name="presentationQosPolicyDefaultTest" access_scope="INSTANCE" coherent_access="false" ordered_access="false"/>
     <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_PGfK4KGNEd-D-tWBUFz8zw" name="rdlQosPolicyDefaultTest">
-      <autopurge_nowriter_samples_delay xmi:id="_0wCE0HZREeCMofdxxKhKYQ"/>
-      <autopurge_disposed_samples_delay xmi:id="_3EkTQHZREeCMofdxxKhKYQ"/>
+      <autopurge_nowriter_samples_delay xmi:id="_0wCE0HZREeCMofdxxKhKYQ" nanosecond="2147483647" second="2147483647"/>
+      <autopurge_disposed_samples_delay xmi:id="_3EkTQHZREeCMofdxxKhKYQ" nanosecond="2147483647" second="2147483647"/>
     </policies>
     <policies xsi:type="opendds:reliabilityQosPolicy" xmi:id="_ZA2iQKGNEd-D-tWBUFz8zw" name="reliabilityQosPolicyDefaultTest" kind="BEST_EFFORT">
       <max_blocking_time xmi:id="_i49zsLeCEd-nAsONlpcwOw" nanosecond="2147483647" second="2147483647"/>
