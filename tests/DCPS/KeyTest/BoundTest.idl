@@ -1,0 +1,221 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#include "tao/StringSeq.pidl"
+#include "tao/FloatSeq.pidl"
+
+// Struct with all simple bounded fields
+module Bound {
+
+  // Struct with all simple bounded fields should be bounded
+#pragma DCPS_DATA_TYPE "Bound::SimpleBoundedMessage"
+
+  enum EnumType {
+    FIRST, SECOND, THIRD
+  };
+
+  struct SimpleBoundedMessage {
+    short short_field;
+    unsigned short unsigned_short_field;
+    long long_field;
+    unsigned long unsigned_long_field;
+    long long long_long_field;
+    unsigned long long unsigned_long_long_field;
+    char char_field;
+    wchar wchar_field;
+    float float_field;
+    double double_field;
+    long double long_double_field;
+    boolean boolean_field;
+    octet octet_field;
+    EnumType enum_field;
+  };
+
+  // string field should cause struct to be unbounded
+#pragma DCPS_DATA_TYPE "Bound::StringMessage"
+
+  struct StringMessage {
+    string string_field;
+  };
+
+  // wstring field should cause struct to be unbounded
+#pragma DCPS_DATA_TYPE "Bound::WStringMessage"
+
+  struct WStringMessage {
+    wstring wstring_field;
+  };
+
+  // Struct with all arrays of simple bounded fields should be bounded
+#pragma DCPS_DATA_TYPE "Bound::SimpleBoundedArrayMessage"
+
+  typedef short ShortArray[10];
+  typedef unsigned short UnsignedShortArray[10];
+  typedef long LongArray[10];
+  typedef unsigned long UnsignedLongArray[10];
+  typedef long long LongLongArray[10];
+  typedef unsigned long long UnsignedLongLongArray[10];
+  typedef char CharArray[10];
+  typedef wchar WCharArray[10];
+  typedef float FloatArray[10];
+  typedef double DoubleArray[10];
+  typedef long double LongDoubleArray[10];
+  typedef boolean BooleanArray[10];
+  typedef octet OctetArray[10];
+  typedef EnumType EnumTypeArray[10];
+
+  struct SimpleBoundedArrayMessage {
+    ShortArray short_array;
+    UnsignedShortArray unsigned_short_array;
+    LongArray long_array;
+    UnsignedLongArray unsigned_long_array;
+    LongLongArray long_long_array;
+    UnsignedLongLongArray unsigned_long_long_array;
+    CharArray char_array;
+    WCharArray wchar_array;
+    FloatArray float_array;
+    DoubleArray double_array;
+    LongDoubleArray long_double_array;
+    BooleanArray boolean_array;
+    OctetArray octet_array;
+    EnumTypeArray enum_array;
+  };
+
+  // string array field should cause struct to be unbounded
+#pragma DCPS_DATA_TYPE "Bound::StringArrayMessage"
+
+  typedef string StringArray[10];
+
+  struct StringArrayMessage {
+    StringArray string_array;
+  };
+
+  // wstring array field should cause struct to be unbounded
+#pragma DCPS_DATA_TYPE "Bound::WStringArrayMessage"
+
+  typedef wstring WStringArray[10];
+
+  struct WStringArrayMessage {
+    WStringArray wstring_array;
+  };
+
+  // Nested structs resulting in a bounded message
+#pragma DCPS_DATA_TYPE "Bound::BoundedNestedMessage"
+
+  struct Nest1 {
+    long long_field;
+    short short_field;
+  };
+
+  struct Nest2 {
+    Nest1 nest1_field;
+    float float_field;
+  };
+
+  struct BoundedNestedMessage {
+    Nest2 nest2_field;
+  };
+
+  // Nested structs resulting in a bounded message
+#pragma DCPS_DATA_TYPE "Bound::UnboundedNestedMessage"
+
+  struct Nest3 {
+    long long_field;
+    short short_field;
+    string string_field;
+  };
+
+  struct Nest4 {
+    Nest3 nest3_field;
+    float float_field;
+  };
+
+  struct UnboundedNestedMessage {
+    Nest4 nest4_field;
+  };
+
+  // Bounded sequence of bounded type
+#pragma DCPS_DATA_TYPE "Bound::BoundedSequenceOfBoundedMessage"
+
+  typedef sequence<float, 20> BoundedFloatSeq;
+
+  struct BoundedSequenceOfBoundedMessage {
+    BoundedFloatSeq float_seq;
+  };
+
+  // Unbounded sequence of bounded type
+#pragma DCPS_DATA_TYPE "Bound::UnboundedSequenceOfBoundedMessage"
+
+  typedef sequence<float> UnboundedFloatSeq;
+
+  struct UnboundedSequenceOfBoundedMessage {
+    UnboundedFloatSeq float_seq;
+  };
+
+  // Bounded sequence of unbounded type
+#pragma DCPS_DATA_TYPE "Bound::BoundedSequenceOfUnboundedMessage"
+
+  typedef sequence<string, 20> BoundedStringSeq;
+
+  struct BoundedSequenceOfUnboundedMessage {
+    BoundedStringSeq string_seq;
+  };
+
+  // Unbounded sequence of unbounded type
+#pragma DCPS_DATA_TYPE "Bound::UnboundedSequenceOfUnboundedMessage"
+
+  typedef sequence<string> UnboundedStringSeq;
+
+  struct UnboundedSequenceOfUnboundedMessage {
+    UnboundedStringSeq string_seq;
+  };
+
+  // Union of bounded types
+#pragma DCPS_DATA_TYPE "Bound::BoundedUnionMessage"
+
+  union BoundedUnion switch (short) {
+  case 1: float float_field;
+  case 2: long long_field;
+  default: short short_field;
+  };
+
+  struct BoundedUnionMessage {
+    BoundedUnion union_field;
+  };
+
+  // Union of unbounded types
+#pragma DCPS_DATA_TYPE "Bound::UnboundedUnionMessage"
+
+  union UnboundedUnion switch (short) {
+  case 1: string string_field;
+  case 2: long long_field;
+  default: short short_field;
+  };
+
+  struct UnboundedUnionMessage {
+    UnboundedUnion union_field;
+  };
+
+  // Recursive type definition (unbounded)
+#pragma DCPS_DATA_TYPE "Bound::RecursiveMessage"
+
+  struct RecursiveMessage;
+
+  typedef sequence<RecursiveMessage, 1> SingleMessageSeq;
+
+  union NestedMessageUnion switch (short) {
+  case 1: SingleMessageSeq message;
+  case 2: long long_field;
+  default: short short_field;
+  };
+
+  struct RecursiveMessage {
+    NestedMessageUnion union_field;
+    float float_field;
+  };
+
+};

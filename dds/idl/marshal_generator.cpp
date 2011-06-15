@@ -190,62 +190,6 @@ namespace {
     }
     string cxx_elem = scoped(elem->name());
     {
-      Function is_bounded("gen_is_bounded_size", "bool");
-      is_bounded.addArg("seq", "const " + cxx + "&");
-      is_bounded.endArgs();
-      if (seq->unbounded() || (elem_cls & CL_UNION)) {
-        be_global->impl_ << "  return false;\n";
-      } else if (elem_cls & CL_STRING) {
-        be_global->impl_ << "  return "
-          << ((elem_cls & CL_BOUNDED) ? "true" : "false") << ";\n";
-      } else if (elem_cls & (CL_STRUCTURE | CL_SEQUENCE | CL_ARRAY)) {
-        const bool arr = (elem_cls & CL_ARRAY);
-        be_global->impl_ << "  " << scoped(seq->base_type()->name())
-          << " element;\n";
-        if (arr) {
-          be_global->impl_ <<
-            "  " << cxx_elem << "_forany element_forany(element);\n";
-        }
-        be_global->impl_ <<
-          "  return gen_is_bounded_size(element" << (arr ? "_forany" : "")
-          << ");\n";
-      } else { // primitive
-        be_global->impl_ << "  return true;\n";
-      }
-    }
-    {
-      Function max_marsh("gen_max_marshaled_size", "size_t");
-      max_marsh.addArg("seq", "const " + cxx + "&");
-      max_marsh.endArgs();
-      std::ostringstream expr;
-      string intro;
-      if (elem_cls & CL_ENUM) {
-        expr << "seq.maximum() * max_marshaled_size_ulong()";
-      } else if (elem_cls & CL_STRING) {
-        expr << "seq.maximum() * (max_marshaled_size_ulong()";
-        AST_String* str = AST_String::narrow_from_decl(elem);
-        if (elem_cls & CL_BOUNDED) {
-          expr << " + " << str->max_size()->ev()->u.ulval;
-        }
-        expr << ")";
-      } else if (elem_cls & CL_PRIMITIVE) {
-        expr << "seq.maximum() * " << getMaxSizeExprPrimitive(elem);
-      } else if (elem_cls & CL_UNION) {
-        expr << "100000 /* from TAO_IDL_BE */";
-      } else if (elem_cls & (CL_SEQUENCE | CL_STRUCTURE)) {
-        expr << "seq.maximum() * gen_max_marshaled_size("
-          << scoped(seq->base_type()->name()) << "())";
-      } else if (elem_cls & CL_ARRAY) {
-        intro += "  " + cxx_elem + " tmp;\n";
-        expr << "seq.maximum() * gen_max_marshaled_size(" << cxx_elem
-          << "_forany(tmp))";
-      } else {
-        expr << '0';
-      }
-      be_global->impl_ << intro <<
-        "  return max_marshaled_size_ulong() + " << expr.str() << ";\n";
-    }
-    {
       Function find_size("gen_find_size", "size_t");
       find_size.addArg("seq", "const " + cxx + "&");
       find_size.endArgs();
@@ -394,68 +338,9 @@ namespace {
       be_global->add_referenced(elem->file_name().c_str());
     }
     string cxx_elem = scoped(elem->name());
-    {
-      Function is_bounded("gen_is_bounded_size", "bool");
-      is_bounded.addArg("arr", "const " + cxx + "_forany&");
-      is_bounded.endArgs();
-      if (elem_cls & CL_UNION) {
-        be_global->impl_ << "  return false;\n";
-      } else if (elem_cls & CL_STRING) {
-        be_global->impl_ << "  return "
-          << ((elem_cls & CL_BOUNDED) ? "true" : "false") << ";\n";
-      } else if (elem_cls & (CL_STRUCTURE | CL_SEQUENCE)) {
-        be_global->impl_ <<
-          "  return gen_is_bounded_size(arr[CORBA::ULong(0)]);\n";
-      } else if (elem_cls & CL_ARRAY) {
-        be_global->impl_ <<
-          "  " << cxx_elem << "_var tmp_var = " << cxx_elem << "_dup(arr";
-        size_t ndims = AST_Array::narrow_from_decl(elem)->n_dims();
-        for (size_t i = 0; i < ndims; ++i) {
-          be_global->impl_ << "[CORBA::ULong(0)]";
-        }
-        be_global->impl_ << ");\n"
-          "  " << cxx_elem << "_forany tmp = tmp_var.inout();\n"
-          "  return gen_is_bounded_size(tmp);\n";
-      } else { // primitive
-        be_global->impl_ << "  return true;\n";
-      }
-    }
     size_t n_elems = 1;
     for (size_t i = 0; i < arr->n_dims(); ++i) {
       n_elems *= arr->dims()[i]->ev()->u.ulval;
-    }
-    {
-      Function max_marsh("gen_max_marshaled_size", "size_t");
-      max_marsh.addArg("arr", "const " + cxx + "_forany&");
-      max_marsh.endArgs();
-      std::ostringstream expr;
-      string intro;
-      if (elem_cls & CL_ENUM) {
-        expr << "max_marshaled_size_ulong()";
-      } else if (elem_cls & CL_STRING) {
-        expr << "(max_marshaled_size_ulong()";
-        AST_String* str = AST_String::narrow_from_decl(elem);
-        if (elem_cls & CL_BOUNDED) {
-          expr << " + " << str->max_size()->ev()->u.ulval;
-        }
-        expr << ")";
-      } else if (elem_cls & CL_PRIMITIVE) {
-        expr << getMaxSizeExprPrimitive(elem);
-      } else if (elem_cls & CL_ARRAY) {
-        intro += "  " + cxx_elem + "_var tmp_var = " + cxx_elem + "_dup(arr";
-        size_t ndims = AST_Array::narrow_from_decl(elem)->n_dims();
-        for (size_t i = 0; i < ndims; ++i) {
-          intro += "[CORBA::ULong(0)]";
-        }
-        intro += ");\n"
-          "  " + cxx_elem + "_forany tmp = tmp_var.inout();\n";
-        expr << "gen_max_marshaled_size(tmp)";
-      } else { // Struct, Sequence, Union
-        expr << "gen_max_marshaled_size(" << scoped(arr->base_type()->name())
-          << "())";
-      }
-      be_global->impl_ << intro <<
-        "  return " << n_elems << " * " << expr.str() << ";\n";
     }
     {
       Function find_size("gen_find_size", "size_t");
@@ -660,6 +545,148 @@ namespace {
     }
     throw std::string("Field not found.");
   }
+
+  bool is_bounded_type(AST_Type* type) {
+    bool bounded = true;
+    static std::vector<AST_Type*> type_stack;
+    unTypeDef(type);
+    for (unsigned int i = 0; i < type_stack.size(); i++) {
+      // If we encounter the same type recursively, then we are unbounded
+      if (type == type_stack[i]) return false;
+    }
+    type_stack.push_back(type);
+    Classification fld_cls = classify(type);
+    if ((fld_cls & CL_STRING) && !(fld_cls & CL_BOUNDED)) {
+      bounded = false;
+    } else if (fld_cls & CL_STRUCTURE) {
+      AST_Structure* struct_node = dynamic_cast<AST_Structure*>(type);
+      for (unsigned long i = 0; i < struct_node->nfields(); ++i) {
+	AST_Field** f;
+	struct_node->field(f, i);
+	if (!is_bounded_type((*f)->field_type())) {
+	  bounded = false;
+	  break;
+	}
+      }
+    } else if (fld_cls & CL_SEQUENCE) {
+      if (fld_cls & CL_BOUNDED) {
+	AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
+	if (!is_bounded_type(seq_node->base_type())) bounded = false;
+      } else {
+	bounded = false;
+      }
+    } else if (fld_cls & CL_ARRAY) {
+      AST_Array* array_node = dynamic_cast<AST_Array*>(type);
+      if (!is_bounded_type(array_node->base_type())) bounded = false;
+    } else if (fld_cls & CL_UNION) {
+      AST_Union* union_node = dynamic_cast<AST_Union*>(type);
+      for (unsigned long i = 0; i < union_node->nfields(); ++i) {
+	AST_Field** f;
+	union_node->field(f, i);
+	if (!is_bounded_type((*f)->field_type())) {
+	  bounded = false;
+	  break;
+	}
+      }
+    }
+    type_stack.pop_back();
+    return bounded;
+  }
+
+  // Should only be called on bounded types (see above function)
+  size_t max_marshaled_size(AST_Type* type) {
+    unTypeDef(type);
+    size_t size = 0;
+    switch (type->node_type()) {
+    case AST_Decl::NT_pre_defined: {
+	AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+	switch (p->pt()) {
+	case AST_PredefinedType::PT_char:
+	case AST_PredefinedType::PT_boolean:
+	case AST_PredefinedType::PT_octet:
+	  size += 1;
+	  break;
+	case AST_PredefinedType::PT_short:
+	case AST_PredefinedType::PT_ushort:
+	case AST_PredefinedType::PT_wchar:
+	  size += 2;
+	  break;
+	case AST_PredefinedType::PT_long:
+	case AST_PredefinedType::PT_ulong:
+	case AST_PredefinedType::PT_float:
+	  size += 4;
+	  break;
+	case AST_PredefinedType::PT_longlong:
+	case AST_PredefinedType::PT_ulonglong:
+	case AST_PredefinedType::PT_double:
+	  size += 8;
+	  break;
+	case AST_PredefinedType::PT_longdouble:
+	  size += 16;
+	  break;
+	default:
+	  // Anything else shouldn't be in a DDS type or is unbounded.
+	  break;
+	}
+	break;
+      }
+    case AST_Decl::NT_enum:
+      size += 4;
+      break;
+    case AST_Decl::NT_string:
+    case AST_Decl::NT_wstring: {
+	AST_String* string_node = dynamic_cast<AST_String*>(type);
+	size += string_node->width() * string_node->max_size()->ev ()->u.ulval;
+	break;
+      }
+    case AST_Decl::NT_struct: {
+	AST_Structure* struct_node = dynamic_cast<AST_Structure*>(type);
+	for (unsigned long i = 0; i < struct_node->nfields(); ++i) {
+	  AST_Field** f;
+	  struct_node->field(f, i);
+	  AST_Type* field_type = (*f)->field_type();
+	  size += max_marshaled_size(field_type);
+	}
+	break;
+      }
+    case AST_Decl::NT_sequence: {
+	AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
+	AST_Type* base_node = seq_node->base_type();
+	size_t bound = seq_node->max_size()->ev()->u.ulval;
+	size += 4 + bound * max_marshaled_size(base_node);
+	break;
+      }
+    case AST_Decl::NT_array: {
+	AST_Array* array_node = dynamic_cast<AST_Array*>(type);
+	AST_Type* base_node = array_node->base_type();
+	size_t array_size = 1;
+	AST_Expression** dims = array_node->dims();
+	for (unsigned long i = 0; i < array_node->n_dims(); i++) {
+	  array_size *= dims[i]->ev()->u.ulval;
+	}
+	size += array_size * max_marshaled_size(base_node);
+	break;
+      }
+    case AST_Decl::NT_union: {
+	AST_Union* union_node = dynamic_cast<AST_Union*>(type);
+	size += max_marshaled_size(union_node->disc_type());
+	size_t largest_field_size = 0;
+	for (unsigned long i = 0; i < union_node->nfields(); ++i) {
+	  AST_Field** f;
+	  union_node->field(f, i);
+	  AST_Type* field_type = (*f)->field_type();
+	  size_t field_size = max_marshaled_size(field_type);
+	  if (field_size > largest_field_size) largest_field_size = field_size;
+	}
+	size += largest_field_size;
+	break;
+      }
+    default:
+      // Anything else should be not here or is unbounded
+      break;
+    }
+    return size;
+  }
 }
 
 bool marshal_generator::gen_typedef(UTL_ScopedName* name, AST_Type* base,
@@ -764,83 +791,20 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
   {
-    Function is_bounded("gen_is_bounded_size", "bool");
-    is_bounded.addArg("stru", "const " + cxx + "&");
-    is_bounded.endArgs();
-    string intro, expr = "true";
-    for (size_t i = 0; i < fields.size(); ++i) {
-      AST_Type* field_type = fields[i]->field_type();
-      unTypeDef(field_type);
-      Classification fld_cls = classify(field_type);
-      if ((fld_cls & CL_STRING) && !(fld_cls & CL_BOUNDED)) {
-        expr = "false";
-        intro = "";
-        break;
-      } else if (fld_cls & (CL_STRUCTURE | CL_SEQUENCE | CL_ARRAY | CL_UNION)) {
-        if (expr == "true") expr = ""; else expr += " && ";
-        const char* fname = fields[i]->local_name()->get_string();
-        if (fld_cls & CL_ARRAY) {
-          intro += "  " +
-            getArrayForany("stru", fname,
-              scoped(fields[i]->field_type()->name())) + "\n";
-        }
-        expr += string("gen_is_bounded_size(stru")
-          + ((fld_cls & CL_ARRAY) ? '_' : '.') + fname + ")";
-      }
-    }
-    be_global->impl_ << intro << "  return " << expr << ";\n";
-  }
-  {
-    Function max_marsh("gen_max_marshaled_size", "size_t");
-    max_marsh.addArg("stru", "const " + cxx + "&");
-    max_marsh.endArgs();
-    std::ostringstream expr;
-    string intro;
-    for (size_t i = 0; i < fields.size(); ++i) {
-      if (i) expr << "\n    + ";
-      const char* fname = fields[i]->local_name()->get_string();
-      AST_Type* field_type = fields[i]->field_type();
-      unTypeDef(field_type);
-      Classification fld_cls = classify(field_type);
-      if (!field_type->in_main_file()
-          && field_type->node_type() != AST_Decl::NT_pre_defined) {
-        be_global->add_referenced(field_type->file_name().c_str());
-      }
-      if (fld_cls & CL_ENUM) {
-        expr << "max_marshaled_size_ulong()";
-      } else if (fld_cls & CL_STRING) {
-        AST_String* str = AST_String::narrow_from_decl(field_type);
-        expr << "max_marshaled_size_ulong()";
-        if (fld_cls & CL_BOUNDED) {
-          expr << " + " << str->max_size()->ev()->u.ulval;
-        }
-      } else if (fld_cls == CL_UNKNOWN) {
-        expr << "0"; // warning will be issued for the serialize functions
-      } else { // predefined, sequence, struct, union, array
-        string fieldref = string("stru");
-        if (fld_cls & CL_ARRAY) {
-          intro += "  " + getArrayForany("stru", fname,
-            scoped(field_type->name()))
-            + "\n";
-          fieldref += '_';
-        } else {
-          fieldref += '.';
-        }
-        expr << "gen_max_marshaled_size("
-          << getWrapper(fieldref + fname, field_type, WD_OUTPUT) << ")";
-      }
-    }
-    be_global->impl_ << intro << "  return " << expr.str() << ";\n";
-  }
-  {
     Function find_size("gen_find_size", "size_t");
     find_size.addArg("stru", "const " + cxx + "&");
     find_size.endArgs();
     string expr, intro;
     for (size_t i = 0; i < fields.size(); ++i) {
+      AST_Type* field_type = fields[i]->field_type();
+      unTypeDef(field_type);
+      if (!field_type->in_main_file()
+          && field_type->node_type() != AST_Decl::NT_pre_defined) {
+        be_global->add_referenced(field_type->file_name().c_str());
+      }
       if (i) expr += "\n    + ";
       expr += findSizeCommon(fields[i]->local_name()->get_string(),
-        fields[i]->field_type(), "stru", intro);
+			     field_type, "stru", intro);
     }
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
@@ -871,16 +835,42 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
 
-  // Generate key-related marshaling code
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
-  // Only generate if this is a DCPS type
+  // Only generate these methods if this is a DCPS type
   if (info != 0) {
+    bool is_bounded_struct = true;
+    {
+      Function is_bounded("gen_is_bounded_size", "bool");
+      is_bounded.addArg("stru", "const " + cxx + "&");
+      is_bounded.endArgs();
+      for (size_t i = 0; i < fields.size(); ++i) {
+	if (!is_bounded_type(fields[i]->field_type())) {
+	  is_bounded_struct = false;
+	  break;
+	}
+      }
+      be_global->impl_ << "  return "
+                       << (is_bounded_struct ? "true" : "false") << ";\n";
+    }
+    {
+      Function max_marsh("gen_max_marshaled_size", "size_t");
+      max_marsh.addArg("stru", "const " + cxx + "&");
+      max_marsh.endArgs();
+      size_t size = 0;
+      if (is_bounded_struct) {  // If not bounded, return 0.
+	for (size_t i = 0; i < fields.size(); ++i) {
+	  size += max_marshaled_size(fields[i]->field_type());
+	}
+      }
+      be_global->impl_ << "  return " << size << ";\n";
+    }
+
+    // Generate key-related marshaling code
     bool bounded_key = true;
     {
       Function is_bounded("gen_is_bounded_size", "bool");
       is_bounded.addArg("stru", "KeyOnly<const " + cxx + ">");
       is_bounded.endArgs();
-
 
       IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
       for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
@@ -893,21 +883,14 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
                     << " (" << key_name << "). " << error << std::endl;
           return false;
         }
-        unTypeDef(field_type);
-        Classification fld_cls = classify(field_type);
-        if ((fld_cls & CL_STRING) ||
-            (fld_cls & CL_WIDE)) {
-          // Currently, the only key types that can make the marshaled
-          // key by unbounded are strings and wstrings.
-          bounded_key = false;
-        }
+	if (!is_bounded_type(field_type)) {
+	  bounded_key = false;
+	  break;
+	}
       }
 
-      if (bounded_key) {
-        be_global->impl_ << "  return true;\n";
-      } else {
-        be_global->impl_ << "  return false;\n";
-      }
+      be_global->impl_ << "  return "
+                       << (bounded_key ? "true" : "false") << ";\n";
     }
 
     {
@@ -915,9 +898,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
       max_marsh.addArg("stru", "KeyOnly<const " + cxx + ">");
       max_marsh.endArgs();
 
-      bool first = true;
-      std::ostringstream expr;
-      string intro;
+      size_t size = 0;
       if (bounded_key) {  // Only generate a size if the key is bounded
         IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
         for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
@@ -930,30 +911,10 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
                       << " (" << key_name << "). " << error << std::endl;
             return false;
           }
-          if (first) first = false;
-          else       expr << "\n    + ";
-          unTypeDef(field_type);
-          Classification fld_cls = classify(field_type);
-          if (fld_cls & CL_ENUM) {
-            expr << "max_marshaled_size_ulong()";
-          } else if (fld_cls & CL_STRING) {
-            AST_String* str = AST_String::narrow_from_decl(field_type);
-            expr << "max_marshaled_size_ulong()";
-            if (fld_cls & CL_BOUNDED) {
-              expr << " + " << str->max_size()->ev()->u.ulval;
-            }
-          } else if (fld_cls == CL_UNKNOWN) {
-            expr << "0"; // warning will be issued for the serialize functions
-          } else { // predefined, sequence, struct, union, array
-            string fieldref = string("stru.t.");
-            expr << "gen_max_marshaled_size("
-                 << getWrapper(fieldref + key_name, field_type, WD_OUTPUT)
-                 << ")";
-          }
+	  size += max_marshaled_size(field_type);
         }
       }
-      if (first) expr << "0";  // No key, size = 0
-      be_global->impl_ << intro << "  return " << expr.str() << ";\n";
+      be_global->impl_  << "  return " << size << ";\n";
     }
 
     {
@@ -1190,18 +1151,6 @@ bool marshal_generator::gen_union(UTL_ScopedName* name,
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
-  {
-    Function is_bounded("gen_is_bounded_size", "bool");
-    is_bounded.addArg("", "const " + cxx + "&");
-    is_bounded.endArgs();
-    be_global->impl_ << "  return false;\n";
-  }
-  {
-    Function max_marsh("gen_max_marshaled_size", "size_t");
-    max_marsh.addArg("", "const " + cxx + "&");
-    max_marsh.endArgs();
-    be_global->impl_ << "  return 100000; /* from TAO_IDL_BE */\n";
-  }
   const string wrap_out = getWrapper("uni._d()", discriminator, WD_OUTPUT);
   {
     Function find_size("gen_find_size", "size_t");

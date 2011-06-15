@@ -20,11 +20,17 @@ module Xyz {
   typedef  AnEnum    ArrayOfAnEnum[5];
 
   // needed to call size methods on arrays
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfBoolean"
   struct StructOfArrayOfBoolean { ArrayOfBoolean f; };
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfString"
   struct StructOfArrayOfString { ArrayOfString f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfChar"
   struct StructOfArrayOfChar { ArrayOfChar f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfOctet"
   struct StructOfArrayOfOctet { ArrayOfOctet f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfLong"
   struct StructOfArrayOfLong { ArrayOfLong f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfAnEnum"
   struct StructOfArrayOfAnEnum { ArrayOfAnEnum f;};
 
   // needed to detect duplicate overload problems
@@ -42,6 +48,20 @@ module Xyz {
   typedef sequence<octet,6>   SeqOfOctet;
   typedef sequence<long,6>    SeqOfLong;
   typedef sequence<AnEnum,6>  SeqOfAnEnum;
+
+  // Wrap the SeqOf* in a struct to test 
+#pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfBoolean"
+  struct StructOfSeqOfBoolean { SeqOfBoolean field; };
+#pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfString"
+  struct StructOfSeqOfString { SeqOfString field; };
+#pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfChar"
+  struct StructOfSeqOfChar { SeqOfChar field; };
+#pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfOctet"
+  struct StructOfSeqOfOctet { SeqOfOctet field; };
+#pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfLong"
+  struct StructOfSeqOfLong { SeqOfLong field; };
+#pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfAnEnum"
+  struct StructOfSeqOfAnEnum { SeqOfAnEnum field; };
 
   // needed to detect duplicate overload problems
   typedef sequence<boolean,3> SeqOfBoolean2;
@@ -66,11 +86,17 @@ module Xyz {
   typedef SeqOfAnEnum  ArrayOfSeqOfAnEnum[6];
 
   // needed to call size methods on arrays
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfBoolean"
   struct StructOfArrayOfSeqOfBoolean { ArrayOfSeqOfBoolean f; };
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfString"
   struct StructOfArrayOfSeqOfString { ArrayOfSeqOfString f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfChar"
   struct StructOfArrayOfSeqOfChar { ArrayOfSeqOfChar f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfOctet"
   struct StructOfArrayOfSeqOfOctet { ArrayOfSeqOfOctet f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfLong"
   struct StructOfArrayOfSeqOfLong { ArrayOfSeqOfLong f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfAnEnum"
   struct StructOfArrayOfSeqOfAnEnum { ArrayOfSeqOfAnEnum f;};
 
   // sequences of arrays
@@ -91,10 +117,15 @@ module Xyz {
 
   // needed to call size methods on arrays
   struct StructOfArrayOfArrayOfBoolean { ArrayOfArrayOfBoolean f; };
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfString"
   struct StructOfArrayOfArrayOfString { ArrayOfArrayOfString f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfChar"
   struct StructOfArrayOfArrayOfChar { ArrayOfArrayOfChar f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfOctet"
   struct StructOfArrayOfArrayOfOctet { ArrayOfArrayOfOctet f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfLong"
   struct StructOfArrayOfArrayOfLong { ArrayOfArrayOfLong f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfAnEnum"
   struct StructOfArrayOfArrayOfAnEnum { ArrayOfArrayOfAnEnum f;};
 
   // sequences of sequences
@@ -104,6 +135,9 @@ module Xyz {
   typedef sequence<SeqOfOctet,4>   SeqOfSeqOfOctet;
   typedef sequence<SeqOfLong,4>    SeqOfSeqOfLong;
   typedef sequence<SeqOfAnEnum,4>  SeqOfSeqOfAnEnum;
+
+#pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfSeqOfLong"
+  struct StructOfSeqOfSeqOfLong { SeqOfSeqOfLong field; };
 
   typedef string<7> SevenStr;
   struct AStruct {
@@ -282,6 +316,7 @@ module Xyz {
   };
 
   // for access to _dcps_* methods
+#pragma DCPS_DATA_TYPE "Xyz::StructAUnion"
   struct StructAUnion {
     AUnion sau_f1;
   };

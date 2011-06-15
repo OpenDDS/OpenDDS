@@ -95,6 +95,12 @@ struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
   }
 };
 
+inline OpenDDS_Dcps_Export size_t
+gen_max_marshaled_size(const GUID_t&)
+{
+  return 16;
+}
+
 // Check for equality using the generated logical functor.
 inline OpenDDS_Dcps_Export bool
 operator==(const GUID_t& lhs, const GUID_t& rhs)

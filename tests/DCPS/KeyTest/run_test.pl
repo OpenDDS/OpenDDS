@@ -32,6 +32,14 @@ if ($retcode != 0) {
 }
 
 
+$TST = PerlDDS::create_process("IsBounded", "");
+print STDERR "Running IsBounded\n";
+my $retcode = $TST->SpawnWaitKill(60);
+if ($retcode != 0) {
+    $status = 1;
+}
+
+
 # These files each represent an expected error from the key processing
 # code in the opendds_idl compiler.  Run the compiler against each of
 # them and verify that an error occurs.
