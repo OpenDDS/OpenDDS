@@ -81,20 +81,21 @@
                 '&quot; with no offset',
                 $newline)"/>
     </xsl:when>
-    <xsl:when test="not(transport)">
-      <xsl:value-of select="concat(
-                '   // Skipping generation for instance &quot;',
-                $Instname,
-                '&quot; with no transport',
-                $newline)"/>
-    </xsl:when>
     <xsl:otherwise>
       <xsl:variable name="classname" select="concat($Instname, $modelname, 'Traits')"/>
       <xsl:value-of select="concat($classname, '::~', $classname,
       '() { }', $newline, $newline)"/>
       <xsl:value-of select="concat('void ', $classname)"/>
       <xsl:text>::transport_config(OpenDDS::DCPS::TransportIdType id) {
-  OpenDDS::DCPS::TransportConfiguration_rch config;
+</xsl:text>
+      <xsl:choose>
+        <xsl:when test="not(transport)">
+          <xsl:value-of select="concat(
+                    '  // No transports defined for instance',
+                    ' &quot;', $Instname, '&quot;', $newline, $newline)"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:text>  OpenDDS::DCPS::TransportConfiguration_rch config;
   ACE_TString transport_type;
 
   try {
@@ -103,13 +104,15 @@
     // Create configuration for this transport ID
     switch (id) {
 </xsl:text>
-    <xsl:apply-templates/>
-    <xsl:text>      default:
+          <xsl:apply-templates/>
+          <xsl:text>      default:
         throw std::runtime_error("Invalid transport ID in configuration");
     };
   }
-
-  // Create the impl
+</xsl:text>
+        </xsl:otherwise>
+      </xsl:choose>
+<xsl:text>  // Create the impl
   OpenDDS::DCPS::TransportImpl_rch impl = TheTransportFactory->obtain(id);
   if (!impl.in()) {
     impl = TheTransportFactory->create_transport_impl(id, true);

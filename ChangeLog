@@ -1,3 +1,10 @@
+Wed Jun 15 15:24:12 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          For instances without transports, generate the class
+          implementation.
+
 Wed Jun 15 15:22:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/testdata/DataLib/DataLibConstraintErrorsTest1.opendds:
