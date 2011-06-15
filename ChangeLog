@@ -1,3 +1,16 @@
+Wed Jun 15 15:22:10 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/testdata/DataLib/DataLibConstraintErrorsTest1.opendds:
+        * tools/modeling/testdata/DataLib/DataLibConstraintErrorsTest1.opendds_diagram:
+        * tools/modeling/testdata/DataLib/DataLibConstraintErrorsTest1_screenshot_1.png:
+
+          Fixed model file after Dean Wette identified it as being invalid XML
+          using the validator he's currently developing.
+
+        * tools/modeling/testdata/DataLib/DataLibConstraintErrorsTest1.opendds_diagram_datalib:
+
+          Removed this file.
+
 Tue Jun 14 20:44:31 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/policy_duration_infinite.png:
