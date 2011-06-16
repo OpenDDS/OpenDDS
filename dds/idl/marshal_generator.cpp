@@ -561,19 +561,19 @@ namespace {
     } else if (fld_cls & CL_STRUCTURE) {
       AST_Structure* struct_node = dynamic_cast<AST_Structure*>(type);
       for (unsigned long i = 0; i < struct_node->nfields(); ++i) {
-	AST_Field** f;
-	struct_node->field(f, i);
-	if (!is_bounded_type((*f)->field_type())) {
-	  bounded = false;
-	  break;
-	}
+        AST_Field** f;
+        struct_node->field(f, i);
+        if (!is_bounded_type((*f)->field_type())) {
+          bounded = false;
+          break;
+        }
       }
     } else if (fld_cls & CL_SEQUENCE) {
       if (fld_cls & CL_BOUNDED) {
-	AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
-	if (!is_bounded_type(seq_node->base_type())) bounded = false;
+        AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
+        if (!is_bounded_type(seq_node->base_type())) bounded = false;
       } else {
-	bounded = false;
+        bounded = false;
       }
     } else if (fld_cls & CL_ARRAY) {
       AST_Array* array_node = dynamic_cast<AST_Array*>(type);
@@ -581,12 +581,12 @@ namespace {
     } else if (fld_cls & CL_UNION) {
       AST_Union* union_node = dynamic_cast<AST_Union*>(type);
       for (unsigned long i = 0; i < union_node->nfields(); ++i) {
-	AST_Field** f;
-	union_node->field(f, i);
-	if (!is_bounded_type((*f)->field_type())) {
-	  bounded = false;
-	  break;
-	}
+        AST_Field** f;
+        union_node->field(f, i);
+        if (!is_bounded_type((*f)->field_type())) {
+          bounded = false;
+          break;
+        }
       }
     }
     type_stack.pop_back();
@@ -599,87 +599,87 @@ namespace {
     size_t size = 0;
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
-	AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
-	switch (p->pt()) {
-	case AST_PredefinedType::PT_char:
-	case AST_PredefinedType::PT_boolean:
-	case AST_PredefinedType::PT_octet:
-	  size += 1;
-	  break;
-	case AST_PredefinedType::PT_short:
-	case AST_PredefinedType::PT_ushort:
-	case AST_PredefinedType::PT_wchar:
-	  size += 2;
-	  break;
-	case AST_PredefinedType::PT_long:
-	case AST_PredefinedType::PT_ulong:
-	case AST_PredefinedType::PT_float:
-	  size += 4;
-	  break;
-	case AST_PredefinedType::PT_longlong:
-	case AST_PredefinedType::PT_ulonglong:
-	case AST_PredefinedType::PT_double:
-	  size += 8;
-	  break;
-	case AST_PredefinedType::PT_longdouble:
-	  size += 16;
-	  break;
-	default:
-	  // Anything else shouldn't be in a DDS type or is unbounded.
-	  break;
-	}
-	break;
+        AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+        switch (p->pt()) {
+        case AST_PredefinedType::PT_char:
+        case AST_PredefinedType::PT_boolean:
+        case AST_PredefinedType::PT_octet:
+          size += 1;
+          break;
+        case AST_PredefinedType::PT_short:
+        case AST_PredefinedType::PT_ushort:
+        case AST_PredefinedType::PT_wchar:
+          size += 2;
+          break;
+        case AST_PredefinedType::PT_long:
+        case AST_PredefinedType::PT_ulong:
+        case AST_PredefinedType::PT_float:
+          size += 4;
+          break;
+        case AST_PredefinedType::PT_longlong:
+        case AST_PredefinedType::PT_ulonglong:
+        case AST_PredefinedType::PT_double:
+          size += 8;
+          break;
+        case AST_PredefinedType::PT_longdouble:
+          size += 16;
+          break;
+        default:
+          // Anything else shouldn't be in a DDS type or is unbounded.
+          break;
+        }
+        break;
       }
     case AST_Decl::NT_enum:
       size += 4;
       break;
     case AST_Decl::NT_string:
     case AST_Decl::NT_wstring: {
-	AST_String* string_node = dynamic_cast<AST_String*>(type);
-	size += string_node->width() * string_node->max_size()->ev ()->u.ulval;
-	break;
+        AST_String* string_node = dynamic_cast<AST_String*>(type);
+        size += string_node->width() * string_node->max_size()->ev ()->u.ulval;
+        break;
       }
     case AST_Decl::NT_struct: {
-	AST_Structure* struct_node = dynamic_cast<AST_Structure*>(type);
-	for (unsigned long i = 0; i < struct_node->nfields(); ++i) {
-	  AST_Field** f;
-	  struct_node->field(f, i);
-	  AST_Type* field_type = (*f)->field_type();
-	  size += max_marshaled_size(field_type);
-	}
-	break;
+        AST_Structure* struct_node = dynamic_cast<AST_Structure*>(type);
+        for (unsigned long i = 0; i < struct_node->nfields(); ++i) {
+          AST_Field** f;
+          struct_node->field(f, i);
+          AST_Type* field_type = (*f)->field_type();
+          size += max_marshaled_size(field_type);
+        }
+        break;
       }
     case AST_Decl::NT_sequence: {
-	AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
-	AST_Type* base_node = seq_node->base_type();
-	size_t bound = seq_node->max_size()->ev()->u.ulval;
-	size += 4 + bound * max_marshaled_size(base_node);
-	break;
+        AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
+        AST_Type* base_node = seq_node->base_type();
+        size_t bound = seq_node->max_size()->ev()->u.ulval;
+        size += 4 + bound * max_marshaled_size(base_node);
+        break;
       }
     case AST_Decl::NT_array: {
-	AST_Array* array_node = dynamic_cast<AST_Array*>(type);
-	AST_Type* base_node = array_node->base_type();
-	size_t array_size = 1;
-	AST_Expression** dims = array_node->dims();
-	for (unsigned long i = 0; i < array_node->n_dims(); i++) {
-	  array_size *= dims[i]->ev()->u.ulval;
-	}
-	size += array_size * max_marshaled_size(base_node);
-	break;
+        AST_Array* array_node = dynamic_cast<AST_Array*>(type);
+        AST_Type* base_node = array_node->base_type();
+        size_t array_size = 1;
+        AST_Expression** dims = array_node->dims();
+        for (unsigned long i = 0; i < array_node->n_dims(); i++) {
+          array_size *= dims[i]->ev()->u.ulval;
+        }
+        size += array_size * max_marshaled_size(base_node);
+        break;
       }
     case AST_Decl::NT_union: {
-	AST_Union* union_node = dynamic_cast<AST_Union*>(type);
-	size += max_marshaled_size(union_node->disc_type());
-	size_t largest_field_size = 0;
-	for (unsigned long i = 0; i < union_node->nfields(); ++i) {
-	  AST_Field** f;
-	  union_node->field(f, i);
-	  AST_Type* field_type = (*f)->field_type();
-	  size_t field_size = max_marshaled_size(field_type);
-	  if (field_size > largest_field_size) largest_field_size = field_size;
-	}
-	size += largest_field_size;
-	break;
+        AST_Union* union_node = dynamic_cast<AST_Union*>(type);
+        size += max_marshaled_size(union_node->disc_type());
+        size_t largest_field_size = 0;
+        for (unsigned long i = 0; i < union_node->nfields(); ++i) {
+          AST_Field** f;
+          union_node->field(f, i);
+          AST_Type* field_type = (*f)->field_type();
+          size_t field_size = max_marshaled_size(field_type);
+          if (field_size > largest_field_size) largest_field_size = field_size;
+        }
+        size += largest_field_size;
+        break;
       }
     default:
       // Anything else should be not here or is unbounded
@@ -804,7 +804,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
       }
       if (i) expr += "\n    + ";
       expr += findSizeCommon(fields[i]->local_name()->get_string(),
-			     field_type, "stru", intro);
+                             field_type, "stru", intro);
     }
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
@@ -844,10 +844,10 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
       is_bounded.addArg("stru", "const " + cxx + "&");
       is_bounded.endArgs();
       for (size_t i = 0; i < fields.size(); ++i) {
-	if (!is_bounded_type(fields[i]->field_type())) {
-	  is_bounded_struct = false;
-	  break;
-	}
+        if (!is_bounded_type(fields[i]->field_type())) {
+          is_bounded_struct = false;
+          break;
+        }
       }
       be_global->impl_ << "  return "
                        << (is_bounded_struct ? "true" : "false") << ";\n";
@@ -858,9 +858,9 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
       max_marsh.endArgs();
       size_t size = 0;
       if (is_bounded_struct) {  // If not bounded, return 0.
-	for (size_t i = 0; i < fields.size(); ++i) {
-	  size += max_marshaled_size(fields[i]->field_type());
-	}
+        for (size_t i = 0; i < fields.size(); ++i) {
+          size += max_marshaled_size(fields[i]->field_type());
+        }
       }
       be_global->impl_ << "  return " << size << ";\n";
     }
@@ -883,10 +883,10 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
                     << " (" << key_name << "). " << error << std::endl;
           return false;
         }
-	if (!is_bounded_type(field_type)) {
-	  bounded_key = false;
-	  break;
-	}
+        if (!is_bounded_type(field_type)) {
+          bounded_key = false;
+          break;
+        }
       }
 
       be_global->impl_ << "  return "
@@ -911,7 +911,7 @@ bool marshal_generator::gen_struct(UTL_ScopedName* name,
                       << " (" << key_name << "). " << error << std::endl;
             return false;
           }
-	  size += max_marshaled_size(field_type);
+          size += max_marshaled_size(field_type);
         }
       }
       be_global->impl_  << "  return " << size << ";\n";

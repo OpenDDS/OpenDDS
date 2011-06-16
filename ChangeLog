@@ -1,3 +1,10 @@
+Thu Jun 16 19:50:46 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/idl/marshal_generator.cpp:
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef2.idl:
+
+          Fix some fuzz errors.
+
 Thu Jun 16 19:12:43 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/DCPS/KeyTest/KeyTest.mpc:

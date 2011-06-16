@@ -30,7 +30,7 @@ module Xyz {
   typedef    long    ArrayOfLong2[5];
   typedef  AnEnum    ArrayOfAnEnum2[5];
 
-  // Wrap the SeqOf* in a struct to test 
+  // Wrap the SeqOf* in a struct to test
 #pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfBoolean"
   struct StructOfSeqOfBoolean { SeqOfBoolean field; };
 #pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfString"
