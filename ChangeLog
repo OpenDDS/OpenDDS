@@ -1,3 +1,13 @@
+Thu Jun 16 15:34:49 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
+        * tests/DCPS/Compiler/idl_test3_lib/FooDef2.idl:
+        * tests/DCPS/Compiler/idl_test3_lib/idl_test3_lib.mpc:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          Split the FooDef.idl file to avoid some build problems
+          with large object files.
+
 Thu Jun 16 14:58:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * configure:

@@ -10,10 +10,12 @@ project : dcps {
 
   IDL_Files {
     FooDef.idl
+    FooDef2.idl
   }
 
   TypeSupport_Files {
     FooDef.idl
+    FooDef2.idl
   }
 }
 

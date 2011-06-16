@@ -1,4 +1,5 @@
 #include "../idl_test3_lib/FooDefTypeSupportImpl.h"
+#include "../idl_test3_lib/FooDef2TypeSupportImpl.h"
 #include "ace/ACE.h"
 #include "ace/Log_Msg.h"
 #include <map>
