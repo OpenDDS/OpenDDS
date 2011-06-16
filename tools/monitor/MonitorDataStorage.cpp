@@ -567,17 +567,17 @@ Monitor::MonitorDataStorage::manageTransportLink(
   }
 
   // Transport Id display.
-  QString label( QObject::tr( "Transport Id"));
+  QString label( QObject::tr( "Transport"));
   int row = node->indexOf( 0, label);
   if( row == -1) {
     // New entry, add a reference to the actual transport node.
     QList<QVariant> list;
     list << label << QString( QObject::tr("<error>"));;
     TreeNode* idNode = new TreeNode( list, node);
-idNode->setColor( 1, QColor("#bfbfff"));
+    idNode->setColor( 1, QColor("#bfbfff"));
     node->append( idNode);
     transportNode->addValueRef( idNode);
-transportNode->setColor( 1, QColor("#bfffbf"));
+    transportNode->setColor( 1, QColor("#bfffbf"));
     create = true;
   }
 }
@@ -666,10 +666,10 @@ Monitor::MonitorDataStorage::manageTopicLink(
     QList<QVariant> list;
     list << topicLabel << QString( QObject::tr("<error>"));
     TreeNode* idNode = new TreeNode( list, node);
-idNode->setColor( 1, QColor("#bfbfff"));
+    idNode->setColor( 1, QColor("#bfbfff"));
     node->append( idNode);
     refNode->addValueRef( idNode);
-refNode->setColor( 1, QColor("#bfffbf"));
+    refNode->setColor( 1, QColor("#bfffbf"));
     create = true;
   }
 }
