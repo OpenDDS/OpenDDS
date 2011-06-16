@@ -1,3 +1,9 @@
+Thu Jun 16 18:53:21 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test3_lib/idl_test3_lib.mpc:
+
+          Add the /bigobj option to the vc9 & vc10 builds.
+
 Thu Jun 16 16:29:40 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
@@ -15,8 +21,8 @@ Thu Jun 16 15:58:16 UTC 2011  Don Hudson  <hudsond@ociweb.com>
 
           Fixed problem of monitor creating new transport nodes
           when existing transport nodes are updated by changing
-          manageTransportLink() to lookup an existing transport 
-          using label "Transport" instead of "Transport Id" to 
+          manageTransportLink() to lookup an existing transport
+          using label "Transport" instead of "Transport Id" to
           match the label used when a transport node is created.
 
           Fixed some indentions.

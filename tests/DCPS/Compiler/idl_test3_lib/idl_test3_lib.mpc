@@ -8,6 +8,10 @@ project : dcps {
   pch_header   =
   pch_source   =
 
+  specific (vc9, vc10) {
+    compile_flags += /bigobj
+  }
+
   IDL_Files {
     FooDef.idl
     FooDef2.idl
