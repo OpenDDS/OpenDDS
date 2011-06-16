@@ -1,3 +1,10 @@
+Thu Jun 16 14:58:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * configure:
+
+          Default inline to 1, since we now have make install but it doesn't
+          work yet with inline = 0.
+
 Wed Jun 15 17:57:12 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:

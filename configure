@@ -34,7 +34,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
    ['Build flags:',
     'debug!', 'Debugging (yes)',
     'optimize!', 'Optimization (no)',
-    'inline!', 'Inlining (yes, if optimize)',
+    'inline!', 'Inlining (yes)',
     'static!', 'Static libraries (no)',
     'ipv6!', 'IPv6 support (no)'
    ],
@@ -407,7 +407,6 @@ if (-r "$ENV{'ACE_ROOT'}/ace/config.h") {
 }
 else {
   $opts{'optimize'} = 0 if !exists $opts{'optimize'};
-  $opts{'inline'} = $opts{'optimize'} if !exists $opts{'inline'};
   my $pi = $platforminfo{$opts{'host'}};
 
   # config.h
