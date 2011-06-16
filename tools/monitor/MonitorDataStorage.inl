@@ -910,7 +910,6 @@ MonitorDataStorage::update< OpenDDS::DCPS::TransportReport>(
 
   // Retain knowledge of node insertions, updates, and deletions.
   bool layoutChanged = !remove; // Updated by getTransportNode()
-  bool dataChanged   = false;
 
   TransportKey key( std::string(data.host), data.pid, data.transport_id);
   TreeNode* node = this->getTransportNode( key, layoutChanged);
@@ -942,7 +941,6 @@ MonitorDataStorage::update< OpenDDS::DCPS::TransportReport>(
       1,
       QString( QObject::tr( static_cast<const char*>(data.transport_type)))
     );
-    dataChanged = true;
   }
 }
 

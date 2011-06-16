@@ -1,3 +1,9 @@
+Thu Jun 16 21:27:29 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tools/monitor/MonitorDataStorage.inl:
+
+          Fix some unused variable warnings.
+
 Thu Jun 16 19:50:46 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/idl/marshal_generator.cpp:
