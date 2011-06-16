@@ -11,11 +11,15 @@ project : dcps {
   IDL_Files {
     FooDef.idl
     FooDef2.idl
+    FooDef3.idl
+    SharedTypes.idl
   }
 
   TypeSupport_Files {
     FooDef.idl
     FooDef2.idl
+    FooDef3.idl
+    SharedTypes.idl
   }
 }
 

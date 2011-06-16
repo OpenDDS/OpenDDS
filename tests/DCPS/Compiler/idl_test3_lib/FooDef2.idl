@@ -3,21 +3,10 @@
 //    char, octet, boolean, string
 // where as all of the integer and float types are just one case.
 
+#include "SharedTypes.idl"
+
 module Xyz {
 
-#pragma DCPS_DATA_TYPE "Xyz::Foo"
-#pragma DCPS_DATA_KEY "Xyz::Foo key"
-#pragma DCPS_DATA_KEY "Xyz::Foo xcolor"
-
-  enum AnEnum { redx, greenx, bluex };
-
-  // basic arrays
-  typedef boolean    ArrayOfBoolean[5];
-  typedef  string<7> ArrayOfString[5];
-  typedef    char    ArrayOfChar[5];
-  typedef   octet    ArrayOfOctet[5];
-  typedef    long    ArrayOfLong[5];
-  typedef  AnEnum    ArrayOfAnEnum[5];
 
   // needed to call size methods on arrays
 #pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfBoolean"
@@ -40,14 +29,6 @@ module Xyz {
   typedef   octet    ArrayOfOctet2[5];
   typedef    long    ArrayOfLong2[5];
   typedef  AnEnum    ArrayOfAnEnum2[5];
-
-  // basic sequences
-  typedef sequence<boolean,6> SeqOfBoolean;
-  typedef sequence<string,6>  SeqOfString;
-  typedef sequence<char,6>    SeqOfChar;
-  typedef sequence<octet,6>   SeqOfOctet;
-  typedef sequence<long,6>    SeqOfLong;
-  typedef sequence<AnEnum,6>  SeqOfAnEnum;
 
   // Wrap the SeqOf* in a struct to test 
 #pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfBoolean"
