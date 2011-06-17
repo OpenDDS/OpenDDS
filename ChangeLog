@@ -1,3 +1,15 @@
+Fri Jun 17 16:36:27 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/KeyTest:
+        * tests/DCPS/KeyTest/BoundTest.idl:
+        * tests/DCPS/KeyTest/BoundTest2.idl:
+        * tests/DCPS/KeyTest/IsBounded.cpp:
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+
+          More splitting of IDL files with large amounts of generated
+          code.  There are still some builds having problems with this
+          file.
+
 Fri Jun 17 14:09:11 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/idl/metaclass_generator.cpp:

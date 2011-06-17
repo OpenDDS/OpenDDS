@@ -13,12 +13,14 @@ project(DDS*idl): dcps_test_lib {
     KeyTest.idl
     KeyTest2.idl
     BoundTest.idl
+    BoundTest2.idl
   }
 
   Idl_Files {
     KeyTest.idl
     KeyTest2.idl
     BoundTest.idl
+    BoundTest2.idl
   }
 }
 

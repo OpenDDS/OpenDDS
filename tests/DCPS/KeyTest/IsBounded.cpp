@@ -11,6 +11,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "../common/TestSupport.h"
 #include "BoundTestTypeSupportImpl.h"
+#include "BoundTest2TypeSupportImpl.h"
 
 #include <iostream>
 
