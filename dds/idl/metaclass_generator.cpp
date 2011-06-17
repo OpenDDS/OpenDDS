@@ -88,6 +88,7 @@ namespace {
         "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
         "      return make_field_cmp(&T::" << fieldName << ", next);\n"
         "    }\n";
+      be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_STRUCTURE) {
       size_t n = fieldName.size() + 1 /* 1 for the dot */;
       std::string fieldType = scoped(field->field_type()->name());
@@ -113,6 +114,7 @@ namespace {
       "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
       "      return &static_cast<const T*>(stru)->" << fieldName << ";\n"
       "    }\n";
+    be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
   }
 
   void assign_field(AST_Field* field)
@@ -131,6 +133,7 @@ namespace {
         "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n"
         "      return;\n"
         "    }\n";
+      be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_ARRAY) {
       AST_Type* unTD = field->field_type();
       unTypeDef(unTD);
@@ -141,6 +144,7 @@ namespace {
         fieldName << ";\n"
         "      const " << fieldType << "* rhsArr = static_cast<const " <<
         fieldType << "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n";
+      be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
       AST_Type* elem = arr->base_type();
       AST_Type* elemUnTD = elem;
       unTypeDef(elemUnTD);
@@ -175,6 +179,7 @@ namespace {
     const char* fieldName = field->local_name()->get_string();
     be_global->impl_ <<
       "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n";
+    be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     if (cls & CL_STRING) {
       be_global->impl_ << // ACE_OS::strcmp has overloads for narrow & wide
         "      " << "return 0 == ACE_OS::strcmp(static_cast<const T*>(lhs)->" <<
