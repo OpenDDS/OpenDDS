@@ -15,18 +15,23 @@
         description="Detects incorrect or questionable semantic constructs for elements in a PolicyLib diagram."
         path="//@audits/@categories.0"/>
     <categories
-        id="org.opendds.modeling.model.qospolicies.validation.errors"
+        id="org.opendds.modeling.model.policylib.validation.errors"
         name="PolicyLib Errors"
-        description="Detects modeling constructs that would result in invalid generated OpenDDS code."
-        path="//@audits/@categories.0 //@audits/@categories.1"
-        audits="//@audits/@rules.0"/>
+        description="Detects PolicyLib elements that would result in invalid generated OpenDDS code."
+        path="//@audits/@categories.0 //@audits/@categories.1"/>
+    <categories
+        id="org.opendds.modeling.model.qospolicies.validation.errors"
+        name="QoS Policy Errors"
+        description="Detects QoS Policy members that would result in invalid generated OpenDDS code."
+        path="//@audits/@categories.0 //@audits/@categories.1 //@audits/@categories.2"
+        audits="//@audits/@rules.0 //@audits/@rules.1 //@audits/@rules.2 //@audits/@rules.3 //@audits/@rules.4 //@audits/@rules.5 //@audits/@rules.6 //@audits/@rules.7"/>
     <rules
-        name="Policy Name Emtpy"
+        name="Policy Name Validation"
         description="Policy names should not be empty"
         id="org.opendds.modeling.model.qospolicies.validation.error.name_blank"
         rule="//@expressionProviders/@providers.0/@expressions.18"
         message="Policy name is empty"
-        category="//@audits/@categories.1">
+        category="//@audits/@categories.2">
       <target
           xsi:type="gmfgen:GenDomainElementTarget"
           contextSelector="//@audits/@clientContexts.0">
@@ -34,8 +39,106 @@
             href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/QosPolicy"/>
       </target>
     </rules>
+    <rules
+        name="dsQosPolicy max_samples validation"
+        description="dsQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_samples"
+        rule="//@expressionProviders/@providers.0/@expressions.19"
+        message="dsQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        category="//@audits/@categories.2">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/DurabilityServiceQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="dsQosPolicy max_instances validation"
+        description="dsQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_instances"
+        rule="//@expressionProviders/@providers.0/@expressions.20"
+        message="dsQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        category="//@audits/@categories.2">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/DurabilityServiceQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="dsQosPolicy max_samples_per_instance validation"
+        description="dsQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_samples_per_instance"
+        rule="//@expressionProviders/@providers.0/@expressions.21"
+        message="dsQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        category="//@audits/@categories.2">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/DurabilityServiceQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="dsQosPolicy history_depth validation"
+        description="dsQosPolicy history_depth must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.history_depth"
+        rule="//@expressionProviders/@providers.0/@expressions.22"
+        message="dsQosPolicy history_depth must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        category="//@audits/@categories.2">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/DurabilityServiceQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="rlQosPolicy max_samples validation"
+        description="rlQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        id="org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_samples"
+        rule="//@expressionProviders/@providers.0/@expressions.23"
+        message="rlQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        category="//@audits/@categories.2">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/ResourceLimitsQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="rlQosPolicy max_instances validation"
+        description="rlQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        id="org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_instances"
+        rule="//@expressionProviders/@providers.0/@expressions.24"
+        message="rlQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        category="//@audits/@categories.2">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/ResourceLimitsQosPolicy"/>
+      </target>
+    </rules>
+    <rules
+        name="rlQosPolicy max_samples_per_instance validation"
+        description="rlQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        id="org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_samples_per_instance"
+        rule="//@expressionProviders/@providers.0/@expressions.25"
+        message="rlQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero"
+        category="//@audits/@categories.2">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="../../org.opendds.modeling.model/model/OpenDDS_dup_PolicyLib.genmodel#//qos/ResourceLimitsQosPolicy"/>
+      </target>
+    </rules>
     <clientContexts
-        ruleTargets="//@audits/@rules.0/@target"/>
+        ruleTargets="//@audits/@rules.0/@target //@audits/@rules.1/@target //@audits/@rules.2/@target //@audits/@rules.3/@target //@audits/@rules.4/@target //@audits/@rules.5/@target //@audits/@rules.6/@target //@audits/@rules.7/@target"/>
   </audits>
   <diagram
       visualID="1000"
@@ -3341,6 +3444,27 @@
       <expressions
           xsi:type="gmfgen:GenConstraint"
           body="not self.name.oclIsUndefined() and self.name &lt;> ''"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.max_samples = -1 or&#xA;self.max_samples > 0&#xA;"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.max_instances = -1 or&#xA;self.max_instances > 0&#xA;"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.max_samples_per_instance = -1 or&#xA;self.max_samples_per_instance > 0&#xA;"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.history_depth = -1 or&#xA;self.history_depth > 0&#xA;"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.max_samples = -1 or&#xA;self.max_samples > 0&#xA;"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.max_instances = -1 or&#xA;self.max_instances > 0&#xA;"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="self.max_samples_per_instance = -1 or&#xA;self.max_samples_per_instance > 0&#xA;"/>
     </providers>
   </expressionProviders>
   <labelParsers

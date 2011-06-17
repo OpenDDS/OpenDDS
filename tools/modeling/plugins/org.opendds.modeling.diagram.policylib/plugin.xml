@@ -836,13 +836,97 @@
          <constraints categories="org.opendds.modeling.model.qospolicies.validations/org.opendds.modeling.model.qospolicies.validation.errors">
                   <constraint id="org.opendds.modeling.model.qospolicies.validation.error.name_blank"
             lang="OCL"
-            name="Policy Name Emtpy"
+            name="Policy Name Validation"
             mode="Batch"
             severity="ERROR" statusCode="200">
             <![CDATA[not self.name.oclIsUndefined() and self.name <> '']]>
             <description><![CDATA[Policy names should not be empty]]></description>
             <message><![CDATA[Policy name is empty]]></message>
             <target class="qos.QosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_samples"
+            lang="OCL"
+            name="dsQosPolicy max_samples validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.max_samples = -1 or
+self.max_samples > 0
+]]>
+            <description><![CDATA[dsQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero]]></description>
+            <message><![CDATA[dsQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero]]></message>
+            <target class="qos.DurabilityServiceQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_instances"
+            lang="OCL"
+            name="dsQosPolicy max_instances validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.max_instances = -1 or
+self.max_instances > 0
+]]>
+            <description><![CDATA[dsQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero]]></description>
+            <message><![CDATA[dsQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero]]></message>
+            <target class="qos.DurabilityServiceQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_samples_per_instance"
+            lang="OCL"
+            name="dsQosPolicy max_samples_per_instance validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.max_samples_per_instance = -1 or
+self.max_samples_per_instance > 0
+]]>
+            <description><![CDATA[dsQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero]]></description>
+            <message><![CDATA[dsQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero]]></message>
+            <target class="qos.DurabilityServiceQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.history_depth"
+            lang="OCL"
+            name="dsQosPolicy history_depth validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.history_depth = -1 or
+self.history_depth > 0
+]]>
+            <description><![CDATA[dsQosPolicy history_depth must be -1 (LENGTH_UNLIMITED) or greater than zero]]></description>
+            <message><![CDATA[dsQosPolicy history_depth must be -1 (LENGTH_UNLIMITED) or greater than zero]]></message>
+            <target class="qos.DurabilityServiceQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_samples"
+            lang="OCL"
+            name="rlQosPolicy max_samples validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.max_samples = -1 or
+self.max_samples > 0
+]]>
+            <description><![CDATA[rlQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero]]></description>
+            <message><![CDATA[rlQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero]]></message>
+            <target class="qos.ResourceLimitsQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_instances"
+            lang="OCL"
+            name="rlQosPolicy max_instances validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.max_instances = -1 or
+self.max_instances > 0
+]]>
+            <description><![CDATA[rlQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero]]></description>
+            <message><![CDATA[rlQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero]]></message>
+            <target class="qos.ResourceLimitsQosPolicy"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_samples_per_instance"
+            lang="OCL"
+            name="rlQosPolicy max_samples_per_instance validation"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.max_samples_per_instance = -1 or
+self.max_samples_per_instance > 0
+]]>
+            <description><![CDATA[rlQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero]]></description>
+            <message><![CDATA[rlQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero]]></message>
+            <target class="qos.ResourceLimitsQosPolicy"/>
          </constraint>
                   </constraints>
       </constraintProvider>
@@ -855,6 +939,13 @@
       </clientContext>
       <binding context="org.opendds.modeling.diagram.policylibDefaultCtx">
                   <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.error.name_blank"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_samples"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_instances"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_samples_per_instance"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.history_depth"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_samples"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_instances"/>
+                  <constraint ref="org.opendds.modeling.diagram.policylib.org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_samples_per_instance"/>
                </binding>
 
    </extension>

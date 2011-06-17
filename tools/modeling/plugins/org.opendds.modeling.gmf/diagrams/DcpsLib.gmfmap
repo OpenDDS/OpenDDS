@@ -2383,6 +2383,115 @@
               href="../../org.opendds.modeling.model/model/Domain.ecore#//DomainEntity"/>
         </target>
       </audits>
+      <childContainers
+          id="org.opendds.modeling.model.qospolicies.validation.errors"
+          name="QoS Policy Errors"
+          description="Detects QoS Policy members that would result in invalid generated OpenDDS code.">
+        <audits
+            name="Policy Name Validation"
+            description="Policy names should not be empty"
+            id="org.opendds.modeling.model.qospolicies.validation.error.name_blank"
+            message="Policy name is empty">
+          <rule
+              body="not self.name.oclIsUndefined() and self.name &lt;> ''"/>
+          <target
+              xsi:type="gmfmap:DomainElementTarget">
+            <element
+                href="../../org.opendds.modeling.model/model/QoS.ecore#//QosPolicy"/>
+          </target>
+        </audits>
+        <audits
+            name="dsQosPolicy max_samples validation"
+            description="dsQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero"
+            id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_samples"
+            message="dsQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero">
+          <rule
+              body="self.max_samples = -1 or&#xA;self.max_samples > 0&#xA;"/>
+          <target
+              xsi:type="gmfmap:DomainElementTarget">
+            <element
+                href="../../org.opendds.modeling.model/model/QoS.ecore#//DurabilityServiceQosPolicy"/>
+          </target>
+        </audits>
+        <audits
+            name="dsQosPolicy max_instances validation"
+            description="dsQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero"
+            id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_instances"
+            message="dsQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero">
+          <rule
+              body="self.max_instances = -1 or&#xA;self.max_instances > 0&#xA;"/>
+          <target
+              xsi:type="gmfmap:DomainElementTarget">
+            <element
+                href="../../org.opendds.modeling.model/model/QoS.ecore#//DurabilityServiceQosPolicy"/>
+          </target>
+        </audits>
+        <audits
+            name="dsQosPolicy max_samples_per_instance validation"
+            description="dsQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero"
+            id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.max_samples_per_instance"
+            message="dsQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero">
+          <rule
+              body="self.max_samples_per_instance = -1 or&#xA;self.max_samples_per_instance > 0&#xA;"/>
+          <target
+              xsi:type="gmfmap:DomainElementTarget">
+            <element
+                href="../../org.opendds.modeling.model/model/QoS.ecore#//DurabilityServiceQosPolicy"/>
+          </target>
+        </audits>
+        <audits
+            name="dsQosPolicy history_depth validation"
+            description="dsQosPolicy history_depth must be -1 (LENGTH_UNLIMITED) or greater than zero"
+            id="org.opendds.modeling.model.qospolicies.validation.dsQosPolicy.history_depth"
+            message="dsQosPolicy history_depth must be -1 (LENGTH_UNLIMITED) or greater than zero">
+          <rule
+              body="self.history_depth = -1 or&#xA;self.history_depth > 0&#xA;"/>
+          <target
+              xsi:type="gmfmap:DomainElementTarget">
+            <element
+                href="../../org.opendds.modeling.model/model/QoS.ecore#//DurabilityServiceQosPolicy"/>
+          </target>
+        </audits>
+        <audits
+            name="rlQosPolicy max_samples validation"
+            description="rlQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero"
+            id="org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_samples"
+            message="rlQosPolicy max_samples must be -1 (LENGTH_UNLIMITED) or greater than zero">
+          <rule
+              body="self.max_samples = -1 or&#xA;self.max_samples > 0&#xA;"/>
+          <target
+              xsi:type="gmfmap:DomainElementTarget">
+            <element
+                href="../../org.opendds.modeling.model/model/QoS.ecore#//ResourceLimitsQosPolicy"/>
+          </target>
+        </audits>
+        <audits
+            name="rlQosPolicy max_instances validation"
+            description="rlQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero"
+            id="org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_instances"
+            message="rlQosPolicy max_instances must be -1 (LENGTH_UNLIMITED) or greater than zero">
+          <rule
+              body="self.max_instances = -1 or&#xA;self.max_instances > 0&#xA;"/>
+          <target
+              xsi:type="gmfmap:DomainElementTarget">
+            <element
+                href="../../org.opendds.modeling.model/model/QoS.ecore#//ResourceLimitsQosPolicy"/>
+          </target>
+        </audits>
+        <audits
+            name="rlQosPolicy max_samples_per_instance validation"
+            description="rlQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero"
+            id="org.opendds.modeling.model.qospolicies.validation.rlQosPolicy.max_samples_per_instance"
+            message="rlQosPolicy max_samples_per_instance must be -1 (LENGTH_UNLIMITED) or greater than zero">
+          <rule
+              body="self.max_samples_per_instance = -1 or&#xA;self.max_samples_per_instance > 0&#xA;"/>
+          <target
+              xsi:type="gmfmap:DomainElementTarget">
+            <element
+                href="../../org.opendds.modeling.model/model/QoS.ecore#//ResourceLimitsQosPolicy"/>
+          </target>
+        </audits>
+      </childContainers>
     </childContainers>
     <childContainers
         id="org.opendds.modeling.model.dcps.validation.warnings"
