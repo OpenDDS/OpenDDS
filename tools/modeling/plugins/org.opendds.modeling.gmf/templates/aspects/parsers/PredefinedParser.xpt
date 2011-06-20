@@ -60,7 +60,13 @@
 	«EXPAND xpt::Common::generatedMemberComment»
 	private void numbersToSymbols(Object[] values) {
 		for (int i = 0; i < values.length; i++) {
-			if (values[i] instanceof Long) {
+			if (values[i] instanceof Integer) {
+				long val = (Integer) values[i];
+				if (val == INFINITY_32) {
+					values[i] = "Infinity";
+				}
+			}
+			else if (values[i] instanceof Long) {
 				long val = (Long) values[i];
 				if (val == INFINITY_32) {
 					values[i] = "Infinity";
@@ -148,6 +154,11 @@
 					value = new Integer(((Number) value).intValue());
 				} else if (value instanceof String) {
 					String s = (String) value;
+«REM»Custom modifications begin«ENDREM-»
+					if (s.length() > 2 && s.substring(0, 3).equalsIgnoreCase("inf")) {
+						value = new Integer(INFINITY_32);
+					} else
+«REM»Custom modifications end«ENDREM-»
 					if (s.length() == 0) {
 						value = null;
 					} else {
