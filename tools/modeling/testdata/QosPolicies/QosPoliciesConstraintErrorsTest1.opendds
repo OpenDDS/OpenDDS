@@ -19,7 +19,7 @@
     <topicDescriptions xsi:type="topics:Topic" xmi:id="_0A67oJj5EeCoLuk9W_C8sg" name="testTopic" datatype="_sI_WEJj5EeCoLuk9W_C8sg"/>
     <policies xsi:type="opendds:efQosPolicy" xmi:id="_CPQfEJj5EeCoLuk9W_C8sg" autoenable_created_entities="true"/>
     <policies xsi:type="opendds:dsQosPolicy" xmi:id="_OBhzQJj5EeCoLuk9W_C8sg" name="dsBad" history_depth="0" history_kind="KEEP_LAST" max_instances="-10" max_samples="-5" max_samples_per_instance="0">
-      <service_cleanup_delay xmi:id="_OBhzQZj5EeCoLuk9W_C8sg"/>
+      <service_cleanup_delay xmi:id="_OBhzQZj5EeCoLuk9W_C8sg" second="-1"/>
     </policies>
     <policies xsi:type="opendds:rlQosPolicy" xmi:id="_ODnd8Jj5EeCoLuk9W_C8sg" name="rlBad" max_instances="0" max_samples="-50" max_samples_per_instance="-100"/>
   </libs>
@@ -27,6 +27,36 @@
     <types xsi:type="types:Struct" xmi:id="_sI_WEJj5EeCoLuk9W_C8sg" name="TestStruct" isDcpsDataType="true">
       <fields xmi:id="_uKU7sJj5EeCoLuk9W_C8sg" name="size" type="_xmgusZj5EeCoLuk9W_C8sg"/>
     </types>
+  </libs>
+  <libs xsi:type="opendds:PolicyLib" xmi:id="_pLu6kJtFEeC4XualBrsC8g" name="PolicyLibPolicyDurationErrors">
+    <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_wh7FAJtFEeC4XualBrsC8g" name="deadline">
+      <period xmi:id="_wh86MJtFEeC4XualBrsC8g" nanosecond="256" second="-1"/>
+    </policies>
+    <policies xsi:type="opendds:dsQosPolicy" xmi:id="_gjzdoJtUEeCljP3YuF0scg" name="ds" history_depth="1" history_kind="KEEP_LAST" max_instances="-1" max_samples="-1" max_samples_per_instance="-1">
+      <service_cleanup_delay xmi:id="_gj3vEJtUEeCljP3YuF0scg" nanosecond="2000000000"/>
+    </policies>
+    <policies xsi:type="opendds:lbQosPolicy" xmi:id="_mgCykJtUEeCljP3YuF0scg" name="lb">
+      <duration xmi:id="_mgCykZtUEeCljP3YuF0scg" nanosecond="2147483647" second="-1"/>
+    </policies>
+    <policies xsi:type="opendds:lifespanQosPolicy" xmi:id="_AOcqcJtVEeCljP3YuF0scg" name="lifespan">
+      <duration xmi:id="_AOdRgJtVEeCljP3YuF0scg" nanosecond="2147483647" second="-2"/>
+    </policies>
+    <policies xsi:type="opendds:livelinessQosPolicy" xmi:id="_MaXNsJtVEeCljP3YuF0scg" name="liveliness" kind="AUTOMATIC">
+      <lease_duration xmi:id="_MaXNsZtVEeCljP3YuF0scg" nanosecond="2147483647" second="-1"/>
+    </policies>
+    <policies xsi:type="opendds:rdlQosPolicy" xmi:id="_QM1ZwJtVEeCljP3YuF0scg" name="rdl">
+      <autopurge_nowriter_samples_delay xmi:id="_QM2n4JtVEeCljP3YuF0scg" nanosecond="2147483647" second="-1"/>
+      <autopurge_disposed_samples_delay xmi:id="_QM2A0JtVEeCljP3YuF0scg" nanosecond="2147483647" second="-1"/>
+    </policies>
+    <policies xsi:type="opendds:reliabilityQosPolicy" xmi:id="_UvnBYJtVEeCljP3YuF0scg" name="reliability" kind="BEST_EFFORT">
+      <max_blocking_time xmi:id="_UvnocJtVEeCljP3YuF0scg" nanosecond="2147483647" second="-1"/>
+    </policies>
+    <policies xsi:type="opendds:tbfQosPolicy" xmi:id="_XYgWQJtVEeCljP3YuF0scg" name="tbf">
+      <minimum_separation xmi:id="_XYgWQZtVEeCljP3YuF0scg" second="-1"/>
+    </policies>
+    <policies xsi:type="opendds:lbQosPolicy" xmi:id="_n5LkMJteEeC-Ia6MyLaxUg" name="lb2">
+      <duration xmi:id="_n5LkMZteEeC-Ia6MyLaxUg" nanosecond="2147483647"/>
+    </policies>
   </libs>
   <basicTypes xmi:id="_xmfgkJj5EeCoLuk9W_C8sg">
     <types xsi:type="types:Boolean" xmi:id="_xmgHoJj5EeCoLuk9W_C8sg"/>
