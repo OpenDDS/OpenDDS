@@ -54,7 +54,7 @@
     <xsd:attribute ref="xmi:id"/>
     <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
     <xsd:attribute name="nanosecond" type="xsd:long"/>
-    <xsd:attribute name="second" type="xsd:long"/>
+    <xsd:attribute name="second" type="xsd:int"/>
   </xsd:complexType>
   <xsd:element name="Period" type="enumerations:Period"/>
 </xsd:schema>

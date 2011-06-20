@@ -1,3 +1,11 @@
+Mon Jun 20 18:54:42 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Enumerations.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/EnumerationsXMI.xsd:
+
+	  Changed Period's second attribute type from ELong to EInt as 32-bit EInt
+	  corresponds to 32-bit CORBA Long used in DDS.
+
 Mon Jun 20 17:58:43 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
