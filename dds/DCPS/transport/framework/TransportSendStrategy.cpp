@@ -151,6 +151,7 @@ TransportSendStrategy::perform_work()
   DBG_ENTRY_LVL("TransportSendStrategy","perform_work",6);
 
   SendPacketOutcome outcome;
+  bool no_more_work = false;
 
   { // scope for the guard(this->lock_);
     GuardType guard(this->lock_);
@@ -271,6 +272,7 @@ TransportSendStrategy::perform_work()
 
       // Revert back to MODE_DIRECT mode.
       this->mode_ = MODE_DIRECT;
+      no_more_work = true;
     }
   } // End of scope for guard(this->lock_);
 
@@ -283,7 +285,7 @@ TransportSendStrategy::perform_work()
 
   // If we sent the whole packet (eg, partial_send is false), and the queue_
   // is now empty, then we've cleared the backpressure situation.
-  if ((outcome == OUTCOME_COMPLETE_SEND) && (this->queue_->size() == 0)) {
+  if (no_more_work) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
               "We sent the whole packet, and there is nothing left on "
               "the queue now.\n"), 5);
@@ -1562,7 +1564,6 @@ TransportSendStrategy::direct_send(bool relink)
 
       // We encountered backpressure, or only sent part of the packet.
       this->mode_ = MODE_QUEUE;
-      this->synch_->work_available();
 
     } else if ((outcome == OUTCOME_PEER_LOST) ||
                (outcome == OUTCOME_SEND_ERROR)) {
