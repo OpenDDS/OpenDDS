@@ -1,3 +1,11 @@
+Tue Jun 21 18:27:18 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/images/problems_view_menu.png:
+        * tools/modeling/plugins/org.opendds.modeling.help/html/modeling/tasks/performingvalidations.html:
+
+	  Add discussion about issue when validating two libs in the same model and how
+	  to restrict scope of errors shown in the Problem view.
+
 Tue Jun 21 12:35:55 UTC 2011  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
