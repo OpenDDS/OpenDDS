@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="modelvalidation" default="compile" basedir=".">
+
+  <property file="build.properties"/>
+ 
+  <!-- 
+
+	/******************************************************
+	 Setup class path for targets 
+	******************************************************/ -->
+  <path id="project.class.path">
+    <pathelement location="${build.dir}" />
+    <fileset dir="${lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+  </path>
+  <!-- 
+
+	/******************************************************
+	 Initialization
+	******************************************************/ -->
+  <target name="init">
+    <tstamp />
+  </target>
+  
+  <!-- 
+
+	/******************************************************
+	 Prepare for compilation 
+	******************************************************/ -->
+  <target name="prepare" depends="init">
+    <mkdir dir="${build.dir}" />
+    <copy todir="${build.dir}">
+       <fileset dir="${src.dir}">
+         <exclude name="**/*.java"/>
+       </fileset>
+     </copy>
+  </target>
+
+  <!-- 
+
+	    /******************************************************
+	     Transform generated xsd files 
+	    ******************************************************/ -->
+  <target name="transform-xsd" depends="compile">
+    <delete dir="${gen.xsd.dir}"/>
+    <mkdir dir="${gen.xsd.dir}"/>
+   
+    <java classname="${app.package}.OpenDDSXMISchemaTransformer" fork="yes">
+      <arg value="-src" />
+      <arg value="${src.xsd.dir}" />
+      <arg value="-dest" />
+      <arg value="${gen.xsd.dir}" />
+      <classpath refid="project.class.path" />
+    </java>
+  </target>
+  
+  <target name="staging" depends="transform-xsd, compile" description="setup distribution">
+    <delete dir="${staging.dir}"/>
+    <mkdir dir="${staging.dir}"/>
+    <jar destfile="${staging.dir}/${app.name}.jar">
+      <fileset dir="${build.dir}" excludes="**/Test.class"/>
+       <archives>
+         <zips>
+           <fileset dir="lib" includes="*.jar"/>
+         </zips>
+       </archives>
+      <manifest>
+        <attribute name="Main-Class" value="${app.package}.OpenDDSModelValidator"/>
+      </manifest>
+     </jar>
+    <mkdir dir="${staging.dir}/xsd"/>
+    <copy todir="${staging.dir}/xsd">
+      <fileset dir="${gen.xsd.dir}">
+        <include name="*.xsd"/>
+      </fileset>
+    </copy>
+    <copy todir="${staging.dir}">
+      <fileset dir="${rsrc.dir}">
+        <include name="*.sh"/>
+        <include name="*.bat"/>
+      </fileset>
+    </copy>
+    <replace dir="${staging.dir}" propertyFile="build.properties">
+      <include name="*.sh"/>
+      <include name="*.bat"/>
+      <replacefilter token="__APPNAME__" property="app.name"/>
+    </replace>
+  </target>
+  
+  <target name="dist.win" depends="staging" description="build zip distribution for windows">
+    <zip destfile="${dist.dir}/${app.name}.zip" basedir="${staging.dir}" excludes="**/*.sh" />
+    <delete dir="${staging.dir}"/>
+    <echo message="windows distribution created at: ${dist.dir}/${app.name}.zip"/>
+  </target>
+
+  <target name="dist.nix" depends="staging" description="build tar.gz distribution for linux, unix">
+    <fixcrlf srcdir="${staging.dir}" eol="unix" eof="remove" includes="**/*.sh" />
+    <chmod dir="${staging.dir}" includes="**/*.sh" perm="ugo+rx"/>
+    
+    <tar destfile="${dist.dir}/${app.name}.tar.gz" compression="gzip">
+        <tarfileset dir="${staging.dir}" mode="755">
+            <include name="**/*.sh"/>
+        </tarfileset>
+        <tarfileset dir="${staging.dir}">
+            <include name="**/*"/>
+            <exclude name="**/*.sh"/>
+            <exclude name="**/*.bat"/>
+       </tarfileset>
+    </tar>
+    <delete dir="${staging.dir}"/>
+    <echo message="linux/unix distribution created at: ${dist.dir}/${app.name}.tar.gz"/>
+  </target>
+  
+  <target name="dist.all" depends="clean" description="build distributions for all windows, linux, unix">
+    <antcall target="dist.win"/>
+    <antcall target="dist.nix"/>
+  </target>
+
+  <!-- 
+
+	/******************************************************
+	 Compile source
+	******************************************************/ -->
+  <target name="compile" depends="prepare" description="compile source code">
+    <javac includeAntRuntime="false" destdir="${build.dir}">
+      <src path="${src.dir}" />
+      <classpath refid="project.class.path" />
+    </javac>
+  </target>
+  <!-- 
+
+	/******************************************************
+	Cleanup everything
+	******************************************************/ -->
+  <target name="clean" depends="clean.build" description="remove class files" />
+  <!-- 
+
+	/******************************************************
+	Cleanup previous builds
+	******************************************************/ -->
+  <target name="clean.build" depends="init">
+    <delete dir="${build.dir}" />
+    <delete dir="${dist.dir}" />
+  </target>
+</project>
