@@ -1,3 +1,14 @@
+Thu Jun 23 21:12:50 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/validation/modelvalidation/build.xml:
+        * tools/modeling/validation/modelvalidation/docs/README:
+        * tools/modeling/validation/modelvalidation/lib/test/junit-4.4.jar:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.bat:
+        * tools/modeling/validation/modelvalidation/resources/openddsvalidate.sh:
+
+          Added junit-4.4.jar file needed for ant build.xml to run tests.
+          Changed how the tool is packaged.
+
 Thu Jun 23 20:02:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * NEWS:

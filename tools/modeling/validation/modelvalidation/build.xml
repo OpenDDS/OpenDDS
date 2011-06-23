@@ -59,6 +59,7 @@
     <delete dir="${staging.dir}"/>
     <mkdir dir="${staging.dir}"/>
     <mkdir dir="${staging.dir}/xsd"/>
+    <mkdir dir="${staging.dir}/lib"/>
     <copy todir="${staging.dir}/xsd">
       <fileset dir="${gen.xsd.dir}">
         <include name="*.xsd"/>
@@ -79,7 +80,7 @@
       <include name="log4j.xml"/>
       <replacefilter token="${app.name.token}" property="app.name"/>
     </replace>
-   <jar destfile="${staging.dir}/${app.name}.jar">
+   <jar destfile="${staging.dir}/lib/${app.name}.jar">
       <fileset dir="${build.dir}" excludes="**/Test.class"/>
      <zipfileset src="${lib.dir}/log4j-1.2.16.jar" excludes="META-INF/*"/>
      <zipfileset src="${lib.dir}/commons-cli-1.2.jar" excludes="META-INF/*"/>
