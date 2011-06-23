@@ -9,6 +9,17 @@ Version 2.4 of OpenDDS.
   consideration needs to be given to how these "missing" samples impact the
   QoS behavior, see the document in docs/design/CONTENT_SUBSCRIPTION.
 
+- DisjointSequence, an internal class used to track sequence numbers for both
+  multicast and wait_for_acks, was enhanced to store contiguous ranges instead
+  of individual values.  Thus it will not require so much memory in cases where
+  there are gaps in the sequence numbers.
+
+- Began implementing the DDS Interoperabiltiy specification aka "RTPS"
+  (see OMG formal/2010-11-01).  Changes in this release include fragmentation
+  and reassembly for udp and multicast, 64-bit sequence numbers, and the ability
+  to transmit only the key fields for the instance-control messages (register,
+  unregister, dispose).
+
 - Various enhancements and fixes were made to the diagram modeling portion
   of the OpenDDS Modeling SDK. These include:             [Modeling SDK 1.0.1]
     * The property sheet now includes a tab for viewing and editing
