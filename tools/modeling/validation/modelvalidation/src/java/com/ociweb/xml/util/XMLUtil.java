@@ -2,6 +2,8 @@ package com.ociweb.xml.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
@@ -35,7 +37,7 @@ public class XMLUtil {
 		transformer.transform(source, result);
 	}
 	
-	public static boolean validate(final File schemaFile, final File xmlFile) throws SAXException, IOException {
+	public static List<SAXParseException> validate(final File schemaFile, final File xmlFile) throws SAXException, IOException {
 		logger.debug("schemaFile = " + schemaFile);
 		logger.debug("xmlFile = " + xmlFile);
 		Source schemaSource = new StreamSource(schemaFile);
@@ -46,24 +48,26 @@ public class XMLUtil {
     	ValidationErrorHandler veh = new ValidationErrorHandler();
     	validator.setErrorHandler(veh);
         validator.validate(xmlSource);
-        return veh.numMsgs == 0;
+        return veh.errors;
 	}
 	
 	static class ValidationErrorHandler implements ErrorHandler {
-		int numMsgs;
+		final List<SAXParseException> errors = new ArrayList<SAXParseException>();
 		@Override
 		public void error(SAXParseException exception) throws SAXException {
-			++numMsgs;
-			logger.error(exception.getMessage());
+			errors.add(exception);
+			logger.debug(exception.getMessage());
 		}
 		@Override
 		public void fatalError(SAXParseException exception) throws SAXException {
-			logger.fatal(exception.getMessage());
+			// the parser might throw anyway
+			logger.error(exception.getMessage());
 			throw exception;
 		}
 		@Override
 		public void warning(SAXParseException exception) throws SAXException {
-			logger.warn(exception.getMessage());
+			// these can be safely ignored
+			logger.debug(exception.getMessage());
 		}
 	}
 	

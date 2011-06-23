@@ -1,33 +1,40 @@
 package com.ociweb.xml.util;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.transform.Transformer;
 
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 public class OpenDDSValidationUtilTest {
 	private static final Logger logger = Logger.getLogger(OpenDDSValidationUtilTest.class);
 
-	static String ddsRoot;
-	static String xsdDir;
-	static String testsDir;
-	static String testDataDir;
+	
+	static final String baseDir = "../../../modeling/";	
+	static String xsdDir = baseDir + "plugins/org.opendds.modeling.model/model/";
+	static String testsDir = baseDir + "tests/";
+	static String testDataDir = baseDir + "testdata/";
 	static final String TRANSFORMED_XSD_DIR = "build";
 	static final String XSD_FILE = "OpenDDSXMI.xsd";
 	
+	static final List<File> knownBadFiles = new ArrayList<File>() {{
+		add(new File(testDataDir + "DataLib/DataLibConstraintErrorsTest1.opendds"));
+	}};
+	
 	@BeforeClass
     public static void oneTimeSetUp() {
-		String baseDir = "../../../modeling/";
-		xsdDir = baseDir + "plugins/org.opendds.modeling.model/model/";
-		testsDir = baseDir + "tests/";
-		testDataDir = baseDir + "testdata/";
 	}
 
 	@Test
@@ -92,16 +99,20 @@ public class OpenDDSValidationUtilTest {
 			}
 			File transformedXsd = new File(transformedXsdDir, xsdFilename);
 			File idempotentXsd = new File(idempotentXsdDir, xsdFilename);
-			logger.info("XSL = " + xslFile);
-			logger.info("XSD = " + xsdFile);
+			logger.debug("XSL = " + xslFile);
+			logger.debug("XSD = " + xsdFile);
 			XMLUtil.transform(xsdFile, xslFile, transformedXsd);
 			XMLUtil.transform(transformedXsd, xslFile, idempotentXsd);
 		}
 		String validatationXsd = "build/idempotent/OpenDDSXMI.xsd";
 		File folder = new File(testsDir);
-		validate(folder, validatationXsd);
+		if (!validate(folder, validatationXsd)) {
+			fail("validation falied for " + folder);
+		}
 		folder = new File(testDataDir);
-		validate(folder, validatationXsd);
+		if (!validate(folder, validatationXsd)) {
+			fail("validation falied for " + folder);
+		}
 
 	}
 	
@@ -111,26 +122,57 @@ public class OpenDDSValidationUtilTest {
 		final String xsd = TRANSFORMED_XSD_DIR + System.getProperty("file.separator") + XSD_FILE;
 		XMLUtil.validate(new File(xsd), new File(xml));
 		try {
-			xml = "test/data/satellite.opendds";
 			XMLUtil.validate(new File("bogus.xsd"), new File(xml));
 			fail("expected exception");
 		} catch (Exception e) {
 			
 		}
 		File folder = new File(testsDir);
-		validate(folder, xsd);
+		if (!validate(folder, xsd)) {
+			fail("validation falied for " + folder);
+		}
 		folder = new File(testDataDir);
-		validate(folder, xsd);
+		if (!validate(folder, xsd)) {
+			fail("validation falied for " + folder);
+		}
 	}
 	
-	void validate(File parent, String xsdFile) throws Exception {
+	@Test
+	public void testValidBadFails() throws SAXException, IOException {
+		final String xsd = TRANSFORMED_XSD_DIR + System.getProperty("file.separator") + XSD_FILE;
+		for (File badfile : knownBadFiles) {
+			List<SAXParseException> errors = XMLUtil.validate(new File(xsd), badfile);
+			assertFalse(errors.isEmpty());
+		}
+	}
+	
+	boolean validate(File parent, String xsdFile) throws SAXException, IOException {
+		boolean success = true;
 		for (File f: parent.listFiles()) {
 			if (f.isDirectory()) {
-				validate(f, xsdFile);
+				success = validate(f, xsdFile) ? success : false;
 			} else if (f.getName().toLowerCase().endsWith(".opendds")) {
-				logger.info("Validating " + f.getPath());
-				XMLUtil.validate(new File(xsdFile), f);
+				if (!knownBadFiles.contains(f)) {
+					logger.debug("Validating " + f.getPath());
+					try {
+						List<SAXParseException> errors = XMLUtil.validate(new File(xsdFile), f);
+						if (!errors.isEmpty()) {
+							logger.error(f + " has the following validation errors:");
+							for (SAXParseException se : errors) {
+								logger.error("Line " + se.getLineNumber() + " Column " + se.getColumnNumber() + ": " + se.getMessage());
+							}
+							success = false;
+						}
+					} catch (SAXException e) {
+						logger.error(e);
+						throw e;
+					} catch (IOException e) {
+						logger.error(e);
+						throw e;
+					}
+				}
 			}
 		}
+		return success;
 	}
 }

@@ -6,7 +6,8 @@
       <param name="Target" value="System.out"/>
       <param name="Threshold" value="INFO"/>
       <layout class="org.apache.log4j.PatternLayout">
-         <param name="ConversionPattern" value="%d{ABSOLUTE} @%t [%c{1}] %m%n"/>
+         <!--<param name="ConversionPattern" value="%d{ABSOLUTE} @%t [%c{1}] %m%n"/>-->
+         <param name="ConversionPattern" value="%m%n"/>
       </layout>
    </appender>
 

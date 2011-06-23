@@ -1,6 +1,7 @@
 package org.opendds.modeling.validation;
 
 import java.io.File;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -10,6 +11,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.Logger;
+import org.xml.sax.SAXParseException;
 
 import com.ociweb.xml.util.XMLUtil;
 
@@ -18,6 +20,7 @@ public class OpenDDSModelValidator {
 
 	static final String XSD_FILE_PROPERTY = "opendds.xsd.file";
 	static final String XSD_DEFAULT_FILE = "xsd/OpenDDSXMI.xsd";
+	static final String APP_NAME_PROPERTY = "app.name";
 	static final String FILE_ARG = "file";
 	static final String DIR_ARG = "dir";
 	static final String RECURSIVE_ARG = "recursive";
@@ -38,7 +41,9 @@ public class OpenDDSModelValidator {
 			
 			if (!(line.hasOption(FILE_ARG) || line.hasOption(DIR_ARG))) {
 				HelpFormatter formatter = new HelpFormatter();
-				formatter.printHelp(OpenDDSModelValidator.class.getSimpleName(), options);
+				formatter.printHelp(
+						System.getProperty(APP_NAME_PROPERTY, OpenDDSModelValidator.class.getSimpleName()), 
+						options);
 			}
 			String[] files = line.getOptionValues(FILE_ARG);
 			String dir = line.getOptionValue(DIR_ARG);
@@ -51,14 +56,21 @@ public class OpenDDSModelValidator {
 			}
 		}
 		catch( ParseException exp ) {
-			logger.error( "Unexpected exception:" + exp.getMessage() );
+			logger.error("Encountered an unexpected error:" + exp.getMessage());
 		}
 	}
 	
 	static void validateFile(final File xsd, final File xml) {
 		try {
-			logger.info("Validating " + xml);
-			XMLUtil.validate(xsd, xml);
+			List<SAXParseException> errors = XMLUtil.validate(xsd, xml);
+			if (!errors.isEmpty()) {
+				logger.error("Error: while validating " + xml + " the following errors were found:");
+				for (SAXParseException se : errors) {
+					logger.error("    Line " + se.getLineNumber() + " Column " + se.getColumnNumber() + ": " + se.getMessage());
+				}
+			} else {
+				logger.info("Validated " + xml);
+			}
 		} catch (Exception e) {
 			logger.error("Fatal validation Error: " + e.getMessage());
 		}

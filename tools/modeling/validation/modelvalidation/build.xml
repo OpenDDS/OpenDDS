@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="modelvalidation" default="compile" basedir=".">
+<project name="modelvalidation" default="test" basedir=".">
 
   <property file="build.properties"/>
  
@@ -11,9 +11,9 @@
   <path id="project.class.path">
     <pathelement location="${build.dir}" />
     <fileset dir="${lib.dir}">
-      <include name="*.jar" />
+      <include name="**/*.jar" />
     </fileset>
-  </path>
+ </path>
   <!-- 
 
 	/******************************************************
@@ -55,20 +55,9 @@
     </java>
   </target>
   
-  <target name="staging" depends="transform-xsd, compile" description="setup distribution">
+  <target name="staging" depends="transform-xsd, compile, test" description="setup distribution">
     <delete dir="${staging.dir}"/>
     <mkdir dir="${staging.dir}"/>
-    <jar destfile="${staging.dir}/${app.name}.jar">
-      <fileset dir="${build.dir}" excludes="**/Test.class"/>
-       <archives>
-         <zips>
-           <fileset dir="lib" includes="*.jar"/>
-         </zips>
-       </archives>
-      <manifest>
-        <attribute name="Main-Class" value="${app.package}.OpenDDSModelValidator"/>
-      </manifest>
-     </jar>
     <mkdir dir="${staging.dir}/xsd"/>
     <copy todir="${staging.dir}/xsd">
       <fileset dir="${gen.xsd.dir}">
@@ -84,7 +73,43 @@
     <replace dir="${staging.dir}" propertyFile="build.properties">
       <include name="*.sh"/>
       <include name="*.bat"/>
-      <replacefilter token="__APPNAME__" property="app.name"/>
+      <replacefilter token="${app.name.token}" property="app.name"/>
+    </replace>
+    <replace dir="${build.dir}" propertyFile="build.properties">
+      <include name="log4j.xml"/>
+      <replacefilter token="${app.name.token}" property="app.name"/>
+    </replace>
+   <jar destfile="${staging.dir}/${app.name}.jar">
+      <fileset dir="${build.dir}" excludes="**/Test.class"/>
+     <zipfileset src="${lib.dir}/log4j-1.2.16.jar" excludes="META-INF/*"/>
+     <zipfileset src="${lib.dir}/commons-cli-1.2.jar" excludes="META-INF/*"/>
+     <!-- only in ant 1.8
+       <archives>
+         <zips>
+           <fileset dir="lib" includes="*.jar"/>
+         </zips>
+       </archives>
+      -->
+      <manifest>
+        <attribute name="Main-Class" value="${app.package}.OpenDDSModelValidator"/>
+        <!--attribute name="Class-Path" value="lib/log4j-1.2.16.jar lib/commons-cli-1.2.jar"/-->
+      </manifest>
+     </jar>
+    <copy todir="${staging.dir}/xsd">
+      <fileset dir="${gen.xsd.dir}">
+        <include name="*.xsd"/>
+      </fileset>
+    </copy>
+    <copy todir="${staging.dir}">
+      <fileset dir="${rsrc.dir}">
+        <include name="*.sh"/>
+        <include name="*.bat"/>
+      </fileset>
+    </copy>
+    <replace dir="${staging.dir}" propertyFile="build.properties">
+      <include name="*.sh"/>
+      <include name="*.bat"/>
+      <replacefilter token="${app.name.token}" property="app.name"/>
     </replace>
   </target>
   
@@ -123,17 +148,44 @@
 	 Compile source
 	******************************************************/ -->
   <target name="compile" depends="prepare" description="compile source code">
+    <replace dir="${src.dir}" propertyFile="build.properties">
+      <include name="**/*.java"/>
+      <replacefilter token="${app.name.token}" property="app.name"/>
+    </replace>
     <javac includeAntRuntime="false" destdir="${build.dir}">
       <src path="${src.dir}" />
       <classpath refid="project.class.path" />
     </javac>
   </target>
+  
+  <target name="compile.test" depends="compile" description="compile test source code">
+    <javac includeAntRuntime="false" destdir="${build.dir}">
+      <src path="${test.dir}/src" />
+      <classpath refid="project.class.path" />
+    </javac>
+  </target>
+  
+  <target name="test" depends="clean.test,compile.test" description="runs all JUnit tests">
+    <mkdir dir="${test.report.dir}"/>
+      <junit fork="yes" printsummary="yes">
+        <classpath refid="project.class.path"/>
+        <batchtest todir="${test.report.dir}">
+          <fileset dir="${test.dir}/src" includes="**/*Test.java"/>
+        </batchtest>
+        <formatter type="xml"/>
+      </junit>
+      <junitreport toDir="${test.report.dir}">
+        <fileset dir="${test.report.dir}"/>
+        <report format="frames" todir="${test.report.dir}"/>
+      </junitreport>
+    </target>
+
   <!-- 
 
 	/******************************************************
 	Cleanup everything
 	******************************************************/ -->
-  <target name="clean" depends="clean.build" description="remove class files" />
+  <target name="clean" depends="clean.build, clean.test" description="clean everything (build, test, dist)" />
   <!-- 
 
 	/******************************************************
@@ -142,5 +194,8 @@
   <target name="clean.build" depends="init">
     <delete dir="${build.dir}" />
     <delete dir="${dist.dir}" />
+  </target>
+  <target name="clean.test" depends="init">
+    <delete dir="${test.report.dir}" />
   </target>
 </project>
