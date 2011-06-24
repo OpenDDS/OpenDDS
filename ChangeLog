@@ -1,3 +1,10 @@
+Fri Jun 24 14:04:27 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
+
+          Protect generated IDL from multiple inclusion 
+          with #ifndef/#define/#endif
+
 Thu Jun 23 21:12:50 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/validation/modelvalidation/build.xml:
