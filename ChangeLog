@@ -1,8 +1,17 @@
+Fri Jun 24 15:23:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/setup.pl:
+
+          Build and run the new modelvalidation tool as part of the test
+          setup step.  This will cause an error to be seen if any of the
+          .opendds files under this directory are no longer valid according
+          to the .xsd schemas in plugins/org.opendds.modeling.model/model.
+
 Fri Jun 24 14:04:27 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/idl.xsl:
 
-          Protect generated IDL from multiple inclusion 
+          Protect generated IDL from multiple inclusion
           with #ifndef/#define/#endif
 
 Thu Jun 23 21:12:50 UTC 2011  Dean Wette  <wette_d@ociweb.com>
