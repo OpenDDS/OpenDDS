@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.xml.transform.Transformer;
@@ -31,6 +32,8 @@ public class OpenDDSValidationUtilTest {
 	
 	static final List<File> knownBadFiles = new ArrayList<File>() {{
 		add(new File(testDataDir + "DataLib/DataLibConstraintErrorsTest1.opendds"));
+		add(new File("test/data/satellite.opendds"));
+		add(new File("test/data/DataLibConstraintErrorsTest1.opendds"));
 	}};
 	
 	@BeforeClass
@@ -104,15 +107,17 @@ public class OpenDDSValidationUtilTest {
 			XMLUtil.transform(xsdFile, xslFile, transformedXsd);
 			XMLUtil.transform(transformedXsd, xslFile, idempotentXsd);
 		}
-		String validatationXsd = "build/idempotent/OpenDDSXMI.xsd";
+		String xsd = "build/idempotent/OpenDDSXMI.xsd";
 		File folder = new File(testsDir);
-		if (!validate(folder, validatationXsd)) {
-			fail("validation falied for " + folder);
-		}
-		folder = new File(testDataDir);
-		if (!validate(folder, validatationXsd)) {
-			fail("validation falied for " + folder);
-		}
+        Collection<File> failures = validate(folder, xsd);
+        if (!failures.isEmpty()) {
+            fail("validation falied for " + failures);
+        }
+        folder = new File(testDataDir);
+        failures = validate(folder, xsd);
+        if (!failures.isEmpty()) {
+            fail("validation falied for " + failures);
+        }
 
 	}
 	
@@ -128,12 +133,14 @@ public class OpenDDSValidationUtilTest {
 			
 		}
 		File folder = new File(testsDir);
-		if (!validate(folder, xsd)) {
-			fail("validation falied for " + folder);
+		Collection<File> failures = validate(folder, xsd);
+		if (!failures.isEmpty()) {
+			fail("validation falied for " + failures);
 		}
 		folder = new File(testDataDir);
-		if (!validate(folder, xsd)) {
-			fail("validation falied for " + folder);
+		failures = validate(folder, xsd);
+		if (!failures.isEmpty()) {
+			fail("validation falied for " + failures);
 		}
 	}
 	
@@ -146,11 +153,11 @@ public class OpenDDSValidationUtilTest {
 		}
 	}
 	
-	boolean validate(File parent, String xsdFile) throws SAXException, IOException {
-		boolean success = true;
+	Collection<File> validate(File parent, String xsdFile) throws SAXException, IOException {
+		Collection<File> failures = new ArrayList<File>();
 		for (File f: parent.listFiles()) {
 			if (f.isDirectory()) {
-				success = validate(f, xsdFile) ? success : false;
+			    failures.addAll(validate(f, xsdFile));
 			} else if (f.getName().toLowerCase().endsWith(".opendds")) {
 				if (!knownBadFiles.contains(f)) {
 					logger.debug("Validating " + f.getPath());
@@ -161,7 +168,7 @@ public class OpenDDSValidationUtilTest {
 							for (SAXParseException se : errors) {
 								logger.error("Line " + se.getLineNumber() + " Column " + se.getColumnNumber() + ": " + se.getMessage());
 							}
-							success = false;
+							failures.add(f);
 						}
 					} catch (SAXException e) {
 						logger.error(e);
@@ -173,6 +180,6 @@ public class OpenDDSValidationUtilTest {
 				}
 			}
 		}
-		return success;
+		return failures;
 	}
 }

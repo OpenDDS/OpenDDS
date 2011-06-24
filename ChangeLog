@@ -1,3 +1,11 @@
+Fri Jun 24 16:26:14 UTC 2011  Dean Wette  <wette_d@ociweb.com>
+
+        * tools/modeling/validation/modelvalidation/test/data/satellite.opendds:
+        * tools/modeling/validation/modelvalidation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
+          Changed the unit/functional test code to report which files are invalid
+          as a result of failure when running the ant test target.
+
 Fri Jun 24 15:23:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * tools/modeling/tests/setup.pl:
