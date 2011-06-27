@@ -1,3 +1,25 @@
+Mon Jun 27 23:27:09 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/dissector/dissector.mpc:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+        * tools/dissector/plugin.cpp:
+
+          Replaced the original packet.cpp with packet-opendds.[cpp|h] and
+          added packet-repo.*. This is not a final commit by any stretch,
+          format is still in flux, lacking documentation, style unification,
+          etc.
+
+          Reformatted original C-style organization of dds packet dissector
+          to be more object oriented, but more work is needed to make that
+          right.
+
+        * tools/dissector/packet.cpp:
+
+          Removed this file.
+
 Fri Jun 24 16:26:14 UTC 2011  Dean Wette  <wette_d@ociweb.com>
 
         * tools/modeling/validation/modelvalidation/test/data/satellite.opendds:

@@ -10,7 +10,8 @@ project : dcps, wireshark {
 
   Source_Files {
     plugin.cpp
-    packet.cpp
+    packet-opendds.cpp
+    packet-repo.cpp
   }
 
   Resource_Files {

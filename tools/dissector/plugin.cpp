@@ -16,8 +16,10 @@ extern "C" {
 } // extern "C"
 
 #include <dds/Version.h>
-
 #include "dissector_export.h"
+
+#include "tools/dissector/packet-opendds.h"
+#include "tools/dissector/packet-repo.h"
 
 #ifndef ACE_AS_STATIC_LIBS
 extern "C"
@@ -27,15 +29,15 @@ extern "C"
 dissector_Export void
 plugin_register()
 {
-  extern void proto_register_opendds();
-  proto_register_opendds();
+  proto_register_opendds ();
+  proto_register_repo ();
 }
 
 extern "C"
 dissector_Export void
 plugin_reg_handoff()
 {
-  extern void proto_reg_handoff_opendds();
-  proto_reg_handoff_opendds();
+  proto_reg_handoff_opendds ();
+  proto_reg_handoff_repo ();
 }
 #endif  /* ACE_AS_STATIC_LIBS */
