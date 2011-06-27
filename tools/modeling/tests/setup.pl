@@ -15,6 +15,30 @@ use PerlDDS::Run_Test;
 my $dir = 'tools/modeling/tests';
 my $test_lst = "$DDS_ROOT/$dir/modeling_tests.lst";
 
+my $cwd = getcwd();
+if (defined $ENV{'ANT_HOME'}) {
+  chdir '../validation/modelvalidation';
+  my $status = system("\"$ENV{'ANT_HOME'}/bin/ant\" -l ant.log test");
+  open LOG, 'ant.log' or die "ERROR: Can't open ant.log";
+  my $testclass;
+  while (<LOG>) {
+    chomp;
+    if (/^\s*\[junit\] (Tests|Running) (.*)/) {
+      $2 =~ /^run: \d+, Failures: (\d+), Errors: (\d+), Time elapsed: (\d+)/;
+      my $result = $1 + $2;
+      if ($result) {
+        print "ERROR in JUnit testing of modeling/validation/modelvalidation\n";
+      }
+    }
+    print "$_\n";
+  }
+  close LOG;
+  chdir $cwd;
+}
+else {
+  print "Warning: skipping model validation due to lack of ANT_HOME\n";
+}
+
 sub get_dirs {
   if ($#ARGV >= 0) {
     print "Overriding dir list\n";
@@ -65,7 +89,6 @@ sub generate {
 open MWC, '>modeling_tests.mwc' or die "Can't write modeling_tests.mwc";
 print MWC "workspace {\n";
 
-my $cwd = getcwd();
 foreach my $dir (get_dirs()) {
   chdir $cwd . '/' . $dir or die "Can't change to $dir\n";
   my @ddsfiles = glob '*.codegen';

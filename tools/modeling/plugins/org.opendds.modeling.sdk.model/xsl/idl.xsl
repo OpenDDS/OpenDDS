@@ -42,6 +42,10 @@
 
 <!-- process the entire model document to produce the IDL.  -->
 <xsl:template match="/opendds:OpenDDSModel">
+  <xsl:variable name = "MODELNAME" select = "translate(@name, $lower, $upper)"/>
+
+  <xsl:value-of select="concat('#ifndef ', $MODELNAME, '_IDL', $newline)"/>
+  <xsl:value-of select="concat('#define ', $MODELNAME, '_IDL', $newline)"/>
 
   <!-- required to build on windows -->
   <xsl:call-template name="processIntrinsicSequences"/>
@@ -78,6 +82,8 @@
     </xsl:with-param>
     <xsl:with-param name="universe" select="$local-remainder"/>
   </xsl:call-template>
+
+  <xsl:value-of select="concat('#endif ', $newline)"/>
 </xsl:template>
 <!-- End of main processing template. -->
 

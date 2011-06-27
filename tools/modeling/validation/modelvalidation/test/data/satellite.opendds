@@ -50,7 +50,7 @@
           <readers xmi:id="_3O7D8HtFEeCw3PknRCYWbw" name="alert_dr" copyFromTopicQos="false" topic="_jhG1gHtFEeCw3PknRCYWbw"/>
         </subscribers>
       </participants>
-      <topicDescriptions xsi:type="topics:Topic" xmi:id="_ZRHJMGBmEeCpi8RBy2tIfQ" name="telemetry_topic" datatype="_xWQ3MGBZEeCpi8RBy2tIfQ"/>
+      <topicDescriptions xsi:type="domain:DomainEntity" xmi:id="_ZRHJMGBmEeCpi8RBy2tIfQ" name="telemetry_topic" datatype="_xWQ3MGBZEeCpi8RBy2tIfQ"/>
       <topicDescriptions xsi:type="topics:Topic" xmi:id="_jhG1gHtFEeCw3PknRCYWbw" name="alert_topic" datatype="_uv9JAHtEEeCw3PknRCYWbw"/>
       <policies xsi:type="opendds:livelinessQosPolicy" xmi:id="_Pps7gIyDEeCtv5tZHFx34w" name="liveliness" kind="AUTOMATIC">
         <lease_duration xmi:id="_PpuwsIyDEeCtv5tZHFx34w" second="10"/>
