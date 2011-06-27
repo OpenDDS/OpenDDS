@@ -1,3 +1,12 @@
+Mon Jun 27 22:25:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/setup.pl:
+
+          Adapt our use of the ANT_HOME environment variable to work with
+          versions of Ant available as Linux packages.  The other place we use
+          Ant (in java/build_scripts/jms_scoreboard.pl) is already taken care
+          of the in the earlier commit.
+
 Mon Jun 27 22:07:47 UTC 2011  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r4599 through r4606.
