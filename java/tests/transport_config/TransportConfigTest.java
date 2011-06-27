@@ -16,7 +16,7 @@ import OpenDDS.DCPS.transport.TheTransportFactory;
 import OpenDDS.DCPS.transport.TransportImpl;
 import OpenDDS.DCPS.transport.TransportException;
 import OpenDDS.DCPS.transport.TransportConfiguration;
-import OpenDDS.DCPS.transport.SimpleTcpConfiguration;
+import OpenDDS.DCPS.transport.TcpConfiguration;
 import OpenDDS.DCPS.transport.UdpConfiguration;
 import OpenDDS.DCPS.transport.MulticastConfiguration;
 
@@ -29,7 +29,7 @@ public class TransportConfigTest {
         //    System.out.println("READY");
         //    try {System.in.read();} catch (java.io.IOException ioe) {}
 
-        // We need to load the SimpleTcp lib before initializing the
+        // We need to load the Tcp lib before initializing the
         // ParticipantFactory, because it will read and parse the config file.
         TheTransportFactory.get_or_create_configuration(99 /*bogus ID*/,
             TheTransportFactory.TRANSPORT_TCP);
@@ -56,7 +56,7 @@ public class TransportConfigTest {
         // Verify the values were read in from the ini file
         assert tc.isSwapBytes();
         assert tc.getMaxSamplesPerPacket() == 5;
-        SimpleTcpConfiguration tc_tcp = (SimpleTcpConfiguration) tc;
+        TcpConfiguration tc_tcp = (TcpConfiguration) tc;
         assert tc_tcp.getConnRetryAttempts() == 42;
 
         tc.setSwapBytes(false);

@@ -9,7 +9,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 #include "ace/SString.h"
 
 /**
@@ -130,18 +130,18 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
     this->transport_
       = TheTransportFactory->create_transport_impl(
           TestConfig::SubscriberTransport,
-          ACE_TEXT("SimpleTcp"),
+          ACE_TEXT("tcp"),
           OpenDDS::DCPS::DONT_AUTO_CONFIG
         );
 
     OpenDDS::DCPS::TransportConfiguration_rch reader_config
       = TheTransportFactory->create_configuration(
           TestConfig::SubscriberTransport,
-          ACE_TEXT("SimpleTcp")
+          ACE_TEXT("tcp")
         );
 
-    OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
-      = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*>( reader_config.in() );
+    OpenDDS::DCPS::TcpConfiguration* reader_tcp_config
+      = static_cast <OpenDDS::DCPS::TcpConfiguration*>( reader_config.in() );
 
     if( this->config_.transportAddressName().length() > 0)
     {

@@ -1,6 +1,6 @@
 // $Id$
 
 project {
-  libs        += SimpleTcp
-  after       += SimpleTcp
+  libs        += OpenDDS_Tcp
+  after       += OpenDDS_Tcp
 }

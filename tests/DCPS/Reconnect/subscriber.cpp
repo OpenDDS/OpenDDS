@@ -16,11 +16,11 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
-#include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
+#include <dds/DCPS/transport/tcp/TcpConfiguration.h>
 #include <dds/DCPS/transport/framework/TransportDebug.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
 #include <ace/streams.h>
@@ -147,14 +147,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     // Initialize the transport
     OpenDDS::DCPS::TransportImpl_rch tcp_impl =
       TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
-                                                  ACE_TEXT ("SimpleTcp"),
+                                                  ACE_TEXT("tcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
     OpenDDS::DCPS::TransportConfiguration_rch reader_config
-      = TheTransportFactory->create_configuration (TCP_IMPL_ID, ACE_TEXT ("SimpleTcp"));
+      = TheTransportFactory->create_configuration (TCP_IMPL_ID, ACE_TEXT("tcp"));
 
-    OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
-      = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
+    OpenDDS::DCPS::TcpConfiguration* reader_tcp_config
+      = static_cast <OpenDDS::DCPS::TcpConfiguration*> (reader_config.in ());
 
     reader_tcp_config->local_address_ = ACE_INET_Addr (local_address.c_str ());
     reader_tcp_config->local_address_str_ = local_address;

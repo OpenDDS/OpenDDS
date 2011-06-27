@@ -8,10 +8,10 @@
 #include "tests/DCPS/FooType/FooTypeTypeSupportImpl.h"
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
 
 #include "ace/Arg_Shifter.h"

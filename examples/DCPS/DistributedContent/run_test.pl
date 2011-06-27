@@ -19,13 +19,11 @@ my $dcpsrepo_ior = "repo.ior";
 my $dcpsrepo_port = PerlACE::random_port();
 
 # BuiltIn Topic (bit) support required for ignore_* operations
-# simple_tcp.conf contains the instructions to automatically load the SimpleTcp
-#  transport.
-my $RepoOpts = "-ORBSvcConf simple_tcp.conf -ORBEndpoint iiop://:$dcpsrepo_port";
+my $RepoOpts = "-ORBEndpoint iiop://:$dcpsrepo_port";
 
 # simple_tcp.conf contains the instructions to automatically load the SimpleTcp
 #  transport.
-my $opts = "-ORBSvcConf simple_tcp.conf";
+my $opts = "-ORBSvcConf tcp.conf";
 
 my $node_1_opts = "$opts -n node_1 -d files1 -DCPSInfoRepo corbaloc:iiop:localhost:$dcpsrepo_port/DCPSInfoRepo ";
 my $node_2_opts = "$opts -n node_2 -d files2 -DCPSInfoRepo corbaloc:iiop:localhost:$dcpsrepo_port/DCPSInfoRepo";

@@ -6,7 +6,7 @@
 // #include "ace/Log_Msg.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
 
 namespace { // anonymous namespace for file scope.

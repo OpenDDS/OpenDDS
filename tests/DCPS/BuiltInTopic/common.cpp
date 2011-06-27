@@ -8,7 +8,7 @@
 // resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
@@ -49,13 +49,13 @@ OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;
 int init_transport ()
 {
   reader_transport_impl
-    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (SUB_TRAFFIC, ACE_TEXT("tcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch reader_config
-    = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
+    = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("tcp"));
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
+  OpenDDS::DCPS::TcpConfiguration* reader_tcp_config
+    = static_cast <OpenDDS::DCPS::TcpConfiguration*> (reader_config.in ());
 
   ACE_INET_Addr reader_address (reader_address_str);
   reader_tcp_config->local_address_ = reader_address;
@@ -70,13 +70,13 @@ int init_transport ()
   }
 
   writer_transport_impl
-    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (PUB_TRAFFIC, ACE_TEXT("tcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch writer_config
-    = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
+    = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("tcp"));
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+  OpenDDS::DCPS::TcpConfiguration* writer_tcp_config
+    = static_cast <OpenDDS::DCPS::TcpConfiguration*> (writer_config.in ());
 
   ACE_INET_Addr writer_address (writer_address_str);
   writer_tcp_config->local_address_ = writer_address;

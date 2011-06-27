@@ -15,7 +15,7 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
-#include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
+#include <dds/DCPS/transport/tcp/TcpConfiguration.h>
 #include <dds/DCPS/transport/udp/UdpConfiguration.h>
 #include <ace/streams.h>
 
@@ -138,7 +138,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        OpenDDS::DCPS::TransportImpl_rch pub_tcp_impl;
        if (useTCP) {
          pub_tcp_impl = TheTransportFactory->create_transport_impl (TCP_IMPL_ID,
-                                                     ACE_TEXT("SimpleTcp"),
+                                                     ACE_TEXT("tcp"),
                                                      ::OpenDDS::DCPS::AUTO_CONFIG);
         } else {
          pub_tcp_impl = TheTransportFactory->create_transport_impl (UDP_IMPL_ID,
@@ -195,7 +195,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        if (useTCP) {
          sub_tcp_impl
            = TheTransportFactory->create_transport_impl (TCP_IMPL_ID+1,
-                                                         ACE_TEXT("SimpleTcp"),
+                                                         ACE_TEXT("tcp"),
                                                          ::OpenDDS::DCPS::AUTO_CONFIG);
        } else {
          sub_tcp_impl

@@ -16,7 +16,7 @@
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
 #include "MessengerTypeSupportImpl.h"
@@ -86,7 +86,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // Initialize and attach Transport
     OpenDDS::DCPS::TransportImpl_rch transport_impl =
-      TheTransportFactory->create_transport_impl(OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID,
+      TheTransportFactory->create_transport_impl(OpenDDS::DCPS::DEFAULT_TCP_ID,
                                                  OpenDDS::DCPS::AUTO_CONFIG);
 
     if (transport_impl->attach(publisher.in()) != OpenDDS::DCPS::ATTACH_OK) {

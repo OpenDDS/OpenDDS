@@ -37,7 +37,7 @@ namespace Test {
  *
  *   -t [ tcp | udp | mc ]
  *      Establish the transport implementation for data.  The values are:
- *        tcp - use the SimpleTcp transport
+ *        tcp - use the Tcp transport
  *        udp - use the udp transport
  *        mc  - use the multicast transport
  *
@@ -102,7 +102,7 @@ class Options  {
     /// Types of transport implementations supported.
     enum TransportType {
       TRANSPORT_NONE,     // Unsupported (NONE is a macro on VxWorks)
-      TCP,      // SimpleTcp
+      TCP,      // Tcp
       UDP,      // udp
       MC        // multicast
     };

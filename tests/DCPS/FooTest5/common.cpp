@@ -7,10 +7,10 @@
 // resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #include "dds/DCPS/transport/udp/UdpConfiguration.h"
 #include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
 
@@ -115,14 +115,14 @@ int init_reader_transport ()
         {
           reader_tcp_impl
             = TheTransportFactory->create_transport_impl (SUB_TRAFFIC_TCP,
-                                                          ACE_TEXT("SimpleTcp"),
+                                                          ACE_TEXT("tcp"),
                                                           OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
           OpenDDS::DCPS::TransportConfiguration_rch reader_config
-            = TheTransportFactory->create_configuration (SUB_TRAFFIC_TCP, ACE_TEXT("SimpleTcp"));
+            = TheTransportFactory->create_configuration (SUB_TRAFFIC_TCP, ACE_TEXT("tcp"));
 
-          OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
-            = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
+          OpenDDS::DCPS::TcpConfiguration* reader_tcp_config
+            = static_cast <OpenDDS::DCPS::TcpConfiguration*> (reader_config.in ());
 
           if (reader_address_given)
             {
@@ -201,14 +201,14 @@ int init_writer_transport ()
 
     writer_tcp_impl
       = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_TCP,
-                                                    ACE_TEXT("SimpleTcp"),
+                                                    ACE_TEXT("tcp"),
                                                     OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
     OpenDDS::DCPS::TransportConfiguration_rch writer_config
-      = TheTransportFactory->create_configuration (PUB_TRAFFIC_TCP, ACE_TEXT("SimpleTcp"));
+      = TheTransportFactory->create_configuration (PUB_TRAFFIC_TCP, ACE_TEXT("tcp"));
 
-    OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
-      = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+    OpenDDS::DCPS::TcpConfiguration* writer_tcp_config
+      = static_cast <OpenDDS::DCPS::TcpConfiguration*> (writer_config.in ());
 
     if (writer_address_given)
       {

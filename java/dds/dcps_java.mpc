@@ -64,7 +64,7 @@ project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
     OpenDDS/DCPS/transport/MiscProblemException.java
     OpenDDS/DCPS/transport/NotConfiguredException.java
     OpenDDS/DCPS/transport/NotFoundException.java
-    OpenDDS/DCPS/transport/SimpleTcpConfiguration.java
+    OpenDDS/DCPS/transport/TcpConfiguration.java
     OpenDDS/DCPS/transport/UdpConfiguration.java
     OpenDDS/DCPS/transport/MulticastConfiguration.java
     OpenDDS/DCPS/transport/TransportConfiguration.java
@@ -89,7 +89,7 @@ project: dcps, idl2jni, optional_jni_check, dcps_java_optional {
     classes/DDS/GuardCondition.class
     classes/OpenDDS/DCPS/transport/TheTransportFactory.class
     classes/OpenDDS/DCPS/transport/TransportImpl.class << classes/OpenDDS/DCPS/transport/TheTransportFactory.class
-    classes/OpenDDS/DCPS/transport/SimpleTcpConfiguration.class
+    classes/OpenDDS/DCPS/transport/TcpConfiguration.class
     classes/OpenDDS/DCPS/transport/UdpConfiguration.class
     classes/OpenDDS/DCPS/transport/MulticastConfiguration.class
   }

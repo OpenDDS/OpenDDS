@@ -20,7 +20,7 @@ public final class TheTransportFactory {
     // Transport type string constants that can be passed as the 2nd parameter
     // to the create_transport_impl() method and to the
     // get_or_create_configuration() method.
-    public static final String TRANSPORT_TCP = "SimpleTcp";
+    public static final String TRANSPORT_TCP = "tcp";
     public static final String TRANSPORT_UDP = "udp";
     public static final String TRANSPORT_MULTICAST = "multicast";
 

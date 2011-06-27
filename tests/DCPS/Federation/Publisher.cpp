@@ -7,7 +7,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 #include "ace/SString.h"
 
 #include <set>
@@ -74,19 +74,19 @@ Publisher::Publisher( int argc, ACE_TCHAR** argv, char** envp)
   }
   this->transport_ = TheTransportFactory->create_transport_impl(
                        0,
-                       ACE_TEXT("SimpleTcp"),
+                       ACE_TEXT("tcp"),
                        OpenDDS::DCPS::DONT_AUTO_CONFIG
                      );
 
   OpenDDS::DCPS::TransportConfiguration_rch transport_config
     = TheTransportFactory->create_configuration(
         0,
-        ACE_TEXT("SimpleTcp")
+        ACE_TEXT("tcp")
       );
 
 #if 0
-  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*>( transport_config.in() );
+  OpenDDS::DCPS::TcpConfiguration* tcp_config
+    = static_cast <OpenDDS::DCPS::TcpConfiguration*>( transport_config.in() );
 
   std::string address;
   if( address.length() > 0) {

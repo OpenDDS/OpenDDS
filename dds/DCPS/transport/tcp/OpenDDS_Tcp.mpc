@@ -1,0 +1,8 @@
+project: dcps, install {
+  sharedname   = OpenDDS_Tcp
+  dynamicflags = OPENDDS_TCP_BUILD_DLL
+
+  specific {
+    install_dir = dds/DCPS/transport/tcp
+  }
+}

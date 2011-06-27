@@ -11,7 +11,7 @@
 #include <ace/OS_main.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #include <dds/DCPS/transport/udp/Udp.h>
 #include <dds/DCPS/transport/multicast/Multicast.h>
 #endif
@@ -22,7 +22,7 @@
 namespace {
 
 OpenDDS::DCPS::TransportIdType local_transport_id(1);
-ACE_TString local_transport_type(ACE_TEXT("SimpleTcp"));
+ACE_TString local_transport_type(ACE_TEXT("tcp"));
 const int num_messages = 100;
 
 void

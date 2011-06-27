@@ -208,6 +208,7 @@ private:
   friend class TransportInterface;
   friend class TransportImplFactory;
   friend class TransportFactory;
+  friend class TransportRegistry;
   friend class DataLink;
 //MJM: blech.
 

@@ -4,11 +4,4 @@ project(DcpsFooTest4_0): dcpsexe_with_tcp {
   libpaths += ../common
   libs     +=  DcpsFooType4 common
   after    += DcpsFooType4 common
-
-  Source_Files {
-    main.cpp
-    Reader.cpp
-    Writer.cpp
-    DataReaderListener.cpp
-  }
 }

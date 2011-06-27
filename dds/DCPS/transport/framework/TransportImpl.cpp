@@ -271,7 +271,7 @@ OpenDDS::DCPS::TransportImpl::reserve_datalink(
                          receive_listener);
 
   // This is called on the subscriber side to let the concrete
-  // datalink to do some necessary work such as SimpleTcp will
+  // datalink to do some necessary work such as Tcp will
   // send the FULLY_ASSOCIATED ack to the publisher.
   link->fully_associated();
 
@@ -718,8 +718,8 @@ OpenDDS::DCPS::TransportImpl::get_transport_id_description()
     oss << " (BIT Transport Id for domain: " << this->transport_id_ - BIT_ALL_TRAFFIC << ")";
   } else {
     switch (this->transport_id_) {
-    case DEFAULT_SIMPLE_TCP_ID:
-      oss << " (Default Simple TCP Transport Id)";
+    case DEFAULT_TCP_ID:
+      oss << " (Default TCP Transport Id)";
       break;
     case DEFAULT_DUMMY_TCP_ID:
       oss << " (Default Dummy TCP Transport Id)";

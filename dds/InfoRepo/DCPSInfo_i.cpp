@@ -10,7 +10,7 @@
 
 #include /**/ "DCPSInfo_i.h"
 
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "UpdateManager.h"
 #include "ShutdownInterface.h"
@@ -2030,28 +2030,28 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
   try {
 
 #ifndef ACE_AS_STATIC_LIBS
-    if (ACE_Service_Config::current()->find(ACE_TEXT("DCPS_SimpleTcpLoader"))
+    if (ACE_Service_Config::current()->find(ACE_TEXT("OpenDDS_Tcp"))
         < 0 /* not found (-1) or suspended (-2) */) {
       static const ACE_TCHAR directive[] =
-        ACE_TEXT("dynamic DCPS_SimpleTcpLoader Service_Object * ")
-        ACE_TEXT("SimpleTcp:_make_DCPS_SimpleTcpLoader() \"-type SimpleTcp\"");
+        ACE_TEXT("dynamic OpenDDS_Tcp Service_Object * ")
+        ACE_TEXT("OpenDDS_Tcp:_make_TcpLoader()");
       ACE_Service_Config::process_directive(directive);
     }
 #endif
 
     OpenDDS::DCPS::TransportImpl_rch trans_impl
     = TheTransportFactory->create_transport_impl(OpenDDS::DCPS::BIT_ALL_TRAFFIC,
-                                                 ACE_TEXT("SimpleTcp"),
+                                                 ACE_TEXT("tcp"),
                                                  OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
     OpenDDS::DCPS::TransportConfiguration_rch config
     = TheTransportFactory->get_or_create_configuration(OpenDDS::DCPS::BIT_ALL_TRAFFIC,
-                                                       ACE_TEXT("SimpleTcp"));
+                                                       ACE_TEXT("tcp"));
 
     config->datalink_release_delay_ = 0;
 
-    OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*>(config.in());
+    OpenDDS::DCPS::TcpConfiguration* tcp_config
+    = static_cast <OpenDDS::DCPS::TcpConfiguration*>(config.in());
 
     tcp_config->conn_retry_attempts_ = 0;
 

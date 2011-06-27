@@ -36,7 +36,7 @@
   <xsl:text>
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 #include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
 #include "dds/DCPS/transport/udp/UdpConfiguration.h"
 #include &lt;model/TransportDirectives.h&gt;
@@ -162,8 +162,8 @@
 <!-- Handle TCP-specific configuration parameters -->
 <xsl:template match="TCPTransport[*]">
   <xsl:text>        {
-          OpenDDS::DCPS::SimpleTcpConfiguration* specific_config =
-              (OpenDDS::DCPS::SimpleTcpConfiguration*) config.in();
+          OpenDDS::DCPS::TcpConfiguration* specific_config =
+              (OpenDDS::DCPS::TcpConfiguration*) config.in();
 </xsl:text>
   <xsl:apply-templates/>
   <xsl:text>        }
@@ -239,7 +239,7 @@
 <!-- Map subelements to transport type string -->
 <xsl:template name="transport-type">
   <xsl:choose>
-    <xsl:when test="TCPTransport">SimpleTcp</xsl:when>
+    <xsl:when test="TCPTransport">tcp</xsl:when>
     <xsl:when test="MulticastTransport">multicast</xsl:when>
     <xsl:when test="UDPTransport">udp</xsl:when>
     <xsl:when test="*">

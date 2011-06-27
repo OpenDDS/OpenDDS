@@ -2,7 +2,7 @@
 #include "TestException.h"
 #include "ace/Log_Msg.h"
 
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 

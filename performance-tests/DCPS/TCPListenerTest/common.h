@@ -10,7 +10,7 @@
 // ============================================================================
 
 
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 
@@ -64,8 +64,8 @@ int init_reader_tranport ()
   OpenDDS::DCPS::TransportConfiguration_rch reader_config
     = TheTransportFactory->get_configuration (SUB_TRAFFIC);
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
+  OpenDDS::DCPS::TcpConfiguration* reader_tcp_config
+    = static_cast <OpenDDS::DCPS::TcpConfiguration*> (reader_config.in ());
 
   if (0 != ACE_OS::strcmp(ACE_TEXT("default"), reader_address_str) )
     {
@@ -93,8 +93,8 @@ int init_writer_tranport ()
   OpenDDS::DCPS::TransportConfiguration_rch writer_config
     = TheTransportFactory->get_configuration (PUB_TRAFFIC);
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+  OpenDDS::DCPS::TcpConfiguration* writer_tcp_config
+    = static_cast <OpenDDS::DCPS::TcpConfiguration*> (writer_config.in ());
 
   if (0 != ACE_OS::strcmp(ACE_TEXT("default"), writer_address_str) )
     {

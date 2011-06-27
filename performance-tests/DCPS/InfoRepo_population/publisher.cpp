@@ -17,9 +17,9 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
-#include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
+#include <dds/DCPS/transport/tcp/TcpConfiguration.h>
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
 #include <ace/streams.h>
@@ -228,14 +228,14 @@ Publisher::run (void)
         this->transports_[ count]
           = TheTransportFactory->create_transport_impl(
               this->transport_impl_id_ + count,
-              ACE_TEXT("SimpleTcp"),
+              ACE_TEXT("tcp"),
               ::OpenDDS::DCPS::DONT_AUTO_CONFIG
             );
 
         OpenDDS::DCPS::TransportConfiguration_rch config
           = TheTransportFactory->create_configuration(
               this->transport_impl_id_ + count,
-              ACE_TEXT("SimpleTcp")
+              ACE_TEXT("tcp")
             );
 
         if( this->transports_[ count]->configure( config.in()) != 0) {

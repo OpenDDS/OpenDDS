@@ -11,7 +11,7 @@
 #include "TransportReactorTask.h"
 #include "TransportExceptions.h"
 #include "TransportGenerator.h"
-//#include "dds/DCPS/transport/simpleTCP/SimpleTcpGenerator.h"
+//#include "dds/DCPS/transport/tcp/TcpGenerator.h"
 #include "EntryExit.h"
 
 ACE_INLINE

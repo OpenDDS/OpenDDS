@@ -18,7 +18,7 @@
 #include "FooTypeTypeSupportImpl.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-# include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+# include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
 class DDS_TEST
@@ -112,7 +112,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     ++transportId;
 
     OpenDDS::DCPS::TransportConfiguration_rch sub_config =
-      TheTransportFactory->get_or_create_configuration(transportId, ACE_TEXT("SimpleTcp"));
+      TheTransportFactory->get_or_create_configuration(transportId, ACE_TEXT("tcp"));
 
     OpenDDS::DCPS::TransportImpl_rch sub_transport =
       TheTransportFactory->create_transport_impl(transportId);
@@ -137,7 +137,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     ++transportId;
 
     OpenDDS::DCPS::TransportConfiguration_rch pub_config =
-      TheTransportFactory->get_or_create_configuration(transportId, ACE_TEXT("SimpleTcp"));
+      TheTransportFactory->get_or_create_configuration(transportId, ACE_TEXT("tcp"));
 
     OpenDDS::DCPS::TransportImpl_rch pub_transport =
       TheTransportFactory->create_transport_impl(transportId);

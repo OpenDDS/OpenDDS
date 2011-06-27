@@ -5,7 +5,7 @@
 // resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
@@ -146,11 +146,11 @@ SubDriver::init()
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Use TheTransportFactory to create a TransportImpl object "
-             "of SimpleTcp with the ALL_TRAFFIC transport_id (%d).\n",
+             "of Tcp with the ALL_TRAFFIC transport_id (%d).\n",
              ALL_TRAFFIC));
 
   // Now we can ask TheTransportFactory to create a TransportImpl object
-  // using the "SimpleTcp" factory.  We also supply an identifier for this
+  // using the "Tcp" factory.  We also supply an identifier for this
   // particular TransportImpl object that will be created.  This is known
   // as the "impl_id", or "the TransportImpl's instance id".  The point is
   // that we assign the impl_id, and TheTransportFactory caches a reference
@@ -161,13 +161,13 @@ SubDriver::init()
   // a reference to the cached TransportImpl will be returned.
   OpenDDS::DCPS::TransportImpl_rch transport_impl
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC,
-                                                  ACE_TEXT("SimpleTcp"),
+                                                  ACE_TEXT("tcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Create a new SimpleTcpConfiguration object.\n"));
+             "Create a new TcpConfiguration object.\n"));
 
-  // Get the existing or create a new SimpleTcpConfiguration object.  It just has one field
+  // Get the existing or create a new TcpConfiguration object.  It just has one field
   // to set - the local_address_ field.  This is the address that will be
   // used to open an acceptor object to listen for passive connection
   // requests.  This is the TransportImpl object's (local) "endpoint" address.
@@ -175,10 +175,10 @@ SubDriver::init()
   // PubDriver.cpp (in the PubDriver::init() method) that describes the
   // other configuration options available.
   OpenDDS::DCPS::TransportConfiguration_rch config
-    = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("SimpleTcp"));
+    = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("tcp"));
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
+  OpenDDS::DCPS::TcpConfiguration* tcp_config
+    = static_cast <OpenDDS::DCPS::TcpConfiguration*> (config.in ());
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Set the config->local_address_ to our (local) sub_addr_.\n"));

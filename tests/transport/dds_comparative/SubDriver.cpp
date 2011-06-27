@@ -9,7 +9,7 @@
 // resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include <ace/Arg_Shifter.h>
 #include <string>
@@ -100,13 +100,13 @@ SubDriver::init()
 {
   OpenDDS::DCPS::TransportImpl_rch transport_impl
     = TheTransportFactory->create_transport_impl (TRANSPORT_IMPL_ID,
-                                                  ACE_TEXT("SimpleTcp"),
+                                                  ACE_TEXT("tcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
   OpenDDS::DCPS::TransportConfiguration_rch config
-    = TheTransportFactory->create_configuration (TRANSPORT_IMPL_ID, ACE_TEXT("SimpleTcp"));
+    = TheTransportFactory->create_configuration (TRANSPORT_IMPL_ID, ACE_TEXT("tcp"));
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
+  OpenDDS::DCPS::TcpConfiguration* tcp_config
+    = static_cast <OpenDDS::DCPS::TcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->local_address_;
   tcp_config->local_address_str_ = this->sub_addr_str_;

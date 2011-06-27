@@ -13,7 +13,7 @@
 const DDS::DomainId_t TestBase::DEFAULT_DOMAIN = 42;
 const char*           TestBase::DEFAULT_TOPIC = "TestFramework";
 const DDS::Duration_t TestBase::DEFAULT_TIMEOUT = { 30, 0 }; // 30 seconds
-const ACE_TCHAR*      TestBase::DEFAULT_TRANSPORT = ACE_TEXT("SimpleTcp");
+const ACE_TCHAR*      TestBase::DEFAULT_TRANSPORT = ACE_TEXT("tcp");
 
 const OpenDDS::DCPS::TransportIdType
       TestBase::DEFAULT_TRANSPORT_ID = 0xFFFFFFFF;

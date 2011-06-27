@@ -23,11 +23,12 @@ UdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 
   if (initialized) return 0;  // already initialized
 
-  TransportGenerator *generator;
-  ACE_NEW_RETURN(generator, UdpGenerator, -1);
+  TransportGenerator_rch generator = new UdpGenerator;
+
+  TheTransportRegistry->register_generator(UDP_TRANSPORT_TYPE, generator);
 
   TheTransportFactory->register_generator(UDP_TRANSPORT_TYPE,
-                                          generator);
+                                          generator._retn());
   initialized = true;
 
   return 0;
@@ -36,7 +37,7 @@ UdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 ACE_FACTORY_DEFINE(OpenDDS_Udp, UdpLoader);
 ACE_STATIC_SVC_DEFINE(
   UdpLoader,
-  ACE_TEXT("UdpLoader"),
+  ACE_TEXT("OpenDDS_Udp"),
   ACE_SVC_OBJ_T,
   &ACE_SVC_NAME(UdpLoader),
   ACE_Service_Type::DELETE_THIS | ACE_Service_Type::DELETE_OBJ,

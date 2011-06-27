@@ -25,7 +25,7 @@
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
-#include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
+#include <dds/DCPS/transport/tcp/TcpConfiguration.h>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -165,14 +165,14 @@ MonitorFactoryImpl::initialize()
   {
     transport_impl = TheTransportFactory->create_transport_impl(
       MONITOR_TRANSPORT_ID,
-      ACE_TEXT("SimpleTcp"),
+      ACE_TEXT("tcp"),
       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
     OpenDDS::DCPS::TransportConfiguration_rch config
-      = TheTransportFactory->get_or_create_configuration(MONITOR_TRANSPORT_ID, ACE_TEXT("SimpleTcp"));
+      = TheTransportFactory->get_or_create_configuration(MONITOR_TRANSPORT_ID, ACE_TEXT("tcp"));
 
-    OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
-      = static_cast <SimpleTcpConfiguration*>(config.in());
+    OpenDDS::DCPS::TcpConfiguration* tcp_config
+      = static_cast <TcpConfiguration*>(config.in());
 
     transport_impl->configure (tcp_config);
   }

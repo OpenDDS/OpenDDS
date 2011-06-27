@@ -6,7 +6,7 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
 
 #include "MessengerTypeSupportImpl.h"

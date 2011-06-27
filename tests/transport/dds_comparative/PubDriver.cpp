@@ -9,7 +9,7 @@
 // resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include <ace/Arg_Shifter.h>
 #include <string>
@@ -101,8 +101,8 @@ void
 PubDriver::init()
 {
   // Ask TheTransportFactory to create a TransportImpl using the
-  // "SimpleTcp" TransportImplFactory object that was registered as default
-  // SimpleTcp factory. We also assign an impl id (aka instance id) to
+  // "Tcp" TransportImplFactory object that was registered as default
+  // Tcp factory. We also assign an impl id (aka instance id) to
   // the TransportImpl object that gets created - the impl id we assign
   // to this TransportImpl object is TRANSPORT_IMPL_ID.  After the
   // create_transport_impl() has completed, the
@@ -110,14 +110,14 @@ PubDriver::init()
   // TransportImpl object.
   OpenDDS::DCPS::TransportImpl_rch transport_impl
     = TheTransportFactory->create_transport_impl (TRANSPORT_IMPL_ID,
-                                                  ACE_TEXT("SimpleTcp"),
+                                                  ACE_TEXT("tcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
   // Now we can configure the TransportImpl object.
   OpenDDS::DCPS::TransportConfiguration_rch config
-    = TheTransportFactory->create_configuration (TRANSPORT_IMPL_ID, ACE_TEXT("SimpleTcp"));
+    = TheTransportFactory->create_configuration (TRANSPORT_IMPL_ID, ACE_TEXT("tcp"));
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
+  OpenDDS::DCPS::TcpConfiguration* tcp_config
+    = static_cast <OpenDDS::DCPS::TcpConfiguration*> (config.in ());
 
   // We use all of the default configuration settings, except for those
   // that need to be set (ie, the default values are not valid).

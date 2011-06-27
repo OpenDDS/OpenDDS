@@ -10,7 +10,7 @@
            name="OpenDDS:service=DCPSInfoRepo">
         <attribute name="ORBListenEndpoints">iiop://:6666</attribute>
         <attribute name="ORBLogFile">${jboss.server.log.dir}/opendds-repo.log</attribute>
-        <attribute name="TransportType">SimpleTcp</attribute>
+        <attribute name="TransportType">tcp</attribute>
         <depends>jboss.jca:service=RARDeployment,name='opendds-jms-2.3.rar'</depends>
     </mbean>
 </connection-factories>

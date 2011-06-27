@@ -48,9 +48,6 @@ public:
   /// Return a singleton instance of this class.
   static TransportFactory * instance();
 
-  /// Register the SimpleTcp transport since it's part of the DDSDcps library.
-  void register_simpletcp();
-
   /// This will shutdown all TransportImpl objects.
   ///
   /// Client Application calls this method to tear down the transport

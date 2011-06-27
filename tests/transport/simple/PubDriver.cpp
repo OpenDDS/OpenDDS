@@ -4,7 +4,7 @@
 // resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
@@ -144,22 +144,22 @@ PubDriver::init()
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Use TheTransportFactory to create a TransportImpl object "
-             "of SimpleTcp with the ALL_TRAFFIC transport_id (%d).\n",
+             "of Tcp with the ALL_TRAFFIC transport_id (%d).\n",
              ALL_TRAFFIC));
 
   OpenDDS::DCPS::TransportImpl_rch transport_impl
     = TheTransportFactory->create_transport_impl (ALL_TRAFFIC,
-                                                  ACE_TEXT("SimpleTcp"),
+                                                  ACE_TEXT("tcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Get an existing or create a new SimpleTcpConfiguration object.\n"));
+             "Get an existing or create a new TcpConfiguration object.\n"));
 
   OpenDDS::DCPS::TransportConfiguration_rch config
-    = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("SimpleTcp"));
+    = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("tcp"));
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
+  OpenDDS::DCPS::TcpConfiguration* tcp_config
+    = static_cast <OpenDDS::DCPS::TcpConfiguration*> (config.in ());
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Set the config->local_address_ to our (local) pub_addr_.\n"));

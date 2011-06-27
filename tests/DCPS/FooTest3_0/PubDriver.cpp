@@ -2,7 +2,7 @@
 #include "TestException.h"
 #include "tests/DCPS/FooType3/FooDefC.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/Service_Participant.h"
@@ -1224,13 +1224,13 @@ void PubDriver::add_subscription (
 void PubDriver::attach_to_transport ()
 {
   OpenDDS::DCPS::TransportImpl_rch transport_impl
-    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, ACE_TEXT("SimpleTcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
+    = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, ACE_TEXT("tcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch config
-    = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("SimpleTcp"));
+    = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("tcp"));
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (config.in ());
+  OpenDDS::DCPS::TcpConfiguration* tcp_config
+    = static_cast <OpenDDS::DCPS::TcpConfiguration*> (config.in ());
 
   tcp_config->local_address_ = this->pub_addr_;
   tcp_config->local_address_str_ = this->pub_addr_str_;

@@ -16,9 +16,9 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/transport/framework/TheTransportFactory.h>
-#include <dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h>
+#include <dds/DCPS/transport/tcp/TcpConfiguration.h>
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
 #include <ace/streams.h>
@@ -45,9 +45,9 @@ parse_args (int argc, ACE_TCHAR *argv[])
       else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("multicast")) == 0) {
         transport_impl_id = 3;
       }
-      // test with DEFAULT_SIMPLE_TCP_ID.
+      // test with DEFAULT_TCP_ID.
       else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_tcp")) == 0) {
-        transport_impl_id = OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID;
+        transport_impl_id = OpenDDS::DCPS::DEFAULT_TCP_ID;
       }
       // test with DEFAULT_UDP_ID.
       else if (ACE_OS::strcmp (get_opts.opt_arg (), ACE_TEXT("default_udp")) == 0) {

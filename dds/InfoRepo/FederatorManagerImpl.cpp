@@ -16,8 +16,8 @@
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #include "tao/ORB_Core.h"
 #include "ace/Log_Priority.h"
 #include "ace/Log_Msg.h"
@@ -172,13 +172,13 @@ ManagerImpl::initialize()
   OpenDDS::DCPS::TransportImpl_rch transport
   = TheTransportFactory->create_transport_impl(
       this->config_.federationDomain(),
-      ACE_TEXT("SimpleTcp"),
+      ACE_TEXT("tcp"),
       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch transportConfig
   = TheTransportFactory->create_configuration(
       this->config_.federationDomain(),
-      ACE_TEXT("SimpleTcp"));
+      ACE_TEXT("tcp"));
 
   if (transport->configure(transportConfig.in()) != 0) {
     ACE_ERROR((LM_ERROR,
@@ -195,13 +195,13 @@ ManagerImpl::initialize()
   OpenDDS::DCPS::TransportImpl_rch subscriptionTransport
   = TheTransportFactory->create_transport_impl(
       1 + this->config_.federationDomain(),
-      ACE_TEXT("SimpleTcp"),
+      ACE_TEXT("tcp"),
       OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch subscriptionTransportConfig
   = TheTransportFactory->create_configuration(
       1 + this->config_.federationDomain(),
-      ACE_TEXT("SimpleTcp"));
+      ACE_TEXT("tcp"));
 
   if (subscriptionTransport->configure(subscriptionTransportConfig.in()) != 0) {
     ACE_ERROR((LM_ERROR,

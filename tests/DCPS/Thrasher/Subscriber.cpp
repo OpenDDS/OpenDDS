@@ -18,7 +18,7 @@
 #include "FooTypeTypeSupportImpl.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-# include <dds/DCPS/transport/simpleTCP/SimpleTcp.h>
+# include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
 namespace
@@ -92,8 +92,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     // Attach Transport
     OpenDDS::DCPS::TransportImpl_rch transport =
       TheTransportFactory->create_transport_impl(
-          OpenDDS::DCPS::DEFAULT_SIMPLE_TCP_ID,
-          "SimpleTcp");
+          OpenDDS::DCPS::DEFAULT_TCP_ID,
+          "Tcp");
 
     OpenDDS::DCPS::SubscriberImpl* subscriber_i =
       dynamic_cast<OpenDDS::DCPS::SubscriberImpl*>(subscriber.in());

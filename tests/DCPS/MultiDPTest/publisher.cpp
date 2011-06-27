@@ -20,7 +20,7 @@
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 
 #include "ace/Arg_Shifter.h"
 
@@ -138,14 +138,14 @@ void init ()
 
   writer_impl
     = TheTransportFactory->create_transport_impl (PUB_TRAFFIC_TCP,
-                                                  ACE_TEXT("SimpleTcp"),
+                                                  ACE_TEXT("tcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch writer_config
-    = TheTransportFactory->create_configuration (PUB_TRAFFIC_TCP, ACE_TEXT("SimpleTcp"));
+    = TheTransportFactory->create_configuration (PUB_TRAFFIC_TCP, ACE_TEXT("tcp"));
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+  OpenDDS::DCPS::TcpConfiguration* writer_tcp_config
+    = static_cast <OpenDDS::DCPS::TcpConfiguration*> (writer_config.in ());
 
   if (writer_address_given)
     {

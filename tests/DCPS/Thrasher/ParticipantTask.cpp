@@ -66,7 +66,7 @@ ParticipantTask::svc()
     OpenDDS::DCPS::TransportIdType transportId = ++transportIds;
 
     OpenDDS::DCPS::TransportConfiguration_rch config =
-      TheTransportFactory->get_or_create_configuration(transportId, ACE_TEXT("SimpleTcp"));
+      TheTransportFactory->get_or_create_configuration(transportId, ACE_TEXT("tcp"));
 
     OpenDDS::DCPS::TransportImpl_rch transport =
       TheTransportFactory->create_transport_impl(transportId);

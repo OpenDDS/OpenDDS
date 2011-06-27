@@ -23,7 +23,7 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
 
 #include "ace/Arg_Shifter.h"
@@ -178,10 +178,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
       OpenDDS::DCPS::TransportImpl_rch transport_impl
-        = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, ACE_TEXT("SimpleTcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
+        = TheTransportFactory->create_transport_impl (ALL_TRAFFIC, ACE_TEXT("tcp"), OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
       OpenDDS::DCPS::TransportConfiguration_rch config
-        = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("SimpleTcp"));
+        = TheTransportFactory->create_configuration (ALL_TRAFFIC, ACE_TEXT("tcp"));
 
       if (transport_impl->configure(config.in ()) != 0)
         {

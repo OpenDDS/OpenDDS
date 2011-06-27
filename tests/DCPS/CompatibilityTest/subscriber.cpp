@@ -22,7 +22,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
 
 #include "ace/Arg_Shifter.h"
@@ -35,11 +35,11 @@ static int init_reader_tranport (OpenDDS::DCPS::TransportImpl_rch& reader_transp
 
   reader_transport_impl =
       TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
-                                                  ACE_TEXT("SimpleTcp"),
+                                                  ACE_TEXT("tcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch reader_config
-    = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
+    = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("tcp"));
 
   if (reader_transport_impl->configure(reader_config.in()) != 0)
     {

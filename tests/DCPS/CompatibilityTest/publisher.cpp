@@ -21,7 +21,7 @@
 #include "DataWriterListenerImpl.h"
 
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/simpleTCP/SimpleTcp.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
 
 #include "ace/Arg_Shifter.h"
@@ -39,14 +39,14 @@ static int init_writer_tranport (OpenDDS::DCPS::TransportImpl_rch& writer_transp
 
   writer_transport_impl =
       TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                  ACE_TEXT ("SimpleTcp"),
+                                                  ACE_TEXT("tcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch writer_config
-    = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT ("SimpleTcp"));
+    = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("tcp"));
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
-    = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+  OpenDDS::DCPS::TcpConfiguration* writer_tcp_config
+    = static_cast <OpenDDS::DCPS::TcpConfiguration*> (writer_config.in ());
 
   if (writer_address_given)
     {

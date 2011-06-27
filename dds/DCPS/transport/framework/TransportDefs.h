@@ -156,7 +156,7 @@ typedef ACE_UINT64  DataLinkIdType;
 //       DEFAULT_<transport>_ID values. If a new transport is
 //       implemented, the default ID of the new transport must be
 //       defined here.
-const TransportIdType DEFAULT_SIMPLE_TCP_ID = 0xFFFFFF00;
+const TransportIdType DEFAULT_TCP_ID = 0xFFFFFF00;
 const TransportIdType DEFAULT_DUMMY_TCP_ID = 0xFFFFFF01;
 
 const TransportIdType DEFAULT_UDP_ID = 0xFFFFFF04;

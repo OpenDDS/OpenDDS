@@ -4,5 +4,5 @@
 
 project {
   libs        += OpenDDS_Udp
-  after       += opendds_udp
+  after       += OpenDDS_Udp
 }

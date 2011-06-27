@@ -14,7 +14,11 @@
 #include "DataDurabilityCache.h"
 #include "RepoIdConverter.h"
 #include "MonitorFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
+#endif
+
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 #include "tao/ORB_Core.h"
@@ -1137,7 +1141,7 @@ Service_Participant::init_bit_transport_impl(DDS::DomainId_t domain)
 
   this->bitTransportMap_[ domain]
   = TheTransportFactory->create_transport_impl(transportKey,
-                                               ACE_TEXT("SimpleTcp"),
+                                               ACE_TEXT("tcp"),
                                                DONT_AUTO_CONFIG);
 
   if (DCPS_debug_level > 0) {
@@ -1148,10 +1152,10 @@ Service_Participant::init_bit_transport_impl(DDS::DomainId_t domain)
   }
 
   TransportConfiguration_rch config
-  = TheTransportFactory->get_or_create_configuration(transportKey, ACE_TEXT("SimpleTcp"));
+  = TheTransportFactory->get_or_create_configuration(transportKey, ACE_TEXT("tcp"));
 
-  SimpleTcpConfiguration* tcp_config
-  = static_cast <SimpleTcpConfiguration*>(config.in());
+  TcpConfiguration* tcp_config
+  = static_cast <TcpConfiguration*>(config.in());
 
   tcp_config->datalink_release_delay_ = 0;
 

@@ -23,20 +23,22 @@ MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 
   if (initialized) return 0;  // already initialized
 
-  TransportGenerator *generator;
-  ACE_NEW_RETURN(generator, MulticastGenerator, -1);
+  TransportGenerator_rch generator = new MulticastGenerator;
+
+  TheTransportRegistry->register_generator(MULTICAST_TRANSPORT_TYPE,
+                                           generator);
 
   TheTransportFactory->register_generator(MULTICAST_TRANSPORT_TYPE,
-                                          generator);
+                                          generator._retn());
   initialized = true;
 
   return 0;
 }
 
-ACE_FACTORY_DEFINE(OpenDDS_Multicast, MulticastLoader);
+ACE_FACTORY_DEFINE(OpenDDS_Multicast, MulticastLoader)
 ACE_STATIC_SVC_DEFINE(
   MulticastLoader,
-  ACE_TEXT("MulticastLoader"),
+  ACE_TEXT("OpenDDS_Multicast"),
   ACE_SVC_OBJ_T,
   &ACE_SVC_NAME(MulticastLoader),
   ACE_Service_Type::DELETE_THIS | ACE_Service_Type::DELETE_OBJ,

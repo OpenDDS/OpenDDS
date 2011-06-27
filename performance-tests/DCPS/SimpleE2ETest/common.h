@@ -10,10 +10,10 @@
 // ============================================================================
 
 
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpFactory.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration_rch.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpFactory.h"
+#include "dds/DCPS/transport/tcp/TcpTransport.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration_rch.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 #include "dds/DCPS/transport/framework/TheTransportFactory.h"
 
 
@@ -60,14 +60,14 @@ int init_reader_tranport ()
 
   reader_transport_impl =
       TheTransportFactory->create_transport_impl (SUB_TRAFFIC,
-                                                  ACE_TEXT("SimpleTcp"),
+                                                  ACE_TEXT("tcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch reader_config
-        = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
+        = TheTransportFactory->create_configuration (SUB_TRAFFIC, ACE_TEXT("tcp"));
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* reader_tcp_config
-        = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (reader_config.in ());
+  OpenDDS::DCPS::TcpConfiguration* reader_tcp_config
+        = static_cast <OpenDDS::DCPS::TcpConfiguration*> (reader_config.in ());
 
   if (0 != ACE_OS::strcmp(ACE_TEXT("default"), reader_address_str) )
     {
@@ -94,14 +94,14 @@ int init_writer_tranport ()
 
   writer_transport_impl =
       TheTransportFactory->create_transport_impl (PUB_TRAFFIC,
-                                                  ACE_TEXT("SimpleTcp"),
+                                                  ACE_TEXT("tcp"),
                                                   OpenDDS::DCPS::DONT_AUTO_CONFIG);
 
   OpenDDS::DCPS::TransportConfiguration_rch writer_config
-        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("SimpleTcp"));
+        = TheTransportFactory->create_configuration (PUB_TRAFFIC, ACE_TEXT("tcp"));
 
-  OpenDDS::DCPS::SimpleTcpConfiguration* writer_tcp_config
-        = static_cast <OpenDDS::DCPS::SimpleTcpConfiguration*> (writer_config.in ());
+  OpenDDS::DCPS::TcpConfiguration* writer_tcp_config
+        = static_cast <OpenDDS::DCPS::TcpConfiguration*> (writer_config.in ());
 
   if (0 != ACE_OS::strcmp(ACE_TEXT("default"), writer_address_str) )
     {

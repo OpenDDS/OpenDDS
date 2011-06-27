@@ -158,7 +158,7 @@ OpenDDS::DCPS::DummyTcpConnection::open(void* arg)
                           sizeof(network_order_address)) == -1)
     {
       ACE_ERROR_RETURN((LM_ERROR,
-         ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::open() - ")
+         ACE_TEXT("(%P|%t) ERROR: TcpConnection::open() - ")
          ACE_TEXT("unable to receive the length of address string ")
          ACE_TEXT("from the remote (active) side of the connection. ")
          ACE_TEXT("%p\n"),
@@ -452,7 +452,7 @@ OpenDDS::DCPS::DummyTcpConnection::passive_reconnect_i ()
         {
           this->_remove_ref ();
           ACE_ERROR_RETURN((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::passive_reconnect_i")
+            ACE_TEXT("(%P|%t) ERROR: TcpConnection::passive_reconnect_i")
             ACE_TEXT(", %p.\n"), ACE_TEXT("schedule_timer")),
                             -1);
         }
@@ -649,7 +649,7 @@ OpenDDS::DCPS::DummyTcpConnection::transfer (DummyTcpConnection* connection)
       if (rs->get_reactor()->cancel_timer(this) == -1)
       {
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: SimpleTcpConnection::transfer, ")
+          ACE_TEXT("(%P|%t) ERROR: TcpConnection::transfer, ")
           ACE_TEXT(" %p. \n"), ACE_TEXT("cancel_timer")));
       }
       this->_remove_ref ();

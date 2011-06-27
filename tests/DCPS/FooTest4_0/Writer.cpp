@@ -337,7 +337,7 @@ int Writer::init_transport ()
   OpenDDS::DCPS::TransportIdType transportId = ++transportIds;
 
   OpenDDS::DCPS::TransportConfiguration_rch writer_config
-    = TheTransportFactory->get_or_create_configuration (transportId, ACE_TEXT("SimpleTcp"));
+    = TheTransportFactory->get_or_create_configuration (transportId, ACE_TEXT("tcp"));
 
   writer_transport_impl
     = TheTransportFactory->create_transport_impl(transportId, 0);

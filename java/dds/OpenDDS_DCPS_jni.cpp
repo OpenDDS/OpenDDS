@@ -10,7 +10,7 @@
 #include "OpenDDS_DCPS_TheServiceParticipant.h"
 #include "OpenDDS_DCPS_transport_TheTransportFactory.h"
 #include "OpenDDS_DCPS_transport_TransportImpl.h"
-#include "OpenDDS_DCPS_transport_SimpleTcpConfiguration.h"
+#include "OpenDDS_DCPS_transport_TcpConfiguration.h"
 #include "OpenDDS_DCPS_transport_UdpConfiguration.h"
 #include "OpenDDS_DCPS_transport_MulticastConfiguration.h"
 #include "DDS_WaitSet.h"
@@ -27,7 +27,7 @@
 #include "dds/DCPS/transport/framework/PerConnectionSynchStrategy.h"
 #include "dds/DCPS/transport/framework/PoolSynchStrategy.h"
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
-#include "dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.h"
+#include "dds/DCPS/transport/tcp/TcpConfiguration.h"
 #include "dds/DCPS/transport/udp/UdpConfiguration.h"
 #include "dds/DCPS/transport/multicast/MulticastConfiguration.h"
 
@@ -223,14 +223,14 @@ BaseField<Cfg> *fields[] = {&sb, &qmpp, &qip, &mps, &mspp, &ops, &tpc};
 
 namespace TcpConfig {
 
-typedef OpenDDS::DCPS::SimpleTcpConfiguration Tcp;
-const char *jclassName = "OpenDDS/DCPS/transport/SimpleTcpConfiguration";
-const ACE_TCHAR *configName = ACE_TEXT("SimpleTcp");
+typedef OpenDDS::DCPS::TcpConfiguration Tcp;
+const char *jclassName = "OpenDDS/DCPS/transport/TcpConfiguration";
+const ACE_TCHAR *configName = ACE_TEXT("tcp");
 
-const ACE_TCHAR *svcName = ACE_TEXT("DCPS_SimpleTcpLoader");
+const ACE_TCHAR *svcName = ACE_TEXT("OpenDDS_Tcp");
 const ACE_TCHAR *svcConfDir =
-  ACE_TEXT("dynamic DCPS_SimpleTcpLoader Service_Object * ")
-  ACE_TEXT("SimpleTcp:_make_DCPS_SimpleTcpLoader() \"-type SimpleTcp\"");
+  ACE_TEXT("dynamic OpenDDS_Tcp Service_Object * ")
+  ACE_TEXT("OpenDDS_Tcp:_make_TcpLoader()");
 
 InetAddrField<Tcp> la("localAddress",
                       &Tcp::local_address_str_, &Tcp::local_address_);
@@ -262,10 +262,9 @@ const char *jclassName =
 const char *jclassNameUdp = "OpenDDS/DCPS/transport/UdpConfiguration";
 const ACE_TCHAR *configName = ACE_TEXT("udp");
 
-const ACE_TCHAR *svcName =
-  ACE_TEXT("OpenDDS_DCPS_Udp_Service");
+const ACE_TCHAR *svcName = ACE_TEXT("OpenDDS_Udp");
 const ACE_TCHAR *svcConfDir =
-  ACE_TEXT("dynamic OpenDDS_DCPS_Udp_Service Service_Object *")
+  ACE_TEXT("dynamic OpenDDS_Udp Service_Object *")
   ACE_TEXT(" OpenDDS_Udp:_make_UdpLoader()");
 
 InetAddrField<config> local_address("localAddress",
@@ -287,9 +286,9 @@ const char *jclassNameUdp = "OpenDDS/DCPS/transport/MulticastConfiguration";
 const ACE_TCHAR *configName = ACE_TEXT("multicast");
 
 const ACE_TCHAR *svcName =
-  ACE_TEXT("OpenDDS_DCPS_Multicast_Service");
+  ACE_TEXT("OpenDDS_Multicast");
 const ACE_TCHAR *svcConfDir =
-  ACE_TEXT("dynamic OpenDDS_DCPS_Multicast_Service Service_Object *")
+  ACE_TEXT("dynamic OpenDDS_Multicast Service_Object *")
   ACE_TEXT(" OpenDDS_Multicast:_make_MulticastLoader()");
 
 BoolField<config> default_to_ipv6("defaultToIPv6", &config::default_to_ipv6_);
@@ -564,23 +563,23 @@ void narrowTransportConfig(T *&transportConfig, jlong javaPtr)
 
 } // namespace
 
-// SimpleTcpConfiguration
+// TcpConfiguration
 
 void JNICALL
-Java_OpenDDS_DCPS_transport_SimpleTcpConfiguration_saveSpecificConfig
+Java_OpenDDS_DCPS_transport_TcpConfiguration_saveSpecificConfig
 (JNIEnv *jni, jobject jThis, jlong ptr)
 {
-  OpenDDS::DCPS::SimpleTcpConfiguration *tc;
+  OpenDDS::DCPS::TcpConfiguration *tc;
   narrowTransportConfig(tc, ptr);
   jclass clazz = findClass(jni, TcpConfig::jclassName);
   toCxx(jni, clazz, jThis, *tc, TcpConfig::fields);
 }
 
 void JNICALL
-Java_OpenDDS_DCPS_transport_SimpleTcpConfiguration_loadSpecificConfig
+Java_OpenDDS_DCPS_transport_TcpConfiguration_loadSpecificConfig
 (JNIEnv *jni, jobject jThis, jlong ptr)
 {
-  OpenDDS::DCPS::SimpleTcpConfiguration *tc;
+  OpenDDS::DCPS::TcpConfiguration *tc;
   narrowTransportConfig(tc, ptr);
   jclass clazz = findClass(jni, TcpConfig::jclassName);
   toJava(jni, clazz, *tc, jThis, TcpConfig::fields);
