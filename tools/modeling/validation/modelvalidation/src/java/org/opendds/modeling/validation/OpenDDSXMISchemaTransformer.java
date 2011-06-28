@@ -17,21 +17,21 @@ import com.ociweb.xml.util.XMLUtil;
 
 public class OpenDDSXMISchemaTransformer {
 	private static final Logger logger = Logger.getLogger(OpenDDSXMISchemaTransformer.class.getName());
-	
+
 	public static final String SRC_DIR_ARG = "src";
 	public static final String DEST_DIR_ARG = "dest";
 	public static final String XSL_DIR = "src/xsl";
 	public static final String DEFAULT_XSL_FILE = "Default.xslt";
-	
+
 	public static void main(String[] args) {
 		CommandLineParser parser = new PosixParser();
 		Options options = new Options();
 		options.addOption(SRC_DIR_ARG, true, "source directory for opendds schema files");
 		options.addOption(DEST_DIR_ARG, true, "destination directory for corrected schema files");
-		
+
 		try {
 			CommandLine cmdLine = parser.parse(options, args);
-			
+
 			if (!(cmdLine.hasOption(SRC_DIR_ARG) && cmdLine.hasOption(DEST_DIR_ARG))) {
 				HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp(OpenDDSXMISchemaTransformer.class.getSimpleName(), options);
@@ -42,7 +42,7 @@ public class OpenDDSXMISchemaTransformer {
 				System.err.println("The directory specified for '" + SRC_DIR_ARG + "' does not appear to be valid");
 				System.exit(-1);
 			}
-			File destDir = new File(cmdLine.getOptionValue(DEST_DIR_ARG));			
+			File destDir = new File(cmdLine.getOptionValue(DEST_DIR_ARG));
 			if (!validDir(destDir)) {
 				System.err.println("The directory specified for '" + DEST_DIR_ARG + "' does not appear to be valid");
 				System.exit(-1);
@@ -54,14 +54,14 @@ public class OpenDDSXMISchemaTransformer {
 			logger.error( "Unexpected exception:" + e.getMessage() );
 		}
 	}
-	
+
 	static boolean validDir(final File dir) {
 		if (!dir.exists() || !dir.isDirectory()) {
 			return false;
 		}
 		return true;
 	}
-	
+
 	static void transform(final File sourceDir, final File destDir) throws TransformerException {
 		logger.debug("source dir = " + sourceDir);
 		logger.debug("dest dir = " + destDir);

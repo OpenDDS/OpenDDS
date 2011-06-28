@@ -24,9 +24,9 @@ public class OpenDDSModelValidator {
 	static final String FILE_ARG = "file";
 	static final String DIR_ARG = "dir";
 	static final String RECURSIVE_ARG = "recursive";
-	
+
 	public static void main(String[] args) {
-		
+
 		CommandLineParser parser = new PosixParser();
 		Options options = new Options();
 		Option fileOpt = new Option("f", FILE_ARG, true, "opendds file(s) to validate");
@@ -34,15 +34,15 @@ public class OpenDDSModelValidator {
 		options.addOption(fileOpt);
 		options.addOption("d", DIR_ARG, true, "directory of opendds files to validate");
 		options.addOption("r", RECURSIVE_ARG, false, "search directory recursively for opendds files");
-		
+
 		try {
-			String xsdFilename = System.getProperty(XSD_FILE_PROPERTY, XSD_DEFAULT_FILE);				
+			String xsdFilename = System.getProperty(XSD_FILE_PROPERTY, XSD_DEFAULT_FILE);
 			CommandLine line = parser.parse(options, args);
-			
+
 			if (!(line.hasOption(FILE_ARG) || line.hasOption(DIR_ARG))) {
 				HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp(
-						System.getProperty(APP_NAME_PROPERTY, OpenDDSModelValidator.class.getSimpleName()), 
+						System.getProperty(APP_NAME_PROPERTY, OpenDDSModelValidator.class.getSimpleName()),
 						options);
 			}
 			String[] files = line.getOptionValues(FILE_ARG);
@@ -59,7 +59,7 @@ public class OpenDDSModelValidator {
 			logger.error("Encountered an unexpected error:" + exp.getMessage());
 		}
 	}
-	
+
 	static void validateFile(final File xsd, final File xml) {
 		try {
 			List<SAXParseException> errors = XMLUtil.validate(xsd, xml);
@@ -75,15 +75,15 @@ public class OpenDDSModelValidator {
 			logger.error("Fatal validation Error: " + e.getMessage());
 		}
 	}
-	
+
 	static void validateFiles(final File xsd, final String[] files) {
 		for (String filename : files) {
 			validateFile(xsd, new File(filename));
 		}
 	}
-	
+
 	static void validateDir(final File parent, final boolean recursive){
-		File xsdFile = new File(System.getProperty(XSD_FILE_PROPERTY, XSD_DEFAULT_FILE));				
+		File xsdFile = new File(System.getProperty(XSD_FILE_PROPERTY, XSD_DEFAULT_FILE));
 		for (File f: parent.listFiles()) {
 			logger.debug("Checking " + f.getPath());
 			if (f.isDirectory() && recursive) {

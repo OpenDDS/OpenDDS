@@ -1,3 +1,18 @@
+Tue Jun 28 14:26:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.site:
+
+          svn:ignore only
+
+        * tools/modeling/validation/modelvalidation/build.xml:
+        * tools/modeling/validation/modelvalidation/src/java/com/ociweb/xml/util/XMLUtil.java:
+        * tools/modeling/validation/modelvalidation/src/java/log4j.xml:
+        * tools/modeling/validation/modelvalidation/src/java/org/opendds/modeling/validation/OpenDDSModelValidator.java:
+        * tools/modeling/validation/modelvalidation/src/java/org/opendds/modeling/validation/OpenDDSXMISchemaTransformer.java:
+        * tools/modeling/validation/modelvalidation/test/src/com/ociweb/xml/util/OpenDDSValidationUtilTest.java:
+
+          Whitespace cleanup only.
+
 Mon Jun 27 23:27:09 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
 
         * tools/dissector/dissector.mpc:

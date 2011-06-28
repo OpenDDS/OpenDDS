@@ -22,20 +22,20 @@ import org.xml.sax.SAXParseException;
 public class OpenDDSValidationUtilTest {
 	private static final Logger logger = Logger.getLogger(OpenDDSValidationUtilTest.class);
 
-	
-	static final String baseDir = "../../../modeling/";	
+
+	static final String baseDir = "../../../modeling/";
 	static String xsdDir = baseDir + "plugins/org.opendds.modeling.model/model/";
 	static String testsDir = baseDir + "tests/";
 	static String testDataDir = baseDir + "testdata/";
 	static final String TRANSFORMED_XSD_DIR = "build";
 	static final String XSD_FILE = "OpenDDSXMI.xsd";
-	
+
 	static final List<File> knownBadFiles = new ArrayList<File>() {{
 		add(new File(testDataDir + "DataLib/DataLibConstraintErrorsTest1.opendds"));
 		add(new File("test/data/satellite.opendds"));
 		add(new File("test/data/DataLibConstraintErrorsTest1.opendds"));
 	}};
-	
+
 	@BeforeClass
     public static void oneTimeSetUp() {
 	}
@@ -52,7 +52,7 @@ public class OpenDDSValidationUtilTest {
 		transformer = XMLUtil.createTransformer(new File(xslt));
 		assertNotNull(transformer);
 	}
-	
+
 	@Test
 	public void testTransform() throws Exception {
 		String defaultXsltFilename = "Default.xslt";
@@ -74,9 +74,9 @@ public class OpenDDSValidationUtilTest {
 			}
 			File transformedXsd = new File(transformedXsdDir, xsdFilename);
 			XMLUtil.transform(xsdFile, xslFile, transformedXsd);
-		}	
+		}
 	}
-	
+
 	// this is really a functional test
 	@Test
 	public void testTransformAndValidate() throws Exception {
@@ -85,7 +85,7 @@ public class OpenDDSValidationUtilTest {
 		File transformedXsdDir = new File(TRANSFORMED_XSD_DIR);
 		File idempotentXsdDir = new File("build/idempotent");
 		idempotentXsdDir.mkdirs();
-		
+
 		File xslDir = new File("src/xsl");
 		FileFilter filter = new FileFilter() {
 			@Override
@@ -120,7 +120,7 @@ public class OpenDDSValidationUtilTest {
         }
 
 	}
-	
+
 	@Test
 	public void testValidate() throws Exception {
 		String xml = "test/data/satellite.opendds";
@@ -130,7 +130,7 @@ public class OpenDDSValidationUtilTest {
 			XMLUtil.validate(new File("bogus.xsd"), new File(xml));
 			fail("expected exception");
 		} catch (Exception e) {
-			
+
 		}
 		File folder = new File(testsDir);
 		Collection<File> failures = validate(folder, xsd);
@@ -143,7 +143,7 @@ public class OpenDDSValidationUtilTest {
 			fail("validation falied for " + failures);
 		}
 	}
-	
+
 	@Test
 	public void testValidBadFails() throws SAXException, IOException {
 		final String xsd = TRANSFORMED_XSD_DIR + System.getProperty("file.separator") + XSD_FILE;
@@ -152,7 +152,7 @@ public class OpenDDSValidationUtilTest {
 			assertFalse(errors.isEmpty());
 		}
 	}
-	
+
 	Collection<File> validate(File parent, String xsdFile) throws SAXException, IOException {
 		Collection<File> failures = new ArrayList<File>();
 		for (File f: parent.listFiles()) {

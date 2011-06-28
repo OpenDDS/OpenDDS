@@ -2,11 +2,11 @@
 <project name="modelvalidation" default="test" basedir=".">
 
   <property file="build.properties"/>
- 
-  <!-- 
+
+  <!--
 
 	/******************************************************
-	 Setup class path for targets 
+	 Setup class path for targets
 	******************************************************/ -->
   <path id="project.class.path">
     <pathelement location="${build.dir}" />
@@ -14,7 +14,7 @@
       <include name="**/*.jar" />
     </fileset>
  </path>
-  <!-- 
+  <!--
 
 	/******************************************************
 	 Initialization
@@ -22,11 +22,11 @@
   <target name="init">
     <tstamp />
   </target>
-  
-  <!-- 
+
+  <!--
 
 	/******************************************************
-	 Prepare for compilation 
+	 Prepare for compilation
 	******************************************************/ -->
   <target name="prepare" depends="init">
     <mkdir dir="${build.dir}" />
@@ -37,15 +37,15 @@
      </copy>
   </target>
 
-  <!-- 
+  <!--
 
 	    /******************************************************
-	     Transform generated xsd files 
+	     Transform generated xsd files
 	    ******************************************************/ -->
   <target name="transform-xsd" depends="compile">
     <delete dir="${gen.xsd.dir}"/>
     <mkdir dir="${gen.xsd.dir}"/>
-   
+
     <java classname="${app.package}.OpenDDSXMISchemaTransformer" fork="yes">
       <arg value="-src" />
       <arg value="${src.xsd.dir}" />
@@ -54,7 +54,7 @@
       <classpath refid="project.class.path" />
     </java>
   </target>
-  
+
   <target name="staging" depends="transform-xsd, compile, test" description="setup distribution">
     <delete dir="${staging.dir}"/>
     <mkdir dir="${staging.dir}"/>
@@ -113,7 +113,7 @@
       <replacefilter token="${app.name.token}" property="app.name"/>
     </replace>
   </target>
-  
+
   <target name="dist.win" depends="staging" description="build zip distribution for windows">
     <zip destfile="${dist.dir}/${app.name}.zip" basedir="${staging.dir}" excludes="**/*.sh" />
     <delete dir="${staging.dir}"/>
@@ -123,7 +123,7 @@
   <target name="dist.nix" depends="staging" description="build tar.gz distribution for linux, unix">
     <fixcrlf srcdir="${staging.dir}" eol="unix" eof="remove" includes="**/*.sh" />
     <chmod dir="${staging.dir}" includes="**/*.sh" perm="ugo+rx"/>
-    
+
     <tar destfile="${dist.dir}/${app.name}.tar.gz" compression="gzip">
         <tarfileset dir="${staging.dir}" mode="755">
             <include name="**/*.sh"/>
@@ -137,13 +137,13 @@
     <delete dir="${staging.dir}"/>
     <echo message="linux/unix distribution created at: ${dist.dir}/${app.name}.tar.gz"/>
   </target>
-  
+
   <target name="dist.all" depends="clean" description="build distributions for all windows, linux, unix">
     <antcall target="dist.win"/>
     <antcall target="dist.nix"/>
   </target>
 
-  <!-- 
+  <!--
 
 	/******************************************************
 	 Compile source
@@ -158,14 +158,14 @@
       <classpath refid="project.class.path" />
     </javac>
   </target>
-  
+
   <target name="compile.test" depends="compile" description="compile test source code">
     <javac includeAntRuntime="false" destdir="${build.dir}">
       <src path="${test.dir}/src" />
       <classpath refid="project.class.path" />
     </javac>
   </target>
-  
+
   <target name="test" depends="clean.test,compile.test" description="runs all JUnit tests">
     <mkdir dir="${test.report.dir}"/>
       <junit fork="yes" printsummary="yes">
@@ -181,13 +181,13 @@
       </junitreport>
     </target>
 
-  <!-- 
+  <!--
 
 	/******************************************************
 	Cleanup everything
 	******************************************************/ -->
   <target name="clean" depends="clean.build, clean.test" description="clean everything (build, test, dist)" />
-  <!-- 
+  <!--
 
 	/******************************************************
 	Cleanup previous builds
